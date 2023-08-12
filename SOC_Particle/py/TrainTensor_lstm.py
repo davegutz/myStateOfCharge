@@ -125,8 +125,11 @@ def process_battery_attributes(df):
 
 
 # Resize and convert to numpy
-def resizer(v, rows, batch_size):
-    return v.to_numpy('float')[:rows*batch_size].reshape(rows, batch_size, 1)
+def resizer(v, targ_rows, batch_size, subsample=1):
+    v = v.to_numpy('float')[:targ_rows*batch_size*subsample]
+    rows_raw = len(v)
+    x = v.reshape(int(rows_raw/subsample), subsample, 1)[:, 0, 0]
+    return x.reshape(targ_rows, batch_size, 1)
 
 
 def train_model(mod, x, y, epochs_=20, batch_size=1, verbose=0):
@@ -155,7 +158,8 @@ test = pd.read_csv(".//generateDV_Data.csv", skipinitialspace=True)
 test['voc'] = test['vb'] - test['dv_dyn']
 test['dv'] = test['voc'] - test['voc_stat']
 test_df = test[['Tb', 'ib', 'soc', 'dv']]
-# Split training data into train and validation
+
+# Split training data into train and validation data frames
 train_attr, validate_attr = train_test_split(train_df, test_size=0.2, shuffle=False)
 test_attr, test_val_attr = train_test_split(test_df, test_size=None, shuffle=False)
 train_attr, train_y = process_battery_attributes(train_attr)
@@ -166,33 +170,25 @@ validate_x = validate_attr['ib']
 test_x = test_attr['ib']
 
 # Create model
-time_steps = 120
-batch_size = 6
 dropping = 0.2
 use_two = False
+learning_rate = 0.0001
+epochs = 50
 if use_two:
-    learning_rate = 0.0002
-    epochs = 50
-else:
-    learning_rate = 0.0001
-    epochs = 50
+    learning_rate *= 2
 hidden = 4
+subsample = 5
+batch_size = int(30 / subsample)
 
-rows_train = int(len(train_y) / batch_size)
-# train_x = train_x.to_numpy('float')[:rows_train*batch_size].reshape(rows_train, batch_size, 1)
-# train_y = train_y.to_numpy('float')[:rows_train*batch_size].reshape(rows_train, batch_size, 1)
-train_x = resizer(train_x, rows_train, batch_size)
-train_y = resizer(train_y, rows_train, batch_size)
-rows_val = int(len(validate_y) / batch_size)
-# validate_x = validate_x.to_numpy('float')[:rows_val*batch_size].reshape(rows_val, batch_size, 1)
-# validate_y = validate_y.to_numpy('float')[:rows_val*batch_size].reshape(rows_val, batch_size, 1)
-validate_x = resizer(validate_x, rows_val, batch_size)
-validate_y = resizer(validate_y, rows_val, batch_size)
-rows_tst = int(len(test_y) / batch_size)
-# test_x = test_x.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
-# test_y = test_y.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
-test_x = resizer(test_x, rows_tst, batch_size)
-test_y = resizer(test_y, rows_tst, batch_size)
+rows_train = int(len(train_y) / batch_size / subsample)
+train_x = resizer(train_x, rows_train, batch_size, subsample=subsample)
+train_y = resizer(train_y, rows_train, batch_size, subsample=subsample)
+rows_val = int(len(validate_y) / batch_size / subsample)
+validate_x = resizer(validate_x, rows_val, batch_size, subsample=subsample)
+validate_y = resizer(validate_y, rows_val, batch_size, subsample=subsample)
+rows_tst = int(len(test_y) / batch_size / subsample)
+test_x = resizer(test_x, rows_tst, batch_size, subsample=subsample)
+test_y = resizer(test_y, rows_tst, batch_size, subsample=subsample)
 model=create_LSTM(hidden_units=hidden, dense_units=1, input_shape=(train_x.shape[1], train_x.shape[2]),
                   activation=['relu', 'sigmoid', 'linear'], learning_rate=learning_rate, dropping=dropping,
                   use_two=use_two)
