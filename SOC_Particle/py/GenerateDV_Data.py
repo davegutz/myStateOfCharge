@@ -68,8 +68,8 @@ with open(csv_file, "w") as output:
         if soc >= 1. and ib_charge > 0.:
             ib_charge = 0.
         ib_hys = ib_charge / 90.
-        if sat:
-            ib_hys = dv_min
+        # if sat:
+        #     ib_hys = dv_min
         ib = ib_charge
         q += ib_charge * T
         soc = max(min(q / qcrs, 1.), 0.)

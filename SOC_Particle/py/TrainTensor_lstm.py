@@ -39,27 +39,27 @@ pd.options.display.float_format = "{:.1f}".format
 #     return lstm
 
 
-def create_LSTM(hidden_units, dense_units, input_shape, activation):
+def create_LSTM(hidden_units, dense_units, input_shape, activation, learning_rate=0.01):
     lstm = Sequential()
-    lstm.add(LSTM(hidden_units, input_shape=input_shape, activation=activation[0]))
-    lstm.add(Dense(units=dense_units, activation=activation[1]))
-    lstm.compile(loss='mean_squared_error', optimizer='adam')
+    # lstm.add(SimpleRNN(hidden_units, input_shape=input_shape, activation=activation[0]))
+    lstm.add(LSTM(hidden_units, input_shape=input_shape, activation=activation[0], recurrent_activation=activation[1]))
+    lstm.add(Dense(units=dense_units, activation=activation[2]))
+    # lstm.compile(loss='mean_squared_error', optimizer='adam')
+    lstm.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate))
     return lstm
 
 
 # Plotting function
 def plot_the_loss_curve(epochs_, mse_training, mse_validation):
     """Plot a curve of loss vs. epoch."""
-
     plt.figure()
     plt.xlabel("Epoch")
     plt.ylabel("Mean Squared Error")
-
     plt.plot(epochs_, mse_training, label="Training Loss")
     plt.plot(epochs_, mse_validation, label="Validation Loss")
 
     # mse_training is a pandas Series, so convert it to a list first.
-    merged_mse_lists = mse_training.tolist() + mse_validation
+    merged_mse_lists = np.append(mse_training.to_numpy(), mse_validation)
     highest_loss = max(merged_mse_lists)
     lowest_loss = min(merged_mse_lists)
     top_of_y_axis = highest_loss * 1.03
@@ -69,7 +69,22 @@ def plot_the_loss_curve(epochs_, mse_training, mse_validation):
     plt.legend()
 
 
-# Plot the result
+# Plot the inputs
+def plot_input(trn_x, val_x, tst_x):
+    input = np.append(trn_x, val_x)
+    input = np.append(input, tst_x)
+    rows = len(input)
+    plt.figure(figsize=(15, 6), dpi=80)
+    plt.plot(range(rows), input)
+    plt.axvline(x=len(trn_x), color='r')
+    plt.axvline(x=len(trn_x)+len(val_x), color='r')
+    plt.legend(['Inputs'])
+    plt.xlabel('Observation number after given time steps')
+    plt.ylabel('ib scaled')
+    plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
+
+
+# Plot the results
 def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
     actual = np.append(trn_y, val_y)
     actual = np.append(actual, tst_y)
@@ -104,9 +119,9 @@ def process_battery_attributes(df):
     data = df[['Tb', 'ib', 'soc']]
     with pd.option_context('mode.chained_assignment', None):
         data['Tb'] = data['Tb'].map(lambda x: x/50.)
-        data['ib'] = data['ib'].map(lambda x: x/50.)
-        data['Tb'] = data['soc'].map(lambda x: x/1.)
-        y = df['dv'] / 5.
+        data['ib'] = data['ib'].map(lambda x: x/10.)
+        data['soc'] = data['soc'].map(lambda x: x/1.)
+        y = df['dv'] / 0.1
 
     return data, y
 
@@ -148,14 +163,14 @@ validate_x = validate_attr['ib']
 test_x = test_attr['ib']
 
 # Create model
-time_steps = 12
-model = create_LSTM(hidden_units=3, dense_units=1, input_shape=(time_steps, 1), activation=['tanh', 'tanh'])
+time_steps = 120
+model = create_LSTM(hidden_units=2, dense_units=1, input_shape=(time_steps, 1), activation=['tanh', 'sigmoid', 'tanh'],
+                    learning_rate=0.1)
 # model = create_lstm(hidden_units=3, time_steps=12, learning_rate=0.01)
 
 # Train model
 print("[INFO] training model...")
-epochs, mse, history = train_model(model, train_x, train_y, epochs_=20
-                                   , batch_size=1, verbose=1)
+epochs, mse, history = train_model(model, train_x, train_y, epochs_=10, batch_size=6, verbose=1)
 plot_the_loss_curve(epochs, mse, history["loss"])
 
 # make predictions
@@ -168,9 +183,12 @@ test_predict = model.predict(test_x)
 print_error(trn_y=train_y, val_y=validate_y, tst_y=test_y, trn_pred=train_predict, val_pred=validate_predict,
             tst_pred=test_predict)
 # Plot result
+plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x)
 plot_result(trn_y=train_y, val_y=validate_y, tst_y=test_y, trn_pred=train_predict, val_pred=validate_predict,
             tst_pred=test_predict)
 plt.show()
+
+x = 1
 
 # Tb_boundaries = np.linspace(0, 50, 3)
 # inputs = {
