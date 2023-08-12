@@ -30,13 +30,16 @@ pd.options.display.max_rows = 10
 pd.options.display.float_format = "{:.1f}".format
 
 
-def create_LSTM(hidden_units, dense_units, input_shape, activation, learning_rate=0.01):
+def create_LSTM(hidden_units, dense_units, input_shape, activation, learning_rate=0.01, dropping=0.2, use_two=False):
     lstm = Sequential()
-    # lstm.add(SimpleRNN(hidden_units, input_shape=input_shape, activation=activation[0]))
-    lstm.add(LSTM(hidden_units, input_shape=input_shape, activation=activation[0], recurrent_activation=activation[1]))
-    lstm.add(Dropout(0.2))
-    # lstm.add(LSTM(hidden_units, activation=activation[0], recurrent_activation=activation[1]))
-    # lstm.add(Dropout(0.2))
+    if use_two:
+        lstm.add(LSTM(hidden_units, input_shape=input_shape, activation=activation[0], recurrent_activation=activation[1], return_sequences=True))
+    else:
+        lstm.add(LSTM(hidden_units, input_shape=input_shape, activation=activation[0], recurrent_activation=activation[1], return_sequences=False))
+    lstm.add(Dropout(dropping))
+    if use_two:
+        lstm.add(LSTM(hidden_units, activation=activation[0], recurrent_activation=activation[1], return_sequences=False))
+        lstm.add(Dropout(dropping))
     lstm.add(Dense(units=dense_units, activation=activation[2]))
     # lstm.compile(loss='mean_squared_error', optimizer='adam')
     lstm.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate))
@@ -121,6 +124,11 @@ def process_battery_attributes(df):
     return data, y
 
 
+# Resize and convert to numpy
+def resizer(v, rows, batch_size):
+    return v.to_numpy('float')[:rows*batch_size].reshape(rows, batch_size, 1)
+
+
 def train_model(mod, x, y, epochs_=20, batch_size=1, verbose=0):
     """Feed a dataset into the model in order to train it."""
 
@@ -160,23 +168,38 @@ test_x = test_attr['ib']
 # Create model
 time_steps = 120
 batch_size = 6
+dropping = 0.2
+use_two = False
+if use_two:
+    learning_rate = 0.0002
+    epochs = 50
+else:
+    learning_rate = 0.0001
+    epochs = 50
+hidden = 4
+
 rows_train = int(len(train_y) / batch_size)
-train_x = train_x.to_numpy('float')[:rows_train*batch_size].reshape(rows_train, batch_size, 1)
-train_y = train_y.to_numpy('float')[:rows_train*batch_size].reshape(rows_train, batch_size, 1)
+# train_x = train_x.to_numpy('float')[:rows_train*batch_size].reshape(rows_train, batch_size, 1)
+# train_y = train_y.to_numpy('float')[:rows_train*batch_size].reshape(rows_train, batch_size, 1)
+train_x = resizer(train_x, rows_train, batch_size)
+train_y = resizer(train_y, rows_train, batch_size)
 rows_val = int(len(validate_y) / batch_size)
-validate_x = validate_x.to_numpy('float')[:rows_val*batch_size].reshape(rows_val, batch_size, 1)
-validate_y = validate_y.to_numpy('float')[:rows_val*batch_size].reshape(rows_val, batch_size, 1)
+# validate_x = validate_x.to_numpy('float')[:rows_val*batch_size].reshape(rows_val, batch_size, 1)
+# validate_y = validate_y.to_numpy('float')[:rows_val*batch_size].reshape(rows_val, batch_size, 1)
+validate_x = resizer(validate_x, rows_val, batch_size)
+validate_y = resizer(validate_y, rows_val, batch_size)
 rows_tst = int(len(test_y) / batch_size)
-test_x = test_x.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
-test_y = test_y.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
-# model = create_LSTM(hidden_units=16, dense_units=1, input_shape=(time_steps, 1),
-model=create_LSTM(hidden_units=4, dense_units=1, input_shape=(train_x.shape[1], train_x.shape[2]),
-                                      activation=['relu', 'sigmoid', 'linear'], learning_rate=0.0001)
-# model = create_lstm(hidden_units=3, time_steps=12, learning_rate=0.01)
+# test_x = test_x.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
+# test_y = test_y.to_numpy('float')[:rows_tst*batch_size].reshape(rows_tst, batch_size, 1)
+test_x = resizer(test_x, rows_tst, batch_size)
+test_y = resizer(test_y, rows_tst, batch_size)
+model=create_LSTM(hidden_units=hidden, dense_units=1, input_shape=(train_x.shape[1], train_x.shape[2]),
+                  activation=['relu', 'sigmoid', 'linear'], learning_rate=learning_rate, dropping=dropping,
+                  use_two=use_two)
 
 # Train model
 print("[INFO] training model...")
-epochs, mse, history = train_model(model, train_x, train_y, epochs_=30, batch_size=batch_size, verbose=1)
+epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, batch_size=batch_size, verbose=1)
 plot_the_loss_curve(epochs, mse, history["loss"])
 
 # make predictions
