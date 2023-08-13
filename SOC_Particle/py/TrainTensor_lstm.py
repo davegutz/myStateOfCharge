@@ -24,6 +24,9 @@ from keras.models import Sequential
 from keras.layers import Dense, SimpleRNN, LSTM, Dropout
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
+from keras.callbacks import EarlyStopping
+from keras.callbacks import ModelCheckpoint
+from keras.callbacks import  Callback
 
 # The following lines adjust the granularity of reporting.
 pd.options.display.max_rows = 10
@@ -138,11 +141,17 @@ def resizer(v, targ_rows, btch_size, sub_samp=1):
     return x.reshape(targ_rows, btch_size, 1)
 
 
-def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0):
+def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, callbacks=None):
     """Feed a dataset into the model in order to train it."""
 
+    # Training callbacks
+    es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=10)
+    file_path = 'my_model.x'
+    mc = ModelCheckpoint(file_path, monitor='loss', mode='min', verbose=1, save_best_only=True)
+    cb = [es, mc]
+
     # train the model
-    hist = mod.fit(x=x, y=y, epochs=epochs_, batch_size=btch_size, shuffle=False, verbose=verbose)
+    hist = mod.fit(x=x, y=y, epochs=epochs_, batch_size=btch_size, shuffle=False, verbose=verbose, callbacks=cb)
 
     # Get details that will be useful for plotting the loss curve.
     epochs_ = hist.epoch
@@ -237,6 +246,15 @@ for wt in model.layers[0].weights:
 plt.show()
 
 
+"""
+        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50) --> Often, the first sign of no further improvement may not be the best time to stop training. This is because the model may coast into a plateau of no improvement or even get slightly worse before getting much better. We can account for this by adding a delay to the trigger in terms of the number of epochs on which we would like to see no improvement. This can be done by setting the “patience” argument.
+
+        es = EarlyStopping(monitor='val_accuracy', mode='max', min_delta=1) --> By default, any change in the performance measure, no matter how fractional, will be considered an improvement. You may want to consider an improvement that is a specific increment, such as 1 unit for mean squared error or 1% for accuracy. This can be specified via the “min_delta” argument.
+
+        es = EarlyStopping(monitor='val_loss', mode='min', baseline=0.4) --> Finally, it may be desirable to only stop training if performance stays above or below a given threshold or baseline. For example, if you have familiarity with the training of the model (e.g. learning curves) and know that once a validation loss of a given value is achieved that there is no point in continuing training. This can be specified by setting the “baseline” argument.
+
+        mc = ModelCheckpoint('best_model.h5', monitor='val_loss', mode='min', verbose=1) --> The EarlyStopping callback will stop training once triggered, but the model at the end of training may not be the model with best performance on the validation dataset. An additional callback is required that will save the best model observed during training for later use. This is the ModelCheckpoint callback.
+"""
 # Tb_boundaries = np.linspace(0, 50, 3)
 # inputs = {
 #     'Tb':
