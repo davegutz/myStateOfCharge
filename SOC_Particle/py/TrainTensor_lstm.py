@@ -21,12 +21,11 @@ import pandas as pd
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from keras.models import Sequential
-from keras.layers import Dense, SimpleRNN, LSTM, Dropout
+from keras.layers import Dense, LSTM, Dropout
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
-from keras.callbacks import  Callback
 
 # The following lines adjust the granularity of reporting.
 pd.options.display.max_rows = 10
@@ -80,11 +79,13 @@ def plot_the_loss_curve(epochs_, mse_training, mse_validation):
 def plot_input(trn_x, val_x, tst_x):
     inp = np.append(trn_x, val_x)
     inp = np.append(inp, tst_x)
-    rows = len(inp)
+    rows = len(inp)  # inp is unstacked while all the x's are stacked
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(range(rows), inp)
-    plt.axvline(x=len(trn_x), color='r')
-    plt.axvline(x=len(trn_x)+len(val_x), color='r')
+    trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
+    val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
+    plt.axvline(x=trn_len, color='r')
+    plt.axvline(x=trn_len+val_len, color='r')
     plt.legend(['Inputs'])
     plt.xlabel('Observation number after given time steps')
     plt.ylabel('ib scaled')
@@ -141,7 +142,7 @@ def resizer(v, targ_rows, btch_size, sub_samp=1):
     return x.reshape(targ_rows, btch_size, 1)
 
 
-def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, callbacks=None):
+def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0):
     """Feed a dataset into the model in order to train it."""
 
     # Training callbacks
