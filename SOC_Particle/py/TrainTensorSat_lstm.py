@@ -21,8 +21,8 @@ import pandas as pd
 import tensorflow as tf
 from matplotlib import pyplot as plt
 from keras.models import Sequential
-from keras.models import load_model
-from keras.layers import Dense, LSTM, Dropout
+from keras.models import load_model, Model
+from keras.layers import Dense, LSTM, Dropout, Input, Concatenate
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
@@ -33,11 +33,17 @@ pd.options.display.max_rows = 10
 pd.options.display.float_format = "{:.1f}".format
 
 
-def create_lstm(hidden_units, input_shape, dense_units=1, activation=None, learn_rate=0.01, drop=0.2,
+# Single input with one-hot augmentation path
+def create_sat_mod(hidden_units, input_shape, dense_units=1, activation=None, learn_rate=0.01, drop=0.2,
                 use_two_lstm=False):
     if activation is None:
-        activation = ['relu', 'sigmoid', 'linear']
+        activation = ['relu', 'sigmoid', 'linear', 'linear']
+    ib_in = Input(shape=input_shape, name = 'ib-in')
+    sat_in = Input(shape=input_shape, name='sat-in')
+
+    # LSTM using ib
     lstm = Sequential()
+    lstm.add(ib_in)
     if use_two_lstm:
         lstm.add(LSTM(hidden_units, input_shape=input_shape, activation=activation[0],
                       recurrent_activation=activation[1], return_sequences=True))
@@ -49,11 +55,18 @@ def create_lstm(hidden_units, input_shape, dense_units=1, activation=None, learn
         lstm.add(LSTM(hidden_units, activation=activation[0],
                       recurrent_activation=activation[1], return_sequences=False))
         lstm.add(Dropout(drop))
-    lstm.add(Dense(units=dense_units, activation=activation[2]))
-    # lstm.compile(loss='mean_squared_error', optimizer='adam')
-    lstm.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate))
-    lstm.summary()
-    return lstm
+    lstm.add(Dense(units=1, activation=activation[2]))
+
+    # Add sat to calculation
+    out = Concatenate()([lstm, sat_in])
+    out.add(Dense(units=dense_units, activation=activation[3]))
+
+    # Implement the final configuration
+    modified = Model([ib_in, sat_in], out)
+    modified.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate))
+    modified.summary()
+
+    return modified
 
 
 # Plotting function
@@ -125,22 +138,23 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
 
 def process_battery_attributes(df):
     # column names of continuous features
-    data = df[['Tb', 'ib', 'soc']]
+    data = df[['Tb', 'ib', 'soc', 'sat']]
     with pd.option_context('mode.chained_assignment', None):
         data['Tb'] = data['Tb'].map(lambda x: x/50.)
         data['ib'] = data['ib'].map(lambda x: x/10.)
         data['soc'] = data['soc'].map(lambda x: x/1.)
+        data['sat'] = data['sat'].map(lambda x: x/1.)
         y = df['dv'] / 0.1
 
     return data, y
 
 
 # Resize and convert to numpy
-def resizer(v, targ_rows, btch_size, sub_samp=1):
+def resizer(v, targ_rows, btch_size, sub_samp=1, n_in=1):
     v = v.to_numpy('float')[:targ_rows*btch_size*sub_samp]
     rows_raw = len(v)
-    x = v.reshape(int(rows_raw/sub_samp), sub_samp, 1)[:, 0, 0]
-    return x.reshape(targ_rows, btch_size, 1)
+    x = v.reshape(int(rows_raw/sub_samp), sub_samp, n_in)[:, 0, :]
+    return x.reshape(targ_rows, btch_size, n_in)
 
 
 def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
@@ -173,13 +187,13 @@ print("[INFO] loading train/validation attributes...")
 train = pd.read_csv(train_file, skipinitialspace=True)
 train['voc'] = train['vb'] - train['dv_dyn']
 train['dv'] = train['voc'] - train['voc_stat']
-train_df = train[['Tb', 'ib', 'soc', 'dv']]
+train_df = train[['Tb', 'ib', 'soc', 'sat', 'dv']]
 
 print("[INFO] loading test attributes...")
 test = pd.read_csv(".//generateDV_Data.csv", skipinitialspace=True)
 test['voc'] = test['vb'] - test['dv_dyn']
 test['dv'] = test['voc'] - test['voc_stat']
-test_df = test[['Tb', 'ib', 'soc', 'dv']]
+test_df = test[['Tb', 'ib', 'soc', 'sat', 'dv']]
 
 # Split training data into train and validation data frames
 train_attr, validate_attr = train_test_split(train_df, test_size=val_fraction, shuffle=False)
@@ -187,9 +201,9 @@ test_attr, test_val_attr = train_test_split(test_df, test_size=None, shuffle=Fal
 train_attr, train_y = process_battery_attributes(train_attr)
 validate_attr, validate_y = process_battery_attributes(validate_attr)
 test_attr, test_y = process_battery_attributes(test_attr)
-train_x = train_attr['ib']
-validate_x = validate_attr['ib']
-test_x = test_attr['ib']
+train_x = train_attr[['ib', 'sat']]
+validate_x = validate_attr[['ib', 'sat']]
+test_x = test_attr[['ib', 'sat']]
 
 
 # Create model
@@ -208,17 +222,17 @@ batch_size = int(nom_batch_size / subsample)
 
 # Setup model
 rows_train = int(len(train_y) / batch_size / subsample)
-train_x = resizer(train_x, rows_train, batch_size, sub_samp=subsample)
+train_x = resizer(train_x, rows_train, batch_size, sub_samp=subsample, n_in=2)
 train_y = resizer(train_y, rows_train, batch_size, sub_samp=subsample)
 rows_val = int(len(validate_y) / batch_size / subsample)
-validate_x = resizer(validate_x, rows_val, batch_size, sub_samp=subsample)
+validate_x = resizer(validate_x, rows_val, batch_size, sub_samp=subsample, n_in=2)
 validate_y = resizer(validate_y, rows_val, batch_size, sub_samp=subsample)
 rows_tst = int(len(test_y) / batch_size / subsample)
-test_x = resizer(test_x, rows_tst, batch_size, sub_samp=subsample)
+test_x = resizer(test_x, rows_tst, batch_size, sub_samp=subsample, n_in=2)
 test_y = resizer(test_y, rows_tst, batch_size, sub_samp=subsample)
-model = create_lstm(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]), dense_units=1,
-                    activation=['relu', 'sigmoid', 'linear'], learn_rate=learning_rate, drop=dropping,
-                    use_two_lstm=use_two)
+model = create_sat_mod(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]), dense_units=1,
+                       activation=['relu', 'sigmoid', 'linear', 'linear'], learn_rate=learning_rate, drop=dropping,
+                       use_two_lstm=use_two)
 
 # Train model
 print("[INFO] training model...")
