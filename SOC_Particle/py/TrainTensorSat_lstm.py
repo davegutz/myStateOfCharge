@@ -91,18 +91,21 @@ def plot_the_loss_curve(epochs_, mse_training, mse_validation):
 
 # Plot the inputs
 def plot_input(trn_x, val_x, tst_x):
-    inp = np.append(trn_x, val_x)
-    inp = np.append(inp, tst_x)
-    rows = len(inp)  # inp is unstacked while all the x's are stacked
+    inp_ib = np.append(trn_x[:, :, 0], val_x[:, :, 0])
+    inp_ib = np.append(inp_ib, tst_x[:, :, 0])
+    inp_sat = np.append(trn_x[:, :, 1], val_x[:, :, 1])
+    inp_sat = np.append(inp_sat, tst_x[:, :, 1])
+    rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
     plt.figure(figsize=(15, 6), dpi=80)
-    plt.plot(range(rows), inp)
+    plt.plot(range(rows), inp_ib,  label='ib scaled')
+    plt.plot(range(rows), inp_sat, label='sat')
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
     val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
     plt.axvline(x=trn_len, color='r')
     plt.axvline(x=trn_len+val_len, color='r')
-    plt.legend(['Inputs'])
+    plt.legend(loc=3)
     plt.xlabel('Observation number after given time steps')
-    plt.ylabel('ib scaled')
+    plt.ylabel('ib scaled / sat')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
 
 
