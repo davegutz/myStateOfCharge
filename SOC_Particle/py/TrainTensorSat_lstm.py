@@ -22,7 +22,7 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.models import load_model, Model
-from keras.layers import Dense, LSTM, Dropout, Input, Concatenate
+from keras.layers import Dense, LSTM, Dropout, Input, concatenate
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
@@ -38,35 +38,34 @@ def create_sat_mod(hidden_units, input_shape, dense_units=1, activation=None, le
                 use_two_lstm=False):
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
-    ib_in = Input(shape=input_shape, name = 'ib-in')
-    sat_in = Input(shape=input_shape, name='sat-in')
+    simple_input = (input_shape[0], 1)
+    ib_in = Input(shape=simple_input, name='ib-in')
+    sat_in = Input(shape=simple_input, name='sat-in')
 
     # LSTM using ib
     lstm = Sequential()
     lstm.add(ib_in)
     if use_two_lstm:
-        lstm.add(LSTM(hidden_units, input_shape=input_shape, activation=activation[0],
+        lstm.add(LSTM(hidden_units, input_shape=simple_input, activation=activation[0],
                       recurrent_activation=activation[1], return_sequences=True))
     else:
-        lstm.add(LSTM(hidden_units, input_shape=input_shape, activation=activation[0],
-                      recurrent_activation=activation[1], return_sequences=False))
+        lstm.add(LSTM(hidden_units, input_shape=simple_input, activation=activation[0],
+                      recurrent_activation=activation[1], return_sequences=True))
     lstm.add(Dropout(drop))
     if use_two_lstm:
         lstm.add(LSTM(hidden_units, activation=activation[0],
-                      recurrent_activation=activation[1], return_sequences=False))
+                      recurrent_activation=activation[1], return_sequences=True))
         lstm.add(Dropout(drop))
     lstm.add(Dense(units=1, activation=activation[2]))
 
-    # Add sat to calculation
-    out = Concatenate()([lstm, sat_in])
-    out.add(Dense(units=dense_units, activation=activation[3]))
-
     # Implement the final configuration
-    modified = Model([ib_in, sat_in], out)
-    modified.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate))
-    modified.summary()
+    merged = concatenate([lstm.output, sat_in])
+    predictions = Dense(units=dense_units, activation=activation[2])(merged)
+    final = Model(inputs=[ib_in, sat_in], outputs=predictions)
+    final.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate))
+    final.summary()
 
-    return modified
+    return final
 
 
 # Plotting function
