@@ -57,6 +57,7 @@ def create_sat_mod(hidden_units, input_shape, dense_units=1, activation=None, le
                       recurrent_activation=activation[1], return_sequences=True))
         lstm.add(Dropout(drop))
     lstm.add(Dense(units=1, activation=activation[2]))
+    lstm.summary()
 
     # Implement the final configuration
     merged = concatenate([lstm.output, sat_in])
@@ -222,12 +223,15 @@ batch_size = int(nom_batch_size / subsample)
 # Setup model
 rows_train = int(len(train_y) / batch_size / subsample)
 train_x = resizer(train_x, rows_train, batch_size, sub_samp=subsample, n_in=2)
+train_x_vec = [train_x[:, :, 0], train_x[:, :, 0]]
 train_y = resizer(train_y, rows_train, batch_size, sub_samp=subsample)
 rows_val = int(len(validate_y) / batch_size / subsample)
 validate_x = resizer(validate_x, rows_val, batch_size, sub_samp=subsample, n_in=2)
+validate_x_vec = [validate_x[:, :, 0], validate_x[:, :, 0]]
 validate_y = resizer(validate_y, rows_val, batch_size, sub_samp=subsample)
 rows_tst = int(len(test_y) / batch_size / subsample)
 test_x = resizer(test_x, rows_tst, batch_size, sub_samp=subsample, n_in=2)
+test_x_vec = [test_x[:, :, 0], test_x[:, :, 0]]
 test_y = resizer(test_y, rows_tst, batch_size, sub_samp=subsample)
 model = create_sat_mod(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]), dense_units=1,
                        activation=['relu', 'sigmoid', 'linear', 'linear'], learn_rate=learning_rate, drop=dropping,
@@ -235,14 +239,14 @@ model = create_sat_mod(hidden_units=hidden, input_shape=(train_x.shape[1], train
 
 # Train model
 print("[INFO] training model...")
-epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, btch_size=batch_size, verbose=1)
+epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1)
 plot_the_loss_curve(epochs, mse, history["loss"])
 
 # make predictions
 print("[INFO] predicting 'dv'...")
 train_predict = model.predict(train_x)
-validate_predict = model.predict(validate_x)
-test_predict = model.predict(test_x)
+validate_predict = model.predict(validate_x_vec)
+test_predict = model.predict(test_x_vec)
 
 # Print error
 print_error(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
