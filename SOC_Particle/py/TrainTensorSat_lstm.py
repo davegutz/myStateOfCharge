@@ -161,7 +161,7 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
     """Feed a dataset into the model in order to train it."""
 
     # Training callbacks
-    es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=10)
+    es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=patient)
     file_path = 'TrainTensor_lstm.h5'
     mc = ModelCheckpoint(file_path, monitor='loss', mode='min', verbose=1, save_weights_only=False, save_best_only=True)
     cb = [es, mc]
@@ -209,11 +209,12 @@ test_x = test_attr[['ib', 'sat']]
 # Create model
 dropping = 0.2
 use_two = False
-learning_rate = 0.0001
+learning_rate = 0.001
 epochs = 250
 hidden = 4
 subsample = 5
 nom_batch_size = 30
+patience = 5
 
 # Adjust model automatically
 if use_two:
@@ -239,29 +240,31 @@ model = create_sat_mod(hidden_units=hidden, input_shape=(train_x.shape[1], train
 
 # Train model
 print("[INFO] training model...")
-epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1)
+epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
+                                   patient=patience)
 plot_the_loss_curve(epochs, mse, history["loss"])
 
 # make predictions
 print("[INFO] predicting 'dv'...")
-train_predict = model.predict(train_x)
+train_predict = model.predict(train_x_vec)
 validate_predict = model.predict(validate_x_vec)
 test_predict = model.predict(test_x_vec)
 
 # Print error
 print_error(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
-            trn_pred=train_predict, val_pred=validate_predict, tst_pred=test_predict)
+            trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :], tst_pred=test_predict[:, batch_size-1, :])
 
 # Plot result
 plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x)
 plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
-            trn_pred=train_predict, val_pred=validate_predict, tst_pred=test_predict)
+            trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :], tst_pred=test_predict[:, batch_size-1, :])
 
 # Print model
 model.summary()
 print('\nShape:')
-for wt in model.layers[0].weights:
+for wt in model.layers[1].weights:
     print(wt.name, '-->', wt.shape)
+    print(wt.numpy())
 
 # look at h5 file
 print('\nBest:')
