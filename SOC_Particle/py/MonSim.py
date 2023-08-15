@@ -182,7 +182,9 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         if i == 0:
             T = t[1] - t[0]
         else:
-            T = t[i] - t[i - 1]
+            candidate_dt = t[i] - t[i-1]
+            if candidate_dt > 1e-6:
+                T = candidate_dt
         if dTb_in is not None:
             dTb = lut_dTb.interp(t[i])
         else:
