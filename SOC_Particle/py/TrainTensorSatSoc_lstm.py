@@ -35,22 +35,19 @@ pd.options.display.float_format = "{:.1f}".format
 
 # Single input with one-hot augmentation path
 def create_sat_mod(hidden_units, input_shape, dense_units=1, activation=None, learn_rate=0.01, drop=0.2,
-                use_two_lstm=False):
+                   use_two_lstm=False):
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     simple_input = (input_shape[0], 1)
     ib_in = Input(shape=simple_input, name='ib-in')
     sat_in = Input(shape=simple_input, name='sat-in')
+    soc_in = Input(shape=simple_input, name='soc-in')
 
     # LSTM using ib
     lstm = Sequential()
     lstm.add(ib_in)
-    if use_two_lstm:
-        lstm.add(LSTM(hidden_units, input_shape=simple_input, activation=activation[0],
-                      recurrent_activation=activation[1], return_sequences=True))
-    else:
-        lstm.add(LSTM(hidden_units, input_shape=simple_input, activation=activation[0],
-                      recurrent_activation=activation[1], return_sequences=True))
+    lstm.add(LSTM(hidden_units, input_shape=simple_input, activation=activation[0],
+                  recurrent_activation=activation[1], return_sequences=True))
     lstm.add(Dropout(drop))
     if use_two_lstm:
         lstm.add(LSTM(hidden_units, activation=activation[0],
@@ -60,9 +57,9 @@ def create_sat_mod(hidden_units, input_shape, dense_units=1, activation=None, le
     lstm.summary()
 
     # Implement the final configuration
-    merged = concatenate([lstm.output, sat_in])
+    merged = concatenate([lstm.output, sat_in, soc_in])
     predictions = Dense(units=dense_units, activation=activation[2])(merged)
-    final = Model(inputs=[ib_in, sat_in], outputs=predictions)
+    final = Model(inputs=[ib_in, sat_in, soc_in], outputs=predictions)
     final.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate))
     final.summary()
 
@@ -95,17 +92,20 @@ def plot_input(trn_x, val_x, tst_x):
     inp_ib = np.append(inp_ib, tst_x[:, :, 0])
     inp_sat = np.append(trn_x[:, :, 1], val_x[:, :, 1])
     inp_sat = np.append(inp_sat, tst_x[:, :, 1])
+    inp_soc = np.append(trn_x[:, :, 2], val_x[:, :, 2])
+    inp_soc = np.append(inp_soc, tst_x[:, :, 2])
     rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(range(rows), inp_ib,  label='ib scaled')
     plt.plot(range(rows), inp_sat, label='sat')
+    plt.plot(range(rows), inp_soc, label='soc')
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
     val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
     plt.axvline(x=trn_len, color='r')
     plt.axvline(x=trn_len+val_len, color='r')
     plt.legend(loc=3)
     plt.xlabel('Observation number after given time steps')
-    plt.ylabel('ib scaled / sat')
+    plt.ylabel('ib scaled / sat / soc')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
 
 
@@ -183,7 +183,7 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
 # train_file = ".//temp//dv_train_soc0p_ch_rep.csv"
 # test_file = ".//temp//dv_test_soc0p_ch_rep.csv"
 train_file = ".//generateDV_Data.csv"
-val_fraction = 0.2
+val_fraction = 0.25
 test_file = ".//generateDV_Data.csv"
 
 print("[INFO] loading train/validation attributes...")
@@ -204,15 +204,15 @@ test_attr, test_val_attr = train_test_split(test_df, test_size=None, shuffle=Fal
 train_attr, train_y = process_battery_attributes(train_attr)
 validate_attr, validate_y = process_battery_attributes(validate_attr)
 test_attr, test_y = process_battery_attributes(test_attr)
-train_x = train_attr[['ib', 'sat']]
-validate_x = validate_attr[['ib', 'sat']]
-test_x = test_attr[['ib', 'sat']]
+train_x = train_attr[['ib', 'sat', 'soc']]
+validate_x = validate_attr[['ib', 'sat', 'soc']]
+test_x = test_attr[['ib', 'sat', 'soc']]
 
 
 # Create model
 dropping = 0.2
 use_two = False
-learning_rate = 0.001
+learning_rate = 0.0005
 epochs = 250
 hidden = 3
 subsample = 5
@@ -226,16 +226,16 @@ batch_size = int(nom_batch_size / subsample)
 
 # Setup model
 rows_train = int(len(train_y) / batch_size / subsample)
-train_x = resizer(train_x, rows_train, batch_size, sub_samp=subsample, n_in=2)
-train_x_vec = [train_x[:, :, 0], train_x[:, :, 1]]
+train_x = resizer(train_x, rows_train, batch_size, sub_samp=subsample, n_in=3)
+train_x_vec = [train_x[:, :, 0], train_x[:, :, 1], train_x[:, :, 2]]
 train_y = resizer(train_y, rows_train, batch_size, sub_samp=subsample)
 rows_val = int(len(validate_y) / batch_size / subsample)
-validate_x = resizer(validate_x, rows_val, batch_size, sub_samp=subsample, n_in=2)
-validate_x_vec = [validate_x[:, :, 0], validate_x[:, :, 1]]
+validate_x = resizer(validate_x, rows_val, batch_size, sub_samp=subsample, n_in=3)
+validate_x_vec = [validate_x[:, :, 0], validate_x[:, :, 1], validate_x[:, :, 2]]
 validate_y = resizer(validate_y, rows_val, batch_size, sub_samp=subsample)
 rows_tst = int(len(test_y) / batch_size / subsample)
-test_x = resizer(test_x, rows_tst, batch_size, sub_samp=subsample, n_in=2)
-test_x_vec = [test_x[:, :, 0], test_x[:, :, 1]]
+test_x = resizer(test_x, rows_tst, batch_size, sub_samp=subsample, n_in=3)
+test_x_vec = [test_x[:, :, 0], test_x[:, :, 1], test_x[:, :, 2]]
 test_y = resizer(test_y, rows_tst, batch_size, sub_samp=subsample)
 model = create_sat_mod(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]), dense_units=1,
                        activation=['relu', 'sigmoid', 'linear', 'linear'], learn_rate=learning_rate, drop=dropping,
@@ -256,7 +256,8 @@ test_predict = model.predict(test_x_vec)
 # Plot result
 plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x)
 plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
-            trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :], tst_pred=test_predict[:, batch_size-1, :])
+            trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
+            tst_pred=test_predict[:, batch_size-1, :])
 
 # Print model
 model.summary()
@@ -275,7 +276,6 @@ print_error(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1,
             trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :], tst_pred=test_predict[:, batch_size-1, :])
 
 plt.show()
-
 
 """
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50) --> Often, the first sign of no further improvement may not be the best time to stop training. This is because the model may coast into a plateau of no improvement or even get slightly worse before getting much better. We can account for this by adding a delay to the trigger in terms of the number of epochs on which we would like to see no improvement. This can be done by setting the “patience” argument.
