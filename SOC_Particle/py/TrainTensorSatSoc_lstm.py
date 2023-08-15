@@ -180,26 +180,37 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
 
 
 # Load data and normalize
-# train_file = ".//temp//dv_train_soc0p_ch_rep.csv"
-# test_file = ".//temp//dv_test_soc0p_ch_rep.csv"
-train_file = ".//generateDV_Data.csv"
-val_fraction = 0.25
-test_file = ".//generateDV_Data.csv"
+train_file = ".//temp//dv_train_soc0p_ch_rep.csv"
+validate_file = ".//temp//dv_validate_soc0p_ch_rep.csv"
+test_file = ".//temp//dv_test_soc0p_ch_rep.csv"
+# train_file = ".//generateDV_Data.csv"
+# validate_file = None
+# test_file = ".//generateDV_Data.csv"
+# val_fraction = 0.25
 
 print("[INFO] loading train/validation attributes...")
 train = pd.read_csv(train_file, skipinitialspace=True)
 train['voc'] = train['vb'] - train['dv_dyn']
 train['dv'] = train['voc'] - train['voc_stat']
 train_df = train[['Tb', 'ib', 'soc', 'sat', 'dv']]
+if validate_file is not None:
+    validate = pd.read_csv(validate_file, skipinitialspace=True)
+    validate['voc'] = validate['vb'] - validate['dv_dyn']
+    validate['dv'] = validate['voc'] - validate['voc_stat']
+    validate_df = validate[['Tb', 'ib', 'soc', 'sat', 'dv']]
 
 print("[INFO] loading test attributes...")
-test = pd.read_csv(".//generateDV_Data.csv", skipinitialspace=True)
+test = pd.read_csv(test_file, skipinitialspace=True)
 test['voc'] = test['vb'] - test['dv_dyn']
 test['dv'] = test['voc'] - test['voc_stat']
 test_df = test[['Tb', 'ib', 'soc', 'sat', 'dv']]
 
 # Split training data into train and validation data frames
-train_attr, validate_attr = train_test_split(train_df, test_size=val_fraction, shuffle=False)
+if validate_file is None:
+    train_attr, validate_attr = train_test_split(train_df, test_size=val_fraction, shuffle=False)
+else:
+    train_attr, none_attr = train_test_split(train_df, test_size=None, shuffle=False)
+    validate_attr, none_attr = train_test_split(validate_df, test_size=None, shuffle=False)
 test_attr, test_val_attr = train_test_split(test_df, test_size=None, shuffle=False)
 train_attr, train_y = process_battery_attributes(train_attr)
 validate_attr, validate_y = process_battery_attributes(validate_attr)
