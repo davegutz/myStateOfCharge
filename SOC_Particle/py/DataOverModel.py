@@ -491,7 +491,7 @@ class SavedData:
                 else:
                     lag_reset = False
                     T_lag = self.cTime[i] - self.cTime[i-1]
-                self.sat_lag[i] = SatLag.calculate_tau(self.sat[i], lag_reset, T_lag, sat_lag)
+                self.sat_lag[i] = SatLag.calculate_tau(float(self.sat[i]), lag_reset, T_lag, sat_lag)
             self.sel = np.array(data.sel[:i_end])
             self.mod_data = np.array(data.mod[:i_end])
             self.bms_off = np.array(data.bmso[:i_end])

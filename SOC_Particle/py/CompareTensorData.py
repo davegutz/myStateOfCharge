@@ -46,7 +46,7 @@ def add_sat_lag(data):
     for i in range(n):
         if i > 0:
             dt = data.cTime[i] - data.cTime[i-1]
-        data.sat_lag[i] = SatLag.calculate_tau(data.sat[i], i == 0, dt, lag_tau)
+        data.sat_lag[i] = SatLag.calculate_tau(float(data.sat[i]), i == 0, dt, lag_tau)
     return data
 
 
@@ -98,8 +98,8 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     temp_file = None
 
     # Save these examples
-    # data_file_txt = 'dv_train_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True
-    data_file_txt = 'dv_validate_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True
+    data_file_txt = 'dv_train_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True
+    # data_file_txt = 'dv_validate_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True
     # data_file_txt = 'dv_test_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True
     # data_file_txt = 'GenerateDV_Data.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True; use_vb_sim_in = True
 

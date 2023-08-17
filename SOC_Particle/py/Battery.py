@@ -511,7 +511,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.reset.append(self.reset)
         self.saved.e_wrap.append(self.e_wrap)
         self.saved.e_wrap_filt.append(self.e_wrap_filt)
-        self.saved.sat_lag.append(int(self.sat_lag))
+        self.saved.sat_lag.append(self.sat_lag)
 
 
 class BatterySim(Battery):
