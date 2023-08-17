@@ -31,10 +31,9 @@ from pyDAGx import myTables
 import statistics as sts
 
 
-
 def save_clean_file(mon_ver, csv_file, unit_key):
     default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,\
-      Tb,  vb,  ib,  ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
+      Tb,  vb,  ib,  ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,sat_lag,"
     n = len(mon_ver.time)
     date_time_start = datetime.now()
     with open(csv_file, "w") as output:
@@ -62,6 +61,7 @@ def save_clean_file(mon_ver, csv_file, unit_key):
             s += "{:7.3f},".format(mon_ver.soc_s[i])
             s += "{:7.3f},".format(mon_ver.soc_ekf[i])
             s += "{:7.3f},".format(mon_ver.soc[i])
+            s += "{:7.5f},".format(mon_ver.sat_lag[i])
             s += "\n"
             output.write(s)
         print("Wrote(save_clean_file):", csv_file)

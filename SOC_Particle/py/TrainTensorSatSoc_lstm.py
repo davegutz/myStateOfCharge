@@ -40,7 +40,7 @@ def create_sat_mod(hidden_units, input_shape, dense_units=1, activation=None, le
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     simple_input = (input_shape[0], 1)
     ib_in = Input(shape=simple_input, name='ib-in')
-    sat_in = Input(shape=simple_input, name='sat-in')
+    sat_in = Input(shape=simple_input, name='sat_lag-in')
     soc_in = Input(shape=simple_input, name='soc-in')
 
     # LSTM using ib
@@ -97,7 +97,7 @@ def plot_input(trn_x, val_x, tst_x):
     rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(range(rows), inp_ib,  label='ib scaled')
-    plt.plot(range(rows), inp_sat, label='sat')
+    plt.plot(range(rows), inp_sat, label='sat_lag')
     plt.plot(range(rows), inp_soc, label='soc')
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
     val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
@@ -105,7 +105,7 @@ def plot_input(trn_x, val_x, tst_x):
     plt.axvline(x=trn_len+val_len, color='r')
     plt.legend(loc=3)
     plt.xlabel('Observation number after given time steps')
-    plt.ylabel('ib scaled / sat / soc')
+    plt.ylabel('ib scaled / sat_lag / soc')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
 
 
@@ -141,12 +141,12 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
 
 def process_battery_attributes(df):
     # column names of continuous features
-    data = df[['Tb', 'ib', 'soc', 'sat']]
+    data = df[['Tb', 'ib', 'soc', 'sat_lag']]
     with pd.option_context('mode.chained_assignment', None):
         data['Tb'] = data['Tb'].map(lambda x: x/50.)
         data['ib'] = data['ib'].map(lambda x: x/10.)
         data['soc'] = data['soc'].map(lambda x: x/1.)
-        data['sat'] = data['sat'].map(lambda x: x/1.)
+        data['sat_lag'] = data['sat_lag'].map(lambda x: x/1.)
         y = df['dv'] / 0.1
 
     return data, y
@@ -179,7 +179,7 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
     return epochs_, mserr, ret_hist
 
 
-# Load data and normalize
+# Load data and normalize.  Using inputs from these _rep files so doesn't matter that they're derived
 train_file = ".//temp//dv_train_soc0p_ch_rep.csv"
 validate_file = ".//temp//dv_validate_soc0p_ch_rep.csv"
 test_file = ".//temp//dv_test_soc0p_ch_rep.csv"
@@ -192,18 +192,18 @@ print("[INFO] loading train/validation attributes...")
 train = pd.read_csv(train_file, skipinitialspace=True)
 train['voc'] = train['vb'] - train['dv_dyn']
 train['dv'] = train['voc'] - train['voc_stat']
-train_df = train[['Tb', 'ib', 'soc', 'sat', 'dv']]
+train_df = train[['Tb', 'ib', 'soc', 'sat_lag', 'dv']]
 if validate_file is not None:
     validate = pd.read_csv(validate_file, skipinitialspace=True)
     validate['voc'] = validate['vb'] - validate['dv_dyn']
     validate['dv'] = validate['voc'] - validate['voc_stat']
-    validate_df = validate[['Tb', 'ib', 'soc', 'sat', 'dv']]
+    validate_df = validate[['Tb', 'ib', 'soc', 'sat_lag', 'dv']]
 
 print("[INFO] loading test attributes...")
 test = pd.read_csv(test_file, skipinitialspace=True)
 test['voc'] = test['vb'] - test['dv_dyn']
 test['dv'] = test['voc'] - test['voc_stat']
-test_df = test[['Tb', 'ib', 'soc', 'sat', 'dv']]
+test_df = test[['Tb', 'ib', 'soc', 'sat_lag', 'dv']]
 
 # Split training data into train and validation data frames
 if validate_file is None:
@@ -215,9 +215,9 @@ test_attr, test_val_attr = train_test_split(test_df, test_size=None, shuffle=Fal
 train_attr, train_y = process_battery_attributes(train_attr)
 validate_attr, validate_y = process_battery_attributes(validate_attr)
 test_attr, test_y = process_battery_attributes(test_attr)
-train_x = train_attr[['ib', 'sat', 'soc']]
-validate_x = validate_attr[['ib', 'sat', 'soc']]
-test_x = test_attr[['ib', 'sat', 'soc']]
+train_x = train_attr[['ib', 'sat_lag', 'soc']]
+validate_x = validate_attr[['ib', 'sat_lag', 'soc']]
+test_x = test_attr[['ib', 'sat_lag', 'soc']]
 
 
 # Create model

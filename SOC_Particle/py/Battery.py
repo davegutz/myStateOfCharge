@@ -133,6 +133,7 @@ class Battery(Coulombs):
         self.sel = 0
         self.tweak_test = tweak_test
         self.s_hys = s_hys
+        self.SatLag = LagExp(1., 1., 0., 1.)  # Lag to be run on sat to produce sat_lag.  T and tau set at run time
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -333,6 +334,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dv_dyn = self.vb - self.voc
 
         # Hysteresis model
+        self.sat_lag = self.SatLag.calculate_tau(float(self.sat), reset, self.dt, self.chemistry.sat_lag_tau)
         self.hys.calculate_hys(self.ib, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR)
         self.dv_hys, self.tau_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=self.e_wrap,
@@ -509,6 +511,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.reset.append(self.reset)
         self.saved.e_wrap.append(self.e_wrap)
         self.saved.e_wrap_filt.append(self.e_wrap_filt)
+        self.saved.sat_lag.append(int(self.sat_lag))
 
 
 class BatterySim(Battery):
@@ -596,6 +599,7 @@ class BatterySim(Battery):
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 
         # Hysteresis model
+        self.sat_lag = self.SatLag.calculate_tau(float(self.sat), reset, self.dt, self.chemistry.sat_lag_tau)
         self.hys.calculate_hys(curr_in, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR)
         self.dv_hys, self.tau_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.,
@@ -858,6 +862,7 @@ class Saved:
         self.reset = []  # Reset flag used for initialization
         self.e_wrap = []  # Verification of wrap calculation, V
         self.e_wrap_filt = []  # Verification of filtered wrap calculation, V
+        self.sat_lag = []  # Lagged indication that battery is saturated, T=saturated
 
 
 def overall_batt(mv, sv, filename,

@@ -101,6 +101,19 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
+    plt.figure()  # GP 2
+    n_fig += 1
+    plt.subplot(111)
+    plt.title(plot_title + ' GP 2 sat_lag')
+    plt.plot(mo.time, mo.sat, color='black', linestyle='-', label='sat' + ref_str)
+    plt.plot(mv.time, mv.sat, color='orange', linestyle='--', label='sat' + test_str)
+    plt.plot(mo.time, mo.sat_lag, color='blue', linestyle='-.', label='sat_lag' + ref_str)
+    plt.plot(mv.time, mv.sat_lag, color='red', linestyle=':', label='sat_lag' + test_str)
+    plt.legend(loc=1)
+    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
     plt.figure()  # GP 3 Tune
     n_fig += 1
     plt.subplot(331)
