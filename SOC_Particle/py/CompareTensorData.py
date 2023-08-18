@@ -35,7 +35,7 @@ plt.rcParams['axes.grid'] = True
 
 
 # Add sat_lag = sat lagged by time constant
-def add_sat_lag(data):
+def add_sat_lag(data, sat_init_in=None):
     lag_tau = sat_lag(data.chm[0])
     SatLag = LagExp(1., lag_tau, 0., 1.)
     n = len(data.cTime)
@@ -44,6 +44,8 @@ def add_sat_lag(data):
         data.sat_lag = np.zeros(n)
     dt = data.cTime[1] - data.cTime[0]
     for i in range(n):
+        if i == 0 and sat_init_in is not None:
+            data.sat[i] = sat_init_in
         if i > 0:
             dt = data.cTime[i] - data.cTime[i-1]
         data.sat_lag[i] = SatLag.calculate_tau(float(data.sat[i]), i == 0, dt, lag_tau)
@@ -96,11 +98,12 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     ds_voc_soc_in = 0.
     data_file_txt = None
     temp_file = None
+    sat_init_in = None
 
     # Save these examples
-    data_file_txt = 'dv_train_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True
-    # data_file_txt = 'dv_validate_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True
-    # data_file_txt = 'dv_test_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True
+    # data_file_txt = 'dv_train_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; sat_init_in = True  #; time_end_in = 249194.
+    # data_file_txt = 'dv_validate_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True
+    data_file_txt = 'dv_test_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True
     # data_file_txt = 'GenerateDV_Data.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True; use_vb_sim_in = True
 
     if data_file_path is None:
@@ -118,7 +121,9 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     # # Load mon v4 (old)
     mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
         load_data(data_file, skip, unit_key, zero_zero_in, time_end_in, legacy=legacy_in)
-    mon_old = add_sat_lag(mon_old)
+    mon_old = add_sat_lag(mon_old, sat_init_in=sat_init_in)
+    mon_old_file_save = data_file_clean.replace(".csv", "_clean.csv")
+    save_clean_file(mon_old, mon_old_file_save, 'mon' + date_)
 
     # How to initialize
     if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording

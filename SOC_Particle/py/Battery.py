@@ -44,7 +44,7 @@ class Battery(Coulombs):
     # Battery constants
     UNIT_CAP_RATED = 100.
     NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
-    mxeps_bb = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc
+    mxeps_bb = 1.05  # Numerical maximum of coefficient model with scaled soc
     TCHARGE_DISPLAY_DEADBAND = 0.1  # Inside this +/- deadband, charge time is displayed '---', A
     DF1 = 0.02  # Weighted selection lower transition drift, fraction
     DF2 = 0.70  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
@@ -266,6 +266,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.sdb_voc = SlidingDeadband(Battery.HDB_VBATT)
         self.e_wrap = 0.
         self.e_wrap_filt = 0.
+        self.reset_past = True
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -334,7 +335,6 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dv_dyn = self.vb - self.voc
 
         # Hysteresis model
-        self.sat_lag = self.SatLag.calculate_tau(float(self.sat), reset, self.dt, self.chemistry.sat_lag_tau)
         self.hys.calculate_hys(self.ib, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR)
         self.dv_hys, self.tau_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=self.e_wrap,
@@ -448,6 +448,9 @@ class BatteryMonitor(Battery, EKF1x1):
         self.soc_ekf = soc
         self.init_ekf(soc, 0.0)
         self.q_ekf = self.soc_ekf * self.q_capacity
+
+    def lag_sat(self, sat, reset):
+        self.sat_lag = self.SatLag.calculate_tau(float(sat), reset, self.dt, self.chemistry.sat_lag_tau)
 
     def regauge(self, temp_c):
         if self.converged_ekf() and abs(self.soc_ekf - self.soc) > Battery.DF2:
@@ -599,7 +602,6 @@ class BatterySim(Battery):
         self.voc_stat = min(self.voc_stat + (soc - soc_lim) * self.dv_dsoc, self.vsat * 1.2)
 
         # Hysteresis model
-        self.sat_lag = self.SatLag.calculate_tau(float(self.sat), reset, self.dt, self.chemistry.sat_lag_tau)
         self.hys.calculate_hys(curr_in, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR)
         self.dv_hys, self.tau_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.,
@@ -653,6 +655,7 @@ class BatterySim(Battery):
             self.model_saturated = sat_init
             self.sat = sat_init
         self.sat = self.model_saturated
+        self.sat_lag = self.SatLag.calculate_tau(float(self.sat), reset, self.dt, self.chemistry.sat_lag_tau)
         # print('SIM:   soc', self.soc, 'q', self.q, 'voc_stat', self.voc_stat, 'vb_down', self.chemistry.vb_down, 'charging', bms_charging, 'voltage_low', voltage_low, 'tweak_test', rp.tweak_test(), 'bms_off', self.bms_off, 'ib', self.ib, 'ib_charge', self.ib_charge)
 
         return self.vb

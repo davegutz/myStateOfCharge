@@ -271,6 +271,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         ib_charge = mon.ib_charge
         sat = is_sat(Tb_, mon.voc_filt, mon.soc, mon.chemistry.nom_vsat, mon.chemistry.dvoc_dt, mon.chemistry.low_t)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
+        mon.lag_sat(sat, reset)
         if rp.modeling == 0:
             mon.count_coulombs(chem=_chm_m, dt=T, reset=reset, temp_c=Tb_, charge_curr=ib_charge, sat=saturated,
                                use_soc_in=use_mon_soc, soc_in=mon_old.soc[i])
@@ -306,6 +307,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
                   "{:9.3f}".format(mon.hys.ibs), "{:9.3f}".format(mon.hys.ioc), "{:4.0f}".format(mon.sat),
                   "{:9.3f}".format(mon.hys.disabled), "{:9.3f}".format(mon.hys.dv_dot),
                   "{:9.3f}".format(mon.saved.dv_hys[i]))
+        # print('mon: t', t[i], 'voc', mon.voc, 'vsat', mon.vsat, 'sat', mon.sat, 'here sat', sat, 'here saturated', saturated, 'sat_lag', mon.sat_lag)
 
     # Data
     if verbose:

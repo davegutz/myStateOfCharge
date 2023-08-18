@@ -103,12 +103,22 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
 
     plt.figure()  # GP 2
     n_fig += 1
-    plt.subplot(111)
+    plt.subplot(311)
     plt.title(plot_title + ' GP 2 sat_lag')
     plt.plot(mo.time, mo.sat, color='black', linestyle='-', label='sat' + ref_str)
     plt.plot(mv.time, mv.sat, color='orange', linestyle='--', label='sat' + test_str)
     plt.plot(mo.time, mo.sat_lag, color='blue', linestyle='-.', label='sat_lag' + ref_str)
     plt.plot(mv.time, mv.sat_lag, color='red', linestyle=':', label='sat_lag' + test_str)
+    plt.legend(loc=1)
+    plt.subplot(312)
+    plt.plot(mo.time, mo.voc, color='black', linestyle='-', label='voc' + ref_str)
+    plt.plot(mv.time, mv.voc, color='orange', linestyle='--', label='voc' + test_str)
+    plt.plot(mo.time, mo.vsat, color='blue', linestyle='-.', label='vsat' + ref_str)
+    plt.plot(mv.time, mv.vsat, color='red', linestyle=':', label='vsat' + test_str)
+    plt.legend(loc=1)
+    plt.subplot(313)
+    plt.plot(mo.time, mo.soc, color='black', linestyle='-', label='soc' + ref_str)
+    plt.plot(mv.time, mv.soc, color='orange', linestyle='--', label='soc' + test_str)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
