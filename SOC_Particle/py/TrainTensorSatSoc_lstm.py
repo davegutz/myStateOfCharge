@@ -180,13 +180,17 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
 
 
 # Load data and normalize.  Using inputs from these _rep files so doesn't matter that they're derived
-train_file = ".//temp//dv_train_soc0p_ch_rep.csv"
-validate_file = ".//temp//dv_validate_soc0p_ch_rep.csv"
-test_file = ".//temp//dv_test_soc0p_ch_rep.csv"
+# train_file = ".//temp//dv_train_soc0p_ch_rep.csv"
+# train_file = ".//temp//dv_train_soc0p_ch_clean.csv"
+train_file = ".//temp//dv_validate_soc0p_ch_rep.csv"
+# validate_file = ".//temp//dv_validate_soc0p_ch_rep.csv"
+validate_file = ".//temp//dv_test_soc0p_ch_rep.csv"
+# test_file = ".//temp//dv_test_soc0p_ch_rep.csv"
+test_file = ".//temp//dv_train_soc0p_ch_clean.csv"
 # train_file = ".//generateDV_Data.csv"
 # validate_file = None
 # test_file = ".//generateDV_Data.csv"
-# val_fraction = 0.25
+val_fraction = 0.25
 
 print("[INFO] loading train/validation attributes...")
 train = pd.read_csv(train_file, skipinitialspace=True)
