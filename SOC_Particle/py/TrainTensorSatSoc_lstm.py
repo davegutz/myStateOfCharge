@@ -23,7 +23,7 @@ from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.models import load_model, Model
 from keras.layers import Dense, LSTM, Dropout, Input, concatenate
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
@@ -60,7 +60,8 @@ def create_sat_mod(hidden_units, input_shape, dense_units=1, activation=None, le
     merged = concatenate([lstm.output, sat_in, soc_in])
     predictions = Dense(units=dense_units, activation=activation[2])(merged)
     final = Model(inputs=[ib_in, sat_in, soc_in], outputs=predictions)
-    final.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate))
+    final.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
+                  metrics=['mse', 'mae'])
     final.summary()
 
     return final
@@ -87,7 +88,7 @@ def plot_the_loss_curve(epochs_, mse_training, mse_validation):
 
 
 # Plot the inputs
-def plot_input(trn_x, val_x, tst_x):
+def plot_input(trn_x, val_x, tst_x, t_samp):
     inp_ib = np.append(trn_x[:, :, 0], val_x[:, :, 0])
     inp_ib = np.append(inp_ib, tst_x[:, :, 0])
     inp_sat = np.append(trn_x[:, :, 1], val_x[:, :, 1])
@@ -96,35 +97,41 @@ def plot_input(trn_x, val_x, tst_x):
     inp_soc = np.append(inp_soc, tst_x[:, :, 2])
     rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
     plt.figure(figsize=(15, 6), dpi=80)
-    plt.plot(range(rows), inp_ib,  label='ib scaled')
-    plt.plot(range(rows), inp_sat, label='sat_lag')
-    plt.plot(range(rows), inp_soc, label='soc')
+    time = range(rows) * t_samp
+    plt.plot(time, inp_ib,  label='ib scaled')
+    plt.plot(time, inp_sat, label='sat_lag')
+    plt.plot(time, inp_soc, label='soc')
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
     val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
-    plt.axvline(x=trn_len, color='r')
-    plt.axvline(x=trn_len+val_len, color='r')
+    plt.axvline(x=trn_len*t_samp, color='r')
+    plt.axvline(x=(trn_len+val_len)*t_samp, color='g')
     plt.legend(loc=3)
     plt.xlabel('Observation number after given time steps')
+    plt.xlabel('seconds')
     plt.ylabel('ib scaled / sat_lag / soc')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
 
 
 # Plot the results
-def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
+def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, t_samp):
     actual = np.append(trn_y, val_y)
     actual = np.append(actual, tst_y)
     predictions = np.append(trn_pred, val_pred)
     predictions = np.append(predictions, tst_pred)
+    errors = predictions - actual
     rows = len(actual)
+    time = range(rows) * t_samp
     plt.figure(figsize=(15, 6), dpi=80)
-    plt.plot(range(rows), actual)
-    plt.plot(range(rows), predictions)
-    plt.axvline(x=len(trn_y), color='r')
-    plt.axvline(x=len(trn_y)+len(val_y), color='r')
-    plt.legend(['Actual', 'Predictions'])
-    plt.xlabel('Observation number after given time steps')
+    plt.plot(time, actual)
+    plt.plot(time, predictions)
+    plt.plot(time, errors)
+    plt.axvline(x=len(trn_y)*t_samp, color='r')
+    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp, color='g')
+    plt.legend(['Actual', 'Predictions', 'Error'])
+    # plt.xlabel('Observation number after given time steps')
+    plt.xlabel('seconds')
     plt.ylabel('dv scaled')
-    plt.title('Actual and Predicted Values. The Red Line Separates The Training, Validation, and Test Examples')
+    plt.title('Actual, Predicted, and Error Values. The Red Line Separates The Training, Validation, and Test Examples')
 
 
 def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
@@ -132,11 +139,14 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
     trn_rmse = math.sqrt(mean_squared_error(trn_y, trn_pred))
     val_rmse = math.sqrt(mean_squared_error(val_y, val_pred))
     tst_rmse = math.sqrt(mean_squared_error(tst_y, tst_pred))
+    trn_mae = mean_absolute_error(trn_y, trn_pred)
+    val_mae = mean_absolute_error(val_y, val_pred)
+    tst_mae = mean_absolute_error(tst_y, tst_pred)
 
     # Print RMSE
-    print('Train RMSE: %.3f RMSE' % trn_rmse)
-    print('Validate RMSE: %.3f RMSE' % val_rmse)
-    print('Test RMSE: %.3f RMSE' % tst_rmse)
+    print("Train    RMSE {:6.3f}".format(trn_rmse), " ||  MAE {:6.3f}".format(trn_mae))
+    print("Validate RMSE {:6.3f}".format(val_rmse), " ||  MAE {:6.3f}".format(val_mae))
+    print("Test     RMSE {:6.3f}".format(tst_rmse), " ||  MAE {:6.3f}".format(tst_mae))
 
 
 def process_battery_attributes(df):
@@ -180,18 +190,9 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
 
 
 # Load data and normalize.  Using inputs from these _rep files so doesn't matter that they're derived
-# train_file = ".//temp//dv_train_soc0p_ch_rep.csv"
-# train_file = ".//temp//dv_train_soc0p_ch_clean.csv"
-# validate_file = ".//temp//dv_validate_soc0p_ch_rep.csv"
+train_file = ".//temp//dv_train_soc0p_ch_clean.csv"
 validate_file = ".//temp//dv_validate_soc0p_ch_clean.csv"
-# validate_file = ".//temp//dv_validate_soc0p_ch_rep.csv"
-# train_file = ".//temp//dv_test_soc0p_ch_rep.csv"
-train_file = ".//temp//dv_test_soc0p_ch_clean.csv"
-# test_file = ".//temp//dv_test_soc0p_ch_rep.csv"
-test_file = ".//temp//dv_train_soc0p_ch_clean.csv"
-# train_file = ".//generateDV_Data.csv"
-# validate_file = None
-# test_file = ".//generateDV_Data.csv"
+test_file = ".//temp//dv_test_soc0p_ch_clean.csv"
 val_fraction = 0.25
 
 print("[INFO] loading train/validation attributes...")
@@ -215,9 +216,10 @@ test_df = test[['Tb', 'ib', 'soc', 'sat_lag', 'dv']]
 if validate_file is None:
     train_attr, validate_attr = train_test_split(train_df, test_size=val_fraction, shuffle=False)
 else:
-    train_attr, none_attr = train_test_split(train_df, test_size=None, shuffle=False)
-    validate_attr, none_attr = train_test_split(validate_df, test_size=None, shuffle=False)
-test_attr, test_val_attr = train_test_split(test_df, test_size=None, shuffle=False)
+    train_attr = train_df
+    validate_attr = validate_df
+test_attr = test_df
+
 train_attr, train_y = process_battery_attributes(train_attr)
 validate_attr, validate_y = process_battery_attributes(validate_attr)
 test_attr, test_y = process_battery_attributes(test_attr)
@@ -271,10 +273,13 @@ validate_predict = model.predict(validate_x_vec)
 test_predict = model.predict(test_x_vec)
 
 # Plot result
-plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x)
+t_samp = train['cTime'][20]-train['cTime'][19]
+t_samp_input = t_samp * subsample
+t_samp_result = t_samp_input * batch_size
+plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x, t_samp=t_samp_input)
 plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
             trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
-            tst_pred=test_predict[:, batch_size-1, :])
+            tst_pred=test_predict[:, batch_size-1, :], t_samp=t_samp_result)
 
 # Print model
 model.summary()
