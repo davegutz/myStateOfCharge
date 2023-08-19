@@ -19,8 +19,8 @@ from pyDAGx import myTables
 
 
 # tentative values sat lag
-LAG_BB = 25.*25.
-LAG_CH = 25.*25.
+LAG_BB = 25.*25.*3
+LAG_CH = 25.*25.*3
 
 
 def sat_lag(chm):
