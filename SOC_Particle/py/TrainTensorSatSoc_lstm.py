@@ -182,9 +182,11 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
 # Load data and normalize.  Using inputs from these _rep files so doesn't matter that they're derived
 # train_file = ".//temp//dv_train_soc0p_ch_rep.csv"
 # train_file = ".//temp//dv_train_soc0p_ch_clean.csv"
-validate_file = ".//temp//dv_validate_soc0p_ch_rep.csv"
 # validate_file = ".//temp//dv_validate_soc0p_ch_rep.csv"
-train_file = ".//temp//dv_test_soc0p_ch_rep.csv"
+validate_file = ".//temp//dv_validate_soc0p_ch_clean.csv"
+# validate_file = ".//temp//dv_validate_soc0p_ch_rep.csv"
+# train_file = ".//temp//dv_test_soc0p_ch_rep.csv"
+train_file = ".//temp//dv_test_soc0p_ch_clean.csv"
 # test_file = ".//temp//dv_test_soc0p_ch_rep.csv"
 test_file = ".//temp//dv_train_soc0p_ch_clean.csv"
 # train_file = ".//generateDV_Data.csv"
@@ -229,7 +231,7 @@ dropping = 0.2
 use_two = False
 learning_rate = 0.0005
 epochs = 250
-hidden = 12
+hidden = 8
 subsample = 5
 nom_batch_size = 30
 patience = 5
