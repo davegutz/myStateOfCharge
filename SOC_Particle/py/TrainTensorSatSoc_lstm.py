@@ -33,40 +33,6 @@ pd.options.display.max_rows = 10
 pd.options.display.float_format = "{:.1f}".format
 
 
-# Single input with one-hot augmentation path
-def create_sat_mod(hidden_units, input_shape, dense_units=1, activation=None, learn_rate=0.01, drop=0.2,
-                   use_two_lstm=False):
-    if activation is None:
-        activation = ['relu', 'sigmoid', 'linear', 'linear']
-    simple_input = (input_shape[0], 1)
-    ib_in = Input(shape=simple_input, name='ib-in')
-    sat_in = Input(shape=simple_input, name='sat_lag-in')
-    soc_in = Input(shape=simple_input, name='soc-in')
-
-    # LSTM using ib
-    lstm = Sequential()
-    lstm.add(ib_in)
-    lstm.add(LSTM(hidden_units, input_shape=simple_input, activation=activation[0],
-                  recurrent_activation=activation[1], return_sequences=True))
-    lstm.add(Dropout(drop))
-    if use_two_lstm:
-        lstm.add(LSTM(hidden_units, activation=activation[0],
-                      recurrent_activation=activation[1], return_sequences=True))
-        lstm.add(Dropout(drop))
-    lstm.add(Dense(units=1, activation=activation[2]))
-    lstm.summary()
-
-    # Implement the final configuration
-    merged = concatenate([lstm.output, sat_in, soc_in])
-    predictions = Dense(units=dense_units, activation=activation[2])(merged)
-    final = Model(inputs=[ib_in, sat_in, soc_in], outputs=predictions)
-    final.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
-                  metrics=['mse', 'mae'])
-    final.summary()
-
-    return final
-
-
 # Plotting function
 def plot_the_loss_curve(epochs_, mse_training, mse_validation):
     """Plot a curve of loss vs. epoch."""
@@ -149,15 +115,16 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
     print("Test     RMSE {:6.3f}".format(tst_rmse), " ||  MAE {:6.3f}".format(tst_mae))
 
 
-def process_battery_attributes(df):
+def process_battery_attributes(df, scale=(50., 10., 1., 1., 0.1)):
     # column names of continuous features
     data = df[['Tb', 'ib', 'soc', 'sat_lag']]
+    s_Tb, s_ib, s_soc, s_sat_lag, s_dv = scale
     with pd.option_context('mode.chained_assignment', None):
-        data['Tb'] = data['Tb'].map(lambda x: x/50.)
-        data['ib'] = data['ib'].map(lambda x: x/10.)
-        data['soc'] = data['soc'].map(lambda x: x/1.)
-        data['sat_lag'] = data['sat_lag'].map(lambda x: x/1.)
-        y = df['dv'] / 0.1
+        data['Tb'] = data['Tb'].map(lambda x: x/s_Tb)
+        data['ib'] = data['ib'].map(lambda x: x/s_ib)
+        data['soc'] = data['soc'].map(lambda x: x/s_soc)
+        data['sat_lag'] = data['sat_lag'].map(lambda x: x/s_sat_lag)
+        y = df['dv'] / s_dv
 
     return data, y
 
@@ -168,6 +135,40 @@ def resizer(v, targ_rows, btch_size, sub_samp=1, n_in=1):
     rows_raw = len(v)
     x = v.reshape(int(rows_raw/sub_samp), sub_samp, n_in)[:, 0, :]
     return x.reshape(targ_rows, btch_size, n_in)
+
+
+# Single input with one-hot augmentation path
+def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=None, learn_rate=0.01, drop=0.2,
+                        use_two_lstm=False):
+    if activation is None:
+        activation = ['relu', 'sigmoid', 'linear', 'linear']
+    simple_input = (input_shape[0], 1)
+    ib_in = Input(shape=simple_input, name='ib-in')
+    sat_in = Input(shape=simple_input, name='sat_lag-in')
+    soc_in = Input(shape=simple_input, name='soc-in')
+
+    # LSTM using ib
+    lstm = Sequential()
+    lstm.add(ib_in)
+    lstm.add(LSTM(hidden_units, input_shape=simple_input, activation=activation[0],
+                  recurrent_activation=activation[1], return_sequences=True))
+    lstm.add(Dropout(drop))
+    if use_two_lstm:
+        lstm.add(LSTM(hidden_units, activation=activation[0],
+                      recurrent_activation=activation[1], return_sequences=True))
+        lstm.add(Dropout(drop))
+    lstm.add(Dense(units=1, activation=activation[2]))
+    lstm.summary()
+
+    # Implement the final configuration
+    merged = concatenate([lstm.output, sat_in, soc_in])
+    predictions = Dense(units=dense_units, activation=activation[2])(merged)
+    final = Model(inputs=[ib_in, sat_in, soc_in], outputs=predictions)
+    final.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
+                  metrics=['mse', 'mae'])
+    final.summary()
+
+    return final
 
 
 def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
@@ -220,15 +221,9 @@ else:
     validate_attr = validate_df
 test_attr = test_df
 
-train_attr, train_y = process_battery_attributes(train_attr)
-validate_attr, validate_y = process_battery_attributes(validate_attr)
-test_attr, test_y = process_battery_attributes(test_attr)
-train_x = train_attr[['ib', 'sat_lag', 'soc']]
-validate_x = validate_attr[['ib', 'sat_lag', 'soc']]
-test_x = test_attr[['ib', 'sat_lag', 'soc']]
-
-
 # Create model
+scale_in = (50., 10., 1., 1., 0.1)
+# scale_in = (1., 1., 1., 1., 1.)
 dropping = 0.2
 use_two = False
 learning_rate = 0.0005
@@ -237,6 +232,14 @@ hidden = 8
 subsample = 5
 nom_batch_size = 30
 patience = 5
+
+# Adjust data
+train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
+validate_attr, validate_y = process_battery_attributes(validate_attr, scale=scale_in)
+test_attr, test_y = process_battery_attributes(test_attr, scale=scale_in)
+train_x = train_attr[['ib', 'sat_lag', 'soc']]
+validate_x = validate_attr[['ib', 'sat_lag', 'soc']]
+test_x = test_attr[['ib', 'sat_lag', 'soc']]
 
 # Adjust model automatically
 if use_two:
@@ -256,9 +259,9 @@ rows_tst = int(len(test_y) / batch_size / subsample)
 test_x = resizer(test_x, rows_tst, batch_size, sub_samp=subsample, n_in=3)
 test_x_vec = [test_x[:, :, 0], test_x[:, :, 1], test_x[:, :, 2]]
 test_y = resizer(test_y, rows_tst, batch_size, sub_samp=subsample)
-model = create_sat_mod(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]), dense_units=1,
-                       activation=['relu', 'sigmoid', 'linear', 'linear'], learn_rate=learning_rate, drop=dropping,
-                       use_two_lstm=use_two)
+model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]), dense_units=1,
+                            activation=['relu', 'sigmoid', 'linear', 'linear'], learn_rate=learning_rate, drop=dropping,
+                            use_two_lstm=use_two)
 
 # Train model
 print("[INFO] training model...")
