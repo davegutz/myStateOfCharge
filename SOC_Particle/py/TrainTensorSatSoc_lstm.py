@@ -70,7 +70,8 @@ def plot_input(trn_x, val_x, tst_x, t_samp):
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
     val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
     plt.axvline(x=trn_len*t_samp, color='r')
-    plt.axvline(x=(trn_len+val_len)*t_samp, color='g')
+    plt.axvline(x=(trn_len+val_len)*t_samp, color='m'
+                                                  '')
     plt.legend(loc=3)
     plt.xlabel('Observation number after given time steps')
     plt.xlabel('seconds')
@@ -90,15 +91,23 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, t_samp):
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(time, actual)
     plt.plot(time, predictions)
-    plt.plot(time, errors)
     plt.axvline(x=len(trn_y)*t_samp, color='r')
-    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp, color='g')
-    plt.legend(['Actual', 'Predictions', 'Error'])
+    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp, color='m')
+    plt.legend(['Actual', 'Predictions'])
     # plt.xlabel('Observation number after given time steps')
     plt.xlabel('seconds')
     plt.ylabel('dv scaled')
-    plt.title('Actual, Predicted, and Error Values. The Red Line Separates The Training, Validation, and Test Examples')
+    plt.title('Actual and Predicted Values. The Red Line Separates The Training, Validation, and Test Examples')
 
+    plt.figure(figsize=(15, 6), dpi=80)
+    plt.plot(time, errors)
+    plt.axvline(x=len(trn_y)*t_samp, color='r')
+    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp, color='m')
+    plt.legend(['Error'])
+    # plt.xlabel('Observation number after given time steps')
+    plt.xlabel('seconds')
+    plt.ylabel('dv scaled')
+    plt.title('Error Values. The Red Line Separates The Training, Validation, and Test Examples')
 
 def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
     # Error of predictions
@@ -227,11 +236,12 @@ scale_in = (50., 10., 1., 1., 0.1)
 dropping = 0.2
 use_two = False
 learning_rate = 0.0005
-epochs = 250
+epochs = 500
 hidden = 8
 subsample = 5
 nom_batch_size = 30
 patience = 5
+patience = 25
 
 # Adjust data
 train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
