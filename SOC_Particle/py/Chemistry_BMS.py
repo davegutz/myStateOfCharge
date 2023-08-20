@@ -18,16 +18,31 @@ import numpy as np
 from pyDAGx import myTables
 
 
-# tentative values sat lag
-LAG_BB = 25.*25.*3
-LAG_CH = 25.*25.*3
+# tentative values lags
+# IB_LAG_BB = 83.
+# IB_LAG_CH = 24.9
+SAT_LAG_BB = 25.*25.*3
+SAT_LAG_CH = 25.*25.*3
+IB_LAG_BB = SAT_LAG_BB
+IB_LAG_CH = SAT_LAG_CH
+
+
+def ib_lag(chm):
+    if chm == 0.:
+        lag = IB_LAG_BB
+    elif chm == 1.:
+        lag = IB_LAG_CH
+    else:
+        print('bad chm value')
+        exit(1)
+    return lag
 
 
 def sat_lag(chm):
     if chm == 0.:
-        lag = LAG_BB
+        lag = SAT_LAG_BB
     elif chm == 1.:
-        lag = LAG_CH
+        lag = SAT_LAG_CH
     else:
         print('bad chm value')
         exit(1)
@@ -79,6 +94,7 @@ class Chemistry(BMS):
         self.lu_x_hys = None
         self.lu_n_hys = None
         self.assign_all_mod(mod_code=mod_code)
+        self.ib_lag_tau = None
         self.sat_lag_tau = None
 
     # Assign chemistry, anytime
@@ -98,7 +114,7 @@ class Chemistry(BMS):
         self.dvoc_dt = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
         self.dvoc = 0.  # Adjustment for calibration error, V (systematic error; may change in future, 0..)
         self.hys_cap = 3.6e3  # Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022 (3.6e3)
-                            # tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
+                                # tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
         self.low_voc = 9.0  # Voltage threshold for BMS to turn off battery, V (9.0)
         self.low_t = 0  # Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0)
         self.r_0 = 0.0113  # ChargeTransfer R0, ohms (0.0113)
@@ -115,7 +131,7 @@ class Chemistry(BMS):
         self.nom_vsat = 13.85 - 0.05  # Saturation threshold at temperature, deg C (13.85 - 0.05 HDB_VB)
         self.r_ss = self.r_0 + self.r_ct
         self.dv_min_abs = 0.3  # Absolute value of +/- hysteresis limit, V
-        self.sat_lag_tau = LAG_BB  # Lag time to wash out sat effect on dv, s
+        self.sat_lag_tau = SAT_LAG_BB  # Lag time to wash out sat effect on dv, s
 
         # Tables Battleborn Bmon=0, Bsim=0
         # VOC_SOC table
@@ -168,7 +184,7 @@ class Chemistry(BMS):
         self.coul_eff = 0.9976  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (.9976)
         self.dqdt = 0.01  # Change of charge with temperature, fraction/deg C (0.01 from literature)
         self.dvoc_dt = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
-        self.dvoc = 0.  # Adjustment for calibration error, V (systematic error; may change in future, 0)
+        self.dvoc = 0.  # Adjustment for calibration error, V (systematic error; may change in the future, 0)
         self.hys_cap = 1.e4  # Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s (1e4)
         self.low_voc = 9.0  # Voltage threshold for BMS to turn off battery (9.0)
         self.low_t = 0.  # Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0.)
@@ -186,7 +202,8 @@ class Chemistry(BMS):
         self.nom_vsat = 13.85 - 0.05  # Saturation threshold at temperature, deg C (13.85 - 0.05 HDB_VB)
         self.r_ss = self.r_0 + self.r_ct
         self.dv_min_abs = 0.06  # Absolute value of +/- hysteresis limit, V
-        self.sat_lag_tau = LAG_CH  # Lag time to wash out sat effect on dv, s
+        self.sat_lag_tau = SAT_LAG_CH  # Lag time to wash out sat effect on dv, s
+        self.ib_lag_tau = IB_LAG_CH  # Lag time to wash out sat effect on dv, s
 
         # Tables CHINS Bmon=1, Bsim=1, from ReGaugeVocSoc 3/2/2023
         # VOC_SOC table
@@ -264,5 +281,3 @@ class Chemistry(BMS):
         s += "  {}\n".format(self.lu_x_hys.__str__('dv_max(soc)', '  '))
         s += "  {}\n".format(self.lu_n_hys.__str__('dv_min(soc)', '  '))
         return s
-
-

@@ -134,6 +134,8 @@ class Battery(Coulombs):
         self.tweak_test = tweak_test
         self.s_hys = s_hys
         self.SatLag = LagExp(1., 1., 0., 1.)  # Lag to be run on sat to produce sat_lag.  T and tau set at run time
+        self.ib_lag = 0.
+        self.IbLag = LagExp(1., 1., -100., 100.)  # Lag to be run on sat to produce sat_lag.  T and tau set at run time
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -324,6 +326,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.ib_charge = 0.
         if self.bms_off and voltage_low:
             self.ib = 0.
+        self.ib_lag = self.IbLag.calculate_tau(self.ib, reset, self.dt, self.chemistry.ib_lag_tau)
 
         # Dynamic emf
         self.vb = vb
@@ -444,6 +447,9 @@ class BatteryMonitor(Battery, EKF1x1):
         self.H = self.dv_dsoc
         return self.hx, self.H
 
+    def lag_ib(self, ib, reset):
+        self.ib_lag = self.IbLag.calculate_tau(ib, reset, self.dt, self.chemistry.ib_lag_tau)
+
     def init_soc_ekf(self, soc):
         self.soc_ekf = soc
         self.init_ekf(soc, 0.0)
@@ -515,6 +521,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.e_wrap.append(self.e_wrap)
         self.saved.e_wrap_filt.append(self.e_wrap_filt)
         self.saved.sat_lag.append(self.sat_lag)
+        self.saved.ib_lag.append(self.ib_lag)
 
 
 class BatterySim(Battery):
@@ -627,6 +634,7 @@ class BatterySim(Battery):
             ib_charge_fut = 0.
         if self.bms_off and voltage_low:
             self.ib = 0.
+        self.ib_lag = self.IbLag.calculate_tau(self.ib, reset, self.dt, self.chemistry.ib_lag_tau)
 
         # Charge transfer dynamics
         self.vb = self.voc + (self.ChargeTransfer.calculate(self.ib, reset, dt)*self.chemistry.r_ct +
@@ -866,6 +874,7 @@ class Saved:
         self.e_wrap = []  # Verification of wrap calculation, V
         self.e_wrap_filt = []  # Verification of filtered wrap calculation, V
         self.sat_lag = []  # Lagged indication that battery is saturated, T=saturated
+        self.ib_lag = []  # Lagged ib, A
 
 
 def overall_batt(mv, sv, filename,

@@ -64,7 +64,7 @@ def plot_input(trn_x, val_x, tst_x, t_samp):
     rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
     plt.figure(figsize=(15, 6), dpi=80)
     time = range(rows) * t_samp
-    plt.plot(time, inp_ib,  label='ib scaled')
+    plt.plot(time, inp_ib,  label='ib_lag scaled')
     plt.plot(time, inp_sat, label='sat_lag')
     plt.plot(time, inp_soc, label='soc')
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
@@ -75,7 +75,7 @@ def plot_input(trn_x, val_x, tst_x, t_samp):
     plt.legend(loc=3)
     plt.xlabel('Observation number after given time steps')
     plt.xlabel('seconds')
-    plt.ylabel('ib scaled / sat_lag / soc')
+    plt.ylabel('ib_lag scaled / sat_lag / soc')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
 
 
@@ -126,11 +126,11 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
 
 def process_battery_attributes(df, scale=(50., 10., 1., 1., 0.1)):
     # column names of continuous features
-    data = df[['Tb', 'ib', 'soc', 'sat_lag']]
+    data = df[['Tb', 'ib_lag', 'soc', 'sat_lag']]
     s_Tb, s_ib, s_soc, s_sat_lag, s_dv = scale
     with pd.option_context('mode.chained_assignment', None):
         data['Tb'] = data['Tb'].map(lambda x: x/s_Tb)
-        data['ib'] = data['ib'].map(lambda x: x/s_ib)
+        data['ib_lag'] = data['ib_lag'].map(lambda x: x/s_ib)
         data['soc'] = data['soc'].map(lambda x: x/s_soc)
         data['sat_lag'] = data['sat_lag'].map(lambda x: x/s_sat_lag)
         y = df['dv'] / s_dv
@@ -152,7 +152,7 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     simple_input = (input_shape[0], 1)
-    ib_in = Input(shape=simple_input, name='ib-in')
+    ib_in = Input(shape=simple_input, name='ib_lag-in')
     sat_in = Input(shape=simple_input, name='sat_lag-in')
     soc_in = Input(shape=simple_input, name='soc-in')
 
@@ -209,18 +209,18 @@ print("[INFO] loading train/validation attributes...")
 train = pd.read_csv(train_file, skipinitialspace=True)
 train['voc'] = train['vb'] - train['dv_dyn']
 train['dv'] = train['voc'] - train['voc_stat']
-train_df = train[['Tb', 'ib', 'soc', 'sat_lag', 'dv']]
+train_df = train[['Tb', 'ib_lag', 'soc', 'sat_lag', 'dv']]
 if validate_file is not None:
     validate = pd.read_csv(validate_file, skipinitialspace=True)
     validate['voc'] = validate['vb'] - validate['dv_dyn']
     validate['dv'] = validate['voc'] - validate['voc_stat']
-    validate_df = validate[['Tb', 'ib', 'soc', 'sat_lag', 'dv']]
+    validate_df = validate[['Tb', 'ib_lag', 'soc', 'sat_lag', 'dv']]
 
 print("[INFO] loading test attributes...")
 test = pd.read_csv(test_file, skipinitialspace=True)
 test['voc'] = test['vb'] - test['dv_dyn']
 test['dv'] = test['voc'] - test['voc_stat']
-test_df = test[['Tb', 'ib', 'soc', 'sat_lag', 'dv']]
+test_df = test[['Tb', 'ib_lag', 'soc', 'sat_lag', 'dv']]
 
 # Split training data into train and validation data frames
 if validate_file is None:
@@ -247,9 +247,9 @@ patience = 25
 train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
 validate_attr, validate_y = process_battery_attributes(validate_attr, scale=scale_in)
 test_attr, test_y = process_battery_attributes(test_attr, scale=scale_in)
-train_x = train_attr[['ib', 'sat_lag', 'soc']]
-validate_x = validate_attr[['ib', 'sat_lag', 'soc']]
-test_x = test_attr[['ib', 'sat_lag', 'soc']]
+train_x = train_attr[['ib_lag', 'sat_lag', 'soc']]
+validate_x = validate_attr[['ib_lag', 'sat_lag', 'soc']]
+test_x = test_attr[['ib_lag', 'sat_lag', 'soc']]
 
 # Adjust model automatically
 if use_two:
