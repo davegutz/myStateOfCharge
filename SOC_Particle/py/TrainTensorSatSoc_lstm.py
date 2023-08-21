@@ -40,7 +40,7 @@ def plot_the_loss_curve(epochs_, mse_training, mse_validation):
     plt.xlabel("Epoch")
     plt.ylabel("Mean Squared Error")
     plt.plot(epochs_, mse_training, label="Training Loss")
-    plt.plot(epochs_, mse_validation, label="Validation Loss")
+    # plt.plot(epochs_, mse_validation, label="Validation Loss")   # no validation in model
 
     # mse_training is a pandas Series, so convert it to a list first.
     merged_mse_lists = np.append(mse_training.to_numpy(), mse_validation)
@@ -54,7 +54,7 @@ def plot_the_loss_curve(epochs_, mse_training, mse_validation):
 
 
 # Plot the inputs
-def plot_input(trn_x, val_x, tst_x, t_samp):
+def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
     inp_ib = np.append(trn_x[:, :, 0], val_x[:, :, 0])
     inp_ib = np.append(inp_ib, tst_x[:, :, 0])
     inp_sat = np.append(trn_x[:, :, 1], val_x[:, :, 1])
@@ -63,8 +63,11 @@ def plot_input(trn_x, val_x, tst_x, t_samp):
     inp_soc = np.append(inp_soc, tst_x[:, :, 2])
     rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
     plt.figure(figsize=(15, 6), dpi=80)
-    time = range(rows) * t_samp
-    plt.plot(time, inp_ib,  label='ib_lag scaled')
+    time = range(rows) * t_samp_
+    if use_ib_lag_:
+        plt.plot(time, inp_ib,  label='ib_lag scaled')
+    else:
+        plt.plot(time, inp_ib, label='ib scaled')
     plt.plot(time, inp_sat, label='sat_lag')
     plt.plot(time, inp_soc, label='soc')
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
@@ -75,26 +78,28 @@ def plot_input(trn_x, val_x, tst_x, t_samp):
     plt.legend(loc=3)
     plt.xlabel('Observation number after given time steps')
     plt.xlabel('seconds')
-    plt.ylabel('ib_lag scaled / sat_lag / soc')
+    if use_ib_lag_:
+        plt.ylabel('ib_lag scaled / sat_lag / soc')
+    else:
+        plt.ylabel('ib scaled / sat_lag / soc')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
 
 
 # Plot the results
-def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, t_samp):
+def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, t_samp_):
     actual = np.append(trn_y, val_y)
     actual = np.append(actual, tst_y)
     predictions = np.append(trn_pred, val_pred)
     predictions = np.append(predictions, tst_pred)
     errors = predictions - actual
     rows = len(actual)
-    time = range(rows) * t_samp
+    time = range(rows) * t_samp_
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(time, actual)
     plt.plot(time, predictions)
-    plt.axvline(x=len(trn_y)*t_samp, color='r')
-    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp, color='m')
+    plt.axvline(x=len(trn_y)*t_samp_, color='r')
+    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
     plt.legend(['Actual', 'Predictions'])
-    # plt.xlabel('Observation number after given time steps')
     plt.xlabel('seconds')
     plt.ylabel('dv scaled')
     plt.title('Actual and Predicted Values. The Red Line Separates The Training, Validation, and Test Examples')
@@ -102,12 +107,12 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, t_samp):
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(time, errors)
     plt.axvline(x=len(trn_y)*t_samp, color='r')
-    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp, color='m')
+    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
     plt.legend(['Error'])
-    # plt.xlabel('Observation number after given time steps')
     plt.xlabel('seconds')
     plt.ylabel('dv scaled')
     plt.title('Error Values. The Red Line Separates The Training, Validation, and Test Examples')
+
 
 def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
     # Error of predictions
@@ -126,10 +131,11 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
 
 def process_battery_attributes(df, scale=(50., 10., 1., 1., 0.1)):
     # column names of continuous features
-    data = df[['Tb', 'ib_lag', 'soc', 'sat_lag']]
+    data = df[['Tb', 'ib', 'soc', 'sat_lag', 'ib_lag']]
     s_Tb, s_ib, s_soc, s_sat_lag, s_dv = scale
     with pd.option_context('mode.chained_assignment', None):
         data['Tb'] = data['Tb'].map(lambda x: x/s_Tb)
+        data['ib'] = data['ib'].map(lambda x: x / s_ib)
         data['ib_lag'] = data['ib_lag'].map(lambda x: x/s_ib)
         data['soc'] = data['soc'].map(lambda x: x/s_soc)
         data['sat_lag'] = data['sat_lag'].map(lambda x: x/s_sat_lag)
@@ -152,8 +158,8 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     simple_input = (input_shape[0], 1)
-    ib_in = Input(shape=simple_input, name='ib_lag-in')
-    sat_in = Input(shape=simple_input, name='sat_lag-in')
+    ib_in = Input(shape=simple_input, name='ib-in')
+    sat_in = Input(shape=simple_input, name='sat-in')
     soc_in = Input(shape=simple_input, name='soc-in')
 
     # LSTM using ib
@@ -209,18 +215,21 @@ print("[INFO] loading train/validation attributes...")
 train = pd.read_csv(train_file, skipinitialspace=True)
 train['voc'] = train['vb'] - train['dv_dyn']
 train['dv'] = train['voc'] - train['voc_stat']
-train_df = train[['Tb', 'ib_lag', 'soc', 'sat_lag', 'dv']]
+train_df = train[['Tb', 'ib', 'soc', 'sat', 'sat_lag', 'ib_lag', 'dv']]
+
 if validate_file is not None:
     validate = pd.read_csv(validate_file, skipinitialspace=True)
     validate['voc'] = validate['vb'] - validate['dv_dyn']
     validate['dv'] = validate['voc'] - validate['voc_stat']
-    validate_df = validate[['Tb', 'ib_lag', 'soc', 'sat_lag', 'dv']]
+    validate_df = validate[['Tb', 'ib', 'soc', 'sat', 'sat_lag', 'ib_lag', 'dv']]
+else:
+    validate_df = None
 
 print("[INFO] loading test attributes...")
 test = pd.read_csv(test_file, skipinitialspace=True)
 test['voc'] = test['vb'] - test['dv_dyn']
 test['dv'] = test['voc'] - test['voc_stat']
-test_df = test[['Tb', 'ib_lag', 'soc', 'sat_lag', 'dv']]
+test_df = test[['Tb', 'ib', 'soc', 'sat', 'sat_lag', 'ib_lag', 'dv']]
 
 # Split training data into train and validation data frames
 if validate_file is None:
@@ -235,21 +244,27 @@ scale_in = (50., 10., 1., 1., 0.1)
 # scale_in = (1., 1., 1., 1., 1.)
 dropping = 0.2
 use_two = False
+use_ib_lag = True
 learning_rate = 0.0005
 epochs = 500
 hidden = 8
 subsample = 5
 nom_batch_size = 30
-patience = 5
+# patience = 5
 patience = 25
 
 # Adjust data
 train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
 validate_attr, validate_y = process_battery_attributes(validate_attr, scale=scale_in)
 test_attr, test_y = process_battery_attributes(test_attr, scale=scale_in)
-train_x = train_attr[['ib_lag', 'sat_lag', 'soc']]
-validate_x = validate_attr[['ib_lag', 'sat_lag', 'soc']]
-test_x = test_attr[['ib_lag', 'sat_lag', 'soc']]
+if use_ib_lag:
+    train_x = train_attr[['ib_lag', 'sat_lag', 'soc']]
+    validate_x = validate_attr[['ib_lag', 'sat_lag', 'soc']]
+    test_x = test_attr[['ib_lag', 'sat_lag', 'soc']]
+else:
+    train_x = train_attr[['ib', 'sat_lag', 'soc']]
+    validate_x = validate_attr[['ib', 'sat_lag', 'soc']]
+    test_x = test_attr[['ib', 'sat_lag', 'soc']]
 
 # Adjust model automatically
 if use_two:
@@ -289,10 +304,10 @@ test_predict = model.predict(test_x_vec)
 t_samp = train['cTime'][20]-train['cTime'][19]
 t_samp_input = t_samp * subsample
 t_samp_result = t_samp_input * batch_size
-plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x, t_samp=t_samp_input)
+plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x, t_samp_=t_samp_input, use_ib_lag_=use_ib_lag)
 plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
             trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
-            tst_pred=test_predict[:, batch_size-1, :], t_samp=t_samp_result)
+            tst_pred=test_predict[:, batch_size-1, :], t_samp_=t_samp_result)
 
 # Print model
 model.summary()
