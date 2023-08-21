@@ -139,13 +139,14 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, v
     plt.title('Actual and Predicted Values and old model. The Red Line Separates The Training, Validation, and Test Examples')
 
     plt.figure(figsize=(15, 6), dpi=80)
-    plt.plot(time, errors, color='o')
+    plt.plot(time, errors, color='orange')
     plt.plot(time, errors_old, color='g')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
     plt.legend(['Error', 'Error_old'])
     plt.xlabel('seconds')
     plt.ylabel('dv scaled')
+    plt.grid()
     plt.title('Error Values. The Red Line Separates The Training, Validation, and Test Examples')
 
 
@@ -289,8 +290,7 @@ epochs = 350
 hidden = 8
 subsample = 5
 nom_batch_size = 30
-# patience = 5
-patience = 50
+patience = 25
 fail_ib_mag = 5
 ib_bias = [.1, .5, 1.]
 
