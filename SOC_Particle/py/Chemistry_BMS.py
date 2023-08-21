@@ -19,8 +19,10 @@ from pyDAGx import myTables
 
 
 # tentative values lags
-IB_LAG_BB = 25.*25.*3
-IB_LAG_CH = 25.*25.*3
+# IB_LAG_BB = 25.*25.*3
+# IB_LAG_CH = 25.*25.*3
+IB_LAG_BB = 180.
+IB_LAG_CH = 180.
 
 
 def ib_lag(chm):
