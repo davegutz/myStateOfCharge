@@ -107,8 +107,6 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.title(plot_title + ' GP 2 nn lag')
     plt.plot(mo.time, mo.sat, color='black', linestyle='-', label='sat' + ref_str)
     plt.plot(mv.time, mv.sat, color='orange', linestyle='--', label='sat' + test_str)
-    plt.plot(mo.time, mo.sat_lag, color='blue', linestyle='-.', label='sat_lag' + ref_str)
-    plt.plot(mv.time, mv.sat_lag, color='red', linestyle=':', label='sat_lag' + test_str)
     plt.legend(loc=1)
     plt.subplot(412)
     plt.plot(mo.time, mo.voc, color='black', linestyle='-', label='voc' + ref_str)

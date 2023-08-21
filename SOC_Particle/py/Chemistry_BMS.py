@@ -19,12 +19,8 @@ from pyDAGx import myTables
 
 
 # tentative values lags
-# IB_LAG_BB = 83.
-# IB_LAG_CH = 24.9
-SAT_LAG_BB = 25.*25.*3
-SAT_LAG_CH = 25.*25.*3
-IB_LAG_BB = SAT_LAG_BB
-IB_LAG_CH = SAT_LAG_CH
+IB_LAG_BB = 25.*25.*3
+IB_LAG_CH = 25.*25.*3
 
 
 def ib_lag(chm):
@@ -32,17 +28,6 @@ def ib_lag(chm):
         lag = IB_LAG_BB
     elif chm == 1.:
         lag = IB_LAG_CH
-    else:
-        print('bad chm value')
-        exit(1)
-    return lag
-
-
-def sat_lag(chm):
-    if chm == 0.:
-        lag = SAT_LAG_BB
-    elif chm == 1.:
-        lag = SAT_LAG_CH
     else:
         print('bad chm value')
         exit(1)
@@ -95,7 +80,6 @@ class Chemistry(BMS):
         self.lu_n_hys = None
         self.assign_all_mod(mod_code=mod_code)
         self.ib_lag_tau = None
-        self.sat_lag_tau = None
 
     # Assign chemistry, anytime
     def assign_all_mod(self, mod_code=0):
@@ -131,7 +115,6 @@ class Chemistry(BMS):
         self.nom_vsat = 13.85 - 0.05  # Saturation threshold at temperature, deg C (13.85 - 0.05 HDB_VB)
         self.r_ss = self.r_0 + self.r_ct
         self.dv_min_abs = 0.3  # Absolute value of +/- hysteresis limit, V
-        self.sat_lag_tau = SAT_LAG_BB  # Lag time to wash out sat effect on dv, s
 
         # Tables Battleborn Bmon=0, Bsim=0
         # VOC_SOC table
@@ -202,7 +185,6 @@ class Chemistry(BMS):
         self.nom_vsat = 13.85 - 0.05  # Saturation threshold at temperature, deg C (13.85 - 0.05 HDB_VB)
         self.r_ss = self.r_0 + self.r_ct
         self.dv_min_abs = 0.06  # Absolute value of +/- hysteresis limit, V
-        self.sat_lag_tau = SAT_LAG_CH  # Lag time to wash out sat effect on dv, s
         self.ib_lag_tau = IB_LAG_CH  # Lag time to wash out sat effect on dv, s
 
         # Tables CHINS Bmon=1, Bsim=1, from ReGaugeVocSoc 3/2/2023

@@ -44,7 +44,6 @@ class Coulombs:
         self.reset = False
         self.chemistry = Chemistry(mod_code=mod_code)
         self.chemistry.assign_all_mod(mod_code)
-        self.sat_lag = 1.
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""

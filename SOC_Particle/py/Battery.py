@@ -133,9 +133,8 @@ class Battery(Coulombs):
         self.sel = 0
         self.tweak_test = tweak_test
         self.s_hys = s_hys
-        self.SatLag = LagExp(1., 1., 0., 1.)  # Lag to be run on sat to produce sat_lag.  T and tau set at run time
         self.ib_lag = 0.
-        self.IbLag = LagExp(1., 1., -100., 100.)  # Lag to be run on sat to produce sat_lag.  T and tau set at run time
+        self.IbLag = LagExp(1., 1., -100., 100.)  # Lag to be run on sat to produce ib_lag.  T and tau set at run time
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -455,9 +454,6 @@ class BatteryMonitor(Battery, EKF1x1):
         self.init_ekf(soc, 0.0)
         self.q_ekf = self.soc_ekf * self.q_capacity
 
-    def lag_sat(self, sat, reset):
-        self.sat_lag = self.SatLag.calculate_tau(float(sat), reset, self.dt, self.chemistry.sat_lag_tau)
-
     def regauge(self, temp_c):
         if self.converged_ekf() and abs(self.soc_ekf - self.soc) > Battery.DF2:
             print("Resetting Coulomb Counter Monitor from ", self.soc, " to EKF=", self.soc_ekf, "...")
@@ -520,7 +516,6 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.reset.append(self.reset)
         self.saved.e_wrap.append(self.e_wrap)
         self.saved.e_wrap_filt.append(self.e_wrap_filt)
-        self.saved.sat_lag.append(self.sat_lag)
         self.saved.ib_lag.append(self.ib_lag)
 
 
@@ -663,7 +658,6 @@ class BatterySim(Battery):
             self.model_saturated = sat_init
             self.sat = sat_init
         self.sat = self.model_saturated
-        self.sat_lag = self.SatLag.calculate_tau(float(self.sat), reset, self.dt, self.chemistry.sat_lag_tau)
         # print('SIM:   soc', self.soc, 'q', self.q, 'voc_stat', self.voc_stat, 'vb_down', self.chemistry.vb_down, 'charging', bms_charging, 'voltage_low', voltage_low, 'tweak_test', rp.tweak_test(), 'bms_off', self.bms_off, 'ib', self.ib, 'ib_charge', self.ib_charge)
 
         return self.vb
@@ -873,7 +867,6 @@ class Saved:
         self.reset = []  # Reset flag used for initialization
         self.e_wrap = []  # Verification of wrap calculation, V
         self.e_wrap_filt = []  # Verification of filtered wrap calculation, V
-        self.sat_lag = []  # Lagged indication that battery is saturated, T=saturated
         self.ib_lag = []  # Lagged ib, A
 
 

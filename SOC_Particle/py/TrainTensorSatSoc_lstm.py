@@ -56,8 +56,8 @@ def plot_the_loss_curve(epochs_, mse_training, mse_validation):
 # Plot hysteresis
 def plot_hys(trn_x, trn_y, trn_predict):
     plt.figure()
-    plt.plot(trn_x[:, 5, 2], trn_y[:, 5], label='dv_scaled_train')
-    plt.plot(trn_x[:, 5, 2], trn_predict[:, 5], label='dv_scaled_predict')
+    plt.plot(trn_x[:, 5, 1], trn_y[:, 5], label='dv_scaled_train')
+    plt.plot(trn_x[:, 5, 1], trn_predict[:, 5], label='dv_scaled_predict')
     plt.legend(loc=3)
     plt.xlabel('soc')
     plt.ylabel('dv_scaled')
@@ -85,10 +85,8 @@ def plot_fail(trn_y, trn_predict, trn_predict_fail_ib, t_samp_, ib_bias_):
 def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
     inp_ib = np.append(trn_x[:, :, 0], val_x[:, :, 0])
     inp_ib = np.append(inp_ib, tst_x[:, :, 0])
-    inp_sat = np.append(trn_x[:, :, 1], val_x[:, :, 1])
-    inp_sat = np.append(inp_sat, tst_x[:, :, 1])
-    inp_soc = np.append(trn_x[:, :, 2], val_x[:, :, 2])
-    inp_soc = np.append(inp_soc, tst_x[:, :, 2])
+    inp_soc = np.append(trn_x[:, :, 1], val_x[:, :, 1])
+    inp_soc = np.append(inp_soc, tst_x[:, :, 1])
     rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
     plt.figure(figsize=(15, 6), dpi=80)
     time = range(rows) * t_samp_
@@ -96,7 +94,6 @@ def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
         plt.plot(time, inp_ib,  label='ib_lag scaled')
     else:
         plt.plot(time, inp_ib, label='ib scaled')
-    plt.plot(time, inp_sat, label='sat_lag')
     plt.plot(time, inp_soc, label='soc')
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
     val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
@@ -107,9 +104,9 @@ def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
     plt.xlabel('Observation number after given time steps')
     plt.xlabel('seconds')
     if use_ib_lag_:
-        plt.ylabel('ib_lag scaled / sat_lag / soc')
+        plt.ylabel('ib_lag scaled / soc')
     else:
-        plt.ylabel('ib scaled / sat_lag / soc')
+        plt.ylabel('ib scaled / soc')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
 
 
@@ -165,16 +162,15 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
     print("Test     RMSE {:6.3f}".format(tst_rmse), " ||  MAE {:6.3f}".format(tst_mae))
 
 
-def process_battery_attributes(df, scale=(50., 10., 1., 1., 0.1)):
+def process_battery_attributes(df, scale=(50., 10., 1., 0.1)):
     # column names of continuous features
-    data = df[['Tb', 'ib', 'soc', 'sat_lag', 'ib_lag', 'dv_hys']]
-    s_Tb, s_ib, s_soc, s_sat_lag, s_dv = scale
+    data = df[['Tb', 'ib', 'soc', 'ib_lag', 'dv_hys']]
+    s_Tb, s_ib, s_soc, s_dv = scale
     with pd.option_context('mode.chained_assignment', None):
         data['Tb'] = data['Tb'].map(lambda x: x/s_Tb)
         data['ib'] = data['ib'].map(lambda x: x / s_ib)
         data['ib_lag'] = data['ib_lag'].map(lambda x: x/s_ib)
         data['soc'] = data['soc'].map(lambda x: x/s_soc)
-        data['sat_lag'] = data['sat_lag'].map(lambda x: x/s_sat_lag)
         data['dv_hys'] = data['dv_hys'].map(lambda x: x/s_dv)
         y = df['dv'] / s_dv
 
@@ -196,7 +192,6 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     simple_input = (input_shape[0], 1)
     ib_in = Input(shape=simple_input, name='ib-in')
-    sat_in = Input(shape=simple_input, name='sat-in')
     soc_in = Input(shape=simple_input, name='soc-in')
 
     # LSTM using ib
@@ -213,9 +208,9 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
     lstm.summary()
 
     # Implement the final configuration
-    merged = concatenate([lstm.output, sat_in, soc_in])
+    merged = concatenate([lstm.output, soc_in])
     predictions = Dense(units=dense_units, activation=activation[2])(merged)
-    final = Model(inputs=[ib_in, sat_in, soc_in], outputs=predictions)
+    final = Model(inputs=[ib_in, soc_in], outputs=predictions)
     final.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
                   metrics=['mse', 'mae'])
     final.summary()
@@ -253,14 +248,14 @@ train = pd.read_csv(train_file, skipinitialspace=True)
 train['voc'] = train['vb'] - train['dv_dyn']
 train['dv_hys'] = train['voc'] - train['voc_stat']
 train['dv'] = train['voc'] - train['voc_soc']
-train_df = train[['Tb', 'ib', 'soc', 'sat', 'sat_lag', 'ib_lag', 'dv_hys', 'dv']]
+train_df = train[['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys', 'dv']]
 
 if validate_file is not None:
     validate = pd.read_csv(validate_file, skipinitialspace=True)
     validate['voc'] = validate['vb'] - validate['dv_dyn']
     validate['dv_hys'] = validate['voc'] - validate['voc_stat']
     validate['dv'] = validate['voc'] - validate['voc_soc']
-    validate_df = validate[['Tb', 'ib', 'soc', 'sat', 'sat_lag', 'ib_lag', 'dv_hys', 'dv']]
+    validate_df = validate[['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys', 'dv']]
 else:
     validate_df = None
 
@@ -269,7 +264,7 @@ test = pd.read_csv(test_file, skipinitialspace=True)
 test['voc'] = test['vb'] - test['dv_dyn']
 test['dv_hys'] = test['voc'] - test['voc_stat']
 test['dv'] = test['voc'] - test['voc_soc']
-test_df = test[['Tb', 'ib', 'soc', 'sat', 'sat_lag', 'ib_lag', 'dv_hys', 'dv']]
+test_df = test[['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys', 'dv']]
 
 # Split training data into train and validation data frames
 if validate_file is None:
@@ -280,8 +275,8 @@ else:
 test_attr = test_df
 
 # Create model
-scale_in = (50., 10., 1., 1., 0.1)
-# scale_in = (1., 1., 1., 1., 1.)
+scale_in = (50., 10., 1., 0.1)
+# scale_in = (1., 1., 1., 1.)
 dropping = 0.2
 use_two = False
 use_ib_lag = True
@@ -299,13 +294,13 @@ train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
 validate_attr, validate_y = process_battery_attributes(validate_attr, scale=scale_in)
 test_attr, test_y = process_battery_attributes(test_attr, scale=scale_in)
 if use_ib_lag:
-    train_x = train_attr[['ib_lag', 'sat_lag', 'soc']]
-    validate_x = validate_attr[['ib_lag', 'sat_lag', 'soc']]
-    test_x = test_attr[['ib_lag', 'sat_lag', 'soc']]
+    train_x = train_attr[['ib_lag', 'soc']]
+    validate_x = validate_attr[['ib_lag', 'soc']]
+    test_x = test_attr[['ib_lag', 'soc']]
 else:
-    train_x = train_attr[['ib', 'sat_lag', 'soc']]
-    validate_x = validate_attr[['ib', 'sat_lag', 'soc']]
-    test_x = test_attr[['ib', 'sat_lag', 'soc']]
+    train_x = train_attr[['ib', 'soc']]
+    validate_x = validate_attr[['ib', 'soc']]
+    test_x = test_attr[['ib', 'soc']]
 train_dv_hys = train_attr[['dv_hys']]
 validate_dv_hys = validate_attr[['dv_hys']]
 test_dv_hys = test_attr[['dv_hys']]
@@ -317,18 +312,18 @@ batch_size = int(nom_batch_size / subsample)
 
 # Setup model
 rows_train = int(len(train_y) / batch_size / subsample)
-train_x = resizer(train_x, rows_train, batch_size, sub_samp=subsample, n_in=3)
-train_x_vec = [train_x[:, :, 0], train_x[:, :, 1], train_x[:, :, 2]]
+train_x = resizer(train_x, rows_train, batch_size, sub_samp=subsample, n_in=2)
+train_x_vec = [train_x[:, :, 0], train_x[:, :, 1]]
 train_y = resizer(train_y, rows_train, batch_size, sub_samp=subsample)
 train_dv_hys = resizer(train_dv_hys, rows_train, batch_size, sub_samp=subsample)
 rows_val = int(len(validate_y) / batch_size / subsample)
-validate_x = resizer(validate_x, rows_val, batch_size, sub_samp=subsample, n_in=3)
-validate_x_vec = [validate_x[:, :, 0], validate_x[:, :, 1], validate_x[:, :, 2]]
+validate_x = resizer(validate_x, rows_val, batch_size, sub_samp=subsample, n_in=2)
+validate_x_vec = [validate_x[:, :, 0], validate_x[:, :, 1]]
 validate_y = resizer(validate_y, rows_val, batch_size, sub_samp=subsample)
 validate_dv_hys = resizer(validate_dv_hys, rows_val, batch_size, sub_samp=subsample)
 rows_tst = int(len(test_y) / batch_size / subsample)
-test_x = resizer(test_x, rows_tst, batch_size, sub_samp=subsample, n_in=3)
-test_x_vec = [test_x[:, :, 0], test_x[:, :, 1], test_x[:, :, 2]]
+test_x = resizer(test_x, rows_tst, batch_size, sub_samp=subsample, n_in=2)
+test_x_vec = [test_x[:, :, 0], test_x[:, :, 1]]
 test_y = resizer(test_y, rows_tst, batch_size, sub_samp=subsample)
 test_dv_hys = resizer(test_dv_hys, rows_tst, batch_size, sub_samp=subsample)
 model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]), dense_units=1,
@@ -350,7 +345,7 @@ train_x_fail_ib = train_x
 train_predict_fail_ib = []
 for fail_ib_mag in ib_bias:
     train_x_fail_ib[:, :, 0] += fail_ib_mag/scale_in[1]
-    train_x_fail_ib_vec = [train_x_fail_ib[:, :, 0], train_x_fail_ib[:, :, 1], train_x_fail_ib[:, :, 2]]
+    train_x_fail_ib_vec = [train_x_fail_ib[:, :, 0], train_x_fail_ib[:, :, 1]]
     train_predict_fail_ib.append(model.predict(train_x_fail_ib_vec))
 
 # Plot result
