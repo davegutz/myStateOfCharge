@@ -53,6 +53,31 @@ def plot_the_loss_curve(epochs_, mse_training, mse_validation):
     plt.legend()
 
 
+# Plot hysteresis
+def plot_hys(trn_x, trn_y, trn_predict):
+    plt.figure()
+    plt.plot(trn_x[:, 5, 2], trn_y[:, 5], label='dv_scaled_train')
+    plt.plot(trn_x[:, 5, 2], trn_predict[:, 5], label='dv_scaled_predict')
+    plt.legend(loc=3)
+    plt.xlabel('soc')
+    plt.ylabel('dv_scaled')
+    plt.title('Hysteresis for Training and Prediction')
+
+
+# Plot fail detection predictions
+def plot_fail(trn_y, trn_predict, trn_predict_fail_ib, t_samp_):
+    rows = len(train_y)
+    time = range(rows) * t_samp_
+    plt.figure(figsize=(15, 6), dpi=80)
+    plt.plot(time, trn_y[:, 5, :], label='actual')
+    plt.plot(time, trn_predict[:, 5, :], label='prediction')
+    plt.plot(time, trn_predict_fail_ib[:, 5, :], label='prediction with +10A')
+    plt.legend(loc=3)
+    plt.xlabel('seconds')
+    plt.ylabel('dv scaled')
+    plt.title('Failure Effects at Steady State')
+
+
 # Plot the inputs
 def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
     inp_ib = np.append(trn_x[:, :, 0], val_x[:, :, 0])
@@ -72,8 +97,8 @@ def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
     plt.plot(time, inp_soc, label='soc')
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
     val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
-    plt.axvline(x=trn_len*t_samp, color='r')
-    plt.axvline(x=(trn_len+val_len)*t_samp, color='m'
+    plt.axvline(x=trn_len*t_samp_, color='r')
+    plt.axvline(x=(trn_len+val_len)*t_samp_, color='m'
                                                   '')
     plt.legend(loc=3)
     plt.xlabel('Observation number after given time steps')
@@ -106,7 +131,7 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, t_samp_):
 
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(time, errors)
-    plt.axvline(x=len(trn_y)*t_samp, color='r')
+    plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
     plt.legend(['Error'])
     plt.xlabel('seconds')
@@ -299,6 +324,10 @@ print("[INFO] predicting 'dv'...")
 train_predict = model.predict(train_x_vec)
 validate_predict = model.predict(validate_x_vec)
 test_predict = model.predict(test_x_vec)
+train_x_fail_ib = train_x
+train_x_fail_ib[:, :, 0] += 10./scale_in[1]
+train_x_fail_ib_vec = [train_x_fail_ib[:, :, 0], train_x_fail_ib[:, :, 1], train_x_fail_ib[:, :, 2]]
+train_predict_fail_ib = model.predict(train_x_fail_ib_vec)
 
 # Plot result
 t_samp = train['cTime'][20]-train['cTime'][19]
@@ -308,6 +337,8 @@ plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x, t_samp_=t_samp_input, 
 plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
             trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
             tst_pred=test_predict[:, batch_size-1, :], t_samp_=t_samp_result)
+plot_hys(train_x, train_y, train_predict)
+plot_fail(train_y, train_predict, train_predict_fail_ib, t_samp_=t_samp_result)
 
 # Print model
 model.summary()
