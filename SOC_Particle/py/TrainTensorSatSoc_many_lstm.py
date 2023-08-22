@@ -218,6 +218,35 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
     return final
 
 
+# Single input with one-hot augmentation path
+def tensor_model_create_many_to_one(hidden_units, input_shape, dense_units=1, activation=None, learn_rate=0.01,
+                                    drop=0.2, use_two_lstm=False):
+    if activation is None:
+        activation = ['relu', 'sigmoid', 'linear', 'linear']
+    simple_input = (input_shape[0], 1)
+    ib_in = Input(shape=simple_input, name='ib-in')
+    soc_in = Input(shape=simple_input, name='soc-in')
+    dual_input = (input_shape[0], 2)
+    both_in = Input(shape=dual_input, name='ib-soc-in')
+
+    # LSTM using all_in
+    lstm = Sequential()
+    lstm.add(both_in)
+    lstm.add(LSTM(hidden_units, input_shape=dual_input, activation=activation[0],
+                  recurrent_activation=activation[1], return_sequences=True))
+    lstm.add(Dropout(drop))
+    if use_two_lstm:
+        lstm.add(LSTM(hidden_units, activation=activation[0],
+                      recurrent_activation=activation[1], return_sequences=True))
+        lstm.add(Dropout(drop))
+    lstm.add(Dense(units=1, activation=activation[2]))
+    lstm.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
+                metrics=['mse', 'mae'])
+    lstm.summary()
+
+    return lstm
+
+
 def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
     """Feed a dataset into the model in order to train it."""
 
@@ -280,8 +309,8 @@ scale_in = (50., 10., 1., 0.1)
 dropping = 0.2
 use_two = False
 use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
-learning_rate = 0.0003
-epochs = 350
+learning_rate = 0.0002
+epochs = 500
 hidden = 4
 subsample = 5
 nom_batch_size = 30
@@ -326,27 +355,26 @@ test_x = resizer(test_x, rows_tst, batch_size, sub_samp=subsample, n_in=2)
 test_x_vec = [test_x[:, :, 0], test_x[:, :, 1]]
 test_y = resizer(test_y, rows_tst, batch_size, sub_samp=subsample)
 test_dv_hys = resizer(test_dv_hys, rows_tst, batch_size, sub_samp=subsample)
-model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
+model = tensor_model_create_many_to_one(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
                                         dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
                                         learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two)
 
 # Train model
 print("[INFO] training model...")
-epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
+epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
                                    patient=patience)
 plot_the_loss_curve(epochs, mse, history["loss"])
 
 # make predictions
 print("[INFO] predicting 'dv'...")
-train_predict = model.predict(train_x_vec)
-validate_predict = model.predict(validate_x_vec)
-test_predict = model.predict(test_x_vec)
-train_x_fail_ib = train_x
+train_predict = model.predict(train_x)
+validate_predict = model.predict(validate_x)
+test_predict = model.predict(test_x)
+train_x_fail = train_x
 train_predict_fail_ib = []
 for fail_ib_mag in ib_bias:
-    train_x_fail_ib[:, :, 0] += fail_ib_mag/scale_in[1]
-    train_x_fail_ib_vec = [train_x_fail_ib[:, :, 0], train_x_fail_ib[:, :, 1]]
-    train_predict_fail_ib.append(model.predict(train_x_fail_ib_vec))
+    train_x_fail[:, :, 0] += fail_ib_mag/scale_in[1]
+    train_predict_fail_ib.append(model.predict(train_x_fail))
 
 # Plot result
 t_samp = train['cTime'][20]-train['cTime'][19]
