@@ -111,19 +111,24 @@ def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
 
 
 # Plot the results
-def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, val_dv_hys, tst_dv_hys, t_samp_):
-    actual = np.append(trn_y, val_y)
-    actual = np.append(actual, tst_y)
-    predictions = np.append(trn_pred, val_pred)
-    predictions = np.append(predictions, tst_pred)
+def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, val_dv_hys, tst_dv_hys, t_samp_,
+                scale_in_dv_=1.):
+    actual_train = np.append(trn_y, val_y)
+    actual = np.append(actual_train, tst_y)
+    predictions_train = np.append(trn_pred, val_pred)
+    predictions = np.append(predictions_train, tst_pred)
     dv_hys = np.append(trn_dv_hys, val_dv_hys)
     dv_hys = np.append(dv_hys, tst_dv_hys)
-    errors = predictions - actual
-    dv_hys_old = np.append(trn_dv_hys, val_dv_hys)
-    dv_hys_old = np.append(dv_hys_old, tst_dv_hys)
-    errors_old = dv_hys_old - actual
+    errors_train = (predictions_train - actual_train)*scale_in_dv_*1000.
+    errors = (predictions - actual)*scale_in_dv_*1000.
+    dv_hys_old_train = np.append(trn_dv_hys, val_dv_hys)
+    dv_hys_old = np.append(dv_hys_old_train, tst_dv_hys)
+    errors_old_train = (dv_hys_old_train - actual_train)*scale_in_dv_*1000.
+    errors_old = (dv_hys_old - actual)*scale_in_dv_*1000.
     rows = len(actual)
     time = range(rows) * t_samp_
+    rows_train_ = len(actual_train)
+    time_train = range(rows_train_) * t_samp_
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(time, actual)
     plt.plot(time, predictions)
@@ -135,16 +140,26 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, v
     plt.ylabel('dv scaled')
     plt.title('Actual and Predicted Values and old model. The Red Line Separates The Training, Validation, and Test Examples')
 
-    plt.figure(figsize=(15, 6), dpi=80)
+    plt.figure(figsize=(15, 12), dpi=80)
+    plt.subplot(2,1,1)
+    plt.title('Error Values. The Red Line Separates The Training, Validation, and Test Examples')
     plt.plot(time, errors, color='orange')
     plt.plot(time, errors_old, color='g')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
-    plt.legend(['Error', 'Error_old'])
+    plt.legend(['Error, mV', 'Error_old, mV'])
     plt.xlabel('seconds')
-    plt.ylabel('dv scaled')
+    plt.ylabel('dv, mV')
     plt.grid()
-    plt.title('Error Values. The Red Line Separates The Training, Validation, and Test Examples')
+    plt.subplot(2,1,2)
+    plt.plot(time_train, errors_train, color='orange')
+    plt.plot(time_train, errors_old_train, color='g')
+    plt.axvline(x=len(trn_y)*t_samp_, color='r')
+    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
+    plt.legend(['Error, mV', 'Error_old, mV'])
+    plt.xlabel('seconds')
+    plt.ylabel('dv, mV')
+    plt.grid()
 
 
 def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
@@ -277,6 +292,7 @@ test_attr = test_df
 # Create model
 scale_in = (50., 10., 1., 0.1)
 # scale_in = (1., 1., 1., 1.)
+scale_in_dv = scale_in[3]
 dropping = 0.2
 use_two = False
 use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
@@ -358,7 +374,7 @@ plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1,
             tst_pred=test_predict[:, batch_size-1, :],
             trn_dv_hys=train_dv_hys[:, batch_size-1, :], val_dv_hys=validate_dv_hys[:, batch_size-1,:],
             tst_dv_hys=test_dv_hys[:, batch_size-1, :],
-            t_samp_=t_samp_result)
+            t_samp_=t_samp_result, scale_in_dv_=scale_in_dv)
 plot_hys(train_x, train_y, train_predict)
 plot_fail(train_y, train_predict, np.array(train_predict_fail_ib), t_samp_=t_samp_result, ib_bias_=ib_bias)
 

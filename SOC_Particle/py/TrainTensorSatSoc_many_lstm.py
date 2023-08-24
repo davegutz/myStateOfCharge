@@ -23,143 +23,14 @@ from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.models import load_model, Model
 from keras.layers import Dense, LSTM, Dropout, Input, concatenate
-from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
+from TrainTensorSatSoc_lstm import plot_result, plot_input, plot_the_loss_curve, plot_hys, plot_fail, print_error
 
 # The following lines adjust the granularity of reporting.
 pd.options.display.max_rows = 10
 pd.options.display.float_format = "{:.1f}".format
-
-
-# Plotting function
-def plot_the_loss_curve(epochs_, mse_training, mse_validation):
-    """Plot a curve of loss vs. epoch."""
-    plt.figure()
-    plt.xlabel("Epoch")
-    plt.ylabel("Mean Squared Error")
-    plt.plot(epochs_, mse_training, label="Training Loss")
-    # plt.plot(epochs_, mse_validation, label="Validation Loss")   # no validation in model
-
-    # mse_training is a pandas Series, so convert it to a list first.
-    merged_mse_lists = np.append(mse_training.to_numpy(), mse_validation)
-    highest_loss = max(merged_mse_lists)
-    lowest_loss = min(merged_mse_lists)
-    top_of_y_axis = highest_loss * 1.03
-    bottom_of_y_axis = lowest_loss * 0.97
-
-    plt.ylim([bottom_of_y_axis, top_of_y_axis])
-    plt.legend()
-
-
-# Plot hysteresis
-def plot_hys(trn_x, trn_y, trn_predict):
-    plt.figure()
-    plt.plot(trn_x[:, 5, 1], trn_y[:, 5], label='dv_scaled_train')
-    plt.plot(trn_x[:, 5, 1], trn_predict[:, 5], label='dv_scaled_predict')
-    plt.legend(loc=3)
-    plt.xlabel('soc')
-    plt.ylabel('dv_scaled')
-    plt.title('Hysteresis for Training and Prediction')
-
-
-# Plot fail detection predictions
-def plot_fail(trn_y, trn_predict, trn_predict_fail_ib, t_samp_, ib_bias_):
-    n_fail = trn_predict_fail_ib.shape[0]
-    rows = len(train_y)
-    time = range(rows) * t_samp_
-    plt.figure(figsize=(15, 6), dpi=80)
-    plt.plot(time, trn_y[:, 5, :], label='actual')
-    plt.plot(time, trn_predict[:, 5, :], label='prediction')
-    for i in range(n_fail):
-        label_ = "prediction with {:5.2f} A".format(ib_bias_[i])
-        plt.plot(time, trn_predict_fail_ib[i, :, 5, :], label=label_)
-    plt.legend(loc=3)
-    plt.xlabel('seconds')
-    plt.ylabel('dv scaled')
-    plt.title('Failure Effects at Steady State')
-
-
-# Plot the inputs
-def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
-    inp_ib = np.append(trn_x[:, :, 0], val_x[:, :, 0])
-    inp_ib = np.append(inp_ib, tst_x[:, :, 0])
-    inp_soc = np.append(trn_x[:, :, 1], val_x[:, :, 1])
-    inp_soc = np.append(inp_soc, tst_x[:, :, 1])
-    rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
-    plt.figure(figsize=(15, 6), dpi=80)
-    time = range(rows) * t_samp_
-    if use_ib_lag_:
-        plt.plot(time, inp_ib,  label='ib_lag scaled')
-    else:
-        plt.plot(time, inp_ib, label='ib scaled')
-    plt.plot(time, inp_soc, label='soc')
-    trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
-    val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
-    plt.axvline(x=trn_len*t_samp_, color='r')
-    plt.axvline(x=(trn_len+val_len)*t_samp_, color='m'
-                                                  '')
-    plt.legend(loc=3)
-    plt.xlabel('Observation number after given time steps')
-    plt.xlabel('seconds')
-    if use_ib_lag_:
-        plt.ylabel('ib_lag scaled / soc')
-    else:
-        plt.ylabel('ib scaled / soc')
-    plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
-
-
-# Plot the results
-def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, val_dv_hys, tst_dv_hys, t_samp_):
-    actual = np.append(trn_y, val_y)
-    actual = np.append(actual, tst_y)
-    predictions = np.append(trn_pred, val_pred)
-    predictions = np.append(predictions, tst_pred)
-    dv_hys = np.append(trn_dv_hys, val_dv_hys)
-    dv_hys = np.append(dv_hys, tst_dv_hys)
-    errors = predictions - actual
-    dv_hys_old = np.append(trn_dv_hys, val_dv_hys)
-    dv_hys_old = np.append(dv_hys_old, tst_dv_hys)
-    errors_old = dv_hys_old - actual
-    rows = len(actual)
-    time = range(rows) * t_samp_
-    plt.figure(figsize=(15, 6), dpi=80)
-    plt.plot(time, actual)
-    plt.plot(time, predictions)
-    plt.plot(time, dv_hys)
-    plt.axvline(x=len(trn_y)*t_samp_, color='r')
-    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
-    plt.legend(['Actual', 'Predictions', 'old model'])
-    plt.xlabel('seconds')
-    plt.ylabel('dv scaled')
-    plt.title('Actual and Predicted Values and old model. The Red Line Separates The Training, Validation, and Test Examples')
-
-    plt.figure(figsize=(15, 6), dpi=80)
-    plt.plot(time, errors, color='orange')
-    plt.plot(time, errors_old, color='g')
-    plt.axvline(x=len(trn_y)*t_samp_, color='r')
-    plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
-    plt.legend(['Error', 'Error_old'])
-    plt.xlabel('seconds')
-    plt.ylabel('dv scaled')
-    plt.grid()
-    plt.title('Error Values. The Red Line Separates The Training, Validation, and Test Examples')
-
-
-def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
-    # Error of predictions
-    trn_rmse = math.sqrt(mean_squared_error(trn_y, trn_pred))
-    val_rmse = math.sqrt(mean_squared_error(val_y, val_pred))
-    tst_rmse = math.sqrt(mean_squared_error(tst_y, tst_pred))
-    trn_mae = mean_absolute_error(trn_y, trn_pred)
-    val_mae = mean_absolute_error(val_y, val_pred)
-    tst_mae = mean_absolute_error(tst_y, tst_pred)
-
-    # Print RMSE
-    print("Train    RMSE {:6.3f}".format(trn_rmse), " ||  MAE {:6.3f}".format(trn_mae))
-    print("Validate RMSE {:6.3f}".format(val_rmse), " ||  MAE {:6.3f}".format(val_mae))
-    print("Test     RMSE {:6.3f}".format(tst_rmse), " ||  MAE {:6.3f}".format(tst_mae))
 
 
 def process_battery_attributes(df, scale=(50., 10., 1., 0.1)):
@@ -386,7 +257,7 @@ plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1,
             tst_pred=test_predict[:, batch_size-1, :],
             trn_dv_hys=train_dv_hys[:, batch_size-1, :], val_dv_hys=validate_dv_hys[:, batch_size-1,:],
             tst_dv_hys=test_dv_hys[:, batch_size-1, :],
-            t_samp_=t_samp_result)
+            t_samp_=t_samp_result, scale_in_dv_=scale_in_dv)
 plot_hys(train_x, train_y, train_predict)
 plot_fail(train_y, train_predict, np.array(train_predict_fail_ib), t_samp_=t_samp_result, ib_bias_=ib_bias)
 
