@@ -117,14 +117,16 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, v
     actual = np.append(actual_train, tst_y)
     predictions_train = np.append(trn_pred, val_pred)
     predictions = np.append(predictions_train, tst_pred)
-    dv_hys = np.append(trn_dv_hys, val_dv_hys)
-    dv_hys = np.append(dv_hys, tst_dv_hys)
-    errors_train = (predictions_train - actual_train)*scale_in_dv_*1000.
-    errors = (predictions - actual)*scale_in_dv_*1000.
+    dv_hys_train = np.append(trn_dv_hys, val_dv_hys)
+    dv_hys = np.append(dv_hys_train, tst_dv_hys)
+    dv_hys_train_mv = dv_hys_train*scale_in_dv_*1000.
+    dv_hys_mv = dv_hys*scale_in_dv_*1000.
+    errors_train = -(predictions_train - actual_train)*scale_in_dv_*1000.
+    errors = -(predictions - actual)*scale_in_dv_*1000.
     dv_hys_old_train = np.append(trn_dv_hys, val_dv_hys)
     dv_hys_old = np.append(dv_hys_old_train, tst_dv_hys)
-    errors_old_train = (dv_hys_old_train - actual_train)*scale_in_dv_*1000.
-    errors_old = (dv_hys_old - actual)*scale_in_dv_*1000.
+    errors_old_train = -(dv_hys_old_train - actual_train)*scale_in_dv_*1000.
+    errors_old = -(dv_hys_old - actual)*scale_in_dv_*1000.
     rows = len(actual)
     time = range(rows) * t_samp_
     rows_train_ = len(actual_train)
@@ -145,18 +147,20 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, v
     plt.title('Error Values. The Red Line Separates The Training, Validation, and Test Examples')
     plt.plot(time, errors, color='orange')
     plt.plot(time, errors_old, color='g')
+    plt.plot(time, dv_hys_mv, color='blue')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
-    plt.legend(['Error, mV', 'Error_old, mV'])
+    plt.legend(['Error, mV', 'Error_old, mV', 'dv_hys, mV'])
     plt.xlabel('seconds')
     plt.ylabel('dv, mV')
     plt.grid()
     plt.subplot(2,1,2)
     plt.plot(time_train, errors_train, color='orange')
     plt.plot(time_train, errors_old_train, color='g')
+    plt.plot(time_train, dv_hys_train_mv, color='blue')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
-    plt.legend(['Error, mV', 'Error_old, mV'])
+    plt.legend(['Error, mV', 'Error_old, mV', 'dv_hys, mV'])
     plt.xlabel('seconds')
     plt.ylabel('dv, mV')
     plt.grid()
@@ -202,7 +206,7 @@ def resizer(v, targ_rows, btch_size, sub_samp=1, n_in=1):
 
 # Single input with one-hot augmentation path
 def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=None, learn_rate=0.01, drop=0.2,
-                        use_two_lstm=False):
+                        use_two_lstm=False, use_mae=False):
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     simple_input = (input_shape[0], 1)
@@ -226,7 +230,11 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
     merged = concatenate([lstm.output, soc_in])
     predictions = Dense(units=dense_units, activation=activation[2])(merged)
     final = Model(inputs=[ib_in, soc_in], outputs=predictions)
-    final.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
+    if fit_mae:
+        loss_ = 'mean_absolute_error'
+    else:
+        loss_ = 'mean_squared_error'
+    final.compile(loss=loss_, optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
                   metrics=['mse', 'mae'])
     final.summary()
 
@@ -290,6 +298,7 @@ else:
 test_attr = test_df
 
 # Create model
+fit_mae = True
 scale_in = (50., 10., 1., 0.1)
 # scale_in = (1., 1., 1., 1.)
 scale_in_dv = scale_in[3]
@@ -297,7 +306,7 @@ dropping = 0.2
 use_two = False
 use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
 learning_rate = 0.0003
-epochs = 350
+epochs = 10
 hidden = 4
 subsample = 5
 nom_batch_size = 30
@@ -344,7 +353,7 @@ test_y = resizer(test_y, rows_tst, batch_size, sub_samp=subsample)
 test_dv_hys = resizer(test_dv_hys, rows_tst, batch_size, sub_samp=subsample)
 model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
                                         dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
-                                        learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two)
+                                        learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two, use_mae=fit_mae)
 
 # Train model
 print("[INFO] training model...")
@@ -357,7 +366,7 @@ print("[INFO] predicting 'dv'...")
 train_predict = model.predict(train_x_vec)
 validate_predict = model.predict(validate_x_vec)
 test_predict = model.predict(test_x_vec)
-train_x_fail_ib = train_x
+train_x_fail_ib = train_x.copy()
 train_predict_fail_ib = []
 for fail_ib_mag in ib_bias:
     train_x_fail_ib[:, :, 0] += fail_ib_mag/scale_in[1]

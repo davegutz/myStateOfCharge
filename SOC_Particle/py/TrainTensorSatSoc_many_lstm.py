@@ -91,7 +91,7 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
 
 # Single input with one-hot augmentation path
 def tensor_model_create_many_to_one(hidden_units, input_shape, dense_units=1, activation=None, learn_rate=0.01,
-                                    drop=0.2, use_two_lstm=False):
+                                    drop=0.2, use_two_lstm=False, fit_mae=False):
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     simple_input = (input_shape[0], 1)
@@ -111,8 +111,12 @@ def tensor_model_create_many_to_one(hidden_units, input_shape, dense_units=1, ac
                       recurrent_activation=activation[1], return_sequences=True))
         lstm.add(Dropout(drop))
     lstm.add(Dense(units=1, activation=activation[2]))
-    lstm.compile(loss='mean_squared_error', optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
-                metrics=['mse', 'mae'])
+    if fit_mae:
+        loss_  = 'mean_absolute_error'
+    else:
+        loss_ = 'mean_squared_error'
+    lstm.compile(loss=loss_, optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
+                 metrics=['mse', 'mae'])
     lstm.summary()
 
     return lstm
@@ -175,6 +179,7 @@ else:
 test_attr = test_df
 
 # Create model
+fit_mae = True
 scale_in = (50., 10., 1., 0.1)
 # scale_in = (1., 1., 1., 1.)
 dropping = 0.2
@@ -228,7 +233,7 @@ test_y = resizer(test_y, rows_tst, batch_size, sub_samp=subsample)
 test_dv_hys = resizer(test_dv_hys, rows_tst, batch_size, sub_samp=subsample)
 model = tensor_model_create_many_to_one(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
                                         dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
-                                        learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two)
+                                        learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two, use_mae=fit_mae)
 
 # Train model
 print("[INFO] training model...")
@@ -241,7 +246,7 @@ print("[INFO] predicting 'dv'...")
 train_predict = model.predict(train_x)
 validate_predict = model.predict(validate_x)
 test_predict = model.predict(test_x)
-train_x_fail = train_x
+train_x_fail = train_x.copy()
 train_predict_fail_ib = []
 for fail_ib_mag in ib_bias:
     train_x_fail[:, :, 0] += fail_ib_mag/scale_in[1]
