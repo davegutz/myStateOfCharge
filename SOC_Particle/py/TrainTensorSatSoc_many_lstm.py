@@ -127,9 +127,10 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
 
     # Training callbacks
     es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=patient)
-    file_path = 'TrainTensor_lstm.h5'
-    mc = ModelCheckpoint(file_path, monitor='loss', mode='min', verbose=1, save_weights_only=False, save_best_only=True)
-    cb = [es, mc]
+    # file_path = 'TrainTensorSatSoc_many_lstm.keras'
+    # mc = ModelCheckpoint(file_path, monitor='loss', mode='min', verbose=1, save_weights_only=False, save_best_only=True)
+    # cb = [es, mc]
+    cb = [es]
 
     # train the model
     hist = mod.fit(x=x, y=y, epochs=epochs_, batch_size=btch_size, shuffle=False, verbose=verbose, callbacks=cb)
@@ -193,6 +194,7 @@ nom_batch_size = 30
 patience = 25
 fail_ib_mag = 5
 ib_bias = [.1, .5, 1.]
+save_path = 'TrainTensorSatSoc_many_lstm.keras'
 
 # Adjust data
 train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
@@ -239,6 +241,7 @@ model = tensor_model_create_many_to_one(hidden_units=hidden, input_shape=(train_
 print("[INFO] training model...")
 epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
                                    patient=patience)
+model.save(save_path)
 plot_the_loss_curve(epochs, mse, history["loss"])
 
 # make predictions

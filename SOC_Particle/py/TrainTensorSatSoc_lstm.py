@@ -246,9 +246,10 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
 
     # Training callbacks
     es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=patient)
-    file_path = 'TrainTensor_lstm.h5'
-    mc = ModelCheckpoint(file_path, monitor='loss', mode='min', verbose=1, save_weights_only=False, save_best_only=True)
-    cb = [es, mc]
+    # file_path = 'TrainTensorSatSoc_lstm.h5'
+    # mc = ModelCheckpoint(file_path, monitor='loss', mode='min', verbose=1, save_weights_only=False, save_best_only=True)
+    # cb = [es, mc]
+    cb = [es]
 
     # train the model
     hist = mod.fit(x=x, y=y, epochs=epochs_, batch_size=btch_size, shuffle=False, verbose=verbose, callbacks=cb)
@@ -306,13 +307,15 @@ dropping = 0.2
 use_two = False
 use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
 learning_rate = 0.0003
-epochs = 10
+epochs = 350
 hidden = 4
 subsample = 5
 nom_batch_size = 30
 patience = 25
 fail_ib_mag = 5
 ib_bias = [.1, .5, 1.]
+save_path = 'TrainTensorSatSoc_lstm.keras'
+try_load_model = False
 
 # Adjust data
 train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
@@ -351,14 +354,18 @@ test_x = resizer(test_x, rows_tst, batch_size, sub_samp=subsample, n_in=2)
 test_x_vec = [test_x[:, :, 0], test_x[:, :, 1]]
 test_y = resizer(test_y, rows_tst, batch_size, sub_samp=subsample)
 test_dv_hys = resizer(test_dv_hys, rows_tst, batch_size, sub_samp=subsample)
-model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
-                                        dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
-                                        learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two, use_mae=fit_mae)
+if try_load_model:
+    model = load_model(save_path)
+else:
+    model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
+                                dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
+                                learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two, use_mae=fit_mae)
 
 # Train model
 print("[INFO] training model...")
 epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
                                    patient=patience)
+model.save(save_path)
 plot_the_loss_curve(epochs, mse, history["loss"])
 
 # make predictions
