@@ -22,15 +22,21 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.models import load_model, Model
+from sklearn.model_selection import train_test_split
 from keras.layers import Dense, LSTM, Dropout, Input, concatenate
 from sklearn.metrics import mean_squared_error, mean_absolute_error
-from sklearn.model_selection import train_test_split
-from keras.callbacks import EarlyStopping
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from keras.saving import register_keras_serializable
 
 # The following lines adjust the granularity of reporting.
 pd.options.display.max_rows = 10
 pd.options.display.float_format = "{:.1f}".format
+
+
+@register_keras_serializable()
+def mre_loss(y_true, y_pred):
+    square_root_difference = tf.math.sqrt(abs(y_true - y_pred))
+    return tf.reduce_mean(square_root_difference, axis=-1)
 
 
 # Load data frame from file
@@ -197,14 +203,19 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
     trn_rmse = math.sqrt(mean_squared_error(trn_y, trn_pred))
     val_rmse = math.sqrt(mean_squared_error(val_y, val_pred))
     tst_rmse = math.sqrt(mean_squared_error(tst_y, tst_pred))
+
     trn_mae = mean_absolute_error(trn_y, trn_pred)
     val_mae = mean_absolute_error(val_y, val_pred)
     tst_mae = mean_absolute_error(tst_y, tst_pred)
 
-    # Print RMSE
-    print("Train    RMSE {:6.3f}".format(trn_rmse), " ||  MAE {:6.3f}".format(trn_mae))
-    print("Validate RMSE {:6.3f}".format(val_rmse), " ||  MAE {:6.3f}".format(val_mae))
-    print("Test     RMSE {:6.3f}".format(tst_rmse), " ||  MAE {:6.3f}".format(tst_mae))
+    trn_mre = np.mean(np.sqrt(np.abs(trn_y - trn_pred)))
+    val_mre = np.mean(np.sqrt(np.abs(val_y - val_pred)))
+    tst_mre = np.mean(np.sqrt(np.abs(tst_y - tst_pred)))
+
+    # Print
+    print("Train    RMSE {:6.3f}".format(trn_rmse), " ||  MAE {:6.3f}".format(trn_mae), " ||  MRE {:6.3f}".format(trn_mre))
+    print("Validate RMSE {:6.3f}".format(val_rmse), " ||  MAE {:6.3f}".format(val_mae), " ||  MRE {:6.3f}".format(val_mre))
+    print("Test     RMSE {:6.3f}".format(tst_rmse), " ||  MAE {:6.3f}".format(tst_mae), " ||  MRE {:6.3f}".format(tst_mre))
 
 
 def process_battery_attributes(df, scale=(50., 10., 1., 0.1)):
@@ -269,7 +280,7 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
 
 # Single input with one-hot augmentation path
 def tensor_model_create_many_to_one(hidden_units, input_shape, activation=None, learn_rate=0.01,
-                                    drop=0.2, use_two_lstm=False, use_mae=True):
+                                    drop=0.2, use_two_lstm=False, use_mae=True, use_mre_loss_=False):
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     dual_input = (input_shape[0], 2)
@@ -290,6 +301,8 @@ def tensor_model_create_many_to_one(hidden_units, input_shape, activation=None, 
         loss_ = 'mean_absolute_error'
     else:
         loss_ = 'mean_squared_error'
+    if use_mre_loss_:
+        loss_ = mre_loss
     lstm.compile(loss=loss_, optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
                  metrics=['mse', 'mae'])
     lstm.summary()
@@ -307,7 +320,9 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10, use_m
     else:
         file_path = 'TrainTensor_lstm.h5'
     mc = ModelCheckpoint(file_path, monitor='loss', mode='min', verbose=1, save_weights_only=False, save_best_only=True)
-    cb = [es, mc]
+    rp = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=int(patient/2), verbose=1, mode='auto', min_delta=0.0001,
+                      cooldown=5, min_lr=0)
+    cb = [es, mc, rp]
     # cb = es
 
     # train the model
@@ -338,13 +353,14 @@ def train_tensor_lstm():
     use_two = False
     use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
     learning_rate = 0.0003
-    epochs = 350
+    epochs = 500
     hidden = 4
     subsample = 5
     nom_batch_size = 30
-    patience = 25
+    patience = 40
     ib_bias = [.1, .5, 1.]
     try_load_model = False
+    use_mre_loss = True
 
     # Adjust model automatically
     if use_two:
@@ -399,7 +415,7 @@ def train_tensor_lstm():
             model = tensor_model_create_many_to_one(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
                                                     activation=['relu', 'sigmoid', 'linear', 'linear'],
                                                     learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two,
-                                                    use_mae=fit_mae)
+                                                    use_mae=fit_mae, use_mre_loss_=use_mre_loss)
         else:
             model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
                                         dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
