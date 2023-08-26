@@ -149,7 +149,7 @@ BatteryMonitor::BatteryMonitor():
     q_ekf_(NOM_UNIT_CAP*3600.), soc_ekf_(1.0), tcharge_(0.), tcharge_ekf_(0.), voc_filt_(NOMINAL_VB), voc_soc_(NOMINAL_VB),
     y_filt_(0.)
 {
-    voc_filt_ = chem_.v_sat-HDB_VB;
+    voc_filt_ = chem_.v_sat - HDB_VB;
     // EKF
     this->Q_ = EKF_Q_SD_NORM*EKF_Q_SD_NORM;
     this->R_ = EKF_R_SD_NORM*EKF_R_SD_NORM;
