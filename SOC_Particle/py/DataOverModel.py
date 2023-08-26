@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from MonSim import replicate, save_clean_file, save_clean_file_sim
 from Battery import overall_batt
+from myFilters import LagExp
 # below suppresses runtime error display******************
 # import os
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
@@ -34,6 +35,7 @@ from Battery import overall_batt
 # if platform != 'linux':
 #     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+import Chemistry_BMS
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
@@ -405,6 +407,7 @@ class SavedData:
             self.chm = None  # Battery chemistry code
             self.qcrs = None  # Unit capacity rated scaled, Coulombs
             self.sat = None  # Indication that battery is saturated, T=saturated
+            self.ib_lag = None  # Lagged indication that battery is saturated, 1=saturated
             self.sel = None  # Current source selection, 0=amp, 1=no amp
             self.mod = None  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
             self.bms_off = None  # Battery management system off, T=off
@@ -476,6 +479,19 @@ class SavedData:
             if hasattr(data, 'qcrs'):
                 self.qcrs = data.qcrs[:i_end]
             self.sat = np.array(data.sat[:i_end])
+            # Lag for saturation
+            n = len(self.cTime)
+            ib_lag = Chemistry_BMS.ib_lag(self.chm[0])
+            IbLag = LagExp(1., ib_lag, -100., 100.)
+            self.ib_lag = np.zeros(n)
+            for i in range(n):
+                if i == 0:
+                    lag_reset = True
+                    T_lag = self.cTime[i+1] - self.cTime[i]
+                else:
+                    lag_reset = False
+                    T_lag = self.cTime[i] - self.cTime[i-1]
+                self.ib_lag[i] = IbLag.calculate_tau(float(self.ib[i]), lag_reset, T_lag, ib_lag)
             self.sel = np.array(data.sel[:i_end])
             self.mod_data = np.array(data.mod[:i_end])
             self.bms_off = np.array(data.bmso[:i_end])

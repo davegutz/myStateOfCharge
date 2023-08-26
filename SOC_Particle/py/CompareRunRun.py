@@ -30,7 +30,8 @@ plt.rcParams['axes.grid'] = True
 
 
 # Load from files
-def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_batt_cap=Battery.UNIT_CAP_RATED, legacy=False):
+def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_batt_cap=Battery.UNIT_CAP_RATED,
+              legacy=False):
     title_key = "unit,"  # Find one instance of title
     title_key_sel = "unit_s,"  # Find one instance of title
     unit_key_sel = "unit_sel"

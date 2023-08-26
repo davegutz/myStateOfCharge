@@ -18,6 +18,7 @@ of the totals and standardize the calculations."""
 
 # Constants
 from Chemistry_BMS import Chemistry
+from myFilters import LagExp
 
 
 class Coulombs:
@@ -42,6 +43,7 @@ class Coulombs:
         self.tweak_test = tweak_test
         self.reset = False
         self.chemistry = Chemistry(mod_code=mod_code)
+        self.chemistry.assign_all_mod(mod_code)
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""

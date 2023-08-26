@@ -44,7 +44,7 @@ class Battery(Coulombs):
     # Battery constants
     UNIT_CAP_RATED = 100.
     NOM_SYS_VOLT = 12.  # Nominal system output, V, at which the reported amps are used (12)
-    mxeps_bb = 1 - 1e-6  # Numerical maximum of coefficient model with scaled soc
+    mxeps_bb = 1.05  # Numerical maximum of coefficient model with scaled soc
     TCHARGE_DISPLAY_DEADBAND = 0.1  # Inside this +/- deadband, charge time is displayed '---', A
     DF1 = 0.02  # Weighted selection lower transition drift, fraction
     DF2 = 0.70  # Threshold to reset Coulomb Counter if different from ekf, fraction (0.05)
@@ -133,6 +133,8 @@ class Battery(Coulombs):
         self.sel = 0
         self.tweak_test = tweak_test
         self.s_hys = s_hys
+        self.ib_lag = 0.
+        self.IbLag = LagExp(1., 1., -100., 100.)  # Lag to be run on sat to produce ib_lag.  T and tau set at run time
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -265,6 +267,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.sdb_voc = SlidingDeadband(Battery.HDB_VBATT)
         self.e_wrap = 0.
         self.e_wrap_filt = 0.
+        self.reset_past = True
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -322,6 +325,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.ib_charge = 0.
         if self.bms_off and voltage_low:
             self.ib = 0.
+        self.ib_lag = self.IbLag.calculate_tau(self.ib, reset, self.dt, self.chemistry.ib_lag_tau)
 
         # Dynamic emf
         self.vb = vb
@@ -442,6 +446,9 @@ class BatteryMonitor(Battery, EKF1x1):
         self.H = self.dv_dsoc
         return self.hx, self.H
 
+    def lag_ib(self, ib, reset):
+        self.ib_lag = self.IbLag.calculate_tau(ib, reset, self.dt, self.chemistry.ib_lag_tau)
+
     def init_soc_ekf(self, soc):
         self.soc_ekf = soc
         self.init_ekf(soc, 0.0)
@@ -509,6 +516,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.reset.append(self.reset)
         self.saved.e_wrap.append(self.e_wrap)
         self.saved.e_wrap_filt.append(self.e_wrap_filt)
+        self.saved.ib_lag.append(self.ib_lag)
 
 
 class BatterySim(Battery):
@@ -621,6 +629,7 @@ class BatterySim(Battery):
             ib_charge_fut = 0.
         if self.bms_off and voltage_low:
             self.ib = 0.
+        self.ib_lag = self.IbLag.calculate_tau(self.ib, reset, self.dt, self.chemistry.ib_lag_tau)
 
         # Charge transfer dynamics
         self.vb = self.voc + (self.ChargeTransfer.calculate(self.ib, reset, dt)*self.chemistry.r_ct +
@@ -858,6 +867,7 @@ class Saved:
         self.reset = []  # Reset flag used for initialization
         self.e_wrap = []  # Verification of wrap calculation, V
         self.e_wrap_filt = []  # Verification of filtered wrap calculation, V
+        self.ib_lag = []  # Lagged ib, A
 
 
 def overall_batt(mv, sv, filename,

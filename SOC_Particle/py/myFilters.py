@@ -87,6 +87,9 @@ class DiscreteFilter:
     def calculate(self, in_, reset, dt):
         raise NotImplementedError
 
+    def calculate_tau(self, in_, reset, dt, tau):
+        raise NotImplementedError
+
     def assign_coeff(self, tau):
         raise NotImplementedError
 
@@ -373,8 +376,23 @@ class LagExp(DiscreteFilter):
         self.assign_coeff(self.tau)
         self.calc_state_(in_)
 
+    def calc_state(self, in_, dt):
+        self.dt = dt
+        self.assign_coeff(self.tau)
+        self.calc_state_(in_)
+
     def calculate(self, in_, reset, dt):
         self.in_ = in_
+        if reset:
+            self.state = self.in_
+            self.rstate = self.in_
+        self.calc_state(self.in_, dt)
+        self.out_ = self.state
+        return self.out_
+
+    def calculate_tau(self, in_, reset, dt, tau_):
+        self.in_ = in_
+        self.tau = tau_
         if reset:
             self.state = self.in_
             self.rstate = self.in_

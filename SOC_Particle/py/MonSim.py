@@ -31,10 +31,9 @@ from pyDAGx import myTables
 import statistics as sts
 
 
-
 def save_clean_file(mon_ver, csv_file, unit_key):
     default_header_str = "unit,               hm,                  cTime,        dt,       sat,sel,mod,\
-      Tb,  vb,  ib,  ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,"
+      Tb,  vb,  ib,  ioc,  voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,ib_lag,"
     n = len(mon_ver.time)
     date_time_start = datetime.now()
     with open(csv_file, "w") as output:
@@ -62,6 +61,7 @@ def save_clean_file(mon_ver, csv_file, unit_key):
             s += "{:7.3f},".format(mon_ver.soc_s[i])
             s += "{:7.3f},".format(mon_ver.soc_ekf[i])
             s += "{:7.3f},".format(mon_ver.soc[i])
+            s += "{:7.5f},".format(mon_ver.ib_lag[i])
             s += "\n"
             output.write(s)
         print("Wrote(save_clean_file):", csv_file)
@@ -182,7 +182,9 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         if i == 0:
             T = t[1] - t[0]
         else:
-            T = t[i] - t[i - 1]
+            candidate_dt = t[i] - t[i-1]
+            if candidate_dt > 1e-6:
+                T = candidate_dt
         if dTb_in is not None:
             dTb = lut_dTb.interp(t[i])
         else:
@@ -304,6 +306,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
                   "{:9.3f}".format(mon.hys.ibs), "{:9.3f}".format(mon.hys.ioc), "{:4.0f}".format(mon.sat),
                   "{:9.3f}".format(mon.hys.disabled), "{:9.3f}".format(mon.hys.dv_dot),
                   "{:9.3f}".format(mon.saved.dv_hys[i]))
+        # print('mon: t', t[i], 'voc', mon.voc, 'vsat', mon.vsat, 'sat', mon.sat, 'here sat', sat, 'here saturated', saturated)
 
     # Data
     if verbose:
