@@ -280,7 +280,8 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
 
 # Single input with one-hot augmentation path
 def tensor_model_create_many_to_one(hidden_units, input_shape, activation=None, learn_rate=0.01,
-                                    drop=0.2, use_two_lstm=False, use_mae=True, use_mre_loss_=False):
+                                    drop=0.2, use_two_lstm=False, use_mae=True, use_mre_loss_=False,
+                                    use_huber_loss_=False):
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     dual_input = (input_shape[0], 2)
@@ -303,6 +304,8 @@ def tensor_model_create_many_to_one(hidden_units, input_shape, activation=None, 
         loss_ = 'mean_squared_error'
     if use_mre_loss_:
         loss_ = mre_loss
+    if use_huber_loss_:
+        loss_ = 'huber_loss'
     lstm.compile(loss=loss_, optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
                  metrics=['mse', 'mae'])
     lstm.summary()
@@ -361,6 +364,7 @@ def train_tensor_lstm():
     ib_bias = [.1, .5, 1.]
     try_load_model = False
     use_mre_loss = True
+    use_huber_loss = False
 
     # Adjust model automatically
     if use_two:
@@ -415,7 +419,8 @@ def train_tensor_lstm():
             model = tensor_model_create_many_to_one(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
                                                     activation=['relu', 'sigmoid', 'linear', 'linear'],
                                                     learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two,
-                                                    use_mae=fit_mae, use_mre_loss_=use_mre_loss)
+                                                    use_mae=fit_mae, use_mre_loss_=use_mre_loss,
+                                                    use_huber_loss_=use_huber_loss)
         else:
             model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
                                         dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
