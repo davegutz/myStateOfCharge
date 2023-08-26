@@ -88,7 +88,7 @@ def plot_hys(trn_x, trn_y, trn_predict):
 # Plot fail detection predictions
 def plot_fail(trn_y, trn_predict, trn_predict_fail_ib, t_samp_, ib_bias_):
     n_fail = trn_predict_fail_ib.shape[0]
-    rows = len(train_y)
+    rows = len(trn_y)
     time = range(rows) * t_samp_
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(time, trn_y[:, 5, :], label='actual')
@@ -154,22 +154,22 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, v
     plt.figure(figsize=(15, 12), dpi=80)
     plt.subplot(2, 1, 1)
     plt.title('Actual and Predicted Values and old model. The Red Line Separates The Training, Validation, and Test Examples')
-    plt.plot(time, actual)
-    plt.plot(time, predictions)
-    plt.plot(time, dv_hys)
+    plt.plot(time, actual, color='black')
+    plt.plot(time, predictions, color='orange')
+    plt.plot(time, dv_hys, color='blue')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
-    plt.legend(['Actual', 'Predictions', 'old model'])
+    plt.legend(['Actual', 'Predictions', 'dv_hys'])
     plt.xlabel('seconds')
     plt.ylabel('dv scaled')
     plt.grid()
     plt.subplot(2, 1, 2)
-    plt.plot(time_train, actual_train, color='orange')
-    plt.plot(time_train, predictions_train, color='g')
+    plt.plot(time_train, actual_train, color='black')
+    plt.plot(time_train, predictions_train, color='orange')
     plt.plot(time_train, dv_hys_train, color='blue')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
-    plt.legend(['Actual', 'Predictions', 'old model'])
+    plt.legend(['Actual', 'Predictions', 'dv_hys'])
     plt.xlabel('seconds')
     plt.ylabel('dv scaled')
     plt.grid()
@@ -323,157 +323,160 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
     return epochs_, mserr, ret_hist
 
 
-# Inputs
-train_file = ".//temp//dv_train_soc0p_ch_clip_clean.csv"
-validate_file = ".//temp//dv_validate_soc0p_ch_clip_clean.csv"
-test_file = ".//temp//dv_test_soc0p_ch_clean.csv"
-params = ['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys', 'dv']
-val_fraction = 0.25
-fit_mae = True
-use_many = True
-scale_in = (50., 10., 1., 0.1)
-# scale_in = (1., 1., 1., 1.)
-scale_in_dv = scale_in[3]
-dropping = 0.2
-use_two = False
-use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
-learning_rate = 0.0003
-epochs = 350
-hidden = 4
-subsample = 5
-nom_batch_size = 30
-patience = 25
-fail_ib_mag = 5
-ib_bias = [.1, .5, 1.]
-try_load_model = False
+def train_tensor_lstm():
+    # Inputs shouldn't have to change
+    val_fraction = 0.25
+    dropping = 0.2
 
-# Adjust model automatically
-if use_two:
-    learning_rate *= 2
-if use_many:
-    save_path = 'TrainTensor_many_lstm.keras'
-    hidden *= 2
-else:
-    save_path = 'TrainTensor_lstm.keras'
-batch_size = int(nom_batch_size / subsample)
+    # Inputs frequently changed
+    train_file = ".//temp//dv_train_soc0p_ch_clip_clean.csv"
+    validate_file = ".//temp//dv_validate_soc0p_ch_clip_clean.csv"
+    test_file = ".//temp//dv_test_soc0p_ch_clean.csv"
+    params = ['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys', 'dv']
+    fit_mae = True
+    use_many = False
+    scale_in = (50., 10., 1., 0.1)
+    # scale_in = (1., 1., 1., 1.)
+    scale_in_dv = scale_in[3]
+    use_two = False
+    use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
+    learning_rate = 0.0003
+    epochs = 350
+    hidden = 4
+    subsample = 5
+    nom_batch_size = 30
+    patience = 25
+    ib_bias = [.1, .5, 1.]
+    try_load_model = False
 
-print("[INFO] loading train/validation attributes...")
-train_df, train = load_data_file(train_file, params)
-if validate_file is not None:
-    validate_df, validate = load_data_file(validate_file, params)
-    train_attr = train_df
-    validate_attr = validate_df
-else:
-    validate_df = None
-    validate = None
-    train_attr, validate_attr = train_test_split(train_df, test_size=val_fraction, shuffle=False)
-
-print("[INFO] loading test attributes...")
-test_df, test = load_data_file(test_file, params)
-test_attr = test_df
-
-# Adjust data
-train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
-validate_attr, validate_y = process_battery_attributes(validate_attr, scale=scale_in)
-test_attr, test_y = process_battery_attributes(test_attr, scale=scale_in)
-if use_ib_lag:
-    train_x = train_attr[['ib_lag', 'soc']]
-    validate_x = validate_attr[['ib_lag', 'soc']]
-    test_x = test_attr[['ib_lag', 'soc']]
-else:
-    train_x = train_attr[['ib', 'soc']]
-    validate_x = validate_attr[['ib', 'soc']]
-    test_x = test_attr[['ib', 'soc']]
-
-# Setup model
-rows_train = int(len(train_y) / batch_size / subsample)
-train_x, train_y, train_x_vec = parse_inputs(train_x, train_y, batch_size, subsample)
-
-rows_val = int(len(validate_y) / batch_size / subsample)
-validate_x, validate_y, validate_x_vec = parse_inputs(validate_x, validate_y, batch_size, subsample)
-
-rows_tst = int(len(test_y) / batch_size / subsample)
-test_x, test_y, test_x_vec = parse_inputs(test_x, test_y, batch_size, subsample)
-
-# Optional make new model
-if try_load_model:
-    model = load_model(save_path)
-else:
+    # Adjust model automatically
+    if use_two:
+        learning_rate *= 2
     if use_many:
-        model = tensor_model_create_many_to_one(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
-                                                activation=['relu', 'sigmoid', 'linear', 'linear'],
-                                                learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two,
-                                                use_mae=fit_mae)
+        save_path = 'TrainTensor_many_lstm.keras'
+        hidden *= 2
     else:
-        model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
-                                    dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
-                                    learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two, use_mae=fit_mae)
+        save_path = 'TrainTensor_lstm.keras'
+    batch_size = int(nom_batch_size / subsample)
 
-# Train model
-print("[INFO] training model...")
-if use_many:
-    epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
-                                       patient=patience)
-else:
-    epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
-                                       patient=patience)
-model.save(save_path)
-plot_the_loss_curve(epochs, mse, history["loss"], use_mae=fit_mae)
+    print("[INFO] loading train/validation attributes...")
+    train_df, train = load_data_file(train_file, params)
+    if validate_file is not None:
+        validate_attr, validate = load_data_file(validate_file, params)
+        train_attr = train_df
+    else:
+        train_attr, validate_attr = train_test_split(train_df, test_size=val_fraction, shuffle=False)
 
-# make predictions
-print("[INFO] predicting 'dv'...")
-if use_many:
-    train_predict = model.predict(train_x)
-    validate_predict = model.predict(validate_x)
-    test_predict = model.predict(test_x)
-else:
-    train_predict = model.predict(train_x_vec)
-    validate_predict = model.predict(validate_x_vec)
-    test_predict = model.predict(test_x_vec)
-train_x_fail_ib = train_x.copy()
-train_predict_fail_ib = []
-for fail_ib_mag in ib_bias:
-    train_x_fail_ib[:, :, 0] += fail_ib_mag / scale_in[1]
+    print("[INFO] loading test attributes...")
+    test_df, test = load_data_file(test_file, params)
+    test_attr = test_df
+
+    # Adjust data
+    train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
+    validate_attr, validate_y = process_battery_attributes(validate_attr, scale=scale_in)
+    test_attr, test_y = process_battery_attributes(test_attr, scale=scale_in)
+    if use_ib_lag:
+        train_x = train_attr[['ib_lag', 'soc']]
+        validate_x = validate_attr[['ib_lag', 'soc']]
+        test_x = test_attr[['ib_lag', 'soc']]
+    else:
+        train_x = train_attr[['ib', 'soc']]
+        validate_x = validate_attr[['ib', 'soc']]
+        test_x = test_attr[['ib', 'soc']]
+
+    # Setup model
+    rows_train = int(len(train_y) / batch_size / subsample)
+    train_x, train_y, train_x_vec = parse_inputs(train_x, train_y, batch_size, subsample)
+
+    rows_val = int(len(validate_y) / batch_size / subsample)
+    validate_x, validate_y, validate_x_vec = parse_inputs(validate_x, validate_y, batch_size, subsample)
+
+    rows_tst = int(len(test_y) / batch_size / subsample)
+    test_x, test_y, test_x_vec = parse_inputs(test_x, test_y, batch_size, subsample)
+
+    # Optional make new model
+    if try_load_model:
+        model = load_model(save_path)
+    else:
+        if use_many:
+            model = tensor_model_create_many_to_one(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
+                                                    activation=['relu', 'sigmoid', 'linear', 'linear'],
+                                                    learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two,
+                                                    use_mae=fit_mae)
+        else:
+            model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
+                                        dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
+                                        learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two, use_mae=fit_mae)
+
+    # Train model
+    print("[INFO] training model...")
     if use_many:
-        train_predict_fail_ib.append(model.predict(train_x_fail_ib))
+        epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
+                                           patient=patience)
     else:
-        train_x_fail_ib_vec = [train_x_fail_ib[:, :, 0], train_x_fail_ib[:, :, 1]]
-        train_predict_fail_ib.append(model.predict(train_x_fail_ib_vec))
+        epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
+                                           patient=patience)
+    model.save(save_path)
+    plot_the_loss_curve(epochs, mse, history["loss"], use_mae=fit_mae)
 
-# Plot result
-t_samp = train['cTime'][20]-train['cTime'][19]
-t_samp_input = t_samp * subsample
-t_samp_result = t_samp_input * batch_size
-train_dv_hys = resizer(train_attr[['dv_hys']], rows_train, batch_size, sub_samp=subsample)
-validate_dv_hys = resizer(validate_attr[['dv_hys']], rows_val, batch_size, sub_samp=subsample)
-test_dv_hys = resizer(test_attr[['dv_hys']], rows_tst, batch_size, sub_samp=subsample)
-plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x, t_samp_=t_samp_input, use_ib_lag_=use_ib_lag)
-plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
-            trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
-            tst_pred=test_predict[:, batch_size-1, :],
-            trn_dv_hys=train_dv_hys[:, batch_size-1, :], val_dv_hys=validate_dv_hys[:, batch_size-1, :],
-            tst_dv_hys=test_dv_hys[:, batch_size-1, :],
-            t_samp_=t_samp_result, scale_in_dv_=scale_in_dv)
-plot_hys(train_x, train_y, train_predict)
-plot_fail(train_y, train_predict, np.array(train_predict_fail_ib), t_samp_=t_samp_result, ib_bias_=ib_bias)
+    # make predictions
+    print("[INFO] predicting 'dv'...")
+    if use_many:
+        train_predict = model.predict(train_x)
+        validate_predict = model.predict(validate_x)
+        test_predict = model.predict(test_x)
+    else:
+        train_predict = model.predict(train_x_vec)
+        validate_predict = model.predict(validate_x_vec)
+        test_predict = model.predict(test_x_vec)
+    train_x_fail_ib = train_x.copy()
+    train_predict_fail_ib = []
+    for fail_ib_mag in ib_bias:
+        train_x_fail_ib[:, :, 0] += fail_ib_mag / scale_in[1]
+        if use_many:
+            train_predict_fail_ib.append(model.predict(train_x_fail_ib))
+        else:
+            train_x_fail_ib_vec = [train_x_fail_ib[:, :, 0], train_x_fail_ib[:, :, 1]]
+            train_predict_fail_ib.append(model.predict(train_x_fail_ib_vec))
 
-# Print model
-model.summary()
-print('\nShape:')
-for wt in model.layers[1].weights:
-    print(wt.name, '-->', wt.shape)
-    print(wt.numpy())
+    # Plot result
+    t_samp = train['cTime'][20]-train['cTime'][19]
+    t_samp_input = t_samp * subsample
+    t_samp_result = t_samp_input * batch_size
+    train_dv_hys = resizer(train_attr[['dv_hys']], rows_train, batch_size, sub_samp=subsample)
+    validate_dv_hys = resizer(validate_attr[['dv_hys']], rows_val, batch_size, sub_samp=subsample)
+    test_dv_hys = resizer(test_attr[['dv_hys']], rows_tst, batch_size, sub_samp=subsample)
+    plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x, t_samp_=t_samp_input, use_ib_lag_=use_ib_lag)
+    plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
+                trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
+                tst_pred=test_predict[:, batch_size-1, :],
+                trn_dv_hys=train_dv_hys[:, batch_size-1, :], val_dv_hys=validate_dv_hys[:, batch_size-1, :],
+                tst_dv_hys=test_dv_hys[:, batch_size-1, :],
+                t_samp_=t_samp_result, scale_in_dv_=scale_in_dv)
+    plot_hys(train_x, train_y, train_predict)
+    plot_fail(train_y, train_predict, np.array(train_predict_fail_ib), t_samp_=t_samp_result, ib_bias_=ib_bias)
 
-# look at h5 file
-print('\nBest:')
-classifier = load_model(save_path)
-print(classifier.summary())
+    # Print model
+    model.summary()
+    print('\nShape:')
+    for wt in model.layers[1].weights:
+        print(wt.name, '-->', wt.shape)
+        print(wt.numpy())
 
-# Print error
-print_error(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
-            trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :], tst_pred=test_predict[:, batch_size-1, :])
+    # look at h5 file
+    print('\nBest:')
+    classifier = load_model(save_path)
+    print(classifier.summary())
 
-plt.show()
+    # Print error
+    print_error(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
+                trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :], tst_pred=test_predict[:, batch_size-1, :])
+
+    plt.show()
+
+
+if __name__ == '__main__':
+    train_tensor_lstm()
 
 """
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=50) --> Often, the first sign of no further improvement may not be the best time to stop training. This is because the model may coast into a plateau of no improvement or even get slightly worse before getting much better. We can account for this by adding a delay to the trigger in terms of the number of epochs on which we would like to see no improvement. This can be done by setting the “patience” argument.
