@@ -37,7 +37,7 @@ pd.options.display.float_format = "{:.1f}".format
 def load_data_file(file, attributes=None):
     data = pd.read_csv(file, skipinitialspace=True)
     data['voc'] = data['vb'] - data['dv_dyn']
-    data['dv_hys'] = data['voc'] - data['voc_stat']
+    data['dv_hys_old'] = data['voc'] - data['voc_stat']
     data['dv'] = data['voc'] - data['voc_soc']
     data_df = data[attributes]
     return data_df, data
@@ -131,20 +131,16 @@ def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
 
 
 # Plot the results
-def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, val_dv_hys, tst_dv_hys, t_samp_,
+def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys_old, val_dv_hys_old, tst_dv_hys_old, t_samp_,
                 scale_in_dv_=1.):
     actual_train = np.append(trn_y, val_y)
     actual = np.append(actual_train, tst_y)
     predictions_train = np.append(trn_pred, val_pred)
     predictions = np.append(predictions_train, tst_pred)
-    dv_hys_train = np.append(trn_dv_hys, val_dv_hys)
-    dv_hys = np.append(dv_hys_train, tst_dv_hys)
-    dv_hys_train_mv = dv_hys_train*scale_in_dv_*1000.
-    dv_hys_mv = dv_hys*scale_in_dv_*1000.
     errors_train = -(predictions_train - actual_train)*scale_in_dv_*1000.
     errors = -(predictions - actual)*scale_in_dv_*1000.
-    dv_hys_old_train = np.append(trn_dv_hys, val_dv_hys)
-    dv_hys_old = np.append(dv_hys_old_train, tst_dv_hys)
+    dv_hys_old_train = np.append(trn_dv_hys_old, val_dv_hys_old)
+    dv_hys_old = np.append(dv_hys_old_train, tst_dv_hys_old)
     errors_old_train = -(dv_hys_old_train - actual_train)*scale_in_dv_*1000.
     errors_old = -(dv_hys_old - actual)*scale_in_dv_*1000.
     rows = len(actual)
@@ -156,7 +152,7 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, v
     plt.title('Actual and Predicted Values and old model. The Red Line Separates The Training, Validation, and Test Examples')
     plt.plot(time, actual, color='black')
     plt.plot(time, predictions, color='orange')
-    plt.plot(time, dv_hys, color='blue')
+    plt.plot(time, dv_hys_old, color='green')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
     plt.legend(['Actual', 'Predictions', 'dv_hys'])
@@ -166,10 +162,10 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, v
     plt.subplot(2, 1, 2)
     plt.plot(time_train, actual_train, color='black')
     plt.plot(time_train, predictions_train, color='orange')
-    plt.plot(time_train, dv_hys_train, color='blue')
+    plt.plot(time_train, dv_hys_old_train, color='green')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
-    plt.legend(['Actual', 'Predictions', 'dv_hys'])
+    plt.legend(['Actual', 'Predictions', 'dv_hys_old'])
     plt.xlabel('seconds')
     plt.ylabel('dv scaled')
     plt.grid()
@@ -178,21 +174,19 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys, v
     plt.subplot(2, 1, 1)
     plt.title('Error Values. The Red Line Separates The Training, Validation, and Test Examples')
     plt.plot(time, errors, color='orange')
-    plt.plot(time, errors_old, color='g')
-    plt.plot(time, dv_hys_mv, color='blue')
+    plt.plot(time, errors_old, color='green')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
-    plt.legend(['Error, mV', 'Error_old, mV', 'dv_hys, mV'])
+    plt.legend(['Error, mV', 'Error_old, mV'])
     plt.xlabel('seconds')
     plt.ylabel('dv, mV')
     plt.grid()
     plt.subplot(2, 1, 2)
     plt.plot(time_train, errors_train, color='orange')
-    plt.plot(time_train, errors_old_train, color='g')
-    plt.plot(time_train, dv_hys_train_mv, color='blue')
+    plt.plot(time_train, errors_old_train, color='green')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
     plt.axvline(x=(len(trn_y)+len(val_y))*t_samp_, color='m')
-    plt.legend(['Error, mV', 'Error_old, mV', 'dv_hys, mV'])
+    plt.legend(['Error, mV', 'Error_old, mV'])
     plt.xlabel('seconds')
     plt.ylabel('dv, mV')
     plt.grid()
@@ -215,14 +209,14 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
 
 def process_battery_attributes(df, scale=(50., 10., 1., 0.1)):
     # column names of continuous features
-    data = df[['Tb', 'ib', 'soc', 'ib_lag', 'dv_hys']]
+    data = df[['Tb', 'ib', 'soc', 'ib_lag', 'dv_hys_old']]
     s_Tb, s_ib, s_soc, s_dv = scale
     with pd.option_context('mode.chained_assignment', None):
         data['Tb'] = data['Tb'].map(lambda x: x/s_Tb)
         data['ib'] = data['ib'].map(lambda x: x / s_ib)
         data['ib_lag'] = data['ib_lag'].map(lambda x: x/s_ib)
         data['soc'] = data['soc'].map(lambda x: x/s_soc)
-        data['dv_hys'] = data['dv_hys'].map(lambda x: x/s_dv)
+        data['dv_hys_old'] = data['dv_hys_old'].map(lambda x: x/s_dv)
         y = df['dv'] / s_dv
 
     return data, y
@@ -332,9 +326,9 @@ def train_tensor_lstm():
     train_file = ".//temp//dv_train_soc0p_ch_clip_clean.csv"
     validate_file = ".//temp//dv_validate_soc0p_ch_clip_clean.csv"
     test_file = ".//temp//dv_test_soc0p_ch_clean.csv"
-    params = ['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys', 'dv']
+    params = ['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys_old', 'dv']
     fit_mae = True
-    use_many = False
+    use_many = True
     scale_in = (50., 10., 1., 0.1)
     # scale_in = (1., 1., 1., 1.)
     scale_in_dv = scale_in[3]
@@ -443,15 +437,15 @@ def train_tensor_lstm():
     t_samp = train['cTime'][20]-train['cTime'][19]
     t_samp_input = t_samp * subsample
     t_samp_result = t_samp_input * batch_size
-    train_dv_hys = resizer(train_attr[['dv_hys']], rows_train, batch_size, sub_samp=subsample)
-    validate_dv_hys = resizer(validate_attr[['dv_hys']], rows_val, batch_size, sub_samp=subsample)
-    test_dv_hys = resizer(test_attr[['dv_hys']], rows_tst, batch_size, sub_samp=subsample)
+    train_dv_hys_old = resizer(train_attr[['dv_hys_old']], rows_train, batch_size, sub_samp=subsample)
+    validate_dv_hys_old = resizer(validate_attr[['dv_hys_old']], rows_val, batch_size, sub_samp=subsample)
+    test_dv_hys_old = resizer(test_attr[['dv_hys_old']], rows_tst, batch_size, sub_samp=subsample)
     plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x, t_samp_=t_samp_input, use_ib_lag_=use_ib_lag)
     plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
                 trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
                 tst_pred=test_predict[:, batch_size-1, :],
-                trn_dv_hys=train_dv_hys[:, batch_size-1, :], val_dv_hys=validate_dv_hys[:, batch_size-1, :],
-                tst_dv_hys=test_dv_hys[:, batch_size-1, :],
+                trn_dv_hys_old=train_dv_hys_old[:, batch_size-1, :], val_dv_hys_old=validate_dv_hys_old[:, batch_size-1, :],
+                tst_dv_hys_old=test_dv_hys_old[:, batch_size-1, :],
                 t_samp_=t_samp_result, scale_in_dv_=scale_in_dv)
     plot_hys(train_x, train_y, train_predict)
     plot_fail(train_y, train_predict, np.array(train_predict_fail_ib), t_samp_=t_samp_result, ib_bias_=ib_bias)
