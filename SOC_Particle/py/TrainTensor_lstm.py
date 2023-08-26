@@ -297,12 +297,15 @@ def tensor_model_create_many_to_one(hidden_units, input_shape, activation=None, 
     return lstm
 
 
-def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10):
+def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10, use_many_=False):
     """Feed a dataset into the model in order to train it."""
 
     # Training callbacks
     es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=patient)
-    file_path = 'TrainTensorSatSoc_lstm.h5'
+    if use_many_:
+        file_path = 'TrainTensor_many_lstm.h5'
+    else:
+        file_path = 'TrainTensor_lstm.h5'
     mc = ModelCheckpoint(file_path, monitor='loss', mode='min', verbose=1, save_weights_only=False, save_best_only=True)
     cb = [es, mc]
     # cb = es
@@ -406,10 +409,10 @@ def train_tensor_lstm():
     print("[INFO] training model...")
     if use_many:
         epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
-                                           patient=patience)
+                                           patient=patience, use_many_=use_many)
     else:
         epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
-                                           patient=patience)
+                                           patient=patience, use_many_=use_many)
     model.save(save_path)
     plot_the_loss_curve(epochs, mse, history["loss"], use_mae=fit_mae)
 
