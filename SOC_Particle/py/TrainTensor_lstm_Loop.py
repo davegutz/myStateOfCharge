@@ -407,6 +407,7 @@ def train_tensor_lstm():
     trainAll_x_vec = None
     trainAll_y = None
     model = None
+    trainAll_attr = None
 
     ####################################################################################################
     for train_file in train_files:
@@ -418,17 +419,19 @@ def train_tensor_lstm():
             train_x = train_attr[['ib_lag', 'soc']]
         else:
             train_x = train_attr[['ib', 'soc']]
-        rows_train = int(len(train_y) / batch_size / subsample)
         train_x, train_y, train_x_vec = parse_inputs(train_x, train_y, batch_size, subsample)
 
         if trainAll_x is None:
             trainAll_x = train_x.copy()
             trainAll_x_vec = train_x_vec.copy()
             trainAll_y = train_y.copy()
+            trainAll_attr = train_attr
         else:
             trainAll_x = np.vstack((trainAll_x, train_x))
             trainAll_x_vec = [trainAll_x[:, :, 0], trainAll_x[:, :, 1]]
             trainAll_y = np.vstack((trainAll_y, train_y))
+            trainAll_attr = pd.concat([trainAll_attr, train_attr])
+        rows_trainAll = int(len(trainAll_y) / batch_size / subsample)
 
         # Optional make new model
         if model is None:
@@ -481,39 +484,39 @@ def train_tensor_lstm():
     # make predictions
     print("[INFO] predicting 'dv'...")
     if use_many:
-        train_predict = model.predict(trainAll_x)
+        trainAll_predict = model.predict(trainAll_x)
         validate_predict = model.predict(validate_x)
         test_predict = model.predict(test_x)
     else:
-        train_predict = model.predict(trainAll_x_vec)
+        trainAll_predict = model.predict(trainAll_x_vec)
         validate_predict = model.predict(validate_x_vec)
         test_predict = model.predict(test_x_vec)
-    train_x_fail_ib = trainAll_x.copy()
-    train_predict_fail_ib = []
+    trainAll_x_fail_ib = trainAll_x.copy()
+    trainAll_predict_fail_ib = []
     for fail_ib_mag in ib_bias:
-        train_x_fail_ib[:, :, 0] += fail_ib_mag / scale_in[1]
+        trainAll_x_fail_ib[:, :, 0] += fail_ib_mag / scale_in[1]
         if use_many:
-            train_predict_fail_ib.append(model.predict(train_x_fail_ib))
+            trainAll_predict_fail_ib.append(model.predict(trainAll_x_fail_ib))
         else:
-            train_x_fail_ib_vec = [train_x_fail_ib[:, :, 0], train_x_fail_ib[:, :, 1]]
-            train_predict_fail_ib.append(model.predict(train_x_fail_ib_vec))
+            trainAll_x_fail_ib_vec = [trainAll_x_fail_ib[:, :, 0], trainAll_x_fail_ib[:, :, 1]]
+            trainAll_predict_fail_ib.append(model.predict(trainAll_x_fail_ib_vec))
 
     # Plot result
     t_samp = train['cTime'][20]-train['cTime'][19]
     t_samp_input = t_samp * subsample
     t_samp_result = t_samp_input * batch_size
-    train_dv_hys_old = resizer(train_attr[['dv_hys_old']], rows_train, batch_size, sub_samp=subsample)
+    trainAll_dv_hys_old = resizer(trainAll_attr[['dv_hys_old']], rows_trainAll, batch_size, sub_samp=subsample)
     validate_dv_hys_old = resizer(validate_attr[['dv_hys_old']], rows_val, batch_size, sub_samp=subsample)
     test_dv_hys_old = resizer(test_attr[['dv_hys_old']], rows_tst, batch_size, sub_samp=subsample)
     plot_input(trn_x=trainAll_x, val_x=validate_x, tst_x=test_x, t_samp_=t_samp_input, use_ib_lag_=use_ib_lag)
-    plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
-                trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
+    plot_result(trn_y=trainAll_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
+                trn_pred=trainAll_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
                 tst_pred=test_predict[:, batch_size-1, :],
-                trn_dv_hys_old=train_dv_hys_old[:, batch_size-1, :], val_dv_hys_old=validate_dv_hys_old[:, batch_size-1, :],
+                trn_dv_hys_old=trainAll_dv_hys_old[:, batch_size-1, :], val_dv_hys_old=validate_dv_hys_old[:, batch_size-1, :],
                 tst_dv_hys_old=test_dv_hys_old[:, batch_size-1, :],
                 t_samp_=t_samp_result, scale_in_dv_=scale_in_dv)
-    plot_hys(trainAll_x, trainAll_y, train_predict)
-    plot_fail(trainAll_y, train_predict, np.array(train_predict_fail_ib), t_samp_=t_samp_result, ib_bias_=ib_bias)
+    plot_hys(trainAll_x, trainAll_y, trainAll_predict)
+    plot_fail(trainAll_y, trainAll_predict, np.array(trainAll_predict_fail_ib), t_samp_=t_samp_result, ib_bias_=ib_bias)
 
     # Print model
     model.summary()
