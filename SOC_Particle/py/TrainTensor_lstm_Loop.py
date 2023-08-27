@@ -402,50 +402,60 @@ def train_tensor_lstm():
         save_path = 'TrainTensor_lstm.keras'
     batch_size = int(nom_batch_size / subsample)
 
+    # Initialize loop
     trainAll_x = None
+    trainAll_x_vec = None
+    trainAll_y = None
+    model = None
 
     ####################################################################################################
-    print("[INFO] loading train attributes...")
-    train_df, train = load_data_file(train_file, params)
-    train_attr = train_df
-    train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
-    if use_ib_lag:
-        train_x = train_attr[['ib_lag', 'soc']]
-    else:
-        train_x = train_attr[['ib', 'soc']]
-    rows_train = int(len(train_y) / batch_size / subsample)
-    train_x, train_y, train_x_vec = parse_inputs(train_x, train_y, batch_size, subsample)
-
-    if trainAll_x is None:
-        trainAll_x = train_x.copy()
-    else:
-        trainAll_x.append(train_x.copy())
-
-    # Optional make new model
-    if try_load_model:
-        model = load_model(save_path)
-    else:
-        if use_many:
-            model = tensor_model_create_many_to_one(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
-                                                    activation=['relu', 'sigmoid', 'linear', 'linear'],
-                                                    learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two,
-                                                    use_mae=fit_mae, use_mre_loss_=use_mre_loss,
-                                                    use_huber_loss_=use_huber_loss, huber_delta_=huber_delta)
+    for train_file in train_files:
+        print("[INFO] loading train attributes...")
+        train_df, train = load_data_file(train_file, params)
+        train_attr = train_df
+        train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
+        if use_ib_lag:
+            train_x = train_attr[['ib_lag', 'soc']]
         else:
-            model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
-                                        dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
-                                        learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two, use_mae=fit_mae)
+            train_x = train_attr[['ib', 'soc']]
+        rows_train = int(len(train_y) / batch_size / subsample)
+        train_x, train_y, train_x_vec = parse_inputs(train_x, train_y, batch_size, subsample)
 
-    # Train model
-    print("[INFO] training model...")
-    if use_many:
-        epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
-                                           patient=patience, use_many_=use_many)
-    else:
-        epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
-                                           patient=patience, use_many_=use_many)
-    model.save(save_path)
-    plot_the_loss_curve(epochs, mse, history["loss"], use_mae=fit_mae)
+        if trainAll_x is None:
+            trainAll_x = train_x.copy()
+            trainAll_x_vec = train_x_vec.copy()
+            trainAll_y = train_y.copy()
+        else:
+            trainAll_x = np.vstack((trainAll_x, train_x))
+            trainAll_x_vec = [trainAll_x[:, :, 0], trainAll_x[:, :, 1]]
+            trainAll_y = np.vstack((trainAll_y, train_y))
+
+        # Optional make new model
+        if model is None:
+            if try_load_model:
+                model = load_model(save_path)
+            else:
+                if use_many:
+                    model = tensor_model_create_many_to_one(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
+                                                            activation=['relu', 'sigmoid', 'linear', 'linear'],
+                                                            learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two,
+                                                            use_mae=fit_mae, use_mre_loss_=use_mre_loss,
+                                                            use_huber_loss_=use_huber_loss, huber_delta_=huber_delta)
+                else:
+                    model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
+                                                dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
+                                                learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two, use_mae=fit_mae)
+
+        # Train model
+        print("[INFO] training model...")
+        if use_many:
+            epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
+                                               patient=patience, use_many_=use_many)
+        else:
+            epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
+                                               patient=patience, use_many_=use_many)
+        model.save(save_path)
+        plot_the_loss_curve(epochs, mse, history["loss"], use_mae=fit_mae)
 
     ####################################################################################################
     print("[INFO] loading validation attributes...")
@@ -471,14 +481,14 @@ def train_tensor_lstm():
     # make predictions
     print("[INFO] predicting 'dv'...")
     if use_many:
-        train_predict = model.predict(train_x)
+        train_predict = model.predict(trainAll_x)
         validate_predict = model.predict(validate_x)
         test_predict = model.predict(test_x)
     else:
-        train_predict = model.predict(train_x_vec)
+        train_predict = model.predict(trainAll_x_vec)
         validate_predict = model.predict(validate_x_vec)
         test_predict = model.predict(test_x_vec)
-    train_x_fail_ib = train_x.copy()
+    train_x_fail_ib = trainAll_x.copy()
     train_predict_fail_ib = []
     for fail_ib_mag in ib_bias:
         train_x_fail_ib[:, :, 0] += fail_ib_mag / scale_in[1]
@@ -495,15 +505,15 @@ def train_tensor_lstm():
     train_dv_hys_old = resizer(train_attr[['dv_hys_old']], rows_train, batch_size, sub_samp=subsample)
     validate_dv_hys_old = resizer(validate_attr[['dv_hys_old']], rows_val, batch_size, sub_samp=subsample)
     test_dv_hys_old = resizer(test_attr[['dv_hys_old']], rows_tst, batch_size, sub_samp=subsample)
-    plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x, t_samp_=t_samp_input, use_ib_lag_=use_ib_lag)
+    plot_input(trn_x=trainAll_x, val_x=validate_x, tst_x=test_x, t_samp_=t_samp_input, use_ib_lag_=use_ib_lag)
     plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
                 trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
                 tst_pred=test_predict[:, batch_size-1, :],
                 trn_dv_hys_old=train_dv_hys_old[:, batch_size-1, :], val_dv_hys_old=validate_dv_hys_old[:, batch_size-1, :],
                 tst_dv_hys_old=test_dv_hys_old[:, batch_size-1, :],
                 t_samp_=t_samp_result, scale_in_dv_=scale_in_dv)
-    plot_hys(train_x, train_y, train_predict)
-    plot_fail(train_y, train_predict, np.array(train_predict_fail_ib), t_samp_=t_samp_result, ib_bias_=ib_bias)
+    plot_hys(trainAll_x, trainAll_y, train_predict)
+    plot_fail(trainAll_y, train_predict, np.array(train_predict_fail_ib), t_samp_=t_samp_result, ib_bias_=ib_bias)
 
     # Print model
     model.summary()
