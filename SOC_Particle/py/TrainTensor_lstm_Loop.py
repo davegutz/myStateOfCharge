@@ -380,8 +380,8 @@ def train_tensor_lstm():
     use_two = False
     use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
     learning_rate = 0.0003
-    epochs = 750
-    epochs = 5
+    epochs_lim = 750
+    epochs_lim = 5
     hidden = 4
     subsample = 5
     nom_batch_size = 30
@@ -449,10 +449,10 @@ def train_tensor_lstm():
         # Train model
         print("[INFO] training model...")
         if use_many:
-            epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
+            epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs_lim, btch_size=batch_size, verbose=1,
                                                patient=patience, use_many_=use_many)
         else:
-            epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
+            epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs_lim, btch_size=batch_size, verbose=1,
                                                patient=patience, use_many_=use_many)
         model.save(save_path)
         plot_the_loss_curve(epochs, mse, history["loss"], use_mae=fit_mae)
