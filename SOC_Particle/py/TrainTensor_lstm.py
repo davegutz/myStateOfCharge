@@ -365,7 +365,8 @@ def train_tensor_lstm():
     dropping = 0.2
 
     # Inputs frequently changed
-    train_file = ".//temp//dv_train_soc0p_ch_clip_clean.csv"
+    train_file = ".//temp//dv_20230826_soc0p_ch_clip_clean.csv"
+    # train_file = ".//temp//dv_train_soc0p_ch_clip_clean.csv"
     validate_file = ".//temp//dv_validate_soc0p_ch_clip_clean.csv"
     test_file = ".//temp//dv_test_soc0p_ch_clean.csv"
     params = ['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys_old', 'dv']
@@ -386,7 +387,7 @@ def train_tensor_lstm():
     try_load_model = False
     use_mre_loss = True
     use_huber_loss = True
-    huber_delta = 1.
+    huber_delta = 0.1
 
     # Adjust model automatically
     if use_two:
