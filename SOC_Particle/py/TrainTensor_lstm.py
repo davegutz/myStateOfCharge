@@ -24,13 +24,30 @@ from keras.models import Sequential
 from keras.models import load_model, Model
 from sklearn.model_selection import train_test_split
 from keras.layers import Dense, LSTM, Dropout, Input, concatenate
+from keras.losses import huber
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 from keras.saving import register_keras_serializable
+from keras.backend import mean as keras_mean
 
 # The following lines adjust the granularity of reporting.
 pd.options.display.max_rows = 10
 pd.options.display.float_format = "{:.1f}".format
+
+
+# The Huber loss function wrapper so can input delta as kwarg
+@register_keras_serializable()
+def get_huber_loss_fn(**huber_loss_kwargs):
+
+    @register_keras_serializable()
+    def custom_huber_loss(y_true, y_pred):
+        return huber(y_true, y_pred, **huber_loss_kwargs)
+
+    return custom_huber_loss
+
+
+def huber_loss_mean(y_true, y_pred, delta_huber=1.0):
+    return keras_mean(huber(y_true, y_pred, delta_huber))
 
 
 @register_keras_serializable()
@@ -198,7 +215,7 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys_ol
     plt.grid()
 
 
-def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
+def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, delta_=1.):
     # Error of predictions
     trn_rmse = math.sqrt(mean_squared_error(trn_y, trn_pred))
     val_rmse = math.sqrt(mean_squared_error(val_y, val_pred))
@@ -212,10 +229,14 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred):
     val_mre = np.mean(np.sqrt(np.abs(val_y - val_pred)))
     tst_mre = np.mean(np.sqrt(np.abs(tst_y - tst_pred)))
 
+    trn_hub = huber_loss_mean(trn_y, trn_pred, delta_huber=delta_)
+    val_hub = huber_loss_mean(val_y, val_pred, delta_huber=delta_)
+    tst_hub = huber_loss_mean(tst_y, tst_pred, delta_huber=delta_)
+
     # Print
-    print("Train    RMSE {:6.3f}".format(trn_rmse), " ||  MAE {:6.3f}".format(trn_mae), " ||  MRE {:6.3f}".format(trn_mre))
-    print("Validate RMSE {:6.3f}".format(val_rmse), " ||  MAE {:6.3f}".format(val_mae), " ||  MRE {:6.3f}".format(val_mre))
-    print("Test     RMSE {:6.3f}".format(tst_rmse), " ||  MAE {:6.3f}".format(tst_mae), " ||  MRE {:6.3f}".format(tst_mre))
+    print("Train    RMSE {:6.3f}".format(trn_rmse), " ||  MAE {:6.3f}".format(trn_mae), " ||  MRE {:6.3f}".format(trn_mre), " || HUB {:6.3f}".format(trn_hub))
+    print("Validate RMSE {:6.3f}".format(val_rmse), " ||  MAE {:6.3f}".format(val_mae), " ||  MRE {:6.3f}".format(val_mre), " || HUB {:6.3f}".format(val_hub))
+    print("Test     RMSE {:6.3f}".format(tst_rmse), " ||  MAE {:6.3f}".format(tst_mae), " ||  MRE {:6.3f}".format(tst_mre), " || HUB {:6.3f}".format(tst_hub))
 
 
 def process_battery_attributes(df, scale=(50., 10., 1., 0.1)):
@@ -281,7 +302,7 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
 # Single input with one-hot augmentation path
 def tensor_model_create_many_to_one(hidden_units, input_shape, activation=None, learn_rate=0.01,
                                     drop=0.2, use_two_lstm=False, use_mae=True, use_mre_loss_=False,
-                                    use_huber_loss_=False):
+                                    use_huber_loss_=False, huber_delta_=1.):
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     dual_input = (input_shape[0], 2)
@@ -305,7 +326,7 @@ def tensor_model_create_many_to_one(hidden_units, input_shape, activation=None, 
     if use_mre_loss_:
         loss_ = mre_loss
     if use_huber_loss_:
-        loss_ = 'huber_loss'
+        loss_ = get_huber_loss_fn(delta=huber_delta_)
     lstm.compile(loss=loss_, optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
                  metrics=['mse', 'mae'])
     lstm.summary()
@@ -364,7 +385,8 @@ def train_tensor_lstm():
     ib_bias = [.1, .5, 1.]
     try_load_model = False
     use_mre_loss = True
-    use_huber_loss = False
+    use_huber_loss = True
+    huber_delta = 1.
 
     # Adjust model automatically
     if use_two:
@@ -420,7 +442,7 @@ def train_tensor_lstm():
                                                     activation=['relu', 'sigmoid', 'linear', 'linear'],
                                                     learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two,
                                                     use_mae=fit_mae, use_mre_loss_=use_mre_loss,
-                                                    use_huber_loss_=use_huber_loss)
+                                                    use_huber_loss_=use_huber_loss, huber_delta_=huber_delta)
         else:
             model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
                                         dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
@@ -488,7 +510,8 @@ def train_tensor_lstm():
 
     # Print error
     print_error(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
-                trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :], tst_pred=test_predict[:, batch_size-1, :])
+                trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :], tst_pred=test_predict[:, batch_size-1, :],
+                delta_=huber_delta)
 
     plt.show()
 
