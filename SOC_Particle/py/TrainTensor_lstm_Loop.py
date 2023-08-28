@@ -431,7 +431,7 @@ def train_tensor_lstm():
             trainAll_x_vec = [trainAll_x[:, :, 0], trainAll_x[:, :, 1]]
             trainAll_y = np.vstack((trainAll_y, train_y))
             trainAll_attr = pd.concat([trainAll_attr, train_attr])
-        rows_trainAll = int(len(trainAll_y) / batch_size / subsample)
+        rows_trainAll = len(trainAll_y)
 
         # Optional make new model
         if model is None:
@@ -531,8 +531,8 @@ def train_tensor_lstm():
     print(classifier.summary())
 
     # Print error
-    print_error(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
-                trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :], tst_pred=test_predict[:, batch_size-1, :],
+    print_error(trn_y=trainAll_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
+                trn_pred=trainAll_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :], tst_pred=test_predict[:, batch_size-1, :],
                 delta_=huber_delta)
 
     plt.show()
