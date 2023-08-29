@@ -423,6 +423,7 @@ class SavedData:
             self.soc_ekf = None  # Solved state of charge, fraction
             self.soc = None  # Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1)
             self.time_ref = 0.  # Adjust time for start of ib input
+            self.voc_soc_new = None  # For studies
         else:
             self.i = 0
             self.cTime = np.array(data.cTime)
@@ -510,6 +511,7 @@ class SavedData:
             self.soc_s = np.array(data.soc_s[:i_end])
             self.soc_ekf = np.array(data.soc_ekf[:i_end])
             self.soc = np.array(data.soc[:i_end])
+            self.voc_soc_new = None
         if sel is None:
             self.c_time_s = None
             self.res = None

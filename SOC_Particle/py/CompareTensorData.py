@@ -30,7 +30,7 @@ from PlotOffOn import off_on_plot
 import os
 from myFilters import LagExp
 import numpy.lib.recfunctions as rf
-from Chemistry_BMS import ib_lag
+from Chemistry_BMS import ib_lag, Chemistry
 plt.rcParams['axes.grid'] = True
 
 
@@ -47,6 +47,18 @@ def add_ib_lag(data):
         if i > 0:
             dt = data.cTime[i] - data.cTime[i-1]
         data.ib_lag[i] = IbLag.calculate_tau(float(data.ib[i]), i == 0, dt, lag_tau)
+    return data
+
+
+# Add reshaped voc_soc curve so it shows on plots
+def add_voc_soc_new(data):
+    chm = data.mod()
+    chem = Chemistry(chm)
+    chem.assign_all_mod(chm)
+    n = len(data.cTime)
+    data.voc_soc_new = np.zeros(n)
+    for i in range(n):
+        data.voc_soc_new[i] = chem.lut_voc_soc.interp(data.soc[i], data.Tb[i])
     return data
 
 
@@ -99,12 +111,12 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     sat_init_in = None
 
     # Save these examples
-    # data_file_txt = 'dv_20230826_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;
+    data_file_txt = 'dv_20230826_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;
     # data_file_txt = 'dv_train_soc0p_ch_clip01.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
     # data_file_txt = 'dv_train_soc0p_ch_clip02.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
     # data_file_txt = 'dv_train_soc0p_ch_clip03.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
     # data_file_txt = 'dv_train_soc0p_ch_clip04.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
-    data_file_txt = 'dv_train_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
+    # data_file_txt = 'dv_train_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
     # data_file_txt = 'dv_validate_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True
     # data_file_txt = 'dv_test_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True
     # data_file_txt = 'GenerateDV_Data.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True; use_vb_sim_in = True
@@ -125,6 +137,7 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
         load_data(data_file, skip, unit_key, zero_zero_in, time_end_in, legacy=legacy_in)
     mon_old = add_ib_lag(mon_old)
+    mon_old = add_voc_soc_new(mon_old)
     mon_old_file_save = data_file_clean.replace(".csv", "_clean.csv")
     save_clean_file(mon_old, mon_old_file_save, 'mon' + date_)
 
