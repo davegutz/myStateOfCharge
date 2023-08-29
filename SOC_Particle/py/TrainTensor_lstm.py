@@ -61,7 +61,7 @@ def load_data_file(file, attributes=None):
     data = pd.read_csv(file, skipinitialspace=True)
     data['voc'] = data['vb'] - data['dv_dyn']
     data['dv_hys_old'] = data['voc'] - data['voc_stat']
-    data['dv'] = data['voc'] - data['voc_soc']
+    data['dv'] = data['voc'] - data['voc_soc_new']
     data_df = data[attributes]
     return data_df, data
 

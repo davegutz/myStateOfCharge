@@ -143,20 +143,37 @@ void Chemistry::assign_BB()
 // CHINS Chemistry
 // CHINS 100 Ah, 12v LiFePO4
 // 2023-02-27:  tune to data.  Add slight slope 0.8-0.98 to make models deterministic
-const uint8_t M_T_CH = 4;    // Number temperature breakpoints for voc table
+// const uint8_t M_T_CH = 4;    // Number temperature breakpoints for voc table
+// const uint8_t N_S_CH = 20;   // Number soc breakpoints for voc table
+// const float Y_T_CH[M_T_CH] = // Temperature breakpoints for voc table
+//     {5., 11.1, 11.2, 40.};
+// const float X_SOC_CH[N_S_CH] = // soc breakpoints for voc table
+//     {-0.100,  -0.060,  -0.035,   0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.980,   0.990,   1.000};
+// const float T_VOC_CH[M_T_CH * N_S_CH] = // r(soc, dv) table
+//     {4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   5.370,  10.042,  12.683,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
+//      4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   6.963,  10.292,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
+//      4.000,   4.000,   4.000,   9.000,  12.453,  12.746,  12.869,  12.931,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
+//      4.000,   4.000,   4.000,   9.000,  12.453,  12.746,  12.869,  12.931,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700};
+// const uint8_t N_N_CH = 4;                                        // Number of temperature breakpoints for x_soc_min table
+// const float X_SOC_MIN_CH[N_N_CH] = {5.000,  11.100,  11.200,  40.000};  // Temperature breakpoints for soc_min table
+// const float T_SOC_MIN_CH[N_N_CH] = {0.200,   0.167,   0.014,   0.014};  // soc_min(t)
+
+// 2023-08-29:  tune to data
+const uint8_t M_T_CH = 5;    // Number temperature breakpoints for voc table
 const uint8_t N_S_CH = 20;   // Number soc breakpoints for voc table
 const float Y_T_CH[M_T_CH] = // Temperature breakpoints for voc table
-    {5., 11.1, 11.2, 40.};
+    {5., 11.1, 11.2, 21.5, 40.};
 const float X_SOC_CH[N_S_CH] = // soc breakpoints for voc table
     {-0.100,  -0.060,  -0.035,   0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.980,   0.990,   1.000};
 const float T_VOC_CH[M_T_CH * N_S_CH] = // r(soc, dv) table
     {4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   5.370,  10.042,  12.683,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
      4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   6.963,  10.292,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
      4.000,   4.000,   4.000,   9.000,  12.453,  12.746,  12.869,  12.931,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
-     4.000,   4.000,   4.000,   9.000,  12.453,  12.746,  12.869,  12.931,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700};
-const uint8_t N_N_CH = 4;                                        // Number of temperature breakpoints for x_soc_min table
-const float X_SOC_MIN_CH[N_N_CH] = {5.000,  11.100,  11.200,  40.000};  // Temperature breakpoints for soc_min table
-const float T_SOC_MIN_CH[N_N_CH] = {0.200,   0.167,   0.014,   0.014};  // soc_min(t)
+     4.000,   4.000,   4.000,   9.000,  10.200,  12.400,  12.650,  12.730,  12.810,  12.920,  12.960,  13.060,  13.100,  13.160,  13.220,  13.284,  13.299,  13.310,  13.486,  14.700,
+     4.000,   4.000,   4.000,   9.000,  10.200,  12.400,  12.650,  12.730,  12.810,  12.920,  12.960,  13.060,  13.100,  13.160,  13.220,  13.284,  13.299,  13.310,  13.486,  14.700};
+const uint8_t N_N_CH = 5;                                        // Number of temperature breakpoints for x_soc_min table
+const float X_SOC_MIN_CH[N_N_CH] = {5.000,  11.100,  11.200,  21.5,  40.000};  // Temperature breakpoints for soc_min table
+const float T_SOC_MIN_CH[N_N_CH] = {0.200,   0.167,   0.014,  0.04,  0.04};  // soc_min(t)
 
 // CHINS Hysteresis
 const uint8_t M_H_CH = 4;     // Number of soc breakpoints in r(soc, dv) table t_r, t_s
