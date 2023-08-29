@@ -380,8 +380,7 @@ def train_tensor_lstm():
     use_two = False
     use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
     learning_rate = 0.0003
-    epochs_lim = 750
-    epochs_lim = 5
+    epochs_lim = 500
     hidden = 4
     subsample = 5
     nom_batch_size = 30

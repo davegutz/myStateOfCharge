@@ -126,19 +126,22 @@ def plot_fail(trn_y, trn_predict, trn_predict_fail_ib, t_samp_, ib_bias_):
 
 
 # Plot the inputs
-def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
+def plot_input(trn_x, trn_y, val_x, val_y, tst_x, tst_y, t_samp_, use_ib_lag_):
     inp_ib = np.append(trn_x[:, :, 0], val_x[:, :, 0])
     inp_ib = np.append(inp_ib, tst_x[:, :, 0])
     inp_soc = np.append(trn_x[:, :, 1], val_x[:, :, 1])
     inp_soc = np.append(inp_soc, tst_x[:, :, 1])
+    inp_dv = np.append(trn_y[:, :, 0], val_y[:, :, 0])
+    inp_dv = np.append(inp_dv, tst_y[:, :, 0])
     rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
     plt.figure(figsize=(15, 6), dpi=80)
     time = range(rows) * t_samp_
+    plt.plot(time, inp_dv, label='dv_scaled', color='blue')
     if use_ib_lag_:
-        plt.plot(time, inp_ib,  label='ib_lag scaled')
+        plt.plot(time, inp_ib,  label='ib_lag scaled', color='orange')
     else:
-        plt.plot(time, inp_ib, label='ib scaled')
-    plt.plot(time, inp_soc, label='soc')
+        plt.plot(time, inp_ib, label='ib scaled', color='orange')
+    plt.plot(time, inp_soc, label='soc', color='black')
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
     val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
     plt.axvline(x=trn_len*t_samp_, color='r')
@@ -147,9 +150,9 @@ def plot_input(trn_x, val_x, tst_x, t_samp_, use_ib_lag_):
     plt.xlabel('Observation number after given time steps')
     plt.xlabel('seconds')
     if use_ib_lag_:
-        plt.ylabel('ib_lag scaled / soc')
+        plt.ylabel('ib_lag scaled / soc / dv scaled')
     else:
-        plt.ylabel('ib scaled / soc')
+        plt.ylabel('ib scaled / soc / dv scaled')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
 
 
@@ -239,7 +242,7 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, delta_=1.):
     print("Test     RMSE {:6.3f}".format(tst_rmse), " ||  MAE {:6.3f}".format(tst_mae), " ||  MRE {:6.3f}".format(tst_mre), " || HUB {:6.3f}".format(tst_hub))
 
 
-def process_battery_attributes(df, scale=(50., 10., 1., 0.1)):
+def process_battery_attributes(df, scale=(50., 10., 1., 0.1), limit_dv=False):
     # column names of continuous features
     data = df[['Tb', 'ib', 'soc', 'ib_lag', 'dv_hys_old']]
     s_Tb, s_ib, s_soc, s_dv = scale
@@ -250,7 +253,8 @@ def process_battery_attributes(df, scale=(50., 10., 1., 0.1)):
         data['soc'] = data['soc'].map(lambda x: x/s_soc)
         data['dv_hys_old'] = data['dv_hys_old'].map(lambda x: x/s_dv)
         y = df['dv'] / s_dv
-
+        if limit_dv:
+            y = y.map(lambda x: max(min(x, s_dv), -s_dv))
     return data, y
 
 
@@ -372,13 +376,14 @@ def train_tensor_lstm():
     params = ['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys_old', 'dv']
     fit_mae = True
     use_many = True
-    scale_in = (50., 10., 1., 0.1)
+    scale_in = (50., 10., 1., 0.25)
     # scale_in = (1., 1., 1., 1.)
     scale_in_dv = scale_in[3]
     use_two = False
     use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
     learning_rate = 0.0003
-    epochs = 750
+    epochs_lim = 750
+    # epochs_lim = 5
     hidden = 4
     subsample = 5
     nom_batch_size = 30
@@ -388,6 +393,7 @@ def train_tensor_lstm():
     use_mre_loss = True
     use_huber_loss = True
     huber_delta = 0.1
+    use_dv_input_limit = False
 
     # Adjust model automatically
     if use_two:
@@ -412,7 +418,7 @@ def train_tensor_lstm():
     test_attr = test_df
 
     # Adjust data
-    train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in)
+    train_attr, train_y = process_battery_attributes(train_attr, scale=scale_in, limit_dv=use_dv_input_limit)
     validate_attr, validate_y = process_battery_attributes(validate_attr, scale=scale_in)
     test_attr, test_y = process_battery_attributes(test_attr, scale=scale_in)
     if use_ib_lag:
@@ -452,10 +458,10 @@ def train_tensor_lstm():
     # Train model
     print("[INFO] training model...")
     if use_many:
-        epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
+        epochs, mse, history = train_model(model, train_x, train_y, epochs_=epochs_lim, btch_size=batch_size, verbose=1,
                                            patient=patience, use_many_=use_many)
     else:
-        epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs, btch_size=batch_size, verbose=1,
+        epochs, mse, history = train_model(model, train_x_vec, train_y, epochs_=epochs_lim, btch_size=batch_size, verbose=1,
                                            patient=patience, use_many_=use_many)
     model.save(save_path)
     plot_the_loss_curve(epochs, mse, history["loss"], use_mae=fit_mae)
@@ -487,7 +493,8 @@ def train_tensor_lstm():
     train_dv_hys_old = resizer(train_attr[['dv_hys_old']], rows_train, batch_size, sub_samp=subsample)
     validate_dv_hys_old = resizer(validate_attr[['dv_hys_old']], rows_val, batch_size, sub_samp=subsample)
     test_dv_hys_old = resizer(test_attr[['dv_hys_old']], rows_tst, batch_size, sub_samp=subsample)
-    plot_input(trn_x=train_x, val_x=validate_x, tst_x=test_x, t_samp_=t_samp_input, use_ib_lag_=use_ib_lag)
+    plot_input(trn_x=train_x, trn_y=train_y, val_x=validate_x, val_y=validate_y, tst_x=test_x, tst_y=test_y,
+               t_samp_=t_samp_input, use_ib_lag_=use_ib_lag)
     plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
                 trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
                 tst_pred=test_predict[:, batch_size-1, :],
