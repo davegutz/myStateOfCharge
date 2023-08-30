@@ -135,6 +135,7 @@ class Battery(Coulombs):
         self.s_hys = s_hys
         self.ib_lag = 0.
         self.IbLag = LagExp(1., 1., -100., 100.)  # Lag to be run on sat to produce ib_lag.  T and tau set at run time
+        self.voc_soc_new = 0.
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -517,6 +518,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.e_wrap.append(self.e_wrap)
         self.saved.e_wrap_filt.append(self.e_wrap_filt)
         self.saved.ib_lag.append(self.ib_lag)
+        self.saved.voc_soc_new.append(self.voc_soc_new)
 
 
 class BatterySim(Battery):
@@ -868,6 +870,7 @@ class Saved:
         self.e_wrap = []  # Verification of wrap calculation, V
         self.e_wrap_filt = []  # Verification of filtered wrap calculation, V
         self.ib_lag = []  # Lagged ib, A
+        self.voc_soc_new = []  # New schedule values
 
 
 def overall_batt(mv, sv, filename,

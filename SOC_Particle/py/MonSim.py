@@ -62,7 +62,7 @@ def save_clean_file(mon_ver, csv_file, unit_key):
             s += "{:7.3f},".format(mon_ver.soc_ekf[i])
             s += "{:7.3f},".format(mon_ver.soc[i])
             s += "{:7.5f},".format(mon_ver.ib_lag[i])
-            s += "{:7.3f},".format(mon_ver.voc_soc[i])
+            s += "{:7.3f},".format(mon_ver.voc_soc_new[i])
             s += "\n"
             output.write(s)
         print("Wrote(save_clean_file):", csv_file)

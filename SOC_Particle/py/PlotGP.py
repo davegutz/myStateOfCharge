@@ -130,6 +130,8 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.plot(mo.soc, mo.voc, color='black', linestyle='-', label='voc' + ref_str)
     plt.plot(mo.soc, mo.voc_soc, color='red', linestyle='-', label='voc_soc' + ref_str)
     plt.plot(mv.soc, mv.voc_soc, color='orange', linestyle='--', label='voc_soc' + test_str)
+    # plt.plot(mv.soc, mv.voc_soc_new, color='magenta', linestyle='-.', label='voc_soc_new' + test_str)
+    plt.plot(mv.soc, np.array(mv.voc_soc) - np.array(mv.voc)+10., color='blue', linestyle='-', label='dv' + test_str + '+10')
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
@@ -217,7 +219,7 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.legend(loc=3)
     plt.subplot(339)
     plt.plot(mo.time, mo.Tb, color='blue', linestyle='-', label='Tb' + ref_str)
-    plt.plot(mv.time, mv.tau_hys, color='cyan', linestyle='--', label='tau_hys' + test_str)
+    # plt.plot(mv.time, mv.tau_hys, color='cyan', linestyle='--', label='tau_hys' + test_str)
     plt.legend(loc=3)
     fig_file_name = filename + '_' + str(n_fig) + ".png"
     fig_files.append(fig_file_name)
