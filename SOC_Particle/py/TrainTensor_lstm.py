@@ -369,7 +369,7 @@ def train_tensor_lstm():
     dropping = 0.2
 
     # Inputs frequently changed
-    train_file = ".//temp//dv_20230826_soc0p_ch_clip_clean.csv"
+    train_file = ".//temp//dv_20230831_soc0p_ch_clip_clean.csv"
     # train_file = ".//temp//dv_train_soc0p_ch_clip_clean.csv"
     validate_file = ".//temp//dv_validate_soc0p_ch_clip_clean.csv"
     test_file = ".//temp//dv_test_soc0p_ch_clean.csv"

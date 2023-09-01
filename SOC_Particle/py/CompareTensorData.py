@@ -50,7 +50,7 @@ def add_ib_lag(data):
     return data
 
 
-# Add reshaped voc_soc curve so it shows on plots
+# Add reshaped voc_soc curve, so it shows on plots to adjust it
 def add_voc_soc_new(data):
     chm = data.chm[1]
     chem = Chemistry(chm)
@@ -59,6 +59,22 @@ def add_voc_soc_new(data):
     data.voc_soc_new = np.zeros(n)
     for i in range(n):
         data.voc_soc_new[i] = chem.lut_voc_soc.interp(data.soc[i], data.Tb[i])
+    return data
+
+
+# Scale soc and adjust ib for observed calibration error
+def adjust_soc(data, dDA_in):
+    n = len(data.cTime)
+    d_soc = 0.
+    for i in range(n-1):
+        T = data.cTime[i+1] - data.cTime[i]
+        # Accumulated soc change
+        d_soc += dDA_in * T / data.qcrs[i]
+        data.soc[i+1] += d_soc
+        data.soc_s[i+1] += d_soc
+        data.soc_ekf[i+1] += d_soc
+        data.ib[i] += dDA_in
+        data.ib_charge[i] += dDA_in
     return data
 
 
@@ -107,30 +123,32 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     cutback_gain_sclr_in = 1.
     ds_voc_soc_in = 0.
     data_file_txt = None
-    temp_file = None
+    temp_file = ''
     sat_init_in = None
     use_mon_soc_in = True
+    dDA_in = None
+
+    data_file_txt = 'dv_20230831_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; dDA_in = .023
+    # data_file_txt = 'dv_train_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;  dDA_in = .023; # time_end_in = 248500.
+    # data_file_txt = 'dv_validate_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;  dDA_in = .023
+    # data_file_txt = 'dv_test_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;  dDA_in = .023
 
     # Save these examples
-    data_file_txt = 'dv_20230831_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;
-    # data_file_txt = 'dv_train_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
-    # data_file_txt = 'dv_validate_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True
-    # data_file_txt = 'dv_test_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True
-
-    # data_file_txt = 'dv_20230826_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;
-    # data_file_txt = 'dv_train_soc0p_ch_clip01.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
-    # data_file_txt = 'dv_train_soc0p_ch_clip02.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
-    # data_file_txt = 'dv_train_soc0p_ch_clip03.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
-    # data_file_txt = 'dv_train_soc0p_ch_clip04.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; # time_end_in = 248500.
+    # data_file_txt = 'dv_20230826_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; dDA_in = .023
+    # data_file_txt = 'dv_train_soc0p_ch_clip01.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; dDA_in = .023; # time_end_in = 248500.
+    # data_file_txt = 'dv_train_soc0p_ch_clip02.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; dDA_in = .023;  # time_end_in = 248500.
+    # data_file_txt = 'dv_train_soc0p_ch_clip03.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; dDA_in = .023; # time_end_in = 248500.
+    # data_file_txt = 'dv_train_soc0p_ch_clip04.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;  dDA_in = .023; # time_end_in = 248500.
     # data_file_txt = 'GenerateDV_Data.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True; use_vb_sim_in = True
 
+    data_file = None
     if data_file_path is None:
         if data_file_txt is not None:
             path_to_data = os.path.join(os.getcwd(), data_file_txt)
         else:
             path_to_data = None
         data_file_path = path_to_data
-        if temp_file is None:
+        if temp_file == '':
             data_file = data_file_path
         else:
             path_to_temp = os.path.join(path_to_temp, temp_file)
@@ -141,6 +159,7 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
         load_data(data_file, skip, unit_key, zero_zero_in, time_end_in, legacy=legacy_in)
     mon_old = add_ib_lag(mon_old)
     mon_old = add_voc_soc_new(mon_old)
+    mon_old = adjust_soc(mon_old, dDA_in)
     mon_old_file_save = data_file_clean.replace(".csv", "_clean.csv")
     save_clean_file(mon_old, mon_old_file_save, 'mon' + date_)
 
