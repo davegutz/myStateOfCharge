@@ -66,9 +66,12 @@ def load_data_file(file, attributes=None):
     return data_df, data
 
 
-def parse_inputs(x, y, batch_size_, subsample_):
+def parse_inputs(x, y, batch_size_, subsample_, use_tri_):
     rows = int(len(y) / batch_size_ / subsample_)
-    x = resizer(x, rows, batch_size_, sub_samp=subsample_, n_in=2)
+    if use_tri_:
+        x = resizer(x, rows, batch_size_, sub_samp=subsample_, n_in=3)
+    else:
+        x = resizer(x, rows, batch_size_, sub_samp=subsample_, n_in=2)
     x_vec = [x[:, :, 0], x[:, :, 1]]
     y = resizer(y, rows, batch_size_, sub_samp=subsample_)
     return x, y, x_vec
@@ -126,11 +129,15 @@ def plot_fail(trn_y, trn_predict, trn_predict_fail_ib, t_samp_, ib_bias_):
 
 
 # Plot the inputs
-def plot_input(trn_x, trn_y, val_x, val_y, tst_x, tst_y, t_samp_, use_ib_lag_):
+def plot_input(trn_x, trn_y, val_x, val_y, tst_x, tst_y, t_samp_, use_ib_lag_, use_tri_):
     inp_ib = np.append(trn_x[:, :, 0], val_x[:, :, 0])
     inp_ib = np.append(inp_ib, tst_x[:, :, 0])
     inp_soc = np.append(trn_x[:, :, 1], val_x[:, :, 1])
     inp_soc = np.append(inp_soc, tst_x[:, :, 1])
+    inp_tb = None
+    if use_tri_:
+        inp_tb = np.append(trn_x[:, :, 2], val_x[:, :, 2])
+        inp_tb = np.append(inp_tb, tst_x[:, :, 2])
     inp_dv = np.append(trn_y[:, :, 0], val_y[:, :, 0])
     inp_dv = np.append(inp_dv, tst_y[:, :, 0])
     rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
@@ -142,6 +149,8 @@ def plot_input(trn_x, trn_y, val_x, val_y, tst_x, tst_y, t_samp_, use_ib_lag_):
     else:
         plt.plot(time, inp_ib, label='ib scaled', color='orange')
     plt.plot(time, inp_soc, label='soc', color='black')
+    if use_tri_:
+        plt.plot(time, inp_tb, label='tb scaled', color='green')
     trn_len = trn_x.shape[0]*trn_x.shape[1]  # x's are stacked
     val_len = val_x.shape[0]*val_x.shape[1]  # x's are stacked
     plt.axvline(x=trn_len*t_samp_, color='r')
@@ -149,10 +158,7 @@ def plot_input(trn_x, trn_y, val_x, val_y, tst_x, tst_y, t_samp_, use_ib_lag_):
     plt.legend(loc=3)
     plt.xlabel('Observation number after given time steps')
     plt.xlabel('seconds')
-    if use_ib_lag_:
-        plt.ylabel('ib_lag scaled / soc / dv scaled')
-    else:
-        plt.ylabel('ib scaled / soc / dv scaled')
+    plt.ylabel('scaled')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
 
 
@@ -254,7 +260,7 @@ def process_battery_attributes(df, scale=(50., 10., 1., 0.1), limit_dv=False):
         data['dv_hys_old'] = data['dv_hys_old'].map(lambda x: x/s_dv)
         y = df['dv'] / s_dv
         if limit_dv:
-            y = y.map(lambda x: max(min(x, s_dv), -s_dv))
+            y = y.map(lambda x: max(min(x, s_dv*2.), -s_dv*2.))
     return data, y
 
 
@@ -311,17 +317,24 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
 # Single input with one-hot augmentation path
 def tensor_model_create_many_to_one(hidden_units, input_shape, activation=None, learn_rate=0.01,
                                     drop=0.2, use_two_lstm=False, use_mae=True, use_mre_loss_=False,
-                                    use_huber_loss_=False, huber_delta_=1.):
+                                    use_huber_loss_=False, huber_delta_=1., use_tri_=False):
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     dual_input = (input_shape[0], 2)
+    tri_input = (input_shape[0], 3)
     both_in = Input(shape=dual_input, name='ib-soc-in')
+    tri_in = Input(shape=tri_input, name='ib-soc-tb-in')
 
     # LSTM using all_in
     lstm = Sequential()
-    lstm.add(both_in)
-    lstm.add(LSTM(hidden_units, input_shape=dual_input, activation=activation[0],
-                  recurrent_activation=activation[1], return_sequences=True))
+    if use_tri_:
+        lstm.add(tri_in)
+        lstm.add(LSTM(hidden_units, input_shape=tri_input, activation=activation[0],
+                      recurrent_activation=activation[1], return_sequences=True))
+    else:
+        lstm.add(both_in)
+        lstm.add(LSTM(hidden_units, input_shape=dual_input, activation=activation[0],
+                      recurrent_activation=activation[1], return_sequences=True))
     lstm.add(Dropout(drop))
     if use_two_lstm:
         lstm.add(LSTM(hidden_units, activation=activation[0],
@@ -380,7 +393,7 @@ def train_tensor_lstm():
     test_file = ".//temp//dv_test_soc0p_ch_clean.csv"
     params = ['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys_old', 'dv']
     fit_mae = True
-    use_many = False
+    use_many = True
     scale_in = (50., 10., 1., 0.25)
     # scale_in = (1., 1., 1., 1.)
     scale_in_dv = scale_in[3]
@@ -388,9 +401,11 @@ def train_tensor_lstm():
     use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
     learning_rate = 0.0003
     epochs_lim = 750
-    # epochs_lim = 5
+    epochs_lim = 5
     hidden = 4
     subsample = 5
+    use_tri = True
+
     nom_batch_size = 30
     patience = 40
     ib_bias = [.1, .5, 1.]
@@ -427,23 +442,33 @@ def train_tensor_lstm():
     validate_attr, validate_y = process_battery_attributes(validate_attr, scale=scale_in)
     test_attr, test_y = process_battery_attributes(test_attr, scale=scale_in)
     if use_ib_lag:
-        train_x = train_attr[['ib_lag', 'soc']]
-        validate_x = validate_attr[['ib_lag', 'soc']]
-        test_x = test_attr[['ib_lag', 'soc']]
+        if use_tri:
+            train_x = train_attr[['ib_lag', 'soc', 'Tb']]
+            validate_x = validate_attr[['ib_lag', 'soc', 'Tb']]
+            test_x = test_attr[['ib_lag', 'soc', 'Tb']]
+        else:
+            train_x = train_attr[['ib_lag', 'soc']]
+            validate_x = validate_attr[['ib_lag', 'soc']]
+            test_x = test_attr[['ib_lag', 'soc']]
     else:
-        train_x = train_attr[['ib', 'soc']]
-        validate_x = validate_attr[['ib', 'soc']]
-        test_x = test_attr[['ib', 'soc']]
+        if use_tri:
+            train_x = train_attr[['ib', 'soc', 'Tb']]
+            validate_x = validate_attr[['ib', 'soc', 'Tb']]
+            test_x = test_attr[['ib', 'soc', 'Tb']]
+        else:
+            train_x = train_attr[['ib', 'soc']]
+            validate_x = validate_attr[['ib', 'soc']]
+            test_x = test_attr[['ib', 'soc']]
 
     # Setup model
     rows_train = int(len(train_y) / batch_size / subsample)
-    train_x, train_y, train_x_vec = parse_inputs(train_x, train_y, batch_size, subsample)
+    train_x, train_y, train_x_vec = parse_inputs(train_x, train_y, batch_size, subsample, use_tri_=use_tri)
 
     rows_val = int(len(validate_y) / batch_size / subsample)
-    validate_x, validate_y, validate_x_vec = parse_inputs(validate_x, validate_y, batch_size, subsample)
+    validate_x, validate_y, validate_x_vec = parse_inputs(validate_x, validate_y, batch_size, subsample, use_tri_=use_tri)
 
     rows_tst = int(len(test_y) / batch_size / subsample)
-    test_x, test_y, test_x_vec = parse_inputs(test_x, test_y, batch_size, subsample)
+    test_x, test_y, test_x_vec = parse_inputs(test_x, test_y, batch_size, subsample, use_tri_=use_tri)
 
     # Optional make new model
     if try_load_model:
@@ -454,7 +479,8 @@ def train_tensor_lstm():
                                                     activation=['relu', 'sigmoid', 'linear', 'linear'],
                                                     learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two,
                                                     use_mae=fit_mae, use_mre_loss_=use_mre_loss,
-                                                    use_huber_loss_=use_huber_loss, huber_delta_=huber_delta)
+                                                    use_huber_loss_=use_huber_loss, huber_delta_=huber_delta,
+                                                    use_tri_=use_tri)
         else:
             model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
                                         dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
@@ -501,7 +527,7 @@ def train_tensor_lstm():
     validate_dv_hys_old = resizer(validate_attr[['dv_hys_old']], rows_val, batch_size, sub_samp=subsample)
     test_dv_hys_old = resizer(test_attr[['dv_hys_old']], rows_tst, batch_size, sub_samp=subsample)
     plot_input(trn_x=train_x, trn_y=train_y, val_x=validate_x, val_y=validate_y, tst_x=test_x, tst_y=test_y,
-               t_samp_=t_samp_input, use_ib_lag_=use_ib_lag)
+               t_samp_=t_samp_input, use_ib_lag_=use_ib_lag, use_tri_=use_tri)
     plot_result(trn_y=train_y[:, batch_size-1, :], val_y=validate_y[:, batch_size-1, :], tst_y=test_y[:, batch_size-1, :],
                 trn_pred=train_predict[:, batch_size-1, :], val_pred=validate_predict[:, batch_size-1, :],
                 tst_pred=test_predict[:, batch_size-1, :],
