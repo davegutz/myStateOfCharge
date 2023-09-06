@@ -268,7 +268,8 @@ def resizer(v, targ_rows, btch_size, sub_samp=1, n_in=1):
 
 # Single input with one-hot augmentation path
 def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=None, learn_rate=0.01, drop=0.2,
-                        use_two_lstm=False, use_mae=True):
+                        use_two_lstm=False, use_mae=True, use_mre_loss_=False,
+                        use_huber_loss_=False, huber_delta_=1.):
     if activation is None:
         activation = ['relu', 'sigmoid', 'linear', 'linear']
     simple_input = (input_shape[0], 1)
@@ -296,6 +297,10 @@ def tensor_model_create(hidden_units, input_shape, dense_units=1, activation=Non
         loss_ = 'mean_absolute_error'
     else:
         loss_ = 'mean_squared_error'
+    if use_mre_loss_:
+        loss_ = mre_loss
+    if use_huber_loss_:
+        loss_ = get_huber_loss_fn(delta=huber_delta_)
     final.compile(loss=loss_, optimizer=tf.keras.optimizers.Adam(learning_rate=learn_rate),
                   metrics=['mse', 'mae'])
     final.summary()
@@ -375,7 +380,7 @@ def train_tensor_lstm():
     test_file = ".//temp//dv_test_soc0p_ch_clean.csv"
     params = ['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys_old', 'dv']
     fit_mae = True
-    use_many = True
+    use_many = False
     scale_in = (50., 10., 1., 0.25)
     # scale_in = (1., 1., 1., 1.)
     scale_in_dv = scale_in[3]
@@ -453,7 +458,9 @@ def train_tensor_lstm():
         else:
             model = tensor_model_create(hidden_units=hidden, input_shape=(train_x.shape[1], train_x.shape[2]),
                                         dense_units=1, activation=['relu', 'sigmoid', 'linear', 'linear'],
-                                        learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two, use_mae=fit_mae)
+                                        learn_rate=learning_rate, drop=dropping, use_two_lstm=use_two, use_mae=fit_mae,
+                                        use_mre_loss_=use_mre_loss, use_huber_loss_=use_huber_loss,
+                                        huber_delta_=huber_delta)
 
     # Train model
     print("[INFO] training model...")
