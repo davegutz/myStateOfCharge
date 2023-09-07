@@ -156,10 +156,16 @@ def plot_input(trn_x, trn_y, val_x, val_y, tst_x, tst_y, t_samp_, use_ib_lag_, u
     plt.axvline(x=trn_len*t_samp_, color='r')
     plt.axvline(x=(trn_len+val_len)*t_samp_, color='m')
     plt.legend(loc=3)
-    plt.xlabel('Observation number after given time steps')
     plt.xlabel('seconds')
     plt.ylabel('scaled')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
+
+    plt.figure(figsize=(15, 6), dpi=80)
+    plt.plot(inp_soc, inp_dv, label='dv_scaled', color='blue')
+    plt.legend(loc=3)
+    plt.xlabel('soc')
+    plt.ylabel('scaled')
+    plt.title('Check dv')
 
 
 # Plot the results
@@ -401,7 +407,7 @@ def train_tensor_lstm():
     use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
     learning_rate = 0.0003
     epochs_lim = 750
-    epochs_lim = 5
+    # epochs_lim = 5
     hidden = 4
     subsample = 5
     use_tri = True
