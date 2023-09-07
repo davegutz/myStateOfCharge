@@ -34,6 +34,7 @@ Use temperature, voltage and bipolar current measurements with a programmable lo
   * [FAQ](#faq)
   * [To get debug data](#to-get-debug-data)
   * [Changelog](#changelog)
+  * [References](#references)
 <!-- TOC -->
 
 ## Abstract
@@ -123,7 +124,9 @@ In the spirit of Software Engineering principles, I document perceived requireme
 ## Assumptions
 
     1. Randles 2-state RC+RC linear dynamic battery model
-    2. RC 1-state dynamic hysteresis lag with variable resistance, R, constant capacitance, C, and limited authority
+    2a. RC 1-state dynamic hysteresis lag with variable resistance, R, constant capacitance, C, and limited authority
+          --or--
+    2b. Recurssive Neural Net hysteresis model with inputs Tb, ib, and soc.
     3. voc(soc) industry standard state-of-charge to voltage characteristic
     4. Battery has Coulombic charging efficiency 
     5. Coulombic efficiency related to Randles resistances
@@ -313,9 +316,6 @@ Heating pads are wrapped around the sides of the battery and another temperature
 
 Heating is done only from the sides
 
-
-
-
 ## Hardware notes
 
 Grounds all tied together to solar ground and also to chassis.
@@ -399,11 +399,30 @@ OLED board carefully off to the side.  Will need a hobby box to contain the fina
 
 
 ## Dynamic Randles Model
+
 ## Dynamic Hysteresis Model
+The first versions of the SOC_Particle application used a physics-based lag model. I designed it then understood it to be a re-derivation of the "Boundary Synthesis Model B" described in [1].
+
+The synthesis model may be found in [Hysteresis.h](src/Hysteresis.h) and [Hysteresis.cpp](src/Hysteresis.cpp) as 'class Hysteresis.'  It suffers from being extremely difficult to tune.  It has dynamics that are regenerative in nature, such that the resistance of the discharge is a function of the charge built up in the hysteresis reservoir of charge.  This may be imagined as 'surface charge' that is built up and dissapated with use.  It has programmed limits of total charge.   The regenerative nature makes it intuitively impossible to tune.   Don't bother.  It uses voltage and current to manage the discharge and charge rates.   Because it uses voltage it is disengenuous to use the it for isolating voltage sensor failures.  But because it has relatively small limits on charge, it is passable.
+
+The second version is a recurrent neural network (RNN) formed by the Keras Long-Short Term Model (LSTM) approach predicting _dv_ = _voc_ - _voc_soc_ using _Tb_, _ib_, and _soc_ as inputs.  It automatically compensates for _voc_soc_ scheduling errors because it is trained using _voc_soc_ and _voc_ presumably derived from a working voltage sensor.
+
+The data needs are similar to generate the second as the first, though it needs more time samples (25 seconds versus 30 minutes) to train instead of tuning the Synthesis model.
+
+I considered and rejected variations on the LSTM theme, notably
+  - Embedding conditions of long ib dwell such that known operation on hysteresis limits could be pre-programmed thereby lessening the load on the network.  I would have implemented using one-hot inputs of 'charging' and 'discharging.'  After examining several transient runs I realized that the amount of time required to achieve the right conditions to wind up the hysteresis charge are so long as to be unpractical.
+  - Combine physics with LSTM to reduce the practical load on the neural network thereby improving accuracy.  This would require full implementation and tuning of the Synthesis model.  Milking mice.
+  - Using _soc_ and _Tb_ after LSTM fed only by _ib_.  Then introduce _soc_ and _Tb_ in a later dense later.   This did not reduce the complexity of the LSTM significantly.  Further, we lost compensation for scheduling errors that tend to be non-linear in nature, such as the _soc^2_, _soc^3_, or _log(soc)_ and to correct would require added inputs to complete the dense tensor flow.
+
+  For trade studies, see _NN_TradeStudies.odt_.  Two programs run the studies:
+  - _py/CompareTensorData.py_.  Source data files are called inline.  Comment/uncomment as needed.  _soc_ is recalculated for detected _dAB_ calibration errors in the _TP_ and _TN_ time sections.  New _voc_soc_new_ is calculated for schedules that could not be generated until the data was available.  These are located in _py/Chemistry_BMS.py_.
+  - _py/TrainTensor_lstm.py_.  This selects and tunes the LSTM models.  By default if runs the final system with _subsample = 5_ so for _T=5_ in the source data that is a 25 second update time needed in the product.  A long lag on _ib_ is needed to avoid losing information during the long sample intervals.  Huber loss with _delta = 0.1_ gave the best looking fits, favoring small error fit more than large (it saturates anyway).
+
+
 ## Coulombic Efficiency
 
 ## Calibration
-See this [document](Calibrate 20230513.odt)
+See _Calibrate20230513.odt_.
 
 ## Appendix 1.   Nomenclature
 
@@ -846,4 +865,9 @@ See 'State of Charge Monitor.odt' for full set of requirements, testing, discuss
     - load function defined 
     - add_stuff consolidated in one place 
     - Complete set of over-plotting functions:   run/run and run/sim
+
+## References
+
+  [1]:  Ma et. al., "Comparative Study of Non-Electrochemical Hysteresis Models for LiFePO4/Graphite Batteries," Journal of Power Electronics, Vol. 18, No. 5, pp. 1585-1594, September 2018.
+
 
