@@ -31,7 +31,7 @@ plt.rcParams['axes.grid'] = True
 
 # Load from files
 def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_batt_cap=Battery.UNIT_CAP_RATED,
-              legacy=False):
+              legacy=False, v1_only=False):
     title_key = "unit,"  # Find one instance of title
     title_key_sel = "unit_s,"  # Find one instance of title
     unit_key_sel = "unit_sel"
@@ -61,7 +61,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
                 'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
                 'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
                 'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
-    if sel_file_clean:
+    if sel_file_clean and not v1_only:
         sel_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
                                 encoding=None).view(np.recarray)
     else:
@@ -74,7 +74,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     cols_ekf = ('c_time', 'Fx_', 'Bu_', 'Q_', 'R_', 'P_', 'S_', 'K_', 'u_', 'x_', 'y_', 'z_', 'x_prior_',
                 'P_prior_', 'x_post_', 'P_post_', 'hx_', 'H_')
     ekf_raw = None
-    if ekf_file_clean:
+    if ekf_file_clean and not v1_only:
         ekf_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float,
                                 encoding=None).view(np.recarray)
 
@@ -91,7 +91,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     else:
         cols_sim = ('c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
                     'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
-    if data_file_sim_clean:
+    if data_file_sim_clean and not v1_only:
         sim_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
                                 dtype=float, encoding=None).view(np.recarray)
         sim = SavedDataSim(time_ref=mon.time_ref, data=sim_raw, time_end=time_end_in)
@@ -103,12 +103,12 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
                                            unit_key='unit_f', skip=skip, comment_str='---')
     cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
               'e_w_f', 'fltw', 'falw')
-    if temp_flt_file_clean:
+    if temp_flt_file_clean and not v1_only:
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                               encoding=None).view(np.recarray)
     else:
         print("data from", temp_flt_file, "empty after loading")
-    if temp_flt_file_clean:
+    if temp_flt_file_clean and not v1_only:
         f_raw = np.unique(f_raw)
         f = add_stuff_f(f_raw, batt, ib_band=IB_BAND)
         print("\nf:\n", f, "\n")

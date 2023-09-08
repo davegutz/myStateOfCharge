@@ -126,6 +126,7 @@ def plot_fail(trn_y, trn_predict, trn_predict_fail_ib, t_samp_, ib_bias_):
     plt.xlabel('seconds')
     plt.ylabel('dv scaled')
     plt.title('Failure Effects at Steady State')
+    plt.grid()
 
 
 # Plot the inputs
@@ -156,6 +157,7 @@ def plot_input(trn_x, trn_y, val_x, val_y, tst_x, tst_y, t_samp_, use_ib_lag_, u
     plt.axvline(x=trn_len*t_samp_, color='r')
     plt.axvline(x=(trn_len+val_len)*t_samp_, color='m')
     plt.legend(loc=3)
+    plt.grid()
     plt.xlabel('seconds')
     plt.ylabel('scaled')
     plt.title('Inputs.  The Red Line Separates The Training, Validation, and Test Examples')
@@ -166,6 +168,7 @@ def plot_input(trn_x, trn_y, val_x, val_y, tst_x, tst_y, t_samp_, use_ib_lag_, u
     plt.xlabel('soc')
     plt.ylabel('scaled')
     plt.title('Check dv')
+    plt.grid()
 
 
 # Plot the results
@@ -185,7 +188,7 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys_ol
     time = range(rows) * t_samp_
     rows_train_ = len(actual_train)
     time_train = range(rows_train_) * t_samp_
-    plt.figure(figsize=(15, 12), dpi=80)
+    plt.figure(figsize=(15, 9), dpi=80)
     plt.subplot(2, 1, 1)
     plt.title('Actual and Predicted Values and old model. The Red Line Separates The Training, Validation, and Test Examples')
     plt.plot(time, actual, color='black')
@@ -198,6 +201,7 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys_ol
     plt.ylabel('dv scaled')
     plt.grid()
     plt.subplot(2, 1, 2)
+    plt.title('Zoom Training and Validation')
     plt.plot(time_train, actual_train, color='black')
     plt.plot(time_train, predictions_train, color='orange')
     plt.plot(time_train, dv_hys_old_train, color='green')
@@ -208,7 +212,7 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys_ol
     plt.ylabel('dv scaled')
     plt.grid()
 
-    plt.figure(figsize=(15, 12), dpi=80)
+    plt.figure(figsize=(15, 9), dpi=80)
     plt.subplot(2, 1, 1)
     plt.title('Error Values. The Red Line Separates The Training, Validation, and Test Examples')
     plt.plot(time, errors, color='orange')
@@ -220,6 +224,7 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys_ol
     plt.ylabel('dv, mV')
     plt.grid()
     plt.subplot(2, 1, 2)
+    plt.title('Zoom Training and Validation')
     plt.plot(time_train, errors_train, color='orange')
     plt.plot(time_train, errors_old_train, color='green')
     plt.axvline(x=len(trn_y)*t_samp_, color='r')
@@ -407,7 +412,7 @@ def train_tensor_lstm():
     use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
     learning_rate = 0.0003
     epochs_lim = 750
-    # epochs_lim = 5
+    # epochs_lim = 2
     hidden = 4
     subsample = 5
     use_tri = True
