@@ -183,35 +183,34 @@ def load_config(path):
     if os.path.isfile(path):
         config.read(path)
     else:
-        cfg_file = open(path, 'w')
-        config.add_section('Base')
-        config.set('Base', 'version remark',
-                   'Format:  vYYYYMMDD')
-        config.set('Base', 'version', 'v20230305')
-        config.set('Base', 'processor remark',
-                   'Possible values:  P, A, P2')
-        config.set('Base', 'processor', 'A')
-        config.set('Base', 'key remark',
-                   'Format:  unit#proc.  The leading key in v1 output set by Particle Workbench config.h')
-        config.set('Base', 'key', 'pro1a')
-        config.set('Base', 'battery remark',
-                   'Possible values: BB, CH')
-        config.set('Base', 'battery', 'CH')
-        config.add_section('Test')
-        config.set('Test', 'version remark',
-                   'Format:  vYYYYMMDD')
-        config.set('Test', 'version', 'v20230515')
-        config.set('Test', 'processor remark',
-                   'Possible values:  P, A, P2')
-        config.set('Test', 'processor', 'A')
-        config.set('Test', 'key remark',
-                   'Format:  unit#proc.  The leading key in v1 output set by Particle Workbench config.h')
-        config.set('Test', 'key', 'pro1a')
-        config.set('Test', 'battery remark',
-                   'Possible values: BB, CH')
-        config.set('Test', 'battery', 'CH')
-        config.write(cfg_file)
-        cfg_file.close()
+        with open(path, 'w') as cfg_file:
+            config.add_section('Base')
+            config.set('Base', 'version remark',
+                       'Format:  vYYYYMMDD')
+            config.set('Base', 'version', 'v20230305')
+            config.set('Base', 'processor remark',
+                       'Possible values:  P, A, P2')
+            config.set('Base', 'processor', 'A')
+            config.set('Base', 'key remark',
+                       'Format:  unit#proc.  The leading key in v1 output set by Particle Workbench config.h')
+            config.set('Base', 'key', 'pro1a')
+            config.set('Base', 'battery remark',
+                       'Possible values: BB, CH')
+            config.set('Base', 'battery', 'CH')
+            config.add_section('Test')
+            config.set('Test', 'version remark',
+                       'Format:  vYYYYMMDD')
+            config.set('Test', 'version', 'v20230515')
+            config.set('Test', 'processor remark',
+                       'Possible values:  P, A, P2')
+            config.set('Test', 'processor', 'A')
+            config.set('Test', 'key remark',
+                       'Format:  unit#proc.  The leading key in v1 output set by Particle Workbench config.h')
+            config.set('Test', 'key', 'pro1a')
+            config.set('Test', 'battery remark',
+                       'Possible values: BB, CH')
+            config.set('Test', 'battery', 'CH')
+            config.write(cfg_file)
     return config
 
 

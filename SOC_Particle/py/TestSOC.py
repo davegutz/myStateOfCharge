@@ -77,10 +77,9 @@ class Begini(ConfigParser):
         if os.path.isfile(self.config_file_path):
             self.read(self.config_file_path)
         else:
-            cfg_file = open(self.config_file_path, 'w')
-            self.read_dict(def_dict_)
-            self.write(cfg_file)
-            cfg_file.close()
+            with open(self.config_file_path, 'w') as cfg_file:
+                self.read_dict(def_dict_)
+                self.write(cfg_file)
             print('wrote', self.config_file_path)
 
     # Get an item
@@ -94,9 +93,8 @@ class Begini(ConfigParser):
 
     # Save again
     def save_to_file(self):
-        cfg_file = open(self.config_file_path, 'w')
-        self.write(cfg_file)
-        cfg_file.close()
+        with open(self.config_file_path, 'w') as cfg_file:
+            self.write(cfg_file)
         print('wrote', self.config_file_path)
 
 
@@ -117,21 +115,19 @@ class ExRoot:
         if os.path.isfile(config_file_path):
             self.root_config.read(config_file_path)
         else:
-            cfg_file = open(config_file_path, 'w')
-            self.root_config.add_section('Root Preferences')
-            rec_folder_path = os.path.expanduser('~') + '/Documents/Recordings'
-            if not os.path.exists(rec_folder_path):
-                os.makedirs(rec_folder_path)
-            self.root_config.set('Root Preferences', 'recordings path', rec_folder_path)
-            self.root_config.write(cfg_file)
-            cfg_file.close()
+            with open(config_file_path, 'w') as cfg_file:
+                self.root_config.add_section('Root Preferences')
+                rec_folder_path = os.path.expanduser('~') + '/Documents/Recordings'
+                if not os.path.exists(rec_folder_path):
+                    os.makedirs(rec_folder_path)
+                self.root_config.set('Root Preferences', 'recordings path', rec_folder_path)
+                self.root_config.write(cfg_file)
         return self.root_config
 
     def save_root_config(self, config_path_):
         if os.path.isfile(config_path_):
-            cfg_file = open(config_path_, 'w')
-            self.root_config.write(cfg_file)
-            cfg_file.close()
+            with open(config_path_, 'w') as cfg_file:
+                self.root_config.write(cfg_file)
             print('Saved', config_path_)
         return self.root_config
 
@@ -216,21 +212,19 @@ class ExTarget:
         if os.path.isfile(config_file_path):
             self.root_config.read(config_file_path)
         else:
-            cfg_file = open(config_file_path, 'w')
-            self.root_config.add_section('Root Preferences')
-            rec_folder_path = os.path.expanduser('~') + '/Documents/Recordings'
-            if not os.path.exists(rec_folder_path):
-                os.makedirs(rec_folder_path)
-            self.root_config.set('Root Preferences', 'recordings path', rec_folder_path)
-            self.root_config.write(cfg_file)
-            cfg_file.close()
+            with open(config_file_path, 'w') as cfg_file:
+                self.root_config.add_section('Root Preferences')
+                rec_folder_path = os.path.expanduser('~') + '/Documents/Recordings'
+                if not os.path.exists(rec_folder_path):
+                    os.makedirs(rec_folder_path)
+                self.root_config.set('Root Preferences', 'recordings path', rec_folder_path)
+                self.root_config.write(cfg_file)
         return self.root_config
 
     def save_root_config(self, config_path_):
         if os.path.isfile(config_path_):
-            cfg_file = open(config_path_, 'w')
-            self.root_config.write(cfg_file)
-            cfg_file.close()
+            with open(config_path_, 'w') as cfg_file:
+                self.root_config.write(cfg_file)
             print('Saved', config_path_)
         return self.root_config
 
@@ -364,12 +358,10 @@ def contain_all(testpath):
 
 # puTTY generates '\0' characters
 def copy_clean(src, dst):
-    file_in = open(src, 'r')
-    data = file_in.read()
-    file_in.close()
-    file_out = open(dst, 'w')
-    file_out.write(data.replace('\0', ''))
-    file_out.close()
+    with open(src, 'r') as file_in:
+        data = file_in.read()
+    with open(dst, 'w') as file_out:
+        file_out.write(data.replace('\0', ''))
 
 
 def create_file_key(version_, unit_, battery_):

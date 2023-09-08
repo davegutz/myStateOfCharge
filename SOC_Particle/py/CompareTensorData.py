@@ -63,7 +63,7 @@ def add_voc_soc_new(data):
 
 
 # Scale soc and adjust ib for observed calibration error
-def adjust_soc(data, dDA_in, scap_in):
+def adjust_soc(data, dDA_in, scap_in=None):
     n = len(data.cTime)
     d_soc = 0.
     for i in range(n-1):
@@ -90,62 +90,33 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
         os.mkdir(path_to_temp)
 
     # Transient  inputs
-    t_ib_fail = None
     init_time_in = None
-    use_ib_mon_in = False
-    scale_in = None
-    use_vb_raw = False
-    scale_r_ss_in = 1.
-    s_hys_in = 1.
-    dvoc_sim_in = 0.
-    dvoc_mon_in = 0.
-    Bmon_in = None
-    Bsim_in = None
+    use_ib_mon_in = True
     skip = 1
-    zero_zero_in = False
-    drive_ekf_in = False
     time_end_in = None
-    dTb = None
     plot_init_in = False
     long_term_in = False
     plot_overall_in = True
     use_vb_sim_in = False
-    sres0_in = 1.
-    sresct_in = 1.
-    stauct_in = 1
-    s_hys_cap_in = 1.
-    s_coul_eff_in = 1.
-    s_cap_chg_in = 1.
-    s_cap_dis_in = 1.
-    s_hys_chg_in = 1.
-    s_hys_dis_in = 1.
-    tune_in = False
     cc_dif_tol_in = 0.2
     verbose_in = False
     legacy_in = False
-    cutback_gain_sclr_in = 1.
-    ds_voc_soc_in = 0.
     data_file_txt = None
     temp_file = ''
     sat_init_in = None
     use_mon_soc_in = True
     v1_only_in = True
-    dDA_in = None
-    scap_in = None
+    dDA_in = 0.
+    zero_zero_in = True
+    unit_key = 'soc0p'
+    data_file_path = None
 
-    # data_file_txt = 'dv_20230831_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; dDA_in = .023
-    # data_file_txt = 'dv_train_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;  dDA_in = .023; # time_end_in = 248500.
-    # data_file_txt = 'dv_validate_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;  dDA_in = .023
-    # data_file_txt = 'dv_test_soc0p_ch.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;  dDA_in = .023
+    # data_file_txt = 'dv_20230831_soc0p_ch_clip.csv'; dDA_in = .023
+    # data_file_txt = 'dv_validate_soc0p_ch_clip.csv'; dDA_in = .023
+    data_file_txt = 'dv_test_soc0p_ch.csv';  dDA_in = .023
 
     # Save these examples
-    # data_file_txt = 'steps v20230128 20230218.txt'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;  dDA_in = 0; legacy_in = True; scap_in = 1.127
-    # data_file_txt = 'dv_20230826_soc0p_ch_clip.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; dDA_in = .023
-    # data_file_txt = 'dv_train_soc0p_ch_clip01.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; dDA_in = .023; # time_end_in = 248500.
-    # data_file_txt = 'dv_train_soc0p_ch_clip02.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; dDA_in = .023;  # time_end_in = 248500.
-    # data_file_txt = 'dv_train_soc0p_ch_clip03.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True; dDA_in = .023; # time_end_in = 248500.
-    # data_file_txt = 'dv_train_soc0p_ch_clip04.csv'; unit_key = 'soc0p'; data_file_path = None; use_ib_mon_in = True; zero_zero_in = True;  dDA_in = .023; # time_end_in = 248500.
-    # data_file_txt = 'GenerateDV_Data.csv'; unit_key = 'soc0p'; data_file_path = None; zero_zero_in = True; use_vb_sim_in = True
+    # data_file_txt = 'GenerateDV_Data.csv'; use_vb_sim_in = True; use_ib_mon_in = False
 
     data_file = None
     if data_file_path is None:
@@ -164,7 +135,7 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
         load_data(data_file, skip, unit_key, zero_zero_in, time_end_in, legacy=legacy_in, v1_only=v1_only_in)
     mon_old = add_ib_lag(mon_old)
-    mon_old = adjust_soc(mon_old, dDA_in, scap_in)
+    mon_old = adjust_soc(mon_old, dDA_in)
     mon_old = add_voc_soc_new(mon_old)
     mon_old_file_save = data_file_clean.replace(".csv", "_clean.csv")
     save_clean_file(mon_old, mon_old_file_save, 'mon' + date_)
@@ -180,21 +151,12 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
             init_time = init_time_in
         else:
             init_time = -4.
-    # Get dv_hys from data
-    # dv_hys = mon_old.dv_hys[0]
 
     # New run
     mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
     mon_ver, sim_ver, sim_s_ver, mon, sim = \
-        replicate(mon_old, sim_old=sim_old, init_time=init_time, sres0=sres0_in, sresct=sresct_in,
-                  t_ib_fail=t_ib_fail, use_ib_mon=use_ib_mon_in, scale_in=scale_in, use_vb_raw=use_vb_raw,
-                  scale_r_ss=scale_r_ss_in, s_hys_sim=s_hys_in, s_hys_mon=s_hys_in, dvoc_sim=dvoc_sim_in,
-                  dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in, drive_ekf=drive_ekf_in,
-                  dTb_in=dTb, verbose=verbose_in, use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=s_hys_cap_in,
-                  scale_hys_cap_mon=s_hys_cap_in, stauct_mon=stauct_in, stauct_sim=stauct_in,
-                  s_coul_eff=s_coul_eff_in, s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in, s_hys_chg=s_hys_chg_in,
-                  s_hys_dis=s_hys_dis_in, cutback_gain_sclr=cutback_gain_sclr_in, ds_voc_soc=ds_voc_soc_in,
-                  use_mon_soc=use_mon_soc_in)
+        replicate(mon_old, sim_old=sim_old, init_time=init_time, use_ib_mon=use_ib_mon_in, verbose=verbose_in,
+                  use_vb_sim=use_vb_sim_in, use_mon_soc=use_mon_soc_in)
     save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
     # Plots
@@ -223,9 +185,6 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
         n_fig, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                        plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
                                        test_str='_ver')
-    if tune_in:
-        n_fig, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
-                                  plot_title=plot_title, n_fig=n_fig, ref_str='', test_str='_ver')
 
     precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
     print('filename', filename, 'path', save_pdf_path)

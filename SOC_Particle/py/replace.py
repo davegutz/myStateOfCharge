@@ -44,10 +44,9 @@ class Begini(ConfigParser):
         if os.path.isfile(self.config_file_path):
             self.read(self.config_file_path)
         else:
-            cfg_file = open(self.config_file_path, 'w')
-            self.read_dict(def_dict_)
-            self.write(cfg_file)
-            cfg_file.close()
+            with open(self.config_file_path, 'w') as cfg_file:
+                self.read_dict(def_dict_)
+                self.write(cfg_file)
             print('updated', self.config_file_path)
 
     # Get an item
@@ -78,9 +77,8 @@ class Begini(ConfigParser):
 
     # Save again
     def save_to_file(self):
-        cfg_file = open(self.config_file_path, 'w')
-        self.write(cfg_file)
-        cfg_file.close()
+        with open(self.config_file_path, 'w') as cfg_file:
+            self.write(cfg_file)
         print('updated', self.config_file_path)
 
 
