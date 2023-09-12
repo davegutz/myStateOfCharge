@@ -81,6 +81,12 @@ def adjust_soc(data, dDA_in, scap_in=None):
     return data
 
 
+# Scale soc and adjust ib for observed calibration error
+def scale_sres0(data, sres0):
+    data.dv_dyn *= sres0
+    return data
+
+
 def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_path='./figures', path_to_temp='./temp'):
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
@@ -110,10 +116,14 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     zero_zero_in = True
     unit_key = 'soc0p'
     data_file_path = None
+    sres0_in = 1.
+    stauct_mon_in = 1.
+    sresct_in = 1.
 
+    data_file_txt = 'dv_20230911_soc0p_ch_raw.csv'; stauct_mon_in = 1.; sresct_in = 1.
     # data_file_txt = 'dv_20230831_soc0p_ch_clip.csv'; dDA_in = .023
     # data_file_txt = 'dv_validate_soc0p_ch_clip.csv'; dDA_in = .023
-    data_file_txt = 'dv_test_soc0p_ch.csv';  dDA_in = .023
+    # data_file_txt = 'dv_test_soc0p_ch.csv';  dDA_in = .023
 
     # Save these examples
     # data_file_txt = 'GenerateDV_Data.csv'; use_vb_sim_in = True; use_ib_mon_in = False
@@ -137,6 +147,7 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     mon_old = add_ib_lag(mon_old)
     mon_old = adjust_soc(mon_old, dDA_in)
     mon_old = add_voc_soc_new(mon_old)
+    mon_old = scale_sres0(mon_old, sres0_in)
     mon_old_file_save = data_file_clean.replace(".csv", "_clean.csv")
     save_clean_file(mon_old, mon_old_file_save, 'mon' + date_)
 
@@ -156,7 +167,8 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
     mon_ver, sim_ver, sim_s_ver, mon, sim = \
         replicate(mon_old, sim_old=sim_old, init_time=init_time, use_ib_mon=use_ib_mon_in, verbose=verbose_in,
-                  use_vb_sim=use_vb_sim_in, use_mon_soc=use_mon_soc_in)
+                  use_vb_sim=use_vb_sim_in, use_mon_soc=use_mon_soc_in,
+                  sres0=sres0_in, stauct_mon=stauct_mon_in, sresct=sresct_in)
     save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
     # Plots
