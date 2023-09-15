@@ -41,8 +41,8 @@ vb = 13.3
 vsat = 13.7
 v_sat = 14.6
 v_normal = 13.3
-dv_max = 0.2
-dv_min = -0.06
+dv_max = 0.08
+dv_min = -0.08
 dv_ds = 0.2  # change in voltage for soc
 dv_di = 0.02  # change in voltage for current
 dv_hys_di = 1. / 90.
@@ -61,7 +61,7 @@ q = soc * qcrs
 reset = True
 n = -1
 with open(csv_file, "w") as output:
-    for dmd in [-5., 5., -4., 4., -3., 3., -2., 2., -1., 1., -0.1, 0.1, 0.]:
+    for dmd in [-20., 20., -12., 12., -10., 10., -9., 9., -8., 8., -7., 7., -6., 6., -5., 5., -4., 4., -3., 3., -2., 2., -1., 1., 0.]:
         dmd_n = -1
         print(f"starting {dmd}, soc={soc}, n={n}")
         while True:
