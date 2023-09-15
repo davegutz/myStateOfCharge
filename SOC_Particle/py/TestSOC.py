@@ -30,6 +30,7 @@ from CompareRunRun import compare_run_run
 import shutil
 import pyperclip
 import subprocess
+import datetime
 global putty_shell
 
 # Transient string
@@ -254,9 +255,21 @@ def add_to_clip_board(text):
     pyperclip.copy(text)
 
 
+def save_putty():
+    m_str = datetime.datetime.fromtimestamp(os.path.getmtime(putty_test_csv_path.get())).strftime("%Y-%m-%dT%H-%M-%S").replace(' ', 'T')
+    putty_test_sav = 'putty_' + m_str + '.csv'
+    putty_test_sav_path = tk.StringVar(master)
+    putty_test_sav_path.set(os.path.join(path_to_data, putty_test_sav))
+    os.rename(putty_test_csv_path.get(), putty_test_sav_path.get())
+    print('wrote', putty_test_sav_path.get())
+
+
 # Compare run driver
 def clear_data():
-    enter_size = os.path.getsize(putty_test_csv_path.get())  # bytes
+    if os.path.isfile(putty_test_csv_path.get()):
+        enter_size = os.path.getsize(putty_test_csv_path.get())  # bytes
+    else:
+        enter_size = 0
     if enter_size > 512:
         time.sleep(1.)
         wait_size = os.path.getsize(putty_test_csv_path.get())  # bytes
@@ -265,9 +278,11 @@ def clear_data():
             tkinter.messagebox.showwarning(message="stop data first")
         # create empty file
         try:
+            save_putty()
             open(empty_csv_path.get(), 'x')
         except FileExistsError:
             pass
+
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
         try:
             os.remove(empty_csv_path.get())
@@ -542,6 +557,12 @@ def save_data_as():
 
 def start_putty():
     global putty_shell
+    if os.path.isfile(putty_test_csv_path.get()):
+        enter_size = os.path.getsize(putty_test_csv_path.get())  # bytes
+    else:
+        enter_size = 0
+    if enter_size > 512:
+        save_putty()
     putty_shell = subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
     print('starting putty   putty -load test')
 
