@@ -25,7 +25,7 @@ from CompareRunRun import load_data
 from DataOverModel import dom_plot
 from PlotSimS import sim_s_plot
 from PlotEKF import ekf_plot
-from PlotGP import tune_r, gp_plot
+from PlotGP import gp_plot
 from PlotOffOn import off_on_plot
 import os
 from myFilters import LagExp
@@ -120,7 +120,8 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     stauct_mon_in = 1.
     sresct_in = 1.
 
-    data_file_txt = 'dv_20230911_soc0p_ch_raw.csv'; stauct_mon_in = 1.; sresct_in = 1.
+    data_file_txt = 'GenerateDV_Data_Loop_20230914.csv'; use_vb_sim_in = True; use_ib_mon_in = False
+    # data_file_txt = 'dv_20230911_soc0p_ch_raw.csv'; stauct_mon_in = 1.; sresct_in = 1.
     # data_file_txt = 'dv_20230831_soc0p_ch_clip.csv'; dDA_in = .023
     # data_file_txt = 'dv_validate_soc0p_ch_clip.csv'; dDA_in = .023
     # data_file_txt = 'dv_test_soc0p_ch.csv';  dDA_in = .023
