@@ -255,41 +255,32 @@ def add_to_clip_board(text):
     pyperclip.copy(text)
 
 
-def save_putty():
-    m_str = datetime.datetime.fromtimestamp(os.path.getmtime(putty_test_csv_path.get())).strftime("%Y-%m-%dT%H-%M-%S").replace(' ', 'T')
-    putty_test_sav = 'putty_' + m_str + '.csv'
-    putty_test_sav_path = tk.StringVar(master)
-    putty_test_sav_path.set(os.path.join(path_to_data, putty_test_sav))
-    os.rename(putty_test_csv_path.get(), putty_test_sav_path.get())
-    print('wrote', putty_test_sav_path.get())
-
-
 # Compare run driver
 def clear_data():
     if os.path.isfile(putty_test_csv_path.get()):
-        enter_size = os.path.getsize(putty_test_csv_path.get())  # bytes
+        enter_size = putty_size()  # bytes
+        time.sleep(1.)
+        wait_size = putty_size()  # bytes
     else:
         enter_size = 0
+        wait_size = 0
     if enter_size > 512:
-        time.sleep(1.)
-        wait_size = os.path.getsize(putty_test_csv_path.get())  # bytes
         if wait_size > enter_size:
             print('stop data first')
             tkinter.messagebox.showwarning(message="stop data first")
-        # create empty file
-        try:
-            save_putty()
-            open(empty_csv_path.get(), 'x')
-        except FileExistsError:
-            pass
-
-        shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
-        try:
-            os.remove(empty_csv_path.get())
-        except OSError:
-            pass
-        print('emptied', putty_test_csv_path.get())
-        reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+        else:
+            # create empty file
+            if not save_putty():
+                tkinter.messagebox.showwarning(message="putty may be open already")
+            else:
+                open(empty_csv_path.get(), 'x')
+                shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
+                print('emptied', putty_test_csv_path.get())
+            try:
+                os.remove(empty_csv_path.get())
+            except OSError:
+                pass
+            reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     else:
         print('putty test file is too small (<512 bytes) probably already done')
         tkinter.messagebox.showwarning(message="Nothing to clear")
@@ -449,6 +440,14 @@ def option_handler(*args):
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
+def putty_size():
+    if os.path.isfile(putty_test_csv_path.get()):
+        enter_size = os.path.getsize(putty_test_csv_path.get())  # bytes
+    else:
+        enter_size = 0
+    return enter_size
+
+
 def ref_remove():
     ref_label.grid_remove()
     Ref.version_button.grid_remove()
@@ -495,11 +494,11 @@ def save_data():
         save_data_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved')
         save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='data saved')
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
+        print('emptied', putty_test_csv_path.get())
         try:
             os.remove(empty_csv_path.get())
         except OSError:
             pass
-        print('emptied', putty_test_csv_path.get())
         print('updating Test file label')
         Test.create_file_path_and_key(name_override=new_file_txt)
     else:
@@ -541,11 +540,11 @@ def save_data_as():
         save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='data saved')
         save_data_as_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved as')
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
+        print('emptied', putty_test_csv_path.get())
         try:
             os.remove(empty_csv_path.get())
         except OSError:
             pass
-        print('emptied', putty_test_csv_path.get())
         print('updating Test file label')
         Test.create_file_path_and_key(name_override=new_file_txt)
     else:
@@ -555,16 +554,30 @@ def save_data_as():
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
+def save_putty():
+    m_str = datetime.datetime.fromtimestamp(os.path.getmtime(putty_test_csv_path.get())).strftime("%Y-%m-%dT%H-%M-%S").replace(' ', 'T')
+    putty_test_sav = 'putty_' + m_str + '.csv'
+    putty_test_sav_path = tk.StringVar(master)
+    putty_test_sav_path.set(os.path.join(path_to_data, putty_test_sav))
+    try:
+        os.rename(putty_test_csv_path.get(), putty_test_sav_path.get())
+        print('wrote', putty_test_sav_path.get())
+        return True
+    except OSError:
+        print('putty already open?')
+        return False
+
+
 def start_putty():
     global putty_shell
-    if os.path.isfile(putty_test_csv_path.get()):
-        enter_size = os.path.getsize(putty_test_csv_path.get())  # bytes
-    else:
-        enter_size = 0
+    enter_size = putty_size()
     if enter_size > 512:
-        save_putty()
-    putty_shell = subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
-    print('starting putty   putty -load test')
+        if not save_putty():
+            tkinter.messagebox.showwarning(message="putty may be open already")
+        enter_size = putty_size()
+    if enter_size <= 512:
+        putty_shell = subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
+        print('starting putty   putty -load test')
 
 
 if __name__ == '__main__':
