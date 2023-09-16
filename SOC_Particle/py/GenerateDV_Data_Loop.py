@@ -17,6 +17,7 @@
 
 from datetime import datetime as dt
 from myFilters import LagExp
+import numpy as np
 
 build = 'g20230530_soc0p_ch'
 chm = 1
@@ -26,7 +27,7 @@ sel = 1
 mod = 0
 bmso = 0
 Tb = 25.
-tau = 90.  # seconds hyst time constant (measured 1540. s)
+tau = 1500.  # seconds hyst time constant (measured 1540. s)
 time_start = 1691689394  # time of start simulation
 T = 5.  # seconds update time
 ctime = 0.  # seconds since boot
@@ -35,8 +36,6 @@ time = time_start
 time_end = time_start + float(days_data) * 24. * 3600.
 # n = int((float(days_data) * 24. * 3600.)/ T) + 1
 ib = 0.
-soc_max = 0.9
-soc_min = 0.8
 vb = 13.3
 vsat = 13.7
 v_sat = 14.6
@@ -52,31 +51,41 @@ dv = dv_max
 Hyst = LagExp(dt=T, max_=dv_max, min_=dv_min, tau=tau)
 csv_file = "generateDV_Data_Loop_20230914.csv"
 ib_charge = float('nan')
-t_settle = 90.
-dmd_n_settle = int(t_settle * 60 / T)
+simple = [(0., .7, .9, 5400.), (-10., .7, .9, 1.e6), (0., .7, .9, 5400.), (10., .7, .9, 1.e6),
+          (0., .7, .9, 5400.), (-9., .7, .9, 1.e6), (0., .7, .9, 5400.), (9., .7, .9, 1.e6),
+          (0., .7, .9, 5400.), (-8., .7, .9, 1.e6), (0., .7, .9, 5400.), (8., .7, .9, 1.e6),
+          (0., .7, .9, 5400.), (-7., .7, .9, 1.e6), (0., .7, .9, 5400.), (7., .7, .9, 1.e6),
+          (0., .7, .9, 5400.), (-6., .7, .9, 1.e6), (0., .7, .9, 5400.), (6., .7, .9, 1.e6),
+          (0., .7, .9, 5400.), (-5., .7, .9, 1.e6), (0., .7, .9, 5400.), (5., .7, .9, 1.e6),
+          (0., .7, .9, 5400.), (-4., .7, .9, 1.e6), (0., .7, .9, 5400.), (4., .7, .9, 1.e6),
+          (0., .7, .9, 5400.), (-3., .7, .9, 1.e6), (0., .7, .9, 5400.), (3., .7, .9, 1.e6),
+          (0., .7, .9, 5400.), (-2., .7, .9, 1.e6), (0., .7, .9, 5400.), (2., .7, .9, 1.e6),
+          (0., .7, .9, 5400.), (-1., .7, .9, 1.e6), (0., .7, .9, 5400.), (1., .7, .9, 1.e6),
+          (0., .7, .9, 9800.)]
 
 # Loop
-soc = soc_max
+soc = simple[1][2]  # always start high
 q = soc * qcrs
 reset = True
 n = -1
 with open(csv_file, "w") as output:
-    for dmd in [-20., 20., -12., 12., -10., 10., -9., 9., -8., 8., -7., 7., -6., 6., -5., 5., -4., 4., -3., 3., -2., 2., -1., 1., 0.]:
+    for dmd, soc_min, soc_max, dur in simple:
         dmd_n = -1
-        print(f"starting {dmd}, soc={soc}, n={n}")
+        tim_n = -T
+        soc = np.clip(soc, soc_min, soc_max)
+        q = soc * qcrs
+        print(f"\n***************init {dmd}, soc {soc} soc_min {soc_min} soc_max {soc_max} dur {dur}")
         while True:
-            if (dmd < 0.0 and soc > soc_min) or (dmd > 0.0 and soc < soc_max):
-                if dmd_n < dmd_n_settle:  # settle
-                    ib_charge = 0.
-                else:
-                    ib_charge = dmd
-            elif dmd == 0.0 and dmd_n < dmd_n_settle:
+            if soc_min <= soc <= soc_max and tim_n < dur:
                 ib_charge = dmd
             else:
-                print(f"finished {dmd}... soc={soc}, dmd_n={dmd_n}, n={n}")
+                print(f"finished {dmd}... soc={soc}, dmd_n={dmd_n}, n={n}, tim_n={tim_n}")
                 break
+            if dmd_n == -1:
+                print(f"starting dmd {dmd} soc {soc} n {n} dur {dur} ib_charge {ib_charge}")
             dmd_n += 1
             n += 1
+            tim_n += T
             ctime = float(n) * T
             time = time_start + int(ctime)
             DATE = dt.utcfromtimestamp(time)
