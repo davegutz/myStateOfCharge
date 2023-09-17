@@ -22,7 +22,7 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.models import load_model, Model
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split  # in package scikit-learn
 from keras.layers import Dense, LSTM, Dropout, Input, concatenate
 from keras.losses import huber
 from sklearn.metrics import mean_squared_error, mean_absolute_error
@@ -254,9 +254,9 @@ def print_error(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, delta_=1.):
     tst_hub = huber_loss_mean(tst_y, tst_pred, delta_huber=delta_)
 
     # Print
-    print("Train    RMSE {:6.3f}".format(trn_rmse), " ||  MAE {:6.3f}".format(trn_mae), " ||  MRE {:6.3f}".format(trn_mre), " || HUB {:6.3f}".format(trn_hub))
-    print("Validate RMSE {:6.3f}".format(val_rmse), " ||  MAE {:6.3f}".format(val_mae), " ||  MRE {:6.3f}".format(val_mre), " || HUB {:6.3f}".format(val_hub))
-    print("Test     RMSE {:6.3f}".format(tst_rmse), " ||  MAE {:6.3f}".format(tst_mae), " ||  MRE {:6.3f}".format(tst_mre), " || HUB {:6.3f}".format(tst_hub))
+    print("Train    RMSE {:7.5f}".format(trn_rmse), " ||  MAE {:7.5f}".format(trn_mae), " ||  MRE {:7.5f}".format(trn_mre), " || HUB {:7.5f}".format(trn_hub))
+    print("Validate RMSE {:7.5f}".format(val_rmse), " ||  MAE {:7.5f}".format(val_mae), " ||  MRE {:7.5f}".format(val_mre), " || HUB {:7.5f}".format(val_hub))
+    print("Test     RMSE {:7.5f}".format(tst_rmse), " ||  MAE {:7.5f}".format(tst_mae), " ||  MRE {:7.5f}".format(tst_mre), " || HUB {:7.5f}".format(tst_hub))
 
 
 def process_battery_attributes(df, scale=(50., 10., 1., 0.1), limit_dv=False):
@@ -378,7 +378,7 @@ def train_model(mod, x, y, epochs_=20, btch_size=1, verbose=0, patient=10, use_m
         file_path = 'TrainTensor_lstm.h5'
     mc = ModelCheckpoint(file_path, monitor='loss', mode='min', verbose=1, save_weights_only=False, save_best_only=True)
     rp = ReduceLROnPlateau(monitor='loss', factor=0.5, patience=int(patient/2), verbose=1, mode='auto', min_delta=0.0001,
-                      cooldown=5, min_lr=0)
+                           cooldown=5, min_lr=0)
     cb = [es, mc, rp]
     # cb = es
 
@@ -398,10 +398,19 @@ def train_tensor_lstm():
     dropping = 0.2
 
     # Inputs frequently changed
-    train_file = ".//temp//dv_20230831_soc0p_ch_clip_clean.csv"
-    # train_file = ".//temp//dv_train_soc0p_ch_clip_clean.csv"
-    validate_file = ".//temp//dv_validate_soc0p_ch_clip_clean.csv"
-    test_file = ".//temp//dv_test_soc0p_ch_clean.csv"
+    train_file = ".//temp//GenerateDV_Data_Loop_cat_20230916_clean.csv"
+    validate_file = ".//temp//GenerateDV_Data_Loop_simple_20230916_clean.csv"
+    test_file = ".//temp//GenerateDV_Data_Loop_step_20230916_clean.csv"
+    # test_file = ".//temp//GenerateDV_Data_Loop_cat_20230916_clean.csv"
+    # train_file = ".//temp//GenerateDV_Data_Loop_simple_20230916_clean.csv"
+    # validate_file = ".//temp//GenerateDV_Data_Loop_step_20230916_clean.csv"
+    # validate_file = ".//temp//GenerateDV_Data_Loop_cat_20230916_clean.csv"
+    # test_file = ".//temp//GenerateDV_Data_Loop_simple_20230916_clean.csv"
+    # train_file = ".//temp//GenerateDV_Data_Loop_step_20230916_clean.csv"
+
+    # train_file = ".//temp//dv_20230831_soc0p_ch_clip_clean.csv"
+    # validate_file = ".//temp//dv_validate_soc0p_ch_clip_clean.csv"
+    # test_file = ".//temp//dv_test_soc0p_ch_clean.csv"
     params = ['Tb', 'ib', 'soc', 'sat', 'ib_lag', 'dv_hys_old', 'dv']
     fit_mae = True
     use_many = True
@@ -412,8 +421,8 @@ def train_tensor_lstm():
     use_ib_lag = True  # 180 sec in Chemistry_BMS.py IB_LAG_CH
     learning_rate = 0.0003
     epochs_lim = 750
-    # epochs_lim = 2
-    hidden = 4
+    # epochs_lim = 5
+    hidden = 8
     subsample = 5
     use_tri = True
 
