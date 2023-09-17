@@ -401,6 +401,13 @@ def train_tensor_lstm():
     train_file = ".//temp//GenerateDV_Data_Loop_cat_20230916_clean.csv"
     validate_file = ".//temp//GenerateDV_Data_Loop_simple_20230916_clean.csv"
     test_file = ".//temp//GenerateDV_Data_Loop_step_20230916_clean.csv"
+    # test_file = ".//temp//GenerateDV_Data_Loop_cat_20230916_clean.csv"
+    # train_file = ".//temp//GenerateDV_Data_Loop_simple_20230916_clean.csv"
+    # validate_file = ".//temp//GenerateDV_Data_Loop_step_20230916_clean.csv"
+    # validate_file = ".//temp//GenerateDV_Data_Loop_cat_20230916_clean.csv"
+    # test_file = ".//temp//GenerateDV_Data_Loop_simple_20230916_clean.csv"
+    # train_file = ".//temp//GenerateDV_Data_Loop_step_20230916_clean.csv"
+
     # train_file = ".//temp//dv_20230831_soc0p_ch_clip_clean.csv"
     # validate_file = ".//temp//dv_validate_soc0p_ch_clip_clean.csv"
     # test_file = ".//temp//dv_test_soc0p_ch_clean.csv"
@@ -415,7 +422,7 @@ def train_tensor_lstm():
     learning_rate = 0.0003
     epochs_lim = 750
     # epochs_lim = 5
-    hidden = 4
+    hidden = 8
     subsample = 5
     use_tri = True
 
