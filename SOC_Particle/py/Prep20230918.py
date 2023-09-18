@@ -64,10 +64,15 @@ t34_raw[0] = t3_raw[-1].copy()
 t45_raw = t5_raw[0:2].copy()
 t45_raw[0] = t4_raw[-1].copy()
 t01_resamp = resample(data=t01_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t01_resamp = t01_resamp[1:-1]
 t12_resamp = resample(data=t12_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t12_resamp = t12_resamp[1:-1]
 t23_resamp = resample(data=t23_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t23_resamp = t23_resamp[1:-1]
 t34_resamp = resample(data=t34_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t34_resamp = t34_resamp[1:-1]
 t45_resamp = resample(data=t45_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t45_resamp = t45_resamp[1:-1]
 
 # Join them all and save to file for subsequent run by CompareTensorData.py
 t_clean = np.hstack((t0_raw, t01_resamp, t1_raw, t12_resamp, t2_raw, t23_resamp, t3_raw, t34_resamp, t4_raw, t45_resamp, t5_raw))
