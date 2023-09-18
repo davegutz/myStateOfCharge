@@ -31,7 +31,7 @@ def ib_lag(chm):
     elif chm == 1.:
         lag = IB_LAG_CH
     else:
-        print('bad chm value')
+        print('bad chm value=', chm)
         exit(1)
     return lag
 

@@ -2,9 +2,7 @@ import os
 from resample import resample
 from DataOverModel import write_clean_file
 import numpy as np
-from MonSim import save_clean_file
-import numpy.lib.recfunctions as rf
-
+import pandas as pd
 
 def data_file(data_file_path, data_file_txt):
     path_to_data = os.path.join(data_file_path, data_file_txt)
@@ -28,7 +26,7 @@ temp_file4 = data_file(os.getcwd(), file4)
 temp_file5 = data_file(os.getcwd(), file5)
 
 # The numerical columns of interest
-cols_t = ('cTime', 'dt', 'chm', 'qcrs', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib',
+cols_t = ('cTime', 'unit', 'dt', 'chm', 'qcrs', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib',
           'ib_charge', 'ioc', 'voc_soc', 'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s',
           'soc_ekf', 'soc', 'soc_min', 'Tbl')
 
@@ -65,11 +63,11 @@ t34_raw = t4_raw[0:2].copy()
 t34_raw[0] = t3_raw[-1].copy()
 t45_raw = t5_raw[0:2].copy()
 t45_raw[0] = t4_raw[-1].copy()
-t01_resamp = resample(data=t01_raw, dt_resamp=T, time_var='cTime', specials=[('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
-t12_resamp = resample(data=t12_raw, dt_resamp=T, time_var='cTime', specials=[('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
-t23_resamp = resample(data=t23_raw, dt_resamp=T, time_var='cTime', specials=[('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
-t34_resamp = resample(data=t34_raw, dt_resamp=T, time_var='cTime', specials=[('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
-t45_resamp = resample(data=t45_raw, dt_resamp=T, time_var='cTime', specials=[('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t01_resamp = resample(data=t01_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t12_resamp = resample(data=t12_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t23_resamp = resample(data=t23_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t34_resamp = resample(data=t34_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t45_resamp = resample(data=t45_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
 
 # Join them all and save to file for subsequent run by CompareTensorData.py
 t_clean = np.hstack((t0_raw, t01_resamp, t1_raw, t12_resamp, t2_raw, t23_resamp, t3_raw, t34_resamp, t4_raw, t45_resamp, t5_raw))
@@ -77,11 +75,5 @@ t_clean = np.hstack((t0_raw, t01_resamp, t1_raw, t12_resamp, t2_raw, t23_resamp,
 path_to_temp = path + '/temp'
 if not os.path.isdir(path_to_temp):
     os.mkdir(path_to_temp)
-join_save = path_to_temp + '/' + basename.replace('.txt', '_join' + '.csv', 1)
-with open(join_save, "w") as out:
-    np.ndarray.tofile(out, sep=',', format='%s')
-
-# t_clean = rf.rec_append_fields(t_clean, 'time', np.array(t_clean['cTime'], dtype=float))
-# t_clean['time'] -= t_clean['time'][0]
-# t_clean = rf.rec_append_fields(t_clean, 'mod_data', np.array(t_clean['mod'], dtype=int))
-# save_clean_file(t_clean, join_save, 'join')
+join_save = path_to_temp + '/' + basename.replace('.csv', '_join' + '.csv', 1)
+pd.DataFrame(t_clean).to_csv(join_save, index_label='index')

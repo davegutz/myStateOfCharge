@@ -61,8 +61,8 @@ def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
             for spec in specials:
                 if spec[0] == var_name:
                     order = spec[1]
-                    if type(order) is not int or order < 0 or order > 1:
-                        raise Exception('order=', order, 'from', spec, 'must be 0 or 1')
+                    if type(order) is not int or order < -1 or order > 1:
+                        raise Exception('order=', order, 'from', spec, 'must be -1, 0 or 1')
 
         # Add interpolated values
         new_var = []
@@ -71,27 +71,33 @@ def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
             time_base = float(data[time_var][i])
             time_ext = float(data[time_var][i+1])
             dtime = time_ext - time_base
-            base = float(var[i])
-            ext = float(var[i+1])
-            time = time_base
-            if typ == '<f8':
-                while time < time_ext and num < new_n:
-                    val = base + (ext-base) * (time-time_base) * order / dtime
-                    new_var.append(val)
-                    num += 1
-                    time = new_time[num]
+            if order >= 0:
+                base = float(var[i])
+                ext = float(var[i+1])
+                time = time_base
+                if typ == '<f8':
+                    while time < time_ext and num < new_n:
+                        val = base + (ext-base) * (time-time_base) * order / dtime
+                        new_var.append(val)
+                        num += 1
+                        time = new_time[num]
+                else:
+                    while time < time_ext and num < new_n:
+                        val = int(round(base + (ext-base) * (time-time_base) * order / dtime))
+                        new_var.append(val)
+                        num += 1
+                        time = new_time[num]
             else:
-                while time < time_ext and num < new_n:
-                    val = int(round(base + (ext-base) * (time-time_base) * order / dtime))
-                    new_var.append(val)
-                    num += 1
-                    time = new_time[num]
+                val = var[i]
+                ext = var[i+1]
         new_var.append(ext)
         num += 1
 
         if var_name != time_var:
             if typ == '<f8':
                 resamp = rf.rec_append_fields(resamp, var_name, np.array(new_var, dtype=float))
+            elif typ == '<U18' or typ == '<U21':
+                resamp = rf.rec_append_fields(resamp, var_name, np.array(new_var, dtype='<U21'))
             else:
                 resamp = rf.rec_append_fields(resamp, var_name, np.array(new_var, dtype=int))
 
