@@ -390,6 +390,7 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, r
     plt.plot(smv.soc_s, smv.voc_stat_s, linestyle='-.', color='black', label='voc_stat_s' + test_str)
     plt.plot(mv.soc, voc_stat_chg, linestyle=':', color='green', label='voc_stat_chg' + test_str)
     plt.plot(mv.soc, voc_stat_dis, linestyle=':', color='red', label='voc_stat_dis' + test_str)
+    plt.plot(mo.soc, mo.voc_soc, color='cyan', linestyle='--', label='voc_soc' + ref_str)
     plt.xlabel('state-of-charge')
     plt.legend(loc=2)
     plt.subplot(223)

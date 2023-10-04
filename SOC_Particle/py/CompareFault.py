@@ -15,7 +15,6 @@
 
 """ Slice and dice the history dumps."""
 
-from pyDAGx import myTables
 import numpy as np
 import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
@@ -118,7 +117,7 @@ def add_stuff(d_ra, mon, ib_band=0.5):
 
 
 # Add schedule lookups and do some rack and stack
-def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100.):
+def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
     voc_soc = []
     soc_min = []
     vsat = []
@@ -139,7 +138,7 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100.):
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         ib_diff.append(ib_diff_)
         C_rate = d_ra.ib[i] / rated_batt_cap
-        voc_soc.append(mon.chemistry.lut_voc_soc.interp(d_ra.soc[i], d_ra.Tb[i]))
+        voc_soc.append(mon.chemistry.lut_voc_soc.interp(d_ra.soc[i], d_ra.Tb[i]) + Dw)
         BB = BatteryMonitor(0)
         cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = \
             fault_thr_bb(Tb, soc, voc_soc[i], voc_stat, C_rate, BB)
@@ -661,7 +660,7 @@ def calc_fault(d_ra, d_mod):
         d_mod = rf.rec_append_fields(d_mod, 'dscn_flt', np.array(dscn_flt, dtype=float))
         d_mod = rf.rec_append_fields(d_mod, 'vb_flt', np.array(vb_flt, dtype=float))
         d_mod = rf.rec_append_fields(d_mod, 'tb_flt', np.array(tb_flt, dtype=float))
-    except:
+    except IOError:
         pass
 
     return d_mod
@@ -903,6 +902,7 @@ if __name__ == '__main__':
         cc_dif_tol_in = 0.2
         use_mon_soc_in = True  # Reconstruction of soc using sub-sampled data is poor.  Drive everything with soc from Monitor
         rated_batt_cap_in = 108.4  # A-hr capacity of test article
+        Dw_in = 0.
 
         # User inputs
         # input_files = ['fail 20221125.txt']
@@ -912,7 +912,9 @@ if __name__ == '__main__':
         # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; rated_batt_cap_in = 100.; scale_in = 1.127; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
         # input_files = ['g20230530/Hd_20230714_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
         # input_files = ['g20230530/hist_Dc06_20230715_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
-        input_files = ['g20230530/Hd_Dc06_20230725_soc1a_bb.csv']
+        # input_files = ['g20230530/Hd_Dc06_20230725_soc1a_bb.csv']
+        # input_files = ['g20230530/serial_20230929_034438.csv']; chm_in = 0; rated_batt_cap_in = 108.4;  # TODO:  fix this
+        input_files = ['g20230530/serial_20231002_104351.csv']; chm_in = 0; rated_batt_cap_in = 108.4; Dw_in = -0.3  # TODO:  fix this
         # input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
         #                'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
         #                'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt', 'serial_20230219_164928.txt',
@@ -960,7 +962,7 @@ if __name__ == '__main__':
             print("data from", temp_flt_file, "empty after loading")
             exit(1)
         f_raw = np.unique(f_raw)
-        f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
+        f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=Dw_in)
         print("\nf:\n", f, "\n")
         f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)
 

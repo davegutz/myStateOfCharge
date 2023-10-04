@@ -81,7 +81,7 @@ class Chemistry(BMS):
         self.lu_x_hys = None
         self.lu_n_hys = None
         self.assign_all_mod(mod_code=mod_code)
-        self.ib_lag_tau = None
+        self.ib_lag_tau = IB_LAG_BB
 
     # Assign chemistry, anytime
     def assign_all_mod(self, mod_code=0):
