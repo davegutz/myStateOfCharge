@@ -398,9 +398,12 @@ def train_tensor_lstm():
     dropping = 0.2
 
     # Inputs frequently changed
-    train_file = ".//temp//GenerateDV_Data_Loop_cat_20230916_clean.csv"
-    validate_file = ".//temp//GenerateDV_Data_Loop_simple_20230916_clean.csv"
-    test_file = ".//temp//GenerateDV_Data_Loop_step_20230916_clean.csv"
+    train_file = ".//temp//temp//putty_2023-09-17T16-48-56_join_clean_clip.csv"
+    validate_file = ".//temp//temp//putty_2023-09-17T16-48-56_join_clean_clip_half.csv"
+    test_file = ".//temp//temp//putty_2023-09-17T16-48-56_join_clean.csv"
+    # train_file = ".//temp//GenerateDV_Data_Loop_cat_20230916_clean.csv"
+    # validate_file = ".//temp//GenerateDV_Data_Loop_simple_20230916_clean.csv"
+    # test_file = ".//temp//GenerateDV_Data_Loop_step_20230916_clean.csv"
     # test_file = ".//temp//GenerateDV_Data_Loop_cat_20230916_clean.csv"
     # train_file = ".//temp//GenerateDV_Data_Loop_simple_20230916_clean.csv"
     # validate_file = ".//temp//GenerateDV_Data_Loop_step_20230916_clean.csv"

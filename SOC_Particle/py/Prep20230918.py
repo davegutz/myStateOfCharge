@@ -55,27 +55,39 @@ t5_raw = np.genfromtxt(temp_file5_clean, delimiter=',', names=True, usecols=cols
 # Resample transitions
 t01_raw = t1_raw[0:2].copy()
 t01_raw[0] = t0_raw[-1].copy()
+t01_raw[1] = t1_raw[0].copy()
 t12_raw = t2_raw[0:2].copy()
 t12_raw[0] = t1_raw[-1].copy()
+t12_raw[1] = t2_raw[0].copy()
 t23_raw = t3_raw[0:2].copy()
 t23_raw[0] = t2_raw[-1].copy()
+t23_raw[1] = t3_raw[0].copy()
 t34_raw = t4_raw[0:2].copy()
 t34_raw[0] = t3_raw[-1].copy()
+t34_raw[1] = t4_raw[0].copy()
 t45_raw = t5_raw[0:2].copy()
 t45_raw[0] = t4_raw[-1].copy()
+t45_raw[1] = t5_raw[0].copy()
 t01_resamp = resample(data=t01_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t01_resamp[:]['unit'] = t01_resamp[0]['unit']
 t01_resamp = t01_resamp[1:-1]
 t12_resamp = resample(data=t12_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t12_resamp[:]['unit'] = t12_resamp[0]['unit']
 t12_resamp = t12_resamp[1:-1]
 t23_resamp = resample(data=t23_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t23_resamp[:]['unit'] = t23_resamp[0]['unit']
 t23_resamp = t23_resamp[1:-1]
 t34_resamp = resample(data=t34_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t34_resamp[:]['unit'] = t34_resamp[0]['unit']
 t34_resamp = t34_resamp[1:-1]
 t45_resamp = resample(data=t45_raw, dt_resamp=T, time_var='cTime', specials=[('unit', -1), ('dt', 0), ('chm', 0), ('sel', 0), ('mod', 0), ('bmso', 0), ('sat', 0)])
+t45_resamp[:]['unit'] = t45_resamp[0]['unit']
 t45_resamp = t45_resamp[1:-1]
 
 # Join them all and save to file for subsequent run by CompareTensorData.py
 t_clean = np.hstack((t0_raw, t01_resamp, t1_raw, t12_resamp, t2_raw, t23_resamp, t3_raw, t34_resamp, t4_raw, t45_resamp, t5_raw))
+# t_clean = np.hstack((t0_raw, t01_resamp, t1_raw))
+# t_clean = np.hstack((t0_raw, t01_resamp))
 (path, basename) = os.path.split(temp_file5)
 path_to_temp = path + '/temp'
 if not os.path.isdir(path_to_temp):

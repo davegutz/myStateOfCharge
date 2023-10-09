@@ -90,6 +90,7 @@ def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
             else:
                 val = var[i]
                 ext = var[i+1]
+                print('ext', ext)
         new_var.append(ext)
         num += 1
 
