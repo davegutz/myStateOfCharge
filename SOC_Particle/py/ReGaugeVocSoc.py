@@ -40,8 +40,8 @@ def pretty_print_vec(vec, prefix='', spacer=''):
 
 # New class with observation def added
 class localChem(Chemistry):
-    def __init__(self, mod_code=0, rated_batt_cap=100., scale=1., keep_sim_happy=0.5):
-        Chemistry.__init__(self, mod_code=mod_code)
+    def __init__(self, mod_code=0, rated_batt_cap=100., scale=1., keep_sim_happy=0.5, dvoc=0.):
+        Chemistry.__init__(self, mod_code=mod_code, dvoc=0.)
         self.rated_batt_cap = rated_batt_cap
         self.scale = scale
         self.new_rated_batt_cap = None

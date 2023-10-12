@@ -65,10 +65,10 @@ float Battery::calculate(const float temp_C, const float soc_frac, float curr_in
 */
 float Battery::calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc)
 {
-    float voc_soc_stat;  // return value
+    float voc;  // return value
     *dv_dsoc = calc_soc_voc_slope(soc + ds_voc_soc_, temp_c);
-    voc_soc_stat = chem_.voc_T_->interp(soc + ds_voc_soc_, temp_c) + chem_.dvoc + dv_voc_soc_;
-    return (voc_soc_stat);
+    voc = chem_.voc_T_->interp(soc + ds_voc_soc_, temp_c) + chem_.dvoc + dv_voc_soc_;
+    return voc;
 }
 
 /* calc_soc_voc_slope:  Derivative model read from tables

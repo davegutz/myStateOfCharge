@@ -24,7 +24,7 @@ from myFilters import LagExp
 class Coulombs:
     """Coulomb Counting"""
 
-    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, tweak_test=False, mod_code=0):
+    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, tweak_test=False, mod_code=0, dvoc=0.):
         self.q_cap_rated = q_cap_rated
         self.q_cap_rated_scaled = q_cap_rated_scaled
         self.t_rated = t_rated
@@ -42,7 +42,7 @@ class Coulombs:
         self.chm = mod_code
         self.tweak_test = tweak_test
         self.reset = False
-        self.chemistry = Chemistry(mod_code=mod_code)
+        self.chemistry = Chemistry(mod_code=mod_code, dvoc=dvoc)
         self.chemistry.assign_all_mod(mod_code)
 
     def __str__(self, prefix=''):

@@ -547,7 +547,7 @@ See _Calibrate20230513.odt_.
       		reset:  Dv0;Hd;Xp0;Rf;W50;+v0;Dr100;Rf;Pf;DP4;
     • Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.
     • To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.
-    • You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.
+    • You may have to increase magnitude of injection (*Dv).  The threshold is 32 * r_ss.
 
  	vHiFailFf:    
 		start: Ff1;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.8;
@@ -769,6 +769,11 @@ Amazon:  5 Pieces I2C Display Module 0.91 Inch I2C OLED Display Module Blue I2C 
   + SCL = SCL-ADS-1013 amp, SCL-ADS-1013 no amp, B-OLED
 
 ## FAQ
+
+### Particle Workbench throws 'Unknown argument local' error
+
+    Solution:  Manually reset CLI installation.  https://community.particle.io/t/
+    https://community.particle.io/t/how-to-manually-reset-your-cli-installation/54018
 
 ### Problem:  CLI starts acting funny:  cannot log in, gives strange errors ("cannot find module semver")
 

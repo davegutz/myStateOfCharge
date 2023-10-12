@@ -50,7 +50,7 @@ class BMS:
 
 class Chemistry(BMS):
     """Properties of battery"""
-    def __init__(self, mod_code=0):
+    def __init__(self, mod_code=0, dvoc=0.):
         BMS.__init__(self)
         self.rated_temp = 0.  # Temperature at UNIT_CAP_RATED, deg C
         self.coul_eff = 0.  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
@@ -65,7 +65,7 @@ class Chemistry(BMS):
         self.m_h = 0  # Number of soc breakpoints in r(soc, dv) table t_r, t_s
         self.nom_vsat = 0.  # Saturation threshold at temperature, deg C
         self.dvoc_dt = 0.  # Change of VOC with operating temperature in range 0 - 50 C V/deg C
-        self.dvoc = 0.  # Adjustment for calibration error, V
+        self.dvoc = dvoc  # Adjustment for calibration error, V
         self.r_0 = 0.  # ChargeTransfer R0, ohms
         self.r_ct = 0.  # ChargeTransfer charge transfer resistance, ohms
         self.tau_ct = 0.  # ChargeTransfer charge transfer time constant, s (=1/Rct/Cct)
