@@ -26,6 +26,8 @@ from Battery import overall_batt
 from Util import cat
 from resample import resample
 from PlotGP import tune_r
+import tkinter as tk
+import tkinter.messagebox
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 IB_BAND = 1.  # Threshold to declare charging or discharging
@@ -1020,6 +1022,10 @@ if __name__ == '__main__':
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=path_to_pdfs)
         cleanup_fig_files(fig_files)
 
-        plt.show()
+        plt.show(block=False)
+        confirmation = tk.messagebox.askyesno('query close plots', 'close plots?')
+        if confirmation is True:
+            plt.close('all')
+
 
     main()

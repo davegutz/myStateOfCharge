@@ -25,6 +25,8 @@ from Battery import Battery, BatteryMonitor
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 import matplotlib.pyplot as plt
 from datetime import datetime
+import tkinter as tk
+import tkinter.messagebox
 
 plt.rcParams['axes.grid'] = True
 
@@ -199,7 +201,11 @@ def compare_run_run(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
                             listWithImagesExtensions=["png"])
     cleanup_fig_files(fig_files)
 
-    plt.show()
+    plt.show(block=False)
+    confirmation = tk.messagebox.askyesno('query close plots', 'close plots?')
+    if confirmation is True:
+        plt.close('all')
+    return True
 
 
 if __name__ == '__main__':
