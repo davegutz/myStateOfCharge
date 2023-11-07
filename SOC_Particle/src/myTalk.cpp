@@ -397,7 +397,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f\n", cp.Tb_bias_model);
                 break;
 
-              case ( 'v' ):  //   *Dv<>:  voltage signal adder for faults
+              case ( 'v' ):  //   * Dv<>:  voltage signal adder for faults
                 Serial.printf("*Sen->vb_add%7.3f to", Sen->vb_add());
                 Sen->vb_add(cp.input_str.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Sen->vb_add());
@@ -829,7 +829,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             }
             break;
 
-          case ( 's' ):  // s<>:  select amp or noa
+          case ( 's' ):  // * s<>:  select amp or noa
             if ( cp.input_str.substring(1).toInt()>0 )
             {
               sp.put_ib_select(1);
@@ -841,7 +841,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", sp.ib_select());
             break;
 
-          case ( 'U' ):  // U<>:  Unix time since epoch
+          case ( 'U' ):  // * U<>:  Unix time since epoch
             Serial.printf("Time.now() %d --> %s to:::> ", (int)Time.now(), Time.timeStr().c_str());
             Serial1.printf("Time.now() %d --> %s to:::> ", (int)Time.now(), Time.timeStr().c_str());
             sp.put_time_now((time_t)cp.input_str.substring(1).toInt());
@@ -849,7 +849,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             Serial1.printf("%d --> %s\n", (int)Time.now(), Time.timeStr().c_str());
             break;
 
-          case ( 'v' ):  // v<>:  verbose level
+          case ( 'v' ):  // * v<>:  verbose level
             Serial.printf("sp.debug %d to ", sp.debug());
             sp.put_debug(cp.input_str.substring(1).toInt());
             Serial.printf("%d\n", sp.debug());
@@ -951,7 +951,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.amp(), sp.inj_bias());
                 break;
 
-              case ( 'f' ): // Xf<>:  injection frequency
+              case ( 'f' ): // * Xf<>:  injection frequency
                 sp.put_freq(max(min(cp.input_str.substring(2).toFloat(), 2.0), 0.0));
                 Serial.printf("Injected freq set%7.3f Hz =", sp.freq());
                 sp.put_freq( sp.freq()*(2. * PI) );
@@ -1355,7 +1355,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
   Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
-  Serial.printf(" Xm=  "); Serial.printf("%d,   modeling bitmap [0b00000000]\n", sp.modeling());
+  Serial.printf(" *Xm=  "); Serial.printf("%d,   modeling bitmap [0b00000000]\n", sp.modeling());
   Serial.printf("      0x128=1<<7 ib_noa_dscn = %d\n", sp.mod_ib_noa_dscn());
   Serial.printf("      0x64 =1<<6 ib_amp_dscn = %d\n", sp.mod_ib_amp_dscn());
   Serial.printf("      0x32 =1<<5 vb_dscn = %d\n", sp.mod_vb_dscn());
@@ -1364,10 +1364,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("      0x4  =1<<2 current = %d\n", sp.mod_ib());
   Serial.printf("      0x2  =1<<1 voltage = %d\n", sp.mod_vb());
   Serial.printf("      0x1  =1<<0 temp = %d\n", sp.mod_tb());
-  Serial.printf(" Xa= "); Serial.printf("%6.3f", sp.amp()); Serial.println(": Inj amp A pk (0-18.3) [0]");
-  Serial.printf(" Xb= "); Serial.printf("%6.3f", sp.inj_bias()); Serial.println(": Inj bias A [0]");
-  Serial.printf(" Xf= "); Serial.printf("%6.3f", sp.freq()/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
-  Serial.printf(" Xt=  "); Serial.printf("%d", sp.type()); Serial.println(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))");
+  Serial.printf(" *Xa= "); Serial.printf("%6.3f", sp.amp()); Serial.println(": Inj amp A pk (0-18.3) [0]");
+  Serial.printf(" *Xb= "); Serial.printf("%6.3f", sp.inj_bias()); Serial.println(": Inj bias A [0]");
+  Serial.printf(" *Xf= "); Serial.printf("%6.3f", sp.freq()/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
+  Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.println(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
   Serial.printf("  Xp-1: Off, modeling false\n");
   Serial.printf("  Xp0: reset tests\n");
