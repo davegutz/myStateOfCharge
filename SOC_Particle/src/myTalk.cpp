@@ -958,13 +958,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f r/s\n", sp.freq());
                 break;
 
-              case ( 'b' ): // Xb<>:  injection bias
+              case ( 'b' ): // * Xb<>:  injection bias
                 Serial.printf("Inj_bias set%7.3f to ", sp.inj_bias());
                 sp.put_inj_bias(cp.input_str.substring(2).toFloat());
                 Serial.printf("%7.3f\n", sp.inj_bias());
                 break;
 
-              case ( 't' ): // Xt<>:  injection type
+              case ( 't' ): // * Xt<>:  injection type
                 switch ( cp.input_str.charAt(2) )
                 {
                   case ( 'n' ):  // Xtn:  none
