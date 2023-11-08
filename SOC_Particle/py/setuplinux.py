@@ -21,4 +21,4 @@
 # run this file in pyCharm as is
 from pyshortcuts import make_shortcut
 
-make_shortcut('TestSOC.py', name='TestSOC')
+make_shortcut('GUI_TestSOC.py', name='GUI_TestSOC')

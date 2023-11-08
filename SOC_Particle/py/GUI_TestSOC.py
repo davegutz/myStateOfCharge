@@ -1,7 +1,7 @@
 #  Graphical interface to Test State of Charge application
 #  Run in PyCharm
 #     or
-#  'python3 TestSOC.py
+#  'python3 GUI_TestSOC.py
 #
 #  2023-Jun-15  Dave Gutz   Create
 # Copyright (C) 2023 Dave Gutz
@@ -31,6 +31,11 @@ import shutil
 import pyperclip
 import subprocess
 import datetime
+import platform
+if platform.system() == 'Darwin':
+    from ttwidgets import TTButton as myButton
+else:
+    from tkinter import Button as myButton
 global putty_shell
 
 # Transient string
@@ -53,8 +58,8 @@ lookup = {'custom': ('', '', ("For general purpose running", "'save data' will p
           'satSitBB': ('Ff0;D^0;Xp0;Xm247;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
           'satSitCH': ('Ff0;D^0;Xp0;Xm247;Ca0.992;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.992;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
           'flatSitHys': ('Ff0;D^0;Xp0;Xm247;Ca0.9;Rb;Rf;Dr100;DP1;Xts;Xa-81;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;Ca.9;W5;Pf;Rf;Pf;v0;DP4;', ("Operate around 0.9.  For CHINS, will check EKF with flat voc(soc).   Takes about 10 minutes.", "Make sure EKF soc (soc_ekf) tracks actual soc without wandering.")),
-          'offSitHysBmsNoiseBB': ('Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.")),
-          'offSitHysBmsNoiseCH': ('Ff0;D^0;Xp0;Xm247;Ca0.014;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.014;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shuttoff.")),
+          'offSitHysBmsNoiseBB': ('Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
+          'offSitHysBmsNoiseCH': ('Ff0;D^0;Xp0;Xm247;Ca0.014;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.014;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
           'ampHiFailSlow': ('Ff0;D^0;Xm247;Ca0.5;Pf;v2;W2;Dr100;DP1;HR;Dm6;Dn0.0001;Fc0.02;Fd0.5;', 'Hd;Xp0;Pf;Rf;W2;+v0;Dr100;DE20;Fc1;Fd1;Rf;Pf;', ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.")),
           'vHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.8;', 'Dv0;Hd;Xp0;Rf;W50;+v0;Dr100;Rf;Pf;DP4;', ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.")),
           'vHiFailFf': ('Ff1;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.8;', 'Dv0;Ff0;Hd;Xp0;Rf;W50;+v0;Dr100;Rf;Pf;DP4;', ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.")),
@@ -189,7 +194,7 @@ class ExTarget:
 
     def enter_unit(self):
         self.unit = tk.simpledialog.askstring(title=self.level, initialvalue=self.unit,
-                                             prompt="Enter unit e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
+                                              prompt="Enter unit e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
         self.cf[self.ind]['unit'] = self.unit
         self.cf.save_to_file()
         self.unit_button.config(text=self.unit)
@@ -299,8 +304,8 @@ def compare_run():
         if not Ref.key_exists_in_file:
             tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in " + Ref.file_txt)
             return
-        print('TestSOC compare_run:  Ref', Ref.file_path, Ref.key)
-        print('TestSOC compare_run:  Test', Test.file_path, Test.key)
+        print('GUI_TestSOC compare_run:  Ref', Ref.file_path, Ref.key)
+        print('GUI_TestSOC compare_run:  Test', Test.file_path, Test.key)
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
         compare_run_run(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
                         save_pdf_path=os.path.join(Test.version_path, './figures'),
@@ -376,6 +381,16 @@ def create_file_key(version_, unit_, battery_):
 
 def create_file_txt(option_, unit_, battery_):
     return option_ + '_' + unit_ + '_' + battery_ + '.csv'
+
+
+def enter_folder():
+    answer = tk.filedialog.askdirectory(title="Select a destination (i.e. Library) folder",
+                                        initialdir=folder.get())
+    if answer is not None and answer != '':
+        folder.set(answer)
+    cf['others']['folder'] = folder.get()
+    cf.save_to_file()
+    folder_butt.config(text=folder.get())
 
 
 def grab_reset():
@@ -597,7 +612,8 @@ if __name__ == '__main__':
                          "unit": "pro1a",
                          "battery": "bb"},
                 'others': {"option": "custom",
-                           'modeling': True}
+                           'modeling': True,
+                           'folder': '<enter data folder>'}
                 }
 
     cf = Begini(__file__, def_dict)
@@ -610,138 +626,163 @@ if __name__ == '__main__':
     main_height = 500
     wrap_length = 800
     bg_color = "lightgray"
+    row = -1
 
     # Master and header
+    row += 1
     master = tk.Tk()
     master.title('State of Charge')
     master.wm_minsize(width=min_width, height=main_height)
     # master.geometry('%dx%d' % (master.winfo_screenwidth(), master.winfo_screenheight()))
-    pwd_path = tk.StringVar(master)
-    pwd_path.set(os.getcwd())
+    pwd_path = tk.StringVar(master, cf['others']['folder'])
     path_to_data = os.path.join(pwd_path.get(), '../dataReduction')
-    print(path_to_data)
-    icon_path = os.path.join(ex_root.script_loc, 'TestSOC_Icon.png')
+    print(f"{path_to_data=}")
+    icon_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC_Icon.png')
     master.iconphoto(False, tk.PhotoImage(file=icon_path))
-    tk.Label(master, text="Item", fg="blue").grid(row=0, column=0, sticky=tk.N, pady=2)
-    tk.Label(master, text="Test", fg="blue").grid(row=0, column=1, sticky=tk.N, pady=2)
+    tk.Label(master, text="Item", fg="blue").grid(row=row, column=0, sticky=tk.N, pady=2)
+    tk.Label(master, text="Test", fg="blue").grid(row=row, column=1, sticky=tk.N, pady=2)
     modeling = tk.BooleanVar(master)
     modeling.set(bool(cf['others']['modeling']))
     modeling_button = tk.Checkbutton(master, text='modeling', bg=bg_color, variable=modeling,
                                      onvalue=True, offvalue=False)
-    modeling_button.grid(row=0, column=3, pady=2, sticky=tk.N)
+    modeling_button.grid(row=row, column=3, pady=2, sticky=tk.N)
     modeling.trace_add('write', modeling_handler)
     ref_label = tk.Label(master, text="Ref", fg="blue")
-    ref_label.grid(row=0, column=4, sticky=tk.N, pady=2)
+    ref_label.grid(row=row, column=4, sticky=tk.N, pady=2)
 
     # Version row
-    tk.Label(master, text="Version").grid(row=1, column=0, pady=2)
-    Test.version_button = tk.Button(master, text=Test.version, command=Test.enter_version, fg="blue", bg=bg_color)
-    Test.version_button.grid(row=1, column=1, pady=2)
-    Ref.version_button = tk.Button(master, text=Ref.version, command=Ref.enter_version, fg="blue", bg=bg_color)
-    Ref.version_button.grid(row=1, column=4, pady=2)
+    row += 1
+    tk.Label(master, text="Version").grid(row=row, column=0, pady=2)
+    Test.version_button = myButton(master, text=Test.version, command=Test.enter_version, fg="blue", bg=bg_color)
+    Test.version_button.grid(row=row, column=1, pady=2)
+    Ref.version_button = myButton(master, text=Ref.version, command=Ref.enter_version, fg="blue", bg=bg_color)
+    Ref.version_button.grid(row=row, column=4, pady=2)
 
     # Unit row
-    tk.Label(master, text="Unit").grid(row=2, column=0, pady=2)
-    Test.unit_button = tk.Button(master, text=Test.unit, command=Test.enter_unit, fg="purple", bg=bg_color)
-    Test.unit_button.grid(row=2, column=1, pady=2)
-    Ref.unit_button = tk.Button(master, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
-    Ref.unit_button.grid(row=2, column=4, pady=2)
+    row += 1
+    tk.Label(master, text="Unit").grid(row=row, column=0, pady=2)
+    Test.unit_button = myButton(master, text=Test.unit, command=Test.enter_unit, fg="purple", bg=bg_color)
+    Test.unit_button.grid(row=row, column=1, pady=2)
+    Ref.unit_button = myButton(master, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
+    Ref.unit_button.grid(row=row, column=4, pady=2)
 
     # Battery row
-    tk.Label(master, text="Battery").grid(row=3, column=0, pady=2)
-    Test.battery_button = tk.Button(master, text=Test.battery, command=Test.enter_battery, fg="green", bg=bg_color)
-    Test.battery_button.grid(row=3, column=1, pady=2)
-    Ref.battery_button = tk.Button(master, text=Ref.battery, command=Ref.enter_battery, fg="green", bg=bg_color)
-    Ref.battery_button.grid(row=3, column=4, pady=2)
+    row += 1
+    tk.Label(master, text="Battery").grid(row=row, column=0, pady=2)
+    Test.battery_button = myButton(master, text=Test.battery, command=Test.enter_battery, fg="green", bg=bg_color)
+    Test.battery_button.grid(row=row, column=1, pady=2)
+    Ref.battery_button = myButton(master, text=Ref.battery, command=Ref.enter_battery, fg="green", bg=bg_color)
+    Ref.battery_button.grid(row=row, column=4, pady=2)
 
     # Key row
-    tk.Label(master, text="Key").grid(row=4, column=0, pady=2)
+    row += 1
+    tk.Label(master, text="Key").grid(row=row, column=0, pady=2)
     Test.key_label = tk.Label(master, text=Test.key)
-    Test.key_label.grid(row=4, column=1,  padx=5, pady=5)
+    Test.key_label.grid(row=row, column=1,  padx=5, pady=5)
     Ref.key_label = tk.Label(master, text=Ref.key)
-    Ref.key_label.grid(row=4, column=4, padx=5, pady=5)
+    Ref.key_label.grid(row=row, column=4, padx=5, pady=5)
 
     # Image
-    pic_path = os.path.join(ex_root.script_loc, 'TestSOC.png')
+    pic_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC.png')
     picture = tk.PhotoImage(file=pic_path).subsample(5, 5)
     label = tk.Label(master, image=picture)
     label.grid(row=1, column=2, columnspan=2, rowspan=3, padx=5, pady=5)
 
     # Option
-    tk.ttk.Separator(master, orient='horizontal').grid(row=5, columnspan=5, pady=5, sticky='ew')
+    row += 1
+    tk.ttk.Separator(master, orient='horizontal').grid(row=row, columnspan=5, pady=5, sticky='ew')
+    row += 1
     option = tk.StringVar(master)
     option.set(str(cf['others']['option']))
     option_show = tk.StringVar(master)
     option_show.set(str(cf['others']['option']))
     sel = tk.OptionMenu(master, option, *sel_list)
     sel.config(width=20)
-    sel.grid(row=6, padx=5, pady=5, sticky=tk.W)
+    sel.grid(row=row, padx=5, pady=5, sticky=tk.W)
     option.trace_add('write', option_handler)
     Test.label = tk.Label(master, text=Test.file_txt)
-    Test.label.grid(row=6, column=1, padx=5, pady=5)
+    Test.label.grid(row=row, column=1, padx=5, pady=5)
     Ref.label = tk.Label(master, text=Ref.file_txt)
-    Ref.label.grid(row=6, column=4, padx=5, pady=5)
+    Ref.label.grid(row=row, column=4, padx=5, pady=5)
+    folder = tk.StringVar(master, cf['others']['folder'])
+    working_label = tk.Label(master, text="dataReduction folder=")
+    folder_butt = myButton(master, text=folder.get(), command=enter_folder, fg="blue", bg=bg_color)
+    row += 1
+    working_label.grid(row=row, column=0, padx=5, pady=5)
+    folder_butt.grid(row=row, column=1, padx=5, pady=5)
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
 
+    row += 1
     putty_shell = None
     putty_label = tk.Label(master, text='start putty:')
-    putty_label.grid(row=7, column=0, padx=5, pady=5)
-    putty_button = tk.Button(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    putty_button.grid(sticky="W", row=7, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
+    putty_label.grid(row=row, column=0, padx=5, pady=5)
+    putty_button = myButton(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    putty_button.grid(sticky="W", row=row, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
     putty_test_csv_path = tk.StringVar(master)
     putty_test_csv_path.set(os.path.join(path_to_data, 'putty_test.csv'))
     empty_csv_path = tk.StringVar(master)
     empty_csv_path.set(os.path.join(path_to_data, 'empty.csv'))
 
+    row += 1
     start = tk.StringVar(master)
     start.set('')
     start_label = tk.Label(master, text='copy start:')
-    start_label.grid(row=8, column=0, padx=5, pady=5)
-    start_button = tk.Button(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
+    start_label.grid(row=row, column=0, padx=5, pady=5)
+    start_button = myButton(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
                              justify=tk.LEFT, font=("Arial", 8))
-    start_button.grid(sticky="W", row=8, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+    start_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
 
+    row += 1
     reset = tk.StringVar(master)
     reset.set('')
     reset_label = tk.Label(master, text='copy reset:')
-    reset_label.grid(row=10, column=0, padx=5, pady=5)
-    reset_button = tk.Button(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
+    reset_label.grid(row=row, column=0, padx=5, pady=5)
+    reset_button = myButton(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
                              justify=tk.LEFT, font=("Arial", 8))
-    reset_button.grid(sticky="W", row=10, column=1, columnspan=4, rowspan=2, padx=5, pady=5)
+    reset_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
 
+    row += 1
     ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev1_label.grid(sticky="W", row=12, column=1, columnspan=4, padx=5, pady=5)
+    ev1_label.grid(sticky="W", row=row, column=1, columnspan=4, padx=5, pady=5)
 
+    row += 1
     ev2_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev2_label.grid(sticky="W", row=13, column=1, columnspan=4, padx=5, pady=5)
+    ev2_label.grid(sticky="W", row=row, column=1, columnspan=4, padx=5, pady=5)
 
+    row += 1
     ev3_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev3_label.grid(sticky="W", row=14, column=1, columnspan=4, padx=5, pady=5)
+    ev3_label.grid(sticky="W", row=row, column=1, columnspan=4, padx=5, pady=5)
 
+    row += 1
     ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev4_label.grid(sticky="W", row=15, column=1, columnspan=4, padx=5, pady=5)
+    ev4_label.grid(sticky="W", row=row, column=1, columnspan=4, padx=5, pady=5)
 
+    row += 1
     save_data_label = tk.Label(master, text='save data:')
-    save_data_label.grid(row=16, column=0, padx=5, pady=5)
-    save_data_button = tk.Button(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    save_data_button.grid(sticky="W", row=16, column=1, padx=5, pady=5)
-    save_data_as_button = tk.Button(master, text='save as', command=save_data_as, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    save_data_as_button.grid(sticky="W", row=16, column=2, padx=5, pady=5)
-    clear_data_button = tk.Button(master, text='clear', command=clear_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.RIGHT)
-    clear_data_button.grid(sticky="W", row=16, column=3, padx=5, pady=5)
+    save_data_label.grid(row=row, column=0, padx=5, pady=5)
+    save_data_button = myButton(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    save_data_button.grid(sticky="W", row=row, column=1, padx=5, pady=5)
+    save_data_as_button = myButton(master, text='save as', command=save_data_as, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    save_data_as_button.grid(sticky="W", row=row, column=2, padx=5, pady=5)
+    clear_data_button = myButton(master, text='clear', command=clear_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.RIGHT)
+    clear_data_button.grid(sticky="W", row=row, column=3, padx=5, pady=5)
 
-    tk.ttk.Separator(master, orient='horizontal').grid(row=17, columnspan=5, pady=5, sticky='ew')
-    run_button = tk.Button(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    run_button.grid(row=18, column=0, padx=5, pady=5)
+    row += 1
+    tk.ttk.Separator(master, orient='horizontal').grid(row=row, columnspan=5, pady=5, sticky='ew')
+    row += 1
+    run_button = myButton(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    run_button.grid(row=row, column=0, padx=5, pady=5)
 
-    tk.ttk.Separator(master, orient='horizontal').grid(row=19, columnspan=5, pady=5, sticky='ew')
+    row += 1
+    tk.ttk.Separator(master, orient='horizontal').grid(row=row, columnspan=5, pady=5, sticky='ew')
+    row += 1
     choose_label = tk.Label(master, text='choose existing files:')
-    choose_label.grid(row=20, column=0, padx=5, pady=5)
-    run_sim_choose_button = tk.Button(master, text='Compare Run Sim Choose', command=compare_run_sim_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    run_sim_choose_button.grid(sticky="W", row=20, column=1, padx=5, pady=5)
-    run_run_choose_button = tk.Button(master, text='Compare Run Run Choose', command=compare_run_run_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    run_run_choose_button.grid(sticky="W", row=20, column=2, padx=5, pady=5)
+    choose_label.grid(row=row, column=0, padx=5, pady=5)
+    run_sim_choose_button = myButton(master, text='Compare Run Sim Choose', command=compare_run_sim_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    run_sim_choose_button.grid(sticky="W", row=row, column=1, padx=5, pady=5)
+    run_run_choose_button = myButton(master, text='Compare Run Run Choose', command=compare_run_run_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    run_run_choose_button.grid(sticky="W", row=row, column=2, padx=5, pady=5)
 
     # Begin
     modeling_handler()

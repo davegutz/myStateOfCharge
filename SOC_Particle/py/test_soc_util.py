@@ -1,4 +1,4 @@
-#  Utilities for TestSOC
+#  Utilities for GUI_TestSOC
 #  2023-May-15  Dave Gutz   Create
 # Copyright (C) 2023 Dave Gutz
 #
@@ -157,7 +157,7 @@ def config_section_map(config, section):
 # Work out all the paths
 def configurator(filepath):
     (config_path, config_basename) = os.path.split(filepath)
-    config_file_path = os.path.join(config_path, 'TestSOC.ini')
+    config_file_path = os.path.join(config_path, 'GUI_TestSOC.ini')
     config = load_config(config_file_path)
     return config_path, config_basename, config_file_path, config
 
