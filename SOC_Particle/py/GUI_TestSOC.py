@@ -185,7 +185,6 @@ class Exec:
         self.update_file_label()
         self.update_key_label()
         self.update_folder_butt()
-        print('file_txt', self.file_txt)
 
     def enter_battery(self):
         self.battery = tk.simpledialog.askstring(title=self.level,
@@ -501,7 +500,7 @@ def ref_restore():
 
 
 def save_data():
-    if os.path.getsize(putty_test_csv_path.get()) > 512:  # bytes
+    if size_of(putty_test_csv_path.get()) > 512:  # bytes
         # create empty file
         try:
             open(empty_csv_path.get(), 'x')
@@ -534,14 +533,14 @@ def save_data():
         print('updating Test file label')
         Test.create_file_path_and_key(name_override=new_file_txt)
     else:
-        print('putty test file is too small (<512 bytes) probably already done')
+        print('putty test file non-existent or too small (<512 bytes) probably already done')
         tkinter.messagebox.showwarning(message="Nothing to save")
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def save_data_as():
-    if os.path.getsize(putty_test_csv_path.get()) > 512:  # bytes
+    if size_of(putty_test_csv_path.get()) > 512:  # bytes
         # create empty file
         try:
             open(empty_csv_path.get(), 'x')
@@ -600,6 +599,13 @@ def save_putty():
         return False
 
 
+def size_of(path):
+    if os.path.isfile(path) and (size := os.path.getsize(path)) > 0:  # bytes
+        return size
+    else:
+        return 0
+
+
 def start_putty():
     global putty_shell
     enter_size = putty_size()
@@ -651,6 +657,7 @@ if __name__ == '__main__':
     # master.geometry('%dx%d' % (master.winfo_screenwidth(), master.winfo_screenheight()))
     Ref = Exec(cf, 'ref')
     Test = Exec(cf, 'test')
+    putty_test_csv_path = tk.StringVar(master, os.path.join(ex_root.script_loc, '../dataReduction/putty_test.csv'))
     icon_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC_Icon.png')
     master.iconphoto(False, tk.PhotoImage(file=icon_path))
     tk.Label(master, text="Item", fg="blue").grid(row=row, column=0, sticky=tk.N, pady=2)
@@ -663,6 +670,15 @@ if __name__ == '__main__':
     modeling.trace_add('write', modeling_handler)
     ref_label = tk.Label(master, text="Ref", fg="blue")
     ref_label.grid(row=row, column=4, sticky=tk.N, pady=2)
+
+    # Folder row
+    row += 1
+    working_label = tk.Label(master, text="dataReduction folder=")
+    Test.folder_butt = myButton(master, text=Test.dataReduction_folder, command=Test.enter_dataReduction_folder, fg="blue", bg=bg_color)
+    Ref.folder_butt = myButton(master, text=Ref.dataReduction_folder, command=Ref.enter_dataReduction_folder, fg="blue", bg=bg_color)
+    working_label.grid(row=row, column=0, padx=5, pady=5)
+    Test.folder_butt.grid(row=row, column=1, padx=5, pady=5)
+    Ref.folder_butt.grid(row=row, column=4, padx=5, pady=5)
 
     # Version row
     row += 1
@@ -718,13 +734,6 @@ if __name__ == '__main__':
     Test.label.grid(row=row, column=1, padx=5, pady=5)
     Ref.label = tk.Label(master, text=Ref.file_txt)
     Ref.label.grid(row=row, column=4, padx=5, pady=5)
-    working_label = tk.Label(master, text="dataReduction folder=")
-    Test.folder_butt = myButton(master, text=Test.dataReduction_folder, command=Test.enter_dataReduction_folder, fg="blue", bg=bg_color)
-    Ref.folder_butt = myButton(master, text=Ref.dataReduction_folder, command=Ref.enter_dataReduction_folder, fg="blue", bg=bg_color)
-    row += 1
-    working_label.grid(row=row, column=0, padx=5, pady=5)
-    Test.folder_butt.grid(row=row, column=1, padx=5, pady=5)
-    Ref.folder_butt.grid(row=row, column=4, padx=5, pady=5)
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
 
@@ -734,8 +743,6 @@ if __name__ == '__main__':
     putty_label.grid(row=row, column=0, padx=5, pady=5)
     putty_button = myButton(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
     putty_button.grid(sticky="W", row=row, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
-    putty_test_csv_path = tk.StringVar(master)
-    putty_test_csv_path.set(os.path.join(Test.dataReduction_folder, 'putty_test.csv'))
     empty_csv_path = tk.StringVar(master)
     empty_csv_path.set(os.path.join(Test.dataReduction_folder, 'empty.csv'))
 
