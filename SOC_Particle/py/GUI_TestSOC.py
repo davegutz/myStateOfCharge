@@ -139,23 +139,25 @@ class ExRoot:
 
 
 # Executive class to control the global variables
-class ExTarget:
+class Exec:
     def __init__(self, cf_, ind, level=None):
         self.cf = cf_
         self.ind = ind
         self.script_loc = os.path.dirname(os.path.abspath(__file__))
         self.config_path = os.path.join(self.script_loc, 'root_config.ini')
-        self.dataReduction_path = os.path.join(self.script_loc, '../dataReduction')
+        self.dataReduction_folder = cf[self.ind]['dataReduction_folder']
         self.version = self.cf[self.ind]['version']
         self.version_button = None
         if self.version is None:
             self.version = 'undefined'
-        self.version_path = os.path.join(self.dataReduction_path, self.version)
+        self.version_path = os.path.join(self.dataReduction_folder, self.version)
         os.makedirs(self.version_path, exist_ok=True)
         self.battery = self.cf[self.ind]['battery']
         self.battery_button = None
         self.level = level
         self.level_button = None
+        self.folder_butt = myButton(master, text=self.dataReduction_folder, command=self.enter_dataReduction_folder,
+                                    fg="blue", bg=bg_color)
         self.unit = self.cf[self.ind]['unit']
         self.unit_button = None
         self.key_label = None
@@ -164,6 +166,7 @@ class ExTarget:
         self.file_txt = None
         self.file_path = None
         self.file_exists = None
+        self.dataReduction_folder_exists = None
         self.key_exists_in_file = None
         self.label = None
         self.key = None
@@ -181,6 +184,7 @@ class ExTarget:
         self.file_exists = os.path.isfile(self.file_path)
         self.update_file_label()
         self.update_key_label()
+        self.update_folder_butt()
         print('file_txt', self.file_txt)
 
     def enter_battery(self):
@@ -191,6 +195,16 @@ class ExTarget:
         self.battery_button.config(text=self.battery)
         self.create_file_path_and_key()
         self.update_key_label()
+
+    def enter_dataReduction_folder(self):
+        answer = tk.filedialog.askdirectory(title="Select a destination (i.e. Library) dataReduction folder",
+                                            initialdir=self.dataReduction_folder)
+        if answer is not None and answer != '':
+            self.dataReduction_folder = answer
+        cf['others']['dataReduction_folder'] = self.dataReduction_folder
+        cf.save_to_file()
+        self.folder_butt.config(text=self.dataReduction_folder)
+        self.update_folder_butt()
 
     def enter_unit(self):
         self.unit = tk.simpledialog.askstring(title=self.level, initialvalue=self.unit,
@@ -240,6 +254,17 @@ class ExTarget:
             self.label.config(bg='lightgreen')
         else:
             self.label.config(bg='pink')
+
+    def update_folder_butt(self):
+        if os.path.exists(self.dataReduction_folder):
+            self.dataReduction_folder_exists = True
+        else:
+            self.dataReduction_folder_exists = False
+        self.folder_butt.config(text=self.dataReduction_folder)
+        if self.dataReduction_folder_exists:
+            self.folder_butt.config(bg='lightgreen')
+        else:
+            self.folder_butt.config(bg='pink')
 
     def update_key_label(self):
         self.key_label.config(text=self.key)
@@ -383,16 +408,6 @@ def create_file_txt(option_, unit_, battery_):
     return option_ + '_' + unit_ + '_' + battery_ + '.csv'
 
 
-def enter_folder():
-    answer = tk.filedialog.askdirectory(title="Select a destination (i.e. Library) folder",
-                                        initialdir=folder.get())
-    if answer is not None and answer != '':
-        folder.set(answer)
-    cf['others']['folder'] = folder.get()
-    cf.save_to_file()
-    folder_butt.config(text=folder.get())
-
-
 def grab_reset():
     add_to_clip_board(reset.get())
     reset_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
@@ -470,6 +485,7 @@ def ref_remove():
     Ref.battery_button.grid_remove()
     Ref.key_label.grid_remove()
     Ref.label.grid_remove()
+    Ref.folder_butt.grid_remove()
     run_button.config(text='Compare Run Sim')
 
 
@@ -480,6 +496,7 @@ def ref_restore():
     Ref.battery_button.grid()
     Ref.key_label.grid()
     Ref.label.grid()
+    Ref.folder_butt.grid()
     run_button.config(text='Compare Run Run')
 
 
@@ -613,13 +630,10 @@ if __name__ == '__main__':
                          "battery": "bb"},
                 'others': {"option": "custom",
                            'modeling': True,
-                           'folder': '<enter data folder>'}
+                           'dataReduction_folder': '<enter data dataReduction_folder>'}
                 }
 
     cf = Begini(__file__, def_dict)
-
-    Ref = ExTarget(cf, 'ref')
-    Test = ExTarget(cf, 'test')
 
     # Define frames
     min_width = 800
@@ -634,9 +648,8 @@ if __name__ == '__main__':
     master.title('State of Charge')
     master.wm_minsize(width=min_width, height=main_height)
     # master.geometry('%dx%d' % (master.winfo_screenwidth(), master.winfo_screenheight()))
-    pwd_path = tk.StringVar(master, cf['others']['folder'])
-    path_to_data = os.path.join(pwd_path.get(), '../dataReduction')
-    print(f"{path_to_data=}")
+    Ref = Exec(cf, 'ref')
+    Test = Exec(cf, 'test')
     icon_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC_Icon.png')
     master.iconphoto(False, tk.PhotoImage(file=icon_path))
     tk.Label(master, text="Item", fg="blue").grid(row=row, column=0, sticky=tk.N, pady=2)
@@ -704,12 +717,13 @@ if __name__ == '__main__':
     Test.label.grid(row=row, column=1, padx=5, pady=5)
     Ref.label = tk.Label(master, text=Ref.file_txt)
     Ref.label.grid(row=row, column=4, padx=5, pady=5)
-    folder = tk.StringVar(master, cf['others']['folder'])
     working_label = tk.Label(master, text="dataReduction folder=")
-    folder_butt = myButton(master, text=folder.get(), command=enter_folder, fg="blue", bg=bg_color)
+    test_folder_butt = myButton(master, text=Test.dataReduction_folder, command=Test.enter_dataReduction_folder, fg="blue", bg=bg_color)
+    ref_folder_butt = myButton(master, text=Ref.dataReduction_folder, command=Ref.enter_dataReduction_folder, fg="blue", bg=bg_color)
     row += 1
     working_label.grid(row=row, column=0, padx=5, pady=5)
-    folder_butt.grid(row=row, column=1, padx=5, pady=5)
+    test_folder_butt.grid(row=row, column=1, padx=5, pady=5)
+    ref_folder_butt.grid(row=row, column=4, padx=5, pady=5)
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
 
@@ -720,9 +734,9 @@ if __name__ == '__main__':
     putty_button = myButton(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
     putty_button.grid(sticky="W", row=row, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
     putty_test_csv_path = tk.StringVar(master)
-    putty_test_csv_path.set(os.path.join(path_to_data, 'putty_test.csv'))
+    putty_test_csv_path.set(os.path.join(Test.dataReduction_folder, 'putty_test.csv'))
     empty_csv_path = tk.StringVar(master)
-    empty_csv_path.set(os.path.join(path_to_data, 'empty.csv'))
+    empty_csv_path.set(os.path.join(Test.dataReduction_folder, 'empty.csv'))
 
     row += 1
     start = tk.StringVar(master)
@@ -730,7 +744,7 @@ if __name__ == '__main__':
     start_label = tk.Label(master, text='copy start:')
     start_label.grid(row=row, column=0, padx=5, pady=5)
     start_button = myButton(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
-                             justify=tk.LEFT, font=("Arial", 8))
+                            justify=tk.LEFT, font=("Arial", 8))
     start_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
 
     row += 1
