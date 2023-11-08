@@ -590,7 +590,7 @@ def save_putty():
     m_str = datetime.datetime.fromtimestamp(os.path.getmtime(putty_test_csv_path.get())).strftime("%Y-%m-%dT%H-%M-%S").replace(' ', 'T')
     putty_test_sav = 'putty_' + m_str + '.csv'
     putty_test_sav_path = tk.StringVar(master)
-    putty_test_sav_path.set(os.path.join(path_to_data, putty_test_sav))
+    putty_test_sav_path.set(os.path.join(Test.dataReduction_folder, putty_test_sav))
     try:
         os.rename(putty_test_csv_path.get(), putty_test_sav_path.get())
         print('wrote', putty_test_sav_path.get())
@@ -624,14 +624,15 @@ if __name__ == '__main__':
     # Configuration for entire folder selection read with filepaths
     def_dict = {'test': {"version": "g20230530",
                          "unit": "pro1a",
-                         "battery": "bb"},
+                         "battery": "bb",
+                         'dataReduction_folder': '<enter data dataReduction_folder>'},
                 'ref':  {"version": "v20230403",
                          "unit": "pro1a",
-                         "battery": "bb"},
+                         "battery": "bb",
+                         'dataReduction_folder': '<enter data dataReduction_folder>'},
                 'others': {"option": "custom",
-                           'modeling': True,
-                           'dataReduction_folder': '<enter data dataReduction_folder>'}
-                }
+                           'modeling': True}
+              }
 
     cf = Begini(__file__, def_dict)
 
@@ -718,12 +719,12 @@ if __name__ == '__main__':
     Ref.label = tk.Label(master, text=Ref.file_txt)
     Ref.label.grid(row=row, column=4, padx=5, pady=5)
     working_label = tk.Label(master, text="dataReduction folder=")
-    test_folder_butt = myButton(master, text=Test.dataReduction_folder, command=Test.enter_dataReduction_folder, fg="blue", bg=bg_color)
-    ref_folder_butt = myButton(master, text=Ref.dataReduction_folder, command=Ref.enter_dataReduction_folder, fg="blue", bg=bg_color)
+    Test.folder_butt = myButton(master, text=Test.dataReduction_folder, command=Test.enter_dataReduction_folder, fg="blue", bg=bg_color)
+    Ref.folder_butt = myButton(master, text=Ref.dataReduction_folder, command=Ref.enter_dataReduction_folder, fg="blue", bg=bg_color)
     row += 1
     working_label.grid(row=row, column=0, padx=5, pady=5)
-    test_folder_butt.grid(row=row, column=1, padx=5, pady=5)
-    ref_folder_butt.grid(row=row, column=4, padx=5, pady=5)
+    Test.folder_butt.grid(row=row, column=1, padx=5, pady=5)
+    Ref.folder_butt.grid(row=row, column=4, padx=5, pady=5)
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
 
