@@ -176,6 +176,7 @@ public:
   boolean solve_ekf(const boolean reset, const boolean reset_temp, Sensors *Sen);
   float tcharge() { return tcharge_; };
   float dv_dyn() { return dv_dyn_; };
+  float vb_model() { return vb_model_; };
   float voc_filt() { return voc_filt_; };
   float voc_soc() { return voc_soc_; };
   double y_ekf() { return y_; };
@@ -196,6 +197,7 @@ protected:
   float soc_ekf_;      // Filtered state of charge from ekf (0-1)
   float tcharge_;      // Counted charging time to 100%, hr
   float tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
+  float vb_model_;     // Reversionary model of vb, V
   float voc_filt_;     // Filtered, static model open circuit voltage, V
   float voc_soc_;  // Raw table lookup of voc, V
   float y_filt_;       // Filtered EKF y value, V

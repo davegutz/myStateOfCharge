@@ -255,8 +255,14 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     hys_->calculate(ib_, soc_);
     boolean init_low = bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR );
     dv_hys_ = hys_->update(dt_, sat_, init_low, Sen->Flt->e_wrap(), reset_temp);
+    // disable hys g20230530a
+    dv_hys_ = 0.;
     voc_stat_ = voc_ - dv_hys_;
     ioc_ = hys_->ioc();
+    
+
+    // Reversionary model
+    vb_model_ = voc_soc_ + dv_dyn_ + dv_hys_;
 
     // EKF 1x1
     if ( eframe_ == 0 )

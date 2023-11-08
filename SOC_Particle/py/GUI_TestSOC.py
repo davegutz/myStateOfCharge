@@ -113,9 +113,6 @@ class ExRoot:
         self.root_config = None
         self.load_root_config(self.config_path)
 
-    def enter_version(self):
-        self.version = tk.simpledialog.askstring(title=__file__, prompt="Enter version <vYYYYMMDD>:")
-
     def load_root_config(self, config_file_path):
         self.root_config = ConfigParser()
         if os.path.isfile(config_file_path):
@@ -216,15 +213,17 @@ class Exec:
         self.update_file_label()
 
     def enter_version(self):
-        self.version = tk.simpledialog.askstring(title=self.level, prompt="Enter version <vYYYYMMDD>:")
-        self.cf[self.ind]['version'] = self.version
+        self.version = tk.simpledialog.askstring(title=__file__, prompt="Enter version <vYYYYMMDD>:",
+                                                 initialvalue=self.version)
+        cf[self.ind]['version'] = self.version
         self.cf.save_to_file()
         self.version_button.config(text=self.version)
-        self.version_path = os.path.join(self.dataReduction_path, self.version)
+        self.version_path = os.path.join(self.dataReduction_folder, self.version)
         os.makedirs(self.version_path, exist_ok=True)
         self.create_file_path_and_key()
         self.update_key_label()
         self.label.config(text=self.file_txt)
+
 
     def load_root_config(self, config_file_path):
         self.root_config = ConfigParser()
@@ -591,6 +590,7 @@ def save_putty():
     putty_test_sav_path = tk.StringVar(master)
     putty_test_sav_path.set(os.path.join(Test.dataReduction_folder, putty_test_sav))
     try:
+        print(f"{putty_test_sav_path.get()=} {putty_test_sav_path.get()=}")
         os.rename(putty_test_csv_path.get(), putty_test_sav_path.get())
         print('wrote', putty_test_sav_path.get())
         return True
