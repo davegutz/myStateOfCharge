@@ -666,8 +666,11 @@ if __name__ == '__main__':
     master.iconphoto(False, tk.PhotoImage(file=icon_path))
     tk.Label(master, text="Item", fg="blue").grid(row=row, column=0, sticky=tk.N, pady=2)
     tk.Label(master, text="Test", fg="blue").grid(row=row, column=1, sticky=tk.N, pady=2)
-    modeling = tk.BooleanVar(master)
-    modeling.set(bool(cf['others']['modeling']))
+    model_str = cf['others']['modeling']
+    if model_str == 'True':
+        modeling = tk.BooleanVar(master, True)
+    else:
+        modeling = tk.BooleanVar(master, False)
     modeling_button = tk.Checkbutton(master, text='modeling', bg=bg_color, variable=modeling,
                                      onvalue=True, offvalue=False)
     modeling_button.grid(row=row, column=3, pady=2, sticky=tk.N)
