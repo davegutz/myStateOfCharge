@@ -68,3 +68,5 @@ SOC_Particle/py/.idea/py.iml
 SOC_Particle/nul
 SOC_Particle/src/SOC_Particle.cpp
 *.ods#
+SOC_Particle/py/logs.txt
+SOC_Particle/py/logse.txt

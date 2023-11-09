@@ -31,12 +31,16 @@ import shutil
 import pyperclip
 import subprocess
 import datetime
+# import sys
 import platform
 if platform.system() == 'Darwin':
     from ttwidgets import TTButton as myButton
 else:
     from tkinter import Button as myButton
 global putty_shell
+
+# sys.stdout = open('logs.txt', 'w')
+# sys.stderr = open('logse.txt', 'w')
 
 # Transient string
 sel_list = ['custom', 'ampHiFail', 'rapidTweakRegression', 'offSitHysBmsBB', 'offSitHysBmsCH', 'triTweakDisch', 'coldStart', 'ampHiFailFf',
@@ -420,6 +424,29 @@ def grab_start():
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
+def handle_modeling(*args):
+    cf['others']['modeling'] = str(modeling.get())
+    cf.save_to_file()
+    if modeling.get() is True:
+        ref_remove()
+    else:
+        ref_restore()
+
+
+def handle_option(*args):
+    lookup_start()
+    option_ = option.get()
+    option_show.set(option_)
+    cf['others']['option'] = option_
+    cf.save_to_file()
+    Test.create_file_path_and_key()
+    Ref.create_file_path_and_key()
+    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data')
+    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data as')
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+
+
 def lookup_start():
     start_val, reset_val, ev_val = lookup.get(option.get())
     start.set(start_val)
@@ -444,28 +471,6 @@ def lookup_start():
         ev4_label.config(text='-' + ev_val[3])
     else:
         ev4_label.config(text='')
-
-
-def modeling_handler(*args):
-    cf['others']['modeling'] = str(modeling.get())
-    if modeling.get() is True:
-        ref_remove()
-    else:
-        ref_restore()
-
-
-def option_handler(*args):
-    lookup_start()
-    option_ = option.get()
-    option_show.set(option_)
-    cf['others']['option'] = option_
-    cf.save_to_file()
-    Test.create_file_path_and_key()
-    Ref.create_file_path_and_key()
-    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data')
-    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data as')
-    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
-    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def putty_size():
@@ -590,8 +595,7 @@ def save_putty():
     putty_test_sav_path = tk.StringVar(master)
     putty_test_sav_path.set(os.path.join(Test.dataReduction_folder, putty_test_sav))
     try:
-        print(f"{putty_test_sav_path.get()=} {putty_test_sav_path.get()=}")
-        os.rename(putty_test_csv_path.get(), putty_test_sav_path.get())
+        shutil.move(putty_test_csv_path.get(), putty_test_sav_path.get())
         print('wrote', putty_test_sav_path.get())
         return True
     except OSError:
@@ -667,7 +671,7 @@ if __name__ == '__main__':
     modeling_button = tk.Checkbutton(master, text='modeling', bg=bg_color, variable=modeling,
                                      onvalue=True, offvalue=False)
     modeling_button.grid(row=row, column=3, pady=2, sticky=tk.N)
-    modeling.trace_add('write', modeling_handler)
+    modeling.trace_add('write', handle_modeling)
     ref_label = tk.Label(master, text="Ref", fg="blue")
     ref_label.grid(row=row, column=4, sticky=tk.N, pady=2)
 
@@ -729,7 +733,7 @@ if __name__ == '__main__':
     sel = tk.OptionMenu(master, option, *sel_list)
     sel.config(width=20)
     sel.grid(row=row, padx=5, pady=5, sticky=tk.W)
-    option.trace_add('write', option_handler)
+    option.trace_add('write', handle_option)
     Test.label = tk.Label(master, text=Test.file_txt)
     Test.label.grid(row=row, column=1, padx=5, pady=5)
     Ref.label = tk.Label(master, text=Ref.file_txt)
@@ -807,6 +811,6 @@ if __name__ == '__main__':
     run_run_choose_button.grid(sticky="W", row=row, column=2, padx=5, pady=5)
 
     # Begin
-    modeling_handler()
-    option_handler()
+    handle_modeling()
+    handle_option()
     master.mainloop()
