@@ -255,8 +255,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     hys_->calculate(ib_, soc_);
     boolean init_low = bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR );
     dv_hys_ = hys_->update(dt_, sat_, init_low, Sen->Flt->e_wrap(), reset_temp);
-    // disable hys g20230530a
-    dv_hys_ = 0.;
+    // dv_hys_ = 0.;  // disable hys g20230530a
     voc_stat_ = voc_ - dv_hys_;
     ioc_ = hys_->ioc();
     
@@ -423,21 +422,22 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("BM::");
     this->Battery::pretty_print();
     Serial.printf(" BM::BM:\n");
-    Serial.printf("  ah_ekf_%7.3f; A-h\n", amp_hrs_remaining_ekf_);
-    Serial.printf("  ah_soc_%7.3f; A-h\n", amp_hrs_remaining_soc_);
-    Serial.printf("  EKF_conv %d;\n", converged_ekf());
-    Serial.printf("  dv_hys%7.3f; V\n", hys_->dv_hys());
-    Serial.printf("  dv_hys_sim%7.3f; V\n", Sen->Sim->hys_state());
-    Serial.printf("  e_wrap%7.3f; V\n", Sen->Flt->e_wrap());
-    Serial.printf("  q_ekf%10.1f; C\n", q_ekf_);
-    Serial.printf("  soc_ekf%8.4f; frac\n", soc_ekf_);
-    Serial.printf("  tc%5.1f; hr\n", tcharge_);
-    Serial.printf("  tc_ekf%5.1f; hr\n", tcharge_ekf_);
-    Serial.printf("  voc_filt%7.3f; V\n", voc_filt_);
-    Serial.printf("  voc_soc%7.3f; V\n", voc_soc_);
-    Serial.printf("  voc_stat%7.3f; V\n", voc_stat_);
-    Serial.printf("  y_filt%7.3f; Res EKF, V\n", y_filt_);
+    Serial.printf("  ah_ekf_%7.3f A-h\n", amp_hrs_remaining_ekf_);
+    Serial.printf("  ah_soc_%7.3f A-h\n", amp_hrs_remaining_soc_);
+    Serial.printf("  EKF_conv %d\n", converged_ekf());
+    Serial.printf("  dv_hys%7.3f V\n", hys_->dv_hys());
+    Serial.printf("  dv_hys_sim%7.3f V\n", Sen->Sim->hys_state());
+    Serial.printf("  e_wrap%7.3f V\n", Sen->Flt->e_wrap());
+    Serial.printf("  q_ekf%10.1f C\n", q_ekf_);
+    Serial.printf("  soc_ekf%8.4f frac\n", soc_ekf_);
+    Serial.printf("  tc%5.1f hr\n", tcharge_);
+    Serial.printf("  tc_ekf%5.1f hr\n", tcharge_ekf_);
+    Serial.printf("  voc_filt%7.3f V\n", voc_filt_);
+    Serial.printf("  voc_soc%7.3f V\n", voc_soc_);
+    Serial.printf("  voc_stat%7.3f V\n", voc_stat_);
+    Serial.printf("  y_filt%7.3f Res EKF, V\n", y_filt_);
     Serial.printf(" *sp_s_cap_mon%7.3f Slr\n", sp.s_cap_mon());
+    Serial.printf("  vb_model%7.3f V\n", vb_model_);
     hys_->pretty_print();
 }
 
