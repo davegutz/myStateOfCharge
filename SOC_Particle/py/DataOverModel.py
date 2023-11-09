@@ -355,7 +355,7 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
     plt.plot(mv.time, mv.wl_fa + 2, color='red', linestyle='--', label='wrap_lo_fa' + test_str + '+2')
     plt.plot(mo.time, mo.red_loss, color='green', linestyle='-', label='red_loss' + ref_str)
     plt.plot(mv.time, mv.red_loss, color='red', linestyle='--', label='red_loss' + test_str)
-    plt.plot(mo.time, mo.wv_fa + 2, color='green', linestyle='-', label='wrap_vb_fa' + ref_str + '-2')
+    plt.plot(mo.time, mo.wv_fa - 2, color='green', linestyle='-', label='wrap_vb_fa' + ref_str + '-2')
     plt.plot(mv.time, mv.wv_fa - 2, color='red', linestyle='--', label='wrap_vb_fa' + test_str + '-2')
     plt.plot(mo.time, mo.ccd_fa - 4, color='green', linestyle='-', label='cc_diff_fa' + ref_str + '-4')
     plt.plot(mv.time, mv.ccd_fa - 4, color='red', linestyle='--', label='cc_diff_fa' + test_str + '-4')
