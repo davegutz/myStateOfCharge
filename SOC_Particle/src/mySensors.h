@@ -68,7 +68,7 @@ class Shunt: public Adafruit_ADS1015
 {
 public:
   Shunt();
-  Shunt(const String name, const uint8_t port, float *sp_shunt_gain_sclr, float *sp_ib_scale, float *sp_Ib_bias, const float v2a_s,
+  Shunt(const String name, const uint8_t port, float *sp_ib_scale, float *sp_Ib_bias, const float v2a_s,
     const uint8_t vc_pin, const uint8_t vo_pin);
   ~Shunt();
   // operators
@@ -81,8 +81,6 @@ public:
   void pretty_print();
   void sample(const boolean reset_loc, const float T);
   float scale() { return ( *sp_ib_scale_ ); };
-  void sp_shunt_gain_sclr(const float sclr) { *sp_shunt_gain_sclr_ = sclr; };
-  float sp_shunt_gain_sclr() { return *sp_shunt_gain_sclr_; };
   unsigned long int sample_time(void) { return sample_time_; };
   float v2a_s() { return v2a_s_ ; };
   float vshunt() { return vshunt_; };
@@ -105,7 +103,6 @@ protected:
   float Ishunt_cal_;    // Sensed bank current, calibrated ADC, A
   float *sp_Ib_bias_;   // Global bias, A
   float *sp_ib_scale_;  // Global scale, A
-  float *sp_shunt_gain_sclr_; // Scalar on shunt gain
   unsigned long int sample_time_;   // Exact moment of hardware sample
   unsigned long int sample_time_z_; // Exact moment of past hardware sample
   boolean dscn_cmd_;    // User command to ignore hardware, T=ignore

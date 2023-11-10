@@ -49,6 +49,7 @@ Coulombs::~Coulombs() {}
 // Pretty print
 void Coulombs::pretty_print(void)
 {
+#ifndef DEPLOY_PHOTON
   Serial.printf("Coulombs:\n");
   Serial.printf(" coul_eff%9.5f\n", coul_eff_);
   Serial.printf(" delta_q%9.1f, C\n", *sp_delta_q_);
@@ -72,6 +73,9 @@ void Coulombs::pretty_print(void)
   Serial.printf(" t_rlim%7.3f dg C / s\n", t_rlim_);
   Serial.printf("Coulombs (mod_code=%d) ", *chem_.sp_mod_code);
   chem_.pretty_print();
+#else
+     Serial.printf("Coulombs: silent for DEPLOY_PHOTON\n");
+#endif
 }
 
 // functions

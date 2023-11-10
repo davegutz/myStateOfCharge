@@ -54,7 +54,6 @@ SavedPars::SavedPars(SerialRAM *ram)
         delta_q_eeram_.a16 = next_;  next_ += sizeof(delta_q_);
         delta_q_model_eeram_.a16 = next_;  next_ += sizeof(delta_q_model_);
         freq_eeram_.a16 = next_; next_ += sizeof(freq_);
-        hys_scale_eeram_.a16 = next_; next_ += sizeof(hys_scale_);
         Ib_bias_all_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_all_);
         Ib_bias_amp_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_amp_);
         Ib_bias_noa_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_noa_);
@@ -70,7 +69,7 @@ SavedPars::SavedPars(SerialRAM *ram)
         nP_eeram_.a16 = next_; next_ += sizeof(nP_);
         nS_eeram_.a16 = next_; next_ += sizeof(nS_);
         preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving_);
-        shunt_gain_sclr_eeram_.a16 = next_;  next_ += sizeof(shunt_gain_sclr_);
+        Dw_eeram_.a16 = next_;  next_ += sizeof(vb_table_bias_);
         sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm_);
         s_cap_mon_eeram_.a16 = next_;  next_ += sizeof(s_cap_mon_);
         s_cap_sim_eeram_.a16 = next_;  next_ += sizeof(s_cap_sim_);
@@ -125,7 +124,6 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(nP_, float(1e-6), float(100.)) ||
         is_val_corrupt(nS_, float(1e-6), float(100.)) ||
         is_val_corrupt(preserving_, uint8_t(0), uint8_t(1)) ||
-        is_val_corrupt(shunt_gain_sclr_, float(-1e6), float(1e6)) ||
         is_val_corrupt(sim_chm_, uint8_t(0), uint8_t(10)) ||
         is_val_corrupt(s_cap_mon_, float(0.), float(1000.)) ||
         is_val_corrupt(s_cap_sim_, float(0.), float(1000.)) ||
@@ -135,7 +133,8 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(t_last_, float(-10.), float(70.)) ||
         is_val_corrupt(t_last_model_, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_bias_hdwe_, float(-10.), float(70.)) ||
-        is_val_corrupt(Vb_scale_, float(-1e6), float(1e6)) ;
+        is_val_corrupt(Vb_scale_, float(-1e6), float(1e6)) ||
+        is_val_corrupt(vb_table_bias_, float(-1e6), float(1e6));
     if ( corruption )
     {
         Serial.printf("corrupt*********\n");
@@ -202,7 +201,6 @@ int SavedPars::num_diffs()
     if ( float(1.) != cutback_gain_sclr_ ) n++;
     if ( int(0) != debug_ ) n++;
     if ( float(0.) != freq_ ) n++;
-    if ( float(HYS_SCALE) != hys_scale_ ) n++;
     if ( float(CURR_BIAS_ALL) != Ib_bias_all_ ) n++;
     if ( float(CURR_BIAS_AMP) != Ib_bias_amp_ ) n++;
     if ( float(CURR_BIAS_NOA) != Ib_bias_noa_ ) n++;
@@ -214,13 +212,13 @@ int SavedPars::num_diffs()
     if ( uint8_t(MON_CHEM) != mon_chm_ ) n++;
     if ( float(NP) != nP_ ) n++;
     if ( float(NS) != nS_ ) n++;
-    if ( float(1.) != shunt_gain_sclr_ ) n++;
     if ( uint8_t(SIM_CHEM) != sim_chm_ ) n++;
     if ( float(1.) != s_cap_mon_ ) n++;
     if ( float(1.) != s_cap_sim_ ) n++;
     if ( float(TEMP_BIAS) != Tb_bias_hdwe_ ) n++;
     if ( uint8_t(0) != type_ ) n++;
     if ( float(VOLT_BIAS) != Vb_bias_hdwe_ ) n++;
+    if ( float(0.) != vb_table_bias_ ) n++;
     if ( float(VB_SCALE) != Vb_scale_ ) n++;
     return ( n );
 }
@@ -257,7 +255,6 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" delta_q%10.1f %10.1f *DQ<>\n", double(0.), delta_q_);
     if ( all )                                  Serial.printf(" dq_sim %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model_);
     if ( all || float(0.) != freq_ )            Serial.printf(" inj frq%7.3f  %7.3f *Xf<> r/s\n", 0., freq_);
-    if ( all || float(HYS_SCALE) != hys_scale_ ) Serial.printf(" hys_scale     %7.3f    %7.3f *Sh<>\n", HYS_SCALE, hys_scale_);
     if ( all || float(CURR_BIAS_ALL) != Ib_bias_all_ )  Serial.printf(" Ib_bias_all%7.3f  %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all_);
     if ( all || float(CURR_BIAS_AMP) != Ib_bias_amp_ )  Serial.printf(" bias_amp%7.3f  %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp_);
     if ( all || float(CURR_BIAS_NOA) != Ib_bias_noa_ )  Serial.printf(" bias_noa%7.3f  %7.3f *DB<>\n", CURR_BIAS_NOA, Ib_bias_noa_);
@@ -272,7 +269,6 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" preserving %d  %d *Xm<>\n", uint8_t(0), preserving_);
     if ( all || float(NP) != nP_ )              Serial.printf(" nP            %7.3f    %7.3f *BP<> eg '2P1S'\n", NP, nP_);
     if ( all || float(NS) != nS_ )              Serial.printf(" nS            %7.3f    %7.3f *BS<> eg '2P1S'\n", NS, nS_);
-    if ( all || float(1.) != shunt_gain_sclr_ )  Serial.printf(" shunt_gn_slr%7.3f  %7.3f *SG\n", 1., shunt_gain_sclr_);
     if ( all || SIM_CHEM != sim_chm_ )          Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_chm_);
     if ( all || float(1.) != s_cap_mon_ )     Serial.printf(" s_cap_mon%7.3f  %7.3f *SQ<>\n", 1., s_cap_mon_);
     if ( all || float(1.) != s_cap_sim_ )     Serial.printf(" s_cap_sim%7.3f  %7.3f *Sq<>\n", 1., s_cap_sim_);
@@ -281,8 +277,9 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || uint8_t(0) != type_ )           Serial.printf(" type inj %d  %d *Xt<> 1=sin, 2=sq, 3=tri, 4=1C, 5=-1C, 8=cos\n", 0, type_);
     if ( all )                                  Serial.printf(" t_last %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_);
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model_);
-    if ( all || float(VOLT_BIAS) != Vb_bias_hdwe_ )     Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dv<>,*Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe_);
-    if ( all || float(VB_SCALE) != Vb_scale_ )   Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale_);
+    if ( all || float(VOLT_BIAS) != Vb_bias_hdwe_ )     Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe_);
+    if ( all || float(VB_SCALE) != Vb_scale_ )  Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale_);
+    if ( all || float(0.) != vb_table_bias_ )   Serial.printf(" vb_table_bias %7.3f    %7.3f *Dw\n", 0., vb_table_bias_);
     // if ( all )
     // {
     //     Serial.printf("history array (%d):\n", nhis_);
@@ -346,26 +343,22 @@ void SavedPars::put_all_dynamic()
             break;
 
         case ( 2 ):
-            put_hys_scale();
-            break;
-
-        case ( 3 ):
             put_mon_chm();
             break;
 
-        case ( 4 ):
+        case ( 3 ):
             put_sim_chm();
             break;
 
-        case ( 5 ):
+        case ( 4 ):
             put_t_last();
             break;
 
-        case ( 6 ):
+        case ( 5 ):
             put_t_last_model();
             break;
 
-        case ( 7 ):
+        case ( 6 ):
             put_time_now(Time.now());  // If happen to connect to wifi (assume updated automatically), save new time
             blink = 0;
             break;
@@ -404,11 +397,11 @@ void SavedPars::reset_pars()
 {
     put_amp(float(0));
     put_cutback_gain_sclr(float(1.));
+    put_Dw(float(0.));
     put_debug(int(0));
     put_delta_q(double(0.));
     put_delta_q_model(double(0.));
     put_freq(float(0));
-    put_hys_scale(HYS_SCALE);
     put_Ib_bias_all(float(CURR_BIAS_ALL));
     put_Ib_bias_amp(float(CURR_BIAS_AMP));
     put_Ib_bias_noa(float(CURR_BIAS_NOA));
@@ -424,7 +417,6 @@ void SavedPars::reset_pars()
     put_nP(float(NP));
     put_nS(float(NS));
     put_preserving(uint8_t(0));
-    put_shunt_gain_sclr(float(1.));
     put_sim_chm(uint8_t(SIM_CHEM));
     put_s_cap_mon(float(1.));
     put_s_cap_sim(float(1.));

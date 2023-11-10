@@ -32,13 +32,13 @@ Hysteresis::Hysteresis(Chemistry *chem)
 : disabled_(false), res_(0), soc_(0), ib_(0), ibs_(0), ioc_(0), dv_hys_(0), dv_dot_(0), chem_(chem){}
 
 // Calculate
-float Hysteresis::calculate(const float ib, const float soc)
+float Hysteresis::calculate(const float ib, const float soc, const float hys_scale)
 {
     ib_ = ib;
     soc_ = soc;
 
     // Disabled logic
-    disabled_ = sp.hys_scale() < 1e-5;
+    disabled_ = hys_scale < 1e-5;
 
     // Calculate
     if ( disabled_ )
@@ -91,6 +91,7 @@ float Hysteresis::look_slr(const float dv, const float soc)
 // Print
 void Hysteresis::pretty_print()
 {
+#ifndef DEPLOY_PHOTON
     float res = look_hys(0., 0.8);
     Serial.printf("Hysteresis:\n");
     Serial.printf("  cap%10.1f, F\n", chem_->hys_cap);
@@ -104,13 +105,16 @@ void Hysteresis::pretty_print()
     Serial.printf("  res%7.3f, ohm\n", res_);
     Serial.printf("  slr%7.3f,\n", slr_);
     Serial.printf("  soc%8.4f\n", soc_);
-    Serial.printf("  sp.hys_scale()%6.2f Slr\n", sp.hys_scale());
     Serial.printf("  tau%10.1f, null, s\n", res*chem_->hys_cap);
     chem_->pretty_print();
+#else
+     Serial.printf("Hysteresis: silent for DEPLOY_PHOTON\n");
+#endif
 }
 
 // Dynamic update
-float Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const boolean reset_temp)
+float Hysteresis::update(const double dt, const boolean init_high, const boolean init_low, const float e_wrap, const float hys_scale,
+    const boolean reset_temp)
 {
     float dv_max = chem_->hys_Tx_->interp(soc_);
     float dv_min = chem_->hys_Tn_->interp(soc_);
@@ -143,6 +147,6 @@ float Hysteresis::update(const double dt, const boolean init_high, const boolean
     // Normal ODE integration
     dv_hys_ += dv_dot_ * dt;
     dv_hys_ = max(min(dv_hys_, dv_max), dv_min);
-    return (dv_hys_ * (sp.hys_scale())); // Scale on output only.   Don't retain it for feedback to ode
+    return (dv_hys_ * (hys_scale)); // Scale on output only.   Don't retain it for feedback to ode
 }
 

@@ -66,7 +66,6 @@ public:
     double delta_q() { return delta_q_; }
     double delta_q_model() { return delta_q_model_; }
     float freq() { return freq_; }
-    float hys_scale() { return hys_scale_; }
     uint8_t mon_chm() { return mon_chm_; }
     uint8_t sim_chm() { return sim_chm_; }
     float s_cap_mon() { return s_cap_mon_; }
@@ -86,7 +85,7 @@ public:
     float nP() { return nP_; }
     float nS() { return nS_; }
     uint8_t preserving() { return preserving_; }
-    float shunt_gain_sclr() { return shunt_gain_sclr_; }
+    float Dw() { return vb_table_bias_; }
     float Tb_bias_hdwe() { return Tb_bias_hdwe_; }
     time_t time_now() { return time_now_; }
     uint8_t type() { return type_; }
@@ -123,7 +122,6 @@ public:
         void get_delta_q() { double value; rP_->get(delta_q_eeram_.a16, value); delta_q_ = value; }
         void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model_ = value; }
         void get_freq() { float value; rP_->get(freq_eeram_.a16, value); freq_ = value; }
-        void get_hys_scale() { float value; rP_->get(hys_scale_eeram_.a16, value); hys_scale_ = value; }
         void get_Ib_bias_all() { float value; rP_->get(Ib_bias_all_eeram_.a16, value); Ib_bias_all_ = value; }
         void get_Ib_bias_amp() { float value; rP_->get(Ib_bias_amp_eeram_.a16, value); Ib_bias_amp_ = value; }
         void get_Ib_bias_noa() { float value; rP_->get(Ib_bias_noa_eeram_.a16, value); Ib_bias_noa_ = value; }
@@ -139,7 +137,7 @@ public:
         void get_nP() { float value; rP_->get(nP_eeram_.a16, value); nP_ = value; }
         void get_nS() { float value; rP_->get(nS_eeram_.a16, value); nS_ = value; }
         void get_preserving() { preserving_ = rP_->read(preserving_eeram_.a16); }
-        void get_shunt_gain_sclr() { float value; rP_->get(shunt_gain_sclr_eeram_.a16, value); shunt_gain_sclr_ = value; }
+        void get_shunt_gain_sclr() { float value; rP_->get(Dw_eeram_.a16, value); vb_table_bias_ = value; }
         void get_sim_chm() { sim_chm_ = rP_->read(sim_chm_eeram_.a16); }
         void get_s_cap_mon() { float value; rP_->get(s_cap_mon_eeram_.a16, value); s_cap_mon_ = value; }
         void get_s_cap_sim() { float value; rP_->get(s_cap_sim_eeram_.a16, value); s_cap_sim_ = value; }
@@ -171,14 +169,13 @@ public:
         void put_all_dynamic();
         void put_amp(const float input) { amp_ = input; }
         void put_cutback_gain_sclr(const float input) { cutback_gain_sclr_ = input; }
+        void put_Dw(const float input) { vb_table_bias_ = input; }
         void put_debug(const int input) { debug_ = input; }
         void put_delta_q(const double input) { delta_q_ = input; }
         void put_delta_q() {}
         void put_delta_q_model(const double input) { delta_q_model_ = input; }
         void put_delta_q_model() {}
         void put_freq(const float input) { freq_ = input; }
-        void put_hys_scale(const float input) { hys_scale_ = input; }
-        void put_hys_scale() {}
         void put_Ib_bias_all(const float input) { Ib_bias_all_ = input; }
         void put_Ib_bias_amp(const float input) { Ib_bias_amp_ = input; }
         void put_Ib_bias_noa(const float input) { Ib_bias_noa_ = input; }
@@ -195,7 +192,6 @@ public:
         void put_nP(const float input) { nP_ = input; }
         void put_nS(const float input) { nS_ = input; }
         void put_preserving(const uint8_t input) { preserving_ = input; }
-        void put_shunt_gain_sclr(const float input) { shunt_gain_sclr_ = input; }
         void put_sim_chm(const uint8_t input) { sim_chm_ = input; }
         void put_sim_chm() {}
         void put_s_cap_mon(const float input) { s_cap_mon_ = input; }
@@ -214,14 +210,13 @@ public:
         void put_all_dynamic();
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp_ = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr_ = input; }
+        void put_Dw(const float input) { rP_->put(Dw_eeram_.a16, input); vb_table_bias_ = input; }
         void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug_ = input; }
         void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q_ = input; }
         void put_delta_q() { rP_->put(delta_q_eeram_.a16, delta_q_); }
         void put_delta_q_model(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model_ = input; }
         void put_delta_q_model() { rP_->put(delta_q_model_eeram_.a16, delta_q_model_); }
         void put_freq(const float input) { rP_->put(freq_eeram_.a16, input); freq_ = input; }
-        void put_hys_scale(const float input) { rP_->put(hys_scale_eeram_.a16, input); hys_scale_ = input; }
-        void put_hys_scale() { rP_->put(hys_scale_eeram_.a16, hys_scale_); }
         void put_Ib_bias_all(const float input) { rP_->put(Ib_bias_all_eeram_.a16, input); Ib_bias_all_ = input; }
         void put_Ib_bias_amp(const float input) { rP_->put(Ib_bias_amp_eeram_.a16, input); Ib_bias_amp_ = input; }
         void put_Ib_bias_noa(const float input) { rP_->put(Ib_bias_noa_eeram_.a16, input); Ib_bias_noa_ = input; }
@@ -238,7 +233,6 @@ public:
         void put_nP(const float input) { rP_->put(nP_eeram_.a16, input); nP_ = input; }
         void put_nS(const float input) { rP_->put(nS_eeram_.a16, input); nS_ = input; }
         void put_preserving(const uint8_t input) { rP_->write(preserving_eeram_.a16, input); preserving_ = input; }
-        void put_shunt_gain_sclr(const float input) { rP_->put(shunt_gain_sclr_eeram_.a16, input); shunt_gain_sclr_ = input; }
         void put_sim_chm(const uint8_t input) { rP_->write(sim_chm_eeram_.a16, input); sim_chm_ = input; }
         void put_sim_chm() { rP_->write(sim_chm_eeram_.a16, sim_chm_); }
         void put_s_cap_mon(const float input) { rP_->put(s_cap_mon_eeram_.a16, input); s_cap_mon_ = input; }
@@ -265,7 +259,6 @@ protected:
     double delta_q_;        // Charge change since saturated, C
     double delta_q_model_;  // Charge change since saturated, C
     float freq_;            // Injected frequency, Hz (0-2)
-    float hys_scale_;       // Hysteresis scalar
     float Ib_bias_all_;     // Bias on all shunt sensors, A
     float Ib_bias_amp_;     // Calibration adder of amplified shunt sensor, A
     float Ib_bias_noa_;     // Calibration adder of non-amplified shunt sensor, A
@@ -281,7 +274,6 @@ protected:
     float nS_;              // Number of series batteries in bank, e.g. '2P1S'
     uint8_t preserving_;    // Preserving fault buffer
     uint8_t sim_chm_;       // Simulation battery chemistry type
-    float shunt_gain_sclr_; // Shunt gain scalar
     float s_cap_mon_;       // Scalar on battery monitor size
     float s_cap_sim_;       // Scalar on battery model size
     float Tb_bias_hdwe_;    // Bias on Tb sensor, deg C
@@ -289,6 +281,7 @@ protected:
     uint8_t type_;          // Injected waveform type.   0=sine, 1=square, 2=triangle
     float Vb_bias_hdwe_;    // Calibrate Vb, V
     float Vb_scale_;        // Calibrate Vb scale
+    float vb_table_bias_;   // Battery monitor curve bias, V
     float t_last_;          // Updated value of battery temperature injection when sp.modeling_ and proper wire connections made, deg C
     float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
 
@@ -319,7 +312,7 @@ protected:
         address16b nP_eeram_;
         address16b nS_eeram_;
         address16b preserving_eeram_;
-        address16b shunt_gain_sclr_eeram_;
+        address16b Dw_eeram_;
         address16b sim_chm_eeram_;
         address16b s_cap_mon_eeram_;
         address16b s_cap_sim_eeram_;

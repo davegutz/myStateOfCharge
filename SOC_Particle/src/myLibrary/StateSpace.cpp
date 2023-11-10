@@ -124,6 +124,7 @@ void StateSpace::pretty_print_vec(const String name, const uint8_t n, double *x)
 // Pretty Print
 void StateSpace::pretty_print(void)
 {
+#ifndef DEPLOY_PHOTON
   Serial.printf("StateSpace:\n");
   Serial.printf("  dt = %9.6f\n", dt_);
   pretty_print_mat("A ", n_, n_, A_);
@@ -138,6 +139,9 @@ void StateSpace::pretty_print(void)
   {
     pretty_print_mat("AinvB", n_, n_, AinvB_);
   }
+#else
+     Serial.printf("StateSpace: silent for DEPLOY_PHOTON\n");
+#endif
 
 }
 

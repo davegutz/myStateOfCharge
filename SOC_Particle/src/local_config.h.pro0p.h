@@ -4,6 +4,7 @@
 #include "version.h"
 const String unit = version + "_pro0p";
 #define CONFIG_PHOTON
+#undef DEPLOY_PHOTON
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
@@ -18,13 +19,13 @@ const String unit = version + "_pro0p";
     #define CURR_SCALE_AMP        0.968 // Hardware to match data (* 'SA')
     #define CURR_BIAS_NOA         -0.17 // Calibration of non-amplified shunt sensor (* 'DB'), A
     #define CURR_SCALE_NOA        1.016 // Hardware to match data (* 'SB')
-    #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
+    #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (-1333 is -100A/0.075V)
 #else
     #define CURR_BIAS_AMP         0.0   // Calibration of amplified shunt sensor (* 'DA'), A
     #define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SA')
     #define CURR_BIAS_NOA         0.0   // Calibration of amplified shunt sensor (* 'DB'), A
     #define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
-    #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SG'), A/V (-1333 is -100A/0.075V)
+    #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (-1333 is -100A/0.075V)
 #endif
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
 #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms

@@ -24,11 +24,11 @@ from myFilters import LagExp
 class Coulombs:
     """Coulomb Counting"""
 
-    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, t_rlim=0.017, tweak_test=False, mod_code=0, dvoc=0.):
+    def __init__(self, q_cap_rated, q_cap_rated_scaled, t_rated, temp_rlim=0.017, tweak_test=False, mod_code=0, dvoc=0.):
         self.q_cap_rated = q_cap_rated
         self.q_cap_rated_scaled = q_cap_rated_scaled
         self.t_rated = t_rated
-        self.t_rlim = t_rlim
+        self.temp_rlim = temp_rlim
         self.delta_q = 0.
         self.q = 0.
         self.q_capacity = 0.
@@ -62,7 +62,7 @@ class Coulombs:
         s += "  t_rated =    {:5.1f}         // Rated temperature, deg C\n".format(self. t_rated)
         s += "  t_last =     {:5.1f}         // Last battery temperature for rate limit memory, deg C\n"\
             .format(self.t_last)
-        s += "  t_rlim =     {:7.3f}       // Tbatt rate limit, deg C / s\n".format(self. t_rlim)
+        s += "  temp_rlim =     {:7.3f}       // Tbatt rate limit, deg C / s\n".format(self. temp_rlim)
         s += "  resetting =     {:d}          // Flag to test coulomb counters, T = external reset of counter\n"\
             .format(self.resetting)
         s += "  soc_min =    {:7.3f}       // Lowest soc for power delivery.   Arises with temp < 20 C\n"\
@@ -139,7 +139,7 @@ class Coulombs:
         self.sat = sat
 
         # Rate limit temperature
-        self.temp_lim = max(min(temp_c, self.t_last + self.t_rlim*dt), self.t_last - self.t_rlim*dt)
+        self.temp_lim = max(min(temp_c, self.t_last + self.temp_rlim*dt), self.t_last - self.temp_rlim*dt)
         if reset:
             self.temp_lim = temp_c
             self.t_last = temp_c

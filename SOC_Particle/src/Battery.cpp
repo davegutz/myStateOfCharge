@@ -103,6 +103,7 @@ float_t Battery::calc_vsat(void)
 // Print
 void Battery::pretty_print(void)
 {
+#ifndef DEPLOY_PHOTON
     Serial.printf("Battery:\n");
     Serial.printf("  bms_charging %d\n", bms_charging_);
     Serial.printf("  bms_off %d\n", bms_off_);
@@ -128,6 +129,9 @@ void Battery::pretty_print(void)
     Serial.printf("  voc_stat%7.3f, V\n", voc_stat_);
     Serial.printf("  voltage_low %d, BMS will turn off\n", voltage_low_);
     Serial.printf("  vsat%7.3f, V\n", vsat_);
+#else
+     Serial.printf("Battery: silent for DEPLOY_PHOTON\n");
+#endif
 }
 
 // EKF model for update
@@ -413,6 +417,7 @@ boolean BatteryMonitor::is_sat(const boolean reset)
 // Print
 void BatteryMonitor::pretty_print(Sensors *Sen)
 {
+#ifndef DEPLOY_PHOTON
     Serial.printf("BM::");
     this->Battery::pretty_print();
     Serial.printf(" BM::BM:\n");
@@ -430,6 +435,9 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("  y_filt%7.3f Res EKF, V\n", y_filt_);
     Serial.printf(" *sp_s_cap_mon%7.3f Slr\n", sp.s_cap_mon());
     Serial.printf("  vb_model_rev%7.3f V\n", vb_model_rev_);
+#else
+     Serial.printf("BatteryMonitor: silent for DEPLOY_PHOTON\n");
+#endif
 }
 
 // Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
@@ -507,8 +515,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in jumpered hardware testing
 BatterySim::BatterySim() :
-    Battery(&sp.delta_q_model_, &sp.t_last_model_, &sp.sim_chm_, VS), duty_(0UL), ib_fut_(0.), ib_in_(0.), model_cutback_(true),
-    q_(NOM_UNIT_CAP*3600.), sample_time_(0UL), sample_time_z_(0UL), sat_ib_max_(0.)
+    Battery(&sp.delta_q_model_, &sp.t_last_model_, &sp.sim_chm_, VS), duty_(0UL), hys_scale_(HYS_SCALE), ib_fut_(0.),
+    ib_in_(0.), model_cutback_(true), q_(NOM_UNIT_CAP*3600.), sample_time_(0UL), sample_time_z_(0UL), sat_ib_max_(0.)
 {
     // ChargeTransfer dynamic model for EKF
     // Resistance values add up to same resistance loss as matched to installed battery
@@ -589,9 +597,9 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
 
 
     // Hysteresis model
-    hys_->calculate(ib_in_, soc_);
+    hys_->calculate(ib_in_, soc_, hys_scale_);
     boolean init_low = bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR );
-    dv_hys_ = hys_->update(dt_, sat_, init_low, 0.0, reset);
+    dv_hys_ = hys_->update(dt_, sat_, init_low, 0.0, reset, hys_scale_);
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
 
@@ -819,10 +827,12 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
 // Print
 void BatterySim::pretty_print(void)
 {
+#ifndef DEPLOY_PHOTON
     Serial.printf("BS::");
     this->Battery::pretty_print();
     Serial.printf(" BS::BS:\n");
     Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
+    Serial.printf("  hys_scale%7.3f,\n", hys_scale_)
     Serial.printf("  ib%7.3f, A\n", ib_);
     Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
     Serial.printf("  ib_in%7.3f, A\n", ib_in_);
@@ -834,4 +844,7 @@ void BatterySim::pretty_print(void)
     Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
     Serial.printf(" *sp_s_cap_sim%7.3f Slr\n", sp.s_cap_sim());
     hys_->pretty_print();
+#else
+     Serial.printf("BatterySim: silent for DEPLOY_PHOTON\n");
+#endif
 }

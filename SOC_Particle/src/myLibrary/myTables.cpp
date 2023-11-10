@@ -1,6 +1,7 @@
 #include <Arduino.h> //needed for Serial.println
 #include "myTables.h"
 #include "math.h"
+#include "../constants.h"
 
 // Global variables
 extern char buffer[256];
@@ -187,6 +188,7 @@ float TableInterp::interp(void)
 }
 void TableInterp::pretty_print(void)
 {
+#ifndef DEPLOY_PHOTON
   unsigned int i;
   Serial.printf("    x={");
   for ( i = 0; i < n1_; i++ )
@@ -200,6 +202,9 @@ void TableInterp::pretty_print(void)
      Serial.printf("%7.3f, ", v_[i]);
   }
   Serial.printf("};\n");
+#else
+     Serial.printf("TableInterp: silent for DEPLOY_PHOTON\n");
+#endif
 }
 
 // 1-D Interpolation Table Lookup
@@ -298,6 +303,7 @@ static float  vTbl[24]  =
 
 void TableInterp2D::pretty_print()
 {
+#ifndef DEPLOY_PHOTON
   unsigned int i, j;
   Serial.printf("    y={"); for ( j=0; j<n2_; j++ ) Serial.printf("%7.3f, ", y_[j]); Serial.printf("};\n");
   Serial.printf("    x={"); for ( i=0; i<n1_; i++ ) Serial.printf("%7.3f, ", x_[i]); Serial.printf("};\n");
@@ -309,4 +315,7 @@ void TableInterp2D::pretty_print()
     Serial.printf("},\n");
   }
   Serial.printf("      };\n");
+#else
+     Serial.printf("TableInterp2D: silent for DEPLOY_PHOTON\n");
+#endif
 }

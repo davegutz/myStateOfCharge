@@ -106,7 +106,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         t = sim_old.time
     else:
         t = mon_old.time
-    updateTimeIn = sts.mode(mon_old.dt)
+    update_time_in = sts.mode(mon_old.dt)
     if t_max is not None:
         t_delt = t - t[0]
         t = t[np.where(t_delt <= t_max)]
@@ -221,7 +221,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         else:
             _chm_s = Bsim
         sim.calculate(chem=_chm_s, temp_c=Tb_, soc=sim.soc, curr_in=ib_in_s, dt=T, q_capacity=sim.q_capacity,
-                      dc_dc_on=dc_dc_on, reset=reset, updateTimeIn=updateTimeIn, rp=rp, sat_init=sat_s_init,
+                      dc_dc_on=dc_dc_on, reset=reset, update_time_in=update_time_in, rp=rp, sat_init=sat_s_init,
                       bms_off_init=bms_off_init)
         sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb_, charge_curr=sim.ib_charge, sat=False, soc_s_init=soc_s_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q, use_soc_in=use_mon_soc, soc_in=mon_old.soc[i])
@@ -263,11 +263,11 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
             z_old = None
             x_old = None
         if rp.modeling == 0:
-            mon.calculate(_chm_m, Tb_, vb_, ib_, T, rp=rp, reset=reset, updateTimeIn=updateTimeIn, u_old=u_old,
+            mon.calculate(_chm_m, Tb_, vb_, ib_, T, rp=rp, reset=reset, update_time_in=update_time_in, u_old=u_old,
                           z_old=z_old, x_old=x_old, bms_off_init=bms_off_init)
         else:
             mon.calculate(_chm_m, Tb_, vb_ + randn() * v_std + dv_sense, ib_ + randn() * i_std + di_sense, T, rp=rp,
-                          reset=reset, updateTimeIn=updateTimeIn, u_old=u_old, z_old=z_old, x_old=x_old,
+                          reset=reset, update_time_in=update_time_in, u_old=u_old, z_old=z_old, x_old=x_old,
                           bms_off_init=bms_off_init)
         ib_charge = mon.ib_charge
         sat = is_sat(Tb_, mon.voc_filt, mon.soc, mon.chemistry.nom_vsat, mon.chemistry.dvoc_dt, mon.chemistry.low_t)

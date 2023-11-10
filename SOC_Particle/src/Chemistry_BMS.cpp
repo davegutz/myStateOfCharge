@@ -435,6 +435,7 @@ uint8_t Chemistry::encode(const String mod_str)
 // Pretty print
 void Chemistry::pretty_print(void)
 {
+#ifndef DEPLOY_PHOTON
     Serial.printf("Chemistry:\n");
     Serial.printf("  dqdt%7.3f, frac/dg C\n", dqdt);
     Serial.printf("  dv_min_abs%7.3f, V\n", dv_min_abs);
@@ -469,4 +470,7 @@ void Chemistry::pretty_print(void)
     hys_Tx_->pretty_print();
     Serial.printf("  r_min(soc):\n");
     hys_Tn_->pretty_print();
+#else
+     Serial.printf("Chemistry: silent for DEPLOY_PHOTON\n");
+#endif
 }
