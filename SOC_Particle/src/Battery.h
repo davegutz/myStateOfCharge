@@ -171,7 +171,7 @@ public:
   boolean solve_ekf(const boolean reset, const boolean reset_temp, Sensors *Sen);
   float tcharge() { return tcharge_; };
   float dv_dyn() { return dv_dyn_; };
-  float vb_model() { return vb_model_; };
+  float vb_model_rev() { return vb_model_rev_; };
   float voc_filt() { return voc_filt_; };
   float voc_soc() { return voc_soc_; };
   double y_ekf() { return y_; };
@@ -180,21 +180,21 @@ public:
 protected:
   General2_Pole *y_filt = new General2_Pole(2.0, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
   SlidingDeadband *SdVb_;  // Sliding deadband filter for Vb
-  TFDelay *EKF_converged;     // Time persistence
+  TFDelay *EKF_converged;  // Time persistence
   RateLimit *T_RLim = new RateLimit();
-  Iterator *ice_;       // Iteration control for EKF solver
+  Iterator *ice_;      // Iteration control for EKF solver
   float amp_hrs_remaining_ekf_;  // Discharge amp*time left if drain to q_ekf=0, A-h
   float amp_hrs_remaining_soc_;  // Discharge amp*time left if drain soc_ to 0, A-h
-  double dt_eframe_;    // Update time for EKF major frame
-  uint8_t eframe_;      // Counter to run EKF slower than Coulomb Counter and ChargeTransfer models
-  float ib_charge_;  // Current input avaiable for charging, A
+  double dt_eframe_;   // Update time for EKF major frame
+  uint8_t eframe_;     // Counter to run EKF slower than Coulomb Counter and ChargeTransfer models
+  float ib_charge_;    // Current input avaiable for charging, A
   double q_ekf_;       // Filtered charge calculated by ekf, C
   float soc_ekf_;      // Filtered state of charge from ekf (0-1)
   float tcharge_;      // Counted charging time to 100%, hr
   float tcharge_ekf_;  // Solved charging time to 100% from ekf, hr
-  float vb_model_;     // Reversionary model of vb, V
+  float vb_model_rev_; // Reversionary model of vb, V
   float voc_filt_;     // Filtered, static model open circuit voltage, V
-  float voc_soc_;  // Raw table lookup of voc, V
+  float voc_soc_;      // Raw table lookup of voc, V
   float y_filt_;       // Filtered EKF y value, V
   void ekf_predict(double *Fx, double *Bu);
   void ekf_update(double *hx, double *H);

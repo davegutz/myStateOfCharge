@@ -808,7 +808,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   {
     if ( (Flt->wrap_vb_fa() || Flt->vb_fa()) && !cp.fake_faults )
     {
-      Vb = Vb_model;
+      Vb = Mon->vb_model_rev();
       sample_time_vb_ = Sim->sample_time();
     }
     else

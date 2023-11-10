@@ -256,7 +256,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     
 
     // Reversionary model
-    vb_model_ = voc_soc_ + dv_dyn_ + dv_hys_;
+    vb_model_rev_ = voc_soc_ + dv_dyn_ + dv_hys_;
 
     // EKF 1x1
     if ( eframe_ == 0 )
@@ -306,7 +306,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     else 
         tcharge_ekf_ = -24.*soc_ekf_;
 
-    return ( vb_model_ );
+    return ( vb_model_rev_ );
 }
 
 // Charge time calculation
@@ -429,7 +429,7 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("  voc_stat%7.3f V\n", voc_stat_);
     Serial.printf("  y_filt%7.3f Res EKF, V\n", y_filt_);
     Serial.printf(" *sp_s_cap_mon%7.3f Slr\n", sp.s_cap_mon());
-    Serial.printf("  vb_model%7.3f V\n", vb_model_);
+    Serial.printf("  vb_model_rev%7.3f V\n", vb_model_rev_);
 }
 
 // Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
