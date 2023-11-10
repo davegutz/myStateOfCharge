@@ -112,7 +112,6 @@ void Chemistry::assign_BB()
     dqdt = 0.01;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
     dv_min_abs = 0.3;  // Absolute value of +/- hysteresis limit, V (0.3)
     dvoc_dt = 0.004;   // Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
-    dvoc = 0.;         // Adjustment for calibration error, V (systematic error; may change in future, 0.)
     hys_cap = 3.6e3;   // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022 (3.6e3)
                        // tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
     low_voc = 9.0;  // Voltage threshold for BMS to turn off battery, V (9.)
@@ -202,7 +201,6 @@ void Chemistry::assign_CH()
     dqdt = 0.01;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
     dv_min_abs = 0.06; // Absolute value of +/- hysteresis limit, V (0.06)
     dvoc_dt = 0.004;   // Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
-    dvoc = 0.;         // Adjustment for calibration error, V (systematic error; may change in future, 0.)
     hys_cap = 1.e4;    // Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s (1e4)
     Serial.printf("CH dv_min_abs=%7.3f, cap=%7.1f\n", dv_min_abs, hys_cap);
     low_voc = 9.;         // Voltage threshold for BMS to turn off battery (9.)
@@ -252,7 +250,6 @@ void Chemistry::assign_SP()
     // Constants
     dqdt = 0.01;     // Change of charge with temperature, fraction/deg C (0.01 from literature)
     dvoc_dt = 0.004; // Change of VOC with operating temperature in range 0 - 50 C V/deg C
-    dvoc = 0.;       // Adjustment for calibration error, V (systematic error; may change in future)
     hys_cap = 3.6e3; // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022
     low_voc = 9.;    // Voltage threshold for BMS to turn off battery;
     low_t = 0;       // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
@@ -439,7 +436,6 @@ void Chemistry::pretty_print(void)
     Serial.printf("Chemistry:\n");
     Serial.printf("  dqdt%7.3f, frac/dg C\n", dqdt);
     Serial.printf("  dv_min_abs%7.3f, V\n", dv_min_abs);
-    Serial.printf("  dvoc%7.3f, V\n", dvoc);
     Serial.printf("  dvoc_dt%7.3f, V/dg C\n", dvoc_dt);
     Serial.printf("  hys_cap%7.0f, F\n", hys_cap);
     Serial.printf("  low_t%7.3f, V\n", low_t);

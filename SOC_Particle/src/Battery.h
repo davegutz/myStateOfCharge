@@ -71,6 +71,9 @@ const float MXEPS = 1.05;         // Level of soc that indicates mathematically 
 #ifndef VS
   #define VS 0.0
 #endif
+#ifndef VTAB_BIAS
+  #define VTAB_BIAS 0.0
+#endif
 
 // Battery Class
 class Battery : public Coulombs
@@ -91,12 +94,8 @@ public:
   float dqdt() { return chem_.dqdt; };
   void ds_voc_soc(const float _ds) { ds_voc_soc_ = _ds; };
   float ds_voc_soc() { return ds_voc_soc_; };
-  void Dv(const float _dv) { chem_.dvoc = _dv; };
-  float Dv() { return chem_.dvoc; };
   float dv_dsoc() { return dv_dsoc_; };
   float dv_dyn() { return dv_dyn_; };
-  void dv_voc_soc(const float _dv) { dv_voc_soc_ = _dv; };
-  float dv_voc_soc() { return dv_voc_soc_; };
   uint8_t encode(const String mod_str);
   float ib() { return ib_; };            // Battery terminal current, A
   float ibs() { return ibs_; };          // Hysteresis input current, A
@@ -120,7 +119,6 @@ protected:
   float dv_dsoc_;  // Derivative scaled, V/fraction
   float dv_dyn_;   // ib-induced back emf, V
   float dv_hys_;   // Hysteresis state, voc-voc_out, V
-  float dv_voc_soc_;    // VOC(SOC) delta voc on output
   float ib_;       // Battery terminal current, A
   float ibs_;      // Hysteresis input current, A
   float ioc_;      // Hysteresis output current, A
@@ -213,6 +211,8 @@ public:
   float calc_inj(const unsigned long now, const uint8_t type, const float amp, const double freq);
   float count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon, const boolean initializing_all);
   boolean cutback() { return model_cutback_; };
+  void Dv(const float _dv) { dv_voc_soc_ = _dv; };
+  float Dv() { return dv_voc_soc_; };
   double delta_q() { return *sp_delta_q_; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
   void hys_pretty_print () { hys_->pretty_print(); };
@@ -236,6 +236,7 @@ protected:
   TriInj *Tri_inj_;         // Class to create triangle waves
   CosInj *Cos_inj_;         // Class to create cosine waves
   uint32_t duty_;           // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
+  float dv_voc_soc_;        // Adjustment on voc_soc table, Dy, V
   float hys_scale_;         // Hysteresis scalar
   float ib_charge_;         // Current input avaiable for charging, A
   float ib_fut_;            // Future value of limited current, A

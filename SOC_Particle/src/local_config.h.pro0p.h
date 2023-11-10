@@ -5,6 +5,7 @@
 const String unit = version + "_pro0p";
 #define CONFIG_PHOTON
 #undef DEPLOY_PHOTON
+#undef DEBUG_INIT
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
@@ -35,6 +36,7 @@ const String unit = version + "_pro0p";
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
 #define VB_SCALE              1.017  // Scale Vb sensor (* 'SV')
+#define VTAB_BIAS             0.0    // Bias on voc_soc table (* 'Dw'), V
 
 // Battery.  One 12 V 100 Ah battery bank would have NOM_UNIT_CAP 100, NS 1, and NP 1
 // Two 12 V 100 Ah series battery bank would have NOM_UNIT_CAP 100, NS 2, and NP 1

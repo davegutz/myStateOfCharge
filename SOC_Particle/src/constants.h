@@ -65,10 +65,22 @@
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
 #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
     #ifdef DEBUG_INIT
-        #define NSUM              5        // Number of saved SRAM summaries (55)
+        #ifdef DEPLOY_PHOTON
+            #define NSUM              128        // Number of saved SRAM summaries (128)
+                                                 // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
+        #else
+            #define NSUM              -31        // Number of saved SRAM summaries (-31)  ********************This config doesn't  work.  Don't use DEPLOY_PHOTON with DEBUG_INIT
+                                                 // or go reduce print statments.  I suggest Serial1 in myTalk.cpp.  Not needed when not deployed - use PC.
+                                                 // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
+        #endif
     #else
-        #define NSUM              164       // Number of saved SRAM summaries (90)
-                                            // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
+        #ifdef DEPLOY_PHOTON
+            #define NSUM              174       // Number of saved SRAM summaries (174)
+                                                // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
+        #else
+            #define NSUM               15       // Number of saved SRAM summaries (15)
+                                                // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
+        #endif
     #endif
 #elif defined(CONFIG_ARGON)
         #define NSUM              2200      // Number of saved SRAM summaries (2300)

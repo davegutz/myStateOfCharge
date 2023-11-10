@@ -28,8 +28,7 @@ const String unit = version + "_soc1a";
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
 #define VB_SCALE              1.0125 // Scale Vb sensor (* 'SV')
-#define VM                    0.11   // voc_soc mon bias, V (0)
-#define VS                    0.11   // voc_soc sim bias, V (0)
+#define VTAB_BIAS             0.11   // Bias on voc_soc table (* 'Dw'), V
 
 // Battery.  One 12 V 100 Ah battery bank would have NOM_UNIT_CAP 100, NS 1, and NP 1
 // Two 12 V 100 Ah series battery bank would have NOM_UNIT_CAP 100, NS 2, and NP 1

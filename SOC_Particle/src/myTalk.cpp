@@ -879,22 +879,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_str.charAt(1) )
             {
 
-              case ( 'M' ):  //   VM<>:  delta Mon curve voltage out
-                Serial.printf("Mon dv_voc_soc%7.3f to", Mon->dv_voc_soc());
-                Mon->dv_voc_soc(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Mon->dv_voc_soc());
-                break;
-
               case ( 'm' ):  //   Vm<>:  delta Mon curve soc in
                 Serial.printf("Mon ds_voc_soc%7.3f to", Mon->ds_voc_soc());
                 Mon->ds_voc_soc(cp.input_str.substring(2).toFloat());
                 Serial.printf("%7.3f\n", Mon->ds_voc_soc());
-                break;
-
-              case ( 'S' ):  //   VS<>:  delta Sim curve voltage out
-                Serial.printf("Sim dv_voc_soc%7.3f to", Sen->Sim->dv_voc_soc());
-                Sen->Sim->dv_voc_soc(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Sim->dv_voc_soc());
                 break;
 
               case ( 's' ):  //   Vs<>:  delta Sim curve soc in
@@ -1277,7 +1265,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.println(": volt fault inj, V [0]"); 
   Serial1.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.println(": volt fault inj, V [0]"); 
   Serial.printf(" *Dw=  "); Serial.print(sp.Dw()); Serial.println(": Tab mon adj, V [0]"); 
-  Serial1.printf(" *Dw=  "); Serial.print(sp.Dw()); Serial.println(": Tab mon adj, V [0]"); 
+  Serial1.printf(" *Dw=  "); Serial.print(sp.Dw()); Serial.printf(": Tab mon adj, V [%6.3f]\n", VTAB_BIAS); 
   Serial.printf("  Dy=  "); Serial.print(Sen->Sim->Dv()); Serial.println(": Tab sim adj, V [0]"); 
   Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise mod, deg C pk-pk [%6.3f]\n", TB_NOISE); 
   Serial.printf("  DV= "); Serial.printf("%6.3f", Sen->Vb_noise_amp()); Serial.printf(": noise mod, V pk-pk [%6.3f]\n", VB_NOISE); 
@@ -1377,8 +1365,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  v99: calibration\n");
 
   Serial.printf("\nV<?> - VOC(SOC) curve deltas\n");
-  Serial.printf(" VM= "); Serial.printf("%6.3f", Mon->dv_voc_soc()); Serial.println(": Mon vsoc out, V [0]"); 
-  Serial.printf(" VS= "); Serial.printf("%6.3f", Sen->Sim->dv_voc_soc()); Serial.println(": Sim vsoc out, V [0]"); 
   Serial.printf(" Vm= "); Serial.printf("%6.3f", Mon->ds_voc_soc()); Serial.println(": Mon soc in [0]"); 
   Serial.printf(" Vs= "); Serial.printf("%6.3f", Sen->Sim->ds_voc_soc()); Serial.println(": Sim soc in[0]"); 
 

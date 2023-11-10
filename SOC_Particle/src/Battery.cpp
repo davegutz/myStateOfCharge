@@ -38,7 +38,7 @@ Battery::Battery() {}
 Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, const float d_voc_soc)
     : Coulombs(sp_delta_q, sp_t_last, (NOM_UNIT_CAP*3600), T_RLIM, sp_mod_code, COULOMBIC_EFF_SCALE), bms_charging_(false),
 	bms_off_(false), ds_voc_soc_(0), dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.),
-    dv_voc_soc_(d_voc_soc), ib_(0.), ibs_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB),
+    ib_(0.), ibs_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB),
     voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), voltage_low_(false), vsat_(NOMINAL_VB)
 {
     nom_vsat_   = chem_.v_sat - HDB_VB;   // Center in hysteresis
@@ -60,13 +60,13 @@ float Battery::calculate(const float temp_C, const float soc_frac, float curr_in
         temp_c      Battery temperature, deg C
     OUTPUTS:
         dv_dsoc     Derivative scaled, V/fraction
-        voc_soc_stat    Static model open circuit voltage from table (reference), V
+        voc         Static model open circuit voltage from table (reference), V
 */
 float Battery::calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc)
 {
     float voc;  // return value
     *dv_dsoc = calc_soc_voc_slope(soc + ds_voc_soc_, temp_c);
-    voc = chem_.voc_T_->interp(soc + ds_voc_soc_, temp_c) + chem_.dvoc + dv_voc_soc_;
+    voc = chem_.voc_T_->interp(soc + ds_voc_soc_, temp_c);
     return voc;
 }
 
@@ -226,7 +226,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
 
     // Table lookup
-    voc_soc_ = voc_soc_tab(soc_, temp_c_);
+    voc_soc_ = voc_soc_tab(soc_, temp_c_) + sp.Dw();
 
     // Battery management system model
     if ( !bms_off_ )
@@ -361,7 +361,7 @@ void BatteryMonitor::ekf_update(double *hx, double *H)
 {
     // Measurement function hx(x), x=soc ideal capacitor
     float x_lim = max(min(x_, 1.0), 0.0);
-    *hx = Battery::calc_soc_voc(x_lim, temp_c_, &dv_dsoc_);
+    *hx = Battery::calc_soc_voc(x_lim, temp_c_, &dv_dsoc_) + sp.Dw();
 
     // Jacodian of measurement function
     *H = dv_dsoc_;
@@ -491,13 +491,13 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
     // Solver
     static float soc_solved = 1.;
     float dv_dsoc;
-    float voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
+    float voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc) + sp.Dw();
     ice_->init(1., soc_min_, 2*SOLV_ERR);
     while ( abs(ice_->e())>SOLV_ERR && ice_->count()<SOLV_MAX_COUNTS && abs(ice_->dx())>0. )
     {
         ice_->increment();
         soc_solved = ice_->x();
-        voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc);
+        voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc) + sp.Dw();
         ice_->e(voc_solved - voc_stat_);
         ice_->iterate(sp.debug()==-1 && reset_temp, SOLV_SUCC_COUNTS, false);
     }
@@ -524,6 +524,7 @@ BatterySim::BatterySim() :
     Sq_inj_ = new SqInj();
     Tri_inj_ = new TriInj();
     Cos_inj_ = new CosInj();
+    dv_voc_soc_ = 0.;
     sat_ib_null_ = 0.;          // Current cutback value for soc=1, A
     sat_cutback_gain_ = 1000.;  // Gain to retard ib when soc approaches 1, dimensionless
     model_saturated_ = false;
@@ -592,7 +593,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     float soc_lim = max(min(soc_, 1.0), -0.2);  // slightly beyond
 
     // VOC-OCV model
-    voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_);
+    voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_) + sp.Dw() + dv_voc_soc_;
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond sat but don't windup
 
 
@@ -832,7 +833,7 @@ void BatterySim::pretty_print(void)
     this->Battery::pretty_print();
     Serial.printf(" BS::BS:\n");
     Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
-    Serial.printf("  hys_scale%7.3f,\n", hys_scale_)
+    Serial.printf("  hys_scale%7.3f,\n", hys_scale_);
     Serial.printf("  ib%7.3f, A\n", ib_);
     Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
     Serial.printf("  ib_in%7.3f, A\n", ib_in_);
