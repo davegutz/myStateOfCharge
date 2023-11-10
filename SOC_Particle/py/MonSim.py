@@ -100,7 +100,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
               t_ib_fail=None, ib_fail=0., use_ib_mon=False, scale_in=None, Bsim=None, Bmon=None, use_vb_raw=False,
               scale_r_ss=1., s_hys_sim=1., s_hys_mon=1., dvoc_sim=0., dvoc_mon=0., drive_ekf=False, dTb_in=None,
               verbose=True, t_max=None, eframe_mult=Battery.cp_eframe_mult, sres0=1., sresct=1., stauct_sim=1.,
-              stauct_mon=1, use_vb_sim=False, scale_hys_cap_sim=1., scale_hys_cap_mon=1., s_cap_chg=1., s_cap_dis=1.,
+              stauct_mon=1, use_vb_sim=False, scale_hys_cap_sim=1., s_cap_chg=1., s_cap_dis=1.,
               s_hys_chg=1., s_hys_dis=1., s_coul_eff=1., use_mon_soc=False, cutback_gain_sclr=1., ds_voc_soc=0.):
     if sim_old is not None and len(sim_old.time) < len(mon_old.time):
         t = sim_old.time
@@ -132,7 +132,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     rp = Retained()
     try:
         rp.modeling = mon_old.mod()
-    except:
+    except IOError:
         rp.modeling = mon_old.mod_data[0]
     print("rp.modeling is ", rp.modeling)
     print('use_ib_mon is', use_ib_mon)
@@ -163,11 +163,10 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
                      s_hys=s_hys_sim, dvoc=dvoc_sim, scale_hys_cap=scale_hys_cap_sim, s_coul_eff=s_coul_eff,
                      s_cap_chg=s_cap_chg, s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis,
                      cutback_gain_sclr=cutback_gain_sclr, ds_voc_soc=ds_voc_soc)
-    mon = BatteryMonitor(mod_code=chm_m[0], temp_c=temp_c, scale=scale_mon, tweak_test=tweak_test, dv_hys=dv_hys_init,
+    mon = BatteryMonitor(mod_code=chm_m[0], temp_c=temp_c, scale=scale_mon, tweak_test=tweak_test,
                          sres0=sres0, sresct=sresct, stauct=stauct_mon, scaler_q=s_q, scaler_r=s_r,
                          scale_r_ss=scale_r_ss, s_hys=s_hys_mon, dvoc=dvoc_mon, eframe_mult=eframe_mult,
-                         scale_hys_cap=scale_hys_cap_mon, s_coul_eff=s_coul_eff, s_cap_chg=s_cap_chg,
-                         s_cap_dis=s_cap_dis, s_hys_chg=s_hys_chg, s_hys_dis=s_hys_dis)
+                         s_coul_eff=s_coul_eff)
     # need Tb input.   perhaps need higher order to enforce basic type 1 response
     Is_sat_delay = TFDelay(in_=mon_old.soc[0] > 0.97, t_true=T_SAT, t_false=T_DESAT, dt=0.1)  # later, dt is changed
     bms_off_init = mon_old.bms_off[0]
@@ -209,7 +208,6 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
                 sat_s_init = mon_old.voc_stat[0] > mon_old.vsat[0]
             sim.sat = sat_s_init
             mon.sat = sat_init
-            mon.hys.dv_hys = mon_old.dv_hys[i]
 
         # Models
         if sim_old is not None and not use_ib_mon:
@@ -304,9 +302,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
                   "{:9.3f}".format(sim.saved_s.ib_in_s[i]), "{:9.3f}".format(sim.hys.ibs), "{:9.3f}".format(sim.hys.ioc),
                   "{:4.0f}".format(sim.sat), "{:9.3f}".format(sim.hys.disabled), "{:9.3f}".format(sim.hys.dv_dot),
                   "{:9.3f}".format(sim.saved.dv_hys[i]), "{:9.3f}".format(mon.saved.ib[i]), "{:12.7f}".format(mon.saved.soc[i]),
-                  "{:9.3f}".format(mon.hys.ibs), "{:9.3f}".format(mon.hys.ioc), "{:4.0f}".format(mon.sat),
-                  "{:9.3f}".format(mon.hys.disabled), "{:9.3f}".format(mon.hys.dv_dot),
-                  "{:9.3f}".format(mon.saved.dv_hys[i]))
+                  "{:4.0f}".format(mon.sat), "{:9.3f}".format(mon.saved.dv_hys[i]))
         # print('mon: t', t[i], 'voc', mon.voc, 'vsat', mon.vsat, 'sat', mon.sat, 'here sat', sat, 'here saturated', saturated)
 
     # Data
@@ -392,7 +388,7 @@ if __name__ == '__main__':
 
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
-                                           skip=skip, path_to_data=path_to_data, path_to_temp=path_to_temp)
+                                           skip=skip)
         cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'vb', 'ib', 'ioc', 'voc_soc', 'vsat', 'dv_dyn', 'voc_stat',
                 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
@@ -400,8 +396,7 @@ if __name__ == '__main__':
 
         # Load sel (old)
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
-                                          unit_key=unit_key_sel, skip=skip, path_to_data=path_to_data,
-                                          path_to_temp=path_to_temp)
+                                          unit_key=unit_key_sel, skip=skip)
         cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
                     'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
                     'voc_soc', 'e_wrap', 'e_wrap_filt',
@@ -418,8 +413,7 @@ if __name__ == '__main__':
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
-                                               unit_key=unit_key_sim, skip=skip, path_to_data=path_to_data,
-                                               path_to_temp=path_to_temp)
+                                               unit_key=unit_key_sim, skip=skip)
         cols_sim = ('c_time', 'chm_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
                     'ib_in_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         if data_file_sim_clean:
@@ -444,7 +438,7 @@ if __name__ == '__main__':
                                                 sres0=1.0, sresct=1.0, t_ib_fail=t_ib_fail,
                                                 use_ib_mon=use_ib_mon_in, scale_in=scale_in,
                                                 use_vb_raw=use_vb_raw, scale_r_ss=scale_r_ss_in,
-                                                s_hys_sim=scale_hys_sim_in, s_hys_mon=scale_hys_mon_in,
+                                                s_hys_sim=scale_hys_sim_in,
                                                 dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in,
                                                 Bmon=Bmon_in, Bsim=Bsim_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)

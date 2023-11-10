@@ -259,7 +259,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.vsat = 0.
         self.dv_dyn = 0.
         self.voc_ekf = 0.
-        self.temp_rlim = RateLimit()
+        self.Temp_Rlim = RateLimit()
         self.eframe = 0
         self.eframe_mult = eframe_mult
         self.dt_eframe = self.dt*self.eframe_mult
@@ -299,8 +299,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dt = dt
         self.ib_in = ib
         self.mod = rp.modeling
-        self.temp_rlim.update(x=self.temp_c, reset=reset, dt=self.dt, max_=0.017, min_=-.017)
-        temp_rate = self.temp_rlim.rate
+        self.Temp_Rlim.update(x=self.temp_c, reset=reset, dt=self.dt, max_=0.017, min_=-.017)
+        temp_rate = self.Temp_Rlim.rate
         self.ib = max(min(self.ib_in, Battery.IMAX_NUM), -Battery.IMAX_NUM)  # Overflow protection since ib past value used
 
         # Table lookup

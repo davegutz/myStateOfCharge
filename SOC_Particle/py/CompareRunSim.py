@@ -84,6 +84,7 @@ def compare_run_sim(data_file_path=None, unit_key=None, time_end_in=None, save_p
     temp_file = None
 
     # Save these examples
+    # data_file_txt = '../dataReduction/ampHiFail_pro0p_ch.csv'; unit_key = 'g20230530d_pro0p_ch'; #use_ib_mon_in=True; scale_in=1.12
     # data_file_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
     # data_file_txt = 'ampHiFail v20230305 CH.txt'; unit_key = 'pro0p'; cc_dif_tol_in = 0.5
     # data_file_txt = 'ampHiFail vA20230305 BB.txt'; unit_key = 'pro1a'
@@ -166,7 +167,7 @@ def compare_run_sim(data_file_path=None, unit_key=None, time_end_in=None, save_p
                   scale_r_ss=scale_r_ss_in, s_hys_sim=s_hys_in, s_hys_mon=s_hys_in, dvoc_sim=dvoc_sim_in,
                   dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in, drive_ekf=drive_ekf_in,
                   dTb_in=dTb, verbose=verbose_in, use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=s_hys_cap_in,
-                  scale_hys_cap_mon=s_hys_cap_in, stauct_mon=stauct_in, stauct_sim=stauct_in,
+                  stauct_mon=stauct_in, stauct_sim=stauct_in,
                   s_coul_eff=s_coul_eff_in, s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in, s_hys_chg=s_hys_chg_in,
                   s_hys_dis=s_hys_dis_in, cutback_gain_sclr=cutback_gain_sclr_in, ds_voc_soc=ds_voc_soc_in)
     save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
