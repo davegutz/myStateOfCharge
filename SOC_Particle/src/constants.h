@@ -67,7 +67,7 @@
     #ifdef DEBUG_INIT
         #define NSUM              5        // Number of saved SRAM summaries (55)
     #else
-        #define NSUM              15       // Number of saved SRAM summaries (90)   TODO:   Use PLATFORM_ID around verbose hogs
+        #define NSUM              28       // Number of saved SRAM summaries (90)   TODO:   Use PLATFORM_ID around verbose hogs
                                             // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
     #endif
 #elif defined(CONFIG_ARGON)

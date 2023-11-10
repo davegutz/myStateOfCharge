@@ -98,10 +98,6 @@ public:
   void dv_voc_soc(const float _dv) { dv_voc_soc_ = _dv; };
   float dv_voc_soc() { return dv_voc_soc_; };
   uint8_t encode(const String mod_str);
-  void hys_pretty_print () { hys_->pretty_print(); };
-  float hys_state() { return hys_->dv_hys(); };
-  void hys_state(const float st) { hys_->dv_hys(st); };
-  void init_hys(const float hys) { hys_->init(hys); };
   float ib() { return ib_; };            // Battery terminal current, A
   float ibs() { return ibs_; };          // Hysteresis input current, A
   float ioc() { return ioc_; };          // Hysteresis output current, A
@@ -144,7 +140,6 @@ protected:
   double *rand_B_;  // ChargeTransfer model B
   double *rand_C_;  // ChargeTransfer model C
   double *rand_D_;  // ChargeTransfer model D
-  Hysteresis *hys_;
 };
 
 
@@ -220,6 +215,10 @@ public:
   boolean cutback() { return model_cutback_; };
   double delta_q() { return *sp_delta_q_; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
+  void hys_pretty_print () { hys_->pretty_print(); };
+  float hys_state() { return hys_->dv_hys(); };
+  void hys_state(const float st) { hys_->dv_hys(st); };
+  void init_hys(const float hys) { hys_->init(hys); };
   float ib_charge() { return ib_charge_; };
   float ib_fut() { return ib_fut_; };
   void init_battery_sim(const boolean reset, Sensors *Sen);
@@ -247,6 +246,7 @@ protected:
   float sat_cutback_gain_; // Gain to retard ib when voc exceeds vsat, dimensionless
   float sat_ib_max_;       // Current cutback to be applied to modeled ib output, A
   float sat_ib_null_;      // Current cutback value for voc=vsat, A
+  Hysteresis *hys_;
 };
 
 

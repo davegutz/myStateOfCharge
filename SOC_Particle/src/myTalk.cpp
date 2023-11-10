@@ -176,7 +176,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
                     Mon->assign_all_mod("Battleborn");
                     Serial.printf(" to %d\n", sp.mon_chm());
-                    Mon->hys_pretty_print();
                     Mon->chem_pretty_print();
                     cp.cmd_reset();
                     break;
@@ -186,7 +185,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
                     Mon->assign_all_mod("CHINS");
                     Serial.printf(" to %d\n", sp.mon_chm());
-                    Mon->hys_pretty_print();
                     Mon->chem_pretty_print();
                     cp.cmd_reset();
                     break;
@@ -477,10 +475,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'H' ):  //   SH<>: state of all hysteresis
                 scale = cp.input_str.substring(2).toFloat();
 
-                Serial.printf("\nHys::dv_hys%7.3f &%7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
-                Mon->hys_state(scale);
+                Serial.printf("\nSim::Hys::dv_hys%7.3f\n", Sen->Sim->hys_state());
                 Sen->Sim->hys_state(scale);
-                Serial.printf("to%7.3f &%7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
+                Serial.printf("to%7.3f\n", Sen->Sim->hys_state());
                 break;
 
               case ( 'm' ):  //   Sm<>:  Amp signal scalar for faults

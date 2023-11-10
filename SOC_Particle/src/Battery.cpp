@@ -43,7 +43,6 @@ Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, con
 {
     nom_vsat_   = chem_.v_sat - HDB_VB;   // Center in hysteresis
     ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_.tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);  // Update time and time constant changed on the fly
-    hys_ = new Hysteresis(&chem_);
 }
 Battery::~Battery() {}
 // operators
@@ -112,7 +111,6 @@ void Battery::pretty_print(void)
     Serial.printf("  dt%7.3f, s\n", dt_);
     Serial.printf("  dv_dsoc%10.6f, V/frac\n", dv_dsoc_);
     Serial.printf("  dv_dyn%7.3f, V\n", dv_dyn_);
-    Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
     Serial.printf("  dvoc_dt%10.6f, V/dg C\n", chem_.dvoc_dt);
     Serial.printf("  ib%7.3f, A\n", ib_);
     Serial.printf("  r_0%10.6f, ohm\n", chem_.r_0);
@@ -252,12 +250,9 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     dv_dyn_ = vb_ - voc_;
 
     // Hysteresis model
-    hys_->calculate(ib_, soc_);
-    boolean init_low = bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR );
-    dv_hys_ = hys_->update(dt_, sat_, init_low, Sen->Flt->e_wrap(), reset_temp);
     dv_hys_ = 0.;  // disable hys g20230530a
     voc_stat_ = voc_ - dv_hys_;
-    ioc_ = hys_->ioc();
+    ioc_ = ib_;
     
 
     // Reversionary model
@@ -311,7 +306,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     else 
         tcharge_ekf_ = -24.*soc_ekf_;
 
-    return ( soc_ekf_ );
+    return ( vb_model_ );
 }
 
 // Charge time calculation
@@ -380,7 +375,6 @@ void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
     dv_dyn_ = ib_*chem_.r_ss*sr_;
     voc_ = vb_ - dv_dyn_;
-    init_hys(0.0);
     #ifdef DEBUG_INIT
         if ( sp.debug()==-1 )
         {
@@ -425,8 +419,6 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("  ah_ekf_%7.3f A-h\n", amp_hrs_remaining_ekf_);
     Serial.printf("  ah_soc_%7.3f A-h\n", amp_hrs_remaining_soc_);
     Serial.printf("  EKF_conv %d\n", converged_ekf());
-    Serial.printf("  dv_hys%7.3f V\n", hys_->dv_hys());
-    Serial.printf("  dv_hys_sim%7.3f V\n", Sen->Sim->hys_state());
     Serial.printf("  e_wrap%7.3f V\n", Sen->Flt->e_wrap());
     Serial.printf("  q_ekf%10.1f C\n", q_ekf_);
     Serial.printf("  soc_ekf%8.4f frac\n", soc_ekf_);
@@ -438,7 +430,6 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("  y_filt%7.3f Res EKF, V\n", y_filt_);
     Serial.printf(" *sp_s_cap_mon%7.3f Slr\n", sp.s_cap_mon());
     Serial.printf("  vb_model%7.3f V\n", vb_model_);
-    hys_->pretty_print();
 }
 
 // Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
@@ -530,6 +521,7 @@ BatterySim::BatterySim() :
     model_saturated_ = false;
     ib_sat_ = 0.5;              // deadzone for cutback actuation, A
     ib_charge_ = 0.;
+    hys_ = new Hysteresis(&chem_);
 }
 BatterySim::~BatterySim() {}
 
@@ -830,6 +822,7 @@ void BatterySim::pretty_print(void)
     Serial.printf("BS::");
     this->Battery::pretty_print();
     Serial.printf(" BS::BS:\n");
+    Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
     Serial.printf("  ib%7.3f, A\n", ib_);
     Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
     Serial.printf("  ib_in%7.3f, A\n", ib_in_);

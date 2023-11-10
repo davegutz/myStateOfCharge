@@ -109,14 +109,12 @@ void debug_5(BatteryMonitor *Mon, Sensors *Sen)
 void debug_h(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("\nMon::hys\n");
-  Mon->hys_pretty_print();
   Serial.printf("\nSim::hys\n");
   Sen->Sim->hys_pretty_print();
   Serial.printf("\n Mon    Sim\n");
   Serial.printf("vb%6.2f,%6.2f\n", Mon->vb(), Sen->Sim->vb());
   Serial.printf("voc%6.2f,%6.2f\n", Mon->voc(), Sen->Sim->voc());
   Serial.printf("voc_stat%6.2f,%6.2f\n", Mon->voc_stat(), Sen->Sim->voc_stat());
-  Serial.printf("dh_hys%7.3f,%7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
   Serial.printf("voc_soc%6.2f\n", Mon->voc_soc());
   Serial.printf("e_wrap%7.3f\n", Sen->Flt->e_wrap());
   Serial.printf("e_wrap_f%7.3f\n", Sen->Flt->e_wrap_filt());
@@ -124,7 +122,6 @@ void debug_h(BatteryMonitor *Mon, Sensors *Sen)
   Serial1.printf("vb%6.2f,%6.2f\n", Mon->vb(), Sen->Sim->vb());
   Serial1.printf("voc%6.2f,%6.2f\n", Mon->voc(), Sen->Sim->voc());
   Serial1.printf("voc_stat%6.2f,%6.2f\n", Mon->voc_stat(), Sen->Sim->voc_stat());
-  Serial1.printf("dh_hys%7.3f,%7.3f\n", Mon->hys_state(), Sen->Sim->hys_state());
   Serial1.printf("voc_soc%6.2f\n", Mon->voc_soc());
   Serial1.printf("e_wrap%6.3f\n", Sen->Flt->e_wrap());
   Serial1.printf("e_wrap_f%6.3f\n", Sen->Flt->e_wrap_filt());
