@@ -29,5 +29,5 @@ v_std = 0.  # (0.01-->0) ------ noise
 i_std = 0.  # (0.1-->0) ------ noise
 hys_scale_sim = 1.0  # (1e-6<--  0.33-->10.) 1e-6 disables hysteresis
 hys_scale_monitor = 1.0  # (1e-6<--  0.33-->10.) 1e-6 disables hysteresis
-T_SAT = 10.  # Saturation time, sec 8/28/2022
+T_SAT = 22.  # Saturation time, sec 11/11/23
 T_DESAT = T_SAT * 2.  # De-saturation time, sec

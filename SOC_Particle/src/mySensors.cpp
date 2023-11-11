@@ -804,8 +804,16 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   // vb
   if ( sp.mod_vb() )
   {
-    Vb = Vb_model + Vb_noise();
-    sample_time_vb_ = Sim->sample_time();
+    if ( (Flt->wrap_vb_fa() || Flt->vb_fa()) && !cp.fake_faults )
+    {
+      Vb = Mon->vb_model_rev();
+      sample_time_vb_ = Sim->sample_time();
+    }
+    else
+    {
+      Vb = Vb_model + Vb_noise();
+      sample_time_vb_ = Sim->sample_time();
+    }
   }
   else
   {

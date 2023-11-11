@@ -90,7 +90,8 @@
 #define NHIS                  56        // Number of saved SRAM history data slices.  If too large, will get compile error BACKUPSRAM (56)
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
 #define HDB_VB             0.05      // Half deadband to filter Vb, V (0.05)
-#define T_SAT                 10        // Saturation time, sec (10, >=10 for no sat ib lo fault of -100 A)
+// #define T_SAT                 10        // Saturation time, sec (10, >=10 for no sat ib lo fault of -100 A)
+#define T_SAT                 22        // Saturation time, sec (>21 for no SAT with Dv0.82)
 const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
 #define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)
@@ -117,7 +118,7 @@ const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
 #define WRAP_ERR_FILT         4.        // Wrap error filter time constant, s (4)
 #define F_MAX_T_WRAP          2.8       // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT (0.7*T for Tustin), s (2.8)
 #define MAX_WRAP_ERR_FILT     10.       // Anti-windup wrap error filter, V (10)
-const float WRAP_LO_S = (T_SAT-1.);     // Wrap low failure set time, sec (T_SAT-1) // must be quicker than SAT test
+const float WRAP_LO_S =       9.;       // Wrap low failure set time, sec (9) // 9 is legacy must be quicker than SAT test
 const float WRAP_LO_R = (WRAP_LO_S/2.); // Wrap low failure reset time, sec ('up 1, down 2')
 const float WRAP_HI_S = WRAP_LO_S;      // Wrap high failure set time, sec (WRAP_LO_S)
 const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('up 1, down 2')
