@@ -593,7 +593,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     float soc_lim = max(min(soc_, 1.0), -0.2);  // slightly beyond
 
     // VOC-OCV model
-    voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_) + sp.Dw() + dv_voc_soc_;
+    voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_) + dv_voc_soc_;
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond sat but don't windup
 
 
