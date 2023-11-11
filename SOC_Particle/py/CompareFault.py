@@ -155,8 +155,10 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
         time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
         if i > 0:
             dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
-        else:
+        elif len(d_ra.time) > 1:
             dt.append(float(d_ra.time[1] - d_ra.time[0]))
+        else:
+            pass
     time_min = (d_ra.time-d_ra.time[0])/60.
     time_day = (d_ra.time-d_ra.time[0])/3600./24.
     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
