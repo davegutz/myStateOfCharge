@@ -153,7 +153,6 @@ boolean SavedPars::is_corrupt()
         get_delta_q();
         get_delta_q_model();
         get_freq();
-        get_hys_scale();
         get_Ib_bias_all();
         get_Ib_bias_amp();
         get_Ib_bias_noa();
