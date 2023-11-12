@@ -33,6 +33,7 @@ import easygui
 import os
 import tkinter as tk
 import tkinter.messagebox
+from query_close_plots import query_close_plots
 plt.rcParams['axes.grid'] = True
 
 
@@ -209,9 +210,10 @@ def compare_run_sim(data_file_path=None, unit_key=None, time_end_in=None, save_p
     cleanup_fig_files(fig_files)
 
     plt.show(block=False)
-    confirmation = tk.messagebox.askyesno('query close plots', 'close plots?')
-    if confirmation is True:
-        plt.close('all')
+    query_close_plots('CompareRunSim')
+    # confirmation = tk.messagebox.askyesno('query close plots', 'close plots?')
+    # if confirmation is True:
+    #     plt.close('all')
     return True
 
 
