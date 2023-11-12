@@ -326,11 +326,11 @@ def compare_run():
         return
     if modeling.get():
         print('compare_run_sim')
-        master.withdraw()
+        # master.withdraw()
         compare_run_sim(data_file_path=Test.file_path, unit_key=Test.key,
                         save_pdf_path=os.path.join(Test.version_path, './figures'),
                         path_to_temp=os.path.join(Test.version_path, './temp'))
-        master.deiconify()
+        # master.deiconify()
     else:
         if not Ref.key_exists_in_file:
             tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in " + Ref.file_txt)
@@ -338,11 +338,11 @@ def compare_run():
         print('GUI_TestSOC compare_run:  Ref', Ref.file_path, Ref.key)
         print('GUI_TestSOC compare_run:  Test', Test.file_path, Test.key)
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
-        master.withdraw()
+        # master.withdraw()
         compare_run_run(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
                         save_pdf_path=os.path.join(Test.version_path, './figures'),
                         path_to_temp=os.path.join(Test.version_path, './temp'))
-        master.deiconify()
+        # master.deiconify()
 
 
 # Choose file to perform compare_run_run on
@@ -359,12 +359,12 @@ def compare_run_run_choose():
                 ref_path = filedialog.askopenfilename(title='Choose reference file', filetypes=[('csv', '.csv')])
                 ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(ref_path)
                 keys = [ref_key, test_key]
-                master.withdraw()
+                # master.withdraw()
                 compare_run_run(keys=keys, dir_data_ref_path=ref_folder_path,
                                 dir_data_test_path=test_folder_path,
                                 save_pdf_path=test_folder_path + './figures',
                                 path_to_temp=test_folder_path + './temp')
-                master.deiconify()
+                # master.deiconify()
             else:
                 tk.messagebox.showerror(message='key not found in' + testpath)
 

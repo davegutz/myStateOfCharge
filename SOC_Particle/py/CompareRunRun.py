@@ -26,28 +26,9 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanu
 import matplotlib.pyplot as plt
 from datetime import datetime
 import tkinter as tk
-import tkinter.messagebox
-from query_close_plots import query_close_plots
+from PlotKiller import show_killer
 
 plt.rcParams['axes.grid'] = True
-
-
-class Killer(tk.Toplevel):
-    def __init__(self, message, caller):
-        """Recursively keep asking to close plots until positive"""
-        tk.Toplevel.__init__(self)
-        tk.Label(self, text=caller + message).grid(row=0, column=0)
-        tk.Button(self, command=self.close_all, text="Close All").grid(row=1, column=0)
-        self.lift()  # Puts Window on top
-        self.grab_set()  # Prevents other Tkinter windows from being used
-
-    def close_all(self):
-        plt.close('all')
-        self.destroy()
-
-
-def show_killer(string, caller):
-    Killer(string, caller)
 
 
 # Load from files
@@ -221,12 +202,6 @@ def compare_run_run(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
     cleanup_fig_files(fig_files)
 
     plt.show(block=False)
-    # confirmation = tk.messagebox.askyesno('query close plots', 'close plots?')
-    # if confirmation is True:
-    #     plt.close('all')
-
-    # query_close_plots('CompareRunRun')
-
     w = tk.Tk()
     show_killer('CompareRunRun: close plots?', 'CompareRunRun.py')
     w.mainloop()
