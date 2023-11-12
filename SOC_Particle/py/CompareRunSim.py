@@ -31,9 +31,7 @@ from PlotGP import tune_r, gp_plot
 from PlotOffOn import off_on_plot
 import easygui
 import os
-import tkinter as tk
-import tkinter.messagebox
-from query_close_plots import query_close_plots
+from PlotKiller import show_killer
 plt.rcParams['axes.grid'] = True
 
 
@@ -210,10 +208,7 @@ def compare_run_sim(data_file_path=None, unit_key=None, time_end_in=None, save_p
     cleanup_fig_files(fig_files)
 
     plt.show(block=False)
-    query_close_plots('CompareRunSim')
-    # confirmation = tk.messagebox.askyesno('query close plots', 'close plots?')
-    # if confirmation is True:
-    #     plt.close('all')
+    show_killer('close plots?', 'CompareRunSim')
     return True
 
 

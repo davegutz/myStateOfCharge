@@ -23,16 +23,19 @@ class PlotKiller(tk.Toplevel):
     def __init__(self, message, caller):
         """Recursively keep asking to close plots until positive"""
         tk.Toplevel.__init__(self)
-        self.label = tk.Label(self, text=caller + message)
+        self.label = tk.Label(self, text=caller + ' ' + message)
         self.label.grid(row=0, column=0)
         self.lift()  # Puts Window on top
-        tk.Button(self, command=self.close_all, text="Close All").grid(row=1, column=0)
-        self.grab_set()  # Prevents other Tkinter windows from being used
+        tk.Button(self, command=self.close_all, text="Close All").grid(row=2, column=0)
+        # self.grab_set()  # Prevents other Tkinter windows from being used
 
     def close_all(self):
         plt.close('all')
+        # self.grab_release()
         self.destroy()
 
 
 def show_killer(string, caller):
+    w = tk.Tk()
     PlotKiller(string, caller)
+    w.mainloop()

@@ -26,9 +26,7 @@ from Battery import overall_batt
 from Util import cat
 from resample import resample
 from PlotGP import tune_r
-import tkinter as tk
-import tkinter.messagebox
-from query_close_plots import query_close_plots
+from PlotKiller import show_killer
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 IB_BAND = 1.  # Threshold to declare charging or discharging
@@ -1026,10 +1024,7 @@ if __name__ == '__main__':
         cleanup_fig_files(fig_files)
 
         plt.show(block=False)
-        query_close_plots('CompareFault')
-        # confirmation = tk.messagebox.askyesno('query close plots', 'close plots?')
-        # if confirmation is True:
-        #     plt.close('all')
+        show_killer('close plots?', 'CompareFault')
 
 
     main()

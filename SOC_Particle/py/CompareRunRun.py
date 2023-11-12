@@ -25,7 +25,6 @@ from Battery import Battery, BatteryMonitor
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 import matplotlib.pyplot as plt
 from datetime import datetime
-import tkinter as tk
 from PlotKiller import show_killer
 
 plt.rcParams['axes.grid'] = True
@@ -202,9 +201,7 @@ def compare_run_run(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
     cleanup_fig_files(fig_files)
 
     plt.show(block=False)
-    w = tk.Tk()
-    show_killer('CompareRunRun: close plots?', 'CompareRunRun.py')
-    w.mainloop()
+    show_killer('close plots?', 'CompareRunRun')
 
     return True
 
