@@ -25,8 +25,9 @@ class PlotKiller(tk.Toplevel):
         tk.Toplevel.__init__(self)
         self.label = tk.Label(self, text=caller + ' ' + message)
         self.label.grid(row=0, column=0)
-        self.lift()  # Puts Window on top
+        self.lift()
         tk.Button(self, command=self.close_all, text="Close All").grid(row=2, column=0)
+        self.mainloop()
         # self.grab_set()  # Prevents other Tkinter windows from being used
 
     def close_all(self):
@@ -36,6 +37,4 @@ class PlotKiller(tk.Toplevel):
 
 
 def show_killer(string, caller):
-    w = tk.Tk()
     PlotKiller(string, caller)
-    w.mainloop()
