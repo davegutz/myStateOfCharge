@@ -16,7 +16,7 @@
 
 """
 Raise a window visible at task bar to close all plots.
-  *** Call ion before show in caller
+  *** Call ion before show in caller, or use 'show_and_kill()' instead of 'plt.show(); show_killer();
   Sometimes works without ion.  (Race condition in IPC)
   https://stackoverflow.com/questions/28269157/plotting-in-a-non-blocking-way-with-matplotlib
   *** sometimes need to send list of figures to prevent close('all') from closing all.  (Again, race condition in IPC)
@@ -46,6 +46,11 @@ class PlotKiller(tk.Toplevel):
                 plt.close(fig)
         # self.grab_release()
         self.destroy()
+
+
+def show_and_kill(string, caller, fig_list=None):
+    plt.show()
+    PlotKiller(string, caller, fig_list)
 
 
 def show_killer(string, caller, fig_list=None):
@@ -89,8 +94,8 @@ def simple_plot2():
            title='Sine wave2')
     ax.grid()
     plt.ion()
-    plt.show()
-    show_killer('close plots?', 'sp2')
+    # plt.show()
+    show_and_kill('close plots?', 'sp2')
 
 
 if __name__ == '__main__':
