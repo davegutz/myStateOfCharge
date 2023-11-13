@@ -1,4 +1,5 @@
-# MonSim:  Monitor and Simulator replication of Particle Photon Application
+# PlotKiller: class called after plt.show to block and take input from user to then close all plots.  Viewable
+# on taskbar.
 # Copyright (C) 2023 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
@@ -21,7 +22,7 @@ import tkinter as tk
 
 class PlotKiller(tk.Toplevel):
     def __init__(self, message, caller, fig_list_=None):
-        """Recursively keep asking to close plots until positive"""
+        """Block caller task asking to close all plots then doing so"""
         self.fig_list = fig_list_
         tk.Toplevel.__init__(self)
         self.label = tk.Label(self, text=caller + ' ' + message)
