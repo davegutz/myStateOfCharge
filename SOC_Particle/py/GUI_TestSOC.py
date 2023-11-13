@@ -203,7 +203,7 @@ class Exec:
                                             initialdir=self.dataReduction_folder)
         if answer is not None and answer != '':
             self.dataReduction_folder = answer
-        cf['others']['dataReduction_folder'] = self.dataReduction_folder
+        cf[self.ind]['dataReduction_folder'] = self.dataReduction_folder
         cf.save_to_file()
         self.folder_butt.config(text=self.dataReduction_folder)
         self.update_folder_butt()
@@ -229,7 +229,6 @@ class Exec:
         self.create_file_path_and_key()
         self.update_key_label()
         self.label.config(text=self.file_txt)
-
 
     def load_root_config(self, config_file_path):
         self.root_config = ConfigParser()
@@ -669,7 +668,7 @@ if __name__ == '__main__':
                          'dataReduction_folder': '<enter data dataReduction_folder>'},
                 'others': {"option": "custom",
                            'modeling': True}
-              }
+                }
 
     cf = Begini(__file__, def_dict)
 
@@ -795,7 +794,7 @@ if __name__ == '__main__':
     reset_label = tk.Label(master, text='copy reset:')
     reset_label.grid(row=row, column=0, padx=5, pady=5)
     reset_button = myButton(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
-                             justify=tk.LEFT, font=("Arial", 8))
+                            justify=tk.LEFT, font=("Arial", 8))
     reset_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
 
     row += 1
