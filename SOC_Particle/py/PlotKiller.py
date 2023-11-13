@@ -14,7 +14,13 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
-"""Raise a window visible at task bar to close all plots"""
+"""
+Raise a window visible at task bar to close all plots.
+  *** Call ion before show in caller
+  Sometimes works without ion.  (Race condition in IPC)
+  https://stackoverflow.com/questions/28269157/plotting-in-a-non-blocking-way-with-matplotlib
+  *** sometimes need to send list of figures to prevent close('all') from closing all.  (Again, race condition in IPC)
+"""
 
 import matplotlib.pyplot as plt
 import tkinter as tk
@@ -27,12 +33,12 @@ class PlotKiller(tk.Toplevel):
         tk.Toplevel.__init__(self)
         self.label = tk.Label(self, text=caller + ' ' + message)
         self.label.grid(row=0, column=0)
-        tk.Button(self, command=self.close_all, text="Close Figs " + caller).grid(row=2, column=0)
+        tk.Button(self, command=self.close_figs, text="Close Figs " + caller).grid(row=2, column=0)
         self.lift()
         self.mainloop()
         # self.grab_set()  # Prevents other Tkinter windows from being used
 
-    def close_all(self):
+    def close_figs(self):
         if self.fig_list is None:
             plt.close('all')
         else:
@@ -63,29 +69,28 @@ def simple_plot1():
     ax.set(xlabel='time (s)', ylabel='voltage (mV)',
            title='Sine wave2')
     ax.grid()
+    plt.ion()
     plt.show()
     show_killer('close plots?', 'sp1', fig_list)
 
 
 def simple_plot2():
     import numpy as np
-    fig_list = []
     t = np.arange(0.0, 2.0, 0.01)
     s = 1 + np.sin(2 * np.pi * t)
     fig, ax = plt.subplots()
-    fig_list.append(fig)
     ax.plot(t, s)
     ax.set(xlabel='time (s)', ylabel='voltage (mV)',
            title='Sine wave1')
     ax.grid()
     fig, ax = plt.subplots()
-    fig_list.append(fig)
     ax.plot(t, s)
     ax.set(xlabel='time (s)', ylabel='voltage (mV)',
            title='Sine wave2')
     ax.grid()
+    plt.ion()
     plt.show()
-    show_killer('close plots?', 'sp2', fig_list)
+    show_killer('close plots?', 'sp2')
 
 
 if __name__ == '__main__':
