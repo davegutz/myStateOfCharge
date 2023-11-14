@@ -82,72 +82,51 @@ class CountdownTimer(tk.Toplevel):
             self.time.set(self.initial_time)
             self.label.config(text=f'{msg} ({self.time.get()}sec)')
             self.button.config(text='', fg=bg_color, bg=bg_color)
-            if message_window is None:  # window is not busy
-                message_start('flash')  # display message
+            if flasher_window is None:  # window is not busy
+                self.flasher_start('flash')  # display message
 
-    def flash_bang(self):
-        while True:
-            print("before flash")
-            flash()
-            print("after flash")
-            self.after(10000)
-            print("before bell")
-            self.bell()
-            print("end")
+    def flasher_start(self, text):
+        """function which creates window with message"""
+        global repeates
+        global flasher_window
+        global flasher_label
 
+        repeates = 15  # how many times change background color
 
-def flash():
-    flasher = tk.Toplevel()
-    flasher.geometry("300x250")
-    flasher.configure(bg='red')
-    flasher.deiconify()
-    flasher.after(2000, flasher.destroy())  # set the flash time to 100 milliseconds
-    flasher.mainloop()
+        # create window with messages
+        flasher_window = tk.Toplevel()
+        flasher_window.geometry("300x250")
+        flasher_label = tk.Label(flasher_window, text=text, bg='red', fg='black')
+        flasher_label.pack()
 
+        # update window after 500ms
+        root.after(500, self.flasher_update)
 
-# function which creates window with message
-def message_start(text):
-    global repeates
-    global message_window
-    global message_label
+    def flasher_update(self):
+        """function which changes background in displayed window"""
+        global flasher_window
+        global repeates
 
-    repeates = 15  # how many times change background color
+        if repeates > 0:
+            repeates -= 1
 
-    # create window with messages
-    message_window = tk.Toplevel()
-    message_window.geometry("300x250")
-    message_label = tk.Label(message_window, text=text, bg='red', fg='black')
-    message_label.pack()
+            flasher_label['text'] = str(repeates)
+            if flasher_label['bg'] == 'red':
+                flasher_label['bg'] = 'white'
+                flasher_window.configure(bg='white')
+            else:
+                flasher_label['bg'] = 'red'
+                flasher_window.configure(bg='red')
+                flasher_label['bg'] = 'red'
 
-    # update window after 500ms
-    root.after(500, message_update)
-
-
-# function which changes background in displayed window
-def message_update():
-    global message_window
-    global repeates
-
-    if repeates > 0:
-        repeates -= 1
-
-        message_label['text'] = str(repeates)
-        if message_label['bg'] == 'red':
-            message_label['bg'] = 'white'
-            message_window.configure(bg='white')
+            # update window after 1000ms
+            root.after(1000, self.flasher_update)
         else:
-            message_label['bg'] = 'red'
-            message_window.configure(bg='red')
-            message_label['bg'] = 'red'
+            # close window
+            flasher_window.destroy()
 
-        # update window after 1000ms
-        root.after(1000, message_update)
-    else:
-        # close window
-        message_window.destroy()
-
-        # inform `check_time` that window is not busy
-        message_window = None
+            # inform `check_time` that window is not busy
+            flasher_window = None
 
 
 def show_countdown_timer(time_, message, caller, exit_function=None):
@@ -178,7 +157,7 @@ def stay_awake(up_set_min=3.):
 
 
 if __name__ == '__main__':
-    message_window = None
+    flasher_window = None
     repeates = 3
     root = tk.Tk()
     tk.Label(root, text="Try timer variations").pack()
