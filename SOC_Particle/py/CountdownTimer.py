@@ -79,6 +79,9 @@ class CountdownTimer(tk.Toplevel):
             self.center()
             self.after(1000, self.countdown)
         else:
+            self.time.set(self.initial_time)
+            self.label.config(text=f'{msg} ({self.time.get()}sec)')
+            self.button.config(text='', fg=bg_color, bg=bg_color)
             if message_window is None:  # window is not busy
                 message_start('flash')  # display message
 
