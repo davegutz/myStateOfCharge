@@ -30,9 +30,12 @@ bg_color = "lightgray"
 
 
 class CountdownTimer(tk.Toplevel):
-    def __init__(self,  time_, message, caller, exit_function=None):
+    def __init__(self,  time_, message, caller, max_flash=30, exit_function=None):
         """Block caller task asking to close all plots then doing so"""
         tk.Toplevel.__init__(self)
+        self.flasher_window = None
+        self.max_flashes = max_flash
+        self.flashes = 0
         self.attributes('-topmost', True)
         self.initial_time = time_
         self.time = tk.IntVar(self, time_)
@@ -82,21 +85,20 @@ class CountdownTimer(tk.Toplevel):
             self.time.set(self.initial_time)
             self.label.config(text=f'{msg} ({self.time.get()}sec)')
             self.button.config(text='', fg=bg_color, bg=bg_color)
-            if flasher_window is None:  # window is not busy
+            if self.flasher_window is None:  # window is not busy
                 self.flasher_start('flash')  # display message
 
     def flasher_start(self, text):
         """function which creates window with message"""
         global repeates
-        global flasher_window
         global flasher_label
 
         repeates = 15  # how many times change background color
 
         # create window with messages
-        flasher_window = tk.Toplevel()
-        flasher_window.geometry("300x250")
-        flasher_label = tk.Label(flasher_window, text=text, bg='red', fg='black')
+        self.flasher_window = tk.Toplevel()
+        self.flasher_window.geometry("300x250")
+        flasher_label = tk.Label(self.flasher_window, text=text, bg='red', fg='black')
         flasher_label.pack()
 
         # update window after 500ms
@@ -104,7 +106,6 @@ class CountdownTimer(tk.Toplevel):
 
     def flasher_update(self):
         """function which changes background in displayed window"""
-        global flasher_window
         global repeates
 
         if repeates > 0:
@@ -113,20 +114,20 @@ class CountdownTimer(tk.Toplevel):
             flasher_label['text'] = str(repeates)
             if flasher_label['bg'] == 'red':
                 flasher_label['bg'] = 'white'
-                flasher_window.configure(bg='white')
+                self.flasher_window.configure(bg='white')
             else:
                 flasher_label['bg'] = 'red'
-                flasher_window.configure(bg='red')
+                self.flasher_window.configure(bg='red')
                 flasher_label['bg'] = 'red'
 
             # update window after 1000ms
             root.after(1000, self.flasher_update)
         else:
             # close window
-            flasher_window.destroy()
+            self.flasher_window.destroy()
 
             # inform `check_time` that window is not busy
-            flasher_window = None
+            self.flasher_window = None
 
 
 def show_countdown_timer(time_, message, caller, exit_function=None):
