@@ -71,3 +71,4 @@ SOC_Particle/src/SOC_Particle.cpp
 SOC_Particle/py/logs.txt
 SOC_Particle/py/logse.txt
 SOC_Particle/py/MyTail.txt
+SOC_Particle/py/putty_test.csv.tail

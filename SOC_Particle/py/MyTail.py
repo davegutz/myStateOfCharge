@@ -24,7 +24,10 @@ Example:
 
 import os
 import sys
+import tkinter.filedialog
 from threading import Thread
+import tkinter as tk
+from tkinter import filedialog, simpledialog
 
 
 class Tail(object):
@@ -81,6 +84,19 @@ class TailError(Exception):
         return self.message
 
 
+def enter_tail_file_name():
+    answer = tk.simpledialog.askstring(title=__file__, prompt="enter tail-f destination file",
+                                       initialvalue=tail_file.get())
+
+
+def enter_folder():
+    answer = tk.filedialog.askdirectory(title="Select a tail destination folder", initialdir=tail_path.get())
+    if answer is not None and answer != '':
+        tail_folder.set(answer)
+    tail_path.set(os.path.join(tail_folder.get(), tail_file.get()))
+    tail_path_butt.config(text=tail_path.get())
+
+
 def gen_data():
     # gen_temp_file(path_=path.get(), max_=max_len.get())
     thread = Thread(target=gen_temp_file, kwargs={'path_': path.get(), 'max_': max_len.get()})
@@ -117,6 +133,31 @@ def watch_data():
     thread.start()
 
 
+def watch_target():
+    global of
+    t = Tail(tail_path.get())
+    t.register_callback(write_to_out_path)
+    try:
+        os.remove(out_path.get())
+    except IOError:
+        pass
+    of = open(out_path.get(), 'a')
+
+    # Register a callback function to be called when a new line is found in the followed file.
+    # If no callback function is registered, new lines would be printed to standard out.
+    # t.register_callback(callback_function)
+
+    # Follow the file with 5 seconds as sleep time between iterations.
+    # If sleep time is not provided 1 second is used as the default time.
+    thread = Thread(target=t.follow, kwargs={'s': 1})
+    thread.start()
+
+
+def write_to_out_path(input):
+    global of
+    of.write(input)
+
+
 if __name__ == '__main__':
     import tkinter as tk
     import time
@@ -130,9 +171,20 @@ if __name__ == '__main__':
     bg_color = "lightgray"
 
     root = tk.Tk()
+    root.title('tail -f')
     path = tk.StringVar(root, os.path.join(os.getcwd(), 'MyTail.txt'))
     max_len = tk.IntVar(root, 1000)
-    tk.Label(root, text="tail -f").pack()
-    myButton(root, text="start monitoring", command=watch_data).pack()
-    myButton(root, text="generate MyTail.txt", command=gen_data).pack()
+    tail_folder = tk.StringVar(root, os.getcwd())
+    tail_file = tk.StringVar(root, 'putty_test.csv')
+    tail_path = tk.StringVar(root, os.path.join(tail_folder.get(), tail_file.get()))
+    out_path = tk.StringVar(root, tail_file.get() + '.tail')
+    myButton(root, text="monitor MyTail.txt", command=watch_data).grid(row=0, column=1)
+    myButton(root, text="generate MyTail.txt", command=gen_data).grid(row=1, column=1)
+    tk.Label(root, text='file name target of tail -f').grid(row=2, column=0)
+    tail_file_butt = myButton(root, text=tail_file.get(), command=enter_tail_file_name)
+    tail_file_butt.grid(row=2, column=1)
+    tk.Label(root, text='change folder: ').grid(row=3, column=0)
+    tail_path_butt = myButton(root, text=tail_path.get(), command=enter_folder, fg="blue", bg=bg_color)
+    tail_path_butt.grid(row=3, column=1, columnspan=3)
+    myButton(root, text="monitor target", command=watch_target).grid(row=5, column=1)
     root.mainloop()
