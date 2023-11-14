@@ -34,7 +34,8 @@ class CountdownTimer(tk.Toplevel):
         """Block caller task asking to close all plots then doing so"""
         tk.Toplevel.__init__(self)
         self.flasher_window = None
-        self.max_flashes = max_flash
+        self.flasher_label = None
+        self.max_flashes = int(max_flash)
         self.flashes = 0
         self.attributes('-topmost', True)
         self.initial_time = time_
@@ -90,35 +91,27 @@ class CountdownTimer(tk.Toplevel):
 
     def flasher_start(self, text):
         """function which creates window with message"""
-        global repeates
-        global flasher_label
-
-        repeates = 15  # how many times change background color
-
         # create window with messages
         self.flasher_window = tk.Toplevel()
         self.flasher_window.geometry("300x250")
-        flasher_label = tk.Label(self.flasher_window, text=text, bg='red', fg='black')
-        flasher_label.pack()
+        self.flasher_label = tk.Label(self.flasher_window, text=text, bg='red', fg='black')
+        self.flasher_label.pack()
 
         # update window after 500ms
         root.after(500, self.flasher_update)
 
     def flasher_update(self):
         """function which changes background in displayed window"""
-        global repeates
-
-        if repeates > 0:
-            repeates -= 1
-
-            flasher_label['text'] = str(repeates)
-            if flasher_label['bg'] == 'red':
-                flasher_label['bg'] = 'white'
+        if self.flashes <= self.max_flashes:
+            self.flashes += 1
+            self.flasher_label['text'] = str(self.flashes)
+            if self.flasher_label['bg'] == 'red':
+                self.flasher_label['bg'] = 'white'
                 self.flasher_window.configure(bg='white')
             else:
-                flasher_label['bg'] = 'red'
+                self.flasher_label['bg'] = 'red'
                 self.flasher_window.configure(bg='red')
-                flasher_label['bg'] = 'red'
+                self.flasher_label['bg'] = 'red'
 
             # update window after 1000ms
             root.after(1000, self.flasher_update)
@@ -130,12 +123,12 @@ class CountdownTimer(tk.Toplevel):
             self.flasher_window = None
 
 
-def show_countdown_timer(time_, message, caller, exit_function=None):
-    CountdownTimer(time_, message, caller, exit_function)
+def show_countdown_timer(time_, message, caller, max_flash=10, exit_function=None):
+    CountdownTimer(time_, message, caller, max_flash=max_flash, exit_function=exit_function)
 
 
 def start():
-    show_countdown_timer(5., "5 second test", 'show_countdown_timer')
+    show_countdown_timer(5., "5 second test", 'show_countdown_timer', max_flash=10, exit_function=None)
 
 
 def stay_awake(up_set_min=3.):
@@ -158,8 +151,6 @@ def stay_awake(up_set_min=3.):
 
 
 if __name__ == '__main__':
-    flasher_window = None
-    repeates = 3
     root = tk.Tk()
     tk.Label(root, text="Try timer variations").pack()
     tk.Button(root, text="Timer", command=start).pack()
