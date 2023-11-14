@@ -143,7 +143,7 @@ class ExRoot:
 
 # Executive class to control the global variables
 class Exec:
-    def __init__(self, cf_, ind, level=None):
+    def __init__(self, cf_, ind, level=None, path_disp_len_=25):
         self.cf = cf_
         self.ind = ind
         self.script_loc = os.path.dirname(os.path.abspath(__file__))
@@ -159,7 +159,7 @@ class Exec:
         self.battery_button = None
         self.level = level
         self.level_button = None
-        self.folder_butt = myButton(master, text=self.dataReduction_folder, command=self.enter_dataReduction_folder,
+        self.folder_butt = myButton(master, text=self.dataReduction_folder[-20:], command=self.enter_dataReduction_folder,
                                     fg="blue", bg=bg_color)
         self.unit = self.cf[self.ind]['unit']
         self.unit_button = None
@@ -173,6 +173,7 @@ class Exec:
         self.key_exists_in_file = None
         self.label = None
         self.key = None
+        self.path_disp_len = path_disp_len_
 
     def create_file_path_and_key(self, name_override=None):
         if name_override is None:
@@ -205,7 +206,7 @@ class Exec:
             self.dataReduction_folder = answer
         cf[self.ind]['dataReduction_folder'] = self.dataReduction_folder
         cf.save_to_file()
-        self.folder_butt.config(text=self.dataReduction_folder)
+        self.folder_butt.config(text=self.dataReduction_folder[self.path_disp_len:])
         self.update_folder_butt()
 
     def enter_unit(self):
@@ -263,7 +264,7 @@ class Exec:
             self.dataReduction_folder_exists = True
         else:
             self.dataReduction_folder_exists = False
-        self.folder_butt.config(text=self.dataReduction_folder)
+        self.folder_butt.config(text=self.dataReduction_folder[-self.path_disp_len:])
         if self.dataReduction_folder_exists:
             self.folder_butt.config(bg='lightgreen')
         else:
@@ -685,8 +686,8 @@ if __name__ == '__main__':
     master.title('State of Charge')
     master.wm_minsize(width=min_width, height=main_height)
     # master.geometry('%dx%d' % (master.winfo_screenwidth(), master.winfo_screenheight()))
-    Ref = Exec(cf, 'ref')
-    Test = Exec(cf, 'test')
+    Ref = Exec(cf, 'ref', path_disp_len_=25)
+    Test = Exec(cf, 'test', path_disp_len_=50)
     putty_test_csv_path = tk.StringVar(master, os.path.join(ex_root.script_loc, '../dataReduction/putty_test.csv'))
     icon_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC_Icon.png')
     master.iconphoto(False, tk.PhotoImage(file=icon_path))
@@ -707,8 +708,8 @@ if __name__ == '__main__':
     # Folder row
     row += 1
     working_label = tk.Label(master, text="dataReduction folder=")
-    Test.folder_butt = myButton(master, text=Test.dataReduction_folder, command=Test.enter_dataReduction_folder, fg="blue", bg=bg_color)
-    Ref.folder_butt = myButton(master, text=Ref.dataReduction_folder, command=Ref.enter_dataReduction_folder, fg="blue", bg=bg_color)
+    Test.folder_butt = myButton(master, text=Test.dataReduction_folder[-25:], command=Test.enter_dataReduction_folder, fg="blue", bg=bg_color)
+    Ref.folder_butt = myButton(master, text=Ref.dataReduction_folder[-25:], command=Ref.enter_dataReduction_folder, fg="blue", bg=bg_color)
     working_label.grid(row=row, column=0, padx=5, pady=5)
     Test.folder_butt.grid(row=row, column=1, padx=5, pady=5)
     Ref.folder_butt.grid(row=row, column=4, padx=5, pady=5)
