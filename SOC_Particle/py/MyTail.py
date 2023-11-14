@@ -43,7 +43,7 @@ class Tail(object):
         self.tailed_file = tailed_file
         self.callback = sys.stdout.write
 
-    def follow(self, s=1):
+    def follow(self, s=1, str=None):
         """Do a tail follow. If a callback function is registered it is called with every new line. 
         Else printed to standard out.
     
@@ -60,7 +60,12 @@ class Tail(object):
                     file_.seek(curr_position)
                     time.sleep(s)
                 else:
-                    self.callback(line)
+                    if str is None:
+                        self.callback(line)
+                    else:
+                        if line.__contains__(str):
+                            print(line)
+                            # self.callback(line)
 
     def register_callback(self, func):
         """ Overrides default callback function to provided function. """
@@ -84,9 +89,18 @@ class TailError(Exception):
         return self.message
 
 
+def enter_string():
+    answer = tk.simpledialog.askstring(title=__file__, prompt="enter tail-f destination file",
+                                       initialvalue=string.get())
+    string.set(answer)
+    string_butt.config(text=string.get())
+
+
 def enter_tail_file_name():
     answer = tk.simpledialog.askstring(title=__file__, prompt="enter tail-f destination file",
                                        initialvalue=tail_file.get())
+    tail_file.set(answer)
+    tail_file_butt.config(text=tail_file.get())
 
 
 def enter_folder():
@@ -95,6 +109,7 @@ def enter_folder():
         tail_folder.set(answer)
     tail_path.set(os.path.join(tail_folder.get(), tail_file.get()))
     tail_path_butt.config(text=tail_path.get())
+    out_path.set(tail_file.get() + '.tail')
 
 
 def gen_data():
@@ -153,6 +168,26 @@ def watch_target():
     thread.start()
 
 
+def watch_target_string():
+    global of
+    t = Tail(tail_path.get())
+    t.register_callback(write_to_out_path)
+    try:
+        os.remove(out_path.get())
+    except IOError:
+        pass
+    of = open(out_path.get(), 'a')
+
+    # Register a callback function to be called when a new line is found in the followed file.
+    # If no callback function is registered, new lines would be printed to standard out.
+    # t.register_callback(callback_function)
+
+    # Follow the file with 5 seconds as sleep time between iterations.
+    # If sleep time is not provided 1 second is used as the default time.
+    thread = Thread(target=t.follow, kwargs={'s': 1, 'str': string.get()})
+    thread.start()
+
+
 def write_to_out_path(input):
     global of
     of.write(input)
@@ -178,6 +213,7 @@ if __name__ == '__main__':
     tail_file = tk.StringVar(root, 'putty_test.csv')
     tail_path = tk.StringVar(root, os.path.join(tail_folder.get(), tail_file.get()))
     out_path = tk.StringVar(root, tail_file.get() + '.tail')
+    string = tk.StringVar(root, '<enter string to monitor>')
     myButton(root, text="monitor MyTail.txt", command=watch_data).grid(row=0, column=1)
     myButton(root, text="generate MyTail.txt", command=gen_data).grid(row=1, column=1)
     tk.Label(root, text='file name target of tail -f').grid(row=2, column=0)
@@ -187,4 +223,8 @@ if __name__ == '__main__':
     tail_path_butt = myButton(root, text=tail_path.get(), command=enter_folder, fg="blue", bg=bg_color)
     tail_path_butt.grid(row=3, column=1, columnspan=3)
     myButton(root, text="monitor target", command=watch_target).grid(row=5, column=1)
+    tk.Label(root, text='string to monitor in target: ').grid(row=6, column=0)
+    string_butt = myButton(root, text=string.get(), command=enter_string, fg="blue", bg=bg_color)
+    string_butt.grid(row=6, column=1, columnspan=3)
+    myButton(root, text="monitor target for string", command=watch_target_string).grid(row=7, column=1)
     root.mainloop()
