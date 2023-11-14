@@ -70,3 +70,4 @@ SOC_Particle/src/SOC_Particle.cpp
 *.ods#
 SOC_Particle/py/logs.txt
 SOC_Particle/py/logse.txt
+SOC_Particle/py/MyTail.txt

@@ -23,7 +23,13 @@ Raise a window visible at task bar to close all plots.
 """
 
 import matplotlib.pyplot as plt
-import tkinter as tk
+import platform
+if platform.system() == 'Darwin':
+    from ttwidgets import TTButton as myButton
+else:
+    import tkinter as tk
+    from tkinter import Button as myButton
+bg_color = "lightgray"
 
 
 class PlotKiller(tk.Toplevel):
