@@ -44,12 +44,12 @@ class CountdownTimer(tk.Toplevel):
         self.label.grid(row=0, column=0)
         self.lift()
         self.button = myButton(self, command=self.begin, text="START " + str(time_) + " sec timer")
-        self.button.grid(row=2, column=0)
+        self.button.grid(row=2, column=1)
         self.center()
         self.mainloop()
         # self.grab_set()  # Prevents other Tkinter windows from being used
 
-    def center(self, width=200, height=100):
+    def center(self, width=200, height=150):
         # get screen width and height
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
@@ -74,27 +74,26 @@ class CountdownTimer(tk.Toplevel):
 
     def countdown(self):
         """Countdown in seconds then exit"""
-        msg = 'Counting down'
         self.time.set(self.time.get() - 1)
-        self.label.config(text=f'{msg} ({self.time.get()}sec)')
-        self.button.config(text='', fg=bg_color, bg=bg_color)
+        self.label.config(text='')
+        self.button.config(text=str(self.time.get()), fg='black', bg=bg_color, font=("Courier", 96))
         if self.time.get() > 0:
             self.lift()
             self.center()
             self.after(1000, self.countdown)
         else:
             self.time.set(self.initial_time)
-            self.label.config(text=f'{msg} ({self.time.get()}sec)')
-            self.button.config(text='', fg=bg_color, bg=bg_color)
+            self.label.config(text=f'Timer ({self.time.get()}sec)')
+            self.button.config(text='0', fg=bg_color, bg=bg_color, font=("Courier", 4))
             if self.flasher_window is None:  # window is not busy
-                self.flasher_start('flash')  # display message
+                self.flasher_start('0')  # display message
 
     def flasher_start(self, text):
         """function which creates window with message"""
         # create window with messages
         self.flasher_window = tk.Toplevel()
         self.flasher_window.geometry("300x250")
-        self.flasher_label = tk.Label(self.flasher_window, text=text, bg='red', fg='black')
+        self.flasher_label = tk.Label(self.flasher_window, text=text, bg='red', fg='black', font=("Courier", 96))
         self.flasher_label.pack()
 
         # update window after 500ms
@@ -123,12 +122,8 @@ class CountdownTimer(tk.Toplevel):
             self.flasher_window = None
 
 
-def show_countdown_timer(time_, message, caller, max_flash=10, exit_function=None):
-    CountdownTimer(time_, message, caller, max_flash=max_flash, exit_function=exit_function)
-
-
-def start():
-    show_countdown_timer(5., "5 second test", 'show_countdown_timer', max_flash=10, exit_function=None)
+def start_timer(caller=''):
+    CountdownTimer(5, "5 second test", caller, max_flash=10, exit_function=None)
 
 
 def stay_awake(up_set_min=3.):
@@ -153,5 +148,5 @@ def stay_awake(up_set_min=3.):
 if __name__ == '__main__':
     root = tk.Tk()
     tk.Label(root, text="Try timer variations").pack()
-    tk.Button(root, text="Timer", command=start).pack()
+    tk.Button(root, text="Timer", command=start_timer).pack()
     root.mainloop()
