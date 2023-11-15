@@ -160,8 +160,8 @@ class Exec:
         self.battery_button = None
         self.level = level
         self.level_button = None
-        self.folder_butt = myButton(master, text=self.dataReduction_folder[-20:], command=self.enter_dataReduction_folder,
-                                    fg="blue", bg=bg_color)
+        self.folder_butt = myButton(master, text=self.dataReduction_folder[-20:],
+                                    command=self.enter_dataReduction_folder, fg="blue", bg=bg_color)
         self.unit = self.cf[self.ind]['unit']
         self.unit_button = None
         self.key_label = None
@@ -427,8 +427,10 @@ def grab_reset():
 
 def grab_start():
     add_to_clip_board(start.get())
-    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data')
-    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data as')
+    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                            text='save data')
+    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                               text='save data as')
     start_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
@@ -469,8 +471,10 @@ def handle_option(*args):
     cf.save_to_file()
     Test.create_file_path_and_key()
     Ref.create_file_path_and_key()
-    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data')
-    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='save data as')
+    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                            text='save data')
+    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                               text='save data as')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
@@ -556,8 +560,10 @@ def save_data():
                 return
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
-        save_data_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved')
-        save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='data saved')
+        save_data_button.config(bg='green', activebackground='green', fg='red', activeforeground='red',
+                                text='data saved')
+        save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                                   text='data saved')
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
         print('emptied', putty_test_csv_path.get())
         try:
@@ -602,8 +608,10 @@ def save_data_as():
                 return
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
-        save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black', text='data saved')
-        save_data_as_button.config(bg='green', activebackground='green', fg='red', activeforeground='red', text='data saved as')
+        save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                                text='data saved')
+        save_data_as_button.config(bg='green', activebackground='green', fg='red', activeforeground='red',
+                                   text='data saved as')
         shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
         print('emptied', putty_test_csv_path.get())
         try:
@@ -648,12 +656,14 @@ def start_putty():
             tkinter.messagebox.showwarning(message="putty may be open already")
         enter_size = putty_size()
     if enter_size <= 512:
-        putty_shell = subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
+        putty_shell = subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1,
+                                       universal_newlines=True)
         print('starting putty   putty -load test')
 
 
 def start_timer():
-    CountdownTimer(master, timer_val.get(), caller=option.get(), message="ALARM", max_flash=60, exit_function=None)
+    CountdownTimer(master, timer_val.get(), caller=option.get(), message="ALARM", max_flash=60, exit_function=None,
+                   trigger=True)
 
 
 if __name__ == '__main__':
@@ -715,8 +725,10 @@ if __name__ == '__main__':
     # Folder row
     row += 1
     working_label = tk.Label(master, text="dataReduction folder=")
-    Test.folder_butt = myButton(master, text=Test.dataReduction_folder[-25:], command=Test.enter_dataReduction_folder, fg="blue", bg=bg_color)
-    Ref.folder_butt = myButton(master, text=Ref.dataReduction_folder[-25:], command=Ref.enter_dataReduction_folder, fg="blue", bg=bg_color)
+    Test.folder_butt = myButton(master, text=Test.dataReduction_folder[-25:], command=Test.enter_dataReduction_folder,
+                                fg="blue", bg=bg_color)
+    Ref.folder_butt = myButton(master, text=Ref.dataReduction_folder[-25:], command=Ref.enter_dataReduction_folder,
+                               fg="blue", bg=bg_color)
     working_label.grid(row=row, column=0, padx=5, pady=5)
     Test.folder_butt.grid(row=row, column=1, padx=5, pady=5)
     Ref.folder_butt.grid(row=row, column=4, padx=5, pady=5)
@@ -782,7 +794,8 @@ if __name__ == '__main__':
     putty_shell = None
     putty_label = tk.Label(master, text='start putty:')
     putty_label.grid(row=row, column=0, padx=5, pady=5)
-    putty_button = myButton(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    putty_button = myButton(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color,
+                            wraplength=wrap_length, justify=tk.LEFT)
     putty_button.grid(sticky="W", row=row, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
     empty_csv_path = tk.StringVar(master)
     empty_csv_path.set(os.path.join(Test.dataReduction_folder, 'empty.csv'))
@@ -828,17 +841,21 @@ if __name__ == '__main__':
     row += 1
     save_data_label = tk.Label(master, text='save data:')
     save_data_label.grid(row=row, column=0, padx=5, pady=5)
-    save_data_button = myButton(master, text='save data', command=save_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    save_data_button = myButton(master, text='save data', command=save_data, fg="red", bg=bg_color,
+                                wraplength=wrap_length, justify=tk.LEFT)
     save_data_button.grid(sticky="W", row=row, column=1, padx=5, pady=5)
-    save_data_as_button = myButton(master, text='save as', command=save_data_as, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    save_data_as_button = myButton(master, text='save as', command=save_data_as, fg="red", bg=bg_color,
+                                   wraplength=wrap_length, justify=tk.LEFT)
     save_data_as_button.grid(sticky="W", row=row, column=2, padx=5, pady=5)
-    clear_data_button = myButton(master, text='clear', command=clear_data, fg="red", bg=bg_color, wraplength=wrap_length, justify=tk.RIGHT)
+    clear_data_button = myButton(master, text='clear', command=clear_data, fg="red", bg=bg_color,
+                                 wraplength=wrap_length, justify=tk.RIGHT)
     clear_data_button.grid(sticky="W", row=row, column=3, padx=5, pady=5)
 
     row += 1
     tk.ttk.Separator(master, orient='horizontal').grid(row=row, columnspan=5, pady=5, sticky='ew')
     row += 1
-    run_button = myButton(master, text='Compare', command=compare_run, fg="green", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    run_button = myButton(master, text='Compare', command=compare_run, fg="green", bg=bg_color,
+                          wraplength=wrap_length, justify=tk.LEFT)
     run_button.grid(row=row, column=0, padx=5, pady=5)
 
     row += 1
@@ -846,9 +863,11 @@ if __name__ == '__main__':
     row += 1
     choose_label = tk.Label(master, text='choose existing files:')
     choose_label.grid(row=row, column=0, padx=5, pady=5)
-    run_sim_choose_button = myButton(master, text='Compare Run Sim Choose', command=compare_run_sim_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    run_sim_choose_button = myButton(master, text='Compare Run Sim Choose', command=compare_run_sim_choose,
+                                     fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
     run_sim_choose_button.grid(sticky="W", row=row, column=1, padx=5, pady=5)
-    run_run_choose_button = myButton(master, text='Compare Run Run Choose', command=compare_run_run_choose, fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+    run_run_choose_button = myButton(master, text='Compare Run Run Choose', command=compare_run_run_choose,
+                                     fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
     run_run_choose_button.grid(sticky="W", row=row, column=2, padx=5, pady=5)
 
     # Begin

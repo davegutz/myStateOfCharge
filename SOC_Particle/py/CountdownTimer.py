@@ -30,7 +30,7 @@ bg_color = "lightgray"
 
 
 class CountdownTimer(tk.Toplevel):
-    def __init__(self,  root_, time_, message, caller, max_flash=30, exit_function=None):
+    def __init__(self,  root_, time_, message, caller, max_flash=30, exit_function=None, trigger=False):
         """Block caller task asking to close all plots then doing so"""
         tk.Toplevel.__init__(self)
         self.root = root_
@@ -40,11 +40,14 @@ class CountdownTimer(tk.Toplevel):
         self.flashes = 0
         self.attributes('-topmost', True)
         self.initial_time = time_
-        self.time = tk.IntVar(self, time_)
+        self.time = tk.IntVar(self, time_ + 1)
         self.lift()
         self.button = myButton(self, command=self.begin, text="START " + str(time_) + " sec timer")
         self.button.pack(side='top', fill='x')
         self.center()
+        self.trigger = trigger
+        if self.trigger:
+            self.begin()
         self.mainloop()
         # self.grab_set()  # Prevents other Tkinter windows from being used
 
@@ -64,6 +67,11 @@ class CountdownTimer(tk.Toplevel):
 
     def begin(self):
         """Countdown in seconds then exit"""
+        if self.trigger:
+            self.trigger = False
+            self.after(1000, self.begin)
+            self.button.config(text='wait')
+            return
         thread = Thread(target=stay_awake, kwargs={'up_set_min': float(self.time.get()) / 60.})
         thread.start()
         self.lift()
@@ -92,9 +100,10 @@ class CountdownTimer(tk.Toplevel):
         self.flasher_label = tk.Label(self.flasher_window, text=text, bg='red', fg='black', font=("Courier", 96))
         self.flasher_label.pack(side='bottom')
         self.flasher_window.configure(bg='red')
+        self.bell()
 
         # update window after 500ms
-        root.after(500, self.flasher_update)
+        self.after(500, self.flasher_update)
 
     def flasher_update(self):
         """function which changes background in displayed window"""
@@ -109,14 +118,14 @@ class CountdownTimer(tk.Toplevel):
                 self.flasher_window.configure(bg='red')
 
             # update window
-            root.after(500, self.flasher_update)
+            self.after(500, self.flasher_update)
         else:
             self.flasher_label.config(text='ran ' + str(self.initial_time) + ' sec then waited ' + str(self.max_flashes),
                                       font=("Courier", 14))
 
 
 def start_timer(caller=''):
-    CountdownTimer(root,5, "5 second test", caller, max_flash=5, exit_function=None)
+    CountdownTimer(root,5, "5 second test", caller, max_flash=5, exit_function=None, trigger=True)
 
 
 def stay_awake(up_set_min=3.):
