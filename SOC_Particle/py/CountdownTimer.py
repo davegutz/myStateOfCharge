@@ -30,9 +30,10 @@ bg_color = "lightgray"
 
 
 class CountdownTimer(tk.Toplevel):
-    def __init__(self,  time_, message, caller, max_flash=30, exit_function=None):
+    def __init__(self,  root_, time_, message, caller, max_flash=30, exit_function=None):
         """Block caller task asking to close all plots then doing so"""
         tk.Toplevel.__init__(self)
+        self.root = root_
         self.flasher_window = None
         self.flasher_label = None
         self.max_flashes = int(max_flash)
@@ -48,8 +49,8 @@ class CountdownTimer(tk.Toplevel):
         # self.grab_set()  # Prevents other Tkinter windows from being used
 
     def center(self, width=200, height=150):
-        screen_width = root.winfo_screenwidth()
-        screen_height = root.winfo_screenheight()
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
 
         # calculate position x and y coordinates
         x = (screen_width / 2) - (width / 2)
@@ -113,8 +114,9 @@ class CountdownTimer(tk.Toplevel):
             self.flasher_label.config(text='ran ' + str(self.initial_time) + ' sec then waited ' + str(self.max_flashes),
                                       font=("Courier", 14))
 
+
 def start_timer(caller=''):
-    CountdownTimer(5, "5 second test", caller, max_flash=5, exit_function=None)
+    CountdownTimer(root,5, "5 second test", caller, max_flash=5, exit_function=None)
 
 
 def stay_awake(up_set_min=3.):

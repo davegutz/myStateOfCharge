@@ -27,17 +27,18 @@ import tkinter.simpledialog
 import tkinter.messagebox
 from CompareRunSim import compare_run_sim
 from CompareRunRun import compare_run_run
+from CountdownTimer import CountdownTimer
 import shutil
 import pyperclip
 import subprocess
 import datetime
-# import sys
 import platform
 if platform.system() == 'Darwin':
     from ttwidgets import TTButton as myButton
 else:
     from tkinter import Button as myButton
 global putty_shell
+bg_color = 'lightgray'
 
 # sys.stdout = open('logs.txt', 'w')
 # sys.stderr = open('logse.txt', 'w')
@@ -148,7 +149,7 @@ class Exec:
         self.ind = ind
         self.script_loc = os.path.dirname(os.path.abspath(__file__))
         self.config_path = os.path.join(self.script_loc, 'root_config.ini')
-        self.dataReduction_folder = cf[self.ind]['dataReduction_folder']
+        self.dataReduction_folder = self.cf[self.ind]['dataReduction_folder']
         self.version = self.cf[self.ind]['version']
         self.version_button = None
         if self.version is None:
@@ -177,7 +178,7 @@ class Exec:
 
     def create_file_path_and_key(self, name_override=None):
         if name_override is None:
-            self.file_txt = create_file_txt(cf['others']['option'], self.unit, self.battery)
+            self.file_txt = create_file_txt(self.cf['others']['option'], self.unit, self.battery)
             self.key = create_file_key(self.version, self.unit, self.battery)
             print('version', self.version, 'key', self.key)
         else:
@@ -204,8 +205,8 @@ class Exec:
                                             initialdir=self.dataReduction_folder)
         if answer is not None and answer != '':
             self.dataReduction_folder = answer
-        cf[self.ind]['dataReduction_folder'] = self.dataReduction_folder
-        cf.save_to_file()
+        self.cf[self.ind]['dataReduction_folder'] = self.dataReduction_folder
+        self.cf.save_to_file()
         self.folder_butt.config(text=self.dataReduction_folder[self.path_disp_len:])
         self.update_folder_butt()
 
@@ -222,7 +223,7 @@ class Exec:
     def enter_version(self):
         self.version = tk.simpledialog.askstring(title=__file__, prompt="Enter version <vYYYYMMDD>:",
                                                  initialvalue=self.version)
-        cf[self.ind]['version'] = self.version
+        self.cf[self.ind]['version'] = self.version
         self.cf.save_to_file()
         self.version_button.config(text=self.version)
         self.version_path = os.path.join(self.dataReduction_folder, self.version)
@@ -475,7 +476,7 @@ def handle_option(*args):
 
 
 def lookup_start():
-    start_val, reset_val, ev_val, timer_val = lookup.get(option.get())
+    start_val, reset_val, ev_val, timer_val_ = lookup.get(option.get())
     start.set(start_val)
     start_button.config(text=start.get())
     reset.set(reset_val)
@@ -498,6 +499,8 @@ def lookup_start():
         ev4_label.config(text='-' + ev_val[3])
     else:
         ev4_label.config(text='')
+    timer_val.set(timer_val_)
+    timer_start_butt.config(text=('START ' + str(timer_val.get()) + ' sec TIMER'))
 
 
 def putty_size():
@@ -649,6 +652,10 @@ def start_putty():
         print('starting putty   putty -load test')
 
 
+def start_timer():
+    CountdownTimer(master, timer_val.get(), caller=option.get(), message="ALARM", max_flash=60, exit_function=None)
+
+
 if __name__ == '__main__':
     import os
     import tkinter as tk
@@ -797,6 +804,10 @@ if __name__ == '__main__':
     reset_button = myButton(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
                             justify=tk.LEFT, font=("Arial", 8))
     reset_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
+    timer_val = tk.IntVar(master, 0)
+    timer_start_butt = myButton(master, text=timer_val.get(), command=start_timer, fg="red", bg=bg_color,
+                                justify=tk.RIGHT, font=("Arial", 8))
+    timer_start_butt.grid(sticky="E", row=row, column=4, columnspan=1, rowspan=1, padx=5, pady=5)
 
     row += 1
     ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
