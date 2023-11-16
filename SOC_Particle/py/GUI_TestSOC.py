@@ -33,11 +33,12 @@ import pyperclip
 import subprocess
 import datetime
 import platform
+import Colors
+from test_soc_util import run_shell_cmd
 if platform.system() == 'Darwin':
     from ttwidgets import TTButton as myButton
 else:
     from tkinter import Button as myButton
-global putty_shell
 bg_color = 'lightgray'
 
 # sys.stdout = open('logs.txt', 'w')
@@ -48,7 +49,7 @@ sel_list = ['init', 'custom', 'ampHiFail', 'rapidTweakRegression', 'offSitHysBms
             'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
             'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailFf', 'pulseEKF', 'pulseSS', 'tbFailMod',
             'tbFailHdwe', 'DvMon', 'DvSim']
-lookup = {'init': ('init0;init1;', '', ('',), 0),
+lookup = {'init': ('v0;XS;Xp0;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;SH0;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '', ('',), 0),
           'custom': ('', '', ("For general purpose running", "'save data' will present a choice of file name", ""), 60),
           'ampHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy)."), 20),
           'rapidTweakRegression': ('Ff0;HR;Xp10;', 'self terminates', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 155),
@@ -292,7 +293,15 @@ def add_to_clip_board(text):
 
 
 # Compare run driver
-def clear_data():
+def clear_data_silent():
+    clear_data(silent=True)
+
+
+def clear_data_verbose():
+    clear_data(silent=False)
+
+
+def clear_data(silent=False):
     if os.path.isfile(putty_test_csv_path.get()):
         enter_size = putty_size()  # bytes
         time.sleep(1.)
@@ -302,16 +311,19 @@ def clear_data():
         wait_size = 0
     if enter_size > 64:  # bytes
         if wait_size > enter_size:
-            print('stop data first')
+            if silent is False:
+                print('stop data first')
             tkinter.messagebox.showwarning(message="stop data first")
         else:
             # create empty file
             if not save_putty():
-                tkinter.messagebox.showwarning(message="putty may be open already")
+                if silent is False:
+                    tkinter.messagebox.showwarning(message="putty may be open already")
             reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     else:
-        print('putty test file non-existent or too small (<64 bytes) probably already done')
-        tkinter.messagebox.showwarning(message="Nothing to clear")
+        if silent is False:
+            print('putty test file non-existent or too small (<64 bytes) probably already done')
+            tkinter.messagebox.showwarning(message="Nothing to clear")
 
 
 def compare_run():
@@ -431,7 +443,8 @@ def grab_init():
     init_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
-    clear_data()
+    start_putty()
+    clear_data_silent()
     print('cleared putty data file')
     Test.create_file_path_and_key()
     Test.update_key_label()
@@ -498,6 +511,30 @@ def handle_option(*args):
                                text='save data as')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+
+
+def kill_putty(sys_=None, silent=True):
+    command = ''
+    if sys_ == 'Linux':
+        command = 'pkill -e putty'
+    elif sys_ == 'Windows':
+        command = 'taskkill /f /im putty.exe'
+    elif sys_ == 'Darwin':
+        command = 'pkill putty'
+    else:
+        print(f"kill_putty: SYS = {sys_} unknown")
+    if silent is False:
+        print(command + '\n')
+        print(Colors.bg.brightblack, Colors.fg.wheat)
+        result = run_shell_cmd(command, silent=silent)
+        print(Colors.reset)
+        print(command + '\n')
+        if result == -1:
+            print(Colors.fg.blue, 'failed.', Colors.reset)
+            return None, False
+    else:
+        result = run_shell_cmd(command, silent=silent)
+    return result
 
 
 def lookup_start():
@@ -650,21 +687,19 @@ def size_of(path):
 
 
 def start_putty():
-    global putty_shell
     enter_size = putty_size()
-    if enter_size > 512:
+    if enter_size >= 64:
         if not save_putty():
             tkinter.messagebox.showwarning(message="putty may be open already")
         enter_size = putty_size()
-    if enter_size <= 512:
-        putty_shell = subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1,
-                                       universal_newlines=True)
-        print('starting putty   putty -load test')
+    if enter_size < 64:
+        kill_putty(platform.system())
+        subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
+        print('restarting putty   putty -load test')
 
 
 def start_timer():
-    CountdownTimer(master, timer_val.get(), caller=option.get(), message="ALARM", max_flash=60, exit_function=None,
-                   trigger=True)
+    CountdownTimer(master, timer_val.get(), max_flash=60, exit_function=None, trigger=True)
 
 
 if __name__ == '__main__':
@@ -790,15 +825,7 @@ if __name__ == '__main__':
     Ref.create_file_path_and_key(cf['others']['option'])
 
     row += 1
-    putty_shell = None
-    putty_label = tk.Label(master, text='start putty:')
-    putty_label.grid(row=row, column=0, padx=5, pady=5)
-    putty_button = myButton(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color,
-                            wraplength=wrap_length, justify=tk.LEFT)
-    putty_button.grid(sticky="W", row=row, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
     empty_csv_path = tk.StringVar(master, os.path.join(Test.dataReduction_folder, 'empty.csv'))
-
-    row += 1
     init_val, dum1, dum2, dum3 = lookup.get('init')
     init = tk.StringVar(master, init_val)
     init_label = tk.Label(master, text='init & clear:')
@@ -852,7 +879,7 @@ if __name__ == '__main__':
     save_data_as_button = myButton(master, text='save as', command=save_data_as, fg="red", bg=bg_color,
                                    wraplength=wrap_length, justify=tk.LEFT)
     save_data_as_button.grid(sticky="W", row=row, column=2, padx=5, pady=5)
-    clear_data_button = myButton(master, text='clear', command=clear_data, fg="red", bg=bg_color,
+    clear_data_button = myButton(master, text='clear', command=clear_data_verbose, fg="red", bg=bg_color,
                                  wraplength=wrap_length, justify=tk.RIGHT)
     clear_data_button.grid(sticky="W", row=row, column=3, padx=5, pady=5)
 

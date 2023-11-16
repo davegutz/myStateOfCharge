@@ -30,7 +30,7 @@ bg_color = "lightgray"
 
 
 class CountdownTimer(tk.Toplevel):
-    def __init__(self,  root_, time_, message, caller, max_flash=30, exit_function=None, trigger=False):
+    def __init__(self,  root_, time_, max_flash=30, exit_function=None, trigger=False):
         """Block caller task asking to close all plots then doing so"""
         tk.Toplevel.__init__(self)
         self.root = root_
@@ -45,6 +45,7 @@ class CountdownTimer(tk.Toplevel):
         self.button = myButton(self, command=self.begin, text="START " + str(time_) + " sec timer")
         self.button.pack(side='top', fill='x')
         # self.center()
+        self.exit_function = exit_function
         self.trigger = trigger
         if self.trigger:
             self.begin()
@@ -60,9 +61,7 @@ class CountdownTimer(tk.Toplevel):
         y = (screen_height / 2) - (height / 2)
         self.geometry('%dx%d+%d+%d' % (width, height, x, y))
 
-    def close_all(self):
-        plt.close('all')
-        # self.grab_release()
+    def close(self):
         self.destroy()
 
     def begin(self):
@@ -89,6 +88,8 @@ class CountdownTimer(tk.Toplevel):
         else:
             self.time.set(self.initial_time)
             self.button.config(text=str(self.initial_time), fg='white', bg=bg_color, font=("Courier", 96))
+            if self.exit_function is not None:
+                self.exit_function()
             if self.flasher_window is None:  # window is not busy
                 self.flasher_start('0')  # display message
 
@@ -120,8 +121,7 @@ class CountdownTimer(tk.Toplevel):
             # update window
             self.after(500, self.flasher_update)
         else:
-            self.flasher_label.config(text='ran ' + str(self.initial_time) + ' sec then waited ' + str(self.max_flashes),
-                                      font=("Courier", 14))
+            self.destroy()
 
 
 def start_timer(caller=''):
