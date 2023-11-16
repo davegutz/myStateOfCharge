@@ -121,6 +121,7 @@ class CountdownTimer(tk.Toplevel):
             # update window
             self.after(500, self.flasher_update)
         else:
+            self.flasher_window.destroy()
             self.destroy()
 
 
