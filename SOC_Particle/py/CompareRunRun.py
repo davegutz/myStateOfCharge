@@ -190,7 +190,7 @@ def compare_run_run(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
     filename = data_root_ref + '__' + data_root_test
     plot_title = dir_root_ref + '/' + data_root_ref + '__' + dir_root_test + '/' + data_root_test + '   ' + date_time
     if temp_flt_file_ref_clean and len(f_ref.time) > 1:
-        fig_list, fig_files, fig_list = over_fault(f_ref, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+        fig_list, fig_files = over_fault(f_ref, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                                    fig_list=fig_list, long_term=long_term_in)
     if plot_overall_in:
         fig_list, fig_files = dom_plot(mon_ref, mon_test, sim_ref, sim_test, sim_test, filename, fig_files,

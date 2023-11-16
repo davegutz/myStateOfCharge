@@ -44,7 +44,7 @@ class CountdownTimer(tk.Toplevel):
         self.lift()
         self.button = myButton(self, command=self.begin, text="START " + str(time_) + " sec timer")
         self.button.pack(side='top', fill='x')
-        self.center()
+        # self.center()
         self.trigger = trigger
         if self.trigger:
             self.begin()
@@ -75,7 +75,7 @@ class CountdownTimer(tk.Toplevel):
         thread = Thread(target=stay_awake, kwargs={'up_set_min': float(self.time.get()) / 60.})
         thread.start()
         self.lift()
-        self.center()
+        # self.center()
         self.countdown()
 
     def countdown(self):
@@ -84,7 +84,7 @@ class CountdownTimer(tk.Toplevel):
         self.button.config(text=str(self.time.get()), fg='black', bg=bg_color, font=("Courier", 96))
         if self.time.get() > 0:
             self.lift()
-            self.center()
+            # self.center()
             self.after(1000, self.countdown)
         else:
             self.time.set(self.initial_time)
