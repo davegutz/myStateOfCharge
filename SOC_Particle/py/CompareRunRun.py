@@ -181,7 +181,7 @@ def compare_run_run(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
                   rated_batt_cap=rated_batt_cap_in, legacy=legacy_in_test)
 
     # Plots
-    n_fig = 0
+    fig_list = []
     fig_files = []
     data_root_ref = data_file_ref_clean.split('/')[-1].replace('.csv', '')
     data_root_test = data_file_test_clean.split('/')[-1].replace('.csv', '')
@@ -190,18 +190,18 @@ def compare_run_run(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
     filename = data_root_ref + '__' + data_root_test
     plot_title = dir_root_ref + '/' + data_root_ref + '__' + dir_root_test + '/' + data_root_test + '   ' + date_time
     if temp_flt_file_ref_clean and len(f_ref.time) > 1:
-        n_fig, fig_files = over_fault(f_ref, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                      n_fig=n_fig, long_term=long_term_in)
+        fig_list, fig_files, fig_list = over_fault(f_ref, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+                                                   fig_list=fig_list, long_term=long_term_in)
     if plot_overall_in:
-        n_fig, fig_files = dom_plot(mon_ref, mon_test, sim_ref, sim_test, sim_test, filename, fig_files,
-                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in)  # all over all
+        fig_list, fig_files = dom_plot(mon_ref, mon_test, sim_ref, sim_test, sim_test, filename, fig_files,
+                                       plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in)  # all over all
     precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
     unite_pictures_into_pdf(outputPdfName=filename+'-'+date_time+'.pdf', save_pdf_path=save_pdf_path,
                             listWithImagesExtensions=["png"])
     cleanup_fig_files(fig_files)
 
     plt.show(block=False)
-    show_killer('close plots?', 'CompareRunRun')
+    show_killer('close plots?', 'CompareRunRun', fig_list=fig_list)
 
     return True
 

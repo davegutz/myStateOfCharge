@@ -39,14 +39,13 @@ import Chemistry_BMS
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
-def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None, plot_init_in=False,
+def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
              ref_str='_ref', test_str='_test'):
     if fig_files is None:
         fig_files = []
 
     if plot_init_in:
-        plt.figure()  # init 1
-        n_fig += 1
+        fig_list.append(plt.figure())  # init 1
         plt.subplot(221)
         plt.title(plot_title + ' init 1')
         plt.plot(so.time, so.reset_s, color='black', linestyle='-', label='reset_s'+ref_str)
@@ -69,15 +68,14 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.plot(mo.time, mo.soc_ekf, marker='^', markersize='5', markevery=32, linestyle='None', color='orange', label='soc_ekf'+ref_str)
         plt.plot(mv.time, mv.soc_ekf, marker='+', markersize='5', markevery=32, linestyle='None', color='cyan',  label='soc_ekf'+test_str)
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        return n_fig, fig_files
+        return fig_list, fig_files
 
     if mo.ibmh is not None:
-        plt.figure()  # 1a
-        n_fig += 1
+        fig_list.append(plt.figure())  # 1a
         plt.subplot(321)
         plt.title(plot_title + ' 1a')
         plt.plot(mo.time, mo.ibmh, color='black', linestyle='-', label='ib_amp_hdwe'+ref_str)
@@ -112,12 +110,11 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.subplot(326)
         plt.plot(mo.time, mo.cc_dif, color='black', linestyle='-', label='cc_diff'+ref_str)
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()  # DOM 1
-        n_fig += 1
+        fig_list.append(plt.figure())  # DOM 1
         plt.subplot(331)
         plt.title(plot_title + ' DOM 1')
         plt.plot(mo.time, mo.ib_charge, color='green', linestyle='-', label='ib_charge'+ref_str)
@@ -206,12 +203,11 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.plot(mo.time, np.array(mo.chm)-0.5, color='blue', linestyle='-', label='chm'+ref_str+'-0.5')
         plt.plot(mv.time, np.array(mv.chm)-0.5, color='red', linestyle='--', label='chm'+test_str+'-0.5')
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # DOM 2
-    n_fig += 1
+    fig_list.append(plt.figure())  # DOM 2
     plt.subplot(321)
     plt.title(plot_title + ' DOM 2')
     plt.plot(mo.time, mo.dv_dyn, color='green', linestyle='-', label='dv_dyn'+ref_str)
@@ -274,12 +270,11 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.plot(so.time, so.chm_s, color='cyan', linestyle='--', label='sim_mod'+ref_str)
     plt.ylim(0., 50.)
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # DOM 3
-    n_fig += 1
+    fig_list.append(plt.figure())  # DOM 3
     plt.subplot(221)
     plt.title(plot_title + ' DOM 3')
     plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc'+ref_str)
@@ -301,12 +296,11 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
     plt.plot(mo.time, mo.soc_ekf, color='cyan', linestyle='-', label='soc_ekf'+ref_str)
     plt.plot(mv.time, mv.soc_ekf, color='black', linestyle='--', label='soc_ekf'+test_str)
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # DOM 4
-    n_fig += 1
+    fig_list.append(plt.figure())  # DOM 4
     plt.subplot(131)
     plt.title(plot_title + ' DOM 4')
     plt.plot(mo.time, mo.soc, color='orange', linestyle='-', label='soc'+ref_str)
@@ -329,13 +323,12 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
     plt.plot(mv.soc, mv.vb, color='green', linestyle='-.', label='vb'+test_str)
     plt.plot(smv.soc_s, smv.vb_s, color='black', linestyle='-.', label='vb_s'+test_str)
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
     if hasattr(mv, 'ib_diff_flt') is True:
-        plt.figure()  # DOM 5
-        n_fig += 1
+        fig_list.append(plt.figure())  # DOM 5
         plt.subplot(221)
         plt.title(plot_title + ' DOM 5')
         plt.plot(mo.time, mo.ib_charge, color='black', linestyle='-', label='ib_charge' + ref_str)
@@ -378,11 +371,11 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.plot(mo.time, mo.tb_sel + 6, color='green', linestyle='-', label='tb_sel_stat' + ref_str + '+6')
         plt.plot(mv.time, mv.tb_sel + 6, color='red', linestyle='--', label='tb_sel_stat' + test_str + '+6')
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-    return n_fig, fig_files
+    return fig_list, fig_files
 
 
 def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, skip=1, comment_str='#'):
@@ -895,7 +888,7 @@ if __name__ == '__main__':
             save_clean_file_sim(sim_s_ver, sim_file_save, '_sim_rep' + date_)
 
         # Plots
-        n_fig = 0
+        fig_list = []
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
@@ -905,12 +898,12 @@ if __name__ == '__main__':
         #     filename = data_root + sys.argv[0].split('/')[-1]
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = overall_batt(mon_ver, sim_ver, filename, fig_files, plot_title=plot_title,
-                                        n_fig=n_fig, suffix='_ver')  # Could be confusing because sim over mon
-        n_fig, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                    plot_title=plot_title, n_fig=n_fig, ref_str='', test_str='_ver')
-        # n_fig, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
-        #                           plot_title=plot_title, n_fig=n_fig, ref_str='', test_str='_ver')
+        fig_list, fig_files = overall_batt(mon_ver, sim_ver, filename, fig_files, plot_title=plot_title,
+                                        fig_list=fig_list, suffix='_ver')  # Could be confusing because sim over mon
+        fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                    plot_title=plot_title, fig_list=fig_list, ref_str='', test_str='_ver')
+        # fig_list, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
+        #                           plot_title=plot_title, fig_list=fig_list, ref_str='', test_str='_ver')
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf',
                                 save_pdf_path='../dataReduction/figures')
         cleanup_fig_files(fig_files)

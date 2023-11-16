@@ -36,12 +36,11 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
-def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None, plot_init_in=False,
+def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
              ref_str='_ref', test_str='_test'):
     if so and smv:
         if mo.Fx is not None:  # ekf
-            plt.figure()  # EKF  1
-            n_fig += 1
+            fig_list.append(plt.figure())  # EKF  1
             plt.subplot(331)
             plt.title(plot_title + ' EKF 1')
             plt.plot(mo.time, mo.u, color='blue', linestyle='-', label='u' + ref_str)
@@ -80,12 +79,11 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
             plt.plot(mo.time, mo.S, color='blue', linestyle='-', label='S' + ref_str)
             plt.plot(mv.time, mv.S, color='red', linestyle='--', label='S' + test_str)
             plt.legend(loc=1)
-            fig_file_name = filename + '_' + str(n_fig) + ".png"
+            fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
             fig_files.append(fig_file_name)
             plt.savefig(fig_file_name, format="png")
 
-            plt.figure()  # EKF  2
-            n_fig += 1
+            fig_list.append(plt.figure())  # EKF  2
             plt.subplot(331)
             plt.title(plot_title + ' EKF 2')
             plt.plot(mo.time, mo.K, color='blue', linestyle='-', label='K' + ref_str)
@@ -125,12 +123,11 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
             plt.plot(mo.time, mo.H, color='blue', linestyle='-', label='H' + ref_str)
             plt.plot(mv.time, mv.H, color='red', linestyle='--', label='H' + test_str)
             plt.legend(loc=1)
-            fig_file_name = filename + '_' + str(n_fig) + ".png"
+            fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
             fig_files.append(fig_file_name)
             plt.savefig(fig_file_name, format="png")
 
-            plt.figure()  # EKF3
-            n_fig += 1
+            fig_list.append(plt.figure())  # EKF3
             plt.subplot(221)
             plt.title(plot_title + ' EKF 3')
             plt.plot(mo.time, mo.ib, color='red', linestyle='-', label='ib' + ref_str)
@@ -158,19 +155,17 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
             plt.legend(loc=1)
 
     if mo.voc_soc is not None:
-        plt.figure()  # EKF  4
-        n_fig += 1
+        fig_list.append(plt.figure())  # EKF  4
         plt.subplot(111)
         plt.title(plot_title + ' EKF 4')
         plt.plot(mo.soc, mo.voc_stat, color='red', linestyle='-', label='voc_stat' + ref_str)
         plt.plot(mo.soc, mo.voc_soc, color='black', linestyle=':', label='voc_soc' + ref_str)
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()  # Hyst 1
-        n_fig += 1
+        fig_list.append(plt.figure())  # Hyst 1
         plt.subplot(331)
         plt.title(plot_title + ' Hyst 1')
         # plt.plot(mo.time, mo.dv_hys_required, linestyle='-', color='black', label='dv_hys_required'+ref_str)
@@ -269,7 +264,7 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_f
         plt.plot(mo.time, mo.voc_stat, color='magenta', linestyle='-', label='voc_stat' + ref_str)
         plt.plot(mv.time, mv.voc_stat, color='pink', linestyle='--', label='voc_stat' + test_str)
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
-    return n_fig, fig_files
+    return fig_list, fig_files

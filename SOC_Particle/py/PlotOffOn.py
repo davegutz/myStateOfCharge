@@ -36,11 +36,10 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
-def off_on_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None, plot_init_in=False,
+def off_on_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
                 ref_str='_ref', test_str='_test'):
     if so and smv:
-        plt.figure()  # 7 off/on sim
-        n_fig += 1
+        fig_list.append(plt.figure())  # 7 off/on sim
         plt.subplot(221)
         plt.title(plot_title + ' off/on sim 1')
         plt.plot(so.time, so.vb_s, color='black', linestyle='-', label='vb_s' + ref_str)
@@ -80,12 +79,11 @@ def off_on_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, 
         if hasattr(sv, 'ib_s'):
             plt.plot(sv.time, sv.ib_s, linestyle='--', color='orange', label='ib_s' + test_str)
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()  # 8 off/on mon
-        n_fig += 1
+        fig_list.append(plt.figure())  # 8 off/on mon
         plt.subplot(221)
         plt.title(plot_title + ' off/on mon 1')
         plt.plot(mo.time, mo.vb, color='black', linestyle='-', label='vb' + ref_str)
@@ -107,8 +105,8 @@ def off_on_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, 
         plt.plot(mv.time, mv.ib_charge, linestyle=':', color='orange', label='ib_charge' + test_str)
         plt.plot(smv.time, smv.ib_charge_s, linestyle='-.', color='blue', label='ib_charge_s' + ref_str)
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-    return n_fig, fig_files
+    return fig_list, fig_files

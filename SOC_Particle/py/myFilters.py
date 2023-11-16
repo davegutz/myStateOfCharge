@@ -522,12 +522,11 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
 
-    def overall(filter_1=Saved1(), filter_2=Saved2(), filename='', fig_files=None, plot_title=None, n_fig=None):
+    def overall(filter_1=Saved1(), filter_2=Saved2(), filename='', fig_files=None, plot_title=None, fig_list=None):
         if fig_files is None:
             fig_files = []
 
-        plt.figure()
-        n_fig += 1
+        fig_list.append(plt.figure())
         plt.subplot(211)
         plt.title(plot_title)
         plt.plot(filter_1.time, filter_1.in_, color='blue', label='in 1')
@@ -537,11 +536,11 @@ if __name__ == '__main__':
         plt.plot(filter_2.time, filter_2.in_, color='blue', label='in 2')
         plt.plot(filter_2.time, filter_2.out_, color='green', label='out 2')
         plt.legend(loc=3)
-        fig_file_name = filename + "_" + str(n_fig) + ".png"
+        fig_file_name = filename + "_" + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        return n_fig, fig_files
+        return fig_list, fig_files
 
 
     class Pulsar:
@@ -618,13 +617,13 @@ if __name__ == '__main__':
         # print(filter_2)
 
         # Plots
-        n_fig = 0
+        fig_list = []
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        overall(filter_1.saved, filter_2.saved, filename, fig_files, plot_title=plot_title, n_fig=n_fig)
+        overall(filter_1.saved, filter_2.saved, filename, fig_files, plot_title=plot_title, fig_list=fig_list)
         plt.show()
 
     main()

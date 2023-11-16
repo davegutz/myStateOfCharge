@@ -36,11 +36,10 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
-def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None, plot_init_in=False,
+def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
                ref_str='_ref', test_str='_test'):
     if so and smv:
-        plt.figure()  # sim_s  1
-        n_fig += 1
+        fig_list.append(plt.figure())  # sim_s  1
         plt.subplot(331)
         plt.title(plot_title + ' sim_s 1')
         plt.plot(mo.time, mo.ib_sel, color='blue',  linestyle='-', label='ib_sel=ib_in'+ref_str)
@@ -111,12 +110,11 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n
             plt.plot(sv.time, np.array(sv.chm_s)+4, color='red', linestyle='-', label='sv.chm'+test_str+'+4')
         plt.plot(smv.time, np.array(smv.chm_s)+4, color='black', linestyle='--', label='smv.chm_s'+test_str+'+4')
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()  # sim_s  2
-        n_fig += 1
+        fig_list.append(plt.figure())  # sim_s  2
         plt.subplot(331)
         plt.title(plot_title + ' sim_s 2')
         plt.plot(mo.time, mo.vb, color='red', linestyle='-', label='vb'+ref_str)
@@ -171,8 +169,7 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n
         plt.plot(smv.time, smv.voc_stat_s, color='orange', linestyle=':', label='voc_stat_s'+test_str)
         plt.legend(loc=1)
 
-        plt.figure()  # sim_s  3
-        n_fig += 1
+        fig_list.append(plt.figure())  # sim_s  3
         plt.subplot(321)
         plt.title(plot_title + ' sim_s 3')
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc'+ref_str)
@@ -242,8 +239,7 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n
             plt.plot(mo.soc, mo.voc_stat, color='red', linestyle='-', label='voc_stat' + ref_str)
         plt.legend(loc=1)
 
-        plt.figure()  # sim_s  4
-        n_fig += 1
+        fig_list.append(plt.figure())  # sim_s  4
         plt.subplot(221)
         plt.title(plot_title + ' sim_s 4')
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc'+ref_str)
@@ -299,4 +295,4 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n
             plt.plot(sv.time, sv.voc_stat_s, color='red', linestyle=':', label='voc_stat_s'+test_str)
         plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
-    return n_fig, fig_files
+    return fig_list, fig_files

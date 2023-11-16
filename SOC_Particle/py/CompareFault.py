@@ -275,13 +275,12 @@ def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, bb):
     return cc_diff_thr, ewhi_thr, ewlo_thr, ib_diff_thr, ib_quiet_thr
 
 
-def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None, long_term=True, cc_dif_tol=0.2):
+def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, subtitle=None, long_term=True, cc_dif_tol=0.2):
     if fig_files is None:
         fig_files = []
 
     if long_term:
-        plt.figure()  # 1
-        n_fig += 1
+        fig_list.append(plt.figure())  # 1
         plt.subplot(331)
         plt.title(plot_title + ' f1')
         plt.suptitle(subtitle)
@@ -334,12 +333,11 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
         plt.plot(hi.time, hi.voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='voc_stat_dis')
         plt.xlabel('days')
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()  # 2
-        n_fig += 1
+        fig_list.append(plt.figure())  # 2
         plt.subplot(221)
         plt.title(plot_title + ' f2')
         plt.suptitle(subtitle)
@@ -371,12 +369,11 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
         plt.plot(hi.time, hi.ib, marker='.', markersize='3', linestyle='-', color='red', label='ib')
         plt.xlabel('days')
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        plt.figure()  # 3
-        n_fig += 1
+        fig_list.append(plt.figure())  # 3
         plt.subplot(221)
         plt.title(plot_title + ' f3')
         plt.suptitle(subtitle)
@@ -405,12 +402,11 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
         plt.plot(hi.time, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
         plt.xlabel('days')
         plt.legend(loc=4)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 4
-    n_fig += 1
+    fig_list.append(plt.figure())  # 4
     plt.subplot(331)
     plt.title(plot_title + ' f4')
     plt.plot(hi.time, hi.ib, color='green', linestyle='-', label='ib')
@@ -462,19 +458,18 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
     plt.plot(hi.time, hi.tb_flt, color='red', linestyle='-', label='tb_flt')
     plt.plot(hi.time, hi.tb_fa, color='cyan', linestyle='--', label='tb_fa')
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    return n_fig, fig_files
+    return fig_list, fig_files
 
 
-def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None):
+def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None):
     if fig_files is None:
         fig_files = []
 
-    plt.figure()  # of 1
-    n_fig += 1
+    fig_list.append(plt.figure())  # of 1
     plt.subplot(331)
     plt.title(plot_title + ' O_F 1')
     plt.plot(mo.time, mo.ib_sel, color='black', linestyle='-', label='ib_sel=ib_in')
@@ -537,18 +532,17 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle='--', label='dv_dyn_ver')
     plt.plot(smv.time, smv.dv_dyn_s, color='orange', linestyle='-.', label='dv_dyn_s_ver')
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
     ref_str = ''
     test_str = '_ver'
 
-    plt.figure()  # GP 3 Tune
-    n_fig += 1
+    fig_list.append(plt.figure())  # GP 3 Tune
     plt.subplot(331)
     plt.title(plot_title + ' GP 3 Tune')
     mo.dv_dyn = mo.vb - mo.voc
@@ -617,11 +611,11 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, n_
     plt.plot(mo.time, mo.Tb, color='blue', linestyle='-', label='Tb'+ref_str)
     plt.plot(mv.time, mv.tau_hys, color='cyan', linestyle='--', label='tau_hys' + test_str)
     plt.legend(loc=3)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    return n_fig, fig_files
+    return fig_list, fig_files
 
 
 def calc_fault(d_ra, d_mod):
@@ -1002,29 +996,29 @@ if __name__ == '__main__':
                       dvoc_mon=dvoc_mon_in, dvoc_sim=dvoc_sim_in)
 
         # Plots
-        n_fig = 0
+        fig_list = []
         fig_files = []
         data_root = temp_hist_file_clean.split('/')[-1].replace('.csv', '_')
         filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
         plot_title = filename + '   ' + date_time
         if len(f.time) > 1:
-            n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig, cc_dif_tol=cc_dif_tol_in)
+            fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+                                          fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
         if len(h_20C.time) > 1:
-            n_fig, fig_files = overall_batt(mon_ver_100, sim_ver_100, suffix='_100',
+            fig_list, fig_files = overall_batt(mon_ver_100, sim_ver_100, suffix='_100',
                                             filename=filename, fig_files=fig_files,
-                                            plot_title=plot_title, n_fig=n_fig)
-            n_fig, fig_files = overall_fault(mon_old_100, mon_ver_100, sim_ver_100, sim_s_ver_100, filename,
-                                             fig_files, plot_title=plot_title, n_fig=n_fig)
-            n_fig, fig_files = tune_r(mon_old_100, mon_ver_100, sim_s_ver_100, filename,
-                                      fig_files, plot_title=plot_title, n_fig=n_fig)
+                                            plot_title=plot_title, fig_list=fig_list)
+            fig_list, fig_files = overall_fault(mon_old_100, mon_ver_100, sim_ver_100, sim_s_ver_100, filename,
+                                             fig_files, plot_title=plot_title, fig_list=fig_list)
+            fig_list, fig_files = tune_r(mon_old_100, mon_ver_100, sim_s_ver_100, filename,
+                                      fig_files, plot_title=plot_title, fig_list=fig_list)
 
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=path_to_pdfs)
         cleanup_fig_files(fig_files)
 
         plt.show(block=False)
-        show_killer('close plots?', 'CompareFault')
+        show_killer('close plots?', 'CompareFault', fig_list=fig_list)
 
 
     main()

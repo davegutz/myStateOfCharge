@@ -190,11 +190,10 @@ class localChem(Chemistry):
 
         return s
 
-    def plot(self, filename='', fig_files=None, plot_title=None, n_fig=None):
+    def plot(self, filename='', fig_files=None, plot_title=None, fig_list=None):
         N = len(self.t_x_soc)
         M = len(self.t_y_t)
-        plt.figure()  # GP 1
-        n_fig += 1
+        fig_list.append(plt.figure())  # GP 1
         plt.subplot(111)
         plt.title(plot_title + ' New Schedule')
         for j in range(M):
@@ -204,11 +203,11 @@ class localChem(Chemistry):
             t_voc_x = self.t_voc_new[j*N:(j+1)*N]
             plt.plot(self.t_x_soc, t_voc_x, color='red', linestyle='--')
         # plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        return n_fig, fig_files
+        return fig_list, fig_files
 
 
 # Plots
@@ -238,13 +237,13 @@ if __name__ == '__main__':
         print('chemistry for observation', obs)  # print the observation
 
         # Plots
-        n_fig = 0
+        fig_list = []
         fig_files = []
         data_root = 'ReGaugeVocSoc.py'
         save_pdf_path = '../dataReduction/figures'
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
-        n_fig, fig_files = obs.plot(filename, fig_files=fig_files, plot_title=plot_title, n_fig=n_fig)
+        fig_list, fig_files = obs.plot(filename, fig_files=fig_files, plot_title=plot_title, fig_list=fig_list)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
         cleanup_fig_files(fig_files)

@@ -150,12 +150,11 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
 
-    def overall(tfd=TFDelay().saved, filename='', fig_files=None, plot_title=None, n_fig=None):
+    def overall(tfd=TFDelay().saved, filename='', fig_files=None, plot_title=None, fig_list=None):
         if fig_files is None:
             fig_files = []
 
-        plt.figure()
-        n_fig += 1
+        fig_list.append(plt.figure())
         plt.subplot(211)
         plt.title(plot_title)
         plt.plot(tfd.time, tfd.timer, color='red', linestyle='-', label='timer')
@@ -166,11 +165,11 @@ if __name__ == '__main__':
         plt.plot(tfd.time, tfd.in_, color='red', linestyle='-', label='in')
         plt.plot(tfd.time, tfd.out, color='blue', linestyle='--', label='out')
         plt.legend(loc=3)
-        fig_file_name = filename + "_" + str(n_fig) + ".png"
+        fig_file_name = filename + "_" + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-        return n_fig, fig_files
+        return fig_list, fig_files
 
 
     def main():
@@ -210,14 +209,14 @@ if __name__ == '__main__':
                 print('short:  ', str(tfd_short))
 
         # Plots
-        n_fig = 0
+        fig_list = []
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         filename = sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
 
-        n_fig, fig_files = overall(tfd_long.saved, filename, fig_files, plot_title='long '+plot_title, n_fig=n_fig)
-        n_fig, fig_files = overall(tfd_short.saved, filename, fig_files, plot_title='short '+plot_title, n_fig=n_fig)
+        fig_list, fig_files = overall(tfd_long.saved, filename, fig_files, plot_title='long '+plot_title, fig_list=fig_list)
+        fig_list, fig_files = overall(tfd_short.saved, filename, fig_files, plot_title='short '+plot_title, fig_list=fig_list)
 
         # unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path='figures')
         # cleanup_fig_files(fig_files)

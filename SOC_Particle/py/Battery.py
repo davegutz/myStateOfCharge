@@ -869,7 +869,7 @@ class Saved:
 
 
 def overall_batt(mv, sv, filename,
-                 mv1=None, sv1=None, suffix1=None, fig_files=None, plot_title=None, n_fig=None, suffix='',
+                 mv1=None, sv1=None, suffix1=None, fig_files=None, plot_title=None, fig_list=None, suffix='',
                  use_time_day=False):
     if fig_files is None:
         fig_files = []
@@ -880,7 +880,7 @@ def overall_batt(mv, sv, filename,
             sv.time = sv.time_day - sv.time_day[0]
 
         plt.figure()  # Batt 1
-        n_fig += 1
+        fig_list += 1
         plt.subplot(321)
         plt.title(plot_title + ' B 1')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
@@ -908,12 +908,12 @@ def overall_batt(mv, sv, filename,
         plt.plot(sv.soc, sv.voc, color='red', linestyle='-', label='SIM voc_stat vs soc'+suffix)
         plt.plot(mv.soc, mv.voc_soc, color='black', linestyle='--', label='MON voc_soc'+suffix+' vs soc')
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # Batt 2
-        n_fig += 1
+        fig_list += 1
         plt.subplot(111)
         plt.title(plot_title + ' B 2')
         plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb'+suffix)
@@ -923,12 +923,12 @@ def overall_batt(mv, sv, filename,
         plt.plot(mv.time, mv.voc, color='magenta', linestyle='-', label='voc'+suffix)
         plt.plot(sv.time, sv.voc, color='black', linestyle='--', label='voc_s'+suffix)
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # Batt 4
-        n_fig += 1
+        fig_list += 1
         plt.subplot(321)
         plt.title(plot_title+' B 4 MON vs SIM')
         plt.plot(mv.time, mv.ib, color='green', linestyle='-', label='ib'+suffix)
@@ -963,12 +963,12 @@ def overall_batt(mv, sv, filename,
         plt.plot(mv.time, mv.vb, color='green', linestyle='-', label='vb'+suffix)
         plt.plot(sv.time, sv.vb, color='black', linestyle='--', label='vb_s'+suffix)
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # Batt 5
-        n_fig += 1
+        fig_list += 1
         plt.subplot(331)
         plt.title(plot_title+' B 5 **EKF')
         plt.plot(mv.time, mv.x_ekf, color='red', linestyle='-', label='x ekf'+suffix)
@@ -998,55 +998,55 @@ def overall_batt(mv, sv, filename,
         plt.subplot(338)
         plt.plot(mv.time, mv.K, color='red', linestyle='-', label='K ekf'+suffix)
         plt.legend(loc=4)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # Batt 6
-        n_fig += 1
+        fig_list += 1
         plt.title(plot_title + ' B 6')
         plt.plot(mv.time, mv.e_voc_ekf, color='blue', linestyle='-.', label='e_voc'+suffix)
         plt.plot(mv.time, mv.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf'+suffix)
         plt.ylim(-0.01, 0.01)
         plt.legend(loc=2)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # Batt 7
-        n_fig += 1
+        fig_list += 1
         plt.title(plot_title + ' B 7')
         plt.plot(mv.time, mv.voc, color='red', linestyle='-', label='voc'+suffix)
         plt.plot(mv.time, mv.voc_ekf, color='blue', linestyle='-.', label='voc_ekf'+suffix)
         plt.plot(sv.time, sv.voc, color='green', linestyle=':', label='voc_s'+suffix)
         plt.legend(loc=4)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # Batt 8
-        n_fig += 1
+        fig_list += 1
         plt.title(plot_title + ' B 8')
         plt.plot(mv.time, mv.soc_ekf, color='blue', linestyle='-', label='soc_ekf'+suffix)
         plt.plot(sv.time, sv.soc, color='green', linestyle='-.', label='soc_s'+suffix)
         plt.plot(mv.time, mv.soc, color='red', linestyle=':', label='soc'+suffix)
         plt.legend(loc=4)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # Batt 9
-        n_fig += 1
+        fig_list += 1
         plt.title(plot_title + ' B 9')
         plt.plot(mv.time, mv.e_voc_ekf, color='blue', linestyle='-.', label='e_voc'+suffix)
         plt.plot(mv.time, mv.e_soc_ekf, color='red', linestyle='dotted', label='e_soc_ekf'+suffix)
         plt.legend(loc=2)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # Batt 10
-        n_fig += 1
+        fig_list += 1
         plt.subplot(221)
         plt.title(plot_title + ' B 10')
         plt.plot(sv.time, sv.soc, color='red', linestyle='-', label='soc'+suffix)
@@ -1059,17 +1059,17 @@ def overall_batt(mv, sv, filename,
         plt.plot(sv.time, sv.dv_hys, color='red', linestyle='-', label='dv_hys, V'+suffix)
         plt.plot(sv.time, sv.tau_hys, color='blue', linestyle='--', label='tau_hys, V'+suffix)
         plt.legend(loc=2)
-        fig_file_name = filename + "_" + str(n_fig) + ".png"
+        fig_file_name = filename + "_" + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # Batt 11
-        n_fig += 1
+        fig_list += 1
         plt.subplot(111)
         plt.title(plot_title + ' B 11')
         plt.plot(sv.soc, sv.voc_stat, color='black', linestyle='dotted', label='SIM voc_stat vs soc'+suffix)
         plt.legend(loc=2)
-        fig_file_name = filename + "_" + str(n_fig) + ".png"
+        fig_file_name = filename + "_" + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
@@ -1094,7 +1094,7 @@ def overall_batt(mv, sv, filename,
         sv1.time -= t_init
 
         plt.figure()
-        n_fig += 1
+        fig_list += 1
         plt.subplot(331)
         plt.title(plot_title + ' Battover 1')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
@@ -1134,12 +1134,12 @@ def overall_batt(mv, sv, filename,
         plt.plot(mv.time, mv.soc_ekf, color='magenta', linestyle='-.', label='soc_ekf'+suffix)
         plt.plot(mv1.time, mv1.soc_ekf, color='blue', linestyle=':', label='soc_ekf'+suffix1)
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()
-        n_fig += 1
+        fig_list += 1
         plt.subplot(321)
         plt.title(plot_title + ' Battover 2')
         plt.plot(mv.time, mv.ib, color='green',   linestyle='-', label='ib'+suffix)
@@ -1159,12 +1159,12 @@ def overall_batt(mv, sv, filename,
         plt.plot(mv.time, mv.tau_hys, color='green', linestyle='-', label='tau_hys'+suffix)
         plt.plot(mv1.time, mv1.tau_hys, color='black', linestyle='--', label='tau_hys'+suffix1)
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()
-        n_fig += 1
+        fig_list += 1
         plt.subplot(331)
         plt.title(plot_title + ' **EKF' + 'Battover 3')
         plt.plot(mv.time, mv.x_ekf, color='green', linestyle='-', label='x ekf' + suffix)
@@ -1210,11 +1210,11 @@ def overall_batt(mv, sv, filename,
         plt.plot(mv1.time, mv1.e_soc_ekf, color='blue', linestyle=':', label='e_soc_ekf' + suffix1)
         # plt.ylim(-0.01, 0.01)
         plt.legend(loc=2)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
-    return n_fig, fig_files
+    return fig_list, fig_files
 
 
 class SavedS:

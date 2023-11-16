@@ -33,10 +33,9 @@ from myFilters import inline_exp_lag
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
-def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fig=None, plot_init_in=False,
+def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
             ref_str='_ref', test_str='_test'):
-    plt.figure()  # GP 1
-    n_fig += 1
+    fig_list.append(plt.figure())  # GP 1
     plt.subplot(221)
     plt.title(plot_title + ' GP 1')
     if so is not None:
@@ -67,12 +66,11 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     if hasattr(smv, 'ib_fut_s'):
         plt.plot(smv.time, smv.ib_fut_s, linestyle='-.', color='orange', label='ib_fut_s' + test_str)
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # GP 2
-    n_fig += 1
+    fig_list.append(plt.figure())  # GP 2
     plt.subplot(221)
     plt.title(plot_title + ' GP 2')
     plt.plot(mo.time, mo.vb, color='black', linestyle='-', label='vb' + ref_str)
@@ -97,12 +95,11 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
         plt.plot(so.time, so.ib_in_s, linestyle='--', color='cyan', label='ib_in_s' + ref_str)
     plt.plot(mv.time, mv.ib_charge, linestyle='-.', color='orange', label='ib_charge' + test_str)
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # GP 2 nn
-    n_fig += 1
+    fig_list.append(plt.figure())  # GP 2 nn
     plt.subplot(321)
     plt.title(plot_title + ' GP 2 nn lag')
     plt.plot(mo.time, mo.sat, color='black', linestyle='-', label='sat' + ref_str)
@@ -142,12 +139,11 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.plot(mo.time, np.array(mo.voc_soc) - np.array(mo.voc)+13., color='blue', linestyle='-', label='dv' + ref_str + '+13')
     plt.plot(mv.time, np.array(mv.voc_soc) - np.array(mv.voc)+13., color='orange', linestyle='--', label='dv' + test_str + '+13')
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # GP 3 Tune
-    n_fig += 1
+    fig_list.append(plt.figure())  # GP 3 Tune
     plt.subplot(331)
     plt.title(plot_title + ' GP 3 Tune')
     plt.plot(mo.time, mo.dv_dyn, color='blue', linestyle='-', label='dv_dyn' + ref_str)
@@ -230,14 +226,14 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, n_fi
     plt.plot(mo.time, mo.Tb, color='blue', linestyle='-', label='Tb' + ref_str)
     # plt.plot(mv.time, mv.tau_hys, color='cyan', linestyle='--', label='tau_hys' + test_str)
     plt.legend(loc=3)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    return n_fig, fig_files
+    return fig_list, fig_files
 
 
-def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, ref_str='_ref', test_str='_test'):
+def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, fig_list=None, ref_str='_ref', test_str='_test'):
     # delineate charging and discharging
     voc_stat_chg = np.copy(mv.voc_stat)
     voc_stat_dis = np.copy(mv.voc_stat)
@@ -324,8 +320,7 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, r
     dv_dot_cap[n-1] = dv_dot_cap[n-2]
     dv_bleed[-1] = dv_bleed[-2]
 
-    plt.figure()  # GP 3 Tune R
-    n_fig += 1
+    fig_list.append(plt.figure())  # GP 3 Tune R
     plt.subplot(321)
     plt.title(plot_title + ' GP 3 Tune R')
     plt.plot(t, vb, color='blue', linestyle='-', label='vb_x')
@@ -371,12 +366,11 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, r
     plt.plot(t, dv_dot_calc, color='blue', linestyle='-.', label='dv_dot_calc_x')
     plt.xlabel('sec')
     plt.legend(loc=2)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # GP 3 Tune Summ
-    n_fig += 1
+    fig_list.append(plt.figure())  # GP 3 Tune Summ
     plt.subplot(221)
     plt.title(plot_title + ' GP 3 Tune Summ')
     plt.plot(mo.time, mo.vb, color='blue', linestyle='-', label='vb' + ref_str)
@@ -406,8 +400,8 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, n_fig=None, r
     plt.plot(smv.time, smv.dv_hys_s, color='magenta', linestyle=':', label='dv_hys_s' + test_str)
     plt.xlabel('sec')
     plt.legend(loc=3)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    return n_fig, fig_files
+    return fig_list, fig_files

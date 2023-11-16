@@ -38,7 +38,7 @@ VOC_RESET_30 = -0.03  # Attempt to rescale to match voc_soc to all data
 VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 
 
-def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_title=None, n_fig=None, subtitle=None,
+def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_title=None, fig_list=None, subtitle=None,
               x_sch=None, z_sch=None, voc_reset=0.):
     if fig_files is None:
         fig_files = []
@@ -85,7 +85,7 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     # Colors
 
     plt.figure()  # 1
-    n_fig += 1
+    fig_list += 1
     plt.subplot(331)
     plt.title(plot_title + ' h1')
     plt.suptitle(subtitle)
@@ -138,12 +138,12 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.plot(hi.time_day, hi.voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='voc_stat_dis')
     plt.xlabel('days')
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
     plt.figure()  # 2
-    n_fig += 1
+    fig_list += 1
     plt.subplot(221)
     plt.title(plot_title + ' h2')
     plt.suptitle(subtitle)
@@ -175,12 +175,12 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.plot(hi.time_day, hi.ib, marker='.', markersize='3', linestyle='-', color='red', label='ib')
     plt.xlabel('days')
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
     plt.figure()  # 3
-    n_fig += 1
+    fig_list += 1
     plt.subplot(131)
     plt.title(plot_title + ' h3')
     plt.suptitle(subtitle)
@@ -206,12 +206,12 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.xlabel('soc_r')
     plt.legend(loc=4)
     plt.ylim(12, 13.5)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
     plt.figure()  # 4
-    n_fig += 1
+    fig_list += 1
     plt.subplot(221)
     plt.title(plot_title + ' h4')
     plt.suptitle(subtitle)
@@ -240,12 +240,12 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.plot(hi.time_day, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
     plt.xlabel('days')
     plt.legend(loc=4)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
     plt.figure()  # 5
-    n_fig += 1
+    fig_list += 1
     plt.subplot(221)
     plt.title(plot_title + ' h5')
     plt.suptitle(subtitle)
@@ -274,20 +274,20 @@ def over_easy(hi, filename, mv_fast=None, mv_slow=None, fig_files=None, plot_tit
     plt.plot(hi.soc, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
     plt.xlabel('soc')
     plt.legend(loc=4)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    return n_fig, fig_files
+    return fig_list, fig_files
 
 
-def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None, long_term=True):
+def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, subtitle=None, long_term=True):
     if fig_files is None:
         fig_files = []
 
     if long_term:
         plt.figure()  # 1
-        n_fig += 1
+        fig_list += 1
         plt.subplot(331)
         plt.title(plot_title + ' f1')
         plt.suptitle(subtitle)
@@ -340,12 +340,12 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
         plt.plot(hi.time, hi.voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='voc_stat_dis')
         plt.xlabel('days')
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # 2
-        n_fig += 1
+        fig_list += 1
         plt.subplot(221)
         plt.title(plot_title + ' f2')
         plt.suptitle(subtitle)
@@ -377,12 +377,12 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
         plt.plot(hi.time, hi.ib, marker='.', markersize='3', linestyle='-', color='red', label='ib')
         plt.xlabel('days')
         plt.legend(loc=1)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
         plt.figure()  # 3
-        n_fig += 1
+        fig_list += 1
         plt.subplot(221)
         plt.title(plot_title + ' f3')
         plt.suptitle(subtitle)
@@ -411,12 +411,12 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
         plt.plot(hi.time, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
         plt.xlabel('days')
         plt.legend(loc=4)
-        fig_file_name = filename + '_' + str(n_fig) + ".png"
+        fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
         plt.savefig(fig_file_name, format="png")
 
     plt.figure()  # 4
-    n_fig += 1
+    fig_list += 1
     plt.subplot(331)
     plt.title(plot_title + ' f4')
     plt.plot(hi.time, hi.ib, color='green', linestyle='-', label='ib')
@@ -465,11 +465,11 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtit
     plt.plot(hi.time, hi.tb_flt, color='red', linestyle='-', label='tb_flt')
     plt.plot(hi.time, hi.tb_fa, color='cyan', linestyle='--', label='tb_fa')
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    return n_fig, fig_files
+    return fig_list, fig_files
 
 
 def calc_fault(d_ra, d_mod):
@@ -696,35 +696,35 @@ if __name__ == '__main__':
                       eframe_mult=eframe_mult)
 
         # Plots
-        n_fig = 0
+        fig_list = []
         fig_files = []
         data_root = temp_hist_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         # if len(h_05C.time) > 1:
-        #     n_fig, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc05, voc_reset=VOC_RESET_05)
+        #     fig_list, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', fig_list=fig_list, x_sch=x0, z_sch=voc_soc05, voc_reset=VOC_RESET_05)
         # if len(h_11C.time) > 1:
-        #     n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc11, voc_reset=VOC_RESET_11)
+        #     fig_list, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', fig_list=fig_list, x_sch=x0, z_sch=voc_soc11, voc_reset=VOC_RESET_11)
         # if len(h_20C.time) > 1:
-        #     n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
+        #     fig_list, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', fig_list=fig_list, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
         # if len(h_30C.time) > 1:
-        #     n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc30, voc_reset=VOC_RESET_30)
+        #     fig_list, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', fig_list=fig_list, x_sch=x0, z_sch=voc_soc30, voc_reset=VOC_RESET_30)
         # if len(h_40C.time) > 1:
-        #     n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
+        #     fig_list, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', fig_list=fig_list, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
         if len(h_20C.time) > 1:
             print("over_easy")
-            n_fig, fig_files = over_easy(h_20C, filename, mv_fast=mon_ver_300new, mv_slow=mon_ver_300old,
+            fig_list, fig_files = over_easy(h_20C, filename, mv_fast=mon_ver_300new, mv_slow=mon_ver_300old,
                                          fig_files=fig_files, plot_title=plot_title, subtitle='h_20C',
-                                         n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
+                                         fig_list=fig_list, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
             print("overall_batt")
-            n_fig, fig_files = overall_batt(mon_ver_300old, sim_ver_300old, randles_ver_300old, suffix='_300old',
+            fig_list, fig_files = overall_batt(mon_ver_300old, sim_ver_300old, randles_ver_300old, suffix='_300old',
                                             filename=filename, fig_files=fig_files,
                                             mv1=mon_ver_300new, sv1=sim_ver_300new, rv1=randles_ver_300new,
-                                            suffix1='_300new', plot_title=plot_title, n_fig=n_fig, use_time_day=True)
+                                            suffix1='_300new', plot_title=plot_title, fig_list=fig_list, use_time_day=True)
         if len(f.time) > 1:
             print('over_fault')
-            n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
+            fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+                                          fig_list=fig_list, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
 
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=path_to_pdfs)

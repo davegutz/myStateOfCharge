@@ -178,30 +178,30 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
     # Plots
-    n_fig = 0
+    fig_list = []
     fig_files = []
     data_root_test = data_file_clean.split('/')[-1].replace('.csv', '')
     dir_root_test = data_file_clean.split('/')[-3].split('\\')[-1]
     filename = data_root_test
     plot_title = dir_root_test + '/' + data_root_test + '   ' + date_time
     if temp_flt_file_clean and len(f.time) > 1:
-        n_fig, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                      n_fig=n_fig, long_term=long_term_in, cc_dif_tol=cc_dif_tol_in)
+        fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+                                      fig_list=fig_list, long_term=long_term_in, cc_dif_tol=cc_dif_tol_in)
     if plot_overall_in:
-        n_fig, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
+        fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                    plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
                                     test_str='_ver')
-        n_fig, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                    plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
+        fig_list, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                    plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
                                     test_str='_ver')
-        n_fig, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                      plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
+        fig_list, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                      plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
                                       test_str='_ver')
-        n_fig, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                   plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
+        fig_list, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                   plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
                                    test_str='_ver')
-        n_fig, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                       plot_title=plot_title, n_fig=n_fig, plot_init_in=plot_init_in, ref_str='',
+        fig_list, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                       plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
                                        test_str='_ver')
 
     precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)

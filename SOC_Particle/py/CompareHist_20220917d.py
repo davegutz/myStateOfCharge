@@ -54,7 +54,7 @@ HYS_SOC_MIN_MARG = 0.15  # add to soc_min to set thr for detecting low endpoint 
 HYS_IB_THR = 1.  # ignore reset if opposite situation exists
 
 
-def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitle=None,  x_sch=None, z_sch=None,
+def over_easy(hi, filename, fig_files=None, plot_title=None, fig_list=None, subtitle=None,  x_sch=None, z_sch=None,
               voc_reset=0.):
     if fig_files is None:
         fig_files = []
@@ -100,9 +100,7 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
 
     # Colors
 
-
-    plt.figure()  # 1
-    n_fig += 1
+    fig_list.append(plt.figure())  # 1
     plt.subplot(331)
     plt.title(plot_title)
     plt.suptitle(subtitle)
@@ -155,12 +153,11 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.time_day, hi.voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='voc_stat_dis')
     plt.xlabel('days')
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 2
-    n_fig += 1
+    fig_list.append(plt.figure())  # 2
     plt.subplot(221)
     plt.title(plot_title)
     plt.suptitle(subtitle)
@@ -192,12 +189,11 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.time_day, hi.ib, marker='.', markersize='3', linestyle='-', color='red', label='ib')
     plt.xlabel('days')
     plt.legend(loc=1)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 3
-    n_fig += 1
+    fig_list.append(plt.figure())  # 3
     plt.subplot(131)
     plt.title(plot_title)
     plt.suptitle(subtitle)
@@ -223,12 +219,11 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.xlabel('soc_r')
     plt.legend(loc=4)
     plt.ylim(12, 13.5)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 4
-    n_fig += 1
+    fig_list.append(plt.figure())  # 4
     plt.subplot(221)
     plt.title(plot_title)
     plt.suptitle(subtitle)
@@ -257,12 +252,11 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.time_day, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
     plt.xlabel('days')
     plt.legend(loc=4)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    plt.figure()  # 5
-    n_fig += 1
+    fig_list.append(plt.figure())  # 5
     plt.subplot(221)
     plt.title(plot_title)
     plt.suptitle(subtitle)
@@ -291,11 +285,11 @@ def over_easy(hi, filename, fig_files=None, plot_title=None, n_fig=None, subtitl
     plt.plot(hi.soc, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
     plt.xlabel('soc')
     plt.legend(loc=4)
-    fig_file_name = filename + '_' + str(n_fig) + ".png"
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    return n_fig, fig_files
+    return fig_list, fig_files
 
 
 # Add schedule lookups and do some rack and stack
@@ -585,21 +579,21 @@ if __name__ == '__main__':
         h_40C = filter_Tb(h, 40., tb_band=TB_BAND, rated_batt_cap=UNIT_CAP_RATED)
 
         # Plots
-        n_fig = 0
+        fig_list = []
         fig_files = []
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         if len(h_05C.time) > 1:
-            n_fig, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc05, voc_reset=VOC_RESET_05)
+            fig_list, fig_files = over_easy(h_05C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_05C', fig_list=fig_list, x_sch=x0, z_sch=voc_soc05, voc_reset=VOC_RESET_05)
         if len(h_11C.time) > 1:
-            n_fig, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc11, voc_reset=VOC_RESET_11)
+            fig_list, fig_files = over_easy(h_11C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_11C', fig_list=fig_list, x_sch=x0, z_sch=voc_soc11, voc_reset=VOC_RESET_11)
         if len(h_20C.time) > 1:
-            n_fig, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
+            fig_list, fig_files = over_easy(h_20C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_20C', fig_list=fig_list, x_sch=x0, z_sch=voc_soc20, voc_reset=VOC_RESET_20)
         if len(h_30C.time) > 1:
-            n_fig, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc30, voc_reset=VOC_RESET_30)
+            fig_list, fig_files = over_easy(h_30C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_30C', fig_list=fig_list, x_sch=x0, z_sch=voc_soc30, voc_reset=VOC_RESET_30)
         if len(h_40C.time) > 1:
-            n_fig, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', n_fig=n_fig, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
+            fig_list, fig_files = over_easy(h_40C, filename, fig_files=fig_files, plot_title=plot_title, subtitle='h_40C', fig_list=fig_list, x_sch=x0, z_sch=voc_soc40, voc_reset=VOC_RESET_40)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=path_to_pdfs)
         cleanup_fig_files(fig_files)
