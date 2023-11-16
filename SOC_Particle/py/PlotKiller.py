@@ -23,6 +23,7 @@ Raise a window visible at task bar to close all plots.
 """
 
 import matplotlib.pyplot as plt
+import time
 import platform
 if platform.system() == 'Darwin':
     from ttwidgets import TTButton as myButton
@@ -56,6 +57,7 @@ class PlotKiller(tk.Toplevel):
 
 def show_and_kill(string, caller, fig_list=None):
     plt.show()
+    time.sleep(1)
     PlotKiller(string, caller, fig_list)
 
 
