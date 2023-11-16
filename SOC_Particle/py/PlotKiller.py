@@ -38,9 +38,7 @@ class PlotKiller(tk.Toplevel):
         """Block caller task asking to close all plots then doing so"""
         self.fig_list = fig_list_
         tk.Toplevel.__init__(self)
-        self.label = tk.Label(self, text=caller + ' ' + message)
-        self.label.grid(row=0, column=0)
-        tk.Button(self, command=self.close_figs, text="Close Figs " + caller).grid(row=2, column=0)
+        tk.Button(self, command=self.close_figs, text=caller + ": close " + message, font=("Courier", 12)).grid(row=0, column=0, padx=15, pady=15)
         self.lift()
         self.mainloop()
         # self.grab_set()  # Prevents other Tkinter windows from being used

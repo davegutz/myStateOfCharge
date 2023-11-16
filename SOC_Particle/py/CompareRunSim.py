@@ -208,7 +208,8 @@ def compare_run_sim(data_file_path=None, unit_key=None, time_end_in=None, save_p
     cleanup_fig_files(fig_files)
 
     plt.show(block=False)
-    show_killer('close plots?', 'CompareRunSim', fig_list=fig_list)
+    string = 'plots ' + str(fig_list[0].number) + ' - ' + str(fig_list[-1].number)
+    show_killer(string,'CompareRunSim', fig_list=fig_list)
     return True
 
 

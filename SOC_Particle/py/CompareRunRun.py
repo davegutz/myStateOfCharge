@@ -201,7 +201,8 @@ def compare_run_run(keys=None, dir_data_ref_path=None, dir_data_test_path=None,
     cleanup_fig_files(fig_files)
 
     plt.show(block=False)
-    show_killer('close plots?', 'CompareRunRun', fig_list=fig_list)
+    string = 'plots ' + str(fig_list[0].number) + ' - ' + str(fig_list[-1].number)
+    show_killer(string,'CompareRunRun', fig_list=fig_list)
 
     return True
 
