@@ -44,11 +44,12 @@ bg_color = 'lightgray'
 # sys.stderr = open('logse.txt', 'w')
 
 # Transient string
-sel_list = ['custom', 'ampHiFail', 'rapidTweakRegression', 'offSitHysBmsBB', 'offSitHysBmsCH', 'triTweakDisch', 'coldStart', 'ampHiFailFf',
+sel_list = ['init', 'custom', 'ampHiFail', 'rapidTweakRegression', 'offSitHysBmsBB', 'offSitHysBmsCH', 'triTweakDisch', 'coldStart', 'ampHiFailFf',
             'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
             'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailFf', 'pulseEKF', 'pulseSS', 'tbFailMod',
             'tbFailHdwe', 'DvMon', 'DvSim']
-lookup = {'custom': ('', '', ("For general purpose running", "'save data' will present a choice of file name", ""), 60),
+lookup = {'init': ('init0;init1;', '', ('',), 0),
+          'custom': ('', '', ("For general purpose running", "'save data' will present a choice of file name", ""), 60),
           'ampHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy)."), 20),
           'rapidTweakRegression': ('Ff0;HR;Xp10;', 'self terminates', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 155),
           'offSitHysBmsBB': ('Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;', ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',), 568),
@@ -299,7 +300,7 @@ def clear_data():
     else:
         enter_size = 0
         wait_size = 0
-    if enter_size > 512:
+    if enter_size > 64:  # bytes
         if wait_size > enter_size:
             print('stop data first')
             tkinter.messagebox.showwarning(message="stop data first")
@@ -307,17 +308,9 @@ def clear_data():
             # create empty file
             if not save_putty():
                 tkinter.messagebox.showwarning(message="putty may be open already")
-            else:
-                open(empty_csv_path.get(), 'x')
-                shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
-                print('emptied', putty_test_csv_path.get())
-            try:
-                os.remove(empty_csv_path.get())
-            except OSError:
-                pass
             reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     else:
-        print('putty test file is too small (<512 bytes) probably already done')
+        print('putty test file non-existent or too small (<64 bytes) probably already done')
         tkinter.messagebox.showwarning(message="Nothing to clear")
 
 
@@ -419,8 +412,34 @@ def create_file_txt(option_, unit_, battery_):
     return option_ + '_' + unit_ + '_' + battery_ + '.csv'
 
 
+def empty_file(target):
+    # create empty file
+    try:
+        open(empty_csv_path.get(), 'x')
+    except FileExistsError:
+        pass
+    shutil.copyfile(empty_csv_path.get(), target)
+    print('emptied', putty_test_csv_path.get())
+    try:
+        os.remove(empty_csv_path.get())
+    except OSError:
+        pass
+
+
+def grab_init():
+    add_to_clip_board(init.get())
+    init_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    clear_data()
+    print('cleared putty data file')
+    Test.create_file_path_and_key()
+    Test.update_key_label()
+
+
 def grab_reset():
     add_to_clip_board(reset.get())
+    init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     reset_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_timer()
@@ -432,6 +451,7 @@ def grab_start():
                             text='save data')
     save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                                text='save data as')
+    init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
@@ -539,12 +559,7 @@ def ref_restore():
 
 
 def save_data():
-    if size_of(putty_test_csv_path.get()) > 512:  # bytes
-        # create empty file
-        try:
-            open(empty_csv_path.get(), 'x')
-        except FileExistsError:
-            pass
+    if size_of(putty_test_csv_path.get()) > 64:  # bytes
         # For custom option, redefine Test.file_path if requested
         new_file_txt = None
         if option.get() == 'custom':
@@ -556,8 +571,8 @@ def save_data():
         if os.path.isfile(Test.file_path) and os.path.getsize(Test.file_path) > 0:  # bytes
             confirmation = tk.messagebox.askyesno('query overwrite', 'File exists:  overwrite?')
             if confirmation is False:
-                print('reset and use clear')
-                tkinter.messagebox.showwarning(message='reset and use clear')
+                print('skipped overwrite')
+                tkinter.messagebox.showwarning(message='retained ' + Test.file_path)
                 return
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
@@ -565,16 +580,11 @@ def save_data():
                                 text='data saved')
         save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                                    text='data saved')
-        shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
-        print('emptied', putty_test_csv_path.get())
-        try:
-            os.remove(empty_csv_path.get())
-        except OSError:
-            pass
+        empty_file(putty_test_csv_path.get())
         print('updating Test file label')
         Test.create_file_path_and_key(name_override=new_file_txt)
     else:
-        print('putty test file non-existent or too small (<512 bytes) probably already done')
+        print('putty test file non-existent or too small (<64 bytes) probably already done')
         tkinter.messagebox.showwarning(message="Nothing to save")
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
@@ -582,11 +592,6 @@ def save_data():
 
 def save_data_as():
     if size_of(putty_test_csv_path.get()) > 512:  # bytes
-        # create empty file
-        try:
-            open(empty_csv_path.get(), 'x')
-        except FileExistsError:
-            pass
         # For custom option, redefine Test.file_path if requested
         if option.get() == 'custom':
             new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:")
@@ -613,12 +618,7 @@ def save_data_as():
                                 text='data saved')
         save_data_as_button.config(bg='green', activebackground='green', fg='red', activeforeground='red',
                                    text='data saved as')
-        shutil.copyfile(empty_csv_path.get(), putty_test_csv_path.get())
-        print('emptied', putty_test_csv_path.get())
-        try:
-            os.remove(empty_csv_path.get())
-        except OSError:
-            pass
+        empty_file(putty_test_csv_path.get())
         print('updating Test file label')
         Test.create_file_path_and_key(name_override=new_file_txt)
     else:
@@ -630,15 +630,15 @@ def save_data_as():
 
 def save_putty():
     m_str = datetime.datetime.fromtimestamp(os.path.getmtime(putty_test_csv_path.get())).strftime("%Y-%m-%dT%H-%M-%S").replace(' ', 'T')
-    putty_test_sav = 'putty_' + m_str + '.csv'
-    putty_test_sav_path = tk.StringVar(master)
-    putty_test_sav_path.set(os.path.join(Test.dataReduction_folder, putty_test_sav))
+    putty_test_sav_path = tk.StringVar(master, os.path.join(Test.dataReduction_folder, 'putty_' + m_str + '.csv'))
+    print(f"{putty_test_csv_path.get()=} {putty_test_sav_path.get()=}")
     try:
-        shutil.move(putty_test_csv_path.get(), putty_test_sav_path.get())
+        shutil.copyfile(putty_test_csv_path.get(), putty_test_sav_path.get())
         print('wrote', putty_test_sav_path.get())
+        empty_file(putty_test_csv_path.get())
         return True
-    except OSError:
-        print('putty already open?')
+    except PermissionError:
+        print('putty holding file open')
         return False
 
 
@@ -776,10 +776,8 @@ if __name__ == '__main__':
     row += 1
     tk.ttk.Separator(master, orient='horizontal').grid(row=row, columnspan=5, pady=5, sticky='ew')
     row += 1
-    option = tk.StringVar(master)
-    option.set(str(cf['others']['option']))
-    option_show = tk.StringVar(master)
-    option_show.set(str(cf['others']['option']))
+    option = tk.StringVar(master, str(cf['others']['option']))
+    option_show = tk.StringVar(master, str(cf['others']['option']))
     sel = tk.OptionMenu(master, option, *sel_list)
     sel.config(width=20)
     sel.grid(row=row, padx=5, pady=5, sticky=tk.W)
@@ -798,12 +796,19 @@ if __name__ == '__main__':
     putty_button = myButton(master, text='putty -load test', command=start_putty, fg="green", bg=bg_color,
                             wraplength=wrap_length, justify=tk.LEFT)
     putty_button.grid(sticky="W", row=row, column=1, columnspan=2, rowspan=1, padx=5, pady=5)
-    empty_csv_path = tk.StringVar(master)
-    empty_csv_path.set(os.path.join(Test.dataReduction_folder, 'empty.csv'))
+    empty_csv_path = tk.StringVar(master, os.path.join(Test.dataReduction_folder, 'empty.csv'))
 
     row += 1
-    start = tk.StringVar(master)
-    start.set('')
+    init_val, dum1, dum2, dum3 = lookup.get('init')
+    init = tk.StringVar(master, init_val)
+    init_label = tk.Label(master, text='init & clear:')
+    init_label.grid(row=row, column=0, padx=5, pady=5)
+    init_button = myButton(master, text=init.get(), command=grab_init, fg="purple", bg=bg_color, wraplength=wrap_length,
+                           justify=tk.LEFT, font=("Arial", 8))
+    init_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
+
+    row += 1
+    start = tk.StringVar(master, '')
     start_label = tk.Label(master, text='copy start:')
     start_label.grid(row=row, column=0, padx=5, pady=5)
     start_button = myButton(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
@@ -811,8 +816,7 @@ if __name__ == '__main__':
     start_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
 
     row += 1
-    reset = tk.StringVar(master)
-    reset.set('')
+    reset = tk.StringVar(master, '')
     reset_label = tk.Label(master, text='copy reset:')
     reset_label.grid(row=row, column=0, padx=5, pady=5)
     reset_button = myButton(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
