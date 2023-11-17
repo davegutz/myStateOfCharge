@@ -169,6 +169,25 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(smv.time, smv.voc_stat_s, color='orange', linestyle=':', label='voc_stat_s'+test_str)
         plt.legend(loc=1)
 
+        fig_list.append(plt.figure())  # sim_s  2a
+        plt.subplot(221)
+        plt.title(plot_title + ' sim_s 2a')
+        plt.plot(mo.time, mo.vb, color='black', linestyle='-', label='vb' + ref_str)
+        plt.plot(so.time, so.vb_s, color='green', linestyle='--', label='vb_s' + ref_str)
+        plt.plot(mo.time, mo.voc, color='brown', linestyle='-', label='voc'+ref_str)
+        plt.plot(so.time, so.voc_s, color='blue', linestyle='-', label='voc_s'+ref_str)
+        plt.plot(mo.time, mo.voc_stat, color='lightgreen', linestyle=':', label='voc_stat'+ref_str)
+        plt.plot(so.time, so.voc_stat_s, color='magenta',  linestyle=':', label='voc_stat_s'+ref_str)
+        plt.legend(loc=1)
+        plt.subplot(222)
+        plt.plot(mo.time, mo.e_wrap, color='magenta', linestyle=':', label='e_wrap' + ref_str)
+        plt.plot(mo.time, mo.e_wrap_filt, color='red', linestyle='-', label='e_wrap_filt' + ref_str)
+        plt.legend(loc=1)
+        plt.subplot(223)
+        plt.plot(mo.time, mo.dv_dyn, color='black', linestyle='-', label='dv' + ref_str)
+        plt.plot(so.time, so.dv_dyn_s, color='red', linestyle='--', label='dv_dyn_s' + ref_str)
+        plt.legend(loc=1)
+
         fig_list.append(plt.figure())  # sim_s  3
         plt.subplot(321)
         plt.title(plot_title + ' sim_s 3')

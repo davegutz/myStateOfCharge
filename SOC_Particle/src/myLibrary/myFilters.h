@@ -305,6 +305,7 @@ public:
   virtual void calcState(double in);
   virtual void calcState(double in, const double T);
   virtual double state(void);
+  void state(double in) { state_ = in; }  // For severity testing - sudden offset
   double a() { return (a_); };
   double b() { return (b_); };
   double rate() { return (rate_); };

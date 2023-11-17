@@ -255,6 +255,7 @@ public:
   boolean wrap_lo_fa() { return failRead(WRAP_LO_FA); };
   boolean wrap_lo_flt() { return faultRead(WRAP_LO_FLT);  };
   boolean wrap_vb_fa() { return failRead(WRAP_VB_FA); };
+  void wrap_err_filt_state(const float in) { WrapErrFilt->state(in); }
 protected:
   TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
   TFDelay *IbdHiPer;        // Persistence ib diff hi

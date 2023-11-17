@@ -137,10 +137,10 @@ void Battery::pretty_print(void)
 // EKF model for update
 float Battery::voc_soc_tab(const float soc, const float temp_c)
 {
-    float voc_stat;     // return value
+    float voc;     // return value
     float dv_dsoc;
-    voc_stat = calc_soc_voc(soc, temp_c, &dv_dsoc);
-    return ( voc_stat );
+    voc = calc_soc_voc(soc, temp_c, &dv_dsoc);
+    return ( voc );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -503,8 +503,8 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
     }
     init_soc_ekf(soc_solved);
     #ifdef DEBUG_INIT
-        if ( sp.debug()==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%8.4f e%10.6f soc_sol%8.4f\n",
-            Sen->Vb, Vb_avg, voc_stat_, voc_solved, ice_->count(), ice_->dx(), ice_->e(), soc_solved);
+        if ( sp.debug()==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_soc%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%8.4f e%10.6f soc_sol%8.4f\n",
+            Sen->Vb, Vb_avg, voc_soc_, voc_stat_, voc_solved, ice_->count(), ice_->dx(), ice_->e(), soc_solved);
     #endif
     // if ( sp.debug()==7 )
     //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
@@ -600,7 +600,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     // Hysteresis model
     hys_->calculate(ib_in_, soc_, hys_scale_);
     boolean init_low = bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR );
-    dv_hys_ = hys_->update(dt_, sat_, init_low, 0.0, reset, hys_scale_);
+    dv_hys_ = hys_->update(dt_, sat_, init_low, 0.0, hys_scale_, reset);
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
 
@@ -648,10 +648,10 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     
     #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
 
-        if ( sp.debug()==75 ) Serial.printf("BatterySim::calculate: temp_c_, soc_, voc_stat_, low_voc,=  %7.3f, %10.6f, %9.5f, %7.3f,\n",
+        if ( sp.debug()==75 ) Serial.printf("BatterySim::calculate: temp_c_ soc_ voc_stat_ low_voc =  %7.3f %10.6f %9.5f %7.3f\n",
             temp_c_, soc_, voc_stat_, chem_.low_voc);
 
-        if ( sp.debug()==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in=%7.3f,ib=%7.3f, voc_stat=%7.3f, voc=%7.3f, vsat=%7.3f, model_saturated=%d, bms_off=%d, dc_dc_on=%d, VB_DC_DC=%7.3f, vb=%7.3f\n",
+        if ( sp.debug()==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in%7.3f ib%7.3f voc_stat%7.3f voc%7.3f vsat%7.3f model_saturated%d bms_off%d dc_dc_on%d VB_DC_DC%7.3f vb%7.3f\n",
             soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, VB_DC_DC, vb_);
 
         if ( sp.debug()==78 || sp.debug()==7 ) Serial.printf("BatterySim::calculate:,  dt_,tempC,curr,soc_,voc,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",

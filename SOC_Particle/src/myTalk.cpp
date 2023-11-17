@@ -488,6 +488,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 scale = cp.input_str.substring(2).toFloat();
                 Serial.printf("\nSim::Hys::dv_hys%7.3f\n", Sen->Sim->hys_state());
                 Sen->Sim->hys_state(scale);
+                Sen->Flt->wrap_err_filt_state(-scale);
                 Serial.printf("to%7.3f\n", Sen->Sim->hys_state());
                 break;
 
