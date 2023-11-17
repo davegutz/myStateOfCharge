@@ -361,6 +361,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.plot(mv.time, mv.e_wrap_filt, color='cyan', linestyle=':', label='e_wrap_filt' + test_str)
         plt.plot(mo.time, mo.ewh_thr, color='black', linestyle='-.', label='ewh_thr' + ref_str)
         plt.plot(mo.time, mo.ewl_thr, color='black', linestyle='-.', label='ewl_thr' + ref_str)
+        plt.plot(mo.time, mo.cc_dif, color='green', linestyle='-', label='cc_diff'+ref_str)
+        plt.plot(mv.time, mv.cc_dif, color='red', linestyle='--', label='cc_diff'+test_str)
         plt.ylim(-1, 1)
         plt.legend(loc=1)
         plt.subplot(224)
