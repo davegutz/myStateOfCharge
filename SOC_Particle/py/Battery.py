@@ -267,6 +267,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.e_wrap = 0.
         self.e_wrap_filt = 0.
         self.reset_past = True
+        self.ib_past = 0.
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -322,11 +323,18 @@ class BatteryMonitor(Battery, EKF1x1):
         if self.bms_off and voltage_low:
             self.ib = 0.
         self.ib_lag = self.IbLag.calculate_tau(self.ib, reset, self.dt, self.chemistry.ib_lag_tau)
+        if reset:
+            self.ib_past = self.ib
 
         # Dynamic emf
+        ib_dyn = 0.
+        if rp.modeling:
+            ib_dyn = self.ib_past
+        else:
+            ib_dyn = self.ib
         self.vb = vb
-        self.voc = self.vb - (self.ChargeTransfer.calculate(self.ib, reset, dt)*self.chemistry.r_ct +
-                              self.ib*self.chemistry.r_0)
+        self.voc = self.vb - (self.ChargeTransfer.calculate(ib_dyn, reset, dt)*self.chemistry.r_ct +
+                              ib_dyn*self.chemistry.r_0)
         if self.bms_off and voltage_low:
             self.voc_stat = self.vb
             self.voc = self.vb
@@ -394,6 +402,8 @@ class BatteryMonitor(Battery, EKF1x1):
         #       "{:7.3f}".format(self.voc_stat), "{:7.3f}".format(voc_stat_past), "{:7.3f}".format(self.chemistry.vb_down),
         #       "{:7.3f}".format(self.chemistry.vb_rising), "{:3d}".format(bms_charging), "{:3d}".format(voltage_low),
         #       "{:3.0f}".format(self.bms_off))
+
+        self.ib_past = self.ib
 
         return self.vb_model_rev
 
