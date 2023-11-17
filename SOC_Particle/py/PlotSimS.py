@@ -187,6 +187,10 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(mo.time, mo.dv_dyn, color='black', linestyle='-', label='dv' + ref_str)
         plt.plot(so.time, so.dv_dyn_s, color='red', linestyle='--', label='dv_dyn_s' + ref_str)
         plt.legend(loc=1)
+        plt.subplot(224)
+        plt.plot(mo.time, mo.ib_charge, color='black', linestyle='-', label='ib_charge' + ref_str)
+        plt.plot(so.time, so.ib_charge_s, color='red', linestyle='--', label='ib_charge_s' + ref_str)
+        plt.legend(loc=1)
 
         fig_list.append(plt.figure())  # sim_s  3
         plt.subplot(321)
