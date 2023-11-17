@@ -184,7 +184,7 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(mo.time, mo.e_wrap_filt, color='red', linestyle='-', label='e_wrap_filt' + ref_str)
         plt.legend(loc=1)
         plt.subplot(223)
-        plt.plot(mo.time, mo.dv_dyn, color='black', linestyle='-', label='dv' + ref_str)
+        plt.plot(mo.time, mo.dv_dyn, color='black', linestyle='-', label='dv_dyn' + ref_str)
         plt.plot(so.time, so.dv_dyn_s, color='red', linestyle='--', label='dv_dyn_s' + ref_str)
         plt.legend(loc=1)
         plt.subplot(224)
