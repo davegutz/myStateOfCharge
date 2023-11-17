@@ -147,7 +147,7 @@ float Battery::voc_soc_tab(const float soc, const float temp_c)
 // Battery monitor class
 BatteryMonitor::BatteryMonitor():
     Battery(&sp.delta_q_, &sp.t_last_, &sp.mon_chm_, VM),
-	amp_hrs_remaining_ekf_(0.), amp_hrs_remaining_soc_(0.), dt_eframe_(0.1), eframe_(0), ib_charge_(0.),
+	amp_hrs_remaining_ekf_(0.), amp_hrs_remaining_soc_(0.), dt_eframe_(0.1), eframe_(0), ib_charge_(0.), ib_past_(0.),
     q_ekf_(NOM_UNIT_CAP*3600.), soc_ekf_(1.0), tcharge_(0.), tcharge_ekf_(0.), voc_filt_(NOMINAL_VB), voc_soc_(NOMINAL_VB),
     y_filt_(0.)
 {
@@ -241,9 +241,13 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
         ib_charge_ = 0.;
     if ( bms_off_ && voltage_low_ )
         ib_ = 0.;
+    if ( reset_temp ) ib_past_ = ib_;
 
-    // Dynamic emf
-    voc_ = vb_ - (ChargeTransfer_->calculate(ib_, reset_temp, chem_.tau_ct, dt_)*chem_.r_ct*sr_ + ib_*chem_.r_0*sr_);
+    // Dynamic emf. vb_ is stale when running with model
+    float ib_dyn;
+    if (sp.mod_vb()) ib_dyn = ib_past_;
+    else ib_dyn = ib_;
+    voc_ = vb_ - (ChargeTransfer_->calculate(ib_dyn, reset_temp, chem_.tau_ct, dt_)*chem_.r_ct*sr_ + ib_dyn*chem_.r_0*sr_);
     if ( !cp.fake_faults )
     {
         if ( (bms_off_ && voltage_low_) ||  Sen->Flt->vb_fa())
@@ -256,7 +260,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     // Hysteresis model
     dv_hys_ = 0.;  // disable hys g20230530a
     voc_stat_ = voc_ - dv_hys_;
-    ioc_ = ib_;
+    ioc_ = ib_dyn;
     
 
     // Reversionary model
@@ -309,6 +313,9 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
         tcharge_ekf_ = 24.*(1. - soc_ekf_);
     else 
         tcharge_ekf_ = -24.*soc_ekf_;
+
+    // Past value for synchronization with vb_, only when modeling    
+    ib_past_ = ib_;
 
     return ( vb_model_rev_ );
 }

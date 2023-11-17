@@ -186,6 +186,7 @@ protected:
   double dt_eframe_;   // Update time for EKF major frame
   uint8_t eframe_;     // Counter to run EKF slower than Coulomb Counter and ChargeTransfer models
   float ib_charge_;    // Current input avaiable for charging, A
+  float ib_past_;      // Past value of current to synchronize e_wrap dynamics with model, A
   double q_ekf_;       // Filtered charge calculated by ekf, C
   float soc_ekf_;      // Filtered state of charge from ekf (0-1)
   float tcharge_;      // Counted charging time to 100%, hr
