@@ -442,8 +442,17 @@ def empty_file(target):
         pass
 
 
+def end_early():
+    add_to_clip_board(init.get())
+    end_early_butt.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
+    init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+
+
 def grab_init():
     add_to_clip_board(init.get())
+    end_early_butt.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
     init_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
@@ -456,6 +465,7 @@ def grab_init():
 
 def grab_reset():
     add_to_clip_board(reset.get())
+    end_early_butt.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
     init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     reset_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
@@ -468,6 +478,7 @@ def grab_start():
                             text='save data')
     save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                                text='save data as')
+    end_early_butt.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
     init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
@@ -566,7 +577,6 @@ def lookup_start():
     else:
         ev4_label.config(text='')
     timer_val.set(timer_val_)
-    timer_start_butt.config(text=('START ' + str(timer_val.get()) + ' sec TIMER'))
 
 
 def putty_size():
@@ -854,9 +864,9 @@ if __name__ == '__main__':
                             justify=tk.LEFT, font=("Arial", 8))
     reset_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
     timer_val = tk.IntVar(master, 0)
-    timer_start_butt = myButton(master, text=timer_val.get(), command=start_timer, fg="red", bg=bg_color,
-                                justify=tk.RIGHT, font=("Arial", 8))
-    timer_start_butt.grid(sticky="E", row=row, column=4, columnspan=1, rowspan=1, padx=5, pady=5)
+    end_early_butt = myButton(master, text='END EARLY', command=end_early, fg="black", bg=bg_color,
+                              justify=tk.RIGHT, font=("Arial", 8))
+    end_early_butt.grid(sticky="E", row=row, column=4, columnspan=1, rowspan=1, padx=5, pady=5)
 
     row += 1
     ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)

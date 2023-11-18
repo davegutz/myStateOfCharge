@@ -428,8 +428,8 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("BM::");
     this->Battery::pretty_print();
     Serial.printf(" BM::BM:\n");
-    Serial.printf("  ah_ekf_%7.3f A-h\n", amp_hrs_remaining_ekf_);
-    Serial.printf("  ah_soc_%7.3f A-h\n", amp_hrs_remaining_soc_);
+    Serial.printf("  ah_ekf%7.3f A-h\n", amp_hrs_remaining_ekf_);
+    Serial.printf("  ah_soc%7.3f A-h\n", amp_hrs_remaining_soc_);
     Serial.printf("  EKF_conv %d\n", converged_ekf());
     Serial.printf("  e_wrap%7.3f V\n", Sen->Flt->e_wrap());
     Serial.printf("  q_ekf%10.1f C\n", q_ekf_);

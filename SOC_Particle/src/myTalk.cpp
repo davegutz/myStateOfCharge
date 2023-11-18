@@ -744,7 +744,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf ("\nM:"); Mon->pretty_print(Sen);
                 Serial.printf ("M::"); Mon->Coulombs::pretty_print();
                 Serial.printf ("M::"); Mon->EKF_1x1::pretty_print();
-                Serial.printf ("\nmodeling = %d\n", sp.modeling());
+                Serial.printf ("\nmodeling %d\n", sp.modeling());
                 break;
 
               case ( 'M' ):  // PM:  Print shunt Amp
@@ -1231,7 +1231,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 // Talk Help
 void talkH(BatteryMonitor *Mon, Sensors *Sen)
 {
-  Serial.printf("\n\nHelp menu.  End entry with ';'.  SRAM='*'.  May omit '='\n");
+  Serial.printf("\n\nHelp menu.  Omit '=' and end entry with ';'\n");
 
   Serial.printf("\nb<?>   Manage fault buffer\n");
   Serial.printf("  bd= "); Serial.printf("dump fault buffer\n");
@@ -1380,14 +1380,14 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
   Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
   Serial.printf(" *Xm=  "); Serial.printf("%d,   modeling bitmap [0b00000000]\n", sp.modeling());
-  Serial.printf("      0x128=1<<7 ib_noa_dscn = %d\n", sp.mod_ib_noa_dscn());
-  Serial.printf("      0x64 =1<<6 ib_amp_dscn = %d\n", sp.mod_ib_amp_dscn());
-  Serial.printf("      0x32 =1<<5 vb_dscn = %d\n", sp.mod_vb_dscn());
-  Serial.printf("      0x16 =1<<4 temp_dscn = %d\n", sp.mod_tb_dscn());
-  Serial.printf("      0x8  =1<<3 tweak_test = %d\n", sp.tweak_test());
-  Serial.printf("      0x4  =1<<2 current = %d\n", sp.mod_ib());
-  Serial.printf("      0x2  =1<<1 voltage = %d\n", sp.mod_vb());
-  Serial.printf("      0x1  =1<<0 temp = %d\n", sp.mod_tb());
+  Serial.printf("      0x128=1<<7 ib_noa_dscn %d\n", sp.mod_ib_noa_dscn());
+  Serial.printf("      0x64 =1<<6 ib_amp_dscn %d\n", sp.mod_ib_amp_dscn());
+  Serial.printf("      0x32 =1<<5 vb_dscn %d\n", sp.mod_vb_dscn());
+  Serial.printf("      0x16 =1<<4 temp_dscn %d\n", sp.mod_tb_dscn());
+  Serial.printf("      0x8  =1<<3 tweak_test %d\n", sp.tweak_test());
+  Serial.printf("      0x4  =1<<2 current %d\n", sp.mod_ib());
+  Serial.printf("      0x2  =1<<1 voltage %d\n", sp.mod_vb());
+  Serial.printf("      0x1  =1<<0 temp %d\n", sp.mod_tb());
   Serial.printf(" *Xa= "); Serial.printf("%6.3f", sp.amp()); Serial.println(": Inj amp A pk (0-18.3) [0]");
   Serial.printf(" *Xf= "); Serial.printf("%6.3f", sp.freq()/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
   Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.println(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))");

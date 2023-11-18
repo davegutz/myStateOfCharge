@@ -54,7 +54,7 @@ void Chemistry::assign_all_chm(const String mod_str)
         assign_SP();
     }
     else
-        Serial.printf("Battery::assign_all_mod:  unknown mod = %d.  Type 'h' for help\n", mod);
+        Serial.printf("assign_all_mod:  unknown mod %d.  Type 'h' (Xm)\n", mod);
     r_ss = r_0 + r_ct;
 }
 
@@ -406,7 +406,7 @@ String Chemistry::decode(const uint8_t mod)
     else
     {
         result = "unknown";
-        Serial.printf("C::decode:  unknown mod = %d. 'h'\n", mod);
+        Serial.printf("C::decode:  unknown mod %d. 'h' (Xm)\n", mod);
     }
     return (result);
 }
@@ -424,7 +424,7 @@ uint8_t Chemistry::encode(const String mod_str)
     else
     {
         result = 99;
-        Serial.printf("C::encode:  unknown mod = %s.  'h'\n", mod_str.c_str());
+        Serial.printf("C::encode:  unknown mod %s 'h' (Xm)\n", mod_str.c_str());
     }
     return (result);
 }

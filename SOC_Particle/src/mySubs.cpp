@@ -166,7 +166,7 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
   if ( year<2020 ) cTimeInit = 0.;
   // Serial.printf("y %ld m %d d %d h %d m %d s %d now %ld millis_flip %ld\n", year, month, day, hours, minutes, seconds, now, millis_flip);
   double cTime = cTimeInit + double(now-millis_flip)/1000.;
-  // Serial.printf("%ld - %ld = %18.12g, cTimeInit=%18.12g, cTime=%18.12g\n", now, millis_flip, double(now-millis_flip)/1000., cTimeInit, cTime);
+  // Serial.printf("%ld - %ld %18.12g cTimeInit%18.12g cTime%18.12g\n", now, millis_flip, double(now-millis_flip)/1000., cTimeInit, cTime);
   return ( cTime );
 }
 
@@ -459,9 +459,9 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   // Text basic Bluetooth (use serial bluetooth app)
   if ( sp.debug()==99 ) // Calibration mode
   {
-    Serial.printf("Tb, Vb, imh, inh |*SV,*Dc |*SA,*DA|*SB,*DB = %7.2fdeg C %7.3fv %7.3fA %7.3fA | %7.3f %7.3fv  |  %7.3f %7.3fA | %7.3f %7.3fA,\n",
+    Serial.printf("Tb, Vb, imh, inh |*SV,*Dc |*SA,*DA|*SB,*DB: %7.2fdeg C %7.3fv %7.3fA %7.3fA | %7.3f %7.3fv  |  %7.3f %7.3fA | %7.3f %7.3fA,\n",
     Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa());
-    Serial1.printf("Tb, Vb, imh, inh |*SV,*Dc |*SA,*DA|*SB,*DB = %7.2fdeg C %7.3fv %7.3fA %7.3fA | %7.3f %7.3fv  |  %7.3f %7.3fA | %7.3f %7.3fA,\n",
+    Serial1.printf("Tb, Vb, imh, inh |*SV,*Dc |*SA,*DA|*SB,*DB: %7.2fdeg C %7.3fv %7.3fA %7.3fA | %7.3f %7.3fv  |  %7.3f %7.3fA | %7.3f %7.3fA,\n",
     Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa());
   }
   else if ( sp.debug()!=4 && sp.debug()!=-2 )  // Normal display
@@ -615,6 +615,7 @@ void finish_request(void)
 {
   // Remove whitespace
   cp.input_str.trim();
+  cp.input_str.replace("\n","");
   cp.input_str.replace("\0","");
   cp.input_str.replace(";","");
   cp.input_str.replace(",","");
@@ -644,6 +645,10 @@ void serialEvent()
 
     // add it to the cp.input_str:
     cp.input_str += inChar;
+    
+    // if (inChar == '\n') Serial.printf("<CR>");
+    // else if (inChar == '\0') Serial.printf("<EOL>");
+    // else Serial.printf("%c", inChar);
 
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
@@ -673,7 +678,7 @@ void serialEvent1()
     cp.input_str += inChar;
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
-    if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',')
+    if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
     {
       finish_request();
       break;  // enable reading multiple inputs

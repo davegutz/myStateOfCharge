@@ -770,6 +770,12 @@ Amazon:  5 Pieces I2C Display Module 0.91 Inch I2C OLED Display Module Blue I2C 
 
 ## FAQ
 
+### Particle Workbench complains about STM32_Pin_Info
+c:\users\daveg\documents\github\mystateofcharge\soc_particle\src\hardware/OneWire.h:98:5: error: 'STM32_Pin_Info' does not name a type; did you mean 'Hal_Pin_Info'?
+   98 |     STM32_Pin_Info* PIN_MAP = HAL_Pin_Map(); // Pointer required for highest access 
+speed
+The solution is to copy the proper 'local_config.h.<>' into 'local_confi.h'
+
 ### Particle Workbench throws 'Unknown argument local' error
 
     Solution:  Manually reset CLI installation.  https://community.particle.io/t/

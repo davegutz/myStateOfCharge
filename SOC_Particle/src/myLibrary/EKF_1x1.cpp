@@ -72,17 +72,17 @@ void EKF_1x1::init_ekf(double soc, double Pinit)
 #ifndef DEPLOY_PHOTON
   Serial.printf("EKF_1x1:\n");
   Serial.printf("In:\n");
-  Serial.printf("  z  =   %8.4f, V\n", z_);
-  Serial.printf("  R  = %10.6f\n", R_);
-  Serial.printf("  Q  = %10.6f\n", Q_);
-  Serial.printf("  H  =    %7.3f\n", H_);
+  Serial.printf("  z  %8.4f, V\n", z_);
+  Serial.printf("  R%10.6f\n", R_);
+  Serial.printf("  Q%10.6f\n", Q_);
+  Serial.printf("  H   %7.3f\n", H_);
   Serial.printf("Out:\n");
-  Serial.printf("  x  =   %8.4f, Vsoc (0-1 fraction)\n", x_);
-  Serial.printf("  hx =   %8.4f\n", hx_);
-  Serial.printf("  y  =   %8.4f, V\n", y_);
-  Serial.printf("  P  = %10.6f\n", P_);
-  Serial.printf("  K  = %10.6f\n", K_);
-  Serial.printf("  S  = %10.6f\n", S_);
+  Serial.printf("  x  %8.4f, Vsoc (0-1 fraction)\n", x_);
+  Serial.printf("  hx %8.4f\n", hx_);
+  Serial.printf("  y   %8.4f, V\n", y_);
+  Serial.printf("  P%10.6f\n", P_);
+  Serial.printf("  K%10.6f\n", K_);
+  Serial.printf("  S%10.6f\n", S_);
 #else
      Serial.printf("EKF_1x1: silent for DEPLOY_PHOTON\n");
 #endif
