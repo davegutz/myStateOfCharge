@@ -1108,7 +1108,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("Xf.002;", QUEUE); // Frequency 0.002 Hz
                       chit("Xa-60;", QUEUE);  // Amplitude -60 A
                       chit("XW60;", QUEUE);   // Wait time before starting to cycle
-                      chit("XT600;", QUEUE);  // Wait time after cycle to print
+                      chit("XT60;", QUEUE);  // Wait time after cycle to print
                       chit("XC1;", QUEUE);    // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
                       chit("v2;", QUEUE);     // Data collection

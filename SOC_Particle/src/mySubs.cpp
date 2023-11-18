@@ -583,6 +583,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   }
   else if ( Sen->elapsed_inj && sp.tweak_test() )  // Done.  elapsed_inj set to 0 is the reset button
   {
+    Serial.printf("STOP echo\n");
     Sen->elapsed_inj = 0UL;
     chit("v0;", ASAP);      // Turn off echo
     chit("Xm247;", QUEUE);  // Turn off tweak_test
