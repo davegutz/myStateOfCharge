@@ -1078,7 +1078,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("W10;Pm;v0;", QUEUE);  // finish
                     break;
 
-                  case ( 9 ): case( 10 ): case ( 11 ): case( 12 ):  // Xp9: Xp10: Xp11: Xp12:  Program regression
+                  case ( 9 ): case( 10 ): case ( 11 ): case( 12 ): case( 13 ): // Xp9: Xp10: Xp11: Xp12: Xp13:  Program regression
                     // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
                     chit("Xp0;", QUEUE);      // Reset nominal
                     chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
@@ -1122,6 +1122,17 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("XC.5;", QUEUE);     // Number of injection cycles
                       chit("W2;", QUEUE);       // Wait
                       chit("v2;", QUEUE);       // Data collection
+                    }
+                    else if ( INT_in == 13 )  // Xp13:  tri tweak
+                    {
+                      chit("Xtt;", QUEUE);      // Start up a triangle wave
+                      chit("Xf.02;", QUEUE);  // Frequency 0.02 Hz
+                      chit("Xa-29500;", QUEUE);// Amplitude -2000 A
+                      chit("XW5;", QUEUE);    // Wait time before starting to cycle
+                      chit("XT5;", QUEUE);    // Wait time after cycle to print
+                      chit("XC3;", QUEUE);    // Number of injection cycles
+                      chit("W2;", QUEUE);     // Wait
+                      chit("v2;", QUEUE);     // Data collection
                     }
                     chit("W2;", QUEUE);       // Wait
                     chit("XR;", QUEUE);       // Run cycle
@@ -1401,11 +1412,12 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Xp6: +/-500 A pulse EKF\n");
   Serial.printf("  Xp7: +/-500 A sw pulse SS\n");
   Serial.printf("  Xp8: +/-500 A hw pulse SS\n");
-  Serial.printf("  Xp10:tweak cycle test\n");
-  Serial.printf("  Xp11:slow cycle test\n");
-  Serial.printf("  Xp12:slow half cycle reg test\n");
-  Serial.printf("  Xp20:collect fast data\n");
-  Serial.printf("  Xp21:collect slow data\n");
+  Serial.printf("  Xp10:tweak sin\n");
+  Serial.printf("  Xp11:slow sin\n");
+  Serial.printf("  Xp12:slow half sin\n");
+  Serial.printf("  Xp13:tweak tri\n");
+  Serial.printf("  Xp20:collect fast\n");
+  Serial.printf("  Xp21:collect slow\n");
   Serial.printf(" XC= "); Serial.printf("%6.3f cycles inj\n", Sen->cycles_inj);
   Serial.printf(" XR  "); Serial.printf("RUN inj\n");
   Serial.printf(" XS  "); Serial.printf("STOP inj\n");
