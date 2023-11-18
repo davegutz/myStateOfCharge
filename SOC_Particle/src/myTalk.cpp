@@ -1066,9 +1066,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("W10;Pm;v0;", QUEUE);  // finish
                     break;
 
-                  case ( 7 ):  // Xp7:  Program a pulse for State Space test
+                  case ( 7 ):  // Xp7:  Program a sensor pulse for State Space test
                     chit("XS;Dm0;Dn0;v0;Xm255;Ca.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
                     chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
+                    chit("W10;Pm;v0;", QUEUE);  // finish
+                    break;
+
+                  case ( 8 ):  // Xp8:  Program a hardware pulse for State Space test
+                    chit("XS;Di0;v0;Xm255;Ca.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
+                    chit("Di500;Di-500;Di0;", QUEUE);  // run
                     chit("W10;Pm;v0;", QUEUE);  // finish
                     break;
 
@@ -1076,7 +1082,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
                     chit("Xp0;", QUEUE);      // Reset nominal
                     chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
-                    chit("Xm255;", QUEUE);     // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
+                    chit("Xm255;", QUEUE);    // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
                     chit("Xts;", QUEUE);      // Start up a sine wave
                     chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
                     chit("Dm1;Dn1;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.
@@ -1383,7 +1389,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("      0x2  =1<<1 voltage = %d\n", sp.mod_vb());
   Serial.printf("      0x1  =1<<0 temp = %d\n", sp.mod_tb());
   Serial.printf(" *Xa= "); Serial.printf("%6.3f", sp.amp()); Serial.println(": Inj amp A pk (0-18.3) [0]");
-  Serial.printf(" *Xb= "); Serial.printf("%6.3f", sp.inj_bias()); Serial.println(": Inj bias A [0]");
   Serial.printf(" *Xf= "); Serial.printf("%6.3f", sp.freq()/2./PI); Serial.println(": Inj freq Hz (0-2) [0]");
   Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.println(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
@@ -1394,7 +1399,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Xp4: -1C soft disch, reset xp0 or Di0\n");
   Serial.printf("  Xp5: +1C soft chg\n");
   Serial.printf("  Xp6: +/-500 A pulse EKF\n");
-  Serial.printf("  Xp7: +/-500 A pulse SS\n");
+  Serial.printf("  Xp7: +/-500 A sw pulse SS\n");
+  Serial.printf("  Xp8: +/-500 A hw pulse SS\n");
   Serial.printf("  Xp10:tweak cycle test\n");
   Serial.printf("  Xp11:slow cycle test\n");
   Serial.printf("  Xp12:slow half cycle reg test\n");
