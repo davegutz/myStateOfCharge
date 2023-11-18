@@ -125,8 +125,8 @@ class CountdownTimer(tk.Toplevel):
             self.destroy()
 
 
-def start_timer(caller=''):
-    CountdownTimer(root,5, "5 second test", caller, max_flash=5, exit_function=None, trigger=True)
+def start_timer():
+    CountdownTimer(root,5, max_flash=5, exit_function=None, trigger=True)
 
 
 def stay_awake(up_set_min=3.):
