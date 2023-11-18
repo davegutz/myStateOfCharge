@@ -1074,7 +1074,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
                   case ( 8 ):  // Xp8:  Program a hardware pulse for State Space test
                     chit("XS;Di0;v0;Xm255;Ca.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
-                    chit("Di500;Di-500;Di0;", QUEUE);  // run
+                    chit("DI500;DI-500;DI0;", QUEUE);  // run
                     chit("W10;Pm;v0;", QUEUE);  // finish
                     break;
 
