@@ -75,10 +75,10 @@
         #endif
     #else
         #ifdef DEPLOY_PHOTON
-            #define NSUM              174       // Number of saved SRAM summaries (174)
+            #define NSUM              169       // Number of saved SRAM summaries (174)
                                                 // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
         #else
-            #define NSUM               15       // Number of saved SRAM summaries (15)
+            #define NSUM               10       // Number of saved SRAM summaries (15)
                                                 // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
         #endif
     #endif
