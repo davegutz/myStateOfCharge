@@ -45,13 +45,14 @@ bg_color = 'lightgray'
 # sys.stderr = open('logse.txt', 'w')
 
 # Transient string
-sel_list = ['init', 'init1', 'custom', 'ampHiFail', 'rapidTweakRegression', 'rapidTweakRegressionH0', 'offSitHysBmsBB', 'offSitHysBmsCH', 'triTweakDisch', 'coldStart', 'ampHiFailFf',
-            'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
-            'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf', 'pulseEKF', 'pulseSS', 'pulseSSH', 'tbFailMod',
-            'tbFailHdwe', 'DvMon', 'DvSim']
+sel_list = ['custom', 'init1', 'ampHiFail', 'rapidTweakRegression', 'rapidTweakRegressionH0', 'offSitHysBmsBB',
+            'offSitHysBmsCH', 'triTweakDisch', 'coldStart', 'ampHiFailFf', 'ampLoFail', 'ampHiFailNoise',
+            'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
+            'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf',
+            'pulseEKF', 'pulseSS', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim']
 lookup = {'init': ('v0;XS;Xp0;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '', ('',), 0),
           'init1': ('v0;XS;Xp0;Ca1;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;v2;', 'v0;', ('Observe effects of initialization',), 15),
-          'custom': ('', '', ("For general purpose running", "'save data' will present a choice of file name", ""), 60),
+          'custom': ('', '', ("For general purpose data collection", "'save data' will present a choice of file name", ""), 60),
           'ampHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 20),
           'rapidTweakRegression': ('Ff0;HR;Xp10;', 'start timer', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 160),
           'rapidTweakRegressionH0': ('Sh0;SH0;Ff0;HR;Xp10;', 'start timer', ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!'), 160),
@@ -733,7 +734,14 @@ if __name__ == '__main__':
     # Define frames
     min_width = 800
     main_height = 500
-    wrap_length = 800
+    folder_reveal = 25
+    wrap_length = 500
+    wrap_length_note = 700
+    note_font = ("Arial bold", 10)
+    label_font = ("Arial bold", 12)
+    label_font_gentle = ("Arial", 10)
+    butt_font = ("Arial", 8)
+    butt_font_large = ("Arial bold", 10)
     bg_color = "lightgray"
 
     # Master and header
@@ -741,8 +749,8 @@ if __name__ == '__main__':
     master.title('State of Charge')
     master.wm_minsize(width=min_width, height=main_height)
     # master.geometry('%dx%d' % (master.winfo_screenwidth(), master.winfo_screenheight()))
-    Ref = Exec(cf, 'ref', path_disp_len_=25)
-    Test = Exec(cf, 'test', path_disp_len_=50)
+    Ref = Exec(cf, 'ref', path_disp_len_=folder_reveal)
+    Test = Exec(cf, 'test', path_disp_len_=folder_reveal)
     putty_test_csv_path = tk.StringVar(master, os.path.join(ex_root.script_loc, '../dataReduction/putty_test.csv'))
     icon_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC_Icon.png')
     master.iconphoto(False, tk.PhotoImage(file=icon_path))
@@ -758,8 +766,8 @@ if __name__ == '__main__':
     top_panel_right = tk.Frame(top_panel)
     top_panel_right.pack(side='left', expand=True, fill='both')
 
-    tk.Label(top_panel_left, text="Item", fg="blue").pack(pady=2)
-    tk.Label(top_panel_left_ctr, text="Test", fg="blue").pack(pady=2)
+    tk.Label(top_panel_left, text="Item", fg="blue", font=label_font).pack(pady=2)
+    tk.Label(top_panel_left_ctr, text="Test", fg="blue", font=label_font).pack(pady=2)
     model_str = cf['others']['modeling']
     if model_str == 'True':
         modeling = tk.BooleanVar(master, True)
@@ -769,42 +777,42 @@ if __name__ == '__main__':
                                      onvalue=True, offvalue=False)
     modeling_button.pack(pady=2, fill='x')
     modeling.trace_add('write', handle_modeling)
-    ref_label = tk.Label(top_panel_right, text="Ref", fg="blue")
+    ref_label = tk.Label(top_panel_right, text="Ref", fg="blue", font=label_font)
     ref_label.pack(pady=2, expand=True, fill='both')
 
     # Folder row
-    working_label = tk.Label(top_panel_left, text="dataReduction folder=")
-    Test.folder_butt = myButton(top_panel_left_ctr, text=Test.dataReduction_folder[-25:], command=Test.enter_dataReduction_folder,
+    working_label = tk.Label(top_panel_left, text="dataReduction Folder", font=label_font)
+    Test.folder_butt = myButton(top_panel_left_ctr, text=Test.dataReduction_folder[-folder_reveal:], command=Test.enter_dataReduction_folder,
                                 fg="blue", bg=bg_color)
-    Ref.folder_butt = myButton(top_panel_right, text=Ref.dataReduction_folder[-25:], command=Ref.enter_dataReduction_folder,
+    Ref.folder_butt = myButton(top_panel_right, text=Ref.dataReduction_folder[-folder_reveal:], command=Ref.enter_dataReduction_folder,
                                fg="blue", bg=bg_color)
     working_label.pack(padx=5, pady=5)
     Test.folder_butt.pack(padx=5, pady=5, anchor=tk.W)
     Ref.folder_butt.pack(padx=5, pady=5, anchor=tk.E)
 
     # Version row
-    tk.Label(top_panel_left, text="Version").pack(pady=2)
+    tk.Label(top_panel_left, text="Version", font=label_font).pack(pady=2)
     Test.version_button = myButton(top_panel_left_ctr, text=Test.version, command=Test.enter_version, fg="blue", bg=bg_color)
     Test.version_button.pack(pady=2)
     Ref.version_button = myButton(top_panel_right, text=Ref.version, command=Ref.enter_version, fg="blue", bg=bg_color)
     Ref.version_button.pack(pady=2)
 
     # Unit row
-    tk.Label(top_panel_left, text="Unit").pack(pady=2, expand=True, fill='both')
+    tk.Label(top_panel_left, text="Unit", font=label_font).pack(pady=2, expand=True, fill='both')
     Test.unit_button = myButton(top_panel_left_ctr, text=Test.unit, command=Test.enter_unit, fg="purple", bg=bg_color)
     Test.unit_button.pack(pady=2)
     Ref.unit_button = myButton(top_panel_right, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
     Ref.unit_button.pack(pady=2)
 
     # Battery row
-    tk.Label(top_panel_left, text="Battery").pack(pady=2, expand=True, fill='both')
+    tk.Label(top_panel_left, text="Battery", font=label_font).pack(pady=2, expand=True, fill='both')
     Test.battery_button = myButton(top_panel_left_ctr, text=Test.battery, command=Test.enter_battery, fg="green", bg=bg_color)
     Test.battery_button.pack(pady=2)
     Ref.battery_button = myButton(top_panel_right, text=Ref.battery, command=Ref.enter_battery, fg="green", bg=bg_color)
     Ref.battery_button.pack(pady=2)
 
     # Key row
-    tk.Label(top_panel_left, text="Key").pack(pady=2, expand=True, fill='both')
+    tk.Label(top_panel_left, text="Key", font=label_font).pack(pady=2, expand=True, fill='both')
     Test.key_label = tk.Label(top_panel_left_ctr, text=Test.key)
     Test.key_label.pack(padx=5, pady=5)
     Ref.key_label = tk.Label(top_panel_right, text=Ref.key)
@@ -819,7 +827,7 @@ if __name__ == '__main__':
     # Option panel
     option_sep_panel = tk.Frame(master)
     option_sep_panel.pack(expand=True, fill='x')
-    tk.Label(option_sep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    tk.Label(option_sep_panel, text=' ', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
     option_panel = tk.Frame(master)
     option_panel.pack(expand=True, fill='both')
     option_panel_left = tk.Frame(option_panel)
@@ -833,7 +841,7 @@ if __name__ == '__main__':
     option = tk.StringVar(master, str(cf['others']['option']))
     option_show = tk.StringVar(master, str(cf['others']['option']))
     sel = tk.OptionMenu(option_panel_left, option, *sel_list)
-    sel.config(width=20)
+    sel.config(width=20, font=butt_font)
     sel.pack(padx=5, pady=5)
     option.trace_add('write', handle_option)
     Test.label = tk.Label(option_panel_ctr, text=Test.file_txt)
@@ -846,41 +854,41 @@ if __name__ == '__main__':
     empty_csv_path = tk.StringVar(master, os.path.join(Test.dataReduction_folder, 'empty.csv'))
     init_val, dum1, dum2, dum3 = lookup.get('init')
     init = tk.StringVar(master, init_val)
-    init_label = tk.Label(option_panel_left, text='init & clear:')
+    init_label = tk.Label(option_panel_left, text='init & clear:', font=label_font_gentle)
     init_label.pack(padx=5, pady=5)
     init_button = myButton(option_panel_ctr, text=init.get(), command=grab_init, fg="purple", bg=bg_color, wraplength=wrap_length,
                            justify=tk.LEFT, font=("Arial", 8))
     init_button.pack(padx=5, pady=5)
 
     start = tk.StringVar(master, '')
-    start_label = tk.Label(option_panel_left, text='copy start:')
+    start_label = tk.Label(option_panel_left, text='copy start:', font=label_font_gentle)
     start_label.pack(padx=5, pady=5, expand=True, fill='x')
     if platform.system() == 'Darwin':
         start_button = myButton(option_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color,
-                                justify=tk.LEFT, font=("Arial", 8))
+                                justify=tk.LEFT, font=butt_font)
     else:
         start_button = myButton(option_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
-                                justify=tk.LEFT, font=("Arial", 8))
+                                justify=tk.LEFT, font=butt_font)
     start_button.pack(padx=5, pady=5, expand=True, fill='both')
     reset = tk.StringVar(master, '')
-    reset_label = tk.Label(option_panel_left, text='copy reset:')
+    reset_label = tk.Label(option_panel_left, text='copy reset:', font=label_font_gentle)
     reset_label.pack(padx=5, pady=5)
     if platform.system() == 'Darwin':
         reset_button = myButton(option_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color,
-                                justify=tk.LEFT, font=("Arial", 8))
+                                justify=tk.LEFT, font=butt_font)
     else:
         reset_button = myButton(option_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
-                                justify=tk.LEFT, font=("Arial", 8))
+                                justify=tk.LEFT, font=butt_font)
     reset_button.pack(padx=5, pady=5, expand=True, fill='both')
     timer_val = tk.IntVar(master, 0)
     end_early_butt = myButton(option_panel_right, text='END EARLY', command=end_early, fg="black", bg=bg_color,
-                              justify=tk.RIGHT, font=("Arial", 8))
+                              justify=tk.RIGHT, font=butt_font)
     end_early_butt.pack(padx=5, pady=5, side=tk.BOTTOM)
 
     # Note panel
     note_sep_panel = tk.Frame(master)
     note_sep_panel.pack(expand=True, fill='x')
-    tk.Label(note_sep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    tk.Label(note_sep_panel, text=' ', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
     note_panel = tk.Frame(master)
     note_panel.pack(expand=True, fill='both')
     note_panel_left = tk.Frame(note_panel)
@@ -889,22 +897,22 @@ if __name__ == '__main__':
     note_panel_ctr.pack(side='left', expand=True, fill='both')
     note_panel_right = tk.Frame(note_panel)
     note_panel_right.pack(side='left', expand=True, fill='both')
-    ev1_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev1_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length_note, justify=tk.LEFT, font=note_font)
     ev1_label.pack(padx=5, pady=5, anchor=tk.W)
-    ev2_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev2_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length_note, justify=tk.LEFT, font=note_font)
     ev2_label.pack(padx=5, pady=5, anchor=tk.W)
-    ev3_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev3_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length_note, justify=tk.LEFT, font=note_font)
     ev3_label.pack(padx=5, pady=5, anchor=tk.W)
-    ev4_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev4_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length_note, justify=tk.LEFT, font=note_font)
     ev4_label.pack(padx=5, pady=5, anchor=tk.W)
 
     # Save row
     sav_panel = tk.Frame(master)
     sav_panel.pack(expand=True, fill='both')
-    save_data_label = tk.Label(sav_panel, text='save data:')
+    save_data_label = tk.Label(sav_panel, text='save data:', font=label_font_gentle)
     save_data_label.pack(side=tk.LEFT, padx=5, pady=5)
     save_data_button = myButton(sav_panel, text='save data', command=save_data, fg="red", bg=bg_color,
-                                wraplength=wrap_length, justify=tk.LEFT)
+                                wraplength=wrap_length, justify=tk.LEFT, font=butt_font_large)
     save_data_button.pack(side=tk.LEFT, padx=5, pady=5)
     clear_data_button = myButton(sav_panel, text='clear', command=clear_data_verbose, fg="red", bg=bg_color,
                                  wraplength=wrap_length, justify=tk.RIGHT)
@@ -916,27 +924,28 @@ if __name__ == '__main__':
     # Run panel
     run_sep_panel = tk.Frame(master)
     run_sep_panel.pack(expand=True, fill='x')
-    tk.Label(run_sep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    tk.Label(run_sep_panel, text=' ', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
     run_panel = tk.Frame(master)
     run_panel.pack(expand=True, fill='x')
-    run_button = myButton(run_panel, text='Compare', command=compare_run, fg="green", bg=bg_color,
-                          wraplength=wrap_length, justify=tk.LEFT)
+    tk.Label(run_panel, text='------->', font=("Courier", 8), bg='lightgreen').pack(side=tk.LEFT)
+    run_button = myButton(run_panel, text=' Compare ', command=compare_run, fg="green", bg=bg_color,
+                          wraplength=wrap_length, justify=tk.LEFT, font=butt_font_large)
     run_button.pack(side=tk.LEFT, padx=5, pady=5)
 
     # Compare panel
     compare_sep_panel = tk.Frame(master)
     compare_sep_panel.pack(expand=True, fill='x')
-    tk.Label(compare_sep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    tk.Label(compare_sep_panel, text=' ', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
     tk.ttk.Separator(compare_sep_panel, orient='horizontal').pack(pady=5, side=tk.TOP)
     compare_panel = tk.Frame(master)
     compare_panel.pack(expand=True, fill='x')
     choose_label = tk.Label(compare_panel, text='choose existing files:')
     choose_label.pack(side=tk.LEFT, padx=5, pady=5)
     run_sim_choose_button = myButton(compare_panel, text='Compare Run Sim Choose', command=compare_run_sim_choose,
-                                     fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+                                     fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT, font=butt_font)
     run_sim_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
     run_run_choose_button = myButton(compare_panel, text='Compare Run Run Choose', command=compare_run_run_choose,
-                                     fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
+                                     fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT, font=butt_font)
     run_run_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
 
     # Begin
