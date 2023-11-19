@@ -776,37 +776,37 @@ if __name__ == '__main__':
                                 fg="blue", bg=bg_color)
     Ref.folder_butt = myButton(top_panel_right, text=Ref.dataReduction_folder[-25:], command=Ref.enter_dataReduction_folder,
                                fg="blue", bg=bg_color)
-    working_label.pack(padx=5, pady=5, expand=True, fill='both')
-    Test.folder_butt.pack(padx=5, pady=5, expand=True, fill='both')
-    Ref.folder_butt.pack(padx=5, pady=5, expand=True, fill='both')
+    working_label.pack(padx=5, pady=5)
+    Test.folder_butt.pack(padx=5, pady=5)
+    Ref.folder_butt.pack(padx=5, pady=5)
 
     # Version row
     tk.Label(top_panel_left, text="Version").pack(pady=2)
     Test.version_button = myButton(top_panel_left_ctr, text=Test.version, command=Test.enter_version, fg="blue", bg=bg_color)
-    Test.version_button.pack(pady=2, expand=True, fill='both')
+    Test.version_button.pack(pady=2)
     Ref.version_button = myButton(top_panel_right, text=Ref.version, command=Ref.enter_version, fg="blue", bg=bg_color)
-    Ref.version_button.pack(pady=2, expand=True, fill='both')
+    Ref.version_button.pack(pady=2)
 
     # Unit row
     tk.Label(top_panel_left, text="Unit").pack(pady=2, expand=True, fill='both')
     Test.unit_button = myButton(top_panel_left_ctr, text=Test.unit, command=Test.enter_unit, fg="purple", bg=bg_color)
-    Test.unit_button.pack(pady=2, expand=True, fill='both')
+    Test.unit_button.pack(pady=2)
     Ref.unit_button = myButton(top_panel_right, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
-    Ref.unit_button.pack(pady=2, expand=True, fill='both')
+    Ref.unit_button.pack(pady=2)
 
     # Battery row
     tk.Label(top_panel_left, text="Battery").pack(pady=2, expand=True, fill='both')
     Test.battery_button = myButton(top_panel_left_ctr, text=Test.battery, command=Test.enter_battery, fg="green", bg=bg_color)
-    Test.battery_button.pack(pady=2, expand=True, fill='both')
+    Test.battery_button.pack(pady=2)
     Ref.battery_button = myButton(top_panel_right, text=Ref.battery, command=Ref.enter_battery, fg="green", bg=bg_color)
-    Ref.battery_button.pack(pady=2, expand=True, fill='both')
+    Ref.battery_button.pack(pady=2)
 
     # Key row
     tk.Label(top_panel_left, text="Key").pack(pady=2, expand=True, fill='both')
     Test.key_label = tk.Label(top_panel_left_ctr, text=Test.key)
-    Test.key_label.pack(padx=5, pady=5, expand=True, fill='both')
+    Test.key_label.pack(padx=5, pady=5)
     Ref.key_label = tk.Label(top_panel_right, text=Ref.key)
-    Ref.key_label.pack(padx=5, pady=5, expand=True, fill='both')
+    Ref.key_label.pack(padx=5, pady=5)
 
     # Image
     pic_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC.png')
@@ -836,9 +836,9 @@ if __name__ == '__main__':
     sel.pack(padx=5, pady=5)
     option.trace_add('write', handle_option)
     Test.label = tk.Label(opt_panel_ctr, text=Test.file_txt)
-    Test.label.pack(padx=5, pady=5, expand=True, fill='x')
+    Test.label.pack(padx=5, pady=5)
     Ref.label = tk.Label(opt_panel_right, text=Ref.file_txt)
-    Ref.label.pack(padx=5, pady=5, side=tk.TOP)
+    Ref.label.pack(padx=5, pady=5)
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
 
@@ -849,21 +849,21 @@ if __name__ == '__main__':
     init_label.pack(padx=5, pady=5)
     init_button = myButton(opt_panel_ctr, text=init.get(), command=grab_init, fg="purple", bg=bg_color, wraplength=wrap_length,
                            justify=tk.LEFT, font=("Arial", 8))
-    init_button.pack(padx=5, pady=5, expand=True, fill='both')
+    init_button.pack(padx=5, pady=5)
 
     start = tk.StringVar(master, '')
     start_label = tk.Label(opt_panel_left, text='copy start:')
     start_label.pack(padx=5, pady=5)
     start_button = myButton(opt_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
                             justify=tk.LEFT, font=("Arial", 8))
-    start_button.pack(padx=5, pady=5, expand=True, fill='both')
+    start_button.pack(padx=5, pady=5)
 
     reset = tk.StringVar(master, '')
     reset_label = tk.Label(opt_panel_left, text='copy reset:')
     reset_label.pack(padx=5, pady=5)
     reset_button = myButton(opt_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
                             justify=tk.LEFT, font=("Arial", 8))
-    reset_button.pack(padx=5, pady=5, expand=True, fill='both')
+    reset_button.pack(padx=5, pady=5)
     timer_val = tk.IntVar(master, 0)
     end_early_butt = myButton(opt_panel_right, text='END EARLY', command=end_early, fg="black", bg=bg_color,
                               justify=tk.RIGHT, font=("Arial", 8))
