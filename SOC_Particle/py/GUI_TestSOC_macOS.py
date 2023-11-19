@@ -589,12 +589,14 @@ def putty_size():
 
 def ref_remove():
     top_panel_right.pack_forget()
+    Ref.label.forget()
     run_button.config(text='Compare Run Sim')
 
 
 def ref_restore():
     top_panel_right.pack(expand=True, fill='both')
     run_button.config(text='Compare Run Run')
+    Ref.label.pack(padx=5, pady=5)
 
 
 def save_data():
@@ -815,28 +817,28 @@ if __name__ == '__main__':
     label.pack(padx=5, pady=5, expand=True, fill='both')
 
     # Option panel
-    optsep_panel = tk.Frame(master)
-    optsep_panel.pack(expand=True, fill='x')
-    tk.Label(optsep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
-    opt_panel = tk.Frame(master)
-    opt_panel.pack(expand=True, fill='both')
-    opt_panel_left = tk.Frame(opt_panel)
-    opt_panel_left.pack(side='left', fill='x')
-    opt_panel_ctr = tk.Frame(opt_panel)
-    opt_panel_ctr.pack(side='left', expand=True, fill='both')
-    opt_panel_right = tk.Frame(opt_panel)
-    opt_panel_right.pack(side='left', expand=True, fill='both')
+    option_sep_panel = tk.Frame(master)
+    option_sep_panel.pack(expand=True, fill='x')
+    tk.Label(option_sep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    option_panel = tk.Frame(master)
+    option_panel.pack(expand=True, fill='both')
+    option_panel_left = tk.Frame(option_panel)
+    option_panel_left.pack(side='left', fill='x')
+    option_panel_ctr = tk.Frame(option_panel)
+    option_panel_ctr.pack(side='left', expand=True, fill='both')
+    option_panel_right = tk.Frame(option_panel)
+    option_panel_right.pack(side='left', expand=True, fill='both')
 
     # Option
     option = tk.StringVar(master, str(cf['others']['option']))
     option_show = tk.StringVar(master, str(cf['others']['option']))
-    sel = tk.OptionMenu(opt_panel_left, option, *sel_list)
+    sel = tk.OptionMenu(option_panel_left, option, *sel_list)
     sel.config(width=20)
     sel.pack(padx=5, pady=5)
     option.trace_add('write', handle_option)
-    Test.label = tk.Label(opt_panel_ctr, text=Test.file_txt)
+    Test.label = tk.Label(option_panel_ctr, text=Test.file_txt)
     Test.label.pack(padx=5, pady=5)
-    Ref.label = tk.Label(opt_panel_right, text=Ref.file_txt)
+    Ref.label = tk.Label(option_panel_right, text=Ref.file_txt)
     Ref.label.pack(padx=5, pady=5)
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
@@ -844,27 +846,27 @@ if __name__ == '__main__':
     empty_csv_path = tk.StringVar(master, os.path.join(Test.dataReduction_folder, 'empty.csv'))
     init_val, dum1, dum2, dum3 = lookup.get('init')
     init = tk.StringVar(master, init_val)
-    init_label = tk.Label(opt_panel_left, text='init & clear:')
+    init_label = tk.Label(option_panel_left, text='init & clear:')
     init_label.pack(padx=5, pady=5)
-    init_button = myButton(opt_panel_ctr, text=init.get(), command=grab_init, fg="purple", bg=bg_color, wraplength=wrap_length,
+    init_button = myButton(option_panel_ctr, text=init.get(), command=grab_init, fg="purple", bg=bg_color, wraplength=wrap_length,
                            justify=tk.LEFT, font=("Arial", 8))
     init_button.pack(padx=5, pady=5)
 
     start = tk.StringVar(master, '')
-    start_label = tk.Label(opt_panel_left, text='copy start:')
+    start_label = tk.Label(option_panel_left, text='copy start:')
     start_label.pack(padx=5, pady=5)
-    start_button = myButton(opt_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
+    start_button = myButton(option_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
                             justify=tk.LEFT, font=("Arial", 8))
     start_button.pack(padx=5, pady=5)
 
     reset = tk.StringVar(master, '')
-    reset_label = tk.Label(opt_panel_left, text='copy reset:')
+    reset_label = tk.Label(option_panel_left, text='copy reset:')
     reset_label.pack(padx=5, pady=5)
-    reset_button = myButton(opt_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
+    reset_button = myButton(option_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
                             justify=tk.LEFT, font=("Arial", 8))
     reset_button.pack(padx=5, pady=5)
     timer_val = tk.IntVar(master, 0)
-    end_early_butt = myButton(opt_panel_right, text='END EARLY', command=end_early, fg="black", bg=bg_color,
+    end_early_butt = myButton(option_panel_right, text='END EARLY', command=end_early, fg="black", bg=bg_color,
                               justify=tk.RIGHT, font=("Arial", 8))
     end_early_butt.pack(padx=5, pady=5, side=tk.BOTTOM)
 
