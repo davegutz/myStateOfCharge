@@ -855,14 +855,22 @@ if __name__ == '__main__':
     start = tk.StringVar(master, '')
     start_label = tk.Label(option_panel_left, text='copy start:')
     start_label.pack(padx=5, pady=5, expand=True, fill='x')
-    start_button = myButton(option_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
-                            justify=tk.LEFT, font=("Arial", 8))
+    if platform.system() == 'Darwin':
+        start_button = myButton(option_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color,
+                                justify=tk.LEFT, font=("Arial", 8))
+    else:
+        start_button = myButton(option_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
+                                justify=tk.LEFT, font=("Arial", 8))
     start_button.pack(padx=5, pady=5, expand=True, fill='both')
     reset = tk.StringVar(master, '')
     reset_label = tk.Label(option_panel_left, text='copy reset:')
     reset_label.pack(padx=5, pady=5)
-    reset_button = myButton(option_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
-                            justify=tk.LEFT, font=("Arial", 8))
+    if platform.system() == 'Darwin':
+        reset_button = myButton(option_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color,
+                                justify=tk.LEFT, font=("Arial", 8))
+    else:
+        reset_button = myButton(option_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
+                                justify=tk.LEFT, font=("Arial", 8))
     reset_button.pack(padx=5, pady=5, expand=True, fill='both')
     timer_val = tk.IntVar(master, 0)
     end_early_butt = myButton(option_panel_right, text='END EARLY', command=end_early, fg="black", bg=bg_color,
@@ -882,13 +890,13 @@ if __name__ == '__main__':
     note_panel_right = tk.Frame(note_panel)
     note_panel_right.pack(side='left', expand=True, fill='both')
     ev1_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev1_label.pack(padx=5, pady=5)
+    ev1_label.pack(padx=5, pady=5, anchor=tk.W)
     ev2_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev2_label.pack(padx=5, pady=5)
+    ev2_label.pack(padx=5, pady=5, anchor=tk.W)
     ev3_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev3_label.pack(padx=5, pady=5)
+    ev3_label.pack(padx=5, pady=5, anchor=tk.W)
     ev4_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev4_label.pack(padx=5, pady=5)
+    ev4_label.pack(padx=5, pady=5, anchor=tk.W)
 
     # Save row
     sav_panel = tk.Frame(master)

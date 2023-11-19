@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 import time
 import platform
 if platform.system() == 'Darwin':
+    import tkinter as tk
     from ttwidgets import TTButton as myButton
 else:
     import tkinter as tk
