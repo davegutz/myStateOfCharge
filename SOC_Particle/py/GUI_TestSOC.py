@@ -588,25 +588,15 @@ def putty_size():
 
 
 def ref_remove():
-    ref_label.grid_remove()
-    Ref.version_button.grid_remove()
-    Ref.unit_button.grid_remove()
-    Ref.battery_button.grid_remove()
-    Ref.key_label.grid_remove()
-    Ref.label.grid_remove()
-    Ref.folder_butt.grid_remove()
+    top_panel_right.pack_forget()
     run_button.config(text='Compare Run Sim')
+    Ref.label.forget()
 
 
 def ref_restore():
-    ref_label.grid()
-    Ref.version_button.grid()
-    Ref.unit_button.grid()
-    Ref.battery_button.grid()
-    Ref.key_label.grid()
-    Ref.label.grid()
-    Ref.folder_butt.grid()
+    top_panel_right.pack(expand=True, fill='both')
     run_button.config(text='Compare Run Run')
+    Ref.label.pack(padx=5, pady=5)
 
 
 def save_data():
@@ -745,10 +735,8 @@ if __name__ == '__main__':
     main_height = 500
     wrap_length = 800
     bg_color = "lightgray"
-    row = -1
 
     # Master and header
-    row += 1
     master = tk.Tk()
     master.title('State of Charge')
     master.wm_minsize(width=min_width, height=main_height)
@@ -758,163 +746,190 @@ if __name__ == '__main__':
     putty_test_csv_path = tk.StringVar(master, os.path.join(ex_root.script_loc, '../dataReduction/putty_test.csv'))
     icon_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC_Icon.png')
     master.iconphoto(False, tk.PhotoImage(file=icon_path))
-    tk.Label(master, text="Item", fg="blue").grid(row=row, column=0, sticky=tk.N, pady=2)
-    tk.Label(master, text="Test", fg="blue").grid(row=row, column=1, sticky=tk.N, pady=2)
+
+    top_panel = tk.Frame(master)
+    top_panel.pack(expand=True, fill='both')
+    top_panel_left = tk.Frame(top_panel)
+    top_panel_left.pack(side='left', expand=True, fill='both')
+    top_panel_left_ctr = tk.Frame(top_panel)
+    top_panel_left_ctr.pack(side='left', expand=True, fill='both')
+    top_panel_right_ctr = tk.Frame(top_panel)
+    top_panel_right_ctr.pack(side='left', expand=True, fill='both')
+    top_panel_right = tk.Frame(top_panel)
+    top_panel_right.pack(side='left', expand=True, fill='both')
+
+    tk.Label(top_panel_left, text="Item", fg="blue").pack(pady=2)
+    tk.Label(top_panel_left_ctr, text="Test", fg="blue").pack(pady=2)
     model_str = cf['others']['modeling']
     if model_str == 'True':
         modeling = tk.BooleanVar(master, True)
     else:
         modeling = tk.BooleanVar(master, False)
-    modeling_button = tk.Checkbutton(master, text='modeling', bg=bg_color, variable=modeling,
+    modeling_button = tk.Checkbutton(top_panel_right_ctr, text='modeling', bg=bg_color, variable=modeling,
                                      onvalue=True, offvalue=False)
-    modeling_button.grid(row=row, column=3, pady=2, sticky=tk.N)
+    modeling_button.pack(pady=2, fill='x')
     modeling.trace_add('write', handle_modeling)
-    ref_label = tk.Label(master, text="Ref", fg="blue")
-    ref_label.grid(row=row, column=4, sticky=tk.N, pady=2)
+    ref_label = tk.Label(top_panel_right, text="Ref", fg="blue")
+    ref_label.pack(pady=2, expand=True, fill='both')
 
     # Folder row
-    row += 1
-    working_label = tk.Label(master, text="dataReduction folder=")
-    Test.folder_butt = myButton(master, text=Test.dataReduction_folder[-25:], command=Test.enter_dataReduction_folder,
+    working_label = tk.Label(top_panel_left, text="dataReduction folder=")
+    Test.folder_butt = myButton(top_panel_left_ctr, text=Test.dataReduction_folder[-25:], command=Test.enter_dataReduction_folder,
                                 fg="blue", bg=bg_color)
-    Ref.folder_butt = myButton(master, text=Ref.dataReduction_folder[-25:], command=Ref.enter_dataReduction_folder,
+    Ref.folder_butt = myButton(top_panel_right, text=Ref.dataReduction_folder[-25:], command=Ref.enter_dataReduction_folder,
                                fg="blue", bg=bg_color)
-    working_label.grid(row=row, column=0, padx=5, pady=5)
-    Test.folder_butt.grid(row=row, column=1, padx=5, pady=5)
-    Ref.folder_butt.grid(row=row, column=4, padx=5, pady=5)
+    working_label.pack(padx=5, pady=5)
+    Test.folder_butt.pack(padx=5, pady=5, anchor=tk.W)
+    Ref.folder_butt.pack(padx=5, pady=5, anchor=tk.E)
 
     # Version row
-    row += 1
-    tk.Label(master, text="Version").grid(row=row, column=0, pady=2)
-    Test.version_button = myButton(master, text=Test.version, command=Test.enter_version, fg="blue", bg=bg_color)
-    Test.version_button.grid(row=row, column=1, pady=2)
-    Ref.version_button = myButton(master, text=Ref.version, command=Ref.enter_version, fg="blue", bg=bg_color)
-    Ref.version_button.grid(row=row, column=4, pady=2)
+    tk.Label(top_panel_left, text="Version").pack(pady=2)
+    Test.version_button = myButton(top_panel_left_ctr, text=Test.version, command=Test.enter_version, fg="blue", bg=bg_color)
+    Test.version_button.pack(pady=2)
+    Ref.version_button = myButton(top_panel_right, text=Ref.version, command=Ref.enter_version, fg="blue", bg=bg_color)
+    Ref.version_button.pack(pady=2)
 
     # Unit row
-    row += 1
-    tk.Label(master, text="Unit").grid(row=row, column=0, pady=2)
-    Test.unit_button = myButton(master, text=Test.unit, command=Test.enter_unit, fg="purple", bg=bg_color)
-    Test.unit_button.grid(row=row, column=1, pady=2)
-    Ref.unit_button = myButton(master, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
-    Ref.unit_button.grid(row=row, column=4, pady=2)
+    tk.Label(top_panel_left, text="Unit").pack(pady=2, expand=True, fill='both')
+    Test.unit_button = myButton(top_panel_left_ctr, text=Test.unit, command=Test.enter_unit, fg="purple", bg=bg_color)
+    Test.unit_button.pack(pady=2)
+    Ref.unit_button = myButton(top_panel_right, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
+    Ref.unit_button.pack(pady=2)
 
     # Battery row
-    row += 1
-    tk.Label(master, text="Battery").grid(row=row, column=0, pady=2)
-    Test.battery_button = myButton(master, text=Test.battery, command=Test.enter_battery, fg="green", bg=bg_color)
-    Test.battery_button.grid(row=row, column=1, pady=2)
-    Ref.battery_button = myButton(master, text=Ref.battery, command=Ref.enter_battery, fg="green", bg=bg_color)
-    Ref.battery_button.grid(row=row, column=4, pady=2)
+    tk.Label(top_panel_left, text="Battery").pack(pady=2, expand=True, fill='both')
+    Test.battery_button = myButton(top_panel_left_ctr, text=Test.battery, command=Test.enter_battery, fg="green", bg=bg_color)
+    Test.battery_button.pack(pady=2)
+    Ref.battery_button = myButton(top_panel_right, text=Ref.battery, command=Ref.enter_battery, fg="green", bg=bg_color)
+    Ref.battery_button.pack(pady=2)
 
     # Key row
-    row += 1
-    tk.Label(master, text="Key").grid(row=row, column=0, pady=2)
-    Test.key_label = tk.Label(master, text=Test.key)
-    Test.key_label.grid(row=row, column=1,  padx=5, pady=5)
-    Ref.key_label = tk.Label(master, text=Ref.key)
-    Ref.key_label.grid(row=row, column=4, padx=5, pady=5)
+    tk.Label(top_panel_left, text="Key").pack(pady=2, expand=True, fill='both')
+    Test.key_label = tk.Label(top_panel_left_ctr, text=Test.key)
+    Test.key_label.pack(padx=5, pady=5)
+    Ref.key_label = tk.Label(top_panel_right, text=Ref.key)
+    Ref.key_label.pack(padx=5, pady=5)
 
     # Image
     pic_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC.png')
     picture = tk.PhotoImage(file=pic_path).subsample(5, 5)
-    label = tk.Label(master, image=picture)
-    label.grid(row=1, column=2, columnspan=2, rowspan=3, padx=5, pady=5)
+    label = tk.Label(top_panel_right_ctr, image=picture)
+    label.pack(padx=5, pady=5, expand=True, fill='both')
 
-    # Option
-    row += 1
-    tk.ttk.Separator(master, orient='horizontal').grid(row=row, columnspan=5, pady=5, sticky='ew')
-    row += 1
+    # Option panel
+    option_sep_panel = tk.Frame(master)
+    option_sep_panel.pack(expand=True, fill='x')
+    tk.Label(option_sep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    option_panel = tk.Frame(master)
+    option_panel.pack(expand=True, fill='both')
+    option_panel_left = tk.Frame(option_panel)
+    option_panel_left.pack(side='left', fill='x')
+    option_panel_ctr = tk.Frame(option_panel)
+    option_panel_ctr.pack(side='left', expand=True, fill='both')
+    option_panel_right = tk.Frame(option_panel)
+    option_panel_right.pack(side='left', expand=True, fill='both')
+
+    # Option row
     option = tk.StringVar(master, str(cf['others']['option']))
     option_show = tk.StringVar(master, str(cf['others']['option']))
-    sel = tk.OptionMenu(master, option, *sel_list)
+    sel = tk.OptionMenu(option_panel_left, option, *sel_list)
     sel.config(width=20)
-    sel.grid(row=row, padx=5, pady=5, sticky=tk.W)
+    sel.pack(padx=5, pady=5)
     option.trace_add('write', handle_option)
-    Test.label = tk.Label(master, text=Test.file_txt)
-    Test.label.grid(row=row, column=1, padx=5, pady=5)
-    Ref.label = tk.Label(master, text=Ref.file_txt)
-    Ref.label.grid(row=row, column=4, padx=5, pady=5)
+    Test.label = tk.Label(option_panel_ctr, text=Test.file_txt)
+    Test.label.pack(padx=5, pady=5, anchor=tk.W)
+    Ref.label = tk.Label(option_panel_right, text=Ref.file_txt)
+    Ref.label.pack(padx=5, pady=5, anchor=tk.E)
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
 
-    row += 1
     empty_csv_path = tk.StringVar(master, os.path.join(Test.dataReduction_folder, 'empty.csv'))
     init_val, dum1, dum2, dum3 = lookup.get('init')
     init = tk.StringVar(master, init_val)
-    init_label = tk.Label(master, text='init & clear:')
-    init_label.grid(row=row, column=0, padx=5, pady=5)
-    init_button = myButton(master, text=init.get(), command=grab_init, fg="purple", bg=bg_color, wraplength=wrap_length,
+    init_label = tk.Label(option_panel_left, text='init & clear:')
+    init_label.pack(padx=5, pady=5)
+    init_button = myButton(option_panel_ctr, text=init.get(), command=grab_init, fg="purple", bg=bg_color, wraplength=wrap_length,
                            justify=tk.LEFT, font=("Arial", 8))
-    init_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
+    init_button.pack(padx=5, pady=5)
 
-    row += 1
     start = tk.StringVar(master, '')
-    start_label = tk.Label(master, text='copy start:')
-    start_label.grid(row=row, column=0, padx=5, pady=5)
-    start_button = myButton(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
+    start_label = tk.Label(option_panel_left, text='copy start:')
+    start_label.pack(padx=5, pady=5, expand=True, fill='x')
+    start_button = myButton(option_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
                             justify=tk.LEFT, font=("Arial", 8))
-    start_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
-
-    row += 1
+    start_button.pack(padx=5, pady=5, expand=True, fill='both')
     reset = tk.StringVar(master, '')
-    reset_label = tk.Label(master, text='copy reset:')
-    reset_label.grid(row=row, column=0, padx=5, pady=5)
-    reset_button = myButton(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
+    reset_label = tk.Label(option_panel_left, text='copy reset:')
+    reset_label.pack(padx=5, pady=5)
+    reset_button = myButton(option_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
                             justify=tk.LEFT, font=("Arial", 8))
-    reset_button.grid(sticky="W", row=row, column=1, columnspan=4, rowspan=1, padx=5, pady=5)
+    reset_button.pack(padx=5, pady=5, expand=True, fill='both')
     timer_val = tk.IntVar(master, 0)
-    end_early_butt = myButton(master, text='END EARLY', command=end_early, fg="black", bg=bg_color,
+    end_early_butt = myButton(option_panel_right, text='END EARLY', command=end_early, fg="black", bg=bg_color,
                               justify=tk.RIGHT, font=("Arial", 8))
-    end_early_butt.grid(sticky="E", row=row, column=4, columnspan=1, rowspan=1, padx=5, pady=5)
+    end_early_butt.pack(padx=5, pady=5, side=tk.BOTTOM)
 
-    row += 1
-    ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev1_label.grid(sticky="W", row=row, column=1, columnspan=4, padx=5, pady=5)
+    # Note panel
+    note_sep_panel = tk.Frame(master)
+    note_sep_panel.pack(expand=True, fill='x')
+    tk.Label(note_sep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    note_panel = tk.Frame(master)
+    note_panel.pack(expand=True, fill='both')
+    note_panel_left = tk.Frame(note_panel)
+    note_panel_left.pack(side='left', fill='x')
+    note_panel_ctr = tk.Frame(note_panel)
+    note_panel_ctr.pack(side='left', expand=True, fill='both')
+    note_panel_right = tk.Frame(note_panel)
+    note_panel_right.pack(side='left', expand=True, fill='both')
+    ev1_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev1_label.pack(padx=5, pady=5)
+    ev2_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev2_label.pack(padx=5, pady=5)
+    ev3_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev3_label.pack(padx=5, pady=5)
+    ev4_label = tk.Label(note_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev4_label.pack(padx=5, pady=5)
 
-    row += 1
-    ev2_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev2_label.grid(sticky="W", row=row, column=1, columnspan=4, padx=5, pady=5)
-
-    row += 1
-    ev3_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev3_label.grid(sticky="W", row=row, column=1, columnspan=4, padx=5, pady=5)
-
-    row += 1
-    ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev4_label.grid(sticky="W", row=row, column=1, columnspan=4, padx=5, pady=5)
-
-    row += 1
-    save_data_label = tk.Label(master, text='save data:')
-    save_data_label.grid(row=row, column=0, padx=5, pady=5)
-    save_data_button = myButton(master, text='save data', command=save_data, fg="red", bg=bg_color,
+    # Save row
+    sav_panel = tk.Frame(master)
+    sav_panel.pack(expand=True, fill='both')
+    save_data_label = tk.Label(sav_panel, text='save data:')
+    save_data_label.pack(side=tk.LEFT, padx=5, pady=5)
+    save_data_button = myButton(sav_panel, text='save data', command=save_data, fg="red", bg=bg_color,
                                 wraplength=wrap_length, justify=tk.LEFT)
-    save_data_button.grid(sticky="W", row=row, column=1, padx=5, pady=5)
-    save_data_as_button = myButton(master, text='save as', command=save_data_as, fg="red", bg=bg_color,
-                                   wraplength=wrap_length, justify=tk.LEFT)
-    save_data_as_button.grid(sticky="W", row=row, column=2, padx=5, pady=5)
-    clear_data_button = myButton(master, text='clear', command=clear_data_verbose, fg="red", bg=bg_color,
+    save_data_button.pack(side=tk.LEFT, padx=5, pady=5)
+    clear_data_button = myButton(sav_panel, text='clear', command=clear_data_verbose, fg="red", bg=bg_color,
                                  wraplength=wrap_length, justify=tk.RIGHT)
-    clear_data_button.grid(sticky="W", row=row, column=3, padx=5, pady=5)
+    clear_data_button.pack(side=tk.RIGHT, padx=5, pady=5)
+    save_data_as_button = myButton(sav_panel, text='save as', command=save_data_as, fg="red", bg=bg_color,
+                                   wraplength=wrap_length, justify=tk.LEFT)
+    save_data_as_button.pack(side=tk.RIGHT, padx=5, pady=5)
 
-    row += 1
-    tk.ttk.Separator(master, orient='horizontal').grid(row=row, columnspan=5, pady=5, sticky='ew')
-    row += 1
-    run_button = myButton(master, text='Compare', command=compare_run, fg="green", bg=bg_color,
+    # Run panel
+    run_sep_panel = tk.Frame(master)
+    run_sep_panel.pack(expand=True, fill='x')
+    tk.Label(run_sep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    run_panel = tk.Frame(master)
+    run_panel.pack(expand=True, fill='x')
+    run_button = myButton(run_panel, text='Compare', command=compare_run, fg="green", bg=bg_color,
                           wraplength=wrap_length, justify=tk.LEFT)
-    run_button.grid(row=row, column=0, padx=5, pady=5)
+    run_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    row += 1
-    tk.ttk.Separator(master, orient='horizontal').grid(row=row, columnspan=5, pady=5, sticky='ew')
-    row += 1
-    choose_label = tk.Label(master, text='choose existing files:')
-    choose_label.grid(row=row, column=0, padx=5, pady=5)
-    run_sim_choose_button = myButton(master, text='Compare Run Sim Choose', command=compare_run_sim_choose,
+    # Compare panel
+    compare_sep_panel = tk.Frame(master)
+    compare_sep_panel.pack(expand=True, fill='x')
+    tk.Label(compare_sep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    tk.ttk.Separator(compare_sep_panel, orient='horizontal').pack(pady=5, side=tk.TOP)
+    compare_panel = tk.Frame(master)
+    compare_panel.pack(expand=True, fill='x')
+    choose_label = tk.Label(compare_panel, text='choose existing files:')
+    choose_label.pack(side=tk.LEFT, padx=5, pady=5)
+    run_sim_choose_button = myButton(compare_panel, text='Compare Run Sim Choose', command=compare_run_sim_choose,
                                      fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    run_sim_choose_button.grid(sticky="W", row=row, column=1, padx=5, pady=5)
-    run_run_choose_button = myButton(master, text='Compare Run Run Choose', command=compare_run_run_choose,
+    run_sim_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
+    run_run_choose_button = myButton(compare_panel, text='Compare Run Run Choose', command=compare_run_run_choose,
                                      fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
-    run_run_choose_button.grid(sticky="W", row=row, column=2, padx=5, pady=5)
+    run_run_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
 
     # Begin
     handle_modeling()
