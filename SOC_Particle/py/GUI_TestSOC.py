@@ -856,8 +856,12 @@ if __name__ == '__main__':
     init = tk.StringVar(master, init_val)
     init_label = tk.Label(option_panel_left, text='init & clear:', font=label_font_gentle)
     init_label.pack(padx=5, pady=5)
-    init_button = myButton(option_panel_ctr, text=init.get(), command=grab_init, fg="purple", bg=bg_color, wraplength=wrap_length,
-                           justify=tk.LEFT, font=("Arial", 8))
+    if platform.system() == 'Darwin':
+        init_button = myButton(option_panel_ctr, text=init.get(), command=grab_init, fg="purple", bg=bg_color,
+                               justify=tk.LEFT, font=("Arial", 8))
+    else:
+        init_button = myButton(option_panel_ctr, text=init.get(), command=grab_init, fg="purple", bg=bg_color,
+                               wraplength=wrap_length, justify=tk.LEFT, font=("Arial", 8))
     init_button.pack(padx=5, pady=5)
 
     start = tk.StringVar(master, '')
@@ -928,8 +932,12 @@ if __name__ == '__main__':
     run_panel = tk.Frame(master)
     run_panel.pack(expand=True, fill='x')
     tk.Label(run_panel, text='------->', font=("Courier", 8), bg='lightgreen').pack(side=tk.LEFT)
-    run_button = myButton(run_panel, text=' Compare ', command=compare_run, fg="green", bg=bg_color,
-                          wraplength=wrap_length, justify=tk.LEFT, font=butt_font_large)
+    if platform.system() == 'Darwin':
+        run_button = myButton(run_panel, text=' Compare ', command=compare_run, fg="green", bg=bg_color,
+                              justify=tk.LEFT, font=butt_font_large)
+    else:
+        run_button = myButton(run_panel, text=' Compare ', command=compare_run, fg="green", bg=bg_color,
+                              wraplength=wrap_length, justify=tk.LEFT, font=butt_font_large)
     run_button.pack(side=tk.LEFT, padx=5, pady=5)
 
     # Compare panel
