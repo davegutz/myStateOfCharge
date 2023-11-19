@@ -814,17 +814,30 @@ if __name__ == '__main__':
     label = tk.Label(top_panel_right_ctr, image=picture)
     label.pack(padx=5, pady=5, expand=True, fill='both')
 
+    # Option panel
+    optsep_panel = tk.Frame(master)
+    optsep_panel.pack(expand=True, fill='x')
+    tk.Label(optsep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    tk.ttk.Separator(optsep_panel, orient='horizontal').pack(pady=5)
+    opt_panel = tk.Frame(master)
+    opt_panel.pack(expand=True, fill='both')
+    opt_panel_left = tk.Frame(opt_panel)
+    opt_panel_left.pack(side='left', fill='x')
+    opt_panel_ctr = tk.Frame(opt_panel)
+    opt_panel_ctr.pack(side='left', expand=True, fill='both')
+    opt_panel_right = tk.Frame(opt_panel)
+    opt_panel_right.pack(side='left', fill='x')
+
     # Option
-    tk.ttk.Separator(master, orient='horizontal').pack(pady=5)
     option = tk.StringVar(master, str(cf['others']['option']))
     option_show = tk.StringVar(master, str(cf['others']['option']))
-    sel = tk.OptionMenu(master, option, *sel_list)
+    sel = tk.OptionMenu(opt_panel_left, option, *sel_list)
     sel.config(width=20)
     sel.pack(padx=5, pady=5)
     option.trace_add('write', handle_option)
-    Test.label = tk.Label(master, text=Test.file_txt)
-    Test.label.pack(padx=5, pady=5)
-    Ref.label = tk.Label(master, text=Ref.file_txt)
+    Test.label = tk.Label(opt_panel_ctr, text=Test.file_txt)
+    Test.label.pack(padx=5, pady=5, expand=True, fill='x')
+    Ref.label = tk.Label(opt_panel_right, text=Ref.file_txt)
     Ref.label.pack(padx=5, pady=5)
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
@@ -832,29 +845,29 @@ if __name__ == '__main__':
     empty_csv_path = tk.StringVar(master, os.path.join(Test.dataReduction_folder, 'empty.csv'))
     init_val, dum1, dum2, dum3 = lookup.get('init')
     init = tk.StringVar(master, init_val)
-    init_label = tk.Label(master, text='init & clear:')
+    init_label = tk.Label(opt_panel_left, text='init & clear:')
     init_label.pack(padx=5, pady=5)
-    init_button = myButton(master, text=init.get(), command=grab_init, fg="purple", bg=bg_color, wraplength=wrap_length,
+    init_button = myButton(opt_panel_ctr, text=init.get(), command=grab_init, fg="purple", bg=bg_color, wraplength=wrap_length,
                            justify=tk.LEFT, font=("Arial", 8))
-    init_button.pack(padx=5, pady=5)
+    init_button.pack(padx=5, pady=5, expand=True, fill='both')
 
     start = tk.StringVar(master, '')
-    start_label = tk.Label(master, text='copy start:')
+    start_label = tk.Label(opt_panel_left, text='copy start:')
     start_label.pack(padx=5, pady=5)
-    start_button = myButton(master, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
+    start_button = myButton(opt_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
                             justify=tk.LEFT, font=("Arial", 8))
-    start_button.pack(padx=5, pady=5)
+    start_button.pack(padx=5, pady=5, expand=True, fill='both')
 
     reset = tk.StringVar(master, '')
-    reset_label = tk.Label(master, text='copy reset:')
+    reset_label = tk.Label(opt_panel_left, text='copy reset:')
     reset_label.pack(padx=5, pady=5)
-    reset_button = myButton(master, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
+    reset_button = myButton(opt_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
                             justify=tk.LEFT, font=("Arial", 8))
-    reset_button.pack(padx=5, pady=5)
+    reset_button.pack(padx=5, pady=5, expand=True, fill='both')
     timer_val = tk.IntVar(master, 0)
-    end_early_butt = myButton(master, text='END EARLY', command=end_early, fg="black", bg=bg_color,
+    end_early_butt = myButton(opt_panel_right, text='END EARLY', command=end_early, fg="black", bg=bg_color,
                               justify=tk.RIGHT, font=("Arial", 8))
-    end_early_butt.pack(padx=5, pady=5)
+    end_early_butt.pack(padx=5, pady=5, side=tk.BOTTOM)
 
     ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
     ev1_label.pack(side=tk.LEFT, padx=5, pady=5)
