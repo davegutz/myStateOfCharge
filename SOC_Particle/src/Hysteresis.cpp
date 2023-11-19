@@ -108,7 +108,7 @@ void Hysteresis::pretty_print()
     Serial.printf("  tau%10.1f, null, s\n", res*chem_->hys_cap);
     chem_->pretty_print();
 #else
-     Serial.printf("Hysteresis: silent for DEPLOY_PHOTON\n");
+     Serial.printf("Hysteresis: silent DEPLOY\n");
 #endif
 }
 

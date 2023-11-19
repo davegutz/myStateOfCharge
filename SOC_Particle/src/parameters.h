@@ -115,7 +115,7 @@ public:
     boolean mod_vb() { return ( 1<<1 & modeling_ || mod_vb_dscn() ); }  // Using Sim as source of vb
     boolean mod_vb_dscn() { return ( 1<<5 & modeling_ ); }              // Nothing connected to vb on A1
     // get
-    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+    #ifndef CONFIG_PHOTON
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp_ = value; }
         void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr_ = value; }
         void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug_ = value; }

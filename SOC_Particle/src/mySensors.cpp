@@ -129,7 +129,7 @@ void Shunt::pretty_print()
   Serial.printf("Shunt(%s)::\n", name_.c_str());
   // Serial.printf("Shunt(%s)::", name_.c_str()); Adafruit_ADS1015::pretty_print(name_);
 #else
-     Serial.printf("Shunt: silent for DEPLOY_PHOTON\n");
+     Serial.printf("Shunt: silent DEPLOY\n");
 #endif
 }
 
@@ -280,7 +280,7 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   ib_quiet_thr_ = QUIET_A*ib_quiet_sclr_;
   faultAssign( !sp.mod_ib() && abs(ib_quiet_)<=ib_quiet_thr_ && !reset_loc, IB_DSCN_FLT );   // initializes false
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
-  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+  #ifndef CONFIG_PHOTON
     if ( sp.debug()==-13 ) debug_m13(Sen);
     if ( sp.debug()==-23 ) debug_m23(Sen);
     if ( sp.debug()==-24 ) debug_m24(Sen);
@@ -366,7 +366,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.print(cp.buffer);
   Serial.printf("   ");
   bitMapPrint(cp.buffer, falw_, NUM_FA);
-  Serial.println(cp.buffer);
+  Serial.printf("%s\n", cp.buffer);
   Serial.printf("  CBA98765x3210 xxA9876543210\n");
   Serial.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
   if ( cp.fake_faults )
@@ -410,7 +410,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.print(cp.buffer);
   Serial1.printf("   ");
   bitMapPrint(cp.buffer, falw_, NUM_FA);
-  Serial1.println(cp.buffer);
+  Serial1.printf("%s\n", cp.buffer);
   Serial1.printf("  CBA98765x3210 xxA9876543210\n");
   Serial1.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
   if ( cp.fake_faults )
@@ -855,18 +855,17 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
           Flt->cc_diff(),
           ib_amp_hdwe(), ib_noa_hdwe(), ib_amp_model(), ib_noa_model(), ib_model(), 
           Flt->ib_diff(), Flt->ib_diff_f());
-      Serial.print(cp.buffer);
+      Serial.printf("%s", cp.buffer);
       sprintf(cp.buffer, "  %7.5f,%7.5f,%7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
           Mon->voc_soc(), Flt->e_wrap(), Flt->e_wrap_filt(),
           Flt->ib_sel_stat(), ib_hdwe(), ib_hdwe_model(), sp.mod_ib(), ib(),
           Flt->vb_sel_stat(), vb_hdwe(), vb_model(), sp.mod_vb(), vb(),
           Tb_hdwe, Tb, sp.mod_tb(), Tb_filt);
-      Serial.print(cp.buffer);
+      Serial.printf("%s", cp.buffer);
       sprintf(cp.buffer, "%d, %d, %7.3f, %7.3f, %d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,",
           Flt->fltw(), Flt->falw(), Flt->ib_rate(), Flt->ib_quiet(), Flt->tb_sel_status(),
           Flt->cc_diff_thr(), Flt->ewhi_thr(), Flt->ewlo_thr(), Flt->ib_diff_thr(), Flt->ib_quiet_thr(), Flt->preserving());
-      Serial.print(cp.buffer);
-      Serial.printlnf("%c,", '\0');
+      Serial.printf("%s\n", cp.buffer);
   }
 }
 

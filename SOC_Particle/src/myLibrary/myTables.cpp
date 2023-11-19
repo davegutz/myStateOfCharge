@@ -203,7 +203,7 @@ void TableInterp::pretty_print(void)
   }
   Serial.printf("};\n");
 #else
-     Serial.printf("TableInterp: silent for DEPLOY_PHOTON\n");
+     Serial.printf("TableInterp: silent DEPLOY\n");
 #endif
 }
 
@@ -316,6 +316,6 @@ void TableInterp2D::pretty_print()
   }
   Serial.printf("      };\n");
 #else
-     Serial.printf("TableInterp2D: silent for DEPLOY_PHOTON\n");
+     Serial.printf("TableInterp2D: silent DEPLOY\n");
 #endif
 }

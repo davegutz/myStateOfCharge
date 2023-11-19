@@ -467,6 +467,6 @@ void Chemistry::pretty_print(void)
     Serial.printf("  r_min(soc):\n");
     hys_Tn_->pretty_print();
 #else
-     Serial.printf("Chemistry: silent for DEPLOY_PHOTON\n");
+     Serial.printf("Chemistry: silent DEPLOY\n");
 #endif
 }

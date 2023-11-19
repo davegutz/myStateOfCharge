@@ -27,18 +27,18 @@
 #include "parameters.h"
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
-// sp.debug()==12 EKF
-void debug_12(BatteryMonitor *Mon, Sensors *Sen)
-{
-  Serial.printf("ib,ib_mod,   vb,vb_mod,  voc,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
-  Mon->ib(), Sen->Sim->ib(),
-  Mon->vb(), Sen->Sim->vb(),
-  Mon->voc(), Sen->Sim->voc_stat(), Sen->Sim->voc(),
-  Mon->K_ekf(), Mon->y_ekf(),
-  Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
-}
+#ifndef CONFIG_PHOTON
+  // sp.debug()==12 EKF
+  void debug_12(BatteryMonitor *Mon, Sensors *Sen)
+  {
+    Serial.printf("ib,ib_mod,   vb,vb_mod,  voc,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
+    Mon->ib(), Sen->Sim->ib(),
+    Mon->vb(), Sen->Sim->vb(),
+    Mon->voc(), Sen->Sim->voc_stat(), Sen->Sim->voc(),
+    Mon->K_ekf(), Mon->y_ekf(),
+    Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
+  }
 
-#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
   // sp.debug()==-13 ib_dscn for Arduino.
   // Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
   void debug_m13(Sensors *Sen)
@@ -105,28 +105,6 @@ void debug_5(BatteryMonitor *Mon, Sensors *Sen)
     pp.pubList.Tb, pp.pubList.Voc, pp.pubList.Ib, pp.pubList.Amp_hrs_remaining_ekf, pp.pubList.tcharge, pp.pubList.Amp_hrs_remaining_soc);
 }
 
-// Hysteresis print
-void debug_h(BatteryMonitor *Mon, Sensors *Sen)
-{
-  Serial.printf("\nMon::hys\n");
-  Serial.printf("\nSim::hys\n");
-  Sen->Sim->hys_pretty_print();
-  Serial.printf("\n Mon    Sim\n");
-  Serial.printf("vb%6.2f,%6.2f\n", Mon->vb(), Sen->Sim->vb());
-  Serial.printf("voc%6.2f,%6.2f\n", Mon->voc(), Sen->Sim->voc());
-  Serial.printf("voc_stat%6.2f,%6.2f\n", Mon->voc_stat(), Sen->Sim->voc_stat());
-  Serial.printf("voc_soc%6.2f\n", Mon->voc_soc());
-  Serial.printf("e_wrap%7.3f\n", Sen->Flt->e_wrap());
-  Serial.printf("e_wrap_f%7.3f\n", Sen->Flt->e_wrap_filt());
-  Serial1.printf("\n Mon    Sim\n");
-  Serial1.printf("vb%6.2f,%6.2f\n", Mon->vb(), Sen->Sim->vb());
-  Serial1.printf("voc%6.2f,%6.2f\n", Mon->voc(), Sen->Sim->voc());
-  Serial1.printf("voc_stat%6.2f,%6.2f\n", Mon->voc_stat(), Sen->Sim->voc_stat());
-  Serial1.printf("voc_soc%6.2f\n", Mon->voc_soc());
-  Serial1.printf("e_wrap%6.3f\n", Sen->Flt->e_wrap());
-  Serial1.printf("e_wrap_f%6.3f\n", Sen->Flt->e_wrap_filt());
-}
-
 // Q quick print critical parameters
 void debug_q(BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -153,6 +131,15 @@ soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling %d\n",
     Mon->delta_q_neg(), Mon->time_neg(), Mon->delta_q_pos(), Mon->time_pos());
 
   if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", QUEUE);
+}
+
+// Calibration
+void debug_99(BatteryMonitor *Mon, Sensors *Sen)
+{
+  Serial.printf("Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw: %6.2fC %7.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3fv,\n",
+  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa(), sp.Dw());
+  Serial1.printf("Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw: %6.2fC %7.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3fv,\n",
+  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa(), sp.Dw());
 }
 
 #ifdef DEBUG_INIT

@@ -140,7 +140,7 @@ void StateSpace::pretty_print(void)
     pretty_print_mat("AinvB", n_, n_, AinvB_);
   }
 #else
-     Serial.printf("StateSpace: silent for DEPLOY_PHOTON\n");
+     Serial.printf("StateSpace: silent DEPLOY\n");
 #endif
 
 }

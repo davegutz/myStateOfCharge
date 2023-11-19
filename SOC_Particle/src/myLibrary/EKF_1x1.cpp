@@ -84,7 +84,7 @@ void EKF_1x1::init_ekf(double soc, double Pinit)
   Serial.printf("  K%10.6f\n", K_);
   Serial.printf("  S%10.6f\n", S_);
 #else
-     Serial.printf("EKF_1x1: silent for DEPLOY_PHOTON\n");
+     Serial.printf("EKF_1x1: silent DEPLOY\n");
 #endif
  }
 

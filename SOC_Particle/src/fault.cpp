@@ -184,7 +184,7 @@ Flt_ram::Flt_ram()
 Flt_ram::~Flt_ram(){}
 
 // Load all
-#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+#ifndef CONFIG_PHOTON
   void Flt_ram::get()
   {
     get_t();
@@ -232,7 +232,7 @@ Flt_ram::~Flt_ram(){}
 void Flt_ram::put(const Flt_st value)
 {
   copy_to_Flt_ram_from(value);
-  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+  #ifndef CONFIG_PHOTON
     put_t();
     put_Tb_hdwe();
     put_vb_hdwe();

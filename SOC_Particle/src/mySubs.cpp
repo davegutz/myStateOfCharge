@@ -81,7 +81,7 @@ void print_serial_header(void)
   if ( ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 ) )
   {
     Serial.printf ("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min, Tbl,\n");
-    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+    #ifndef CONFIG_PHOTON
       Serial1.printf("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min, Tbl,\n");
     #endif
   }
@@ -119,14 +119,13 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
   if ( sp.tweak_test() ) cTime = double(Sen->now)/1000.;
   else cTime = Sen->control_time;
 
-  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d, %7.0f, %d,  %d,  %d,  %d, %6.3f,%6.3f,%10.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%7.5f,%6.3f,%c", \
+  sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d, %7.0f, %d,  %d,  %d,  %d, %6.3f,%6.3f,%10.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%7.5f,%6.3f,", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
     sp.mon_chm(), Mon->q_cap_rated_scaled(), pubList->sat, sp.ib_select(), sp.modeling(), Mon->bms_off(),
     Mon->Tb(), Mon->vb(), Mon->ib(), Mon->ib_charge(), Mon->ioc(), Mon->voc_soc(), 
     Mon->vsat(), Mon->dv_dyn(), Mon->voc_stat(), Mon->hx(),
     Mon->y_ekf(),
-    Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_min(), sp.t_last(),
-    '\0');
+    Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_min(), sp.t_last());
 }
 
 // Convert time to decimal for easy lookup
@@ -202,9 +201,9 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
       sp.pretty_print(true);
       Serial.printf("falw %d tb_fa %d\n", Sen->Flt->falw(), Sen->Flt->tb_fa());
       // Sen->Flt->disab_tb_fa(1);
+      // Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);
+      // Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("Top:"); debug_m1(Mon, Sen);
     }
-  // if ( sp.debug()==-1 ){ Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);} 
-  // if ( sp.debug()==-1 ){ Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("Top:"); debug_m1(Mon, Sen);}
   #endif
 
   // Gather and apply inputs
@@ -458,12 +457,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
 
   // Text basic Bluetooth (use serial bluetooth app)
   if ( sp.debug()==99 ) // Calibration mode
-  {
-    Serial.printf("Tb, Vb, imh, inh |*SV,*Dc |*SA,*DA|*SB,*DB: %7.2fdeg C %7.3fv %7.3fA %7.3fA | %7.3f %7.3fv  |  %7.3f %7.3fA | %7.3f %7.3fA,\n",
-    Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa());
-    Serial1.printf("Tb, Vb, imh, inh |*SV,*Dc |*SA,*DA|*SB,*DB: %7.2fdeg C %7.3fv %7.3fA %7.3fA | %7.3f %7.3fv  |  %7.3f %7.3fA | %7.3f %7.3fA,\n",
-    Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa());
-  }
+    debug_99(Mon, Sen);
   else if ( sp.debug()!=4 && sp.debug()!=-2 )  // Normal display
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
@@ -691,9 +685,9 @@ void serialEvent1()
 void rapid_print(Sensors *Sen, BatteryMonitor *Mon)
 {
   create_rapid_string(&pp.pubList, Sen, Mon);
-  Serial.println(cp.buffer);
-  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
-    Serial1.println(cp.buffer);
+  Serial.printf("%s\n", cp.buffer);
+  #ifndef CONFIG_PHOTON
+    Serial1.printf("%s\n", cp.buffer);
   #endif
 }
 

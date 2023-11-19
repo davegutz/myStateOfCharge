@@ -91,6 +91,7 @@ float Battery::calc_soc_voc_slope(const float soc, const float temp_c)
     INPUTS:
         nom_vsat_   Nominal saturation threshold at 25C, V
         temp_c_     Battery temperature, deg C
+        rated_temp  Battery rated temperature, deg C
         dvoc_dt     Change of VOC with operating temperature in range 0 - 50 C V/deg C
     OUTPUTS:
         vsat        Saturation threshold at temperature, deg C
@@ -130,7 +131,7 @@ void Battery::pretty_print(void)
     Serial.printf("  voltage_low %d, BMS will turn off\n", voltage_low_);
     Serial.printf("  vsat%7.3f, V\n", vsat_);
 #else
-     Serial.printf("Battery: silent for DEPLOY_PHOTON\n");
+     Serial.printf("Battery: silent DEPLOY\n");
 #endif
 }
 
@@ -162,13 +163,15 @@ BatteryMonitor::BatteryMonitor():
 BatteryMonitor::~BatteryMonitor() {}
 
 // operators
+
 // functions
+
 /* BatteryMonitor::calculate:  SOC-OCV curve fit solved by ekf.   Works in 12 V
    battery units.  Scales up/down to number of series/parallel batteries on output/input.
         Inputs:
-        Sen->Tb_filt    Tb filtered for noise, past value of temp_c_, deg C
-        Sen->Vb         Battery terminal voltage, V
-        Sen->Ib         Shunt current Ib, A
+        Sen->Tb_filt    Measured Tb filtered for noise, past value of temp_c_, deg C
+        Sen->Vb         Measured battery terminal voltage, V
+        Sen->Ib         Measured shunt current Ib, A
         Sen->T          Update time, sec
         q_capacity_     Saturation charge at temperature, C
         q_cap_rated_scaled_   Applied rated capacity at rated_temp, after scaling, C
@@ -191,23 +194,23 @@ BatteryMonitor::~BatteryMonitor() {}
         tcharge_ekf_    Solved charging time to full from ekf, hr
         y_filt_         Filtered EKF y residual value, V
 
-                <---ib        ______________         <---ib
+                <--- ib      ______________         <--- ib
                  voc          |             |
        -----------+-----------|   ChargeTransfer   |----------+-----------+ vb
        |                      |_____________|
        |
     ___|___
-    |      |
+    |      |   |
     | HYS  |   |              HYS stores charge ib-ioc.  dv_hys = voc - voc_stat,  Include tau_diff (diffusion)
-    |______|   |
-       |       v  ioc ~= ib
+    |______|   v
+       |       ioc ~= ib
        +   voc_stat
        |
     ___|____  voc_soc
-    |  +    |   ^
-    | Batt  |   |
+    |  +    |  
+    | Batt  |   ^
     |  -    |   |             Batt stores charge ioc
-    |_______|
+    |_______|   |
         |
         |                      Total charge storage ib-ioc + ioc = ib
         _
@@ -295,14 +298,16 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     //     Serial.printf("bms_off,soc,ib,vb,voc,voc_stat,voc_soc,dv_hys,dv_dyn,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
     //     bms_off_, soc_, ib_, vb_, voc_, voc_stat_, voc_soc_, dv_hys_, dv_dyn_);
 
-    // if ( sp.debug()==34 || sp.debug()==7 )
-    //     Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
-    //         dt_, ib_, voc_soc_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
-    // // if ( sp.debug()==37 )
-    //     Serial.printf("BatteryMonitor:ib,vb,voc_stat,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
-    //         ib_, vb_, voc_stat_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());
-    // if ( sp.debug()==-24 ) Serial.printf("Mon:  ib%7.3f soc%8.4f reset_temp%d tau_ct%9.5f r_ct%7.3f r_0%7.3f dv_dyn%7.3f dv_hys%7.3f voc_soc%7.3f  voc_stat%7.3f voc%7.3f vb%7.3f ib _charge%7.3f ",
-    //     ib_, soc_, reset_temp, chem_.tau_ct, chem_.r_ct, chem_.r_0, dv_dyn_, dv_hys_, voc_soc_, voc_stat_, voc_, vb_, ib_charge_);
+    #ifndef CONFIG_PHOTON
+    if ( sp.debug()==34 || sp.debug()==7 )
+        Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
+            dt_, ib_, voc_soc_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
+    if ( sp.debug()==37 )
+        Serial.printf("BatteryMonitor:ib,vb,voc_stat,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
+            ib_, vb_, voc_stat_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());
+    if ( sp.debug()==-24 ) Serial.printf("Mon:  ib%7.3f soc%8.4f reset_temp%d tau_ct%9.5f r_ct%7.3f r_0%7.3f dv_dyn%7.3f dv_hys%7.3f voc_soc%7.3f  voc_stat%7.3f voc%7.3f vb%7.3f ib _charge%7.3f ",
+        ib_, soc_, reset_temp, chem_.tau_ct, chem_.r_ct, chem_.r_0, dv_dyn_, dv_hys_, voc_soc_, voc_stat_, voc_, vb_, ib_charge_);
+    #endif
 
     // Charge time if used ekf 
     if ( ib_charge_ > 0.1 )
@@ -357,9 +362,11 @@ float BatteryMonitor::calc_charge_time(const double q, const float q_capacity, c
 void BatteryMonitor::ekf_predict(double *Fx, double *Bu)
 {
     // Process model  dt_eframe_<<chem_.tau_sd
-    // *Fx = exp(-dt_eframe_ / chem_.tau_sd);
+
+    // Approximation to *Fx = exp(-dt_eframe_ / chem_.tau_sd);
     *Fx = 1. - dt_eframe_ / chem_.tau_sd;
-    // *Bu = (1. - *Fx) * chem_.r_sd;
+    
+    // Approximation to *Bu = (1. - *Fx) * chem_.r_sd;
     *Bu = dt_eframe_ / chem_.c_sd;
 }
 
@@ -388,9 +395,7 @@ void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
     voc_ = vb_ - dv_dyn_;
     #ifdef DEBUG_INIT
         if ( sp.debug()==-1 )
-        {
             Serial.printf("mon: ib%7.3f vb%7.3f voc%7.3f\n", ib_, vb_, voc_);
-        }
     #endif
 }
 
@@ -405,10 +410,11 @@ void BatteryMonitor::init_soc_ekf(const float soc)
 
 /* is_sat:  Calculate saturation status
     Inputs:
+        soc         State of charge
         temp_c      Battery temperature, deg C
         voc_filt    Filtered battery charging voltage, V
-    Outputs:
-        is_saturated    Battery saturation status, T/F
+    State:
+        sat_mem    Battery saturation status, T/F
 */
 boolean BatteryMonitor::is_sat(const boolean reset)
 {
@@ -416,7 +422,6 @@ boolean BatteryMonitor::is_sat(const boolean reset)
     if ( reset)
         sat_mem = temp_c_ > chem_.low_t && (voc_filt_ >= vsat_);
     else
-        // dag 20230716 return ( temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || soc_ >= MXEPS) );
         sat_mem = temp_c_ > chem_.low_t && (voc_filt_ >= vsat_ || (soc_ >= MXEPS && !sat_mem) );
     return sat_mem;
 }
@@ -443,17 +448,19 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf(" *sp_s_cap_mon%7.3f Slr\n", sp.s_cap_mon());
     Serial.printf("  vb_model_rev%7.3f V\n", vb_model_rev_);
 #else
-     Serial.printf("BatteryMonitor: silent for DEPLOY_PHOTON\n");
+     Serial.printf("BatteryMonitor: silent DEPLOY\n");
 #endif
 }
 
-// Reset Coulomb Counter to EKF under restricted conditions especially new boot no history of saturation
+// Reset Coulomb Counter state to EKF under restricted conditions especially new boot no history of saturation
 void BatteryMonitor::regauge(const float temp_c)
 {
     if ( converged_ekf() && abs(soc_ekf_-soc_)>DF2 )
     {
         Serial.printf("CC Mon from%7.3f to EKF%7.3f...", soc_, soc_ekf_);
+
         apply_soc(soc_ekf_, temp_c);
+        
         Serial.printf("conf %7.3f\n", soc_);
     }
 }
@@ -509,18 +516,17 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
         ice_->iterate(sp.debug()==-1 && reset_temp, SOLV_SUCC_COUNTS, false);
     }
     init_soc_ekf(soc_solved);
+
     #ifdef DEBUG_INIT
         if ( sp.debug()==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_soc%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%8.4f e%10.6f soc_sol%8.4f\n",
             Sen->Vb, Vb_avg, voc_soc_, voc_stat_, voc_solved, ice_->count(), ice_->dx(), ice_->e(), soc_solved);
     #endif
-    // if ( sp.debug()==7 )
-    //         Serial.printf("solve    :n_avg, Tb_avg,Vb_avg,Ib_avg,  count,soc_s,vb_avg,voc,voc_m_s,dv_dyn,dv_hys,err, %d, %7.3f,%7.3f,%7.3f,  %d,%8.4f,%7.3f,%7.3f,%7.3f,%7.3f,%10.6f,\n",
-    //         n_avg, Tb_avg, Vb_avg, Ib_avg, ice_->count(), soc_solved, voc, voc_solved, dv_dyn, dv_hys_, ice_->e());
+
     return ( ice_->count()<SOLV_MAX_COUNTS );
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Battery model class for reference use mainly in jumpered hardware testing
+// Battery model class for reference use mainly in regression testing
 BatterySim::BatterySim() :
     Battery(&sp.delta_q_model_, &sp.t_last_model_, &sp.sim_chm_, VS), duty_(0UL), hys_scale_(HYS_SCALE), ib_fut_(0.),
     ib_in_(0.), model_cutback_(true), q_(NOM_UNIT_CAP*3600.), sample_time_(0UL), sample_time_z_(0UL), sat_ib_max_(0.)
@@ -531,7 +537,7 @@ BatterySim::BatterySim() :
     Sq_inj_ = new SqInj();
     Tri_inj_ = new TriInj();
     Cos_inj_ = new CosInj();
-    dv_voc_soc_ = 0.;
+    dv_voc_soc_ = 0.;           // Talk table bias, Dy, V
     sat_ib_null_ = 0.;          // Current cutback value for soc=1, A
     sat_cutback_gain_ = 1000.;  // Gain to retard ib when soc approaches 1, dimensionless
     model_saturated_ = false;
@@ -653,7 +659,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
     
-    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+    #ifndef CONFIG_PHOTON
 
         if ( sp.debug()==75 ) Serial.printf("BatterySim::calculate: temp_c_ soc_ voc_stat_ low_voc =  %7.3f %10.6f %9.5f %7.3f\n",
             temp_c_, soc_, voc_stat_, chem_.low_voc);
@@ -668,10 +674,6 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
             reset, sp.mod_ib(), temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
 
     #endif
-    // if ( sp.debug()==-24 ) Serial.printf("Sim:  ib%7.3f soc%8.4f reset %d  ib_charge%7.3f ib_in%7.3f voltlow %d bmsoff %d bmscha %d ib_chg_fut%7.3f\n",
-    //     ib_, soc_, reset, ib_charge_, ib_in_, voltage_low_, bms_off_, bms_charging_, ib_charge_fut);
-    // if ( sp.debug()==-24 ) Serial.printf("Sim:  ib%7.3f soc%8.4f reset     %d tau_ct%9.5f r_ct%7.3f r_0%7.3f dv_dyn%7.3f dv_hys%7.3f voc_stat%7.3f                 voc%7.3f vb%7.3f ib_charge%7.3f ib_in%7.3f",
-    //     ib_, soc_, reset, chem_.tau_ct, chem_.r_ct, chem_.r_0, dv_dyn_, dv_hys_, voc_stat_, voc_, vb_, ib_charge_, ib_in_);
 
     return ( vb_ );
 }
@@ -801,7 +803,7 @@ float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Battery
         else cTime = Sen->control_time;
         sprintf(cp.buffer, "unit_sim, %13.3f, %d, %7.0f, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
             cTime, sp.sim_chm(), q_cap_rated_scaled_, bms_off_, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ib_charge_, ioc_, model_saturated_, *sp_delta_q_, soc_, reset_temp,'\0');
-        Serial.println(cp.buffer);
+        Serial.printf("%s\n", cp.buffer);
     }
 
     // Save and return
@@ -853,6 +855,6 @@ void BatterySim::pretty_print(void)
     Serial.printf(" *sp_s_cap_sim%7.3f Slr\n", sp.s_cap_sim());
     hys_->pretty_print();
 #else
-     Serial.printf("BatterySim: silent for DEPLOY_PHOTON\n");
+     Serial.printf("BatterySim: silent DEPLOY\n");
 #endif
 }

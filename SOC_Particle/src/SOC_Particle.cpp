@@ -387,8 +387,10 @@ void loop()
     if ( sp.modeling() && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
-    if ( sp.debug()==12 ) debug_12(Mon, Sen);
-
+    #ifndef CONFIG_PHOTON
+      if ( sp.debug()==12 ) debug_12(Mon, Sen);
+    #endif
+    
     // Publish for variable print rate
     if ( cp.publishS )
     {

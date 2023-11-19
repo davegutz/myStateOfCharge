@@ -45,7 +45,7 @@ SavedPars::SavedPars()
 SavedPars::SavedPars(SerialRAM *ram)
 {
     next_ = 0x000;
-    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+    #ifndef CONFIG_PHOTON
         rP_ = ram;
         // Memory map
         amp_eeram_.a16 = next_; next_ += sizeof(amp_);
@@ -144,7 +144,7 @@ boolean SavedPars::is_corrupt()
 }
 
 // Assign all save EERAM to RAM
-#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+#ifndef CONFIG_PHOTON
     void SavedPars::load_all()
     {
         get_amp();
@@ -227,7 +227,7 @@ int SavedPars::num_diffs()
 // Print memory map
 void SavedPars::mem_print()
 {
-    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+    #ifndef CONFIG_PHOTON
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         Serial.printf("Temp mem map print\n");
         for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("0x%X ", rP_->read(i));
@@ -288,7 +288,7 @@ void SavedPars::pretty_print(const boolean all)
     //     print_fault_array();
     //     print_fault_header();
     // }
-    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+    #ifndef CONFIG_PHOTON
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         // Serial.printf("Temp mem map print\n");
         // mem_print();

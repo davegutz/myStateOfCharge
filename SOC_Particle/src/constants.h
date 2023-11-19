@@ -69,21 +69,21 @@
             #define NSUM              128        // Number of saved SRAM summaries (128)
                                                  // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
         #else
-            #define NSUM              -31        // Number of saved SRAM summaries (-31)  ********************This config doesn't  work.  Don't use DEPLOY_PHOTON with DEBUG_INIT
+            #define NSUM              -31        // Number of saved SRAM summaries (-31)  ********************This config doesn't  work.  Cannot use DEPLOY_PHOTON with DEBUG_INIT
                                                  // or go reduce print statments.  I suggest Serial1 in myTalk.cpp.  Not needed when not deployed - use PC.
                                                  // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
         #endif
     #else
         #ifdef DEPLOY_PHOTON
-            #define NSUM              169       // Number of saved SRAM summaries (174)
+            #define NSUM              205       // Number of saved SRAM summaries (205)
                                                 // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
         #else
-            #define NSUM               5        // Number of saved SRAM summaries (15)
+            #define NSUM               45       // Number of saved SRAM summaries (45)
                                                 // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
         #endif
     #endif
 #elif defined(CONFIG_ARGON)
-        #define NSUM              2200      // Number of saved SRAM summaries (2300)
+        #define NSUM              2215  // Number of saved SRAM summaries (2215)
                                         //If too large, will get compile error 'Insufficient room for .data and .bss sections!' or flashing red
 #endif
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)

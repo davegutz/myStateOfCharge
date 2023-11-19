@@ -64,7 +64,7 @@ class Flt_ram : public Flt_st
 public:
   Flt_ram();
   ~Flt_ram();
-#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+#ifndef CONFIG_PHOTON
     void get_t()            { unsigned long value;  rP_->get(t_eeram_.a16, value);            t = value; };
     void get_Tb_hdwe()      { int16_t value;        rP_->get(Tb_hdwe_eeram_.a16, value);      Tb_hdwe = value; };
     void get_vb_hdwe()      { int16_t value;        rP_->get(vb_hdwe_eeram_.a16, value);      vb_hdwe = value; };
@@ -142,7 +142,7 @@ public:
 
 protected:
   SerialRAM *rP_;
-  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+  #ifndef CONFIG_PHOTON
     address16b t_eeram_;
     address16b Tb_hdwe_eeram_;
     address16b vb_hdwe_eeram_;
