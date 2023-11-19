@@ -253,9 +253,21 @@ An almost third situation was software morphing.   Particle requires software ve
 
 ## User Interface
 
+The Serial port of the Particle devices is used for crude interactive interface.  An abbreviated version is available on the Serial1 Bluetooth interface.
+
+The idea is to install _puTTY_ and use the _Python_ interface provided by _GUI_TestSOC.py_.  I tried to set up a direct _Python_ serial driver but found the throughput is too slow.  _puTTY_ is a well known and well used portable serial monitor that runs very fast and friendly as a standalone executable on any platform.  I wrote a _Python_ _tKinter_ GUI that works with whatever automation is available.
+
+One starts at the top of the GUI and enters configuration. I like to store data separately from the GitHub repository because of space.  I use Google Drive.  Point the GUI at that for _dataReduction Folder_.  The GUI works out of the _py_ folder and moves results over.  It also is careful to backup any stored Serial data in the working folder that does not somehow get copied programmatically.  Next proceed pushing buttons top to bottom.  The init button will start puTTY and store a copy of the init string in the mouse paste buffer.  Right-click this into the puTTY window in Windows.  Ctrl-Shift-V in Linux.  _______ in macOS.
+
+The first start the device may be asking for input.  First take care of that or reset the device if you accidentally paste into its dialog.
+
+When init is complete go to start button and paste that then immediatly click on the reset button to start the timer.   The reset string is ready in the buffer for when the timer expires.
+
+Then save.   Then press Compare<>Sim.
+
 It’s all done using a system of two-letter codes.   The user connects a computer to the PLC and fires up some serial interface program such as puTTY.   Callbacks in the application watch for the codes, decode them, and make changes to the program.
 
-There is another [section](doc/TestSOC.md) that describes how to interface with puTTY using a python script [TestSOC.py](../SOC_Particle/py/TestSOC.py).
+There is another [section](doc/TestSOC.md) that describes how to interface with puTTY using a python script [GUI_TestSOC.py](../SOC_Particle/py/GUI_TestSOC.py).
 
 I used Serial transmit / receive to communicate with the PLC.   Particle provides an API to instantly transmit serial information to the application.  There are built-in callback functions ('serialEvent()' and 'serialEvent1()')  for the two serial lines that the user populates with whatever commands they want.   The user is expected to pair this function with 'Serial.available()' function called within the callback to parse out user input. The callback function executes each minor frame – call of 'loop().'   Particle devices work like Arduino, so calls to 'loop()' happen as fast as the application is able to.   The user is responsible for managing time frames.
 
@@ -855,7 +867,9 @@ This is normal for temperature.   Modeled Tb is very simple = to a constant + bi
 
   1. Set debug = 2 in main.h
   2. Rebuild and upload
-  3. Start CoolTerm_0.stc
+  3. Start _GUI_TestSOC.py_
+     - Browse to _SOC_Particle/py_
+     - Open _pyCharm_ or run _GUI_TestSOC.py_ from the command line
 
 See 'State of Charge Monitor.odt' for full set of requirements, testing, discussion and recommendations for going forward.
 
