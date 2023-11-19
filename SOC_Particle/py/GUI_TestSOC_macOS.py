@@ -589,8 +589,8 @@ def putty_size():
 
 def ref_remove():
     top_panel_right.pack_forget()
-    Ref.label.forget()
     run_button.config(text='Compare Run Sim')
+    Ref.label.forget()
 
 
 def ref_restore():
