@@ -826,7 +826,7 @@ if __name__ == '__main__':
     opt_panel_ctr = tk.Frame(opt_panel)
     opt_panel_ctr.pack(side='left', expand=True, fill='both')
     opt_panel_right = tk.Frame(opt_panel)
-    opt_panel_right.pack(side='left', fill='x')
+    opt_panel_right.pack(side='left', expand=True, fill='both')
 
     # Option
     option = tk.StringVar(master, str(cf['others']['option']))
@@ -838,7 +838,7 @@ if __name__ == '__main__':
     Test.label = tk.Label(opt_panel_ctr, text=Test.file_txt)
     Test.label.pack(padx=5, pady=5, expand=True, fill='x')
     Ref.label = tk.Label(opt_panel_right, text=Ref.file_txt)
-    Ref.label.pack(padx=5, pady=5)
+    Ref.label.pack(padx=5, pady=5, side=tk.TOP)
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
 
@@ -869,42 +869,67 @@ if __name__ == '__main__':
                               justify=tk.RIGHT, font=("Arial", 8))
     end_early_butt.pack(padx=5, pady=5, side=tk.BOTTOM)
 
-    ev1_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev1_label.pack(side=tk.LEFT, padx=5, pady=5)
+    # Note panel
+    notsep_panel = tk.Frame(master)
+    notsep_panel.pack(expand=True, fill='x')
+    tk.Label(notsep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    tk.ttk.Separator(notsep_panel, orient='horizontal').pack(pady=5)
+    not_panel = tk.Frame(master)
+    not_panel.pack(expand=True, fill='both')
+    not_panel_left = tk.Frame(not_panel)
+    not_panel_left.pack(side='left', fill='x')
+    not_panel_ctr = tk.Frame(not_panel)
+    not_panel_ctr.pack(side='left', expand=True, fill='both')
+    not_panel_right = tk.Frame(not_panel)
+    not_panel_right.pack(side='left', expand=True, fill='both')
+    ev1_label = tk.Label(not_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev1_label.pack(padx=5, pady=5)
+    ev2_label = tk.Label(not_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev2_label.pack(padx=5, pady=5)
+    ev3_label = tk.Label(not_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev3_label.pack(padx=5, pady=5)
+    ev4_label = tk.Label(not_panel_ctr, text='', wraplength=wrap_length, justify=tk.LEFT)
+    ev4_label.pack(padx=5, pady=5)
 
-    ev2_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev2_label.pack(side=tk.LEFT, padx=5, pady=5)
-
-    ev3_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev3_label.pack(side=tk.LEFT, padx=5, pady=5)
-
-    ev4_label = tk.Label(master, text='', wraplength=wrap_length, justify=tk.LEFT)
-    ev4_label.pack(side=tk.LEFT, padx=5, pady=5)
-
-    save_data_label = tk.Label(master, text='save data:')
-    save_data_label.pack(padx=5, pady=5)
-    save_data_button = myButton(master, text='save data', command=save_data, fg="red", bg=bg_color,
+    # Save row
+    sav_panel = tk.Frame(master)
+    sav_panel.pack(expand=True, fill='both')
+    save_data_label = tk.Label(sav_panel, text='save data:')
+    save_data_label.pack(side=tk.LEFT, padx=5, pady=5)
+    save_data_button = myButton(sav_panel, text='save data', command=save_data, fg="red", bg=bg_color,
                                 wraplength=wrap_length, justify=tk.LEFT)
     save_data_button.pack(side=tk.LEFT, padx=5, pady=5)
-    save_data_as_button = myButton(master, text='save as', command=save_data_as, fg="red", bg=bg_color,
+    save_data_as_button = myButton(sav_panel, text='save as', command=save_data_as, fg="red", bg=bg_color,
                                    wraplength=wrap_length, justify=tk.LEFT)
     save_data_as_button.pack(side=tk.LEFT, padx=5, pady=5)
-    clear_data_button = myButton(master, text='clear', command=clear_data_verbose, fg="red", bg=bg_color,
+    clear_data_button = myButton(sav_panel, text='clear', command=clear_data_verbose, fg="red", bg=bg_color,
                                  wraplength=wrap_length, justify=tk.RIGHT)
     clear_data_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    tk.ttk.Separator(master, orient='horizontal').pack(pady=5, side=tk.TOP)
-    run_button = myButton(master, text='Compare', command=compare_run, fg="green", bg=bg_color,
+    # Run panel
+    runsep_panel = tk.Frame(master)
+    runsep_panel.pack(expand=True, fill='x')
+    tk.Label(runsep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    tk.ttk.Separator(runsep_panel, orient='horizontal').pack(pady=5, side=tk.TOP)
+    run_panel = tk.Frame(master)
+    run_panel.pack(expand=True, fill='x')
+    run_button = myButton(run_panel, text='Compare', command=compare_run, fg="green", bg=bg_color,
                           wraplength=wrap_length, justify=tk.LEFT)
-    run_button.pack(padx=5, pady=5)
+    run_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    tk.ttk.Separator(master, orient='horizontal').pack(pady=5, side=tk.TOP)
-    choose_label = tk.Label(master, text='choose existing files:')
-    choose_label.pack(padx=5, pady=5)
-    run_sim_choose_button = myButton(master, text='Compare Run Sim Choose', command=compare_run_sim_choose,
+    # Compare panel
+    comsep_panel = tk.Frame(master)
+    comsep_panel.pack(expand=True, fill='x')
+    tk.Label(comsep_panel, text='-', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    tk.ttk.Separator(comsep_panel, orient='horizontal').pack(pady=5, side=tk.TOP)
+    com_panel = tk.Frame(master)
+    com_panel.pack(expand=True, fill='x')
+    choose_label = tk.Label(com_panel, text='choose existing files:')
+    choose_label.pack(side=tk.LEFT, padx=5, pady=5)
+    run_sim_choose_button = myButton(com_panel, text='Compare Run Sim Choose', command=compare_run_sim_choose,
                                      fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
     run_sim_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
-    run_run_choose_button = myButton(master, text='Compare Run Run Choose', command=compare_run_run_choose,
+    run_run_choose_button = myButton(com_panel, text='Compare Run Run Choose', command=compare_run_run_choose,
                                      fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT)
     run_run_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
 
