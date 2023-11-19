@@ -4,7 +4,7 @@
 #include "version.h"
 const String unit = version + "_pro0p";
 #define CONFIG_PHOTON
-#undef DEPLOY_PHOTON
+#define DEPLOY_PHOTON
 #undef DEBUG_INIT
 
 // * = SRAM EEPROM adjustments, retained on power reset
