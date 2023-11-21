@@ -29,13 +29,10 @@
 #include "parameters.h"
 #include <math.h>
 #include "debug.h"
-#include "Talk.h"
 
 extern CommandPars cp;            // Various parameters shared at system level
 extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
-
-TalkVariableFloat *floater = new TalkVariableFloat();
 
 // Process asap commands
 void asap()
@@ -82,7 +79,6 @@ void clear_queues()
 // Talk Executive
 void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
-  floater->run();
   float FP_in = -99.;
   int INT_in = -1;
   float scale = 1.;
