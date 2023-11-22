@@ -85,7 +85,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *
   name_(name), port_(port), bare_detected_(false), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0),
   sp_Ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
-  vc_pin_(vc_pin), vo_pin_(vo_pin), Vc_raw_(0), Vc_(0.), Vo_Vc_(0.)
+  vc_pin_(vc_pin), vo_pin_(vo_pin), Vc_raw_(0), Vc_(0.), Vo_Vc_(0.), using_tsc2010_(false)
 {
   #ifdef USE_ADS
     if ( name_=="No Amp")
@@ -106,6 +106,16 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *
   #else
     Serial.printf("Ib %s sense ADC pins %d and %d started\n", name_.c_str(), vo_pin_, vc_pin_);
   #endif
+}
+Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *sp_Ib_bias, const float v2a_s,
+  const uint8_t vo_pin)
+: Adafruit_ADS1015(),
+  name_(name), port_(port), bare_detected_(false), v2a_s_(v2a_s),
+  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0),
+  sp_Ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
+  vo_pin_(vo_pin), Vc_raw_(0), Vc_(0.), Vo_Vc_(0.), using_tsc2010_(true)
+{
+  Serial.printf("Ib %s sense ADC pin %d started using TSC2010\n", name_.c_str(), vo_pin_);
 }
 Shunt::~Shunt() {}
 // operators
@@ -180,10 +190,14 @@ void Shunt::convert(const boolean disconnect)
 void Shunt::sample(const boolean reset_loc, const float T)
 {
   sample_time_z_ = sample_time_;
-  Vc_raw_ = analogRead(vc_pin_);
+  if ( !using_tsc2010_ )
+  {
+    Vc_raw_ = analogRead(vc_pin_);
+    Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
+  }
   sample_time_ = millis();
   Vo_raw_ = analogRead(vo_pin_);
-  Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
+  if  ( sp.debug()==14 )Serial.printf("vo_pin_ %d V0_raw_ %d\n", vo_pin_, Vo_raw_);
   Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
   Vo_Vc_ = Vo_ - Vc_;
 }
@@ -708,8 +722,13 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
   this->T = T;
   this->T_filt = T;
   this->T_temp = T_temp;
-  this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_, &sp.Ib_bias_amp_, SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin);
-  this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_, &sp.Ib_bias_noa_, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin);
+  #ifdef CONFIG_PHOTON2
+    this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_, &sp.Ib_bias_amp_, SHUNT_AMP_GAIN, pins->Vom_pin);
+    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_, &sp.Ib_bias_noa_, SHUNT_NOA_GAIN, pins->Von_pin);
+  #else
+    this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_, &sp.Ib_bias_amp_, SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin);
+    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_, &sp.Ib_bias_noa_, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin);
+  #endif
   this->SensorTb = new TempSensor(pins->pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
   this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
   this->Sim = new BatterySim();

@@ -70,6 +70,8 @@ public:
   Shunt();
   Shunt(const String name, const uint8_t port, float *sp_ib_scale, float *sp_Ib_bias, const float v2a_s,
     const uint8_t vc_pin, const uint8_t vo_pin);
+  Shunt(const String name, const uint8_t port, float *sp_ib_scale, float *sp_Ib_bias, const float v2a_s,
+    const uint8_t vo_pin);
   ~Shunt();
   // operators
   // functions
@@ -114,6 +116,7 @@ protected:
   float Vo_;            // Sensed Vo, output of op amp, V
   float Vo_Vc_;         // Sensed Vo-Vc, difference in output of op amps, V
   float Vo_Vc_f_;       // Sensed, filtered Vo-Vc, difference in output of op amps, V
+  boolean using_tsc2010_; // Using differential hardware amp
 };
 
 // Fault word bits.   All faults heal

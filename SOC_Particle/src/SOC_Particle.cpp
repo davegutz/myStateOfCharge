@@ -56,7 +56,7 @@
 //
 // See README.md
 */
-// This works when I'm using two platforms:   PHOTON = 6 and ARGON = 12 and PHOTON2 = 
+// This works when I'm using three platforms:   PHOTON = 6 and ARGON = 12 and PHOTON2 = (>=20)
 void setup();
 void loop();
 #line 54 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/src/SOC_Particle.ino"
@@ -78,7 +78,7 @@ void loop();
   #endif
 #elif defined(CONFIG_PHOTON2)
   #undef ARDUINO
-  #if (PLATFORM_ID < 20)
+  #if (PLATFORM_ID < PLATFORM_P2)
     #error "copy local_config.xxxx.h to local_config.h"
   #endif
 #endif
@@ -169,14 +169,28 @@ void setup()
     #endif
   #endif
 
-  // Peripherals
+  // Peripherals (non-Photon2 (p2))
   // D6 - one-wire temp sensor
   // D7 - status led heartbeat
   // A1 - Vb
+  // A2 - Primary Ib amp (called by old ADS name Amplified, amp)
   // A3 - Backup Ib amp (called by old ADS name Non Amplified, noa)
   // A4 - Ib amp common
-  // A5 - Primary Ib amp (called by old ADS name Amplified, amp)
-  myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
+  // Peripherals (Photon2 (p2))
+  // D6 - one-wire temp sensor
+  // D7 - status led heartbeat
+  // A2->A0->D11 - Primary Ib amp (called by old ADS name Amplified, amp)
+  // A1->D12 - Vb
+  // A3->A2->D13 - Backup Ib amp (called by old ADS name Non Amplified, noa)
+  // A4 - not available
+  // A5-->D14 - spare
+  #ifdef CONFIG_PHOTON2
+    // myPins = new Pins(D6, D7, 43, 50, 49);
+    // myPins = new Pins(D6, D7, A1, A0, A2);
+    myPins = new Pins(D6, D7, D12, D11, D13);
+  #else
+    myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
+  #endif
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
 

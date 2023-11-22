@@ -55,6 +55,7 @@ struct Pins
   uint16_t Von_pin;     // No Amp (n) output voltage
   uint16_t Vcm_pin;     // Amp (m) common voltage
   uint16_t Vom_pin;     // Amp (m) output voltage
+  boolean using_tsc2010; // Using differential hardware amp
   Pins(void) {}
   Pins(uint16_t pin_1_wire, uint16_t status_led, uint16_t Vb_pin, uint16_t Vcn_pin, uint16_t Von_pin, uint16_t Vcm_pin, uint16_t Vom_pin)
   {
@@ -65,6 +66,16 @@ struct Pins
     this->Von_pin = Von_pin;
     this->Vcm_pin = Vcm_pin;
     this->Vom_pin = Vom_pin;
+    this->using_tsc2010 = false;
+  }
+  Pins(uint16_t pin_1_wire, uint16_t status_led, uint16_t Vb_pin, uint16_t Von_pin, uint16_t Vom_pin)
+  {
+    this->pin_1_wire = pin_1_wire;
+    this->status_led = status_led;
+    this->Vb_pin = Vb_pin;
+    this->Von_pin = Von_pin;
+    this->Vom_pin = Vom_pin;
+    this->using_tsc2010 = true;
   }
 };
 
