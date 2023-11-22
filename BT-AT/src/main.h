@@ -1,8 +1,8 @@
 /*
-Then the LED on the Bluetooth Module start blinking with the inter well of 2 seconds.  This indicates
+Then the LED on the Bluetooth Module start blinking with the interval of 2 seconds.  This indicates
 now the Bluetooth Module in command mode.
 
-Next open the serial monitor on Arduino Uno. And set the baud rate as 9600 and set output mode to
+Next open the serial monitor. And set the baud rate as 9600 and set output mode to
 "Both NL & CR". (box near the baud rate).
 
 Here we use the AT commands. First type AT on the serial monitor and press send. You will see a OK message
@@ -16,15 +16,43 @@ Type AT+NAME=Hackster and press Send. It will return a OK message.
 // hc-06
 // https://mcuoneclipse.com/2013/06/19/using-the-hc-06-bluetooth-module/
 
-// SOC_Particle
-//  AT;
-//  AT+BAUD8;
-//  AT+NAMEsoc1a;
+#define SBAUD 230400
+// #define STEP 1
+#define STEP 2
 
-// AT+BAUD4;    OK9600
-// AT+BAUD8;    OK115200
-// AT+VERSION;  OKlinvorV1.8
-// AT; 	OK 	Used to verify communication
+// Step-by-step
+// 1.  Uncomment line 'STEP1'.  Compile and flash.
+// 2.  Run following:
+//    >AT;    // answers 'OK'
+//    >AT+NAMEpro3p2;  // answers 'OKsetname'
+//    >AT+BAUD9; // use BAUD<n> from table below that matches SBAUD answers 'OK230400'
+//       // This setting makes the device unavailable.  It seems you need to recompile with new baud (STEP 2) ti recommunicate
+// 3.  If you need to run again, comment out '#define STEP 1' and uncomment '#define STEP 2'
+// 4.  On android pair classic BT device.  pwd=1234
+//
+//  Notes:  
+//  a.  Any bad characters corrected by keyboard 'back' will show the special back character
+//  b.  I've had to do the NAME step a couple times, de-powering the device completely between steps
+
+#if STEP==1
+  #define S1BAUD 9600
+#elif STEP==2
+  #define S1BAUD SBAUD
+#endif
+
+//  
+//  >AT;
+//     <<answers 'OK'
+//  >AT+BAUD8;
+//  >AT+NAMEsoc1a;
+
+// >AT+BAUD4;    OK9600
+// >AT+BAUD8;    OK115200
+// >AT+VERSION;  OKlinvorV1.8
+// >AT; 	OK 	Used to verify communication
+
+
+
 /*
 AT+VERSION 	OKlinvorV1.8 	The firmware version (version might depend on firmware)
 AT+NAMExyz 	OKsetname 	Sets the module name to “xyz”
@@ -74,8 +102,8 @@ void delay_no_block(const unsigned long int interval)
 void setup()
 {
   // put your setup code here, to run once:
-  Serial.begin(230400);	/* Define baud rate for serial communication */
-  Serial1.begin(115200); /* Define baud rate for serial1 communication */
+  Serial.begin(SBAUD);	/* Define baud rate for serial communication */
+  Serial1.begin(S1BAUD); /* Define baud rate for serial1 communication */
   // Serial1.begin(115200); /* Define baud rate for serial1 communication */
   // Serial1.begin(38400); /* Define baud rate for serial1 communication */
   ////////IF YOU DON'T GET ANY JOY WITH 115200 TRY 38400 INSTEAD/////////
