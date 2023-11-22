@@ -157,6 +157,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define AMP_FILT_TAU        4.0         // Ib filters time constant for calibration only, s (4.0)
 #define S1BAUD              230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define VC_BARE_DETECTED    0.16        // Level of common voltage to declare circuit unconnected, V (0.16)
+#define HALF_3V3            1.65        // Theoretical center of differential TSC2010
 
 // Conversion gains
 #ifdef USE_ADS

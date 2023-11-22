@@ -85,7 +85,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *
   name_(name), port_(port), bare_detected_(false), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0),
   sp_Ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
-  vc_pin_(vc_pin), vo_pin_(vo_pin), Vc_raw_(0), Vc_(0.), Vo_Vc_(0.), using_tsc2010_(false)
+  vc_pin_(vc_pin), vo_pin_(vo_pin), Vc_raw_(0), Vc_(HALF_3V3), Vo_Vc_(0.), using_tsc2010_(false)
 {
   #ifdef USE_ADS
     if ( name_=="No Amp")
@@ -113,7 +113,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *
   name_(name), port_(port), bare_detected_(false), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0),
   sp_Ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
-  vo_pin_(vo_pin), Vc_raw_(0), Vc_(0.), Vo_Vc_(0.), using_tsc2010_(true)
+  vo_pin_(vo_pin), Vc_raw_(0), Vc_(HALF_3V3), Vo_Vc_(0.), using_tsc2010_(true)
 {
   Serial.printf("Ib %s sense ADC pin %d started using TSC2010\n", name_.c_str(), vo_pin_);
 }
@@ -197,9 +197,9 @@ void Shunt::sample(const boolean reset_loc, const float T)
   }
   sample_time_ = millis();
   Vo_raw_ = analogRead(vo_pin_);
-  if  ( sp.debug()==14 )Serial.printf("vo_pin_ %d V0_raw_ %d\n", vo_pin_, Vo_raw_);
   Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
   Vo_Vc_ = Vo_ - Vc_;
+  if  ( sp.debug()==14 )Serial.printf("vo_pin_%d V0_raw_%d Vo_%7.3f Vo_Vc_%7.3f\n", vo_pin_, Vo_raw_, Vo_, Vo_Vc_);
 }
 
 
