@@ -144,6 +144,8 @@ sample code bearing this copyright.
 
 #include "OneWire.h"
 
+#ifndef CONFIG_PHOTON2
+
 OneWire::OneWire(uint16_t pin)
 {
     pinMode(pin, INPUT);
@@ -592,3 +594,4 @@ uint16_t OneWire::crc16(const uint8_t *input, uint16_t len, uint16_t crc)
     return crc;
 }
 #endif
+#endif  // CONFIG_PHOTON2

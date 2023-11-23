@@ -1,6 +1,8 @@
 #include "DS18.h"
 #include <string.h>
  
+#ifndef CONFIG_PHOTON2
+
 // dag 20220328 allow conversionTime modification.   I don't know why it was set to 1 sec because 10 ms seems to work ok
 DS18::DS18(uint16_t pin, bool parasitic, uint16_t conversion_delay)
   :
@@ -178,3 +180,4 @@ bool DS18::crcError() {
 void DS18::setConversionTime(uint16_t ms) {
   _conversionTime = ms;
 }
+#endif
