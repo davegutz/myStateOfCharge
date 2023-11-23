@@ -26,12 +26,16 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
-// Disable flags if needed for debugging, usually commented
+// Hardware configuration
+#undef CONFIG_BARE
 #undef CONFIG_PHOTON
 #undef CONFIG_ARGON
 #undef CONFIG_PHOTON2
-#undef CONFIG_BARE
-#undef CONFIG_CONFIG_USE_BLE
+#undef CONFIG_47L16
+#undef CONFIG_ADS1013
+#undef CONFIG_USE_BLE
+#undef DEPLOY_PHOTON
+#undef CONFIG_TSC2010
 #include "local_config.h"       // this is not in GitHub repository.  Copy appropriate local_config??.h to match configure
 
 // Constants always defined
@@ -63,7 +67,7 @@
 #define F_MAX_T_TEMP          18.0      // Maximum call update time filters (18.0)
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
-#if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)
+#ifndef CONFIG_47L16
     #ifdef DEBUG_INIT
         #ifdef DEPLOY_PHOTON
             #define NSUM              128        // Number of saved SRAM summaries (128)
@@ -82,7 +86,7 @@
                                                 // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
         #endif
     #endif
-#elif defined(CONFIG_ARGON)
+#else
         #define NSUM              2215  // Number of saved SRAM summaries (2215)
                                         //If too large, will get compile error 'Insufficient room for .data and .bss sections!' or flashing red
 #endif
@@ -160,7 +164,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define HALF_3V3            1.65        // Theoretical center of differential TSC2010
 
 // Conversion gains
-#ifdef USE_ADS
+#ifdef CONFIG_ADS1013
     const float SHUNT_NOA_GAIN = SHUNT_GAIN;
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
 #else

@@ -3,8 +3,10 @@
 
 #include "version.h"
 const String unit = version + "_pro3p2";
+
+// Hardware config
 #define CONFIG_PHOTON2
-#undef DEPLOY_PHOTON
+#define CONFIG_TSC2010
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

@@ -34,7 +34,7 @@
 #include "myLibrary/iterate.h"
 #include "Hysteresis.h"
 class Sensors;
-#define t_float float
+// #define t_float float
 
 #define RATED_TEMP      25.       // Temperature at NOM_UNIT_CAP, deg C (25)
 #define TCHARGE_DISPLAY_DEADBAND  0.1 // Inside this +/- deadband, charge time is displayed '---', A

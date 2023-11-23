@@ -24,9 +24,8 @@
 #ifndef _PARAMETERS_H
 #define _PARAMETERS_H
 
-#define t_float float
+// #define t_float float
 
-//#include "math.h"  // Needed for Photon?
 #include "local_config.h"
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
@@ -62,6 +61,7 @@ public:
     // parameter list
     float amp() { return amp_; }
     float cutback_gain_sclr() { return cutback_gain_sclr_; }
+    float Dw() { return vb_table_bias_; }
     int debug() { return debug_;}
     double delta_q() { return delta_q_; }
     double delta_q_model() { return delta_q_model_; }
@@ -85,7 +85,6 @@ public:
     float nP() { return nP_; }
     float nS() { return nS_; }
     uint8_t preserving() { return preserving_; }
-    float Dw() { return vb_table_bias_; }
     float Tb_bias_hdwe() { return Tb_bias_hdwe_; }
     time_t time_now() { return time_now_; }
     uint8_t type() { return type_; }
@@ -115,9 +114,10 @@ public:
     boolean mod_vb() { return ( 1<<1 & modeling_ || mod_vb_dscn() ); }  // Using Sim as source of vb
     boolean mod_vb_dscn() { return ( 1<<5 & modeling_ ); }              // Nothing connected to vb on A1
     // get
-    #ifndef CONFIG_PHOTON
+    #ifdef CONFIG_47L16
         void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp_ = value; }
         void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr_ = value; }
+        void get_Dw() { float value; rP_->get(Dw_eeram_.a16, value); vb_table_bias_ = value; }
         void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug_ = value; }
         void get_delta_q() { double value; rP_->get(delta_q_eeram_.a16, value); delta_q_ = value; }
         void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model_ = value; }
@@ -137,7 +137,6 @@ public:
         void get_nP() { float value; rP_->get(nP_eeram_.a16, value); nP_ = value; }
         void get_nS() { float value; rP_->get(nS_eeram_.a16, value); nS_ = value; }
         void get_preserving() { preserving_ = rP_->read(preserving_eeram_.a16); }
-        void get_shunt_gain_sclr() { float value; rP_->get(Dw_eeram_.a16, value); vb_table_bias_ = value; }
         void get_sim_chm() { sim_chm_ = rP_->read(sim_chm_eeram_.a16); }
         void get_s_cap_mon() { float value; rP_->get(s_cap_mon_eeram_.a16, value); s_cap_mon_ = value; }
         void get_s_cap_sim() { float value; rP_->get(s_cap_sim_eeram_.a16, value); s_cap_sim_ = value; }
@@ -165,7 +164,7 @@ public:
     void print_fault_header();
     void print_history_array();
     // put
-    #if defined(CONFIG_PHOTON)
+    #ifndef CONFIG_47L16
         void put_all_dynamic();
         void put_amp(const float input) { amp_ = input; }
         void put_cutback_gain_sclr(const float input) { cutback_gain_sclr_ = input; }
@@ -210,7 +209,7 @@ public:
         void put_all_dynamic();
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp_ = input; }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr_ = input; }
-        void put_Dw(const float input) { rP_->put(Dw_eeram_.a16, input); vb_table_bias_ = input; }
+        void put_Dw(const float input) { rP_->put(Dw_eeram_.a16, input); vb_table_bias_ = input;  Serial.printf(" Dw_eeram_.a16 0x%X\n", Dw_eeram_.a16);}
         void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug_ = input; }
         void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q_ = input; }
         void put_delta_q() { rP_->put(delta_q_eeram_.a16, delta_q_); }
@@ -286,7 +285,7 @@ protected:
     float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
 
     uint8_t modeling_;       // Driving saturation calculation with model.  Bits specify which signals use model
-    #if defined(CONFIG_PHOTON)
+    #ifndef CONFIG_47L16
         Flt_st *fault_;
         Flt_st *history_;
     #else

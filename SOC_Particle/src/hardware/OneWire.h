@@ -152,6 +152,42 @@ private:
   #endif
 
   #if defined(CONFIG_PHOTON2)
+    // Fast pin access for STM32F2xx microcontroller
+    Hal_Pin_Info* PIN_MAP = Hal_Pin_Map(); // Pointer required for highest access speed
+
+    // inline void digitalWriteFastLow() {
+    //   PIN_MAP[_pin].gpio_peripheral->BSRRH = PIN_MAP[_pin].gpio_pin;
+    // }
+    inline void digitalWriteFastLow() {
+      pinResetFast(_pin);
+    }
+
+    // inline void digitalWriteFastHigh() {
+    //   PIN_MAP[_pin].gpio_peripheral->BSRRL = PIN_MAP[_pin].gpio_pin;
+    // }
+    inline void digitalWriteFastHigh() {
+      pinSetFast(_pin);
+    }
+
+    inline void pinModeFastOutput(void){
+      // This could probably be speed up by digging a little deeper past
+      // the HAL_Pin_Mode function.
+      HAL_Pin_Mode(_pin, OUTPUT);
+    }
+
+    inline void pinModeFastInput(void){
+      // This could probably be speed up by digging a little deeper past
+      // the HAL_Pin_Mode function.
+      HAL_Pin_Mode(_pin, INPUT);
+    }
+
+    inline uint8_t digitalReadFast(void){
+      // This could probably be speed up by digging a little deeper past
+      // the HAL_GPIO_Read function.
+      return HAL_GPIO_Read(_pin);
+    }
+  #endif
+  #if defined(CONFIG_PHOTON2XXXX)
 
     inline void digitalWriteFastLow() {
       pinResetFast(_pin);

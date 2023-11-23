@@ -3,9 +3,10 @@
 
 #include "version.h"
 const String unit = version + "_pro0p";
+
+// Hardware config
 #define CONFIG_PHOTON
-#undef DEPLOY_PHOTON
-#undef DEBUG_INIT
+#define CONFIG_ADS1013
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
@@ -14,20 +15,11 @@ const String unit = version + "_pro0p";
 #define MODELING              247 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
 
 // Sensor biases
-#define USE_ADS                 // Instead of using ADS device to read amp by I2C, use analog pins
-#ifdef USE_ADS
-    #define CURR_BIAS_AMP         -0.94 // Calibration of amplified shunt sensor (* 'DA'), A
-    #define CURR_SCALE_AMP        0.968 // Hardware to match data (* 'SA')
-    #define CURR_BIAS_NOA         -0.17 // Calibration of non-amplified shunt sensor (* 'DB'), A
-    #define CURR_SCALE_NOA        1.016 // Hardware to match data (* 'SB')
-    #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (-1333 is -100A/0.075V)
-#else
-    #define CURR_BIAS_AMP         0.0   // Calibration of amplified shunt sensor (* 'DA'), A
-    #define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SA')
-    #define CURR_BIAS_NOA         0.0   // Calibration of amplified shunt sensor (* 'DB'), A
-    #define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
-    #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (-1333 is -100A/0.075V)
-#endif
+#define CURR_BIAS_AMP         -0.94 // Calibration of amplified shunt sensor (* 'DA'), A
+#define CURR_SCALE_AMP        0.968 // Hardware to match data (* 'SA')
+#define CURR_BIAS_NOA         -0.17 // Calibration of non-amplified shunt sensor (* 'DB'), A
+#define CURR_SCALE_NOA        1.016 // Hardware to match data (* 'SB')
+#define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (-1333 is -100A/0.075V)
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
 #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A

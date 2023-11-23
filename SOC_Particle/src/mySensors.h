@@ -34,8 +34,13 @@
 #include "parameters.h"
 
 // Temp sensor
-#include "hardware/OneWire.h"
-#include "hardware/DS18.h"
+#ifndef CONFIG_PHOTON2
+  #include "hardware/OneWire.h"
+  #include "hardware/DS18.h"
+#else
+  #include <OneWire.h>
+  #include "hardware/DS18B20.h"
+#endif
 
 // AD
 #include "Adafruit/Adafruit_ADS1X15.h"
@@ -46,7 +51,11 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
 struct Pins;
 
 // DS18-based temp sensor
+#ifndef CONFIG_PHOTON2
 class TempSensor: public DS18
+#else
+class TempSensor: public DS18B20
+#endif
 {
 public:
   TempSensor();
@@ -108,8 +117,8 @@ protected:
   unsigned long int sample_time_;   // Exact moment of hardware sample
   unsigned long int sample_time_z_; // Exact moment of past hardware sample
   boolean dscn_cmd_;    // User command to ignore hardware, T=ignore
-  uint8_t vc_pin_;      // Common voltage pin, for !USE_ADS
-  uint8_t vo_pin_;      // Output voltage pin, for !USE_ADS
+  uint8_t vc_pin_;      // Common voltage pin, for !CONFIG_ADS1013
+  uint8_t vo_pin_;      // Output voltage pin, for !CONFIG_ADS1013
   int Vc_raw_;          // Raw analog read, integer       
   float Vc_;            // Sensed Vc, common op amp voltage ref, V
   int Vo_raw_;          // Raw analog read, integer       

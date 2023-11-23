@@ -85,13 +85,14 @@
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
-#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+#ifdef CONFIG_47L16
   #include "hardware/SerialRAM.h"
   SerialRAM ram;
-  #ifdef CONFIG_USE_BLE
-    #include <BleSerialPeripheralRK.h>
-    SerialLogHandler logHandler;
-  #endif
+#endif
+
+#ifdef CONFIG_USE_BLE
+  #include <BleSerialPeripheralRK.h>
+  SerialLogHandler logHandler;
 #endif
 
 // Globals
@@ -100,13 +101,14 @@ extern CommandPars cp;            // Various parameters to be common at system l
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
-#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+#ifdef CONFIG_47L16
   SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
 #else
   retained Flt_st saved_hist[NHIS];    // For displaying faults
   retained Flt_st saved_faults[NFLT];  // For displaying faults
   retained SavedPars sp = SavedPars(saved_hist, NHIS, saved_faults, NFLT);  // Various parameters to be common at system level
 #endif
+
 Flt_st mySum[NSUM];                   // Summaries
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
@@ -118,14 +120,12 @@ String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
 Adafruit_SSD1306 *display;      // Main OLED display
 
-#if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
-  #ifdef CONFIG_USE_BLE
+#ifdef CONFIG_USE_BLE
   // First parameter is the transmit buffer size, second parameter is the receive buffer size
   BleSerialPeripheralStatic<32, 256> bleSerial;
   const unsigned long TRANSMIT_PERIOD_MS = 2000;
   unsigned long lastTransmit = 0;
   int counter = 0;
-  #endif
 #endif
 
 // Setup
@@ -146,18 +146,20 @@ void setup()
   // Serial1.blockOnOverrun(false); doesn't work:  it's a mess; partial lines galore
   Serial1.begin(S1BAUD);
   Serial1.flush();
+
   // EERAM
-  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+  #ifdef CONFIG_47L16
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
     sp.load_all();
-    // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
-    #ifdef CONFIG_USE_BLE
-      bleSerial.setup();
-      bleSerial.advertise();
-      Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
-    #endif
+  #endif
+
+  // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
+  #ifdef CONFIG_USE_BLE
+    bleSerial.setup();
+    bleSerial.advertise();
+    Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
   #endif
 
   // Peripherals (non-Photon2 (p2))
@@ -176,8 +178,6 @@ void setup()
   // A4 - not available
   // A5-->D14 - spare
   #ifdef CONFIG_PHOTON2
-    // myPins = new Pins(D6, D7, 43, 50, 49);
-    // myPins = new Pins(D6, D7, A1, A0, A2);
     myPins = new Pins(D6, D7, D12, D11, D13);
   #else
     myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
@@ -228,20 +228,23 @@ void setup()
 
   // Determine millis() at turn of Time.now   Used to improve accuracy of timing.
   long time_begin = Time.now();
-  while ( Time.now()==time_begin )
+  uint16_t count = 0;
+  while ( Time.now()==time_begin && count++<1000 )
   {
     delay(1);
     millis_flip = millis()%1000;
   }
+  Serial.printf("millis_flip%ld count%d\n", millis_flip, count);
 
   // Enable and print stored history
-  System.enableFeature(FEATURE_RETAINED_MEMORY);
+  #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)  // TODO: test that ARGON still works with the #if in place
+    System.enableFeature(FEATURE_RETAINED_MEMORY);
+  #endif
   if ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 )
   {
     sp.print_history_array();
     sp.print_fault_header();
   }
-
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
   {
@@ -312,8 +315,7 @@ void loop()
   summarizing = Summarize->update(millis(), false);
   summarizing = summarizing || boot_summ;
 
-  #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
-    #ifdef CONFIG_USE_BLE
+  #ifdef CONFIG_USE_BLE
     // This must be called from loop() on every call to loop.
     bleSerial.loop();
     // Print out anything we receive
@@ -328,7 +330,6 @@ void loop()
         // Log.info("counter=%d", counter);
         // Serial.printf("passing argon bleSerial\n");
     }
-    #endif
   #endif
 
   // Sample temperature
@@ -340,7 +341,7 @@ void loop()
   }
 
   // Sample Ib
-  #ifndef USE_ADS
+  #ifndef CONFIG_ADS1013
     if ( read )
     {
       static unsigned int t_us_last = micros();
@@ -418,7 +419,7 @@ void loop()
   {
     oled_display(display, Sen, Mon);
 
-    #if defined(CONFIG_ARGON) || defined(CONFIG_PHOTON2)
+    #ifdef CONFIG_47L16
       // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
     #endif

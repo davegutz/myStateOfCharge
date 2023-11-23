@@ -33,7 +33,7 @@ SavedPars::SavedPars()
   nflt_ = int( NFLT ); 
   nhis_ = int( NHIS ); 
 }
-#ifdef CONFIG_PHOTON
+#ifndef CONFIG_47L16
     SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
     {
         nhis_ = nhis;
@@ -45,11 +45,12 @@ SavedPars::SavedPars()
 SavedPars::SavedPars(SerialRAM *ram)
 {
     next_ = 0x000;
-    #ifndef CONFIG_PHOTON
+    #ifdef CONFIG_47L16
         rP_ = ram;
         // Memory map
         amp_eeram_.a16 = next_; next_ += sizeof(amp_);
         cutback_gain_sclr_eeram_.a16 = next_; next_ += sizeof(cutback_gain_sclr_);
+        Dw_eeram_.a16 = next_;  next_ += sizeof(vb_table_bias_);
         debug_eeram_.a16 = next_; next_ += sizeof(debug_);
         delta_q_eeram_.a16 = next_;  next_ += sizeof(delta_q_);
         delta_q_model_eeram_.a16 = next_;  next_ += sizeof(delta_q_model_);
@@ -69,7 +70,6 @@ SavedPars::SavedPars(SerialRAM *ram)
         nP_eeram_.a16 = next_; next_ += sizeof(nP_);
         nS_eeram_.a16 = next_; next_ += sizeof(nS_);
         preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving_);
-        Dw_eeram_.a16 = next_;  next_ += sizeof(vb_table_bias_);
         sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm_);
         s_cap_mon_eeram_.a16 = next_;  next_ += sizeof(s_cap_mon_);
         s_cap_sim_eeram_.a16 = next_;  next_ += sizeof(s_cap_sim_);
@@ -105,6 +105,7 @@ boolean SavedPars::is_corrupt()
     boolean corruption = 
         is_val_corrupt(amp_, float(-1e6), float(1e6)) ||
         is_val_corrupt(cutback_gain_sclr_, float(-1000.), float(1000.)) ||
+        is_val_corrupt(vb_table_bias_, float(-1000.), float(1000.)) ||
         is_val_corrupt(debug_, -100, 100) ||
         is_val_corrupt(delta_q_, -1e8, 1e5) ||
         is_val_corrupt(delta_q_model_, -1e8, 1e5) ||
@@ -133,8 +134,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(t_last_, float(-10.), float(70.)) ||
         is_val_corrupt(t_last_model_, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_bias_hdwe_, float(-10.), float(70.)) ||
-        is_val_corrupt(Vb_scale_, float(-1e6), float(1e6)) ||
-        is_val_corrupt(vb_table_bias_, float(-1e6), float(1e6));
+        is_val_corrupt(Vb_scale_, float(-1e6), float(1e6));
     if ( corruption )
     {
         Serial.printf("corrupt*********\n");
@@ -144,11 +144,12 @@ boolean SavedPars::is_corrupt()
 }
 
 // Assign all save EERAM to RAM
-#ifndef CONFIG_PHOTON
+#ifdef CONFIG_47L16
     void SavedPars::load_all()
     {
         get_amp();
         get_cutback_gain_sclr();
+        get_Dw();
         get_debug();
         get_delta_q();
         get_delta_q_model();
@@ -167,7 +168,6 @@ boolean SavedPars::is_corrupt()
         get_nP();
         get_nS();
         get_preserving();
-        get_shunt_gain_sclr();
         get_sim_chm();
         get_s_cap_mon();
         get_s_cap_sim();
@@ -198,6 +198,7 @@ int SavedPars::num_diffs()
     // if ( 0UL < time_now ) n++;
     if ( float(0.) != amp_ ) n++;
     if ( float(1.) != cutback_gain_sclr_ ) n++;
+    if ( float(0.) != vb_table_bias_ ) n++;
     if ( int(0) != debug_ ) n++;
     if ( float(0.) != freq_ ) n++;
     if ( float(CURR_BIAS_ALL) != Ib_bias_all_ ) n++;
@@ -217,7 +218,6 @@ int SavedPars::num_diffs()
     if ( float(TEMP_BIAS) != Tb_bias_hdwe_ ) n++;
     if ( uint8_t(0) != type_ ) n++;
     if ( float(VOLT_BIAS) != Vb_bias_hdwe_ ) n++;
-    if ( float(0.) != vb_table_bias_ ) n++;
     if ( float(VB_SCALE) != Vb_scale_ ) n++;
     return ( n );
 }
@@ -227,7 +227,7 @@ int SavedPars::num_diffs()
 // Print memory map
 void SavedPars::mem_print()
 {
-    #ifndef CONFIG_PHOTON
+    #ifdef CONFIG_47L16
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         Serial.printf("Temp mem map print\n");
         for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("0x%X ", rP_->read(i));
@@ -249,7 +249,8 @@ void SavedPars::pretty_print(const boolean all)
     Serial.printf("saved parameters (sp):\n");
     Serial.printf("             defaults    current EERAM values\n");
     if ( all || float(0.) != amp_ )             Serial.printf(" inj amp%7.3f  %7.3f *Xa<> A pk\n", 0., amp_);
-    if ( all || 1. != cutback_gain_sclr_ )      Serial.printf(" cut_gn_slr%7.3f  %7.3f *Sk<>\n", 1., cutback_gain_sclr_);
+    if ( all || float(1.) != cutback_gain_sclr_ ) Serial.printf(" cut_gn_slr%7.3f  %7.3f *Sk<>\n", 1., cutback_gain_sclr_);
+    if ( all || float(0.) != vb_table_bias_ )   Serial.printf(" vb_table_bias %7.3f    %7.3f *Dw\n", 0., vb_table_bias_);
     if ( all || int(0) != debug_ )              Serial.printf(" debug  %d  %d *v<>\n", int(0), debug_);
     if ( all )                                  Serial.printf(" delta_q%10.1f %10.1f *DQ<>\n", double(0.), delta_q_);
     if ( all )                                  Serial.printf(" dq_sim %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model_);
@@ -278,7 +279,6 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model_);
     if ( all || float(VOLT_BIAS) != Vb_bias_hdwe_ )     Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe_);
     if ( all || float(VB_SCALE) != Vb_scale_ )  Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale_);
-    if ( all || float(0.) != vb_table_bias_ )   Serial.printf(" vb_table_bias %7.3f    %7.3f *Dw\n", 0., vb_table_bias_);
     // if ( all )
     // {
     //     Serial.printf("history array (%d):\n", nhis_);
@@ -288,7 +288,7 @@ void SavedPars::pretty_print(const boolean all)
     //     print_fault_array();
     //     print_fault_header();
     // }
-    #ifndef CONFIG_PHOTON
+    #ifdef CONFIG_47L16
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         // Serial.printf("Temp mem map print\n");
         // mem_print();

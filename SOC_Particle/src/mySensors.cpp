@@ -35,8 +35,13 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
 
 // class TempSensor
 // constructors
+#ifndef CONFIG_PHOTON2
 TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay)
 : DS18(pin, parasitic, conversion_delay), tb_stale_flt_(true)
+#else
+TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay)
+: DS18B20(pin, true), tb_stale_flt_(true)
+#endif
 {
    SdTb = new SlidingDeadband(HDB_TBATT);
    Serial.printf("DS18 1-wire Tb started\n");
@@ -54,7 +59,11 @@ float TempSensor::sample(Sensors *Sen)
   // Read hardware and check
   while ( ++count<MAX_TEMP_READS && temp==0 && !sp.mod_tb_dscn() )
   {
-    if ( read() ) temp = celsius() + (TBATT_TEMPCAL);
+    #ifndef CONFIG_PHOTON2
+      if ( read() ) temp = celsius() + (TBATT_TEMPCAL);
+    #else
+      if ( crcCheck() ) temp = getTemperature() + (TBATT_TEMPCAL);
+    #endif
     delay(1);
   }
 
@@ -87,7 +96,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *
   sp_Ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
   vc_pin_(vc_pin), vo_pin_(vo_pin), Vc_raw_(0), Vc_(HALF_3V3), Vo_Vc_(0.), using_tsc2010_(false)
 {
-  #ifdef USE_ADS
+  #ifdef CONFIG_ADS1013
     if ( name_=="No Amp")
       setGain(GAIN_SIXTEEN, GAIN_SIXTEEN); // 16x gain differential and single-ended  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
     else if ( name_=="Amp")
@@ -146,7 +155,7 @@ void Shunt::pretty_print()
 // Convert sampled shunt data to Ib engineering units
 void Shunt::convert(const boolean disconnect)
 {
-  #ifdef USE_ADS
+  #ifdef CONFIG_ADS1013
     if ( !bare_detected_ && !dscn_cmd_ )
     {
       #ifndef CONFIG_BARE
@@ -722,7 +731,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
   this->T = T;
   this->T_filt = T;
   this->T_temp = T_temp;
-  #ifdef CONFIG_PHOTON2
+  #ifdef CONFIG_TSC2010
     this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_, &sp.Ib_bias_amp_, SHUNT_AMP_GAIN, pins->Vom_pin);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_, &sp.Ib_bias_noa_, SHUNT_NOA_GAIN, pins->Von_pin);
   #else

@@ -1,6 +1,6 @@
 #ifndef _myTables_h
 #define _myTables_h
-#define t_float float
+// #define t_float float
 
 // Interpolating, clipping, 1 and 2-D arbitrarily spaced table look-up
 

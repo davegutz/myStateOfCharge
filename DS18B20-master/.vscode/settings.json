@@ -1,0 +1,5 @@
+{
+    "particle.targetDevice": "pro1a",
+    "particle.firmwareVersion": "5.5.0",
+    "particle.targetPlatform": "argon"
+}

@@ -3,10 +3,10 @@
 
 #include "version.h"
 const String unit = version + "_soc1a";
-#undef CONFIG_PHOTON
-#undef DEPLOY_PHOTON
+
+// Hardware config
 #define CONFIG_ARGON
-#undef CONFIG_PHOTON2
+#define CONFIG_47L16
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
