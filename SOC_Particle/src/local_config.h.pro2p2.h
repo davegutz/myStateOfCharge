@@ -4,7 +4,7 @@
 #include "version.h"
 const String unit = version + "_pro2p2";
 
-// Hardware config
+// Features config
 #define CONFIG_BARE
 #define CONFIG_PHOTON2
 #undef CONFIG_ARGON

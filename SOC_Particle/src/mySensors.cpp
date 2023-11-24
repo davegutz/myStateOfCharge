@@ -35,13 +35,8 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
 
 // class TempSensor
 // constructors
-#ifndef CONFIG_PHOTON2
 TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay)
 : DS18(pin, parasitic, conversion_delay), tb_stale_flt_(true)
-#else
-TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay)
-: DS18B20(pin, true), tb_stale_flt_(true)
-#endif
 {
    SdTb = new SlidingDeadband(HDB_TBATT);
    Serial.printf("DS18 1-wire Tb started\n");
@@ -59,11 +54,7 @@ float TempSensor::sample(Sensors *Sen)
   // Read hardware and check
   while ( ++count<MAX_TEMP_READS && temp==0 && !sp.mod_tb_dscn() )
   {
-    #ifndef CONFIG_PHOTON2
       if ( read() ) temp = celsius() + (TBATT_TEMPCAL);
-    #else
-      if ( crcCheck() ) temp = getTemperature() + (TBATT_TEMPCAL);
-    #endif
     delay(1);
   }
 

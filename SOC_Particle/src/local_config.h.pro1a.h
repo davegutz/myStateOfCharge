@@ -4,7 +4,7 @@
 #include "version.h"
 const String unit = version + "_pro1a";
 
-// Hardware config
+// Features config
 #define CONFIG_ARGON
 #define CONFIG_47L16
 

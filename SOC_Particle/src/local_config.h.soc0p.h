@@ -4,7 +4,7 @@
 #include "version.h"
 const String unit = version + "_soc0p";
 
-// Hardware config
+// Features config
 #define CONFIG_PHOTON
 #define CONFIG_ADS1013
 #define DEPLOY_PHOTON

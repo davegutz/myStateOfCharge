@@ -178,7 +178,8 @@ void setup()
   // A4 - not available
   // A5-->D14 - spare
   #ifdef CONFIG_PHOTON2
-    myPins = new Pins(D6, D7, D12, D11, D13);
+    myPins = new Pins(D3, D7, D12, D11, D13);
+    // pinMode(D3, INPUT_PULLUP);
   #else
     myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
   #endif

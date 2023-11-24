@@ -1,0 +1,109 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2023.11.24 06:12:18 =~=~=~=~=~=~=~=~=~=~=~=
+Xm0;echo: Xm0, 4
+echo: Xm0, 0
+modeling 247 to 0
+Chg...reset
+Modeling 0
+ib_noa_dscn 0
+ib_amp_dscn 0
+vb_dscn 0
+tb_dscn 0
+tweak_test 0
+mod_ib 0
+mod_vb 0
+mod_tb 0
+soft reset...
+XmgetTemperature(forceselect): _addr 0x0 _singleDrop 1 forceSelect 0
+DS18B20::resetsearch _addr 0x0
+getTemperature(forceselect) after resetsearch: _addr 0x0 _singleDrop 1 forceSelect 0
+DS18B20::search before _addr 0x0
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 1 0x1 0 0x0 0x0 00000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 2 0x2 0 0x0 0x0 00000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 3 0x4 0 0x0 0x0 00000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 4 0x8 0 0x8 0x8 80000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 5 0x10 0 0x8 0x8 80000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 6 0x20 0 0x28 0x28 280000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 7 0x40 0 0x28 0x28 280000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 8 0x80 0 0x28 0x28 280000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 9 0x1 1 0x1 0x28 281000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 10 0x2 1 0x1 0x28 281000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 11 0x4 1 0x5 0x28 285000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 12 0x8 1 0xD 0x28 28D000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 13 0x10 1 0xD 0x28 28D000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 14 0x20 1 0x2D 0x28 282D000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 15 0x40 1 0x6D 0x28 286D000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 16 0x80 1 0xED 0x28 28ED000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 17 0x1 2 0x0 0x28 28ED000000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 18 0x2 2 0x2 0x28 28ED200000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 19 0x4 2 0x6 0x28 28ED600000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 20 0x8 2 0x6 0x28 28ED600000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 21 0x10 2 0x16 0x28 28ED1600000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 22 0x20 2 0x36 0x28 28ED3600000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 23 0x40 2 0x76 0x28 28ED7600000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 24 0x80 2 0x76 0x28 28ED7600000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 25 0x1 3 0x0 0x28 28ED7600000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 26 0x2 3 0x0 0x28 28ED7600000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 27 0x4 3 0x4 0x28 28ED7640000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 28 0x8 3 0xC 0x28 28ED76C0000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 29 0x10 3 0x1C 0x28 28ED761C0000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 30 0x20 3 0x3C 0x28 28ED763C0000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 31 0x40 3 0x3C 0x28 28ED763C0000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 32 0x80 3 0xBC 0x28 28ED76BC0000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 33 0x1 4 0x1 0x28 28ED76BC1000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 34 0x2 4 0x3 0x28 28ED76BC3000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 35 0x4 4 0x7 0x28 28ED76BC7000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 36 0x8 4 0x7 0x28 28ED76BC7000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 37 0x10 4 0x17 0x28 28ED76BC17000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 38 0x20 4 0x17 0x28 28ED76BC17000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 39 0x40 4 0x17 0x28 28ED76BC17000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 40 0x80 4 0x17 0x28 28ED76BC17000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 41 0x1 5 0x0 0x28 28ED76BC17000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 42 0x2 5 0x0 0x28 28ED76BC17000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 43 0x4 5 0x0 0x28 28ED76BC17000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 44 0x8 5 0x0 0x28 28ED76BC17000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 45 0x10 5 0x0 0x28 28ED76BC17000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 46 0x20 5 0x20 0x28 28ED76BC172000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 47 0x40 5 0x20 0x28 28ED76BC172000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 48 0x80 5 0x20 0x28 28ED76BC172000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 49 0x1 6 0x0 0x28 28ED76BC172000
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 50 0x2 6 0x2 0x28 28ED76BC172020
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 51 0x4 6 0x6 0x28 28ED76BC172060
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 52 0x8 6 0x6 0x28 28ED76BC172060
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 53 0x10 6 0x6 0x28 28ED76BC172060
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 54 0x20 6 0x6 0x28 28ED76BC172060
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 55 0x40 6 0x6 0x28 28ED76BC172060
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 56 0x80 6 0x6 0x28 28ED76BC172060
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 57 0x1 7 0x1 0x28 28ED76BC172061
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 58 0x2 7 0x3 0x28 28ED76BC172063
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 59 0x4 7 0x3 0x28 28ED76BC172063
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 60 0x8 7 0x3 0x28 28ED76BC172063
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 61 0x10 7 0x3 0x28 28ED76BC172063
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 1 0 1 0 0 0 62 0x20 7 0x23 0x28 28ED76BC1720623
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 63 0x40 7 0x23 0x28 28ED76BC1720623
+OneWire::search do id_bit, cmp_id_bit, search_dir, LastDiscrepancy, LastFamilyDiscrepancy, last_zero, id_bit_number, rom_byte_mask, rom_byte_number, ROM_NO[rom_byte_number] , ROM_NO[0], ROM_NOM: 0 1 0 0 0 0 64 0x80 7 0x23 0x28 28ED76BC1720623
+DS18B20::search after _addr 0x28
+getTemperature(forceselect) after search: _addr 0x28 _singleDrop 1 forceSelect 0
+getTemperature(addr, forceselect): _addr 0x28 WIRE_UNKONWN 0x0 forceSelect 0
+2getTemperature(forceselect): _addr 0x28 _singleDrop 1 forceSelect 0
+getTemperature(forceselect) after search: _addr 0x28 _singleDrop 1 forceSelect 0
+getTemperature(addr, forceselect): _addr 0x28 WIRE_UNKONWN 0x0 forceSelect 0
+47;getTemperature(forceselect): _addr 0x28 _singleDrop 1 forceSelect 0
+getTemperature(forceselect) after search: _addr 0x28 _singleDrop 1 forceSelect 0
+getTemperature(addr, forceselect): _addr 0x28 WIRE_UNKONWN 0x0 forceSelect 0
+echo: Xm247, 4
+getTemperature(forceselect): _addr 0x28 _singleDrop 1 forceSelect 0
+getTemperature(forceselect) after search: _addr 0x28 _singleDrop 1 forceSelect 0
+getTemperature(addr, forceselect): _addr 0x28 WIRE_UNKONWN 0x0 forceSelect 0
+echo: Xm247, 0
+modeling 0 to 247
+Chg...reset
+Modeling 247
+ib_noa_dscn 1
+ib_amp_dscn 1
+vb_dscn 1
+tb_dscn 1
+tweak_test 0
+mod_ib 1
+mod_vb 1
+mod_tb 1
+soft reset...

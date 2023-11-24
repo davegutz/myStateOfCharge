@@ -34,13 +34,8 @@
 #include "parameters.h"
 
 // Temp sensor
-#ifndef CONFIG_PHOTON2
-  #include "hardware/OneWire.h"
-  #include "hardware/DS18.h"
-#else
-  #include <OneWire.h>
-  #include "hardware/DS18B20.h"
-#endif
+#include "hardware/OneWire.h"
+#include "hardware/DS18.h"
 
 // AD
 #include "Adafruit/Adafruit_ADS1X15.h"
@@ -51,11 +46,7 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
 struct Pins;
 
 // DS18-based temp sensor
-#ifndef CONFIG_PHOTON2
 class TempSensor: public DS18
-#else
-class TempSensor: public DS18B20
-#endif
 {
 public:
   TempSensor();
