@@ -75,3 +75,5 @@ SOC_Particle/py/putty_test.csv.tail
 SOC_Particle/dataReduction/g20231111/ampHiFail_pro1a_bb.csv
 SOC_Particle/src/SOC_Particle.cpp
 SOC_Particle/py/GUI_TestSOC.ini
+DS18B20-master/nul
+BT-AT/nul
