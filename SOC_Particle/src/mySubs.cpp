@@ -765,43 +765,63 @@ void wait_on_user_input(Adafruit_SSD1306 *display)
   display->setTextSize(1);              // Normal 1:1 pixel scale
   display->setTextColor(SSD1306_WHITE); // Draw white text
   display->setCursor(0,0);              // Start at top-left corner    sp.print_versus_local_config();
-  display->println("Waiting for user talk\n\nignores after 120s");
+  display->println("Waiting for USB/BT talk\n\nignores after 120s");
   display->display();
   uint8_t count = 0;
-  const uint8_t max_count = 30;
   uint16_t answer = '\r';
-  while ( ++count<max_count && answer!='Y' && answer!='n' && answer!='N' )
+  // Get user input but timeout at 120 seconds if no response
+  while ( count<30 && answer!='Y' && answer!='n' && answer!='N' )
   {
-    if ( count>1 ) delay(4000);
+    if ( answer=='\r')
+    {
+      count++;
+      if ( count>1 ) delay(4000);
+    }
+    else delay(100);
+
     if ( Serial.available() )
-    {
       answer=Serial.read();
-    }
-
     else if ( Serial1.available() )
-    {
       answer=Serial1.read();
-    }
 
-    if ( answer=='Y' )
-    {
-      Serial.printf(" Y\n"); Serial1.printf(" Y\n");
-      sp.reset_pars();
-      sp.pretty_print( true );
-    }
-
-    else if ( answer=='n' || answer=='N' )
-    {
-      Serial.printf(" N.  moving on...\n\n"); Serial1.printf(" N.  moving on...\n\n");
-    }
-
-    else
+    if ( answer=='\r')
     {
       Serial.printf("\n\n");
       sp.pretty_print( false );
-      Serial.printf("Do you wish to reset to defaults? [Y/n]:"); Serial1.printf("Do you wish to reset to defaults? [Y/n]:");
+      Serial.printf("Reset to defaults? [Y/n]:"); Serial1.printf("Reset to defaults? [Y/n]:");
+    }
+    else  // User is typing.  Ignore him until they answer 'Y', 'N', or 'n'.  But timeout at 30 seconds if they don't
+    {
+      while ( answer!='Y' && answer!='N' && answer!='n' && count<30 )
+      {
+        if ( Serial.available() )
+          answer=Serial.read();
+
+        else if ( Serial1.available() )
+          answer=Serial1.read();
+
+        else
+        {
+          Serial.printf("?");
+          count++;
+          delay(1000);
+        }
+      }
     }
 
   }
-  if ( count==max_count ) Serial.printf("time out; moving on\n");
+
+  // Wrap it up
+  if ( answer=='Y' )
+  {
+    Serial.printf("  Y\n\n"); Serial1.printf("  Y\n\n");
+    sp.reset_pars();
+    sp.pretty_print( true );
+    System.backupRamSync();
+  }
+  else if ( answer=='n' || answer=='N' || count==30 )
+  {
+    Serial.printf(" N.  moving on...\n\n"); Serial1.printf(" N.  moving on...\n\n");
+  }
+
 }

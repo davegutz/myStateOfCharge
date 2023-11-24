@@ -911,6 +911,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             }
             break;
 
+          // Photon 2 O/S waits 10 seconds between backup SRAM saves.  To save time, you can get in the habit of pressing 'w;'
+          // This was not done for all passes just to save only when an adjustment change verified by user (* parameters), to avoid SRAM life impact.
+          #ifdef CONFIG_PHOTON2
+            case ( 'w' ):  // w:  confirm write * adjustments to to SRAM
+              System.backupRamSync();
+              Serial.printf("SAVED *\n"); Serial1.printf("SAVED *\n");
+              break;
+          #endif
+
           case ( 'X' ):  // X
             switch ( cp.input_str.charAt(1) )
             {
@@ -1377,6 +1386,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" Vs= "); Serial.printf("%6.3f", Sen->Sim->ds_voc_soc()); Serial.printf(": Sim soc in[0]\n"); 
 
   Serial.printf("\nW<?> - iters to wait\n");
+
+  #ifdef CONFIG_PHOTON2
+    Serial.printf("\nw - save * confirm adjustments to SRAM\n");
+  #endif
 
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
   Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
