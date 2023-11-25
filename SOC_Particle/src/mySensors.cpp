@@ -36,7 +36,7 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
 // class TempSensor
 // constructors
 TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay)
-: DS18(pin, parasitic, conversion_delay), tb_stale_flt_(true)
+: DS18B20(pin, true, conversion_delay), tb_stale_flt_(true)
 {
    SdTb = new SlidingDeadband(HDB_TBATT);
    Serial.printf("DS18 1-wire Tb started\n");
@@ -54,7 +54,7 @@ float TempSensor::sample(Sensors *Sen)
   // Read hardware and check
   while ( ++count<MAX_TEMP_READS && temp==0 && !sp.mod_tb_dscn() )
   {
-      if ( read() ) temp = celsius() + (TBATT_TEMPCAL);
+      if ( crcCheck() ) temp = getTemperature() + (TBATT_TEMPCAL);
     delay(1);
   }
 

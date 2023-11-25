@@ -34,8 +34,8 @@
 #include "parameters.h"
 
 // Temp sensor
-#include "hardware/OneWire.h"
-#include "hardware/DS18.h"
+#include <OneWire.h>
+#include <DS18B20.h>
 
 // AD
 #include "Adafruit/Adafruit_ADS1X15.h"
@@ -46,7 +46,7 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
 struct Pins;
 
 // DS18-based temp sensor
-class TempSensor: public DS18
+class TempSensor: public DS18B20
 {
 public:
   TempSensor();
