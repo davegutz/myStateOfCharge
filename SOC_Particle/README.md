@@ -406,6 +406,7 @@ OLED board carefully off to the side.  Will need a hobby box to contain the fina
   pro0p   0.001         0.035   0.034600        0.000281  0.000096  0.044650              0.031940 0.001910
   pro1a   0.002         0.003   0.002060        0.000377  0.000190  0.048500
   pro2p2  0.002         not measured
+  pro3p2  not Meas      0.002   Not Meas -->
   ```
   5. A Serial.print statement uses about 0.004 seconds.   Best way to measure is to simply 'Dr1;DP100;v1;' and watch dt.
 
