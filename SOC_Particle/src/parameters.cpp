@@ -48,8 +48,8 @@ SavedPars::SavedPars(SerialRAM *ram)
     #ifdef CONFIG_47L16
         rP_ = ram;
         // Memory map
-        amp_eeram_.a16 = next_; next_ += sizeof(amp_);
-        cutback_gain_sclr_eeram_.a16 = next_; next_ += sizeof(cutback_gain_sclr_);
+        amp_eeram_.a16 = next_; next_ += sizeof(float);
+        cutback_gain_sclr_eeram_.a16 = next_; next_ += sizeof(float);
         Dw_eeram_.a16 = next_;  next_ += sizeof(vb_table_bias_);
         debug_eeram_.a16 = next_; next_ += sizeof(debug_);
         delta_q_eeram_.a16 = next_;  next_ += sizeof(delta_q_);
@@ -103,8 +103,8 @@ SavedPars::~SavedPars() {}
 boolean SavedPars::is_corrupt()
 {
     boolean corruption = 
-        is_val_corrupt(amp_, float(-1e6), float(1e6)) ||
-        is_val_corrupt(cutback_gain_sclr_, float(-1000.), float(1000.)) ||
+        is_val_corrupt(amp_->get(), float(-1e6), float(1e6)) ||
+        is_val_corrupt(cutback_gain_sclr_.get(), float(-1000.), float(1000.)) ||
         is_val_corrupt(vb_table_bias_, float(-1000.), float(1000.)) ||
         is_val_corrupt(debug_, -100, 100) ||
         is_val_corrupt(delta_q_, -1e8, 1e5) ||
@@ -196,8 +196,8 @@ int SavedPars::num_diffs()
     // if ( int(-1) != isum_ )    //     n++;
     // if ( uint8_t(0) != preserving_ )    //     n++;
     // if ( 0UL < time_now ) n++;
-    if ( float(0.) != amp_ ) n++;
-    if ( float(1.) != cutback_gain_sclr_ ) n++;
+    if ( float(0.) != amp_->get() ) n++;
+    if ( float(1.) != cutback_gain_sclr_.get() ) n++;
     if ( float(0.) != vb_table_bias_ ) n++;
     if ( int(0) != debug_ ) n++;
     if ( float(0.) != freq_ ) n++;
@@ -248,8 +248,8 @@ void SavedPars::pretty_print(const boolean all)
 {
     Serial.printf("saved parameters (sp):\n");
     Serial.printf("             defaults    current EERAM values\n");
-    if ( all || float(0.) != amp_ )             Serial.printf(" inj amp%7.3f  %7.3f *Xa<> A pk\n", 0., amp_);
-    if ( all || float(1.) != cutback_gain_sclr_ ) Serial.printf(" cut_gn_slr%7.3f  %7.3f *Sk<>\n", 1., cutback_gain_sclr_);
+    if ( all || float(0.) != amp_->get() )             Serial.printf(" %s %7.3f  %7.3f *Xa<> %s pk\n", amp_->description(), 0., amp_->get(), amp_->units());
+    if ( all || float(1.) != cutback_gain_sclr_.get() ) Serial.printf(" cut_gn_slr %s %7.3f  %7.3f *Sk<> %s\n", cutback_gain_sclr_.description(), 1., cutback_gain_sclr_.get(), cutback_gain_sclr_.units());
     if ( all || float(0.) != vb_table_bias_ )   Serial.printf(" vb_table_bias %7.3f    %7.3f *Dw\n", 0., vb_table_bias_);
     if ( all || int(0) != debug_ )              Serial.printf(" debug  %d  %d *v<>\n", int(0), debug_);
     if ( all )                                  Serial.printf(" delta_q%10.1f %10.1f *DQ<>\n", double(0.), delta_q_);

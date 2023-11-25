@@ -82,7 +82,7 @@
             #define NSUM              205       // Number of saved SRAM summaries (205)
                                                 // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
         #else
-            #define NSUM               45       // Number of saved SRAM summaries (45)
+            #define NSUM               24       // Number of saved SRAM summaries (45)
                                                 // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
         #endif
     #endif

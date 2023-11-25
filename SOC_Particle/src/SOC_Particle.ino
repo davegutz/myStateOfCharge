@@ -52,24 +52,27 @@
 */
 // This works when I'm using three platforms:   PHOTON = 6 and ARGON = 12 and PHOTON2 = (>=20)
 #ifndef PLATFORM_ID
-  #define PLATFORM_ID 13
+  #define PLATFORM_ID 6
+#endif
+#ifndef PLATFORM_PHOTON
+  #define PLATFORM_PHOTON 6
 #endif
 
 #include "constants.h"
 // Prevent mixing up local_config files (still could sneak soc0p through as pro0p)
 #if defined(CONFIG_PHOTON)
   #undef ARDUINO
-  #if (PLATFORM_ID > 9)
+  #if (PLATFORM_ID != PLATFORM_PHOTON)
     #error "copy local_config.xxxx.h to local_config.h"
   #endif
 #elif defined(CONFIG_ARGON)
   #undef ARDUINO
-  #if (PLATFORM_ID < 9) || (PLATFORM_ID > 12)
+  #if (PLATFORM_ID != PLATFORM_ARGON)
     #error "copy local_config.xxxx.h to local_config.h"
   #endif
 #elif defined(CONFIG_PHOTON2)
   #undef ARDUINO
-  #if (PLATFORM_ID < PLATFORM_P2)
+  #if (PLATFORM_ID != PLATFORM_P2)
     #error "copy local_config.xxxx.h to local_config.h"
   #endif
 #endif
@@ -162,15 +165,15 @@ void setup()
     Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
   #endif
 
-  // Peripherals (non-Photon2 (p2))
+  // Peripherals (non-Photon2)
   // D6 - one-wire temp sensor
   // D7 - status led heartbeat
   // A1 - Vb
   // A2 - Primary Ib amp (called by old ADS name Amplified, amp)
   // A3 - Backup Ib amp (called by old ADS name Non Amplified, noa)
   // A4 - Ib amp common
-  // Peripherals (Photon2 (p2))
-  // D6 - one-wire temp sensor
+  // Peripherals (Photon2)
+  // D3 - one-wire temp sensor ******** to be replaced by I2C device
   // D7 - status led heartbeat
   // A2->A0->D11 - Primary Ib amp (called by old ADS name Amplified, amp)
   // A1->D12 - Vb

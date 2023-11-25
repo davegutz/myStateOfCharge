@@ -30,6 +30,31 @@
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
 #include "fault.h"
+#include <vector>
+
+// Variables name class to unify units, description and methods
+template <typename T>
+class Variables
+{
+public:
+    Variables(){};
+    Variables(const String &units, const String &description)
+    {
+        units_ = units;
+        description_ = description;
+    };
+    ~Variables(){};
+    const char* description() { return description_.c_str(); }
+    T get() { return val_; }
+    void set(T val) { val_ = val; }
+    const char* units() { return units_.c_str(); }
+protected:
+    T val_;
+    String units_;
+    String description_;
+    boolean RAM_;
+};
+
 
 // Corruption test
 template <typename T>
@@ -59,8 +84,8 @@ public:
     // operators
 
     // parameter list
-    float amp() { return amp_; }
-    float cutback_gain_sclr() { return cutback_gain_sclr_; }
+    Variables <float> * amp() { return amp_; }
+    Variables <float>  cutback_gain_sclr() { return cutback_gain_sclr_; }
     float Dw() { return vb_table_bias_; }
     int debug() { return debug_;}
     double delta_q() { return delta_q_; }
@@ -115,8 +140,8 @@ public:
     boolean mod_vb_dscn() { return ( 1<<5 & modeling_ ); }              // Nothing connected to vb on A1
     // get
     #ifdef CONFIG_47L16
-        void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp_ = value; }
-        void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr_ = value; }
+        void get_amp() { float value; rP_->get(amp_eeram_.a16, value); amp_->set(value); }
+        void get_cutback_gain_sclr() { float value; rP_->get(cutback_gain_sclr_eeram_.a16, value); cutback_gain_sclr_.set(value); }
         void get_Dw() { float value; rP_->get(Dw_eeram_.a16, value); vb_table_bias_ = value; }
         void get_debug() { int value; rP_->get(debug_eeram_.a16, value); debug_ = value; }
         void get_delta_q() { double value; rP_->get(delta_q_eeram_.a16, value); delta_q_ = value; }
@@ -166,8 +191,8 @@ public:
     // put
     #ifndef CONFIG_47L16
         void put_all_dynamic();
-        void put_amp(const float input) { amp_ = input; }
-        void put_cutback_gain_sclr(const float input) { cutback_gain_sclr_ = input; }
+        void put_amp(const float input) { amp_->set(input); }
+        void put_cutback_gain_sclr(const float input) { cutback_gain_sclr_.set(input); }
         void put_Dw(const float input) { vb_table_bias_ = input; }
         void put_debug(const int input) { debug_ = input; }
         void put_delta_q(const double input) { delta_q_ = input; }
@@ -207,8 +232,8 @@ public:
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #else
         void put_all_dynamic();
-        void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp_ = input; }
-        void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr_ = input; }
+        void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp_->set(input); }
+        void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr_.set(input); }
         void put_Dw(const float input) { rP_->put(Dw_eeram_.a16, input); vb_table_bias_ = input;  Serial.printf(" Dw_eeram_.a16 0x%X\n", Dw_eeram_.a16);}
         void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug_ = input; }
         void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q_ = input; }
@@ -251,8 +276,11 @@ public:
     Flt_st put_history(const Flt_st input, const uint8_t i);
     boolean tweak_test() { return ( 0x8 & modeling_ ); } // Driving signal injection completely using software inj_bias 
 protected:
-    float amp_;             // Injected amplitude, A
-    float cutback_gain_sclr_;// Scalar on battery model saturation cutback function
+    Variables <float> *amp_ = new Variables <float>("Amps", "Inj amp");
+    // float amp_;             // Injected amplitude, A
+
+    Variables <float> cutback_gain_sclr_ = Variables<float>("slr", "cutback gain scalar");
+    // float cutback_gain_sclr_;// Scalar on battery model saturation cutback function
                                 // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
     int debug_;             // Level of debug printing
     double delta_q_;        // Charge change since saturated, C

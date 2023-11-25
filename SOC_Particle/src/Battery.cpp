@@ -649,7 +649,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     dv_dyn_ = vb_ - voc_;
 
     // Saturation logic, both full and empty
-    sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ds_voc_soc_) ) * sat_cutback_gain_ * sp.cutback_gain_sclr();
+    sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ds_voc_soc_) ) * sat_cutback_gain_ * sp.cutback_gain_sclr().get();
     if ( sp.tweak_test() || !sp.mod_ib() ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
     ib_fut_ = min(ib_charge_fut, sat_ib_max_);      // the feedback of ib_
     // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past value.  (This prevents sat logic from working)
@@ -705,25 +705,25 @@ float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const fl
             inj_bias = sp.inj_bias();
             break;
         case ( 1 ):   // Sine wave
-            inj_bias = Sin_inj_->signal(amp, freq, t, 0.0) - sp.amp();
+            inj_bias = Sin_inj_->signal(amp, freq, t, 0.0) - sp.amp()->get();
             break;
         case ( 2 ):   // Square wave
-            inj_bias = Sq_inj_->signal(amp, freq, t, 0.0) - sp.amp();
+            inj_bias = Sq_inj_->signal(amp, freq, t, 0.0) - sp.amp()->get();
             break;
         case ( 3 ):   // Triangle wave
             inj_bias = Tri_inj_->signal(amp, freq, t, 0.0);
             break;
         case ( 4 ): case ( 5 ): // Software biases only
-            inj_bias = sp.inj_bias() - sp.amp();
+            inj_bias = sp.inj_bias() - sp.amp()->get();
             break;
         case ( 6 ):   // Positve bias
-            inj_bias = amp - sp.amp();
+            inj_bias = amp - sp.amp()->get();
             break;
         case ( 8 ):   // Cosine wave
-            inj_bias = Cos_inj_->signal(amp, freq, t, 0.0) - sp.amp();
+            inj_bias = Cos_inj_->signal(amp, freq, t, 0.0) - sp.amp()->get();
             break;
         default:
-            inj_bias = -sp.amp();
+            inj_bias = -sp.amp()->get();
             break;
     }
     sp.put_inj_bias(inj_bias);

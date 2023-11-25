@@ -551,11 +551,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             
               case ( 'k' ):  // * Sk<>:  scale cutback gain for sim rep of BMS
                 scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("sp.cutback_gain_sclr%7.3f to ", sp.cutback_gain_sclr());
-                Serial1.printf("sp.cutback_gain_sclr%7.3f to ", sp.cutback_gain_sclr());
+                Serial.printf("sp.cutback_gain_sclr%7.3f to ", sp.cutback_gain_sclr().get());
+                Serial1.printf("sp.cutback_gain_sclr%7.3f to ", sp.cutback_gain_sclr().get());
                 sp.put_cutback_gain_sclr(scale);
-                Serial.printf("%7.3f\n", sp.cutback_gain_sclr());
-                Serial1.printf("%7.3f\n", sp.cutback_gain_sclr());
+                Serial.printf("%7.3f %s, %s\n", sp.cutback_gain_sclr().get(), sp.cutback_gain_sclr().description(), sp.cutback_gain_sclr().units());
+                Serial1.printf("%7.3f %s, %s\n", sp.cutback_gain_sclr().get(), sp.cutback_gain_sclr().description(), sp.cutback_gain_sclr().units());
                 break;
             
               case ( 'V' ):  // * SV<>:  Vb sensor scalar
@@ -962,7 +962,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'a' ): // Xa<>:  injection amplitude
                 sp.put_amp(cp.input_str.substring(2).toFloat()*sp.nP());
-                Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.amp(), sp.inj_bias());
+                // Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.amp(), sp.inj_bias());
+                Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.amp()->units(), sp.amp()->description(), sp.amp()->get(), sp.inj_bias());
                 break;
 
               case ( 'f' ): // * Xf<>:  injection frequency
@@ -1302,7 +1303,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" *SQ=  "); Serial.print(Mon->q_capacity()/Mon->q_capacity()); Serial.printf(": sp. Scalar cap mon\n"); 
   Serial1.printf(" *SQ=  "); Serial1.print(Mon->q_capacity()/Mon->q_capacity()); Serial1.printf(": sp. Scalar cap mon\n"); 
   Serial.printf("  Sr=  "); Serial.print(Sen->Sim->Sr()); Serial.printf(": Scalar res sim\n"); 
-  Serial.printf(" *Sk=  "); Serial.print(sp.cutback_gain_sclr()); Serial.printf(": Sat mod ctbk sclr\n"); 
+  // Serial.printf(" *Sk=  "); Serial.print(sp.cutback_gain_sclr().get()); Serial.printf(": Sat mod ctbk sclr\n"); 
+  Serial.printf(" *Sk=  "); Serial.print(sp.cutback_gain_sclr().get()); Serial.printf("%s, %s\n", sp.cutback_gain_sclr().description(), sp.cutback_gain_sclr().units()); 
   Serial.printf(" *SV= "); Serial.printf("%6.3f", sp.Vb_scale()); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
   Serial1.printf(" *SV= "); Serial1.printf("%6.3f", sp.Vb_scale()); Serial1.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
 
@@ -1402,7 +1404,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("      0x4  =1<<2 current %d\n", sp.mod_ib());
   Serial.printf("      0x2  =1<<1 voltage %d\n", sp.mod_vb());
   Serial.printf("      0x1  =1<<0 temp %d\n", sp.mod_tb());
-  Serial.printf(" *Xa= "); Serial.printf("%6.3f", sp.amp()); Serial.printf(": Inj amp A pk (0-18.3) [0]\n");
+  Serial.printf(" *Xa= "); Serial.printf("%6.3f", sp.amp()->get()); Serial.printf(": Inj amp A pk (0-18.3) [0]\n");
   Serial.printf(" *Xf= "); Serial.printf("%6.3f", sp.freq()/2./PI); Serial.printf(": Inj freq Hz (0-2) [0]\n");
   Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.printf(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))\n");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 

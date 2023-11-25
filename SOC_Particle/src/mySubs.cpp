@@ -584,7 +584,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     chit("Pa;", QUEUE);     // Print all for record.  Last so Pf last and visible
     chit("Xp0;", QUEUE);    // Reset
   }
-  Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type(), sp.amp(), sp.freq());
+  Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type(), sp.amp()->get(), sp.freq());
 }
 
 // If false token, get new string from source
@@ -644,6 +644,7 @@ void serialEvent()
     // if (inChar == '\n') Serial.printf("<CR>");
     // else if (inChar == '\0') Serial.printf("<EOL>");
     // else Serial.printf("%c", inChar);
+    if ( inChar=='\r' ) Serial.printf("\n");
 
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
@@ -671,6 +672,9 @@ void serialEvent1()
     char inChar = (char)Serial1.read();
     // add it to the cp.input_str:
     cp.input_str += inChar;
+
+    if ( inChar=='\r' ) Serial.printf("\n");
+
     // if the incoming character is a newline, set a flag
     // so the main loop can do something about it:
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
@@ -817,7 +821,9 @@ void wait_on_user_input(Adafruit_SSD1306 *display)
     Serial.printf("  Y\n\n"); Serial1.printf("  Y\n\n");
     sp.reset_pars();
     sp.pretty_print( true );
-    System.backupRamSync();
+    #ifdef CONFIG_PHOTON2
+      System.backupRamSync();
+    #endif
   }
   else if ( answer=='n' || answer=='N' || count==30 )
   {
