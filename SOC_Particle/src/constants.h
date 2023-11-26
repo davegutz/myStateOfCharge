@@ -87,7 +87,7 @@
         #endif
     #endif
 #else
-        #define NSUM              2215  // Number of saved SRAM summaries (2215)
+        #define NSUM              2200  // Number of saved SRAM summaries (2215)
                                         //If too large, will get compile error 'Insufficient room for .data and .bss sections!' or flashing red
 #endif
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)

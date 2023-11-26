@@ -29,6 +29,7 @@
 #include "parameters.h"
 #include <math.h>
 #include "debug.h"
+#include "Variable.h"
 
 extern CommandPars cp;            // Various parameters shared at system level
 extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
@@ -77,7 +78,7 @@ void clear_queues()
 }
 
 // Talk Executive
-void talk(BatteryMonitor *Mon, Sensors *Sen)
+void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 {
   float FP_in = -99.;
   int INT_in = -1;
@@ -967,10 +968,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'f' ): // * Xf<>:  injection frequency
-                sp.put_freq(max(min(cp.input_str.substring(2).toFloat(), 2.0), 0.0));
-                Serial.printf("Injected freq set%7.3f Hz =", sp.freq());
-                sp.put_freq( sp.freq()*(2. * PI) );
-                Serial.printf("%7.3f r/s\n", sp.freq());
+                V->Freq.set(max(min(cp.input_str.substring(2).toFloat(), 2.0), 0.0));
+                Serial.printf("Injected freq set%7.3f Hz =", V->Freq.get());
+                V->Freq.set( V->Freq.get()*(2. * PI) );
+                Serial.printf("%7.3f r/s\n", V->Freq.get());
                 break;
 
               case ( 'b' ): // * Xb<>:  injection bias
@@ -1230,7 +1231,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'h' ):  // h: help
-            talkH(Mon, Sen);
+            talkH(Mon, Sen, V);
             break;
 
           default:
@@ -1245,7 +1246,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 }
 
 // Talk Help
-void talkH(BatteryMonitor *Mon, Sensors *Sen)
+void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 {
   Serial.printf("\n\nHelp menu.  Omit '=' and end entry with ';'\n");
 
@@ -1405,7 +1406,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("      0x2  =1<<1 voltage %d\n", sp.mod_vb());
   Serial.printf("      0x1  =1<<0 temp %d\n", sp.mod_tb());
   Serial.printf(" *Xa= "); Serial.printf("%6.3f", sp.amp()->get()); Serial.printf(": Inj amp A pk (0-18.3) [0]\n");
-  Serial.printf(" *Xf= "); Serial.printf("%6.3f", sp.freq()/2./PI); Serial.printf(": Inj freq Hz (0-2) [0]\n");
+  Serial.printf(" *Xf= "); Serial.printf("%6.3f", V->Freq.get()/2./PI); Serial.printf(": %s, %s (0-2) [0]\n", V->Freq.description(), V->Freq.units());
   Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.printf(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))\n");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
   Serial.printf("  Xp-1: Off, modeling false\n");

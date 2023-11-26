@@ -7,6 +7,7 @@ const String unit = version + "_pro1a";
 // Features config
 #define CONFIG_ARGON
 #define CONFIG_47L16
+#define CONFIG_DISP_SKIP 5
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

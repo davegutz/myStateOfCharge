@@ -91,6 +91,8 @@ public:
     double delta_q() { return delta_q_; }
     double delta_q_model() { return delta_q_model_; }
     float freq() { return freq_; }
+    address16b freq_eeram() { return freq_eeram_; }
+    float *freq_ptr() { return &freq_; }
     uint8_t mon_chm() { return mon_chm_; }
     uint8_t sim_chm() { return sim_chm_; }
     float s_cap_mon() { return s_cap_mon_; }
@@ -103,6 +105,7 @@ public:
     float ib_scale_amp() { return ib_scale_amp_; }
     float ib_scale_noa() { return ib_scale_noa_; }
     int8_t ib_select() { return ib_select_; }
+    int8_t *ib_select_ptr() { return &ib_select_;}
     int iflt() { return iflt_; }
     int ihis() { return ihis_; }
     float inj_bias() { return inj_bias_; }
@@ -234,7 +237,7 @@ public:
         void put_all_dynamic();
         void put_amp(const float input) { rP_->put(amp_eeram_.a16, input); amp_->set(input); }
         void put_cutback_gain_sclr(const float input) { rP_->put(cutback_gain_sclr_eeram_.a16, input); cutback_gain_sclr_.set(input); }
-        void put_Dw(const float input) { rP_->put(Dw_eeram_.a16, input); vb_table_bias_ = input;  Serial.printf(" Dw_eeram_.a16 0x%X\n", Dw_eeram_.a16);}
+        void put_Dw(const float input) { rP_->put(Dw_eeram_.a16, input); vb_table_bias_ = input; }
         void put_debug(const int input) { rP_->put(debug_eeram_.a16, input); debug_ = input; }
         void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q_ = input; }
         void put_delta_q() { rP_->put(delta_q_eeram_.a16, delta_q_); }
@@ -286,6 +289,7 @@ protected:
     double delta_q_;        // Charge change since saturated, C
     double delta_q_model_;  // Charge change since saturated, C
     float freq_;            // Injected frequency, Hz (0-2)
+    address16b freq_eeram_;
     float Ib_bias_all_;     // Bias on all shunt sensors, A
     float Ib_bias_amp_;     // Calibration adder of amplified shunt sensor, A
     float Ib_bias_noa_;     // Calibration adder of non-amplified shunt sensor, A
@@ -322,7 +326,7 @@ protected:
         address16b debug_eeram_;
         address16b delta_q_eeram_;
         address16b delta_q_model_eeram_;
-        address16b freq_eeram_;
+        // address16b freq_eeram_;
         address16b hys_scale_eeram_;
         address16b Ib_bias_all_eeram_;
         address16b Ib_bias_amp_eeram_;

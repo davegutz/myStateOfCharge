@@ -27,6 +27,7 @@
 #include <math.h>
 #include "debug.h"
 #include "mySummary.h"
+#include "Variable.h"
 
 extern CommandPars cp;  // Various parameters shared at system level
 extern PublishPars pp;  // For publishing
@@ -372,7 +373,11 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   #endif
   display->setTextSize(1);              // Normal 1:1 pixel scale
   display->setTextColor(SSD1306_WHITE); // Draw white text
-  display->setCursor(0,0);              // Start at top-left corner
+  #ifdef CONFIG_DISP_SKIP
+    display->setCursor(0, CONFIG_DISP_SKIP);              // Start at top-left corner
+  #else
+    display->setCursor(0, 0);              // Start at top-left corner
+  #endif
 
   // ---------- Top Line of Display -------------------------------------------
   // Tb

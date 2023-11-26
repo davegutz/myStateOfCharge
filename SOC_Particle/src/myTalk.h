@@ -24,6 +24,7 @@
 #ifndef _MY_TALK_H
 #define _MY_TALK_H
 #include "Battery.h"
+#include "Variable.h"
 
 enum urgency {INCOMING, ASAP, SOON, QUEUE, NEW};
 typedef enum urgency urgency;
@@ -32,7 +33,7 @@ void asap(void);
 void chat(void);
 void chit(const String cmd, const enum urgency when);
 void clear_queues(void);
-void talk(BatteryMonitor *Mon, Sensors *Sen);
-void talkH(BatteryMonitor *batt, Sensors *Sen); // Help
+void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V);
+void talkH(BatteryMonitor *batt, Sensors *Sen, Vars *V); // Help
 
 #endif

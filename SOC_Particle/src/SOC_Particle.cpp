@@ -93,6 +93,7 @@ void loop();
 #include "myCloud.h"
 #include "debug.h"
 #include "parameters.h"
+#include "Variable.h"
 
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
@@ -115,6 +116,7 @@ extern PublishPars pp;            // For publishing
 
 #ifdef CONFIG_47L16
   SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
+  Variable <float> Freq = Variable<float>(sp.freq_ptr(), &ram, sp.freq_eeram(), "Inj freq", "Hz");
 #else
   retained Flt_st saved_hist[NHIS];    // For displaying faults
   retained Flt_st saved_faults[NFLT];  // For displaying faults
@@ -309,6 +311,9 @@ void loop()
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);
 
+  // Variables storage
+  static Vars *V = new Vars(sp, &ram);
+
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
   // Synchronize
@@ -451,7 +456,7 @@ void loop()
   {
     chat();         // Work on internal chit-chat
   }
-  talk(Mon, Sen);   // Collect user inputs
+  talk(Mon, Sen, V);   // Collect user inputs
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
