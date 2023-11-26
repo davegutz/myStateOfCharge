@@ -9,5 +9,5 @@
 Vars::Vars(SavedPars sp, SerialRAM *ram)
 {
     Freq = Variable<float>(sp.freq_ptr(), ram, sp.freq_eeram(), "Inj freq", "Hz");
-    Ib_select = Variable<int8_t>(sp.ib_select_ptr(), ram, sp.ib_select_eeram(), "vcurr select mode (-1=noa, 0=auto, 1=amp)", "int");
+    Ib_select = Variable<int8_t>(sp.ib_select_ptr(), ram, sp.ib_select_eeram(), "curr sel mode (-1=noa, 0=auto, 1=amp)", "code");
 }

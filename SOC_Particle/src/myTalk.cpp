@@ -845,30 +845,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             break;
 
           case ( 's' ):  // * s<>:  select amp or noa
-            if ( cp.input_str.substring(1).toInt()>0 )
-            {
-              sp.put_ib_select(1);
-            }
-            else if ( cp.input_str.substring(1).toInt()<0 )
-            {
-              sp.put_ib_select(-1);
-            }
-            else
-              sp.put_ib_select(0);
-            Serial.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", sp.ib_select());
-            Serial1.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", sp.ib_select());
-            if ( cp.input_str.substring(1).toInt()>0 )
-            {
-              V->Ib_select.set(1);
-            }
-            else if ( cp.input_str.substring(1).toInt()<0 )
-            {
-              V->Ib_select.set(-1);
-            }
-            else
-              V->Ib_select.set(0);
-            Serial.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", V->Ib_select.get());
-            Serial1.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", V->Ib_select.get());
+            V->Ib_select.set(cp.input_str.substring(1).toInt());
+            Serial.printf("Sig %s set %d\n", V->Ib_select.description(), V->Ib_select.get());
+            Serial1.printf("Sig %s set %d\n", V->Ib_select.description(), V->Ib_select.get());
+            Serial.printf("%s\n", V->Ib_select.print().c_str());
             break;
 
           case ( 'U' ):  // * U<>:  Unix time since epoch

@@ -38,6 +38,11 @@ public:
         *val_loc_ = value; 
         return *val_loc_;
     }
+
+    String print()
+    {
+        return description_ + " = " + String(*val_loc_) + " " + units_;
+    }
     
     void set(T val)
     {
