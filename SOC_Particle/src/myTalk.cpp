@@ -846,9 +846,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
           case ( 's' ):  // * s<>:  select amp or noa
             V->Ib_select.set(cp.input_str.substring(1).toInt());
-            Serial.printf("Sig %s set %d\n", V->Ib_select.description(), V->Ib_select.get());
-            Serial1.printf("Sig %s set %d\n", V->Ib_select.description(), V->Ib_select.get());
             Serial.printf("%s\n", V->Ib_select.print().c_str());
+            Serial1.printf("%s\n", V->Ib_select.print().c_str());
             break;
 
           case ( 'U' ):  // * U<>:  Unix time since epoch
