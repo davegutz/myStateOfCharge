@@ -592,10 +592,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
               case ( 'f' ):  //   Ff<>:  fake faults
                 INT_in = cp.input_str.substring(2).toInt();
-                Serial.printf("cp.fake_faults, sp.ib_select %d, %d to ", cp.fake_faults, sp.ib_select());
+                Serial.printf("cp.fake_faults, sp.ib_select %d, %d to ", cp.fake_faults, V->Ib_select.get());
                 cp.fake_faults = INT_in;
-                sp.put_ib_select(INT_in);
-                Serial.printf("%d, %d\n", cp.fake_faults, sp.ib_select());
+                V->Ib_select.set(INT_in);
+                Serial.printf("%d, %d\n", cp.fake_faults, V->Ib_select.get());
                 break;
 
               case ( 'I' ):  //   FI<>:  Fault disable ib hard
@@ -850,11 +850,25 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
               sp.put_ib_select(1);
             }
             else if ( cp.input_str.substring(1).toInt()<0 )
+            {
               sp.put_ib_select(-1);
+            }
             else
               sp.put_ib_select(0);
             Serial.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", sp.ib_select());
             Serial1.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", sp.ib_select());
+            if ( cp.input_str.substring(1).toInt()>0 )
+            {
+              V->Ib_select.set(1);
+            }
+            else if ( cp.input_str.substring(1).toInt()<0 )
+            {
+              V->Ib_select.set(-1);
+            }
+            else
+              V->Ib_select.set(0);
+            Serial.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", V->Ib_select.get());
+            Serial1.printf("Sig ( -1=noa, 0=auto, 1=amp,) set %d\n", V->Ib_select.get());
             break;
 
           case ( 'U' ):  // * U<>:  Unix time since epoch
@@ -1348,7 +1362,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("  Rs= "); Serial.printf("small.  Reinitialize filters\n");
   Serial.printf("  RS= "); Serial.printf("SavedPars: Reinitialize saved\n");
 
-  Serial.printf("\ns  curr select mode (-1=noa, 0=auto, 1=amp) = "); Serial.println(sp.ib_select());
+  Serial.printf("\ns  %s = %d\n", V->Ib_select.description(), V->Ib_select.get());
 
   Serial.printf(" \n*U= "); Serial.printf("%ld", Time.now()); Serial.printf(": Unix time [auto when wifi]\n"); 
   Serial1.printf(" \n*U= "); Serial1.printf("%ld", Time.now()); Serial1.printf(": Unix time [auto when wifi]\n"); 

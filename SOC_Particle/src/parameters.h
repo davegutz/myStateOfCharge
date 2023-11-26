@@ -105,6 +105,7 @@ public:
     float ib_scale_amp() { return ib_scale_amp_; }
     float ib_scale_noa() { return ib_scale_noa_; }
     int8_t ib_select() { return ib_select_; }
+    address16b ib_select_eeram() { return ib_select_eeram_; }
     int8_t *ib_select_ptr() { return &ib_select_;}
     int iflt() { return iflt_; }
     int ihis() { return ihis_; }
@@ -296,6 +297,7 @@ protected:
     float ib_scale_amp_;    // Calibration scalar of amplified shunt sensor
     float ib_scale_noa_;    // Calibration scalar of non-amplified shunt sensor
     int8_t ib_select_;      // Force current sensor (-1=non-amp, 0=auto, 1=amp)
+    address16b ib_select_eeram_;
     int iflt_;              // Fault snap location.   Begins at -1 because first action is to increment iflt
     int ihis_;              // History location.   Begins at -1 because first action is to increment ihis
     float inj_bias_;        // Constant bias, A
@@ -333,7 +335,7 @@ protected:
         address16b Ib_bias_noa_eeram_;
         address16b ib_scale_amp_eeram_;
         address16b ib_scale_noa_eeram_;
-        address16b ib_select_eeram_;
+        // address16b ib_select_eeram_;
         address16b iflt_eeram_;
         address16b ihis_eeram_;
         address16b inj_bias_eeram_;

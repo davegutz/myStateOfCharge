@@ -8,6 +8,7 @@ class Variable
 {
 public:
     Variable(){};
+
     Variable(T* val_loc, const String &description, const String &units)
     {
         description_ = description;
@@ -15,6 +16,7 @@ public:
         units_ = units;
         val_loc_ = val_loc;
     };
+
     Variable(T* val_loc, SerialRAM *ram, address16b addr, const String &description, const String &units)
     {
         addr_ = addr;
@@ -24,15 +26,19 @@ public:
         rP_ = ram;
         val_loc_ = val_loc;
     };
+
     ~Variable(){};
+
     const char* description() { return description_.c_str(); }
+    
     T get()
     {
-        float value;
+        T value;
         rP_->get(addr_.a16, value);
         *val_loc_ = value; 
         return *val_loc_;
     }
+    
     void set(T val)
     {
         *val_loc_ = val;
@@ -41,7 +47,9 @@ public:
             rP_->put(addr_.a16, val);
         }
     }
+    
     const char* units() { return units_.c_str(); }
+
 protected:
     T* val_loc_;
     String units_;
@@ -59,6 +67,7 @@ public:
     Vars(SavedPars sp, SerialRAM *ram);
     ~Vars(){};
     Variable <float> Freq;
+    Variable <int8_t> Ib_select;
 protected:
 };
 
