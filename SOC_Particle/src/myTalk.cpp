@@ -962,9 +962,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
               case ( 'f' ): // * Xf<>:  injection frequency
                 V->Freq.set(max(min(cp.input_str.substring(2).toFloat(), 2.0), 0.0));
-                Serial.printf("Injected freq set%7.3f Hz =", V->Freq.get());
+                Serial.printf("%s\n", V->Freq.print().c_str());
                 V->Freq.set( V->Freq.get()*(2. * PI) );
-                Serial.printf("%7.3f r/s\n", V->Freq.get());
+                Serial.printf("%s in r/s\n", V->Freq.print().c_str());
                 break;
 
               case ( 'b' ): // * Xb<>:  injection bias
