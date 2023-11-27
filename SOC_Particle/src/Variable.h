@@ -37,7 +37,10 @@ public:
     {
         T value;
         if ( uint8_t_ )
+        {
             value = rP_->read(addr_.a16);
+            Serial.printf("get unit8t 0x%X = %d\n", addr_.a16, uint8_t(value));
+        }
         else
             rP_->get(addr_.a16, value);
         *val_loc_ = value; 
@@ -51,17 +54,24 @@ public:
     
     void set(T val)
     {
+        Serial.printf("set %d ", uint8_t(*val_loc_));
         *val_loc_ = val;
+        Serial.printf("--> %d\n", uint8_t(*val_loc_));
         if ( eeram_ ) 
         {
             if ( uint8_t_ )
+            {
                 rP_->write(addr_.a16, *val_loc_);
+                Serial.printf("set unit8t 0x%X = %d\n", addr_.a16, uint8_t(*val_loc_));
+            }
             else
                 rP_->put(addr_.a16, *val_loc_);
         }
     }
     
     const char* units() { return units_.c_str(); }
+
+    void* ptr() { return (void *)val_loc_; }
 
 protected:
     T* val_loc_;
@@ -81,12 +91,14 @@ class Vars
 {
 public:
     Vars(){};
-    Vars(SavedPars sp, SerialRAM *ram);
+    Vars(SavedPars *sp, SerialRAM *ram);
     ~Vars(){};
     Variable <float> Freq;
     Variable <int8_t> Ib_select;
     Variable <uint8_t> Modeling;
+    void *Modeling_ptr(){ return Modeling.ptr(); }
     void put_Modeling(const uint8_t input, Sensors *Sen);
+    void put_Ib_select(const uint8_t input, Sensors *Sen);
     boolean mod_all_dscn() { return ( 111<Modeling.get() ); }                // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
     boolean mod_any_dscn() { return ( 15<Modeling.get() ); }                 // Bare any
@@ -103,6 +115,7 @@ public:
     boolean mod_vb_dscn() { return ( 1<<5 & Modeling.get() ); }              // Nothing connected to vb on A1
     boolean tweak_test() { return ( 1<<3 & Modeling.get() ); }               // Driving signal injection completely using software inj_bias 
 protected:
+    SavedPars *sp_;
 };
 
 #endif

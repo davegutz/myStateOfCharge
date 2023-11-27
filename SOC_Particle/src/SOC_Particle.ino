@@ -303,7 +303,7 @@ void loop()
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);
 
   // Variables storage
-  static Vars *V = new Vars(sp, &ram);
+  static Vars *V = new Vars(&sp, &ram);
 
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 

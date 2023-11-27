@@ -163,7 +163,7 @@ public:
         void get_ihis() { int value; rP_->get(ihis_eeram_.a16, value); ihis_ = value; }
         void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias_ = value; }
         void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum_ = value; }
-        void get_modeling() { modeling_ = rP_->read(modeling_eeram_.a16); }
+        void get_modeling() { modeling_ = rP_->read(modeling_eeram_.a16); Serial.printf("get_mod 0x%X = %d\n", modeling_eeram_.a16, modeling_); }
         void get_mon_chm() { mon_chm_ = rP_->read(mon_chm_eeram_.a16); }
         void get_nP() { float value; rP_->get(nP_eeram_.a16, value); nP_ = value; }
         void get_nS() { float value; rP_->get(nS_eeram_.a16, value); nS_ = value; }
@@ -257,7 +257,8 @@ public:
         void put_ihis(const int input) { rP_->put(ihis_eeram_.a16, input); ihis_ = input; }
         void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias_ = input; }
         void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum_ = input; }
-        void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling_ = input; }
+        void put_modeling(const uint8_t input) { rP_->write(modeling_eeram_.a16, input); modeling_ = input;  Serial.printf("put_mod 0x%X = %d\n", modeling_eeram_.a16, modeling_);
+}
         void put_mon_chm(const uint8_t input) { rP_->write(mon_chm_eeram_.a16, input); mon_chm_ = input; }
         void put_mon_chm() { rP_->write(mon_chm_eeram_.a16, mon_chm_); }
         void put_nP(const float input) { rP_->put(nP_eeram_.a16, input); nP_ = input; }
@@ -317,7 +318,6 @@ protected:
     float vb_table_bias_;   // Battery monitor curve bias, V
     float t_last_;          // Updated value of battery temperature injection when sp.modeling_ and proper wire connections made, deg C
     float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
-
     uint8_t modeling_;       // Driving saturation calculation with model.  Bits specify which signals use model
     #ifndef CONFIG_47L16
         Flt_st *fault_;

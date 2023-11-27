@@ -261,7 +261,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || int(0) != debug_ )              Serial.printf(" debug  %d  %d *v<>\n", int(0), debug_);
     if ( all )                                  Serial.printf(" delta_q%10.1f %10.1f *DQ<>\n", double(0.), delta_q_);
     if ( all )                                  Serial.printf(" dq_sim %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model_);
-    if ( all || float(0.) != freq_ )            Serial.printf("desc %7.3f  %7.3f *Xf<> units\n", 0., freq_);
+    if ( all || float(0.) != freq_ )            Serial.printf(" freq %7.3f  %7.3f *Xf<> units\n", 0., freq_);
     if ( all || float(CURR_BIAS_ALL) != Ib_bias_all_ )  Serial.printf(" Ib_bias_all%7.3f  %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all_);
     if ( all || float(CURR_BIAS_AMP) != Ib_bias_amp_ )  Serial.printf(" bias_amp%7.3f  %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp_);
     if ( all || float(CURR_BIAS_NOA) != Ib_bias_noa_ )  Serial.printf(" bias_noa%7.3f  %7.3f *DB<>\n", CURR_BIAS_NOA, Ib_bias_noa_);

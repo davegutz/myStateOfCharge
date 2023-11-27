@@ -16,19 +16,29 @@ void bitMapPrint(char *buf, const int16_t fw, const uint8_t num)
 }
 
 
-Vars::Vars(SavedPars sp, SerialRAM *ram)
+Vars::Vars(SavedPars *sp, SerialRAM *ram)
 {
-    Freq = Variable<float>(sp.freq_ptr(), ram, sp.freq_eeram(), "Inj freq", "Hz");
-    Ib_select = Variable<int8_t>(sp.ib_select_ptr(), ram, sp.ib_select_eeram(), "curr sel mode (-1=noa, 0=auto, 1=amp)", "code");
-    Modeling = Variable<uint8_t>(sp.modeling_ptr(), ram, sp.modeling_eeram(), " modeling bitmap [0b00000000]", "bitpacked word", true);
+    sp_ = sp;
+    Freq = Variable<float>(sp->freq_ptr(), ram, sp->freq_eeram(), "Inj freq", "Hz");
+    Ib_select = Variable<int8_t>(sp->ib_select_ptr(), ram, sp->ib_select_eeram(), "curr sel mode (-1=noa, 0=auto, 1=amp)", "code");
+    Serial.printf("modP sp.modeling_ptr %p sp->modeling %d \n", sp->modeling_ptr(), sp->modeling());
+    Modeling = Variable<uint8_t>(sp->modeling_ptr(), ram, sp->modeling_eeram(), " modeling bitmap [0b00000000]", "bitpacked word", true);
+    Serial.printf("modP sp.modeling_ptr %p sp->modeling %d\n", sp->modeling_ptr(), sp->modeling());
+    Serial.printf("V V->modeling_ptr %p V->modeling %d\n", Modeling.ptr(), Modeling.get());
 }
 
 
 // Manage changes to modeling configuration
 void Vars::put_Modeling(const uint8_t input, Sensors *Sen)
 {
+    sp_->put_modeling(input);  // uint8_t pointers change after instantiation!  TODO:  why?
     Modeling.set(input);
     Sen->ShuntAmp->dscn_cmd(mod_ib_amp_dscn());
     Sen->ShuntNoAmp->dscn_cmd(mod_ib_noa_dscn());
 }
 
+void Vars::put_Ib_select(const uint8_t input, Sensors *Sen)
+{
+    sp_->put_ib_select(input);  // int pointers change after instantiation!  TODO:  why?
+    Ib_select.set(input);
+}

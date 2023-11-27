@@ -594,7 +594,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 INT_in = cp.input_str.substring(2).toInt();
                 Serial.printf("cp.fake_faults, sp.ib_select %d, %d to ", cp.fake_faults, V->Ib_select.get());
                 cp.fake_faults = INT_in;
-                V->Ib_select.set(INT_in);
+                V->put_Ib_select(INT_in, Sen);
                 Serial.printf("%d, %d\n", cp.fake_faults, V->Ib_select.get());
                 break;
 
@@ -742,6 +742,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 Serial.printf ("M::"); Mon->Coulombs::pretty_print();
                 Serial.printf ("M::"); Mon->EKF_1x1::pretty_print();
                 Serial.printf ("\nmodeling %d\n", sp.modeling());
+                Serial.printf ("\nmodeling %d\n", V->Modeling.get());
                 break;
 
               case ( 'M' ):  // PM:  Print shunt Amp
@@ -759,6 +760,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
               case ( 's' ):  // Ps:  Print sim
                 Serial.printf("\nmodeling=%d\n", sp.modeling());
+                Serial.printf("\nmodeling=%d\n", V->Modeling.get());
                 Serial.printf("S:");  Sen->Sim->pretty_print();
                 Serial.printf("S::"); Sen->Sim->Coulombs::pretty_print();
                 break;
@@ -845,7 +847,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             break;
 
           case ( 's' ):  // * s<>:  select amp or noa
-            V->Ib_select.set(cp.input_str.substring(1).toInt());
+            V->put_Ib_select(cp.input_str.substring(1).toInt(), Sen);
             Serial.printf("%s\n", V->Ib_select.print().c_str());
             Serial1.printf("%s\n", V->Ib_select.print().c_str());
             break;
@@ -933,6 +935,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                   Serial.printf("sp.modeling %d V->modeling %d to ", sp.modeling(), V->Modeling.get());
                   V->put_Modeling(INT_in, Sen);
                   Serial.printf("sp.modeling %d V->modeling %d\n", sp.modeling(),  V->Modeling.get());
+                  Serial.printf("modP sp.modeling_ptr %p sp.modeling %d\n", sp.modeling_ptr(), sp.modeling());
+                  Serial.printf("V    V->modeling_ptr %p V->modeling %d\n", V->Modeling.ptr(), V->Modeling.get());
                   if ( reset )
                   {
                     Serial.printf("Chg...reset\n");
