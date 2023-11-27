@@ -91,7 +91,7 @@ public:
     double delta_q() { return delta_q_; }
     double delta_q_model() { return delta_q_model_; }
     float freq() { return freq_; }
-    address16b freq_eeram() { return freq_eeram_; }
+    address16b freq_eeram();
     float *freq_ptr() { return &freq_; }
     uint8_t mon_chm() { return mon_chm_; }
     uint8_t sim_chm() { return sim_chm_; }
@@ -105,7 +105,7 @@ public:
     float ib_scale_amp() { return ib_scale_amp_; }
     float ib_scale_noa() { return ib_scale_noa_; }
     int8_t ib_select() { return ib_select_; }
-    address16b ib_select_eeram() { return ib_select_eeram_; }
+    address16b ib_select_eeram();
     int8_t *ib_select_ptr() { return &ib_select_;}
     int iflt() { return iflt_; }
     int ihis() { return ihis_; }
@@ -128,6 +128,8 @@ public:
     void reset_pars();
     uint8_t modeling() { return modeling_; }
     void modeling(const uint8_t input, Sensors *Sen);
+    address16b modeling_eeram();
+    uint8_t *modeling_ptr() { return &modeling_;}
     boolean mod_all_dscn() { return ( 111<modeling_ ); }                // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
     boolean mod_any_dscn() { return ( 15<modeling_ ); }                 // Bare any
@@ -278,7 +280,7 @@ public:
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
-    boolean tweak_test() { return ( 0x8 & modeling_ ); } // Driving signal injection completely using software inj_bias 
+    boolean tweak_test() { return ( 1<<3 & modeling_ ); } // Driving signal injection completely using software inj_bias 
 protected:
     Variables <float> *amp_ = new Variables <float>("Amps", "Inj amp");
     // float amp_;             // Injected amplitude, A
@@ -290,14 +292,12 @@ protected:
     double delta_q_;        // Charge change since saturated, C
     double delta_q_model_;  // Charge change since saturated, C
     float freq_;            // Injected frequency, Hz (0-2)
-    address16b freq_eeram_;
     float Ib_bias_all_;     // Bias on all shunt sensors, A
     float Ib_bias_amp_;     // Calibration adder of amplified shunt sensor, A
     float Ib_bias_noa_;     // Calibration adder of non-amplified shunt sensor, A
     float ib_scale_amp_;    // Calibration scalar of amplified shunt sensor
     float ib_scale_noa_;    // Calibration scalar of non-amplified shunt sensor
     int8_t ib_select_;      // Force current sensor (-1=non-amp, 0=auto, 1=amp)
-    address16b ib_select_eeram_;
     int iflt_;              // Fault snap location.   Begins at -1 because first action is to increment iflt
     int ihis_;              // History location.   Begins at -1 because first action is to increment ihis
     float inj_bias_;        // Constant bias, A
@@ -328,14 +328,14 @@ protected:
         address16b debug_eeram_;
         address16b delta_q_eeram_;
         address16b delta_q_model_eeram_;
-        // address16b freq_eeram_;
+        address16b freq_eeram_;
         address16b hys_scale_eeram_;
         address16b Ib_bias_all_eeram_;
         address16b Ib_bias_amp_eeram_;
         address16b Ib_bias_noa_eeram_;
         address16b ib_scale_amp_eeram_;
         address16b ib_scale_noa_eeram_;
-        // address16b ib_select_eeram_;
+        address16b ib_select_eeram_;
         address16b iflt_eeram_;
         address16b ihis_eeram_;
         address16b inj_bias_eeram_;
