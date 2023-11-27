@@ -20,7 +20,7 @@ Vars::Vars(SavedPars sp, SerialRAM *ram)
 {
     Freq = Variable<float>(sp.freq_ptr(), ram, sp.freq_eeram(), "Inj freq", "Hz");
     Ib_select = Variable<int8_t>(sp.ib_select_ptr(), ram, sp.ib_select_eeram(), "curr sel mode (-1=noa, 0=auto, 1=amp)", "code");
-    Modeling = Variable<uint8_t>(sp.modeling_ptr(), ram, sp.modeling_eeram(), " modeling bitmap [0b00000000]", "bitpacked word");
+    Modeling = Variable<uint8_t>(sp.modeling_ptr(), ram, sp.modeling_eeram(), " modeling bitmap [0b00000000]", "bitpacked word", true);
 }
 
 

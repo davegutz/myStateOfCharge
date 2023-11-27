@@ -930,9 +930,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 if ( INT_in>=0 && INT_in<256 )
                 {
                   boolean reset = V->Modeling.get() != INT_in;
-                  Serial.printf("modeling %d to ", V->Modeling.get());
+                  Serial.printf("sp.modeling %d V->modeling %d to ", sp.modeling(), V->Modeling.get());
                   V->put_Modeling(INT_in, Sen);
-                  Serial.printf("%d\n", V->Modeling.get());
+                  Serial.printf("sp.modeling %d V->modeling %d\n", sp.modeling(),  V->Modeling.get());
                   if ( reset )
                   {
                     Serial.printf("Chg...reset\n");
@@ -1389,6 +1389,18 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
   Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
+
+ Serial.printf(" *Xm=  "); Serial.printf("%d,   modeling bitmap [0b00000000]\n", sp.modeling());
+  Serial.printf("      0x128=1<<7 ib_noa_dscn %d\n", sp.mod_ib_noa_dscn());
+  Serial.printf("      0x64 =1<<6 ib_amp_dscn %d\n", sp.mod_ib_amp_dscn());
+  Serial.printf("      0x32 =1<<5 vb_dscn %d\n", sp.mod_vb_dscn());
+  Serial.printf("      0x16 =1<<4 temp_dscn %d\n", sp.mod_tb_dscn());
+  Serial.printf("      0x8  =1<<3 tweak_test %d\n", sp.tweak_test());
+  Serial.printf("      0x4  =1<<2 current %d\n", sp.mod_ib());
+  Serial.printf("      0x2  =1<<1 voltage %d\n", sp.mod_vb());
+  Serial.printf("      0x1  =1<<0 temp %d\n", sp.mod_tb());
+
+
   bitMapPrint(cp.buffer, V->Modeling.get(), 8);
   Serial.printf("bitmap %s\n", cp.buffer);
   Serial.printf(" *Xm=  "); Serial.printf("%d,   %s\n", V->Modeling.get(), V->Modeling.description());

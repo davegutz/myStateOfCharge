@@ -7,34 +7,39 @@ template <typename T>
 class Variable
 {
 public:
-    Variable(){};
+    Variable(){}
 
-    Variable(T* val_loc, const String &description, const String &units)
+    Variable(T* val_loc, const String &description, const String &units, const boolean _uint8=false)
     {
         description_ = description;
         eeram_ = false;
         units_ = units;
+        uint8_t_ = _uint8;
         val_loc_ = val_loc;
-    };
+    }
 
-    Variable(T* val_loc, SerialRAM *ram, address16b addr, const String &description, const String &units)
+    Variable(T* val_loc, SerialRAM *ram, address16b addr, const String &description, const String &units, boolean _uint8=false)
     {
         addr_ = addr;
         description_ = description;
         eeram_ = true;
-        units_ = units;
         rP_ = ram;
+        units_ = units;
+        uint8_t_ = _uint8;
         val_loc_ = val_loc;
-    };
+    }
 
-    ~Variable(){};
+    ~Variable(){}
 
     const char* description() { return description_.c_str(); }
     
     T get()
     {
         T value;
-        rP_->get(addr_.a16, value);
+        if ( uint8_t_ )
+            value = rP_->read(addr_.a16);
+        else
+            rP_->get(addr_.a16, value);
         *val_loc_ = value; 
         return *val_loc_;
     }
@@ -49,7 +54,10 @@ public:
         *val_loc_ = val;
         if ( eeram_ ) 
         {
-            rP_->put(addr_.a16, val);
+            if ( uint8_t_ )
+                rP_->write(addr_.a16, *val_loc_);
+            else
+                rP_->put(addr_.a16, *val_loc_);
         }
     }
     
@@ -62,6 +70,7 @@ protected:
     boolean eeram_;
     address16b addr_;
     SerialRAM *rP_;
+    boolean uint8_t_;
 };
 
 
