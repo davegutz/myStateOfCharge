@@ -289,23 +289,23 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     }
     eframe_++;
     if ( reset_temp || cp.soft_reset || eframe_ >= cp.eframe_mult ) eframe_ = 0;  // '>=' allows changing cp.eframe_mult on the fly
-    if ( (sp.debug()==3 || sp.debug()==4) && cp.publishS ) EKF_1x1::serial_print(Sen->control_time, Sen->now, dt_eframe_);  // print EKF in Read frame
+    if ( (sp.Debug()==3 || sp.Debug()==4) && cp.publishS ) EKF_1x1::serial_print(Sen->control_time, Sen->now, dt_eframe_);  // print EKF in Read frame
 
     // Filter
     voc_filt_ = SdVb_->update(voc_);   // used for saturation test
 
-    // if ( sp.debug()==13 || sp.debug()==2 || sp.debug()==4 )
+    // if ( sp.Debug()==13 || sp.Debug()==2 || sp.Debug()==4 )
     //     Serial.printf("bms_off,soc,ib,vb,voc,voc_stat,voc_soc,dv_hys,dv_dyn,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
     //     bms_off_, soc_, ib_, vb_, voc_, voc_stat_, voc_soc_, dv_hys_, dv_dyn_);
 
     #ifndef CONFIG_PHOTON
-    if ( sp.debug()==34 || sp.debug()==7 )
+    if ( sp.Debug()==34 || sp.Debug()==7 )
         Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
             dt_, ib_, voc_soc_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
-    if ( sp.debug()==37 )
+    if ( sp.Debug()==37 )
         Serial.printf("BatteryMonitor:ib,vb,voc_stat,voc(z_),  K_,y_,soc_ekf, y_ekf_f, conv,  %7.3f,%7.3f,%7.3f,%7.3f,      %7.4f,%7.4f,%7.4f,%7.4f,  %d,\n",
             ib_, vb_, voc_stat_, voc_,     K_, y_, soc_ekf_, y_filt_, converged_ekf());
-    if ( sp.debug()==-24 ) Serial.printf("Mon:  ib%7.3f soc%8.4f reset_temp%d tau_ct%9.5f r_ct%7.3f r_0%7.3f dv_dyn%7.3f dv_hys%7.3f voc_soc%7.3f  voc_stat%7.3f voc%7.3f vb%7.3f ib _charge%7.3f ",
+    if ( sp.Debug()==-24 ) Serial.printf("Mon:  ib%7.3f soc%8.4f reset_temp%d tau_ct%9.5f r_ct%7.3f r_0%7.3f dv_dyn%7.3f dv_hys%7.3f voc_soc%7.3f  voc_stat%7.3f voc%7.3f vb%7.3f ib _charge%7.3f ",
         ib_, soc_, reset_temp, chem_.tau_ct, chem_.r_ct, chem_.r_0, dv_dyn_, dv_hys_, voc_soc_, voc_stat_, voc_, vb_, ib_charge_);
     #endif
 
@@ -394,7 +394,7 @@ void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
     dv_dyn_ = ib_*chem_.r_ss*sr_;
     voc_ = vb_ - dv_dyn_;
     #ifdef DEBUG_INIT
-        if ( sp.debug()==-1 )
+        if ( sp.Debug()==-1 )
             Serial.printf("mon: ib%7.3f vb%7.3f voc%7.3f\n", ib_, vb_, voc_);
     #endif
 }
@@ -513,12 +513,12 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
         soc_solved = ice_->x();
         voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc) + sp.Dw();
         ice_->e(voc_solved - voc_stat_);
-        ice_->iterate(sp.debug()==-1 && reset_temp, SOLV_SUCC_COUNTS, false);
+        ice_->iterate(sp.Debug()==-1 && reset_temp, SOLV_SUCC_COUNTS, false);
     }
     init_soc_ekf(soc_solved);
 
     #ifdef DEBUG_INIT
-        if ( sp.debug()==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_soc%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%8.4f e%10.6f soc_sol%8.4f\n",
+        if ( sp.Debug()==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_soc%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%8.4f e%10.6f soc_sol%8.4f\n",
             Sen->Vb, Vb_avg, voc_soc_, voc_stat_, voc_solved, ice_->count(), ice_->dx(), ice_->e(), soc_solved);
     #endif
 
@@ -661,16 +661,16 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     
     #ifndef CONFIG_PHOTON
 
-        if ( sp.debug()==75 ) Serial.printf("BatterySim::calculate: temp_c_ soc_ voc_stat_ low_voc =  %7.3f %10.6f %9.5f %7.3f\n",
+        if ( sp.Debug()==75 ) Serial.printf("BatterySim::calculate: temp_c_ soc_ voc_stat_ low_voc =  %7.3f %10.6f %9.5f %7.3f\n",
             temp_c_, soc_, voc_stat_, chem_.low_voc);
 
-        if ( sp.debug()==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in%7.3f ib%7.3f voc_stat%7.3f voc%7.3f vsat%7.3f model_saturated%d bms_off%d dc_dc_on%d VB_DC_DC%7.3f vb%7.3f\n",
+        if ( sp.Debug()==76 ) Serial.printf("BatterySim::calculate:,  soc=%8.4f, temp_c_=%7.3f, ib_in%7.3f ib%7.3f voc_stat%7.3f voc%7.3f vsat%7.3f model_saturated%d bms_off%d dc_dc_on%d VB_DC_DC%7.3f vb%7.3f\n",
             soc_, temp_c_, ib_in_, ib_, voc_stat_, voc_, vsat_, model_saturated_, bms_off_, dc_dc_on, VB_DC_DC, vb_);
 
-        if ( sp.debug()==78 || sp.debug()==7 ) Serial.printf("BatterySim::calculate:,  dt_,tempC,curr,soc_,voc,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
+        if ( sp.Debug()==78 || sp.Debug()==7 ) Serial.printf("BatterySim::calculate:,  dt_,tempC,curr,soc_,voc,dv_dyn,vb,%7.3f,%7.3f,%7.3f,%8.4f,%7.3f,%7.3f,%7.3f,\n",
         dt_,temp_c_, ib_, soc_, voc_, dv_dyn_, vb_);
  
-        if ( sp.debug()==79 ) Serial.printf("reset, mod_ib, temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=%d,%d,%7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
+        if ( sp.Debug()==79 ) Serial.printf("reset, mod_ib, temp_c_, dvoc_dt, vsat_, voc, q_capacity, sat_ib_max, ib_fut, ib,=%d,%d,%7.3f,%7.3f,%7.3f,%7.3f, %10.1f, %7.3f, %7.3f, %7.3f,\n",
             reset, sp.mod_ib(), temp_c_, chem_.dvoc_dt, vsat_, voc_, q_capacity_, sat_ib_max_, ib_fut_, ib_);
 
     #endif
@@ -787,7 +787,7 @@ float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Battery
         *sp_delta_q_ += d_delta_q - chem_.dqdt*q_capacity_*(temp_lim-*sp_t_last_);
         *sp_delta_q_ = max(min(*sp_delta_q_, 0.), -q_capacity_*1.2);
     }
-    // if ( sp.debug()==-24 )Serial.printf("Sim:  charge_curr%7.3f d_delta_q%10.6f delta_q%10.1f temp_lim%7.3f t_last%7.3f\n", charge_curr, d_delta_q, *sp_delta_q_, temp_lim, *sp_t_last_);
+    // if ( sp.Debug()==-24 )Serial.printf("Sim:  charge_curr%7.3f d_delta_q%10.6f delta_q%10.1f temp_lim%7.3f t_last%7.3f\n", charge_curr, d_delta_q, *sp_delta_q_, temp_lim, *sp_t_last_);
     q_ = q_capacity_ + *sp_delta_q_;
 
     // Normalize
@@ -796,7 +796,7 @@ float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Battery
     q_min_ = soc_min_ * q_capacity_;
 
     // print_serial_sim
-    if ( (sp.debug()==2 || sp.debug()==3 || sp.debug()==4 )  && cp.publishS && !initializing_all)
+    if ( (sp.Debug()==2 || sp.Debug()==3 || sp.Debug()==4 )  && cp.publishS && !initializing_all)
     {
         double cTime;
         if ( sp.tweak_test() ) cTime = float(Sen->now)/1000.;
@@ -827,7 +827,7 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
     init_hys(0.0);
     ibs_ = hys_->ibs();
     #ifdef DEBUG_INIT
-        if ( sp.debug()==-1 )
+        if ( sp.Debug()==-1 )
         {
             Serial.printf("sim: ib%7.3f ibs%7.3f voc%7.3f vb%7.3f\n", ib_, ibs_, voc_, vb_);
         }

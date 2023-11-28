@@ -28,7 +28,7 @@
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
 #ifndef CONFIG_PHOTON
-  // sp.debug()==12 EKF
+  // sp.Debug()==12 EKF
   void debug_12(BatteryMonitor *Mon, Sensors *Sen)
   {
     Serial.printf("ib,ib_mod,   vb,vb_mod,  voc,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
@@ -39,19 +39,19 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
     Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
   }
 
-  // sp.debug()==-13 ib_dscn for Arduino.
+  // sp.Debug()==-13 ib_dscn for Arduino.
   // Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
   void debug_m13(Sensors *Sen)
   {
 
     // Arduinio header
     static int8_t last_call = 0;
-    if ( sp.debug()!=last_call && sp.debug()==-13 )
+    if ( sp.Debug()!=last_call && sp.Debug()==-13 )
       Serial.printf("ib_sel_st:, ib_amph:, ib_noah:, ib_rate:, ib_quiet:,  dscn_flt:, dscn_fa:\n");
-    last_call = sp.debug();
+    last_call = sp.Debug();
 
     // Plot
-    if ( sp.debug()!=-13)
+    if ( sp.Debug()!=-13)
       return;
     else
         Serial.printf("%d, %7.3f,%7.3f,  %7.3f,%7.3f,   %d,%d\n",
@@ -61,44 +61,44 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
     Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
   }
 
-  // sp.debug()==-23 vb for Arduino.
+  // sp.Debug()==-23 vb for Arduino.
   // Start Arduino serial plotter.  Toggle v like 'v0;v-23;' to produce legend
   void debug_m23(Sensors *Sen)
   {
 
     // Arduinio header
     static int8_t last_call = 0;
-    if ( sp.debug()!=last_call && sp.debug()==-23 )
+    if ( sp.Debug()!=last_call && sp.Debug()==-23 )
       Serial.printf("Vb_hdwe-Vb_hdwe_f:\n");
-    last_call = sp.debug();
+    last_call = sp.Debug();
 
     // Plot
-    if ( sp.debug()!=-23)
+    if ( sp.Debug()!=-23)
       return;
     else
         Serial.printf("%7.3f\n", Sen->Vb_hdwe - Sen->Vb_hdwe_f);
   }
 
-  // sp.debug()==-24 Vb, Ib for Arduino.
+  // sp.Debug()==-24 Vb, Ib for Arduino.
   // Start Arduino serial plotter.  Toggle v like 'v0;v-23;' to produce legend
   void debug_m24(Sensors *Sen)
   {
 
     // Arduinio header
     static int8_t last_call = 0;
-    if ( sp.debug()!=last_call && sp.debug()==-23 )
+    if ( sp.Debug()!=last_call && sp.Debug()==-23 )
       Serial.printf("Vb_hdwe-Vb_hdwe_f:, Ib_hdwe:\n");
-    last_call = sp.debug();
+    last_call = sp.Debug();
 
     // Plot
-    if ( sp.debug()!=-24)
+    if ( sp.Debug()!=-24)
       return;
     else
         Serial.printf("%7.3f, %7.3f\n", Sen->Vb_hdwe - Sen->Vb_hdwe_f, Sen->Ib_hdwe);
   }
 #endif
 
-// sp.debug()==5 Charge time
+// sp.Debug()==5 Charge time
 void debug_5(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",

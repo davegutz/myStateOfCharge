@@ -27,6 +27,9 @@
 #include "mySensors.h"
 #include "Variable.h"
 
+/* Using pointers in building class so all that stuff does not get saved by 'retained' keyword in SOC_Particle.ino.
+    Only the *_init_ parameters at the bottom of Parameters.h are stored in SRAM
+*/
 
 // class SavedPars 
 SavedPars::SavedPars()
@@ -45,6 +48,8 @@ SavedPars::SavedPars()
 
         Amp_ = new FloatStorage("Xf", "Inj amp", "Amps pk", -1e6, 1e6, &Amp_init_, 0.); Z_[size_++] = Amp_;
         Cutback_gain_sclr_ = new FloatStorage("Sk", "Cutback gain scalar", "slr", -1e6, 1e6, &Cutback_gain_sclr_init_, 1.); Z_[size_++] = Cutback_gain_sclr_;
+        Debug_ = new IntStorage("v", "Verbosity", "level", -128, 128, &Debug_init_, 0); Z_[size_++] = Debug_;
+        Dw_ = new FloatStorage("Dw", "Tab mon adj", "v", -1e3, 1e3, &Dw_init_, VTAB_BIAS); Z_[size_++] = Dw_;
         Freq_ = new FloatStorage("Xf", "Inj freq", "Hz", 0., 2., &Freq_init_, 0.); Z_[size_++] = Freq_;
         Ib_select_ = new Int8tStorage("si", "Curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, &Ib_select_init_, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_;
         Modeling_ = new Uint8tStorage("Xm", "Modeling bitmap", "0x00000000", 0, 255, &Modeling_init_, MODELING); Z_[size_++] = Modeling_;
@@ -58,6 +63,8 @@ SavedPars::SavedPars(SerialRAM *ram)
 
     Amp_= new FloatStorage("Xf", rP_, "Inj amp", "Amps pk", -1e6, 1e6, 0.); Z_[size_++] = Amp_;
     Cutback_gain_sclr_= new FloatStorage("Sk", rP_, "Cutback gain scalar", "slr", -1e6, 1e6, 1.); Z_[size_++] = Cutback_gain_sclr_;
+    Debug_= new IntStorage("v", rP_, "Verbosity", "int", -128, 128, 0); Z_[size_++] = Debug_;
+    Dw_= new FloatStorage("Dw", rP_, "Tab mon adj", "v", -100., 100., VTAB_BIAS); Z_[size_++] = Cutback_gain_sclr_;
     Freq_= new FloatStorage("Xf", rP_, "Inj freq", "Hz", 0., 2., 0.); Z_[size_++] = Freq_;
     Ib_select_ = new Int8tStorage("si", rP_, "curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_;
     Modeling_= new Uint8tStorage("Xm", rP_, " modeling bitmap", "[0x00000000]", 0, 255, MODELING); Z_[size_++] = Modeling_;
@@ -128,7 +135,6 @@ boolean SavedPars::is_corrupt()
     boolean corruption = false;
     for ( int i=0; i<size_; i++ ) corruption |= Z_[i]->is_corrupt();
     corruption = corruption ||
-        is_val_corrupt(vb_table_bias_, float(-1000.), float(1000.)) ||
         is_val_corrupt(debug_, -100, 100) ||
         is_val_corrupt(delta_q_, -1e8, 1e5) ||
         is_val_corrupt(delta_q_model_, -1e8, 1e5) ||
@@ -218,9 +224,10 @@ int SavedPars::num_diffs()
     // if ( 0UL < time_now ) n++;
     if ( Amp_->is_off() ) n++;
     if ( Cutback_gain_sclr_->is_off() ) n++;
-    if ( float(0.) != vb_table_bias_ ) n++;
-    if ( int(0) != debug_ ) n++;
+    if ( Dw_->is_off() ) n++;
+    if ( Debug_->is_off() ) n++;
     if ( Freq_->is_off() ) n++;
+
     if ( float(CURR_BIAS_ALL) != Ib_bias_all_ ) n++;
     if ( float(CURR_BIAS_AMP) != Ib_bias_amp_ ) n++;
     if ( float(CURR_BIAS_NOA) != Ib_bias_noa_ ) n++;
@@ -403,11 +410,14 @@ void SavedPars::reset_pars()
 {
     Amp_->set_default();
     Cutback_gain_sclr_->set_default();
-    put_Dw(float(0.));
-    put_debug(int(0));
+    Debug_->set_default();
+ 
     put_delta_q(double(0.));
     put_delta_q_model(double(0.));
+
+    Dw_->set_default();
     Freq_->set_default();
+    
     put_Ib_bias_all(float(CURR_BIAS_ALL));
     put_Ib_bias_amp(float(CURR_BIAS_AMP));
     put_Ib_bias_noa(float(CURR_BIAS_NOA));

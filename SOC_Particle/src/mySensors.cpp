@@ -64,7 +64,7 @@ float TempSensor::sample(Sensors *Sen)
     {
       Tb_hdwe = SdTb->update(temp);
       tb_stale_flt_ = false;
-      if ( sp.debug()==16 ) Serial.printf("I:  t=%7.3f ct=%d, Tb_hdwe=%7.3f,\n", temp, count, Tb_hdwe);
+      if ( sp.Debug()==16 ) Serial.printf("I:  t=%7.3f ct=%d, Tb_hdwe=%7.3f,\n", temp, count, Tb_hdwe);
     }
     else
     {
@@ -201,7 +201,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
   Vo_raw_ = analogRead(vo_pin_);
   Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
   Vo_Vc_ = Vo_ - Vc_;
-  if  ( sp.debug()==14 )Serial.printf("vo_pin_%d V0_raw_%d Vo_%7.3f Vo_Vc_%7.3f\n", vo_pin_, Vo_raw_, Vo_, Vo_Vc_);
+  if  ( sp.Debug()==14 )Serial.printf("vo_pin_%d V0_raw_%d Vo_%7.3f Vo_Vc_%7.3f\n", vo_pin_, Vo_raw_, Vo_, Vo_Vc_);
 }
 
 
@@ -297,9 +297,9 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   faultAssign( !sp.mod_ib() && abs(ib_quiet_)<=ib_quiet_thr_ && !reset_loc, IB_DSCN_FLT );   // initializes false
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
   #ifndef CONFIG_PHOTON
-    if ( sp.debug()==-13 ) debug_m13(Sen);
-    if ( sp.debug()==-23 ) debug_m23(Sen);
-    if ( sp.debug()==-24 ) debug_m24(Sen);
+    if ( sp.Debug()==-13 ) debug_m13(Sen);
+    if ( sp.Debug()==-23 ) debug_m23(Sen);
+    if ( sp.Debug()==-24 ) debug_m24(Sen);
   #endif
 }
 
@@ -866,7 +866,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   now = sample_time_ib_;
 
   // print_signal_select for data collection
-  if ( (sp.debug()==2 || sp.debug()==4)  && cp.publishS )
+  if ( (sp.Debug()==2 || sp.Debug()==4)  && cp.publishS )
   {
       double cTime;
       if ( sp.tweak_test() ) cTime = double(now)/1000.;
@@ -983,7 +983,7 @@ void Sensors::shunt_select_initial(const boolean reset)
     // Otherwise it generates signals for feedback into hdwe
     else
         Ib_model_in = mod_add;
-    // if ( sp.debug()==-24 ) Serial.printf("Ib_bias_all%7.3f mod_add%7.3f Ib_model_in%7.3f\n", sp.Ib_bias_all(), mod_add, Ib_model_in);
+    // if ( sp.Debug()==-24 ) Serial.printf("Ib_bias_all%7.3f mod_add%7.3f Ib_model_in%7.3f\n", sp.Ib_bias_all(), mod_add, Ib_model_in);
 }
 
 // Load and filter Tb
@@ -1009,7 +1009,7 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
   Tb_hdwe += sp.Tb_bias_hdwe();
   Tb_hdwe_filt += sp.Tb_bias_hdwe();
 
-  if ( sp.debug()==16 || sp.debug()==-1 ) Serial.printf("reset_temp_,Tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
+  if ( sp.Debug()==16 || sp.Debug()==-1 ) Serial.printf("reset_temp_,Tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
     reset_temp_, sp.Tb_bias_hdwe(), RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
 
   Flt->tb_stale(reset_temp_, Sen);

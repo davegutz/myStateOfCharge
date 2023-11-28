@@ -246,7 +246,7 @@ void setup()
   #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)  // TODO: test that ARGON still works with the #if in place
     System.enableFeature(FEATURE_RETAINED_MEMORY);
   #endif
-  if ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 )
+  if ( sp.Debug()==1 || sp.Debug()==2 || sp.Debug()==3 || sp.Debug()==4 )
   {
     sp.print_history_array();
     sp.print_fault_header();
@@ -408,7 +408,7 @@ void loop()
 
     // Debug for read
     #ifndef CONFIG_PHOTON
-      if ( sp.debug()==12 ) debug_12(Mon, Sen);
+      if ( sp.Debug()==12 ) debug_12(Mon, Sen);
     #endif
     
     // Publish for variable print rate
