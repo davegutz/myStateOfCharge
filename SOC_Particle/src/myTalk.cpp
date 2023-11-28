@@ -280,7 +280,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                   #ifdef DEBUG_INIT
                     if ( sp.debug()==-1 ){ Serial.printf("after initialize_all:"); debug_m1(Mon, Sen);}
                   #endif
-                  if ( sp.modeling() )
+                  if ( sp.Modeling() )
                   {
                     cp.cmd_reset();
                     chit("W3;", SOON);  // Wait 3 passes of Control
@@ -302,7 +302,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                   Sen->Sim->apply_soc(FP_in, Sen->Tb_filt);
                   Serial.printf("soc%8.4f, dq%7.3f, soc_mod%8.4f, dq mod%7.3f,\n",
                       Mon->soc(), Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q());
-                  if ( sp.modeling() ) cp.cmd_reset();
+                  if ( sp.Modeling() ) cp.cmd_reset();
                 }
                 else
                   Serial.printf("soc%8.4f; must be 0-1.1\n", FP_in);
@@ -517,7 +517,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 Serial1.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_rated_scaled());
             
                 Sen->Sim->apply_cap_scale(sp.s_cap_sim());
-                if ( sp.modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
+                if ( sp.Modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
             
                 Serial.printf("%7.3f\n", Sen->Sim->q_cap_rated_scaled());
                 Serial.printf("Sim:"); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
@@ -534,7 +534,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 Serial.printf("Mon.q_cap_rated%7.3f %7.3f to ", scale, Mon->q_cap_rated_scaled());
             
                 Mon->apply_cap_scale(sp.s_cap_mon());
-                // if ( sp.modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
+                // if ( sp.Modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
             
                 Serial.printf("%7.3f\n", Mon->q_cap_rated_scaled());
                 Serial.printf("Mon:"); Mon->pretty_print(Sen); Mon->Coulombs::pretty_print();
@@ -552,11 +552,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             
               case ( 'k' ):  // * Sk<>:  scale cutback gain for sim rep of BMS
                 scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("sp.cutback_gain_sclr%7.3f to ", sp.cutback_gain_sclr().get());
-                Serial1.printf("sp.cutback_gain_sclr%7.3f to ", sp.cutback_gain_sclr().get());
-                sp.put_cutback_gain_sclr(scale);
-                Serial.printf("%7.3f %s, %s\n", sp.cutback_gain_sclr().get(), sp.cutback_gain_sclr().description(), sp.cutback_gain_sclr().units());
-                Serial1.printf("%7.3f %s, %s\n", sp.cutback_gain_sclr().get(), sp.cutback_gain_sclr().description(), sp.cutback_gain_sclr().units());
+                sp.Cutback_gain_sclr_->print();
+                sp.Cutback_gain_sclr_->print1();
+                sp.put_Cutback_gain_sclr(scale);
+                sp.Cutback_gain_sclr_->print();
+                sp.Cutback_gain_sclr_->print1();
                 break;
             
               case ( 'V' ):  // * SV<>:  Vb sensor scalar
@@ -616,10 +616,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
               case ( 'f' ):  //   Ff<>:  fake faults
                 INT_in = cp.input_str.substring(2).toInt();
-                Serial.printf("cp.fake_faults, sp.ib_select %d, %d to ", cp.fake_faults, V->Ib_select.get());
+                Serial.printf("cp.fake_faults, sp.ib_select %d, %d to ", cp.fake_faults, sp.Ib_select());
                 cp.fake_faults = INT_in;
-                V->put_Ib_select(INT_in, Sen);
-                Serial.printf("%d, %d\n", cp.fake_faults, V->Ib_select.get());
+                sp.put_Ib_select(INT_in);
+                Serial.printf("%d, %d\n", cp.fake_faults, sp.Ib_select());
                 break;
 
               case ( 'I' ):  //   FI<>:  Fault disable ib hard
@@ -765,8 +765,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 Serial.printf ("\nM:"); Mon->pretty_print(Sen);
                 Serial.printf ("M::"); Mon->Coulombs::pretty_print();
                 Serial.printf ("M::"); Mon->EKF_1x1::pretty_print();
-                Serial.printf ("\nmodeling %d\n", sp.modeling());
-                Serial.printf ("\nmodeling %d\n", V->Modeling.get());
+                Serial.printf ("\nmodeling %d\n", sp.Modeling());
                 break;
 
               case ( 'M' ):  // PM:  Print shunt Amp
@@ -783,8 +782,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 's' ):  // Ps:  Print sim
-                Serial.printf("\nmodeling=%d\n", sp.modeling());
-                Serial.printf("\nmodeling=%d\n", V->Modeling.get());
+                Serial.printf("\nmodeling=%d\n", sp.Modeling());
                 Serial.printf("S:");  Sen->Sim->pretty_print();
                 Serial.printf("S::"); Sen->Sim->Coulombs::pretty_print();
                 break;
@@ -794,12 +792,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                   Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->Vc(), Sen->ShuntAmp->Vo(), Sen->ShuntAmp->Ishunt_cal());
                 Serial.printf("Noa:"); Serial.printf("Vshunt_int,Vshunt,Vc,Vo,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
                   Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->Vc(), Sen->ShuntNoAmp->Vo(), Sen->ShuntNoAmp->Ishunt_cal());
-                Serial.printf("Sel:Noa,Ib=,%d,%7.3f\n", sp.ib_select(), Sen->Ib);
+                Serial.printf("Sel:Noa,Ib=,%d,%7.3f\n", sp.Ib_select(), Sen->Ib);
                 break;
 
               case ( 'v' ):  // Pv:  Print Vb measure
                 Serial.printf("\nVolt:");   Serial.printf("Vb_bias_hdwe,Vb_m,mod,Vb=,%7.3f,%7.3f,%d,%7.3f,\n", 
-                  sp.Vb_bias_hdwe(), Sen->Vb_model, sp.modeling(), Sen->Vb);
+                  sp.Vb_bias_hdwe(), Sen->Vb_model, sp.Modeling(), Sen->Vb);
                 break;
 
               default:
@@ -871,9 +869,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             break;
 
           case ( 's' ):  // * s<>:  select amp or noa
-            V->put_Ib_select(cp.input_str.substring(1).toInt(), Sen);
-            Serial.printf("%s\n", V->Ib_select.print().c_str());
-            Serial1.printf("%s\n", V->Ib_select.print().c_str());
+            sp.put_Ib_select(cp.input_str.substring(1).toInt());
+            Serial.printf("%s\n", sp.Ib_select_->print());
+            Serial1.printf("%s\n", sp.Ib_select_->print());
             break;
 
           case ( 'U' ):  // * U<>:  Unix time since epoch
@@ -956,9 +954,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 if ( INT_in>=0 && INT_in<256 )
                 {
                   boolean reset = V->Modeling.get() != INT_in;
-                  Serial.printf("sp.modeling %d V->modeling %d to ", sp.modeling(), V->Modeling.get());
+                  Serial.printf("sp.modeling %d V->modeling %d to ", sp.Modeling(), V->Modeling.get());
                   V->put_Modeling(INT_in, Sen);
-                  Serial.printf("sp.modeling %d V->modeling %d\n", sp.modeling(),  V->Modeling.get());
+                  Serial.printf("sp.modeling %d V->modeling %d\n", sp.Modeling(),  V->Modeling.get());
                   if ( reset )
                   {
                     Serial.printf("Chg...reset\n");
@@ -1323,8 +1321,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf(" *SQ=  "); Serial.print(Mon->q_capacity()/Mon->q_capacity()); Serial.printf(": sp. Scalar cap mon\n"); 
   Serial1.printf(" *SQ=  "); Serial1.print(Mon->q_capacity()/Mon->q_capacity()); Serial1.printf(": sp. Scalar cap mon\n"); 
   Serial.printf("  Sr=  "); Serial.print(Sen->Sim->Sr()); Serial.printf(": Scalar res sim\n"); 
-  // Serial.printf(" *Sk=  "); Serial.print(sp.cutback_gain_sclr().get()); Serial.printf(": Sat mod ctbk sclr\n"); 
-  Serial.printf(" *Sk=  "); Serial.print(sp.cutback_gain_sclr().get()); Serial.printf("%s, %s\n", sp.cutback_gain_sclr().description(), sp.cutback_gain_sclr().units()); 
+  // Serial.printf(" *Sk=  "); Serial.print(sp.Cutback_gain_sclr()); Serial.printf(": Sat mod ctbk sclr\n"); 
+  Serial.printf(" *Sk=  "); Serial.print(sp.Cutback_gain_sclr()); Serial.printf("%s, %s\n", sp.cutback_gain_sclr().description(), sp.cutback_gain_sclr().units()); 
   Serial.printf(" *SV= "); Serial.printf("%6.3f", sp.Vb_scale()); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
   Serial1.printf(" *SV= "); Serial1.printf("%6.3f", sp.Vb_scale()); Serial1.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
 
@@ -1416,7 +1414,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
   Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
 
- Serial.printf(" *Xm=  "); Serial.printf("%d,   modeling bitmap [0b00000000]\n", sp.modeling());
+ Serial.printf(" *Xm=  "); Serial.printf("%d,   modeling bitmap [0b00000000]\n", sp.Modeling());
   Serial.printf("      0x128=1<<7 ib_noa_dscn %d\n", sp.mod_ib_noa_dscn());
   Serial.printf("      0x64 =1<<6 ib_amp_dscn %d\n", sp.mod_ib_amp_dscn());
   Serial.printf("      0x32 =1<<5 vb_dscn %d\n", sp.mod_vb_dscn());
@@ -1427,8 +1425,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("      0x1  =1<<0 temp %d\n", sp.mod_tb());
 
 
-  bitMapPrint(cp.buffer, V->Modeling.get(), 8);
+  bitMapPrint(cp.buffer, sp.Modeling(), 8);
   Serial.printf("bitmap %s\n", cp.buffer);
+  sp.Modeling->print_help();
   Serial.printf(" *Xm=  "); Serial.printf("%d,   %s\n", V->Modeling.get(), V->Modeling.description());
   Serial.printf("      0x128=1<<7 ib_noa_dscn %d\n", V->mod_ib_noa_dscn());
   Serial.printf("      0x64 =1<<6 ib_amp_dscn %d\n", V->mod_ib_amp_dscn());

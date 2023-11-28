@@ -158,7 +158,7 @@ int16_t Adafruit_ADS1X15::readADC_SingleEnded(uint8_t channel) {
   uint16_t count = 0;
   while ( !conversionComplete() && ++count<count_max )
     ;
-  if ( count==count_max && sp.debug()>0 && !sp.modeling() ) Serial.printf("WARNING(readADC_SingleEnded):  timed out hardcoded count limit**********************\n");
+  if ( count==count_max && sp.debug()>0 && !sp.Modeling() ) Serial.printf("WARNING(readADC_SingleEnded):  timed out hardcoded count limit**********************\n");
 
   // Read the conversion results
   return getLastConversionResults();

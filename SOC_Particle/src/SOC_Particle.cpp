@@ -168,6 +168,8 @@ void setup()
     delay(1000);
     sp.init_ram();
     sp.load_all();
+  #else
+    sp.init();
   #endif
 
   // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
@@ -313,7 +315,11 @@ void loop()
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);
 
   // Variables storage
-  static Vars *V = new Vars(&sp, &ram);
+  #ifdef CONFIG_47L16
+    static Vars *V = new Vars(&sp, &ram);
+  #else
+    static Vars *V = new Vars(&sp);
+  #endif
 
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
@@ -329,7 +335,7 @@ void loop()
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);
   display_and_remember = DisplayUserSync->update(millis(), reset);
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.modeling();
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.Modeling();
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
   summarizing = Summarize->update(millis(), false);
   summarizing = summarizing || boot_summ;
@@ -409,7 +415,7 @@ void loop()
     Mon->regauge(Sen->Tb_filt);
 
     // Empty battery
-    if ( sp.modeling() && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
+    if ( sp.Modeling() && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
     #ifndef CONFIG_PHOTON
