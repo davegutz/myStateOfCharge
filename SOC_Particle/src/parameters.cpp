@@ -51,9 +51,9 @@ SavedPars::SavedPars(SerialRAM *ram)
 
 void SavedPars::init_ram()
 {
-    Zf_= new FloatStorage(rP_, "FloatVariable", "whatever units", 99.);
-    Zi_= new Int8tStorage(rP_, "IntVariable", "whatever units", -9);
-    Zu_= new Uint8tStorage(rP_, "UintVariable", "whatever units", 9);
+    Zf_= new FloatStorage(rP_, "FloatVariable", "whatever units", -1e6, 1e6, 99.);
+    Zi_= new Int8tStorage(rP_, "IntVariable", "whatever units", -100, 100, -9);
+    Zu_= new Uint8tStorage(rP_, "UintVariable", "whatever units", 0, 70, 9);
 
     // Memory map
     amp_eeram_.a16 = next_; next_ += sizeof(float);
@@ -153,9 +153,9 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(t_last_model_, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_bias_hdwe_, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_scale_, float(-1e6), float(1e6)) ||
-        is_val_corrupt(Zf_->get(), float(-1e6), float(1e6)) ||
-        is_val_corrupt(Zi_->get(), int8_t(-100), int8_t(100));
-        // is_val_corrupt(Zi_->get(), uint8_t(-100), uint8_t(100));
+        Zf_->is_corrupt() ||
+        Zi_->is_corrupt() ||
+        Zu_->is_corrupt();
     if ( corruption )
     {
         Serial.printf("corrupt*********\n");
@@ -309,9 +309,9 @@ void SavedPars::pretty_print(const boolean all)
     // Serial.printf("printing Zi:\n"); Zi_->pretty_print();
     // if ( all || Zu_->nominal() != Zu_->get() )  Serial.printf(" %s  %d  %d %s *Su<>\n", Zu_->description(), Zu_->nominal(), Zu_->get(), Zu_->units());
     // Serial.printf("printing Zu:\n"); Zu_->pretty_print();
-    if ( all || Zf_->is_off() )  Serial.printf(" %s *Sf<>\n", Zf_->print().c_str());
-    if ( all || Zi_->is_off() )  Serial.printf(" %s *Si<>\n", Zi_->print().c_str());
-    if ( all || Zu_->is_off() )  Serial.printf(" %s *Su<>\n", Zu_->print().c_str());
+    if ( all || Zf_->is_off() )  Zf_->print();
+    if ( all || Zi_->is_off() )  Zi_->print();
+    if ( all || Zu_->is_off() )  Zu_->print();
     // if ( all )
     // {
     //     Serial.printf("history array (%d):\n", nhis_);

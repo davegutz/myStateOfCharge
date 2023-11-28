@@ -30,7 +30,14 @@
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
 #include "fault.h"
-// #include <vector>
+#include "command.h"
+
+extern CommandPars cp;            // Various parameters shared at system level
+
+#undef max
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#undef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
 
 class Storage
 {
@@ -39,37 +46,25 @@ public:
 
     Storage(const String &description, const String &units, const boolean _uint8=false)
     {
-        description_ = description;
+        description_ = description.substring(0, 20);
+        units_ = units.substring(0, 10);
         is_eeram_ = false;
-        units_ = units;
+        units_ = units.substring(0, 10);
         is_uint8_t_ = _uint8;
     }
 
     Storage(SerialRAM *ram, const String &description, const String &units, boolean _uint8=false)
     {
-        description_ = description;
+        description_ = description.substring(0, 20);
+        units_ = units.substring(0, 10);
         is_eeram_ = true;
         rP_ = ram;
-        units_ = units;
         is_uint8_t_ = _uint8;
     }
 
     ~Storage(){}
 
     const char* description() { return description_.c_str(); }
-
-    void pretty_print(void)
-    {
-    #ifndef DEPLOY_PHOTON
-        Serial.printf(" addr_ 0x%X\n", addr_.a16);
-        Serial.printf(" units_ %s\n", units_.c_str());
-        Serial.printf(" description_ %s\n", description_.c_str());
-        Serial.printf(" is_eeram_ %d\n", is_eeram_);
-        Serial.printf(" is_uint8_t_ %d\n", is_uint8_t_);
-    #else
-        Serial.printf("Storage: silent\n");
-    #endif
-    }
 
     const char* units() { return units_.c_str(); }
 
@@ -88,16 +83,20 @@ class FloatStorage: public Storage
 public:
     FloatStorage(){}
 
-    FloatStorage(const String &description, const String &units, const boolean _uint8=false, const float _default=0):
+    FloatStorage(const String &description, const String &units, const float min, const float max, const boolean _uint8=false, const float _default=0):
         Storage(description, units, _uint8)
     {
-        default_ = _default;
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
     }
 
-    FloatStorage(SerialRAM *ram, const String &description, const String &units, boolean _uint8=false, const float _default=0):
+    FloatStorage(SerialRAM *ram, const String &description, const String &units, const float min, const float max, boolean _uint8=false, const float _default=0):
         Storage(ram, description, units, _uint8)
     {
-        default_ = _default;
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
     }
 
     ~FloatStorage(){}
@@ -118,25 +117,20 @@ public:
         return val_;
     }
 
+    boolean is_corrupt()
+    {
+        return val_ >= max_ || val_ <= min_;
+    }
+
     boolean is_off()
     {
         return val_ != default_;
     }
 
-    void pretty_print(void)
+    void print()
     {
-    #ifndef DEPLOY_PHOTON
-        Storage::pretty_print();
-        Serial.printf(" val_ %7.3f\n", val_);
-        Serial.printf(" default_ %7.3f\n", default_);
-    #else
-        Serial.printf("Storage: silent\n");
-    #endif
-    }
-
-    String print()
-    {
-        return description_ + " = " + String(val_) + " " + units_;
+        sprintf(cp.buffer, "%-20s %7.3f is %7.3f, %10s", description_.c_str(), default_, val_, units_.c_str());
+        Serial.printf("%s\n", cp.buffer);
     }
     
     void set(float val)
@@ -153,6 +147,8 @@ public:
 protected:
     float val_;
     float default_;
+    float min_;
+    float max_;
 };
 
 
@@ -161,16 +157,20 @@ class Int8tStorage: public Storage
 public:
     Int8tStorage(){}
 
-    Int8tStorage(const String &description, const String &units, const boolean _uint8=false, const int8_t _default=0):
+    Int8tStorage(const String &description, const String &units, const int8_t min, const int8_t max, boolean _uint8=false, const int8_t _default=0):
         Storage(description, units, _uint8)
     {
-        default_ = _default;
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
     }
 
-    Int8tStorage(SerialRAM *ram, const String &description, const String &units, boolean _uint8=false, const int8_t _default=0):
+    Int8tStorage(SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max, boolean _uint8=false, const int8_t _default=0):
         Storage(ram, description, units, _uint8)
     {
-        default_ = _default;
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
     }
 
     ~Int8tStorage(){}
@@ -191,25 +191,20 @@ public:
         return val_;
     }
 
+    boolean is_corrupt()
+    {
+        return val_ >= max_ || val_ <= min_;
+    }
+
     boolean is_off()
     {
         return val_ != default_;
     }
 
-    void pretty_print(void)
+    void print()
     {
-    #ifndef DEPLOY_PHOTON
-        Storage::pretty_print();
-        Serial.printf(" val_ %d\n", val_);
-        Serial.printf(" default_ %d\n", default_);
-    #else
-        Serial.printf("Storage: silent\n");
-    #endif
-    }
-
-    String print()
-    {
-        return description_ + " = " + String(val_) + " " + units_;
+        sprintf(cp.buffer, "%-20s %7d is %7d, %10s", description_.c_str(), default_, val_, units_.c_str());
+        Serial.printf("%s\n", cp.buffer);
     }
     
     void set(int8_t val)
@@ -225,6 +220,8 @@ public:
 
 protected:
     int8_t val_;
+    int8_t min_;
+    int8_t max_;
     int8_t default_;
 };
 
@@ -234,16 +231,20 @@ class Uint8tStorage: public Storage
 public:
     Uint8tStorage(){}
 
-    Uint8tStorage(const String &description, const String &units, const boolean _uint8=false, const uint8_t _default=0):
+    Uint8tStorage(const String &description, const String &units, const uint8_t min, const uint8_t max, const boolean _uint8=false, const uint8_t _default=0):
         Storage(description, units, _uint8)
     {
-        default_ = _default;
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
     }
 
-    Uint8tStorage(SerialRAM *ram, const String &description, const String &units, boolean _uint8=false, const uint8_t _default=0):
+    Uint8tStorage(SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max, boolean _uint8=false, const uint8_t _default=0):
         Storage(ram, description, units, _uint8)
     {
-        default_ = _default;
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
     }
 
     ~Uint8tStorage(){}
@@ -262,25 +263,31 @@ public:
         return val_;
     }
 
+    boolean is_corrupt()
+    {
+        return val_ >= max_ || val_ <= min_;
+    }
+
     boolean is_off()
     {
         return val_ != default_;
     }
 
-    void pretty_print(void)
-    {
-    #ifndef DEPLOY_PHOTON
-        Storage::pretty_print();
-        Serial.printf(" val_ %d\n", val_);
-        Serial.printf(" default_ %d\n", default_);
-    #else
-        Serial.printf("Storage: silent\n");
-    #endif
-    }
+    // void pretty_print(void)
+    // {
+    // #ifndef DEPLOY_PHOTON
+    //     Storage::pretty_print();
+    //     Serial.printf(" val_ %d\n", val_);
+    //     Serial.printf(" default_ %d\n", default_);
+    // #else
+    //     Serial.printf("Storage: silent\n");
+    // #endif
+    // }
 
-    String print()
+    void print()
     {
-        return description_ + " = " + String(val_) + " " + units_;
+        sprintf(cp.buffer, "%-20s %7d is %7d, %10s", description_.c_str(), default_, val_, units_.c_str());
+        Serial.printf("%s\n", cp.buffer);
     }
     
     void set(uint8_t val)
@@ -296,6 +303,8 @@ public:
 
 protected:
     uint8_t val_;
+    uint8_t min_;
+    uint8_t max_;
     uint8_t default_;
 };
 
