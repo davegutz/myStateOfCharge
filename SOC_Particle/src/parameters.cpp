@@ -52,7 +52,8 @@ SavedPars::SavedPars(SerialRAM *ram)
 void SavedPars::init_ram()
 {
     Zf_= new FloatStorage(rP_, "FloatVariable", "whatever units", 99.);
-    Zi_= new Int8tStorage(rP_, "IntVariable", "whatever units", 9);
+    Zi_= new Int8tStorage(rP_, "IntVariable", "whatever units", -9);
+    Zu_= new Uint8tStorage(rP_, "UintVariable", "whatever units", 9);
 
     // Memory map
     amp_eeram_.a16 = next_; next_ += sizeof(float);
@@ -89,6 +90,7 @@ void SavedPars::init_ram()
     Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale_);
     next_ = Zf_->assign_addr(next_);
     next_ = Zi_->assign_addr(next_);
+    next_ = Zu_->assign_addr(next_);
     nflt_ = int( NFLT ); 
     fault_ = new Flt_ram[nflt_];
     for ( int i=0; i<nflt_; i++ )
@@ -153,6 +155,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(Vb_scale_, float(-1e6), float(1e6)) ||
         is_val_corrupt(Zf_->get(), float(-1e6), float(1e6)) ||
         is_val_corrupt(Zi_->get(), int8_t(-100), int8_t(100));
+        // is_val_corrupt(Zi_->get(), uint8_t(-100), uint8_t(100));
     if ( corruption )
     {
         Serial.printf("corrupt*********\n");
@@ -239,6 +242,7 @@ int SavedPars::num_diffs()
     if ( float(VB_SCALE) != Vb_scale_ ) n++;
     if ( Zf_->nominal() != Zf_->get() ) n++;
     if ( Zi_->nominal() != Zi_->get() ) n++;
+    if ( Zu_->nominal() != Zu_->get() ) n++;
     return ( n );
 }
 
@@ -299,10 +303,15 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model_);
     if ( all || float(VOLT_BIAS) != Vb_bias_hdwe_ )     Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe_);
     if ( all || float(VB_SCALE) != Vb_scale_ )  Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n", VB_SCALE, Vb_scale_);
-    if ( all || Zf_->nominal() != Zf_->get() )  Serial.printf(" %s  %7.3f  %7.3f %s *Sf<>\n", Zf_->description(), Zf_->nominal(), Zf_->get(), Zf_->units());
-    Serial.printf("printing Zf:\n"); Zf_->pretty_print();
-    if ( all || Zi_->nominal() != Zi_->get() )  Serial.printf(" %s  %d  %d %s *Si<>\n", Zi_->description(), Zi_->nominal(), Zi_->get(), Zi_->units());
-    Serial.printf("printing Zi:\n"); Zi_->pretty_print();
+    // if ( all || Zf_->nominal() != Zf_->get() )  Serial.printf(" %s  %7.3f  %7.3f %s *Sf<>\n", Zf_->description(), Zf_->nominal(), Zf_->get(), Zf_->units());
+    // Serial.printf("printing Zf:\n"); Zf_->pretty_print();
+    // if ( all || Zi_->nominal() != Zi_->get() )  Serial.printf(" %s  %d  %d %s *Si<>\n", Zi_->description(), Zi_->nominal(), Zi_->get(), Zi_->units());
+    // Serial.printf("printing Zi:\n"); Zi_->pretty_print();
+    // if ( all || Zu_->nominal() != Zu_->get() )  Serial.printf(" %s  %d  %d %s *Su<>\n", Zu_->description(), Zu_->nominal(), Zu_->get(), Zu_->units());
+    // Serial.printf("printing Zu:\n"); Zu_->pretty_print();
+    if ( all || Zf_->is_off() )  Serial.printf(" %s *Sf<>\n", Zf_->print().c_str());
+    if ( all || Zi_->is_off() )  Serial.printf(" %s *Si<>\n", Zi_->print().c_str());
+    if ( all || Zu_->is_off() )  Serial.printf(" %s *Su<>\n", Zu_->print().c_str());
     // if ( all )
     // {
     //     Serial.printf("history array (%d):\n", nhis_);
@@ -449,4 +458,7 @@ void SavedPars::reset_pars()
     put_t_last_model(float(RATED_TEMP));  
     put_Vb_bias_hdwe(float(VOLT_BIAS));
     put_Vb_scale(float(VB_SCALE));
+    Zf_->set_default();
+    Zi_->set_default();
+    Zu_->set_default();
  }

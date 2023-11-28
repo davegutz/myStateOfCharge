@@ -573,16 +573,22 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 sp.put_Zf(cp.input_str.substring(2).toFloat());
                 Serial.printf("%7.3f\n", sp.get_Zf());
                 Serial1.printf("%7.3f\n", sp.get_Zf());
-                sp.Zf_->pretty_print();
                 break;
 
               case ( 'i' ):  // * Si<>:  Zi
                 Serial.printf("Zi %d to", sp.get_Zi());
                 Serial1.printf("Zi %d to", sp.get_Zi());
-                sp.put_Zi(cp.input_str.substring(2).toFloat());
+                sp.put_Zi(cp.input_str.substring(2).toInt());
                 Serial.printf(" %d\n", sp.get_Zi());
                 Serial1.printf(" %d\n", sp.get_Zi());
-                sp.Zi_->pretty_print();
+                break;
+
+              case ( 'u' ):  // * Su<>:  Zu
+                Serial.printf("Zu %d to", sp.get_Zu());
+                Serial1.printf("Zu %d to", sp.get_Zu());
+                sp.put_Zu(cp.input_str.substring(2).toInt());
+                Serial.printf(" %d\n", sp.get_Zu());
+                Serial1.printf(" %d\n", sp.get_Zu());
                 break;
 
               default:
@@ -953,8 +959,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                   Serial.printf("sp.modeling %d V->modeling %d to ", sp.modeling(), V->Modeling.get());
                   V->put_Modeling(INT_in, Sen);
                   Serial.printf("sp.modeling %d V->modeling %d\n", sp.modeling(),  V->Modeling.get());
-                  Serial.printf("modP sp.modeling_ptr %p sp.modeling %d\n", sp.modeling_ptr(), sp.modeling());
-                  Serial.printf("V    V->modeling_ptr %p V->modeling %d\n", V->Modeling.ptr(), V->Modeling.get());
                   if ( reset )
                   {
                     Serial.printf("Chg...reset\n");

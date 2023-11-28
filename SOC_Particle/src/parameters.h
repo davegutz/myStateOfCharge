@@ -118,6 +118,11 @@ public:
         return val_;
     }
 
+    boolean is_off()
+    {
+        return val_ != default_;
+    }
+
     void pretty_print(void)
     {
     #ifndef DEPLOY_PHOTON
@@ -136,13 +141,13 @@ public:
     
     void set(float val)
     {
-        // Serial.printf("set %d ", uint8_t(val_));
         val_ = val;
-        // Serial.printf("--> %d\n", uint8_t(val_));
-        if ( is_eeram_ ) 
-        {
-            rP_->put(addr_.a16, val_);
-        }
+        if ( is_eeram_ ) rP_->put(addr_.a16, val_);
+    }
+
+    void set_default()
+    {
+        set(default_);
     }
 
 protected:
@@ -186,6 +191,11 @@ public:
         return val_;
     }
 
+    boolean is_off()
+    {
+        return val_ != default_;
+    }
+
     void pretty_print(void)
     {
     #ifndef DEPLOY_PHOTON
@@ -204,13 +214,13 @@ public:
     
     void set(int8_t val)
     {
-        // Serial.printf("set %d ", uint8_t(val_));
         val_ = val;
-        // Serial.printf("--> %d\n", uint8_t(val_));
-        if ( is_eeram_ ) 
-        {
-            rP_->put(addr_.a16, val_);
-        }
+        if ( is_eeram_ ) rP_->put(addr_.a16, val_);
+    }
+
+    void set_default()
+    {
+        set(default_);
     }
 
 protected:
@@ -252,6 +262,11 @@ public:
         return val_;
     }
 
+    boolean is_off()
+    {
+        return val_ != default_;
+    }
+
     void pretty_print(void)
     {
     #ifndef DEPLOY_PHOTON
@@ -270,14 +285,13 @@ public:
     
     void set(uint8_t val)
     {
-        // Serial.printf("set %d ", uint8_t(val_));
         val_ = val;
-        // Serial.printf("--> %d\n", uint8_t(val_));
-        if ( is_eeram_ ) 
-        {
-            rP_->write(addr_.a16, val_);
-                // Serial.printf("set unit8t 0x%X = %d\n", addr_.a16, uint8_t(val_));
-        }
+        if ( is_eeram_ ) rP_->write(addr_.a16, val_);
+    }
+
+    void set_default()
+    {
+        set(default_);
     }
 
 protected:
@@ -482,6 +496,7 @@ public:
     float Vb_scale() { return Vb_scale_; }
     float Zf() { return Zf_->get(); }
     float Zi() { return Zi_->get(); }
+    float Zu() { return Zu_->get(); }
 
     // functions
     boolean is_corrupt();
@@ -543,6 +558,7 @@ public:
         void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale_ = value; }
         float get_Zf() { return Zf_->get(); }
         int8_t get_Zi() { return Zi_->get(); }
+        uint8_t get_Zu() { return Zu_->get(); }
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
         uint16_t next() { return next_; }
@@ -601,7 +617,8 @@ public:
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { Vb_scale_ = input; }
         void put_Zf(const float input) { Zf_->set(input); }
-        void put_Zi(const float input) { Zi_->set(input); }
+        void put_Zi(const int8_t input) { Zi_->set(input); }
+        void put_Zu(const uint8_t input) { Zu_->set(input); }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #else
         void put_all_dynamic();
@@ -646,6 +663,7 @@ public:
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale_ = input; }
         void put_Zf(const float input) { Zf_->set(input); }
         void put_Zi(const int8_t input) { Zi_->set(input); }
+        void put_Zu(const uint8_t input) { Zu_->set(input); }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
     #endif
     //
@@ -653,6 +671,7 @@ public:
     boolean tweak_test() { return ( 1<<3 & modeling_ ); } // Driving signal injection completely using software inj_bias 
     FloatStorage *Zf_;
     Int8tStorage *Zi_;
+    Uint8tStorage *Zu_;
 protected:
     Variables <float> *amp_ = new Variables <float>("Amps", "Inj amp");
     // float amp_;             // Injected amplitude, A
