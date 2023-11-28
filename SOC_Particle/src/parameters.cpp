@@ -47,13 +47,14 @@ SavedPars::SavedPars(SerialRAM *ram)
 {
     next_ = 0x000;
     rP_ = ram;
+    size_ = 0;
 }
 
 void SavedPars::init_ram()
 {
-    Zf_= new FloatStorage(rP_, "FloatVariable", "whatever units", -1e6, 1e6, 99.);
-    Zi_= new Int8tStorage(rP_, "IntVariable", "whatever units", -100, 100, -9);
-    Zu_= new Uint8tStorage(rP_, "UintVariable", "whatever units", 0, 70, 9);
+    Zf_= new FloatStorage(rP_, "FloatVariable", "whatever units", -1e6, 1e6, 99.); Z_[size_++] = Zf_;
+    Zi_= new Int8tStorage(rP_, "IntVariable", "whatever units", -100, 100, -9); Z_[size_++] = Zi_;
+    Zu_= new Uint8tStorage(rP_, "UintVariable", "whatever units", 0, 70, 9); Z_[size_++] = Zu_;
 
     // Memory map
     amp_eeram_.a16 = next_; next_ += sizeof(float);
@@ -303,12 +304,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model_);
     if ( all || float(VOLT_BIAS) != Vb_bias_hdwe_ )     Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe_);
     if ( all || float(VB_SCALE) != Vb_scale_ )  Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n", VB_SCALE, Vb_scale_);
-    // if ( all || Zf_->nominal() != Zf_->get() )  Serial.printf(" %s  %7.3f  %7.3f %s *Sf<>\n", Zf_->description(), Zf_->nominal(), Zf_->get(), Zf_->units());
-    // Serial.printf("printing Zf:\n"); Zf_->pretty_print();
-    // if ( all || Zi_->nominal() != Zi_->get() )  Serial.printf(" %s  %d  %d %s *Si<>\n", Zi_->description(), Zi_->nominal(), Zi_->get(), Zi_->units());
-    // Serial.printf("printing Zi:\n"); Zi_->pretty_print();
-    // if ( all || Zu_->nominal() != Zu_->get() )  Serial.printf(" %s  %d  %d %s *Su<>\n", Zu_->description(), Zu_->nominal(), Zu_->get(), Zu_->units());
-    // Serial.printf("printing Zu:\n"); Zu_->pretty_print();
+    for (int i=0; i<size_; i++ ) if ( all || Z_[i]->is_off() )  Z_[i]->print();
     if ( all || Zf_->is_off() )  Zf_->print();
     if ( all || Zi_->is_off() )  Zi_->print();
     if ( all || Zu_->is_off() )  Zu_->print();

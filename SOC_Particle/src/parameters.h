@@ -66,6 +66,10 @@ public:
 
     const char* description() { return description_.c_str(); }
 
+    virtual boolean is_off(){return true;};
+
+    virtual void print(){};
+
     const char* units() { return units_.c_str(); }
 
 protected:
@@ -763,6 +767,8 @@ protected:
     uint16_t next_;
     uint16_t nflt_;         // Length of Flt_ram array for faults
     uint16_t nhis_;         // Length of Flt_ram array for history
+    uint16_t size_;
+    Storage *Z_[50];
 };
 
 #endif
