@@ -184,7 +184,7 @@ void delay_no_block(const unsigned long int interval)
 // Harvest charge caused temperature change.   More charge becomes available as battery warms
 void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Sim)
 {
-  sp.put_delta_q(sp.delta_q() - Mon->dqdt() * Mon->q_capacity() * (temp_c - sp.t_last()));
+  sp.put_Delta_q(sp.Delta_q() - Mon->dqdt() * Mon->q_capacity() * (temp_c - sp.t_last()));
   sp.put_t_last(temp_c);
   sp.put_delta_q_model(sp.delta_q_model() - Sim->dqdt() * Sim->q_capacity() * (temp_c - sp.t_last_model()));
   sp.put_t_last_model(temp_c);

@@ -147,7 +147,7 @@ float Battery::voc_soc_tab(const float soc, const float temp_c)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery monitor class
 BatteryMonitor::BatteryMonitor():
-    Battery(&sp.delta_q_, &sp.t_last_, &sp.mon_chm_, VM),
+    Battery(&sp.Delta_q_stored_, &sp.t_last_, &sp.mon_chm_, VM),
 	amp_hrs_remaining_ekf_(0.), amp_hrs_remaining_soc_(0.), dt_eframe_(0.1), eframe_(0), ib_charge_(0.), ib_past_(0.),
     q_ekf_(NOM_UNIT_CAP*3600.), soc_ekf_(1.0), tcharge_(0.), tcharge_ekf_(0.), voc_filt_(NOMINAL_VB), voc_soc_(NOMINAL_VB),
     y_filt_(0.)

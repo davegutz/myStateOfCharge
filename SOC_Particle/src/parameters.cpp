@@ -28,7 +28,7 @@
 #include "Variable.h"
 
 /* Using pointers in building class so all that stuff does not get saved by 'retained' keyword in SOC_Particle.ino.
-    Only the *_init_ parameters at the bottom of Parameters.h are stored in SRAM
+    Only the *_stored_ parameters at the bottom of Parameters.h are stored in SRAM
 */
 
 // class SavedPars 
@@ -46,13 +46,14 @@ SavedPars::SavedPars()
         fault_ = faults;
         size_ = 0;
 
-        Amp_ = new FloatStorage("Xf", "Inj amp", "Amps pk", -1e6, 1e6, &Amp_init_, 0.); Z_[size_++] = Amp_;
-        Cutback_gain_sclr_ = new FloatStorage("Sk", "Cutback gain scalar", "slr", -1e6, 1e6, &Cutback_gain_sclr_init_, 1.); Z_[size_++] = Cutback_gain_sclr_;
-        Debug_ = new IntStorage("v", "Verbosity", "level", -128, 128, &Debug_init_, 0); Z_[size_++] = Debug_;
-        Dw_ = new FloatStorage("Dw", "Tab mon adj", "v", -1e3, 1e3, &Dw_init_, VTAB_BIAS); Z_[size_++] = Dw_;
-        Freq_ = new FloatStorage("Xf", "Inj freq", "Hz", 0., 2., &Freq_init_, 0.); Z_[size_++] = Freq_;
-        Ib_select_ = new Int8tStorage("si", "Curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, &Ib_select_init_, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_;
-        Modeling_ = new Uint8tStorage("Xm", "Modeling bitmap", "0x00000000", 0, 255, &Modeling_init_, MODELING); Z_[size_++] = Modeling_;
+        Amp_ = new FloatStorage("Xf", "Inj amp", "Amps pk", -1e6, 1e6, &Amp_stored_, 0.); Z_[size_++] = Amp_;
+        Cutback_gain_sclr_ = new FloatStorage("Sk", "Cutback gain scalar", "slr", -1e6, 1e6, &Cutback_gain_sclr_stored_, 1.); Z_[size_++] = Cutback_gain_sclr_;
+        Debug_ = new IntStorage("v", "Verbosity", "level", -128, 128, &Debug_stored_, 0); Z_[size_++] = Debug_;
+        Delta_q_ = new DoubleStorage("n/a", "Charge loss", "C", -1e8, 1e5, &Delta_q_stored_, 0); Z_[size_++] = Delta_q_;
+        Dw_ = new FloatStorage("Dw", "Tab mon adj", "v", -1e3, 1e3, &Dw_stored_, VTAB_BIAS); Z_[size_++] = Dw_;
+        Freq_ = new FloatStorage("Xf", "Inj freq", "Hz", 0., 2., &Freq_stored_, 0.); Z_[size_++] = Freq_;
+        Ib_select_ = new Int8tStorage("si", "Curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, &Ib_select_stored_, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_;
+        Modeling_ = new Uint8tStorage("Xm", "Modeling bitmap", "0x00000000", 0, 255, &Modeling_stored_, MODELING); Z_[size_++] = Modeling_;
     }
 #else
 SavedPars::SavedPars(SerialRAM *ram)
@@ -64,7 +65,8 @@ SavedPars::SavedPars(SerialRAM *ram)
     Amp_= new FloatStorage("Xf", rP_, "Inj amp", "Amps pk", -1e6, 1e6, 0.); Z_[size_++] = Amp_;
     Cutback_gain_sclr_= new FloatStorage("Sk", rP_, "Cutback gain scalar", "slr", -1e6, 1e6, 1.); Z_[size_++] = Cutback_gain_sclr_;
     Debug_= new IntStorage("v", rP_, "Verbosity", "int", -128, 128, 0); Z_[size_++] = Debug_;
-    Dw_= new FloatStorage("Dw", rP_, "Tab mon adj", "v", -100., 100., VTAB_BIAS); Z_[size_++] = Cutback_gain_sclr_;
+    Delta_q_ = new DoubleStorage("na", rP_, "Charge used", "C", -1e8, 1e5, 0.); Z_[size_++] = Delta_q_;
+    Dw_ = new FloatStorage("Dw", rP_, "Tab mon adj", "v", -100., 100., VTAB_BIAS); Z_[size_++] = Cutback_gain_sclr_;
     Freq_= new FloatStorage("Xf", rP_, "Inj freq", "Hz", 0., 2., 0.); Z_[size_++] = Freq_;
     Ib_select_ = new Int8tStorage("si", rP_, "curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_;
     Modeling_= new Uint8tStorage("Xm", rP_, " modeling bitmap", "[0x00000000]", 0, 255, MODELING); Z_[size_++] = Modeling_;
@@ -72,9 +74,9 @@ SavedPars::SavedPars(SerialRAM *ram)
     // Memory map
     next_ = Amp_->assign_addr(next_);
     next_ = Cutback_gain_sclr_->assign_addr(next_);
-    Dw_eeram_.a16 = next_;  next_ += sizeof(vb_table_bias_);
-    debug_eeram_.a16 = next_; next_ += sizeof(debug_);
-    delta_q_eeram_.a16 = next_;  next_ += sizeof(delta_q_);
+    // Dw_eeram_.a16 = next_;  next_ += sizeof(vb_table_bias_);
+    // debug_eeram_.a16 = next_; next_ += sizeof(debug_);
+    // delta_q_eeram_.a16 = next_;  next_ += sizeof(delta_q_);
     delta_q_model_eeram_.a16 = next_;  next_ += sizeof(delta_q_model_);
     next_ = Freq_->assign_addr(next_);
     Ib_bias_all_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_all_);
@@ -135,8 +137,8 @@ boolean SavedPars::is_corrupt()
     boolean corruption = false;
     for ( int i=0; i<size_; i++ ) corruption |= Z_[i]->is_corrupt();
     corruption = corruption ||
-        is_val_corrupt(debug_, -100, 100) ||
-        is_val_corrupt(delta_q_, -1e8, 1e5) ||
+        // is_val_corrupt(debug_, -100, 100) ||
+        // is_val_corrupt(delta_q_, -1e8, 1e5) ||
         is_val_corrupt(delta_q_model_, -1e8, 1e5) ||
         is_val_corrupt(Ib_bias_all_, float(-1e5), float(1e5)) ||
         is_val_corrupt(Ib_bias_amp_, float(-1e5), float(1e5)) ||
@@ -216,7 +218,7 @@ int SavedPars::num_diffs()
     // Don't count memories
     // if ( float(RATED_TEMP) != t_last_ )    //   n++;
     // if ( float(RATED_TEMP) != t_last_model_ )    //   n++;
-    // if ( 0. != delta_q_ )    //   n++;
+    // if ( Delta_q_->is_off() ) n++;
     // if ( 0. != delta_q_model_ )    //   n++;
     // if ( int(-1) != iflt_ )    //     n++;
     // if ( int(-1) != isum_ )    //     n++;
@@ -266,9 +268,6 @@ void SavedPars::pretty_print(const boolean all)
 {
     Serial.printf("saved (sp): all=%d\n", all);
     Serial.printf("             defaults    current EERAM values\n");
-    if ( all || float(0.) != vb_table_bias_ )   Serial.printf(" vb_table_bias %7.3f    %7.3f *Dw\n", 0., vb_table_bias_);
-    if ( all || int(0) != debug_ )              Serial.printf(" debug  %d  %d *v<>\n", int(0), debug_);
-    if ( all )                                  Serial.printf(" delta_q%10.1f %10.1f *DQ<>\n", double(0.), delta_q_);
     if ( all )                                  Serial.printf(" dq_sim %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model_);
     if ( all || float(CURR_BIAS_ALL) != Ib_bias_all_ )  Serial.printf(" Ib_bias_all%7.3f  %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all_);
     if ( all || float(CURR_BIAS_AMP) != Ib_bias_amp_ )  Serial.printf(" bias_amp%7.3f  %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp_);
@@ -348,7 +347,7 @@ void SavedPars::put_all_dynamic()
     switch ( blink++ )
     {
         case ( 0 ):
-            put_delta_q();
+            put_Delta_q();
             break;
 
         case ( 1 ):
@@ -411,13 +410,13 @@ void SavedPars::reset_pars()
     Amp_->set_default();
     Cutback_gain_sclr_->set_default();
     Debug_->set_default();
+    Delta_q_->set_default();
  
-    put_delta_q(double(0.));
     put_delta_q_model(double(0.));
 
     Dw_->set_default();
     Freq_->set_default();
-    
+
     put_Ib_bias_all(float(CURR_BIAS_ALL));
     put_Ib_bias_amp(float(CURR_BIAS_AMP));
     put_Ib_bias_noa(float(CURR_BIAS_NOA));

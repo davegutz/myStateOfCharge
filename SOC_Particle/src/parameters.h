@@ -38,7 +38,7 @@ extern CommandPars cp;            // Various parameters shared at system level
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
 /* Using pointers in building class so all that stuff does not get saved by 'retained' keyword in SOC_Particle.ino.
-    Only the *_init_ parameters at the bottom of Parameters.h are stored in SRAM.  Class initialized by *init in arg list.
+    Only the *_stored_ parameters at the bottom of Parameters.h are stored in SRAM.  Class initialized by *init in arg list.
 */
 class Storage
 {
@@ -87,6 +87,108 @@ protected:
     String description_;
     boolean is_eeram_;
     boolean is_uint8_t_;
+};
+
+
+class DoubleStorage: public Storage
+{
+public:
+    DoubleStorage(){}
+
+    DoubleStorage(const String &code, const String &description, const String &units, const double min, const double max, double *init, const double _default=0):
+        Storage(code, description, units, false)
+    {
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
+        init_ = init;
+        set(*init_); // retained
+    }
+
+    DoubleStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, const double _default=0):
+        Storage(code, ram, description, units, false)
+    {
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
+    }
+
+    ~DoubleStorage(){}
+
+    uint16_t assign_addr(uint16_t next)
+    {
+        addr_.a16 = next;
+        return next + sizeof(double);
+    }
+
+    double get()
+    {
+        if ( is_eeram_ )
+        {
+            double value;
+            rP_->get(addr_.a16, value);
+            val_ = value; 
+        }
+        return val_;
+    }
+
+    virtual boolean is_corrupt()
+    {
+        boolean corrupt = val_ > max_ || val_ < min_;
+        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        return corrupt;
+    }
+
+    virtual boolean is_off()
+    {
+        return val_ != default_;
+    }
+
+    double max_of() { return max_; }
+
+    double min_of() { return min_; }
+
+    double nominal() { return default_; }
+    
+    void print()
+    {
+        sprintf(cp.buffer, "%-20s %7.3f -> %7.3f, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
+        Serial.printf("%s\n", cp.buffer);
+    }
+
+    void print1()
+    {
+        sprintf(cp.buffer, "%-20s %7.3f -> %7.3f, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
+        Serial1.printf("%s\n", cp.buffer);
+    }
+    
+    void print_help()
+    {
+      Serial.printf(" *%s= %7.3f: %s, %s (%7.3f - %7.3f) [%7.3f]\n", code_.c_str(), val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+    }
+
+    void set(double val)
+    {
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        else
+        {
+            val_ = val;
+            *init_ = val;
+            if ( is_eeram_ ) rP_->put(addr_.a16, val_);
+        }
+    }
+
+    void set_default()
+    {
+        set(default_);
+    }
+
+protected:
+    double val_;
+    double default_;
+    double min_;
+    double max_;
+    double *init_;
 };
 
 
@@ -544,11 +646,12 @@ public:
     // parameter list
     float Amp() { return Amp_->get(); }
     float Cutback_gain_sclr() { return Cutback_gain_sclr_->get(); }
-    float Dw() { return Dw_->get(); }
     int Debug() { return Debug_->get();}
+    double Delta_q() { return Delta_q_->get();}
 
-    double delta_q() { return delta_q_; }
     double delta_q_model() { return delta_q_model_; }
+
+    float Dw() { return Dw_->get(); }
 
     float Freq() { return Freq_->get(); }
 
@@ -606,11 +709,13 @@ public:
     #ifdef CONFIG_47L16
         float get_Amp() { return Amp_->get(); }
         float get_Cutback_gain_sclr() { return Cutback_gain_sclr_->get(); }
-        float get_Dw() { return Dw_->get(); }
         int get_Debug() { return Debug_->get(); }
+        double get_Delta_q() { return Delta_q_->get(); }
 
-        void get_delta_q() { double value; rP_->get(delta_q_eeram_.a16, value); delta_q_ = value; }
         void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model_ = value; }
+
+        float get_Dw() { return Dw_->get(); }
+
         float get_Freq() { return Freq_->get(); }
         void get_Ib_bias_all() { float value; rP_->get(Ib_bias_all_eeram_.a16, value); Ib_bias_all_ = value; }
         void get_Ib_bias_amp() { float value; rP_->get(Ib_bias_amp_eeram_.a16, value); Ib_bias_amp_ = value; }
@@ -644,8 +749,9 @@ public:
     #else
         float get_Amp() { return Amp_->get(); }
         float get_Cutback_gain_sclr() { return Cutback_gain_sclr_->get(); }
-        float get_Dw() { return Dw_->get(); }
         int get_Debug() { return Debug_->get(); }
+        double get_Delta_q() { return Delta_q_->get(); }
+        float get_Dw() { return Dw_->get(); }
         float get_Freq() { return Freq_->get(); }
         uint8_t get_Modeling() { return Modeling_->get(); }
     #endif
@@ -665,13 +771,14 @@ public:
         void put_all_dynamic();
         void put_Amp(const float input) { Amp_->set(input); }
         void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_->set(input); }
-        void put_Dw(const float input) { Dw_->set(input); }
         void put_Debug(const int input) { Debug_->set(input); }
-
-        void put_delta_q(const double input) { delta_q_ = input; }
-        void put_delta_q() {}
+        void put_Delta_q(const double input) { Delta_q_->set(input); }
+        void put_Delta_q() {}
         void put_delta_q_model(const double input) { delta_q_model_ = input; }
         void put_delta_q_model() {}
+
+        void put_Dw(const float input) { Dw_->set(input); }
+
         void put_Freq(const float input) { Freq_->set(input); }
         void put_Ib_bias_all(const float input) { Ib_bias_all_ = input; }
         void put_Ib_bias_amp(const float input) { Ib_bias_amp_ = input; }
@@ -683,7 +790,7 @@ public:
         void put_ihis(const int input) { ihis_ = input; }
         void put_inj_bias(const float input) { inj_bias_ = input; }
         void put_isum(const int input) { isum_ = input; }
-        void put_Modeling(const uint8_t input) { Modeling_->set(input); Modeling_init_ = Modeling();}
+        void put_Modeling(const uint8_t input) { Modeling_->set(input); Modeling_stored_ = Modeling();}
         void put_mon_chm(const uint8_t input) { mon_chm_ = input; }
         void put_mon_chm() {}
         void put_nP(const float input) { nP_ = input; }
@@ -707,13 +814,16 @@ public:
         void put_all_dynamic();
         void put_Amp(const float input) { Amp_->set(input); }
         void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_->set(input); }
-        void put_Dw(const float input) { Dw_->set(input); }
         void put_Debug(const int input) { Debug_->set(input); }
+        void put_Delta_q(const double input) { Delta_q_->set(input); }
 
-        void put_delta_q(const double input) { rP_->put(delta_q_eeram_.a16, input); delta_q_ = input; }
-        void put_delta_q() { rP_->put(delta_q_eeram_.a16, delta_q_); }
+        // void put_delta_q() { rP_->put(delta_q_eeram_.a16, delta_q_); }
+
         void put_delta_q_model(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model_ = input; }
         void put_delta_q_model() { rP_->put(delta_q_model_eeram_.a16, delta_q_model_); }
+
+        void put_Dw(const float input) { Dw_->set(input); }
+
         void put_Freq(const float input) { Freq_->set(input); }
         void put_Ib_bias_all(const float input) { rP_->put(Ib_bias_all_eeram_.a16, input); Ib_bias_all_ = input; }
         void put_Ib_bias_amp(const float input) { rP_->put(Ib_bias_amp_eeram_.a16, input); Ib_bias_amp_ = input; }
@@ -753,13 +863,17 @@ public:
     FloatStorage *Amp_;
     FloatStorage *Cutback_gain_sclr_;
     IntStorage *Debug_;
+    DoubleStorage *Delta_q_;
     FloatStorage *Dw_;
     FloatStorage *Freq_;
     Int8tStorage *Ib_select_;
     Uint8tStorage *Modeling_;
+    #ifndef CONFIG_47L16
+        double Delta_q_stored_;
+    #endif
 protected:
-    int debug_;             // Level of debug printing
-    double delta_q_;        // Charge change since saturated, C
+    // int debug_;             // Level of debug printing
+    // double delta_q_;        // Charge change since saturated, C
     double delta_q_model_;  // Charge change since saturated, C
     float Ib_bias_all_;     // Bias on all shunt sensors, A
     float Ib_bias_amp_;     // Calibration adder of amplified shunt sensor, A
@@ -789,11 +903,7 @@ protected:
         Flt_st *fault_;
         Flt_st *history_;
     #else
-        address16b cutback_gain_sclr_eeram_;
-        address16b debug_eeram_;
-        address16b delta_q_eeram_;
-        address16b delta_q_model_eeram_;
-        address16b freq_eeram_;
+        // address16b delta_q_model_eeram_;
         address16b hys_scale_eeram_;
         address16b Ib_bias_all_eeram_;
         address16b Ib_bias_amp_eeram_;
@@ -805,7 +915,6 @@ protected:
         address16b ihis_eeram_;
         address16b inj_bias_eeram_;
         address16b isum_eeram_;
-        address16b Modeling()eeram_;
         address16b mon_chm_eeram_;
         address16b nP_eeram_;
         address16b nS_eeram_;
@@ -833,13 +942,13 @@ protected:
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
     #ifndef CONFIG_47L16
-        float Amp_init_;
-        float Cutback_gain_sclr_init_;
-        int Debug_init_;
-        float Dw_init_;
-        float Freq_init_;
-        int8_t Ib_select_init_;
-        uint8_t Modeling_init_;
+        float Amp_stored_;
+        float Cutback_gain_sclr_stored_;
+        int Debug_stored_;
+        float Dw_stored_;
+        float Freq_stored_;
+        int8_t Ib_select_stored_;
+        uint8_t Modeling_stored_;
     #endif
 };
 
