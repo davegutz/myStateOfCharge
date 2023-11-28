@@ -27,6 +27,7 @@
 #include "mySensors.h"
 #include "Variable.h"
 
+
 // class SavedPars 
 SavedPars::SavedPars()
 {
@@ -45,55 +46,61 @@ SavedPars::SavedPars()
 SavedPars::SavedPars(SerialRAM *ram)
 {
     next_ = 0x000;
-    #ifdef CONFIG_47L16
-        rP_ = ram;
-        // Memory map
-        amp_eeram_.a16 = next_; next_ += sizeof(float);
-        cutback_gain_sclr_eeram_.a16 = next_; next_ += sizeof(float);
-        Dw_eeram_.a16 = next_;  next_ += sizeof(vb_table_bias_);
-        debug_eeram_.a16 = next_; next_ += sizeof(debug_);
-        delta_q_eeram_.a16 = next_;  next_ += sizeof(delta_q_);
-        delta_q_model_eeram_.a16 = next_;  next_ += sizeof(delta_q_model_);
-        freq_eeram_.a16 = next_; next_ += sizeof(freq_);
-        Ib_bias_all_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_all_);
-        Ib_bias_amp_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_amp_);
-        Ib_bias_noa_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_noa_);
-        ib_scale_amp_eeram_.a16 =  next_;  next_ += sizeof(ib_scale_amp_);
-        ib_scale_noa_eeram_.a16 =  next_;  next_ += sizeof(ib_scale_noa_);
-        ib_select_eeram_.a16 =  next_;  next_ += sizeof(ib_select_);
-        iflt_eeram_.a16 =  next_;  next_ += sizeof(iflt_);
-        ihis_eeram_.a16 =  next_;  next_ += sizeof(ihis_);
-        inj_bias_eeram_.a16 =  next_;  next_ += sizeof(inj_bias_);
-        isum_eeram_.a16 =  next_;  next_ += sizeof(isum_);
-        mon_chm_eeram_.a16 =  next_;  next_ += sizeof(mon_chm_);
-        modeling_eeram_.a16 =  next_;  next_ += sizeof(modeling_);
-        nP_eeram_.a16 = next_; next_ += sizeof(nP_);
-        nS_eeram_.a16 = next_; next_ += sizeof(nS_);
-        preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving_);
-        sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm_);
-        s_cap_mon_eeram_.a16 = next_;  next_ += sizeof(s_cap_mon_);
-        s_cap_sim_eeram_.a16 = next_;  next_ += sizeof(s_cap_sim_);
-        Tb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Tb_bias_hdwe_);
-        time_now_eeram_.a16 = next_; next_ += sizeof(time_now_);
-        type_eeram_.a16 =  next_;  next_ += sizeof(type_);
-        t_last_eeram_.a16 =  next_;  next_ += sizeof(t_last_);
-        t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model_);
-        Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe_);
-        Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale_);
-        nflt_ = int( NFLT ); 
-        fault_ = new Flt_ram[nflt_];
-        for ( int i=0; i<nflt_; i++ )
-        {
-            fault_[i].instantiate(ram, &next_);
-        }
-        nhis_ = int( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
-        history_ = new Flt_ram[nhis_];
-        for ( int i=0; i<nhis_; i++ )
-        {
-            history_[i].instantiate(ram, &next_);
-        }
-    #endif
+    rP_ = ram;
 }
+
+void SavedPars::init_ram()
+{
+    Zf_= new FloatStorage(rP_, "FloatVariable", "whatever units", 99.);
+
+    // Memory map
+    amp_eeram_.a16 = next_; next_ += sizeof(float);
+    cutback_gain_sclr_eeram_.a16 = next_; next_ += sizeof(float);
+    Dw_eeram_.a16 = next_;  next_ += sizeof(vb_table_bias_);
+    debug_eeram_.a16 = next_; next_ += sizeof(debug_);
+    delta_q_eeram_.a16 = next_;  next_ += sizeof(delta_q_);
+    delta_q_model_eeram_.a16 = next_;  next_ += sizeof(delta_q_model_);
+    freq_eeram_.a16 = next_; next_ += sizeof(freq_);
+    Ib_bias_all_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_all_);
+    Ib_bias_amp_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_amp_);
+    Ib_bias_noa_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_noa_);
+    ib_scale_amp_eeram_.a16 =  next_;  next_ += sizeof(ib_scale_amp_);
+    ib_scale_noa_eeram_.a16 =  next_;  next_ += sizeof(ib_scale_noa_);
+    ib_select_eeram_.a16 =  next_;  next_ += sizeof(ib_select_);
+    iflt_eeram_.a16 =  next_;  next_ += sizeof(iflt_);
+    ihis_eeram_.a16 =  next_;  next_ += sizeof(ihis_);
+    inj_bias_eeram_.a16 =  next_;  next_ += sizeof(inj_bias_);
+    isum_eeram_.a16 =  next_;  next_ += sizeof(isum_);
+    mon_chm_eeram_.a16 =  next_;  next_ += sizeof(mon_chm_);
+    modeling_eeram_.a16 =  next_;  next_ += sizeof(modeling_);
+    nP_eeram_.a16 = next_; next_ += sizeof(nP_);
+    nS_eeram_.a16 = next_; next_ += sizeof(nS_);
+    preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving_);
+    sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm_);
+    s_cap_mon_eeram_.a16 = next_;  next_ += sizeof(s_cap_mon_);
+    s_cap_sim_eeram_.a16 = next_;  next_ += sizeof(s_cap_sim_);
+    Tb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Tb_bias_hdwe_);
+    time_now_eeram_.a16 = next_; next_ += sizeof(time_now_);
+    type_eeram_.a16 =  next_;  next_ += sizeof(type_);
+    t_last_eeram_.a16 =  next_;  next_ += sizeof(t_last_);
+    t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model_);
+    Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe_);
+    Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale_);
+    next_ = Zf_->assign_addr(next_);
+    nflt_ = int( NFLT ); 
+    fault_ = new Flt_ram[nflt_];
+    for ( int i=0; i<nflt_; i++ )
+    {
+        fault_[i].instantiate(rP_, &next_);
+    }
+    nhis_ = int( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
+    history_ = new Flt_ram[nhis_];
+    for ( int i=0; i<nhis_; i++ )
+    {
+        history_[i].instantiate(rP_, &next_);
+    }
+}
+
 SavedPars::~SavedPars() {}
 // operators
 // functions
@@ -141,7 +148,8 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(t_last_, float(-10.), float(70.)) ||
         is_val_corrupt(t_last_model_, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_bias_hdwe_, float(-10.), float(70.)) ||
-        is_val_corrupt(Vb_scale_, float(-1e6), float(1e6));
+        is_val_corrupt(Vb_scale_, float(-1e6), float(1e6)) ||
+        is_val_corrupt(Zf_->get(), float(-1e6), float(1e6));
     if ( corruption )
     {
         Serial.printf("corrupt*********\n");
@@ -226,6 +234,7 @@ int SavedPars::num_diffs()
     if ( uint8_t(0) != type_ ) n++;
     if ( float(VOLT_BIAS) != Vb_bias_hdwe_ ) n++;
     if ( float(VB_SCALE) != Vb_scale_ ) n++;
+    if ( Zf_->nominal() != Zf_->get() ) n++;
     return ( n );
 }
 
@@ -253,7 +262,7 @@ void SavedPars::modeling(const uint8_t input, Sensors *Sen)
 // Print
 void SavedPars::pretty_print(const boolean all)
 {
-    Serial.printf("saved parameters (sp):\n");
+    Serial.printf("saved (sp): all=%d\n", all);
     Serial.printf("             defaults    current EERAM values\n");
     if ( all || float(0.) != amp_->get() )             Serial.printf(" %s %7.3f  %7.3f *Xa<> %s pk\n", amp_->description(), 0., amp_->get(), amp_->units());
     if ( all || float(1.) != cutback_gain_sclr_.get() ) Serial.printf(" cut_gn_slr %s %7.3f  %7.3f *Sk<> %s\n", cutback_gain_sclr_.description(), 1., cutback_gain_sclr_.get(), cutback_gain_sclr_.units());
@@ -285,7 +294,9 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" t_last %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_);
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model_);
     if ( all || float(VOLT_BIAS) != Vb_bias_hdwe_ )     Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe_);
-    if ( all || float(VB_SCALE) != Vb_scale_ )  Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n\n", VB_SCALE, Vb_scale_);
+    if ( all || float(VB_SCALE) != Vb_scale_ )  Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n", VB_SCALE, Vb_scale_);
+    if ( all || Zf_->nominal() != Zf_->get() )  Serial.printf(" %s  %7.3f  %7.3f %s *Sf<>\n", Zf_->description(), Zf_->nominal(), Zf_->get(), Zf_->units());
+    Serial.printf("printing Zf:\n"); Zf_->pretty_print();
     // if ( all )
     // {
     //     Serial.printf("history array (%d):\n", nhis_);

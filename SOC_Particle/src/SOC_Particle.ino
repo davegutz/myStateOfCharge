@@ -157,6 +157,7 @@ void setup()
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
+    sp.init_ram();
     sp.load_all();
   #endif
 

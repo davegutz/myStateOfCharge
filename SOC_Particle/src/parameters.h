@@ -30,7 +30,367 @@
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
 #include "fault.h"
-#include <vector>
+// #include <vector>
+
+class Storage
+{
+public:
+    Storage(){}
+
+    Storage(const String &description, const String &units, const boolean _uint8=false)
+    {
+        description_ = description;
+        is_eeram_ = false;
+        units_ = units;
+        is_uint8_t_ = _uint8;
+    }
+
+    Storage(SerialRAM *ram, const String &description, const String &units, boolean _uint8=false)
+    {
+        description_ = description;
+        is_eeram_ = true;
+        rP_ = ram;
+        units_ = units;
+        is_uint8_t_ = _uint8;
+    }
+
+    ~Storage(){}
+
+    const char* description() { return description_.c_str(); }
+
+    void pretty_print(void)
+    {
+    #ifndef DEPLOY_PHOTON
+        Serial.printf(" addr_ 0x%X\n", addr_.a16);
+        Serial.printf(" units_ %s\n", units_.c_str());
+        Serial.printf(" description_ %s\n", description_.c_str());
+        Serial.printf(" is_eeram_ %d\n", is_eeram_);
+        Serial.printf(" is_uint8_t_ %d\n", is_uint8_t_);
+    #else
+        Serial.printf("Storage: silent\n");
+    #endif
+    }
+
+    const char* units() { return units_.c_str(); }
+
+protected:
+    SerialRAM *rP_;
+    address16b addr_;
+    String units_;
+    String description_;
+    boolean is_eeram_;
+    boolean is_uint8_t_;
+};
+
+
+class FloatStorage: public Storage
+{
+public:
+    FloatStorage(){}
+
+    FloatStorage(const String &description, const String &units, const boolean _uint8=false, const float _default=0):
+        Storage(description, units, _uint8)
+    {
+        default_ = _default;
+    }
+
+    FloatStorage(SerialRAM *ram, const String &description, const String &units, boolean _uint8=false, const float _default=0):
+        Storage(ram, description, units, _uint8)
+    {
+        default_ = _default;
+    }
+
+    ~FloatStorage(){}
+
+    uint16_t assign_addr(uint16_t next)
+    {
+        addr_.a16 = next;
+        return next + sizeof(float);
+    }
+
+    float nominal() { return default_; }
+    
+    float get()
+    {
+        float value;
+        rP_->get(addr_.a16, value);
+        val_ = value; 
+        return val_;
+    }
+
+    void pretty_print(void)
+    {
+    #ifndef DEPLOY_PHOTON
+        Storage::pretty_print();
+        Serial.printf(" val_ %7.3f\n", val_);
+        Serial.printf(" default_ %7.3f\n", default_);
+    #else
+        Serial.printf("Storage: silent\n");
+    #endif
+    }
+
+    String print()
+    {
+        return description_ + " = " + String(val_) + " " + units_;
+    }
+    
+    void set(float val)
+    {
+        // Serial.printf("set %d ", uint8_t(val_));
+        val_ = val;
+        // Serial.printf("--> %d\n", uint8_t(val_));
+        if ( is_eeram_ ) 
+        {
+            rP_->put(addr_.a16, val_);
+        }
+    }
+
+protected:
+    float val_;
+    float default_;
+};
+
+
+class Int8tStorage: public Storage
+{
+public:
+    Int8tStorage(){}
+
+    Int8tStorage(const String &description, const String &units, const boolean _uint8=false, const float _default=0):
+        Storage(description, units, _uint8)
+    {
+        default_ = _default;
+    }
+
+    Int8tStorage(SerialRAM *ram, const String &description, const String &units, boolean _uint8=false, const float _default=0):
+        Storage(ram, description, units, _uint8)
+    {
+        default_ = _default;
+    }
+
+    ~Int8tStorage(){}
+
+    uint16_t assign_addr(uint16_t next)
+    {
+        addr_.a16 = next;
+        return next + sizeof(float);
+    }
+
+    int8_t nominal() { return default_; }
+    
+    int8_t get()
+    {
+        int8_t value;
+        rP_->get(addr_.a16, value);
+        val_ = value; 
+        return val_;
+    }
+
+    void pretty_print(void)
+    {
+    #ifndef DEPLOY_PHOTON
+        Storage::pretty_print();
+        Serial.printf(" val_ %d\n", val_);
+        Serial.printf(" default_ %d\n", default_);
+    #else
+        Serial.printf("Storage: silent\n");
+    #endif
+    }
+
+    String print()
+    {
+        return description_ + " = " + String(val_) + " " + units_;
+    }
+    
+    void set(int8_t val)
+    {
+        // Serial.printf("set %d ", uint8_t(val_));
+        val_ = val;
+        // Serial.printf("--> %d\n", uint8_t(val_));
+        if ( is_eeram_ ) 
+        {
+            rP_->put(addr_.a16, val_);
+        }
+    }
+
+protected:
+    int8_t val_;
+    int8_t default_;
+};
+
+
+class Uint8tStorage: public Storage
+{
+public:
+    Uint8tStorage(){}
+
+    Uint8tStorage(const String &description, const String &units, const boolean _uint8=false, const uint8_t _default=0):
+        Storage(description, units, _uint8)
+    {
+        default_ = _default;
+    }
+
+    Uint8tStorage(SerialRAM *ram, const String &description, const String &units, boolean _uint8=false, const uint8_t _default=0):
+        Storage(ram, description, units, _uint8)
+    {
+        default_ = _default;
+    }
+
+    ~Uint8tStorage(){}
+
+    uint16_t assign_addr(uint16_t next)
+    {
+        addr_.a16 = next;
+        return next + sizeof(float);
+    }
+
+    uint8_t nominal() { return default_; }
+    
+    uint8_t get()
+    {
+        val_ = rP_->read(addr_.a16);
+        return val_;
+    }
+
+    void pretty_print(void)
+    {
+    #ifndef DEPLOY_PHOTON
+        Storage::pretty_print();
+        Serial.printf(" val_ %d\n", val_);
+        Serial.printf(" default_ %d\n", default_);
+    #else
+        Serial.printf("Storage: silent\n");
+    #endif
+    }
+
+    String print()
+    {
+        return description_ + " = " + String(val_) + " " + units_;
+    }
+    
+    void set(uint8_t val)
+    {
+        // Serial.printf("set %d ", uint8_t(val_));
+        val_ = val;
+        // Serial.printf("--> %d\n", uint8_t(val_));
+        if ( is_eeram_ ) 
+        {
+            rP_->write(addr_.a16, val_);
+                // Serial.printf("set unit8t 0x%X = %d\n", addr_.a16, uint8_t(val_));
+        }
+    }
+
+protected:
+    uint8_t val_;
+    uint8_t default_;
+};
+
+// class FloatVariable : public Storage <float>
+// {
+// public:
+//     FloatVariable(){}
+
+//     FloatVariable(const String &description, const String &units, const float _default)
+//     {
+//         Storage <float>(description, units, _default, false);
+//     }
+
+//     FloatVariable(SerialRAM *ram, const String &description, const String &units, const float _default)
+//     {
+//         Storage <float>(ram, description, units, _default, false);
+//     }
+
+//     ~FloatVariable(){}
+// protected:
+// };
+
+
+template <typename T>
+class Variable
+{
+public:
+    Variable(){}
+
+    Variable(T* val_loc, const String &description, const String &units, const boolean _uint8=false)
+    {
+        description_ = description;
+        is_eeram_ = false;
+        units_ = units;
+        uint8_t_ = _uint8;
+        val_loc_ = val_loc;
+    }
+
+    Variable(T* val_loc, SerialRAM *ram, address16b addr, const String &description, const String &units, boolean _uint8=false)
+    {
+        addr_ = addr;
+        description_ = description;
+        is_eeram_ = true;
+        rP_ = ram;
+        units_ = units;
+        uint8_t_ = _uint8;
+        val_loc_ = val_loc;
+    }
+
+    ~Variable(){}
+
+    const char* description() { return description_.c_str(); }
+    
+    T get()
+    {
+        T value;
+        if ( uint8_t_ )
+        {
+            value = rP_->read(addr_.a16);
+            Serial.printf("get unit8t 0x%X = %d\n", addr_.a16, uint8_t(value));
+        }
+        else
+            rP_->get(addr_.a16, value);
+        *val_loc_ = value; 
+        return *val_loc_;
+    }
+
+    uint16_t assign_addr(uint16_t next)
+    {
+        addr_.a16 = next;
+        return next + sizeof(T);
+    }
+
+    String print()
+    {
+        return description_ + " = " + String(*val_loc_) + " " + units_;
+    }
+    
+    void set(T val)
+    {
+        Serial.printf("set %d ", uint8_t(*val_loc_));
+        *val_loc_ = val;
+        Serial.printf("--> %d\n", uint8_t(*val_loc_));
+        if ( is_eeram_ ) 
+        {
+            if ( uint8_t_ )
+            {
+                rP_->write(addr_.a16, *val_loc_);
+                Serial.printf("set unit8t 0x%X = %d\n", addr_.a16, uint8_t(*val_loc_));
+            }
+            else
+                rP_->put(addr_.a16, *val_loc_);
+        }
+    }
+    
+    const char* units() { return units_.c_str(); }
+
+    void* ptr() { return (void *)val_loc_; }
+
+protected:
+    T* val_loc_;
+    String units_;
+    String description_;
+    boolean is_eeram_;
+    address16b addr_;
+    SerialRAM *rP_;
+    boolean uint8_t_;
+};
+
 
 // Variables name class to unify units, description and methods
 template <typename T>
@@ -77,6 +437,7 @@ public:
     SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt);
     SavedPars(SerialRAM *ram);
     ~SavedPars();
+    void init_ram();
     friend Sensors;
     friend BatteryMonitor;
     friend BatterySim;
@@ -119,6 +480,7 @@ public:
     uint8_t type() { return type_; }
     float Vb_bias_hdwe() { return Vb_bias_hdwe_; }
     float Vb_scale() { return Vb_scale_; }
+    float Zf() { return Zf_->get(); }
 
     // functions
     boolean is_corrupt();
@@ -178,6 +540,7 @@ public:
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model_ = value; }
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe_ = value; }
         void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale_ = value; }
+        float get_Zf() { return Zf_->get(); }
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
         uint16_t next() { return next_; }
@@ -235,6 +598,7 @@ public:
         void put_t_last_model() {}
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { Vb_scale_ = input; }
+        void put_Zf(const float input) { Zf_->set(input); }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #else
         void put_all_dynamic();
@@ -277,11 +641,13 @@ public:
         void put_t_last_model() { rP_->put(t_last_model_eeram_.a16, t_last_model_); }
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale_ = input; }
+        void put_Zf(const float input) { Zf_->set(input); }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
     boolean tweak_test() { return ( 1<<3 & modeling_ ); } // Driving signal injection completely using software inj_bias 
+    FloatStorage *Zf_;
 protected:
     Variables <float> *amp_ = new Variables <float>("Amps", "Inj amp");
     // float amp_;             // Injected amplitude, A
@@ -289,6 +655,7 @@ protected:
     Variables <float> cutback_gain_sclr_ = Variables<float>("slr", "cutback gain scalar");
     // float cutback_gain_sclr_;// Scalar on battery model saturation cutback function
                                 // Set this to 0. for one compile-upload cycle if get locked on saturation overflow loop
+    Variable <int8_t> *Ib_select_;
     int debug_;             // Level of debug printing
     double delta_q_;        // Charge change since saturated, C
     double delta_q_model_;  // Charge change since saturated, C

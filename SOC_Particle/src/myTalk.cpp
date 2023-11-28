@@ -567,6 +567,24 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 Serial1.printf("%7.3f\n", sp.Vb_scale());
                 break;
 
+              case ( 'f' ):  // * Sf<>:  Zf
+                Serial.printf("Zf %7.3f to", sp.get_Zf());
+                Serial1.printf("Zf %7.3f to", sp.get_Zf());
+                sp.put_Zf(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.get_Zf());
+                Serial1.printf("%7.3f\n", sp.get_Zf());
+                sp.Zf_->pretty_print();
+                break;
+
+              case ( 'i' ):  // * Si<>:  Zi
+                Serial.printf("Zf %7.3f to", sp.get_Zf());
+                Serial1.printf("Zf %7.3f to", sp.get_Zf());
+                sp.put_Zf(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.get_Zf());
+                Serial1.printf("%7.3f\n", sp.get_Zf());
+                sp.Zf_->pretty_print();
+                break;
+
               default:
                 Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
             }
