@@ -580,8 +580,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 Serial.printf("Zi %d to", sp.get_Zi());
                 Serial1.printf("Zi %d to", sp.get_Zi());
                 sp.put_Zi(cp.input_str.substring(2).toFloat());
-                Serial.printf("%d\n", sp.get_Zi());
-                Serial1.printf("%d\n", sp.get_Zi());
+                Serial.printf(" %d\n", sp.get_Zi());
+                Serial1.printf(" %d\n", sp.get_Zi());
                 sp.Zi_->pretty_print();
                 break;
 
