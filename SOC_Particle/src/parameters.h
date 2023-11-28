@@ -94,12 +94,14 @@ class FloatStorage: public Storage
 public:
     FloatStorage(){}
 
-    FloatStorage(const String &code, const String &description, const String &units, const float min, const float max, const float _default=0):
+    FloatStorage(const String &code, const String &description, const String &units, const float min, const float max, float *init, const float _default=0):
         Storage(code, description, units, false)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
+        init_ = init;
+        set(*init_); // retained
     }
 
     FloatStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max, const float _default=0):
@@ -149,13 +151,13 @@ public:
     
     void print()
     {
-        sprintf(cp.buffer, "%-20s %7.3f is %7.3f, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, "%-20s %7.3f -> %7.3f, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
         Serial.printf("%s\n", cp.buffer);
     }
 
     void print1()
     {
-        sprintf(cp.buffer, "%-20s %7.3f is %7.3f, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, "%-20s %7.3f -> %7.3f, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
         Serial1.printf("%s\n", cp.buffer);
     }
     
@@ -170,6 +172,7 @@ public:
         else
         {
             val_ = val;
+            *init_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, val_);
         }
     }
@@ -184,6 +187,7 @@ protected:
     float default_;
     float min_;
     float max_;
+    float *init_;
 };
 
 
@@ -192,12 +196,14 @@ class Int8tStorage: public Storage
 public:
     Int8tStorage(){}
 
-    Int8tStorage(const String &code, const String &description, const String &units, const int8_t min, const int8_t max, const int8_t _default=0):
+    Int8tStorage(const String &code, const String &description, const String &units, const int8_t min, const int8_t max, int8_t *init, const int8_t _default=0):
         Storage(code, description, units, false)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
+        init_ = init;
+        set(*init_); // retained
     }
 
     Int8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max, const int8_t _default=0):
@@ -247,13 +253,13 @@ public:
     
     void print()
     {
-        sprintf(cp.buffer, "%-20s %7d is %7d, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, "%-20s %7d -> %7d, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
         Serial.printf("%s\n", cp.buffer);
     }
     
     void print1()
     {
-        sprintf(cp.buffer, "%-20s %7d is %7d, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, "%-20s %7d -> %7d, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
         Serial1.printf("%s\n", cp.buffer);
     }
 
@@ -268,6 +274,7 @@ public:
         else
         {
             val_ = val;
+            *init_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, val_);
         }
     }
@@ -282,6 +289,7 @@ protected:
     int8_t min_;
     int8_t max_;
     int8_t default_;
+    int8_t *init_;
 };
 
 
@@ -290,12 +298,14 @@ class Uint8tStorage: public Storage
 public:
     Uint8tStorage(){}
 
-    Uint8tStorage(const String &code, const String &description, const String &units, const uint8_t min, const uint8_t max, const uint8_t _default=0):
+    Uint8tStorage(const String &code, const String &description, const String &units, const uint8_t min, const uint8_t max, uint8_t *init, const uint8_t _default=0):
         Storage(code, description, units, true)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
+        init_ = init;
+        set(*init_); // retained
     }
 
     Uint8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max, const uint8_t _default=0):
@@ -341,13 +351,13 @@ public:
     
     void print()
     {
-        sprintf(cp.buffer, "%-20s %7d is %7d, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, "%-20s %7d -> %7d, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
         Serial.printf("%s\n", cp.buffer);
     }
     
     void print1()
     {
-        sprintf(cp.buffer, "%-20s %7d is %7d, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, "%-20s %7d -> %7d, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
         Serial1.printf("%s\n", cp.buffer);
     }
 
@@ -363,6 +373,7 @@ public:
         else
         {
             val_ = val;
+            *init_ = val;
             if ( is_eeram_ ) rP_->write(addr_.a16, val_);
         }
     }
@@ -377,6 +388,7 @@ protected:
     uint8_t min_;
     uint8_t max_;
     uint8_t default_;
+    uint8_t *init_;
 };
 
 // class FloatVariable : public Storage <float>
@@ -420,8 +432,6 @@ public:
     SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt);
     SavedPars(SerialRAM *ram);
     ~SavedPars();
-    void init();
-    void init_ram();
     friend Sensors;
     friend BatteryMonitor;
     friend BatterySim;
@@ -559,7 +569,7 @@ public:
         void put_ihis(const int input) { ihis_ = input; }
         void put_inj_bias(const float input) { inj_bias_ = input; }
         void put_isum(const int input) { isum_ = input; }
-        void put_Modeling(const uint8_t input) { Modeling_->set(input); }
+        void put_Modeling(const uint8_t input) { Modeling_->set(input); Modeling_init_ = Modeling();}
         void put_mon_chm(const uint8_t input) { mon_chm_ = input; }
         void put_mon_chm() {}
         void put_nP(const float input) { nP_ = input; }
@@ -703,6 +713,15 @@ protected:
     uint16_t nhis_;         // Length of Flt_ram array for history
     uint16_t size_;
     Storage *Z_[50];
+
+    // SRAM storage state "retained" in SOC_Particle.ino
+    #ifndef CONFIG_47L16
+        float Amp_init_;
+        float Cutback_gain_sclr_init_;
+        float Freq_init_;
+        int8_t Ib_select_init_;
+        uint8_t Modeling_init_;
+    #endif
 };
 
 #endif
