@@ -83,7 +83,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   float FP_in = -99.;
   int INT_in = -1;
   float scale = 1.;
+  boolean reset = false;
   urgency request;
+  
   // Serial event  (terminate Send String data with 0A using CoolTerm)
   if (cp.token)
   {
@@ -935,19 +937,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
               case ( 'm' ):  // Xm<>:  code for modeling level
                 INT_in =  cp.input_str.substring(2).toInt();
-                if ( INT_in>=0 && INT_in<256 )
+                sp.Modeling_->print();
+                reset = sp.Modeling() != INT_in;
+                sp.put_Modeling(INT_in);
+                sp.Modeling_->print();
+                if ( reset )
                 {
-                  boolean reset = sp.Modeling() != INT_in;
-                  sp.Modeling_->print();
-                  if ( reset )
-                  {
-                    Serial.printf("Chg...reset\n");
-                    cp.cmd_reset();
-                  }
-                }
-                else
-                {
-                  Serial.printf("err %d, modeling 0-7. 'h'\n", INT_in);
+                  Serial.printf("Chg...reset\n");
+                  cp.cmd_reset();
                 }
                 break;
 

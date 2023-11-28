@@ -146,7 +146,6 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(Ib_bias_noa_, float(-1e5), float(1e5)) ||
         is_val_corrupt(ib_scale_amp_, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_scale_noa_, float(-1e6), float(1e6)) ||
-        is_val_corrupt(ib_select_, int8_t(-1), int8_t(1)) ||
         is_val_corrupt(iflt_, -1, nflt_+1) ||
         is_val_corrupt(ihis_, -1, nhis_+1) ||
         is_val_corrupt(inj_bias_, float(-100.), float(100.)) ||
@@ -273,13 +272,11 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || int(0) != debug_ )              Serial.printf(" debug  %d  %d *v<>\n", int(0), debug_);
     if ( all )                                  Serial.printf(" delta_q%10.1f %10.1f *DQ<>\n", double(0.), delta_q_);
     if ( all )                                  Serial.printf(" dq_sim %10.1f %10.1f *Ca<>, *Cm<>, C\n", double(0.), delta_q_model_);
-    if ( all || float(0.) != freq_ )            Serial.printf(" freq %7.3f  %7.3f *Xf<> units\n", 0., freq_);
     if ( all || float(CURR_BIAS_ALL) != Ib_bias_all_ )  Serial.printf(" Ib_bias_all%7.3f  %7.3f *Di<> A\n", CURR_BIAS_ALL, Ib_bias_all_);
     if ( all || float(CURR_BIAS_AMP) != Ib_bias_amp_ )  Serial.printf(" bias_amp%7.3f  %7.3f *DA<>\n", CURR_BIAS_AMP, Ib_bias_amp_);
     if ( all || float(CURR_BIAS_NOA) != Ib_bias_noa_ )  Serial.printf(" bias_noa%7.3f  %7.3f *DB<>\n", CURR_BIAS_NOA, Ib_bias_noa_);
     if ( all || float(CURR_SCALE_AMP) != ib_scale_amp_ )Serial.printf(" ib_scale_amp%7.3f  %7.3f *SA<>\n", CURR_SCALE_AMP, ib_scale_amp_);
     if ( all || float(CURR_SCALE_NOA) != ib_scale_noa_ )Serial.printf(" ib_scale_noa%7.3f  %7.3f *SB<>\n", CURR_SCALE_NOA, ib_scale_noa_);
-    if ( all || int8_t(FAKE_FAULTS) != ib_select_ )     Serial.printf(" ib_select %d  %d *s<> -1=noa, 0=auto, 1=amp\n", FAKE_FAULTS, ib_select_);
     if ( all )                                  Serial.printf(" iflt                           %d flt ptr\n", iflt_);
     if ( all || float(0.) != inj_bias_ )        Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias_);
     if ( all )                                  Serial.printf(" isum                           %d tbl ptr\n", isum_);

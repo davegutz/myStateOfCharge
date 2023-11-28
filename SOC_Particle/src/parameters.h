@@ -94,16 +94,16 @@ class FloatStorage: public Storage
 public:
     FloatStorage(){}
 
-    FloatStorage(const String &code, const String &description, const String &units, const float min, const float max, const boolean _uint8=false, const float _default=0):
-        Storage(code, description, units, _uint8)
+    FloatStorage(const String &code, const String &description, const String &units, const float min, const float max, const float _default=0):
+        Storage(code, description, units, false)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
     }
 
-    FloatStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max, boolean _uint8=false, const float _default=0):
-        Storage(code, ram, description, units, _uint8)
+    FloatStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max, const float _default=0):
+        Storage(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -118,8 +118,6 @@ public:
         return next + sizeof(float);
     }
 
-    float nominal() { return default_; }
-    
     float get()
     {
         if ( is_eeram_ )
@@ -143,6 +141,12 @@ public:
         return val_ != default_;
     }
 
+    float max_of() { return max_; }
+
+    float min_of() { return min_; }
+
+    float nominal() { return default_; }
+    
     void print()
     {
         sprintf(cp.buffer, "%-20s %7.3f is %7.3f, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
@@ -162,8 +166,12 @@ public:
 
     void set(float val)
     {
-        val_ = val;
-        if ( is_eeram_ ) rP_->put(addr_.a16, val_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        else
+        {
+            val_ = val;
+            if ( is_eeram_ ) rP_->put(addr_.a16, val_);
+        }
     }
 
     void set_default()
@@ -184,16 +192,16 @@ class Int8tStorage: public Storage
 public:
     Int8tStorage(){}
 
-    Int8tStorage(const String &code, const String &description, const String &units, const int8_t min, const int8_t max, boolean _uint8=false, const int8_t _default=0):
-        Storage(code, description, units, _uint8)
+    Int8tStorage(const String &code, const String &description, const String &units, const int8_t min, const int8_t max, const int8_t _default=0):
+        Storage(code, description, units, false)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
     }
 
-    Int8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max, boolean _uint8=false, const int8_t _default=0):
-        Storage(code, ram, description, units, _uint8)
+    Int8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max, const int8_t _default=0):
+        Storage(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -208,8 +216,6 @@ public:
         return next + sizeof(float);
     }
 
-    int8_t nominal() { return default_; }
-    
     int8_t get()
     {
         if ( is_eeram_ )
@@ -233,6 +239,12 @@ public:
         return val_ != default_;
     }
 
+    int8_t max_of() { return max_; }
+
+    int8_t min_of() { return min_; }
+
+    int8_t nominal() { return default_; }
+    
     void print()
     {
         sprintf(cp.buffer, "%-20s %7d is %7d, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
@@ -252,8 +264,12 @@ public:
     
     void set(int8_t val)
     {
-        val_ = val;
-        if ( is_eeram_ ) rP_->put(addr_.a16, val_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        else
+        {
+            val_ = val;
+            if ( is_eeram_ ) rP_->put(addr_.a16, val_);
+        }
     }
 
     void set_default()
@@ -274,16 +290,16 @@ class Uint8tStorage: public Storage
 public:
     Uint8tStorage(){}
 
-    Uint8tStorage(const String &code, const String &description, const String &units, const uint8_t min, const uint8_t max, const boolean _uint8=false, const uint8_t _default=0):
-        Storage(code, description, units, _uint8)
+    Uint8tStorage(const String &code, const String &description, const String &units, const uint8_t min, const uint8_t max, const uint8_t _default=0):
+        Storage(code, description, units, true)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
     }
 
-    Uint8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max, boolean _uint8=false, const uint8_t _default=0):
-        Storage(code, ram, description, units, _uint8)
+    Uint8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max, const uint8_t _default=0):
+        Storage(code, ram, description, units, true)
     {
         min_ = min;
         max_ = max;
@@ -298,8 +314,6 @@ public:
         return next + sizeof(uint8_t);
     }
 
-    uint8_t nominal() { return default_; }
-    
     uint8_t get()
     {
         if ( is_eeram_ )
@@ -319,6 +333,12 @@ public:
         return val_ != default_;
     }
 
+    uint8_t max_of() { return max_; }
+
+    uint8_t min_of() { return min_; }
+
+    uint8_t nominal() { return default_; }
+    
     void print()
     {
         sprintf(cp.buffer, "%-20s %7d is %7d, %10s (* %s)", description_.c_str(), default_, val_, units_.c_str(), code_.c_str());
@@ -339,8 +359,12 @@ public:
     
     void set(uint8_t val)
     {
-        val_ = val;
-        if ( is_eeram_ ) rP_->write(addr_.a16, val_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        else
+        {
+            val_ = val;
+            if ( is_eeram_ ) rP_->write(addr_.a16, val_);
+        }
     }
 
     void set_default()
@@ -444,20 +468,20 @@ public:
     void reset_flt();
     void reset_his();
     void reset_pars();
-    boolean mod_all_dscn() { return ( 111<modeling_ ); }                // Bare all
+    boolean mod_all_dscn() { return ( 111<Modeling() ); }                // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
-    boolean mod_any_dscn() { return ( 15<modeling_ ); }                 // Bare any
-    boolean mod_ib() { return ( 1<<2 & modeling_ || mod_ib_all_dscn() ); }  // Using Sim as source of ib
-    boolean mod_ib_all_dscn() { return ( 191<modeling_ ); }             // Nothing connected to ib sensors in I2C on SDA/SCL
-    boolean mod_ib_amp_dscn() { return ( 1<<6 & modeling_ ); }          // Nothing connected to amp ib sensors in I2C on SDA/SCL
+    boolean mod_any_dscn() { return ( 15<Modeling() ); }                 // Bare any
+    boolean mod_ib() { return ( 1<<2 & Modeling() || mod_ib_all_dscn() ); }  // Using Sim as source of ib
+    boolean mod_ib_all_dscn() { return ( 191<Modeling() ); }             // Nothing connected to ib sensors in I2C on SDA/SCL
+    boolean mod_ib_amp_dscn() { return ( 1<<6 & Modeling() ); }          // Nothing connected to amp ib sensors in I2C on SDA/SCL
     boolean mod_ib_any_dscn() { return ( mod_ib_amp_dscn() || mod_ib_noa_dscn() ); }  // Nothing connected to ib sensors in I2C on SDA/SCL
-    boolean mod_ib_noa_dscn() { return ( 1<<7 & modeling_ ); }          // Nothing connected to noa ib sensors in I2C on SDA/SCL
-    boolean mod_none() { return ( 0==modeling_ ); }                     // Using all
-    boolean mod_none_dscn() { return ( 16>modeling_ ); }                // Bare nothing
-    boolean mod_tb() { return ( 1<<0 & modeling_ || mod_tb_dscn() ); }  // Using Sim as source of tb
-    boolean mod_tb_dscn() { return ( 1<<4 & modeling_ ); }              // Nothing connected to one-wire Tb sensor on D6
-    boolean mod_vb() { return ( 1<<1 & modeling_ || mod_vb_dscn() ); }  // Using Sim as source of vb
-    boolean mod_vb_dscn() { return ( 1<<5 & modeling_ ); }              // Nothing connected to vb on A1
+    boolean mod_ib_noa_dscn() { return ( 1<<7 & Modeling() ); }          // Nothing connected to noa ib sensors in I2C on SDA/SCL
+    boolean mod_none() { return ( 0==Modeling() ); }                     // Using all
+    boolean mod_none_dscn() { return ( 16>Modeling() ); }                // Bare nothing
+    boolean mod_tb() { return ( 1<<0 & Modeling() || mod_tb_dscn() ); }  // Using Sim as source of tb
+    boolean mod_tb_dscn() { return ( 1<<4 & Modeling() ); }              // Nothing connected to one-wire Tb sensor on D6
+    boolean mod_vb() { return ( 1<<1 & Modeling() || mod_vb_dscn() ); }  // Using Sim as source of vb
+    boolean mod_vb_dscn() { return ( 1<<5 & Modeling() ); }              // Nothing connected to vb on A1
     // get
     #ifdef CONFIG_47L16
         float get_Amp() { return Amp_->get(); }
@@ -477,7 +501,7 @@ public:
         void get_ihis() { int value; rP_->get(ihis_eeram_.a16, value); ihis_ = value; }
         void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias_ = value; }
         void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum_ = value; }
-        uint8_t get_Modeling() { return Modeling_->get(); }
+        uint8_t get_Modeling() { return Modeling()->get(); }
         void get_mon_chm() { mon_chm_ = rP_->read(mon_chm_eeram_.a16); }
         void get_nP() { float value; rP_->get(nP_eeram_.a16, value); nP_ = value; }
         void get_nS() { float value; rP_->get(nS_eeram_.a16, value); nS_ = value; }
@@ -577,7 +601,7 @@ public:
         void put_ihis(const int input) { rP_->put(ihis_eeram_.a16, input); ihis_ = input; }
         void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias_ = input; }
         void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum_ = input; }
-        void put_Modeling(const uint8_t input) { Modeling_->set(input); }
+        void put_Modeling(const uint8_t input) { Modeling()->set(input); }
         void put_mon_chm(const uint8_t input) { rP_->write(mon_chm_eeram_.a16, input); mon_chm_ = input; }
         void put_mon_chm() { rP_->write(mon_chm_eeram_.a16, mon_chm_); }
         void put_nP(const float input) { rP_->put(nP_eeram_.a16, input); nP_ = input; }
@@ -600,7 +624,7 @@ public:
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
-    boolean tweak_test() { return ( 1<<3 & modeling_ ); } // Driving signal injection completely using software inj_bias 
+    boolean tweak_test() { return ( 1<<3 & Modeling() ); } // Driving signal injection completely using software inj_bias 
     FloatStorage *Amp_;
     FloatStorage *Cutback_gain_sclr_;
     FloatStorage *Freq_;
@@ -610,13 +634,11 @@ protected:
     int debug_;             // Level of debug printing
     double delta_q_;        // Charge change since saturated, C
     double delta_q_model_;  // Charge change since saturated, C
-    float freq_;            // Injected frequency, Hz (0-2)
     float Ib_bias_all_;     // Bias on all shunt sensors, A
     float Ib_bias_amp_;     // Calibration adder of amplified shunt sensor, A
     float Ib_bias_noa_;     // Calibration adder of non-amplified shunt sensor, A
     float ib_scale_amp_;    // Calibration scalar of amplified shunt sensor
     float ib_scale_noa_;    // Calibration scalar of non-amplified shunt sensor
-    int8_t ib_select_;      // Force current sensor (-1=non-amp, 0=auto, 1=amp)
     int iflt_;              // Fault snap location.   Begins at -1 because first action is to increment iflt
     int ihis_;              // History location.   Begins at -1 because first action is to increment ihis
     float inj_bias_;        // Constant bias, A
@@ -634,9 +656,8 @@ protected:
     float Vb_bias_hdwe_;    // Calibrate Vb, V
     float Vb_scale_;        // Calibrate Vb scale
     float vb_table_bias_;   // Battery monitor curve bias, V
-    float t_last_;          // Updated value of battery temperature injection when sp.modeling_ and proper wire connections made, deg C
+    float t_last_;          // Updated value of battery temperature injection when sp.Modeling() and proper wire connections made, deg C
     float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
-    uint8_t modeling_;       // Driving saturation calculation with model.  Bits specify which signals use model
     #ifndef CONFIG_47L16
         Flt_st *fault_;
         Flt_st *history_;
@@ -657,7 +678,7 @@ protected:
         address16b ihis_eeram_;
         address16b inj_bias_eeram_;
         address16b isum_eeram_;
-        address16b modeling_eeram_;
+        address16b Modeling()eeram_;
         address16b mon_chm_eeram_;
         address16b nP_eeram_;
         address16b nS_eeram_;
