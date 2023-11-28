@@ -52,6 +52,7 @@ SavedPars::SavedPars(SerialRAM *ram)
 void SavedPars::init_ram()
 {
     Zf_= new FloatStorage(rP_, "FloatVariable", "whatever units", 99.);
+    Zi_= new Int8tStorage(rP_, "IntVariable", "whatever units", 9);
 
     // Memory map
     amp_eeram_.a16 = next_; next_ += sizeof(float);
@@ -87,6 +88,7 @@ void SavedPars::init_ram()
     Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe_);
     Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale_);
     next_ = Zf_->assign_addr(next_);
+    next_ = Zi_->assign_addr(next_);
     nflt_ = int( NFLT ); 
     fault_ = new Flt_ram[nflt_];
     for ( int i=0; i<nflt_; i++ )
@@ -149,7 +151,8 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(t_last_model_, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_bias_hdwe_, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_scale_, float(-1e6), float(1e6)) ||
-        is_val_corrupt(Zf_->get(), float(-1e6), float(1e6));
+        is_val_corrupt(Zf_->get(), float(-1e6), float(1e6)) ||
+        is_val_corrupt(Zi_->get(), int8_t(-100), int8_t(100));
     if ( corruption )
     {
         Serial.printf("corrupt*********\n");
@@ -235,6 +238,7 @@ int SavedPars::num_diffs()
     if ( float(VOLT_BIAS) != Vb_bias_hdwe_ ) n++;
     if ( float(VB_SCALE) != Vb_scale_ ) n++;
     if ( Zf_->nominal() != Zf_->get() ) n++;
+    if ( Zi_->nominal() != Zi_->get() ) n++;
     return ( n );
 }
 
@@ -297,6 +301,8 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || float(VB_SCALE) != Vb_scale_ )  Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n", VB_SCALE, Vb_scale_);
     if ( all || Zf_->nominal() != Zf_->get() )  Serial.printf(" %s  %7.3f  %7.3f %s *Sf<>\n", Zf_->description(), Zf_->nominal(), Zf_->get(), Zf_->units());
     Serial.printf("printing Zf:\n"); Zf_->pretty_print();
+    if ( all || Zi_->nominal() != Zi_->get() )  Serial.printf(" %s  %d  %d %s *Si<>\n", Zi_->description(), Zi_->nominal(), Zi_->get(), Zi_->units());
+    Serial.printf("printing Zi:\n"); Zi_->pretty_print();
     // if ( all )
     // {
     //     Serial.printf("history array (%d):\n", nhis_);

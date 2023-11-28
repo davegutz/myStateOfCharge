@@ -156,13 +156,13 @@ class Int8tStorage: public Storage
 public:
     Int8tStorage(){}
 
-    Int8tStorage(const String &description, const String &units, const boolean _uint8=false, const float _default=0):
+    Int8tStorage(const String &description, const String &units, const boolean _uint8=false, const int8_t _default=0):
         Storage(description, units, _uint8)
     {
         default_ = _default;
     }
 
-    Int8tStorage(SerialRAM *ram, const String &description, const String &units, boolean _uint8=false, const float _default=0):
+    Int8tStorage(SerialRAM *ram, const String &description, const String &units, boolean _uint8=false, const int8_t _default=0):
         Storage(ram, description, units, _uint8)
     {
         default_ = _default;
@@ -241,7 +241,7 @@ public:
     uint16_t assign_addr(uint16_t next)
     {
         addr_.a16 = next;
-        return next + sizeof(float);
+        return next + sizeof(uint8_t);
     }
 
     uint8_t nominal() { return default_; }
@@ -481,6 +481,7 @@ public:
     float Vb_bias_hdwe() { return Vb_bias_hdwe_; }
     float Vb_scale() { return Vb_scale_; }
     float Zf() { return Zf_->get(); }
+    float Zi() { return Zi_->get(); }
 
     // functions
     boolean is_corrupt();
@@ -541,6 +542,7 @@ public:
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe_ = value; }
         void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale_ = value; }
         float get_Zf() { return Zf_->get(); }
+        int8_t get_Zi() { return Zi_->get(); }
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
         uint16_t next() { return next_; }
@@ -599,6 +601,7 @@ public:
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { Vb_scale_ = input; }
         void put_Zf(const float input) { Zf_->set(input); }
+        void put_Zi(const float input) { Zi_->set(input); }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #else
         void put_all_dynamic();
@@ -642,12 +645,14 @@ public:
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale_ = input; }
         void put_Zf(const float input) { Zf_->set(input); }
+        void put_Zi(const int8_t input) { Zi_->set(input); }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
     boolean tweak_test() { return ( 1<<3 & modeling_ ); } // Driving signal injection completely using software inj_bias 
     FloatStorage *Zf_;
+    Int8tStorage *Zi_;
 protected:
     Variables <float> *amp_ = new Variables <float>("Amps", "Inj amp");
     // float amp_;             // Injected amplitude, A
