@@ -13,6 +13,7 @@ const String unit = version + "_pro2p2";
 #undef CONFIG_ADS1013
 #undef CONFIG_PHOTON
 #undef DEPLOY_PHOTON
+#define CONFIG_DS18B20
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

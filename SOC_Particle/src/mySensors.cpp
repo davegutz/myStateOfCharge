@@ -48,29 +48,31 @@ float TempSensor::sample(Sensors *Sen)
 {
   // Read Sensor
   // MAXIM conversion 1-wire Tp plenum temperature
-  uint8_t count = 0;
-  float temp = 0.;
   static float Tb_hdwe = 0.;
-  // Read hardware and check
-  while ( ++count<MAX_TEMP_READS && temp==0 && !sp.mod_tb_dscn() )
-  {
-      if ( crcCheck() ) temp = getTemperature() + (TBATT_TEMPCAL);
-    delay(1);
-  }
+  #ifdef CONFIG_DS18B20
+    uint8_t count = 0;
+    float temp = 0.;
+    // Read hardware and check
+    while ( ++count<MAX_TEMP_READS && temp==0 && !sp.mod_tb_dscn() )
+    {
+        if ( crcCheck() ) temp = getTemperature() + (TBATT_TEMPCAL);
+      delay(1);
+    }
 
-  // Check success
-  if ( count<MAX_TEMP_READS && TEMP_RANGE_CHECK<temp && temp<TEMP_RANGE_CHECK_MAX && !Sen->Flt->fail_tb() )
-  {
-    Tb_hdwe = SdTb->update(temp);
-    tb_stale_flt_ = false;
-    if ( sp.debug()==16 ) Serial.printf("I:  t=%7.3f ct=%d, Tb_hdwe=%7.3f,\n", temp, count, Tb_hdwe);
-  }
-  else
-  {
-    Serial.printf("DS18 1-wire Tb, t=%8.1f, ct=%d, sending Tb_hdwe=%8.1f\n", temp, count, Tb_hdwe);
-    tb_stale_flt_ = true;
-    // Using last-good-value:  no assignment
-  }
+    // Check success
+    if ( count<MAX_TEMP_READS && TEMP_RANGE_CHECK<temp && temp<TEMP_RANGE_CHECK_MAX && !Sen->Flt->fail_tb() )
+    {
+      Tb_hdwe = SdTb->update(temp);
+      tb_stale_flt_ = false;
+      if ( sp.debug()==16 ) Serial.printf("I:  t=%7.3f ct=%d, Tb_hdwe=%7.3f,\n", temp, count, Tb_hdwe);
+    }
+    else
+    {
+      Serial.printf("DS18 1-wire Tb, t=%8.1f, ct=%d, sending Tb_hdwe=%8.1f\n", temp, count, Tb_hdwe);
+      tb_stale_flt_ = true;
+      // Using last-good-value:  no assignment
+    }
+  #endif
   return ( Tb_hdwe );
 }
 

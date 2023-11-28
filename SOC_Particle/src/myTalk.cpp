@@ -567,30 +567,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 Serial1.printf("%7.3f\n", sp.Vb_scale());
                 break;
 
-              case ( 'f' ):  // * Sf<>:  Zf
-                Serial.printf("Zf %7.3f to", sp.get_Zf());
-                Serial1.printf("Zf %7.3f to", sp.get_Zf());
-                sp.put_Zf(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.get_Zf());
-                Serial1.printf("%7.3f\n", sp.get_Zf());
-                break;
-
-              case ( 'i' ):  // * Si<>:  Zi
-                Serial.printf("Zi %d to", sp.get_Zi());
-                Serial1.printf("Zi %d to", sp.get_Zi());
-                sp.put_Zi(cp.input_str.substring(2).toInt());
-                Serial.printf(" %d\n", sp.get_Zi());
-                Serial1.printf(" %d\n", sp.get_Zi());
-                break;
-
-              case ( 'u' ):  // * Su<>:  Zu
-                Serial.printf("Zu %d to", sp.get_Zu());
-                Serial1.printf("Zu %d to", sp.get_Zu());
-                sp.put_Zu(cp.input_str.substring(2).toInt());
-                Serial.printf(" %d\n", sp.get_Zu());
-                Serial1.printf(" %d\n", sp.get_Zu());
-                break;
-
               default:
                 Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
             }
@@ -868,10 +844,18 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             }
             break;
 
-          case ( 's' ):  // * s<>:  select amp or noa
-            sp.put_Ib_select(cp.input_str.substring(1).toInt());
-            Serial.printf("%s\n", sp.Ib_select_->print());
-            Serial1.printf("%s\n", sp.Ib_select_->print());
+          case ( 's' ):
+            switch ( cp.input_str.charAt(1) )
+            {
+              case ( 'i' ):  // *si:  selection battery  mode
+                sp.put_Ib_select(cp.input_str.substring(1).toInt());
+                sp.Ib_select_->print();
+                sp.Ib_select_->print1();
+                break;
+
+              default:
+                Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
+            }
             break;
 
           case ( 'U' ):  // * U<>:  Unix time since epoch
@@ -953,10 +937,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 INT_in =  cp.input_str.substring(2).toInt();
                 if ( INT_in>=0 && INT_in<256 )
                 {
-                  boolean reset = V->Modeling.get() != INT_in;
-                  Serial.printf("sp.modeling %d V->modeling %d to ", sp.Modeling(), V->Modeling.get());
-                  V->put_Modeling(INT_in, Sen);
-                  Serial.printf("sp.modeling %d V->modeling %d\n", sp.Modeling(),  V->Modeling.get());
+                  boolean reset = sp.Modeling() != INT_in;
+                  sp.Modeling_->print();
                   if ( reset )
                   {
                     Serial.printf("Chg...reset\n");
@@ -967,28 +949,19 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 {
                   Serial.printf("err %d, modeling 0-7. 'h'\n", INT_in);
                 }
-                Serial.printf("Modeling %d\n", V->Modeling.get());
-                Serial.printf("ib_noa_dscn %d\n", V->mod_ib_noa_dscn());
-                Serial.printf("ib_amp_dscn %d\n", V->mod_ib_amp_dscn());
-                Serial.printf("vb_dscn %d\n", V->mod_vb_dscn());
-                Serial.printf("tb_dscn %d\n", V->mod_tb_dscn());
-                Serial.printf("tweak_test %d\n", V->tweak_test());
-                Serial.printf("mod_ib %d\n", V->mod_ib());
-                Serial.printf("mod_vb %d\n", V->mod_vb());
-                Serial.printf("mod_tb %d\n", V->mod_tb());
                 break;
 
               case ( 'a' ): // Xa<>:  injection amplitude
-                sp.put_amp(cp.input_str.substring(2).toFloat()*sp.nP());
-                // Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.amp(), sp.inj_bias());
-                Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.amp()->units(), sp.amp()->description(), sp.amp()->get(), sp.inj_bias());
+                sp.put_Amp(cp.input_str.substring(2).toFloat()*sp.nP());
+                // Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.Amp(), sp.inj_bias());
+                Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_->units(), sp.Amp_->description(), sp.Amp(), sp.inj_bias());
                 break;
 
               case ( 'f' ): // * Xf<>:  injection frequency
-                V->Freq.set(max(min(cp.input_str.substring(2).toFloat(), 2.0), 0.0));
-                Serial.printf("%s\n", V->Freq.print().c_str());
-                V->Freq.set( V->Freq.get()*(2. * PI) );
-                Serial.printf("%s in r/s\n", V->Freq.print().c_str());
+                sp.put_Freq(max(min(cp.input_str.substring(2).toFloat(), 2.0), 0.0));
+                sp.Freq_->print();  sp.Freq_->print1();
+                sp.put_Freq( sp.Freq()*(2. * PI) );
+                sp.Freq_->print();  sp.Freq_->print1();
                 break;
 
               case ( 'b' ): // * Xb<>:  injection bias
@@ -1192,7 +1165,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 if ( Sen->now>TEMP_INIT_DELAY )
                 {
                   Sen->start_inj = Sen->wait_inj + Sen->now;
-                  Sen->stop_inj = Sen->wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(sp.freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
+                  Sen->stop_inj = Sen->wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(sp.Freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
                   Sen->end_inj = Sen->stop_inj + Sen->tail_inj;
                   Serial.printf("**\n*** RUN: at %ld, %7.3f cycles %ld to %ld with %ld wait and %ld tail\n\n",
                     Sen->now, Sen->cycles_inj, Sen->start_inj, Sen->stop_inj, Sen->wait_inj, Sen->tail_inj);
@@ -1321,8 +1294,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf(" *SQ=  "); Serial.print(Mon->q_capacity()/Mon->q_capacity()); Serial.printf(": sp. Scalar cap mon\n"); 
   Serial1.printf(" *SQ=  "); Serial1.print(Mon->q_capacity()/Mon->q_capacity()); Serial1.printf(": sp. Scalar cap mon\n"); 
   Serial.printf("  Sr=  "); Serial.print(Sen->Sim->Sr()); Serial.printf(": Scalar res sim\n"); 
-  // Serial.printf(" *Sk=  "); Serial.print(sp.Cutback_gain_sclr()); Serial.printf(": Sat mod ctbk sclr\n"); 
-  Serial.printf(" *Sk=  "); Serial.print(sp.Cutback_gain_sclr()); Serial.printf("%s, %s\n", sp.cutback_gain_sclr().description(), sp.cutback_gain_sclr().units()); 
+  sp.Cutback_gain_sclr_->print_help();  // *Sk
   Serial.printf(" *SV= "); Serial.printf("%6.3f", sp.Vb_scale()); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
   Serial1.printf(" *SV= "); Serial1.printf("%6.3f", sp.Vb_scale()); Serial1.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
 
@@ -1365,7 +1337,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("  Rs= "); Serial.printf("small.  Reinitialize filters\n");
   Serial.printf("  RS= "); Serial.printf("SavedPars: Reinitialize saved\n");
 
-  Serial.printf("\ns  %s = %d\n", V->Ib_select.description(), V->Ib_select.get());
+  sp.Ib_select_->print_help();  // *si
 
   Serial.printf(" \n*U= "); Serial.printf("%ld", Time.now()); Serial.printf(": Unix time [auto when wifi]\n"); 
   Serial1.printf(" \n*U= "); Serial1.printf("%ld", Time.now()); Serial1.printf(": Unix time [auto when wifi]\n"); 
@@ -1414,7 +1386,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
   Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
 
- Serial.printf(" *Xm=  "); Serial.printf("%d,   modeling bitmap [0b00000000]\n", sp.Modeling());
+  sp.Modeling_->print_help();  // *Xm
   Serial.printf("      0x128=1<<7 ib_noa_dscn %d\n", sp.mod_ib_noa_dscn());
   Serial.printf("      0x64 =1<<6 ib_amp_dscn %d\n", sp.mod_ib_amp_dscn());
   Serial.printf("      0x32 =1<<5 vb_dscn %d\n", sp.mod_vb_dscn());
@@ -1427,8 +1399,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
   bitMapPrint(cp.buffer, sp.Modeling(), 8);
   Serial.printf("bitmap %s\n", cp.buffer);
-  sp.Modeling->print_help();
-  Serial.printf(" *Xm=  "); Serial.printf("%d,   %s\n", V->Modeling.get(), V->Modeling.description());
+  sp.Modeling_->print_help();  // *Xm
   Serial.printf("      0x128=1<<7 ib_noa_dscn %d\n", V->mod_ib_noa_dscn());
   Serial.printf("      0x64 =1<<6 ib_amp_dscn %d\n", V->mod_ib_amp_dscn());
   Serial.printf("      0x32 =1<<5 vb_dscn %d\n", V->mod_vb_dscn());
@@ -1437,8 +1408,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("      0x4  =1<<2 current %d\n", V->mod_ib());
   Serial.printf("      0x2  =1<<1 voltage %d\n", V->mod_vb());
   Serial.printf("      0x1  =1<<0 temp %d\n", V->mod_tb());
-  Serial.printf(" *Xa= "); Serial.printf("%6.3f", sp.amp()->get()); Serial.printf(": Inj amp A pk (0-18.3) [0]\n");
-  Serial.printf(" *Xf= "); Serial.printf("%6.3f", V->Freq.get()/2./PI); Serial.printf(": %s, %s (0-2) [0]\n", V->Freq.description(), V->Freq.units());
+  sp.Amp_->print_help();  // *Xa
+  sp.Freq_->print_help();  // *Xf
   Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.printf(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))\n");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
   Serial.printf("  Xp-1: Off, modeling false\n");

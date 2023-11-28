@@ -578,7 +578,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     Sen->elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 because using ==0 as reset button
 
     // Put a stop to this
-    if (Sen->now > Sen->stop_inj) sp.put_amp(0);
+    if (Sen->now > Sen->stop_inj) sp.put_Amp(0.);
   }
   else if ( Sen->elapsed_inj && sp.tweak_test() )  // Done.  elapsed_inj set to 0 is the reset button
   {
@@ -589,7 +589,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     chit("Pa;", QUEUE);     // Print all for record.  Last so Pf last and visible
     chit("Xp0;", QUEUE);    // Reset
   }
-  Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type(), sp.amp()->get(), sp.freq());
+  Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type(), sp.Amp(), sp.Freq());
 }
 
 // If false token, get new string from source

@@ -254,6 +254,7 @@ void setup()
     sp.print_history_array();
     sp.print_fault_header();
   }
+
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
   {
@@ -366,7 +367,7 @@ void loop()
       t_us_last = t_us_now;
       Sen->ShuntAmp->sample(reset, T);
       Sen->ShuntNoAmp->sample(reset, T);
-      }
+    }
   #endif
   
   // Input all other sensors and do high rate calculations

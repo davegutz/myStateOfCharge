@@ -46,6 +46,7 @@ public:
 
     Storage(const String &code, const String &description, const String &units, const boolean _uint8=false)
     {
+        code_ = code;
         description_ = description.substring(0, 20);
         units_ = units.substring(0, 10);
         is_eeram_ = false;
@@ -55,6 +56,7 @@ public:
 
     Storage(const String &code, SerialRAM *ram, const String &description, const String &units, boolean _uint8=false)
     {
+        code_ = code;
         description_ = description.substring(0, 20);
         units_ = units.substring(0, 10);
         is_eeram_ = true;
@@ -67,6 +69,8 @@ public:
     String code() { return code_; }
 
     const char* description() { return description_.c_str(); }
+
+    virtual boolean is_corrupt(){return true;};
 
     virtual boolean is_off(){return true;};
 
@@ -118,18 +122,23 @@ public:
     
     float get()
     {
-        float value;
-        rP_->get(addr_.a16, value);
-        val_ = value; 
+        if ( is_eeram_ )
+        {
+            float value;
+            rP_->get(addr_.a16, value);
+            val_ = value; 
+        }
         return val_;
     }
 
-    boolean is_corrupt()
+    virtual boolean is_corrupt()
     {
-        return val_ >= max_ || val_ <= min_;
+        boolean corrupt = val_ > max_ || val_ < min_;
+        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        return corrupt;
     }
 
-    boolean is_off()
+    virtual boolean is_off()
     {
         return val_ != default_;
     }
@@ -203,18 +212,23 @@ public:
     
     int8_t get()
     {
-        int8_t value;
-        rP_->get(addr_.a16, value);
-        val_ = value; 
+        if ( is_eeram_ )
+        {
+            int8_t value;
+            rP_->get(addr_.a16, value);
+            val_ = value;
+        }
         return val_;
     }
 
-    boolean is_corrupt()
+    virtual boolean is_corrupt()
     {
-        return val_ >= max_ || val_ <= min_;
+        boolean corrupt = val_ > max_ || val_ < min_;
+        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        return corrupt;
     }
 
-    boolean is_off()
+    virtual boolean is_off()
     {
         return val_ != default_;
     }
@@ -288,16 +302,19 @@ public:
     
     uint8_t get()
     {
-        val_ = rP_->read(addr_.a16);
+        if ( is_eeram_ )
+            val_ = rP_->read(addr_.a16);
         return val_;
     }
 
-    boolean is_corrupt()
+    virtual boolean is_corrupt()
     {
-        return val_ >= max_ || val_ <= min_;
+        boolean corrupt = val_ > max_ || val_ < min_;
+        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        return corrupt;
     }
 
-    boolean is_off()
+    virtual boolean is_off()
     {
         return val_ != default_;
     }
@@ -420,9 +437,6 @@ public:
     uint8_t type() { return type_; }
     float Vb_bias_hdwe() { return Vb_bias_hdwe_; }
     float Vb_scale() { return Vb_scale_; }
-    float Zf() { return Zf_->get(); }
-    float Zi() { return Zi_->get(); }
-    float Zu() { return Zu_->get(); }
 
     // functions
     boolean is_corrupt();
@@ -478,9 +492,6 @@ public:
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model_ = value; }
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe_ = value; }
         void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale_ = value; }
-        float get_Zf() { return Zf_->get(); }
-        int8_t get_Zi() { return Zi_->get(); }
-        uint8_t get_Zu() { return Zu_->get(); }
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
         uint16_t next() { return next_; }
@@ -490,9 +501,6 @@ public:
         float get_Cutback_gain_sclr() { return Cutback_gain_sclr_->get(); }
         float get_Freq() { return Freq_->get(); }
         uint8_t get_Modeling() { return Modeling_->get(); }
-        float get_Zf() { return Zf_->get(); }
-        int8_t get_Zi() { return Zi_->get(); }
-        uint8_t get_Zu() { return Zu_->get(); }
     #endif
     //
     void mem_print();
@@ -546,9 +554,6 @@ public:
         void put_t_last_model() {}
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { Vb_scale_ = input; }
-        void put_Zf(const float input) { Zf_->set(input); }
-        void put_Zi(const int8_t input) { Zi_->set(input); }
-        void put_Zu(const uint8_t input) { Zu_->set(input); }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #else
         void put_all_dynamic();
@@ -591,9 +596,6 @@ public:
         void put_t_last_model() { rP_->put(t_last_model_eeram_.a16, t_last_model_); }
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe_ = input; }
         void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale_ = input; }
-        void put_Zf(const float input) { Zf_->set(input); }
-        void put_Zi(const int8_t input) { Zi_->set(input); }
-        void put_Zu(const uint8_t input) { Zu_->set(input); }
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
     #endif
     //
@@ -604,9 +606,6 @@ public:
     FloatStorage *Freq_;
     Int8tStorage *Ib_select_;
     Uint8tStorage *Modeling_;
-    FloatStorage *Zf_;
-    Int8tStorage *Zi_;
-    Uint8tStorage *Zu_;
 protected:
     int debug_;             // Level of debug printing
     double delta_q_;        // Charge change since saturated, C

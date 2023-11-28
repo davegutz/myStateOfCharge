@@ -54,11 +54,8 @@ void SavedPars::init()
     Amp_= new FloatStorage("Xf", "Inj amp", "Amps pk", -1e6, 1e6, 0.); Z_[size_++] = Amp_;
     Cutback_gain_sclr_= new FloatStorage("Sk", "Cutback gain scalar", "slr", -1e6, 1e6, 1.); Z_[size_++] = Cutback_gain_sclr_;
     Freq_= new FloatStorage("Xf", "Inj freq", "Hz", 0., 2., 0.); Z_[size_++] = Freq_;
-    Ib_select_ = new Int8tStorage("si", "curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_;
-    Modeling_= new Uint8tStorage("Xm", " modeling bitmap", "[0x00000000]", 0, 255, MODELING); Z_[size_++] = Modeling_;
-    Zf_= new FloatStorage("Zf", "FloatVariable", "whatever units", -1e6, 1e6, 99.); Z_[size_++] = Zf_;
-    Zi_= new Int8tStorage("Zi", "IntVariable", "whatever units", -100, 100, -9); Z_[size_++] = Zi_;
-    Zu_= new Uint8tStorage("Zu", "UintVariable", "whatever units", 0, 70, 9); Z_[size_++] = Zu_;
+    Ib_select_ = new Int8tStorage("si", "Curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_;
+    Modeling_= new Uint8tStorage("Xm", "Modeling bitmap", "0x00000000", 0, 255, MODELING); Z_[size_++] = Modeling_;
 }
 
 
@@ -73,9 +70,6 @@ void SavedPars::init()
         Freq_= new FloatStorage("Xf", rP_, "Inj freq", "Hz", 0., 2., 0.); Z_[size_++] = Freq_;
         Ib_select_ = new Int8tStorage("si", rP_, "curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_;
         Modeling_= new Uint8tStorage("Xm", rP_, " modeling bitmap", "[0x00000000]", 0, 255, MODELING); Z_[size_++] = Modeling_;
-        Zf_= new FloatStorage("Zf", rP_, "FloatVariable", "whatever units", -1e6, 1e6, 99.); Z_[size_++] = Zf_;
-        Zi_= new Int8tStorage("Zi", rP_, "IntVariable", "whatever units", -100, 100, -9); Z_[size_++] = Zi_;
-        Zu_= new Uint8tStorage("Zu", rP_, "UintVariable", "whatever units", 0, 70, 9); Z_[size_++] = Zu_;
 
         // Memory map
         next_ = Amp_->assign_addr(next_);
@@ -110,9 +104,6 @@ void SavedPars::init()
         t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model_);
         Vb_bias_hdwe_eeram_.a16 = next_; next_ += sizeof(Vb_bias_hdwe_);
         Vb_scale_eeram_.a16 = next_; next_ += sizeof(Vb_scale_);
-        next_ = Zf_->assign_addr(next_);
-        next_ = Zi_->assign_addr(next_);
-        next_ = Zu_->assign_addr(next_);
         nflt_ = int( NFLT ); 
         fault_ = new Flt_ram[nflt_];
         for ( int i=0; i<nflt_; i++ )
@@ -143,26 +134,23 @@ SavedPars::~SavedPars() {}
 // battery.  Small compilation changes can change where in this memory the program points, too
 boolean SavedPars::is_corrupt()
 {
-    boolean corruption = 
-        Amp_->is_corrupt() ||
-        Cutback_gain_sclr_->is_corrupt() ||
+    boolean corruption = false;
+    for ( int i=0; i<size_; i++ ) corruption |= Z_[i]->is_corrupt();
+    corruption = corruption ||
         is_val_corrupt(vb_table_bias_, float(-1000.), float(1000.)) ||
         is_val_corrupt(debug_, -100, 100) ||
         is_val_corrupt(delta_q_, -1e8, 1e5) ||
         is_val_corrupt(delta_q_model_, -1e8, 1e5) ||
-        Freq_->is_corrupt() ||
         is_val_corrupt(Ib_bias_all_, float(-1e5), float(1e5)) ||
         is_val_corrupt(Ib_bias_amp_, float(-1e5), float(1e5)) ||
         is_val_corrupt(Ib_bias_noa_, float(-1e5), float(1e5)) ||
         is_val_corrupt(ib_scale_amp_, float(-1e6), float(1e6)) ||
         is_val_corrupt(ib_scale_noa_, float(-1e6), float(1e6)) ||
-        Ib_select_->is_corrupt() ||
         is_val_corrupt(ib_select_, int8_t(-1), int8_t(1)) ||
         is_val_corrupt(iflt_, -1, nflt_+1) ||
         is_val_corrupt(ihis_, -1, nhis_+1) ||
         is_val_corrupt(inj_bias_, float(-100.), float(100.)) ||
         is_val_corrupt(isum_, -1, NSUM+1) ||
-        Modeling_->is_corrupt() ||
         is_val_corrupt(mon_chm_, uint8_t(0), uint8_t(10)) ||
         is_val_corrupt(nP_, float(1e-6), float(100.)) ||
         is_val_corrupt(nS_, float(1e-6), float(100.)) ||
@@ -176,13 +164,10 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(t_last_, float(-10.), float(70.)) ||
         is_val_corrupt(t_last_model_, float(-10.), float(70.)) ||
         is_val_corrupt(Vb_bias_hdwe_, float(-10.), float(70.)) ||
-        is_val_corrupt(Vb_scale_, float(-1e6), float(1e6)) ||
-        Zf_->is_corrupt() ||
-        Zi_->is_corrupt() ||
-        Zu_->is_corrupt();
+        is_val_corrupt(Vb_scale_, float(-1e6), float(1e6));
     if ( corruption )
     {
-        Serial.printf("corrupt*********\n");
+        Serial.printf("corrupt****\n");
         pretty_print(true);
     }
     return corruption;
@@ -264,9 +249,6 @@ int SavedPars::num_diffs()
     if ( uint8_t(0) != type_ ) n++;
     if ( float(VOLT_BIAS) != Vb_bias_hdwe_ ) n++;
     if ( float(VB_SCALE) != Vb_scale_ ) n++;
-    if ( Zf_->is_off() ) n++;
-    if ( Zi_->is_off() ) n++;
-    if ( Zu_->is_off() ) n++;
     return ( n );
 }
 
@@ -462,7 +444,4 @@ void SavedPars::reset_pars()
     put_t_last_model(float(RATED_TEMP));  
     put_Vb_bias_hdwe(float(VOLT_BIAS));
     put_Vb_scale(float(VB_SCALE));
-    Zf_->set_default();
-    Zi_->set_default();
-    Zu_->set_default();
  }
