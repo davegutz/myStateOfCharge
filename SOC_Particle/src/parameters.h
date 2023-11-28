@@ -24,8 +24,6 @@
 #ifndef _PARAMETERS_H
 #define _PARAMETERS_H
 
-// #define t_float float
-
 #include "local_config.h"
 #include "Battery.h"
 #include "hardware/SerialRAM.h"
@@ -39,6 +37,9 @@ extern CommandPars cp;            // Various parameters shared at system level
 #undef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
+/* Using pointers in building class so all that stuff does not get saved by 'retained' keyword in SOC_Particle.ino.
+    Only the *_init_ parameters at the bottom of Parameters.h are stored in SRAM.  Class initialized by *init in arg list.
+*/
 class Storage
 {
 public:
