@@ -116,7 +116,6 @@ extern PublishPars pp;            // For publishing
 
 #ifdef CONFIG_47L16
   SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
-  Variable <float> Freq = Variable<float>(sp.freq_ptr(), &ram, sp.freq_eeram(), "Inj freq", "Hz");
 #else
   retained Flt_st saved_hist[NHIS];    // For displaying faults
   retained Flt_st saved_faults[NFLT];  // For displaying faults
@@ -312,12 +311,8 @@ void loop()
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);
 
-  // Variables storage
-  #ifdef CONFIG_47L16
-    static Vars *V = new Vars(&sp, &ram);
-  #else
-    static Vars *V = new Vars(&sp);
-  #endif
+  // Variables storage  TODO:  combine with Storage
+  static Vars *V = new Vars(&sp);
 
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 

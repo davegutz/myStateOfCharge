@@ -130,13 +130,6 @@ SavedPars::~SavedPars() {}
 // operators
 // functions
 
-// Element access.  Compiler not happy with these in .h file
-#ifdef CONFIG_47L16
-    address16b SavedPars::freq_eeram() { return freq_eeram_; }
-    address16b SavedPars::ib_select_eeram() { return ib_select_eeram_; }
-    address16b SavedPars::modeling_eeram() { return modeling_eeram_; }
-#endif
-
 // Corruption test on bootup.  Needed because retained parameter memory is not managed by the compiler as it relies on
 // battery.  Small compilation changes can change where in this memory the program points, too
 boolean SavedPars::is_corrupt()
