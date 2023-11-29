@@ -669,7 +669,9 @@ public:
     float s_cap_sim() { return s_cap_sim_; }
     float t_last() { return t_last_; }
     float t_last_model() { return t_last_model_; }
-    float Ib_bias_all() { return Ib_bias_all_; }
+
+    float Ib_bias_all() { return Ib_bias_all_stored; }
+
     float Ib_bias_amp() { return Ib_bias_amp_; }
     float Ib_bias_noa() { return Ib_bias_noa_; }
     float ib_scale_amp() { return ib_scale_amp_; }
