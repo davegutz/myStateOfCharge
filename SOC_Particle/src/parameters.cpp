@@ -50,8 +50,8 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Amp_p               = new FloatStorage( "Xf", "Inj amp",               "Amps pk",  -1e6, 1e6, &Amp_stored, 0.);
     Cutback_gain_sclr_p = new FloatStorage( "Sk", "Cutback gain scalar",   "slr",      -1e6, 1e6, &Cutback_gain_sclr_stored, 1.);
     Debug_p             = new IntStorage(   "v",  "Verbosity",             "int",      -128, 128, &Debug_stored, 0);
-    Delta_q_p           = new DoubleStorage("na", "Charge used",           "C",        -1e8, 1e5, &Delta_q_stored, 0.);
-    Delta_q_model_p     = new DoubleStorage("na", "Charge used Sim",       "C",        -1e8, 1e5, &Delta_q_model_stored, 0.);
+    Delta_q_p           = new DoubleStorage("na", "Charge chg",            "C",        -1e8, 1e5, &Delta_q_stored, 0.);
+    Delta_q_model_p     = new DoubleStorage("na", "Charge chg Sim",        "C",        -1e8, 1e5, &Delta_q_model_stored, 0.);
     Dw_p                = new FloatStorage( "Dw", "Tab mon adj",           "v",        -1e2, 1e2, &Dw_stored, VTAB_BIAS);
     Freq_p              = new FloatStorage( "Xf", "Inj freq",              "Hz",        0.,  2.,  &Freq_stored, 0.);
     Ib_bias_all_p       = new FloatStorage( "Di", "Del all",               "A",        -1e5, 1e5, &Ib_bias_all_stored, CURR_BIAS_ALL);
@@ -81,8 +81,8 @@ SavedPars::SavedPars(SerialRAM *ram)
     Amp_p               = new FloatStorage( "Xf", rP_, "Inj amp",               "Amps pk",  -1e6, 1e6, &Amp_stored, 0.);
     Cutback_gain_sclr_p = new FloatStorage( "Sk", rP_, "Cutback gain scalar",   "slr",      -1e6, 1e6, &Cutback_gain_sclr_stored, 1.);
     Debug_p             = new IntStorage(   "v",  rP_, "Verbosity",             "int",      -128, 128, &Debug_stored, 0);
-    Delta_q_p           = new DoubleStorage("na", rP_, "Charge used",           "C",        -1e8, 1e5, &Delta_q_stored, 0.);
-    Delta_q_model_p     = new DoubleStorage("na", rP_, "Charge used Sim",       "C",        -1e8, 1e5, &Delta_q_model_stored, 0.);
+    Delta_q_p           = new DoubleStorage("na", rP_, "Charge chg",            "C",        -1e8, 1e5, &Delta_q_stored, 0.);
+    Delta_q_model_p     = new DoubleStorage("na", rP_, "Charge chg Sim",        "C",        -1e8, 1e5, &Delta_q_model_stored, 0.);
     Dw_p                = new FloatStorage( "Dw", rP_, "Tab mon adj",           "v",        -1e2, 1e2, &Dw_stored, VTAB_BIAS);
     Freq_p              = new FloatStorage( "Xf", rP_, "Inj freq",              "Hz",        0.,  2.,  &Freq_stored, 0.);
     Ib_bias_all_p       = new FloatStorage( "Di", rP_, "Del all",               "A",        -1e5, 1e5, &Ib_bias_all_stored, CURR_BIAS_ALL);
