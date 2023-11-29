@@ -188,6 +188,10 @@ void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Si
   sp.put_t_last(temp_c);
   sp.put_delta_q_model(sp.delta_q_model() - Sim->dqdt() * Sim->q_capacity() * (temp_c - sp.t_last_model()));
   sp.put_t_last_model(temp_c);
+#ifdef DEBUG_INIT
+if ( sp.Debug()==-1 ) Serial.printf("harvest_temp_change:  Delta_q %10.1f temp_c %5.1f t_last %5.1f Delta_q_s %10.1f temp_c_s %5.1f t_last_s %5.1f\n",
+  sp.Delta_q(), temp_c, sp.t_last(), sp.delta_q_model(), temp_c, sp.t_last_model());
+#endif
 }
 
 // Complete initialization of all parameters in Mon and Sim including EKF
