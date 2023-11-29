@@ -267,12 +267,12 @@ public:
     
     void print_help()
     {
-      Serial.printf("* %s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial.printf("* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print1_help()
     {
-      Serial1.printf("* %s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial1.printf("* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void set(float val)
@@ -346,12 +346,12 @@ public:
     
     void print_help()
     {
-      Serial.printf("* %s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial.printf("* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print1_help()
     {
-      Serial1.printf("* %s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial1.printf("* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void set_default(){}
@@ -753,11 +753,13 @@ public:
     float nP() { return nP_; }
     float nS() { return nS_; }
     uint8_t preserving() { return preserving_; }
-    float Tb_bias_hdwe() { return Tb_bias_hdwe_; }
+
+    float Tb_bias_hdwe() { return Tb_bias_hdwe_stored; }
+
     time_t time_now() { return time_now_; }
     uint8_t type() { return type_; }
-    float Vb_bias_hdwe() { return Vb_bias_hdwe_; }
 
+    float Vb_bias_hdwe() { return Vb_bias_hdwe_stored; }
     float Vb_scale() { return Vb_scale_stored; }
 
     // functions
@@ -810,13 +812,16 @@ public:
         void get_sim_chm() { sim_chm_ = rP_->read(sim_chm_eeram_.a16); }
         void get_s_cap_mon() { float value; rP_->get(s_cap_mon_eeram_.a16, value); s_cap_mon_ = value; }
         void get_s_cap_sim() { float value; rP_->get(s_cap_sim_eeram_.a16, value); s_cap_sim_ = value; }
-        void get_Tb_bias_hdwe() { float value; rP_->get(Tb_bias_hdwe_eeram_.a16, value); Tb_bias_hdwe_ = value; }
+
+        float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
+
         void get_time_now() { time_t value; rP_->get(time_now_eeram_.a16, value); time_now_ = value; Time.setTime(value); }
         void get_type() { type_ = rP_->read(type_eeram_.a16); }
         void get_t_last() { float value; rP_->get(t_last_eeram_.a16, value); t_last_ = value; }
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model_ = value; }
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe_ = value; }
 
+        float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
         float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Vb_scale_stored
 
         void get_fault(const uint8_t i) { fault_[i].get(); }
@@ -834,6 +839,8 @@ public:
         float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
         double get_Ib_select() { return Ib_select_p->get(); }
         uint8_t get_Modeling() { return Modeling_p->get(); }
+        float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
+        float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
         float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Ib_bias_stored
     #endif
     //
@@ -882,15 +889,17 @@ public:
         void put_sim_chm() {}
         void put_s_cap_mon(const float input) { s_cap_mon_ = input; }
         void put_s_cap_sim(const float input) { s_cap_sim_ = input; }
-        void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_ = input; }
+
+        void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
+
         void put_time_now(const time_t input) { time_now_ = input; }
         void put_type(const uint8_t input) { type_ = input; }
         void put_t_last(const float input) { t_last_ = input; }
         void put_t_last() {}
         void put_t_last_model(const float input) { t_last_model_ = input; }
         void put_t_last_model() {}
-        void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
 
+        void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
         void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
 
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
@@ -959,6 +968,8 @@ public:
     FloatStorage *Ib_scale_noa_p;
     Int8tStorage *Ib_select_p;
     Uint8tStorage *Modeling_p;
+    FloatStorage *Tb_bias_hdwe_p;
+    FloatStorage *Vb_bias_hdwe_p;
     FloatStorage *Vb_scale_p;
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
@@ -976,6 +987,8 @@ public:
     float Ib_scale_amp_stored;
     float Ib_scale_noa_stored;
     uint8_t Modeling_stored;
+    float Tb_bias_hdwe_stored;
+    float Vb_bias_hdwe_stored;
     float Vb_scale_stored;
 
 protected:
@@ -995,12 +1008,12 @@ protected:
     uint8_t sim_chm_;       // Simulation battery chemistry type
     float s_cap_mon_;       // Scalar on battery monitor size
     float s_cap_sim_;       // Scalar on battery model size
-    float Tb_bias_hdwe_;    // Bias on Tb sensor, deg C
+    // float Tb_bias_hdwe_;    // Bias on Tb sensor, deg C
     time_t time_now_;       // Time now, Unix time since epoch
     uint8_t type_;          // Injected waveform type.   0=sine, 1=square, 2=triangle
-    float Vb_bias_hdwe_;    // Calibrate Vb, V
-    float Vb_scale_;        // Calibrate Vb scale
-    float vb_table_bias_;   // Battery monitor curve bias, V
+    // float Vb_bias_hdwe_;    // Calibrate Vb, V
+    // float Vb_scale_;        // Calibrate Vb scale
+    // float vb_table_bias_;   // Battery monitor curve bias, V
     float t_last_;          // Updated value of battery temperature injection when sp.Modeling() and proper wire connections made, deg C
     float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
     #ifndef CONFIG_47L16
@@ -1019,13 +1032,10 @@ protected:
         address16b sim_chm_eeram_;
         address16b s_cap_mon_eeram_;
         address16b s_cap_sim_eeram_;
-        address16b Tb_bias_hdwe_eeram_;
         address16b time_now_eeram_;
         address16b type_eeram_;
         address16b t_last_eeram_;
         address16b t_last_model_eeram_;
-        address16b Vb_bias_hdwe_eeram_;
-        address16b Vb_scale_eeram_;
         SerialRAM *rP_;
         Flt_ram *fault_;
         Flt_ram *history_;
