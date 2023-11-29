@@ -100,16 +100,17 @@ public:
     {
         min_ = min;
         max_ = max;
-        default_ = max(min(_default, max_), min_);
         val_ = store;
+        default_ = max(min(_default, max_), min_);
         set(*val_); // retained
     }
 
-    DoubleStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, const double _default=0):
+    DoubleStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, double *store, const double _default=0):
         Storage(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
+        val_ = store;
         default_ = max(min(_default, max_), min_);
     }
 
@@ -125,9 +126,7 @@ public:
     {
         if ( is_eeram_ )
         {
-            double value;
-            rP_->get(addr_.a16, value);
-            *val_ = value; 
+            rP_->get(addr_.a16, *val_);
         }
         return *val_;
     }
@@ -165,6 +164,11 @@ public:
     void print_help()
     {
       Serial.printf(" *%s= %9.1f: %s, %s (%9.1f - %9.1f) [%9.1f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+    }
+
+    void print1_help()
+    {
+      Serial1.printf(" *%s= %9.1f: %s, %s (%9.1f - %9.1f) [%9.1f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void set(double val)
@@ -205,11 +209,12 @@ public:
         set(*val_); // retained
     }
 
-    FloatStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max, const float _default=0):
+    FloatStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max, float *store, const float _default=0):
         Storage(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
+        val_ = store;
         default_ = max(min(_default, max_), min_);
     }
 
@@ -225,9 +230,7 @@ public:
     {
         if ( is_eeram_ )
         {
-            float value;
-            rP_->get(addr_.a16, value);
-            *val_ = value; 
+            rP_->get(addr_.a16, *val_);
         }
         return *val_;
     }
@@ -265,6 +268,11 @@ public:
     void print_help()
     {
       Serial.printf(" *%s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+    }
+
+    void print1_help()
+    {
+      Serial1.printf(" *%s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void set(float val)
@@ -305,11 +313,12 @@ public:
         set(*val_); // retained
     }
 
-    IntStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, const int _default=0):
+    IntStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store, const int _default=0):
         Storage(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
+        val_ = store;
         default_ = max(min(_default, max_), min_);
     }
 
@@ -325,9 +334,7 @@ public:
     {
         if ( is_eeram_ )
         {
-            int value;
-            rP_->get(addr_.a16, value);
-            *val_ = value;
+            rP_->get(addr_.a16, *val_);
         }
         return *val_;
     }
@@ -365,6 +372,11 @@ public:
     void print_help()
     {
       Serial.printf(" *%s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+    }
+    
+    void print1_help()
+    {
+      Serial1.printf(" *%s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
     
     void set(int val)
@@ -405,11 +417,12 @@ public:
         set(*val_); // retained
     }
 
-    Int8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max, const int8_t _default=0):
+    Int8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max, int8_t *store, const int8_t _default=0):
         Storage(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
+        val_ = store;
         default_ = max(min(_default, max_), min_);
     }
 
@@ -425,9 +438,7 @@ public:
     {
         if ( is_eeram_ )
         {
-            int8_t value;
-            rP_->get(addr_.a16, value);
-            *val_ = value;
+            rP_->get(addr_.a16, *val_);
         }
         return *val_;
     }
@@ -465,6 +476,11 @@ public:
     void print_help()
     {
       Serial.printf(" *%s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+    }
+    
+    void print1_help()
+    {
+      Serial1.printf(" *%s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
     
     void set(int8_t val)
@@ -505,11 +521,12 @@ public:
         set(*val_); // retained
     }
 
-    Uint8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max, const uint8_t _default=0):
+    Uint8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max, uint8_t *store, const uint8_t _default=0):
         Storage(code, ram, description, units, true)
     {
         min_ = min;
         max_ = max;
+        val_ = store;
         default_ = max(min(_default, max_), min_);
     }
 
@@ -563,7 +580,11 @@ public:
       Serial.printf(" *%s= %d: %s, %s (%df - %df) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
-    
+    void print1_help()
+    {
+      Serial1.printf(" *%s= %d: %s, %s (%df - %df) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+    }
+   
     void set(uint8_t val)
     {
         if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
@@ -634,13 +655,13 @@ public:
     // operators
 
     // parameter list
-    float Amp() { return Amp_p->get(); }
-    float Cutback_gain_sclr() { return Cutback_gain_sclr_p->get(); }
-    int Debug() { return Debug_p->get();}
-    double Delta_q() { return Delta_q_p->get();}
-    double Delta_q_model() { return Delta_q_model_p->get();}
-    float Dw() { return Dw_p->get(); }
-    float Freq() { return Freq_p->get(); }
+    float Amp() { return Amp_stored; }
+    float Cutback_gain_sclr() { return Cutback_gain_sclr_stored; }
+    int Debug() { return Debug_stored;}
+    double Delta_q() { return Delta_q_stored;}
+    double Delta_q_model() { return Delta_q_model_stored;}
+    float Dw() { return Dw_stored; }
+    float Freq() { return Freq_stored; }
 
     uint8_t mon_chm() { return mon_chm_; }
     uint8_t sim_chm() { return sim_chm_; }
@@ -654,14 +675,14 @@ public:
     float ib_scale_amp() { return ib_scale_amp_; }
     float ib_scale_noa() { return ib_scale_noa_; }
 
-    int8_t Ib_select() { return Ib_select_p->get(); }
+    int8_t Ib_select() { return Ib_select_stored; }
 
     int iflt() { return iflt_; }
     int ihis() { return ihis_; }
     float inj_bias() { return inj_bias_; }
     int isum() { return isum_; }
 
-    uint8_t Modeling() { return Modeling_p->get(); }
+    uint8_t Modeling() { return Modeling_stored; }
 
     float nP() { return nP_; }
     float nS() { return nS_; }
@@ -701,8 +722,8 @@ public:
         double get_Delta_q_model() { return Delta_q_model_p->get(); }
         float get_Dw() { return Dw_p->get(); }
         float get_Freq() { return Freq_p->get(); }
+        float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
 
-        void get_Ib_bias_all() { float value; rP_->get(Ib_bias_all_eeram_.a16, value); Ib_bias_all_ = value; }
         void get_Ib_bias_amp() { float value; rP_->get(Ib_bias_amp_eeram_.a16, value); Ib_bias_amp_ = value; }
         void get_Ib_bias_noa() { float value; rP_->get(Ib_bias_noa_eeram_.a16, value); Ib_bias_noa_ = value; }
         void get_ib_scale_amp() { float value; rP_->get(ib_scale_amp_eeram_.a16, value); ib_scale_amp_ = value; }
@@ -743,6 +764,7 @@ public:
         double get_Delta_q_model() { return Delta_q_model_p->get(); }
         float get_Dw() { return Dw_p->get(); }
         float get_Freq() { return Freq_p->get(); }
+        float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
         double get_Ib_select() { return Ib_select_p->get(); }
         uint8_t get_Modeling() { return Modeling_p->get(); }
     #endif
@@ -769,8 +791,8 @@ public:
         void put_Delta_q_model() {}
         void put_Dw(const float input) { Dw_p->set(input); }
         void put_Freq(const float input) { Freq_p->set(input); }
+        void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
 
-        void put_Ib_bias_all(const float input) { Ib_bias_all_ = input; }
         void put_Ib_bias_amp(const float input) { Ib_bias_amp_ = input; }
         void put_Ib_bias_noa(const float input) { Ib_bias_noa_ = input; }
         void put_ib_scale_amp(const float input) { ib_scale_amp_ = input; }
@@ -815,8 +837,8 @@ public:
         void put_Delta_q_model() {}
         void put_Dw(const float input) { Dw_p->set(input); }
         void put_Freq(const float input) { Freq_p->set(input); }
+        void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
 
-        void put_Ib_bias_all(const float input) { rP_->put(Ib_bias_all_eeram_.a16, input); Ib_bias_all_ = input; }
         void put_Ib_bias_amp(const float input) { rP_->put(Ib_bias_amp_eeram_.a16, input); Ib_bias_amp_ = input; }
         void put_Ib_bias_noa(const float input) { rP_->put(Ib_bias_noa_eeram_.a16, input); Ib_bias_noa_ = input; }
         void put_ib_scale_amp(const float input) { rP_->put(ib_scale_amp_eeram_.a16, input); ib_scale_amp_ = input; }
@@ -861,6 +883,7 @@ public:
     DoubleStorage *Delta_q_model_p;
     FloatStorage *Dw_p;
     FloatStorage *Freq_p;
+    FloatStorage *Ib_bias_all_p;
     Int8tStorage *Ib_select_p;
     Uint8tStorage *Modeling_p;
 
@@ -872,6 +895,7 @@ public:
     double Delta_q_model_stored;
     float Dw_stored;
     float Freq_stored;
+    float Ib_bias_all_stored;
     int8_t Ib_select_stored;
     uint8_t Modeling_stored;
 

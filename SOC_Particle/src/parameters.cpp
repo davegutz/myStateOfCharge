@@ -49,10 +49,11 @@ SavedPars::SavedPars()
         Amp_p = new FloatStorage("Xf", "Inj amp", "Amps pk", -1e6, 1e6, &Amp_stored, 0.); Z_[size_++] = Amp_p;
         Cutback_gain_sclr_p = new FloatStorage("Sk", "Cutback gain scalar", "slr", -1e6, 1e6, &Cutback_gain_sclr_stored, 1.); Z_[size_++] = Cutback_gain_sclr_p;
         Debug_p = new IntStorage("v", "Verbosity", "level", -128, 128, &Debug_stored, 0); Z_[size_++] = Debug_p;
-        Delta_q_p = new DoubleStorage("na", "Charge used", "C", -1e8, 1e5, &Delta_q_stored, 0); Z_[size_++] = Delta_q_p;
-        Delta_q_model_p = new DoubleStorage("na", "Charge used model", "C", -1e8, 1e5, &Delta_q_model_stored, 0); Z_[size_++] = Delta_q_model_p;
+        Delta_q_p = new DoubleStorage("na", "Charge used", "C", -1e8, 1e5, &Delta_q_stored, 0.); Z_[size_++] = Delta_q_p;
+        Delta_q_model_p = new DoubleStorage("na", "Charge used model", "C", -1e8, 1e5, &Delta_q_model_stored, 0.); Z_[size_++] = Delta_q_model_p;
         Dw_p = new FloatStorage("Dw", "Tab mon adj", "v", -1e3, 1e3, &Dw_stored, VTAB_BIAS); Z_[size_++] = Dw_p;
         Freq_p = new FloatStorage("Xf", "Inj freq", "Hz", 0., 2., &Freq_stored, 0.); Z_[size_++] = Freq_p;
+        Ib_bias_all_p = new FloatStorage("Di", "Del all", "A", -1e5, 1e5, &Ib_bias_all_stored, CURR_BIAS_ALL); Z_[size_++] = Ib_bias_all_p;
         Ib_select_p = new Int8tStorage("si", "Curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_p;
         Modeling_p = new Uint8tStorage("Xm", "Modeling bitmap", "0x00000000", 0, 255, &Modeling_stored, MODELING); Z_[size_++] = Modeling_p;
     }
@@ -63,15 +64,16 @@ SavedPars::SavedPars(SerialRAM *ram)
     rP_ = ram;
     size_ = 0;
 
-    Amp_p= new FloatStorage("Xf", rP_, "Inj amp", "Amps pk", -1e6, 1e6, 0.); Z_[size_++] = Amp_p;
-    Cutback_gain_sclr_p= new FloatStorage("Sk", rP_, "Cutback gain scalar", "slr", -1e6, 1e6, 1.); Z_[size_++] = Cutback_gain_sclr_p;
-    Debug_p= new IntStorage("v", rP_, "Verbosity", "int", -128, 128, 0); Z_[size_++] = Debug_p;
-    Delta_q_p = new DoubleStorage("na", rP_, "Charge used", "C", -1e8, 1e5, 0.); Z_[size_++] = Delta_q_p;
-    Delta_q_model_p = new DoubleStorage("na", rP_, "Charge used Sim", "C", -1e8, 1e5, 0.); Z_[size_++] = Delta_q_model_p;
-    Dw_p = new FloatStorage("Dw", rP_, "Tab mon adj", "v", -100., 100., VTAB_BIAS); Z_[size_++] = Cutback_gain_sclr_p;
-    Freq_p= new FloatStorage("Xf", rP_, "Inj freq", "Hz", 0., 2., 0.); Z_[size_++] = Freq_p;
-    Ib_select_p = new Int8tStorage("si", rP_, "curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_p;
-    Modeling_p= new Uint8tStorage("Xm", rP_, " modeling bitmap", "[0x00000000]", 0, 255, MODELING); Z_[size_++] = Modeling_p;
+    Amp_p = new FloatStorage("Xf", rP_, "Inj amp", "Amps pk", -1e6, 1e6, &Amp_stored, 0.); Z_[size_++] = Amp_p;
+    Cutback_gain_sclr_p = new FloatStorage("Sk", rP_, "Cutback gain scalar", "slr", -1e6, 1e6, &Cutback_gain_sclr_stored, 1.); Z_[size_++] = Cutback_gain_sclr_p;
+    Debug_p = new IntStorage("v", rP_, "Verbosity", "int", -128, 128, &Debug_stored, 0); Z_[size_++] = Debug_p;
+    Delta_q_p = new DoubleStorage("na", rP_, "Charge used", "C", -1e8, 1e5, &Delta_q_stored, 0.); Z_[size_++] = Delta_q_p;
+    Delta_q_model_p = new DoubleStorage("na", rP_, "Charge used Sim", "C", -1e8, 1e5, &Delta_q_model_stored, 0.); Z_[size_++] = Delta_q_model_p;
+    Dw_p = new FloatStorage("Dw", rP_, "Tab mon adj", "v", -100., 100., &Dw_stored, VTAB_BIAS); Z_[size_++] = Cutback_gain_sclr_p;
+    Freq_p = new FloatStorage("Xf", rP_, "Inj freq", "Hz", 0., 2., &Freq_stored, 0.); Z_[size_++] = Freq_p;
+    Ib_bias_all_p = new FloatStorage("Di", rP_, "Del all", "A", -1e5, 1e5, &Ib_bias_all_stored, CURR_BIAS_ALL); Z_[size_++] = Ib_bias_all_p;
+    Ib_select_p = new Int8tStorage("si", rP_, "curr sel mode (-1=noa, 0=auto, 1=amp)", "code", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS)); Z_[size_++] = Ib_select_p;
+    Modeling_p= new Uint8tStorage("Xm", rP_, " modeling bitmap", "[0x00000000]", 0, 255, &Modeling_stored, MODELING); Z_[size_++] = Modeling_p;
 
     // Memory map
     next_ = Amp_p->assign_addr(next_);
@@ -81,8 +83,8 @@ SavedPars::SavedPars(SerialRAM *ram)
     next_ = Delta_q_model_p->assign_addr(next_);
     next_ = Dw_p->assign_addr(next_);
     next_ = Freq_p->assign_addr(next_);
+    next_ = Ib_bias_all_p->assign_addr(next_);
 
-    Ib_bias_all_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_all_);
     Ib_bias_amp_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_amp_);
     Ib_bias_noa_eeram_.a16 =  next_;  next_ += sizeof(Ib_bias_noa_);
     ib_scale_amp_eeram_.a16 =  next_;  next_ += sizeof(ib_scale_amp_);
@@ -231,8 +233,8 @@ int SavedPars::num_diffs()
     if ( Dw_p->is_off() ) n++;
     if ( Debug_p->is_off() ) n++;
     if ( Freq_p->is_off() ) n++;
+    if ( Ib_bias_all_p->is_off() ) n++;
 
-    if ( float(CURR_BIAS_ALL) != Ib_bias_all_ ) n++;
     if ( float(CURR_BIAS_AMP) != Ib_bias_amp_ ) n++;
     if ( float(CURR_BIAS_NOA) != Ib_bias_noa_ ) n++;
     if ( float(CURR_SCALE_AMP) != ib_scale_amp_ ) n++;
@@ -419,8 +421,8 @@ void SavedPars::reset_pars()
     Delta_q_model_p->set_default();
     Dw_p->set_default();
     Freq_p->set_default();
+    Ib_bias_all_p->set_default();
 
-    put_Ib_bias_all(float(CURR_BIAS_ALL));
     put_Ib_bias_amp(float(CURR_BIAS_AMP));
     put_Ib_bias_noa(float(CURR_BIAS_NOA));
     put_ib_scale_amp(float(CURR_SCALE_AMP));

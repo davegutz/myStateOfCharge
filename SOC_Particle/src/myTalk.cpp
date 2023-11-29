@@ -349,11 +349,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'i' ):  // * Di<>:  Bias all current sensors (same way as Da and Db)
-                Serial.printf("sp.Ib_bias_all%7.3f to", sp.Ib_bias_all());
-                Serial1.printf("sp.Ib_bias_all%7.3f to", sp.Ib_bias_all());
+                sp.Ib_bias_all_p->print();
+                sp.Ib_bias_all_p->print1();
                 sp.put_Ib_bias_all(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\nreset\n", sp.Ib_bias_all());
-                Serial1.printf("%7.3f\nreset\n", sp.Ib_bias_all());
+                sp.Ib_bias_all_p->print();
+                sp.Ib_bias_all_p->print1();
                 cp.cmd_reset();
                 break;
 
@@ -1260,10 +1260,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial1.printf(" *DA= "); Serial1.printf("%6.3f", sp.Ib_bias_amp()); Serial1.printf(": del amp, A [%6.3f]\n", CURR_BIAS_AMP);
   Serial.printf(" *DB= "); Serial.printf("%6.3f", sp.Ib_bias_noa()); Serial.printf(": del noa, A [%6.3f]\n", CURR_BIAS_NOA);
   Serial1.printf(" *DB= "); Serial1.printf("%6.3f", sp.Ib_bias_noa()); Serial1.printf(": del noa, A [%6.3f]\n", CURR_BIAS_NOA);
-  Serial.printf(" *Di= "); Serial.printf("%6.3f", sp.Ib_bias_all()); Serial.printf(": del all, A [%6.3f]\n", CURR_BIAS_ALL);
-  Serial1.printf(" *Di= "); Serial1.printf("%6.3f", sp.Ib_bias_all()); Serial1.printf(": del all, A [%6.3f]\n", CURR_BIAS_ALL);
-  Serial.printf(" *DI= "); Serial.printf("%6.3f", sp.Ib_bias_all()); Serial.printf(": del all no reset, A [%6.3f]\n", CURR_BIAS_ALL);
-  Serial1.printf(" *DI= "); Serial1.printf("%6.3f", sp.Ib_bias_all()); Serial1.printf(": del all no reset, A [%6.3f]\n", CURR_BIAS_ALL);
+
+  sp.Ib_bias_all_p->print_help();  // *Di
+  sp.Ib_bias_all_p->print1_help();  // *Di
+
   Serial.printf(" *Dc= "); Serial.printf("%6.3f", sp.Vb_bias_hdwe()); Serial.printf(": del, V [%6.3f]\n", VOLT_BIAS); 
   Serial1.printf(" *Dc= "); Serial1.printf("%6.3f", sp.Vb_bias_hdwe()); Serial1.printf(": del, V [%6.3f]\n", VOLT_BIAS); 
   Serial.printf("  DE= "); Serial.printf("%d", cp.eframe_mult); Serial.printf(": eframe mult Dr [20]\n");
@@ -1413,6 +1413,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
   sp.Amp_p->print_help();  // *Xa
   sp.Freq_p->print_help();  // *Xf
+  sp.Ib_bias_all_p->print_help();  // *Di
 
   Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.printf(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))\n");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 

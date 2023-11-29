@@ -274,6 +274,8 @@ void setup()
     }
   }
 
+delay(2000); Serial.printf("end setup\n"); delay(2000);
+
   Serial.printf("End setup()\n\n");
 } // setup
 
@@ -478,7 +480,11 @@ void loop()
 
   // Initialize complete once sensors and models started and summary written
   if ( read ) reset = false;
-  if ( read_temp && elapsed>TEMP_INIT_DELAY ) reset_temp = false;
+  if ( read_temp && elapsed>TEMP_INIT_DELAY && reset_temp )
+  {
+    Serial.printf("temp init complete\n");
+    reset_temp = false;
+  }
   if ( cp.publishS ) reset_publish = false;
 
   // Soft reset

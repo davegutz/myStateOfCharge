@@ -184,12 +184,16 @@ void delay_no_block(const unsigned long int interval)
 // Harvest charge caused temperature change.   More charge becomes available as battery warms
 void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Sim)
 {
+#ifdef DEBUG_INIT
+if ( sp.Debug()==-1 ) Serial.printf("entry harvest_temp_change:  Delta_q %10.1f temp_c %5.1f t_last %5.1f Delta_q_model %10.1f temp_c_s %5.1f t_last_s %5.1f\n",
+  sp.Delta_q(), temp_c, sp.t_last(), sp.Delta_q_model(), temp_c, sp.t_last_model());
+#endif
   sp.put_Delta_q(sp.Delta_q() - Mon->dqdt() * Mon->q_capacity() * (temp_c - sp.t_last()));
   sp.put_t_last(temp_c);
   sp.put_Delta_q_model(sp.Delta_q_model() - Sim->dqdt() * Sim->q_capacity() * (temp_c - sp.t_last_model()));
   sp.put_t_last_model(temp_c);
 #ifdef DEBUG_INIT
-if ( sp.Debug()==-1 ) Serial.printf("harvest_temp_change:  Delta_q %10.1f temp_c %5.1f t_last %5.1f Delta_q_model %10.1f temp_c_s %5.1f t_last_s %5.1f\n",
+if ( sp.Debug()==-1 ) Serial.printf("exit harvest_temp_change:  Delta_q %10.1f temp_c %5.1f t_last %5.1f Delta_q_model %10.1f temp_c_s %5.1f t_last_s %5.1f\n",
   sp.Delta_q(), temp_c, sp.t_last(), sp.Delta_q_model(), temp_c, sp.t_last_model());
 #endif
 }
@@ -227,6 +231,8 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
     Sen->Tb = Sen->Tb_hdwe;
     Sen->Tb_filt = Sen->Tb_hdwe_filt;
   }
+  if ( use_soc_in )
+    Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves sp.delta_q and sp.t_last
   #ifdef DEBUG_INIT
     if ( sp.Debug()==-1 )
     { 
@@ -237,8 +243,8 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   #ifdef DEBUG_INIT
     if ( sp.Debug()==-1 ){ Serial.printf("after harvest_temp:"); debug_m1(Mon, Sen);}
   #endif
-  if ( use_soc_in )
-    Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves sp.delta_q and sp.t_last
+  // if ( use_soc_in )
+  //   Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves sp.delta_q and sp.t_last
   Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies sp.delta_q and sp.t_last
   #ifdef DEBUG_INIT
     if ( sp.Debug()==-1 ){ Serial.printf("S.a_d_q_t:"); debug_m1(Mon, Sen);}
