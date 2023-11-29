@@ -175,28 +175,23 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 switch ( INT_in )
                 {
                   case ( 0 ):  // Bm0: Mon Battleborn
-                    Serial.printf("Mon chem %d", sp.mon_chm());
-                    sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
+                    sp.Mon_chm_p->print_adj_print(INT_in);
                     Mon->assign_all_mod("Battleborn");
-                    Serial.printf(" to %d\n", sp.mon_chm());
                     Mon->chem_pretty_print();
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bm1: Mon CHINS
-                    Serial.printf("Mon chem %d", sp.mon_chm());
-                    sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
+                    sp.Mon_chm_p->print_adj_print(INT_in);
                     Mon->assign_all_mod("CHINS");
-                    Serial.printf(" to %d\n", sp.mon_chm());
                     Mon->chem_pretty_print();
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bm2: Mon Spare
-                    Serial.printf("Mon chem %d", sp.mon_chm());
-                    sp.put_mon_chm(max(min(INT_in, UINT8_MAX), 0));
+                    sp.Mon_chm_p->print_adj_print(INT_in);
                     Mon->assign_all_mod("Spare");
-                    Serial.printf(" to %d\n", sp.mon_chm());
+                    Mon->chem_pretty_print();
                     cp.cmd_reset();
                     break;
 
@@ -210,26 +205,20 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 switch ( INT_in )
                 {
                   case ( 0 ):  // Bs0: Sim Battleborn
-                    Serial.printf("Sim chem %d", sp.sim_chm());
-                    sp.put_sim_chm(max(min(INT_in, UINT8_MAX), 0));
+                    sp.Sim_chm_p->print_adj_print(INT_in);
                     Sen->Sim->assign_all_mod("Battleborn");
-                    Serial.printf(" to %d\n", sp.sim_chm());
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bs1: Sim CHINS
-                    Serial.printf("Sim chem %d", sp.sim_chm());
-                    sp.put_sim_chm(max(min(INT_in, UINT8_MAX), 0));
+                    sp.Sim_chm_p->print_adj_print(INT_in);
                     Sen->Sim->assign_all_mod("CHINS");
-                    Serial.printf(" to %d\n", sp.sim_chm());
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bs2: Sim Spare
-                    Serial.printf("Sim chem %d", sp.sim_chm());
-                    sp.put_sim_chm(max(min(INT_in, UINT8_MAX), 0));
+                    sp.Sim_chm_p->print_adj_print(INT_in);
                     Sen->Sim->assign_all_mod("Spare");
-                    Serial.printf(" to %d\n", sp.sim_chm());
                     cp.cmd_reset();
                     break;
 
@@ -1180,8 +1169,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("  bR= "); Serial.printf("reset all buffers\n");
 
   Serial.printf("\nB<?> Battery e.g.:\n");
-  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='CH' [%d]\n", sp.mon_chm(), MON_CHEM); 
-  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='CH' [%d]\n", sp.sim_chm(), SIM_CHEM); 
+  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='CH' [%d]\n", sp.Mon_chm(), MON_CHEM); 
+  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='CH' [%d]\n", sp.Sim_chm(), SIM_CHEM); 
   Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", sp.nP(), NP); 
   Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", sp.nS(), NS); 
 
@@ -1381,6 +1370,5 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf(" XT= "); Serial.printf("%7.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
   Serial.printf(" Xu= "); Serial.printf("%d T=ignore Tb read\n", Sen->Flt->fail_tb());
   Serial.printf(" Xv= "); Serial.printf("%4.2f scale Tb 1-wire stale persist\n", Sen->Flt->tb_stale_time_sclr());
-  Serial.printf("\n*Xx<> = SRAM saved\n");
   Serial.printf("\nurgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE\n");
 }

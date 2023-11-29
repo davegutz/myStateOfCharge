@@ -62,8 +62,10 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Ib_scale_noa_p      = new FloatStorage(  "SB", "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_stored, CURR_SCALE_NOA);
     Ib_select_p         = new Int8tStorage(  "si", "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
     Modeling_p          = new Uint8tStorage( "Xm", "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
+    Mon_chm_p           = new Uint8tStorage( "Bm", "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_stored, MON_CHEM);
     S_cap_mon_p         = new FloatStorage(  "SQ", "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_stored, 1.);
     S_cap_sim_p         = new FloatStorage(  "Sq", "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
+    Sim_chm_p           = new Uint8tStorage( "Bs", "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_stored, SIM_CHEM);
     Tb_bias_hdwe_p      = new FloatStorage(  "Dt", "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
     Type_p              = new Uint8tStorage( "Xt", "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
     Vb_bias_hdwe_p      = new FloatStorage(  "Dc", "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_stored, VOLT_BIAS);
@@ -85,8 +87,10 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Z_[size_++] = Ib_scale_noa_p;
     Z_[size_++] = Ib_select_p;
     Z_[size_++] = Modeling_p;
+    Z_[size_++] = Mon_chm_p;
     Z_[size_++] = S_cap_mon_p;
     Z_[size_++] = S_cap_sim_p;
+    Z_[size_++] = Sim_chm_p;
     Z_[size_++] = Tb_bias_hdwe_p;
     Z_[size_++] = Type_p;
     Z_[size_++] = Vb_bias_hdwe_p;
@@ -115,8 +119,10 @@ SavedPars::SavedPars(SerialRAM *ram)
     Ib_scale_noa_p      = new FloatStorage(  "SB", rP_, "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_stored, CURR_SCALE_NOA);
     Ib_select_p         = new Int8tStorage(  "si", rP_, "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
     Modeling_p          = new Uint8tStorage( "Xm", rP_, "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
+    Mon_chm_p           = new Uint8tStorage( "Bm", rP_, "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_stored, MON_CHEM);
     S_cap_mon_p         = new FloatStorage(  "SQ", rP_, "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_stored, 1.);
     S_cap_sim_p         = new FloatStorage(  "Sq", rP_, "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
+    Sim_chm_p           = new Uint8tStorage( "Bs", rP_, "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_stored, SIM_CHEM);
     Tb_bias_hdwe_p      = new FloatStorage(  "Dt", rP_, "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
     Type_p              = new Uint8tStorage( "Xt", rP_, "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
     Vb_bias_hdwe_p      = new FloatStorage(  "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_stored, VOLT_BIAS);
@@ -138,8 +144,10 @@ SavedPars::SavedPars(SerialRAM *ram)
     Z_[size_++] = Ib_scale_noa_p;
     Z_[size_++] = Ib_select_p;
     Z_[size_++] = Modeling_p;
+    Z_[size_++] = Mon_chm_p;
     Z_[size_++] = S_cap_mon_p;
     Z_[size_++] = S_cap_sim_p;
+    Z_[size_++] = Sim_chm_p;
     Z_[size_++] = Tb_bias_hdwe_p;
     Z_[size_++] = Type_p;
     Z_[size_++] = Vb_bias_hdwe_p;
@@ -149,14 +157,12 @@ SavedPars::SavedPars(SerialRAM *ram)
     ihis_eeram_.a16 =  next_;  next_ += sizeof(ihis_);
     inj_bias_eeram_.a16 =  next_;  next_ += sizeof(inj_bias_);
     isum_eeram_.a16 =  next_;  next_ += sizeof(isum_);
-    mon_chm_eeram_.a16 =  next_;  next_ += sizeof(mon_chm_);
 
     next_ = Modeling_p->assign_addr(next_);
     
     nP_eeram_.a16 = next_; next_ += sizeof(nP_);
     nS_eeram_.a16 = next_; next_ += sizeof(nS_);
     preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving_);
-    sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm_);
     time_now_eeram_.a16 = next_; next_ += sizeof(time_now_);
     t_last_eeram_.a16 =  next_;  next_ += sizeof(t_last_);
     t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model_);
@@ -190,11 +196,9 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(ihis_, -1, nhis_+1) ||
         is_val_corrupt(inj_bias_, float(-100.), float(100.)) ||
         is_val_corrupt(isum_, -1, NSUM+1) ||
-        is_val_corrupt(mon_chm_, uint8_t(0), uint8_t(10)) ||
         is_val_corrupt(nP_, float(1e-6), float(100.)) ||
         is_val_corrupt(nS_, float(1e-6), float(100.)) ||
         is_val_corrupt(preserving_, uint8_t(0), uint8_t(1)) ||
-        is_val_corrupt(sim_chm_, uint8_t(0), uint8_t(10)) ||
         // is_val_corrupt(time_now_, 0UL, 0UL) ||
         is_val_corrupt(t_last_, float(-10.), float(70.)) ||
         is_val_corrupt(t_last_model_, float(-10.), float(70.));
@@ -229,13 +233,13 @@ boolean SavedPars::is_corrupt()
         get_isum();
 
         get_Modeling();
+        get_Mon_chm();
 
-        get_mon_chm();
         get_nP();
         get_nS();
         get_preserving();
-        get_sim_chm();
 
+        get_Sim_chm();
         get_S_cap_mon();
         get_S_cap_sim();
         get_Tb_bias_hdwe();
@@ -283,14 +287,14 @@ int SavedPars::num_diffs()
     if ( float(0.) != inj_bias_ ) n++;
     
     if ( Modeling_p->is_off() ) n++;
+    if ( Mon_chm_p->is_off() ) n++;
     
-    if ( uint8_t(MON_CHEM) != mon_chm_ ) n++;
     if ( float(NP) != nP_ ) n++;
     if ( float(NS) != nS_ ) n++;
-    if ( uint8_t(SIM_CHEM) != sim_chm_ ) n++;
 
     if ( S_cap_mon_p->is_off() ) n++;
     if ( S_cap_sim_p->is_off() ) n++;
+    if ( Sim_chm_p->is_off() ) n++;
     if ( Tb_bias_hdwe_p->is_off() ) n++;
     if ( Type_p->is_off() ) n++;
     if ( Vb_bias_hdwe_p->is_off() ) n++;
@@ -318,11 +322,9 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" iflt                           %d flt ptr\n", iflt_);
     if ( all || float(0.) != inj_bias_ )        Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias_);
     if ( all )                                  Serial.printf(" isum                           %d tbl ptr\n", isum_);
-    if ( all || MON_CHEM != mon_chm_ )          Serial.printf(" mon chem            %d          %d *Bm<> 0=Battleborn, 1=CHINS, 2=Spare\n", MON_CHEM, mon_chm_);
     if ( all )                                  Serial.printf(" preserving %d  %d *Xm<>\n", uint8_t(0), preserving_);
     if ( all || float(NP) != nP_ )              Serial.printf(" nP            %7.3f    %7.3f *BP<> eg '2P1S'\n", NP, nP_);
     if ( all || float(NS) != nS_ )              Serial.printf(" nS            %7.3f    %7.3f *BS<> eg '2P1S'\n", NS, nS_);
-    if ( all || SIM_CHEM != sim_chm_ )          Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_chm_);
     if ( all )                                  Serial.printf(" time_now %d %s *U<> Unix time\n", (int)Time.now(), Time.timeStr().c_str());
     if ( all )                                  Serial.printf(" t_last %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_);
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model_);
@@ -390,11 +392,11 @@ void SavedPars::put_all_dynamic()
             break;
 
         case ( 2 ):
-            put_mon_chm();
+            put_Mon_chm();
             break;
 
         case ( 3 ):
-            put_sim_chm();
+            put_Sim_chm();
             break;
 
         case ( 4 ):
@@ -442,42 +444,43 @@ void SavedPars::reset_his()
  }
 void SavedPars::reset_pars()
 {
-    Amp_p->set_default();
-    Cutback_gain_sclr_p->set_default();
-    Debug_p->set_default();
-    Delta_q_p->set_default();
-    Delta_q_model_p->set_default();
-    Dw_p->set_default();
-    Freq_p->set_default();
-    Ib_bias_all_p->set_default();
-    Ib_bias_all_nan_p->set_default();
-    Ib_bias_amp_p->set_default();
-    Ib_bias_noa_p->set_default();
-    Ib_scale_amp_p->set_default();
-    Ib_scale_noa_p->set_default();
-    Ib_select_p->set_default();
+    for ( int i=0; i<size_; i++ ) Z_[i]->set_default();
+    // Amp_p->set_default();
+    // Cutback_gain_sclr_p->set_default();
+    // Debug_p->set_default();
+    // Delta_q_p->set_default();
+    // Delta_q_model_p->set_default();
+    // Dw_p->set_default();
+    // Freq_p->set_default();
+    // Ib_bias_all_p->set_default();
+    // Ib_bias_all_nan_p->set_default();
+    // Ib_bias_amp_p->set_default();
+    // Ib_bias_noa_p->set_default();
+    // Ib_scale_amp_p->set_default();
+    // Ib_scale_noa_p->set_default();
+    // Ib_select_p->set_default();
 
     put_iflt(int(-1));
     put_ihis(int(-1));
     put_inj_bias(float(0.));
     put_isum(int(-1));
     
-    Modeling_p->set_default();
+    // Modeling_p->set_default();
+    // Mon_chm_p->set_default();
     
-    put_mon_chm(uint8_t(MON_CHEM));
     put_nP(float(NP));
     put_nS(float(NS));
     put_preserving(uint8_t(0));
-    put_sim_chm(uint8_t(SIM_CHEM));
 
-    S_cap_mon_p->set_default();
-    S_cap_sim_p->set_default();
-    Tb_bias_hdwe_p->set_default();
-    Type_p->set_default();
+    // Sim_chm_p->set_default();
+    // S_cap_mon_p->set_default();
+    // S_cap_sim_p->set_default();
+    // Tb_bias_hdwe_p->set_default();
+    // Type_p->set_default();
 
     put_t_last(float(RATED_TEMP));    
     put_t_last_model(float(RATED_TEMP));  
 
-    Vb_bias_hdwe_p->set_default();
-    Vb_scale_p->set_default();
+    // Vb_bias_hdwe_p->set_default();
+    // Vb_scale_p->set_default();
  }

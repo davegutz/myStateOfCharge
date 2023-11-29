@@ -122,7 +122,7 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 
   sprintf(cp.buffer, "%s, %s, %13.3f,%6.3f,   %d, %7.0f, %d,  %d,  %d,  %d, %6.3f,%6.3f,%10.3f,%10.3f,%10.3f,%7.5f,    %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%7.5f,%6.3f,", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
-    sp.mon_chm(), Mon->q_cap_rated_scaled(), pubList->sat, sp.Ib_select(), sp.Modeling(), Mon->bms_off(),
+    sp.Mon_chm(), Mon->q_cap_rated_scaled(), pubList->sat, sp.Ib_select(), sp.Modeling(), Mon->bms_off(),
     Mon->Tb(), Mon->vb(), Mon->ib(), Mon->ib_charge(), Mon->ioc(), Mon->voc_soc(), 
     Mon->vsat(), Mon->dv_dyn(), Mon->voc_stat(), Mon->hx(),
     Mon->y_ekf(),

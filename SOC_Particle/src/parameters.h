@@ -71,13 +71,12 @@ public:
 
     const char* description() { return description_.c_str(); }
 
-    virtual boolean is_corrupt(){return true;};
-
-    virtual boolean is_off(){return true;};
-
-    virtual void print(){};
-
     const char* units() { return units_.c_str(); }
+
+    virtual boolean is_corrupt(){return true;};
+    virtual boolean is_off(){return true;};
+    virtual void print(){};
+    virtual void set_default(){};
 
 protected:
     String code_;
@@ -190,7 +189,7 @@ public:
         }
     }
 
-    void set_default()
+    virtual void set_default()
     {
         set(default_);
     }
@@ -303,7 +302,7 @@ public:
         }
     }
 
-    void set_default()
+    virtual void set_default()
     {
         set(default_);
     }
@@ -372,7 +371,7 @@ public:
       Serial1.printf("* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
-    void set_default(){}
+    virtual void set_default(){}
 
 protected:
     float default_;
@@ -481,7 +480,7 @@ public:
         }
     }
 
-    void set_default()
+    virtual void set_default()
     {
         set(default_);
     }
@@ -594,7 +593,7 @@ public:
         }
     }
 
-    void set_default()
+    virtual void set_default()
     {
         set(default_);
     }
@@ -705,7 +704,7 @@ public:
         }
     }
 
-    void set_default()
+    virtual void set_default()
     {
         set(default_);
     }
@@ -772,12 +771,10 @@ public:
     double Delta_q_model() { return Delta_q_model_stored;}
     float Dw() { return Dw_stored; }
     float Freq() { return Freq_stored; }
-
-    uint8_t mon_chm() { return mon_chm_; }
-    uint8_t sim_chm() { return sim_chm_; }
-
+    uint8_t Mon_chm() { return Mon_chm_stored; }
     float S_cap_mon() { return S_cap_mon_stored; }
     float S_cap_sim() { return S_cap_sim_stored; }
+    uint8_t Sim_chm() { return Sim_chm_stored; }
 
     float t_last() { return t_last_; }
     float t_last_model() { return t_last_model_; }
@@ -787,7 +784,6 @@ public:
     float Ib_bias_noa() { return Ib_bias_noa_stored; }
     float ib_scale_amp() { return Ib_scale_amp_stored; }
     float ib_scale_noa() { return Ib_scale_noa_stored; }
-
     int8_t Ib_select() { return Ib_select_stored; }
 
     int iflt() { return iflt_; }
@@ -851,12 +847,13 @@ public:
         void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum_ = value; }
         
         uint8_t get_Modeling() { return Modeling_p->get(); }
+        uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
         
-        void get_mon_chm() { mon_chm_ = rP_->read(mon_chm_eeram_.a16); }
         void get_nP() { float value; rP_->get(nP_eeram_.a16, value); nP_ = value; }
         void get_nS() { float value; rP_->get(nS_eeram_.a16, value); nS_ = value; }
         void get_preserving() { preserving_ = rP_->read(preserving_eeram_.a16); }
-        void get_sim_chm() { sim_chm_ = rP_->read(sim_chm_eeram_.a16); }
+
+        uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
 
         float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
@@ -887,8 +884,10 @@ public:
         float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
         double get_Ib_select() { return Ib_select_p->get(); }
         uint8_t get_Modeling() { return Modeling_p->get(); }
+        uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
         float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
+        uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
         float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
         uint8_t get_Type() { return Type_p->get(); }  // TODO:  should these be Type_stored
         float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
@@ -930,17 +929,17 @@ public:
         void put_isum(const int input) { isum_ = input; }
 
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); Modeling_stored = Modeling();}
+        void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
+        void put_Mon_chm() {}
 
-        void put_mon_chm(const uint8_t input) { mon_chm_ = input; }
-        void put_mon_chm() {}
         void put_nP(const float input) { nP_ = input; }
         void put_nS(const float input) { nS_ = input; }
         void put_preserving(const uint8_t input) { preserving_ = input; }
-        void put_sim_chm(const uint8_t input) { sim_chm_ = input; }
-        void put_sim_chm() {}
 
         void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
         void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
+        void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
+        void put_Sim_chm() {}
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
 
         void put_time_now(const time_t input) { time_now_ = input; }
@@ -980,17 +979,17 @@ public:
         void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum_ = input; }
 
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); }
+        void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
+        void put_Mon_chm() {}
 
-        void put_mon_chm(const uint8_t input) { rP_->write(mon_chm_eeram_.a16, input); mon_chm_ = input; }
-        void put_mon_chm() { rP_->write(mon_chm_eeram_.a16, mon_chm_); }
         void put_nP(const float input) { rP_->put(nP_eeram_.a16, input); nP_ = input; }
         void put_nS(const float input) { rP_->put(nS_eeram_.a16, input); nS_ = input; }
         void put_preserving(const uint8_t input) { rP_->write(preserving_eeram_.a16, input); preserving_ = input; }
-        void put_sim_chm(const uint8_t input) { rP_->write(sim_chm_eeram_.a16, input); sim_chm_ = input; }
-        void put_sim_chm() { rP_->write(sim_chm_eeram_.a16, sim_chm_); }
 
         void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
         void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
+        void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
+        void put_Sim_chm() {}
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
 
         void put_time_now(const time_t input) { rP_->put(time_now_eeram_.a16, input); time_now_ = input; Time.setTime(time_now_); }
@@ -1025,8 +1024,10 @@ public:
     FloatStorage *Ib_scale_noa_p;
     Int8tStorage *Ib_select_p;
     Uint8tStorage *Modeling_p;
+    Uint8tStorage *Mon_chm_p;
     FloatStorage *S_cap_mon_p;
     FloatStorage *S_cap_sim_p;
+    Uint8tStorage *Sim_chm_p;
     FloatStorage *Tb_bias_hdwe_p;
     Uint8tStorage *Type_p;
     FloatStorage *Vb_bias_hdwe_p;
@@ -1047,8 +1048,10 @@ public:
     float Ib_scale_amp_stored;
     float Ib_scale_noa_stored;
     uint8_t Modeling_stored;
+    uint8_t Mon_chm_stored;
     float S_cap_mon_stored;
     float S_cap_sim_stored;
+    uint8_t Sim_chm_stored;
     float Tb_bias_hdwe_stored;
     uint8_t Type_stored;
     float Vb_bias_hdwe_stored;
@@ -1059,11 +1062,9 @@ protected:
     int ihis_;              // History location.   Begins at -1 because first action is to increment ihis
     float inj_bias_;        // Constant bias, A
     int isum_;              // Summary location.   Begins at -1 because first action is to increment isum
-    uint8_t mon_chm_;       // Monitor battery chemistry type
     float nP_;              // Number of parallel batteries in bank, e.g. '2P1S'
     float nS_;              // Number of series batteries in bank, e.g. '2P1S'
     uint8_t preserving_;    // Preserving fault buffer
-    uint8_t sim_chm_;       // Simulation battery chemistry type
     time_t time_now_;       // Time now, Unix time since epoch
     float t_last_;          // Updated value of battery temperature injection when sp.Modeling() and proper wire connections made, deg C
     float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
@@ -1076,11 +1077,9 @@ protected:
         address16b ihis_eeram_;
         address16b inj_bias_eeram_;
         address16b isum_eeram_;
-        address16b mon_chm_eeram_;
         address16b nP_eeram_;
         address16b nS_eeram_;
         address16b preserving_eeram_;
-        address16b sim_chm_eeram_;
         address16b time_now_eeram_;
         address16b t_last_eeram_;
         address16b t_last_model_eeram_;
