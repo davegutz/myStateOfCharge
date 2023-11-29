@@ -638,11 +638,8 @@ public:
     float Cutback_gain_sclr() { return Cutback_gain_sclr_p->get(); }
     int Debug() { return Debug_p->get();}
     double Delta_q() { return Delta_q_p->get();}
-
-    double delta_q_model() { return delta_q_model_; }
-
+    double Delta_q_model() { return Delta_q_model_p->get();}
     float Dw() { return Dw_p->get(); }
-
     float Freq() { return Freq_p->get(); }
 
     uint8_t mon_chm() { return mon_chm_; }
@@ -701,23 +698,25 @@ public:
         float get_Cutback_gain_sclr() { return Cutback_gain_sclr_p->get(); }
         int get_Debug() { return Debug_p->get(); }
         double get_Delta_q() { return Delta_q_p->get(); }
-
-        void get_delta_q_model() { double value; rP_->get(delta_q_model_eeram_.a16, value); delta_q_model_ = value; }
-
+        double get_Delta_q_model() { return Delta_q_model_p->get(); }
         float get_Dw() { return Dw_p->get(); }
-
         float get_Freq() { return Freq_p->get(); }
+
         void get_Ib_bias_all() { float value; rP_->get(Ib_bias_all_eeram_.a16, value); Ib_bias_all_ = value; }
         void get_Ib_bias_amp() { float value; rP_->get(Ib_bias_amp_eeram_.a16, value); Ib_bias_amp_ = value; }
         void get_Ib_bias_noa() { float value; rP_->get(Ib_bias_noa_eeram_.a16, value); Ib_bias_noa_ = value; }
         void get_ib_scale_amp() { float value; rP_->get(ib_scale_amp_eeram_.a16, value); ib_scale_amp_ = value; }
         void get_ib_scale_noa() { float value; rP_->get(ib_scale_noa_eeram_.a16, value); ib_scale_noa_ = value; }
+
         void get_Ib_select() { return Ib_select_p->get(); }
+        
         void get_iflt() { int value; rP_->get(iflt_eeram_.a16, value); iflt_ = value; }
         void get_ihis() { int value; rP_->get(ihis_eeram_.a16, value); ihis_ = value; }
         void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias_ = value; }
         void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum_ = value; }
+        
         uint8_t get_Modeling() { return Modeling()->get(); }
+        
         void get_mon_chm() { mon_chm_ = rP_->read(mon_chm_eeram_.a16); }
         void get_nP() { float value; rP_->get(nP_eeram_.a16, value); nP_ = value; }
         void get_nS() { float value; rP_->get(nS_eeram_.a16, value); nS_ = value; }
@@ -741,6 +740,7 @@ public:
         float get_Cutback_gain_sclr() { return Cutback_gain_sclr_p->get(); }
         int get_Debug() { return Debug_p->get(); }
         double get_Delta_q() { return Delta_q_p->get(); }
+        double get_Delta_q_model() { return Delta_q_model_p->get(); }
         float get_Dw() { return Dw_p->get(); }
         float get_Freq() { return Freq_p->get(); }
         uint8_t get_Modeling() { return Modeling_p->get(); }
@@ -764,23 +764,26 @@ public:
         void put_Debug(const int input) { Debug_p->set(input); }
         void put_Delta_q(const double input) { Delta_q_p->set(input); }
         void put_Delta_q() {}
-        void put_delta_q_model(const double input) { delta_q_model_ = input; }
-        void put_delta_q_model() {}
-
+        void put_Delta_q_model(const double input) { Delta_q_model_p->set(input); }
+        void put_Delta_q_model() {}
         void put_Dw(const float input) { Dw_p->set(input); }
-
         void put_Freq(const float input) { Freq_p->set(input); }
+
         void put_Ib_bias_all(const float input) { Ib_bias_all_ = input; }
         void put_Ib_bias_amp(const float input) { Ib_bias_amp_ = input; }
         void put_Ib_bias_noa(const float input) { Ib_bias_noa_ = input; }
         void put_ib_scale_amp(const float input) { ib_scale_amp_ = input; }
         void put_ib_scale_noa(const float input) { ib_scale_noa_ = input; }
+
         void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
+
         void put_iflt(const int input) { iflt_ = input; }
         void put_ihis(const int input) { ihis_ = input; }
         void put_inj_bias(const float input) { inj_bias_ = input; }
         void put_isum(const int input) { isum_ = input; }
+
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); Modeling_stored = Modeling();}
+
         void put_mon_chm(const uint8_t input) { mon_chm_ = input; }
         void put_mon_chm() {}
         void put_nP(const float input) { nP_ = input; }
@@ -806,27 +809,25 @@ public:
         void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_p->set(input); }
         void put_Debug(const int input) { Debug_p->set(input); }
         void put_Delta_q(const double input) { Delta_q_p->set(input); }
-
-        // void put_delta_q() { rP_->put(delta_q_eeram_.a16, delta_q_); }
-
-        void put_delta_q_model(const double input) { rP_->put(delta_q_model_eeram_.a16, input); delta_q_model_ = input; }
-        void put_delta_q_model() { rP_->put(delta_q_model_eeram_.a16, delta_q_model_); }
-
+        void put_Delta_q_model(const double input) { Delta_q_p_model->set(input); }
         void put_Dw(const float input) { Dw_p->set(input); }
-
         void put_Freq(const float input) { Freq_p->set(input); }
+
         void put_Ib_bias_all(const float input) { rP_->put(Ib_bias_all_eeram_.a16, input); Ib_bias_all_ = input; }
         void put_Ib_bias_amp(const float input) { rP_->put(Ib_bias_amp_eeram_.a16, input); Ib_bias_amp_ = input; }
         void put_Ib_bias_noa(const float input) { rP_->put(Ib_bias_noa_eeram_.a16, input); Ib_bias_noa_ = input; }
         void put_ib_scale_amp(const float input) { rP_->put(ib_scale_amp_eeram_.a16, input); ib_scale_amp_ = input; }
         void put_ib_scale_noa(const float input) { rP_->put(ib_scale_noa_eeram_.a16, input); ib_scale_noa_ = input; }
+
         void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
-        void put_ib_select(const int8_t input) { rP_->put(ib_select_eeram_.a16, input); ib_select_ = input; }
+        
         void put_iflt(const int input) { rP_->put(iflt_eeram_.a16, input); iflt_ = input; }
         void put_ihis(const int input) { rP_->put(ihis_eeram_.a16, input); ihis_ = input; }
         void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias_ = input; }
         void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum_ = input; }
+
         void put_Modeling(const uint8_t input) { Modeling()->set(input); }
+
         void put_mon_chm(const uint8_t input) { rP_->write(mon_chm_eeram_.a16, input); mon_chm_ = input; }
         void put_mon_chm() { rP_->write(mon_chm_eeram_.a16, mon_chm_); }
         void put_nP(const float input) { rP_->put(nP_eeram_.a16, input); nP_ = input; }
@@ -854,6 +855,7 @@ public:
     FloatStorage *Cutback_gain_sclr_p;
     IntStorage *Debug_p;
     DoubleStorage *Delta_q_p;
+    DoubleStorage *Delta_q_model_p;
     FloatStorage *Dw_p;
     FloatStorage *Freq_p;
     Int8tStorage *Ib_select_p;
@@ -864,13 +866,13 @@ public:
     float Cutback_gain_sclr_stored;
     int Debug_stored;
     double Delta_q_stored;
+    double Delta_q_model_stored;
     float Dw_stored;
     float Freq_stored;
     int8_t Ib_select_stored;
     uint8_t Modeling_stored;
 
 protected:
-    double delta_q_model_;  // Charge change since saturated, C
     float Ib_bias_all_;     // Bias on all shunt sensors, A
     float Ib_bias_amp_;     // Calibration adder of amplified shunt sensor, A
     float Ib_bias_noa_;     // Calibration adder of non-amplified shunt sensor, A
@@ -905,7 +907,6 @@ protected:
         address16b Ib_bias_noa_eeram_;
         address16b ib_scale_amp_eeram_;
         address16b ib_scale_noa_eeram_;
-        address16b ib_select_eeram_;
         address16b iflt_eeram_;
         address16b ihis_eeram_;
         address16b inj_bias_eeram_;
@@ -914,7 +915,6 @@ protected:
         address16b nP_eeram_;
         address16b nS_eeram_;
         address16b preserving_eeram_;
-        address16b Dw_eeram_;
         address16b sim_chm_eeram_;
         address16b s_cap_mon_eeram_;
         address16b s_cap_sim_eeram_;

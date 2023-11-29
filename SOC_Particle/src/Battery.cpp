@@ -528,7 +528,7 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in regression testing
 BatterySim::BatterySim() :
-    Battery(&sp.delta_q_model_, &sp.t_last_model_, &sp.sim_chm_, VS), duty_(0UL), hys_scale_(HYS_SCALE), ib_fut_(0.),
+    Battery(&sp.Delta_q_model_stored, &sp.t_last_model_, &sp.sim_chm_, VS), duty_(0UL), hys_scale_(HYS_SCALE), ib_fut_(0.),
     ib_in_(0.), model_cutback_(true), q_(NOM_UNIT_CAP*3600.), sample_time_(0UL), sample_time_z_(0UL), sat_ib_max_(0.)
 {
     // ChargeTransfer dynamic model for EKF
