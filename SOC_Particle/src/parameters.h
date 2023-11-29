@@ -819,7 +819,6 @@ public:
         void get_type() { type_ = rP_->read(type_eeram_.a16); }
         void get_t_last() { float value; rP_->get(t_last_eeram_.a16, value); t_last_ = value; }
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model_ = value; }
-        void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe_ = value; }
 
         float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
         float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Vb_scale_stored
@@ -937,15 +936,17 @@ public:
         void put_sim_chm() { rP_->write(sim_chm_eeram_.a16, sim_chm_); }
         void put_s_cap_mon(const float input) { rP_->put(s_cap_mon_eeram_.a16, input); s_cap_mon_ = input; }
         void put_s_cap_sim(const float input) { rP_->put(s_cap_sim_eeram_.a16, input); s_cap_sim_ = input; }
-        void put_Tb_bias_hdwe(const float input) { rP_->put(Tb_bias_hdwe_eeram_.a16, input); Tb_bias_hdwe_ = input; }
+
+        void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
+
         void put_time_now(const time_t input) { rP_->put(time_now_eeram_.a16, input); time_now_ = input; Time.setTime(time_now_); }
         void put_type(const uint8_t input) { rP_->write(type_eeram_.a16, input); type_ = input; }
         void put_t_last(const float input) { rP_->put(t_last_eeram_.a16, input); t_last_ = input; }
         void put_t_last() { rP_->put(t_last_eeram_.a16, t_last_); }
         void put_t_last_model(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model_ = input; }
         void put_t_last_model() { rP_->put(t_last_model_eeram_.a16, t_last_model_); }
-        void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe_ = input; }
 
+        void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
         void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
 
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
