@@ -170,7 +170,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
           case ( 'B' ):
             switch ( cp.input_str.charAt(1) )
             {
-              case ( 'm' ):  // Bm:  Monitor chemistry change
+              case ( 'm' ):  //* Bm:  Monitor chemistry change
                 INT_in = cp.input_str.substring(2).toInt();
                 switch ( INT_in )
                 {
@@ -205,7 +205,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 }
                 break;
 
-              case ( 's' ):  // Bs:  Simulation chemistry change
+              case ( 's' ):  //* Bs:  Simulation chemistry change
                 INT_in = cp.input_str.substring(2).toInt();
                 switch ( INT_in )
                 {
@@ -238,7 +238,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 }
                 break;
 
-              case ( 'P' ):  // BP<>:  Number of parallel batteries in bank, e.g. '2P1S'
+              case ( 'P' ):  //* BP<>:  Number of parallel batteries in bank, e.g. '2P1S'
                 FP_in = cp.input_str.substring(2).toFloat();
                 if ( FP_in>0 )  // Apply crude limit to prevent user error
                 {
@@ -250,7 +250,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                   Serial.printf("err%5.2f; <=0\n", FP_in);
                 break;
 
-              case ( 'S' ):  // BS<>:  Number of series batteries in bank, e.g. '2P1S'
+              case ( 'S' ):  //* BS<>:  Number of series batteries in bank, e.g. '2P1S'
                 FP_in = cp.input_str.substring(2).toFloat();
                 if ( FP_in>0 )  // Apply crude limit to prevent user error
                 {
@@ -559,11 +559,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
             
               case ( 'V' ):  // * SV<>:  Vb sensor scalar
-                Serial.printf("sp.Vb_scale%7.3f to", sp.Vb_scale());
-                Serial1.printf("sp.Vb_scale%7.3f to", sp.Vb_scale());
+                sp.Vb_scale_p->print();
+                sp.Vb_scale_p->print1();
                 sp.put_Vb_scale(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.Vb_scale());
-                Serial1.printf("%7.3f\n", sp.Vb_scale());
+                sp.Vb_scale_p->print();
+                sp.Vb_scale_p->print1();
                 break;
 
               default:
@@ -1295,9 +1295,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("  Sr=  "); Serial.print(Sen->Sim->Sr()); Serial.printf(": Scalar res sim\n");
 
   sp.Cutback_gain_sclr_p->print_help();  // *Sk
-  
-  Serial.printf(" *SV= "); Serial.printf("%6.3f", sp.Vb_scale()); Serial.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
-  Serial1.printf(" *SV= "); Serial1.printf("%6.3f", sp.Vb_scale()); Serial1.printf(": scale vb sen [%6.3f]\n", VB_SCALE); 
+  sp.Vb_scale_p->print_help();  // *SV
+  sp.Vb_scale_p->print1_help();  // *SV
 
   Serial.printf("\nF<?>   Faults\n");
   Serial.printf("  Fc= "); Serial.printf("%6.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 

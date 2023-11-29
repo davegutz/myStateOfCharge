@@ -163,12 +163,12 @@ public:
     
     void print_help()
     {
-      Serial.printf(" *%s= %9.1f: %s, %s (%9.1f - %9.1f) [%9.1f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial.printf("* %s= %9.1f: %s, %s (%9.1f - %9.1f) [%9.1f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print1_help()
     {
-      Serial1.printf(" *%s= %9.1f: %s, %s (%9.1f - %9.1f) [%9.1f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial1.printf("* %s= %9.1f: %s, %s (%9.1f - %9.1f) [%9.1f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void set(double val)
@@ -267,12 +267,12 @@ public:
     
     void print_help()
     {
-      Serial.printf(" *%s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial.printf("* %s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print1_help()
     {
-      Serial1.printf(" *%s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial1.printf("* %s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void set(float val)
@@ -346,12 +346,12 @@ public:
     
     void print_help()
     {
-      Serial.printf(" *%s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial.printf("* %s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print1_help()
     {
-      Serial1.printf(" *%s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial1.printf("* %s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void set_default(){}
@@ -436,12 +436,12 @@ public:
 
     void print_help()
     {
-      Serial.printf(" *%s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
     
     void print1_help()
     {
-      Serial1.printf(" *%s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial1.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
     
     void set(int val)
@@ -540,12 +540,12 @@ public:
 
     void print_help()
     {
-      Serial.printf(" *%s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
     
     void print1_help()
     {
-      Serial1.printf(" *%s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial1.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
     
     void set(int8_t val)
@@ -642,12 +642,12 @@ public:
 
     void print_help()
     {
-      Serial.printf(" *%s= %d: %s, %s (%df - %df) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial.printf("* %s= %d: %s, %s (%df - %df) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print1_help()
     {
-      Serial1.printf(" *%s= %d: %s, %s (%df - %df) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial1.printf("* %s= %d: %s, %s (%df - %df) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
    
     void set(uint8_t val)
@@ -757,7 +757,8 @@ public:
     time_t time_now() { return time_now_; }
     uint8_t type() { return type_; }
     float Vb_bias_hdwe() { return Vb_bias_hdwe_; }
-    float Vb_scale() { return Vb_scale_; }
+
+    float Vb_scale() { return Vb_scale_stored; }
 
     // functions
     boolean is_corrupt();
@@ -815,7 +816,9 @@ public:
         void get_t_last() { float value; rP_->get(t_last_eeram_.a16, value); t_last_ = value; }
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model_ = value; }
         void get_Vb_bias_hdwe() { float value; rP_->get(Vb_bias_hdwe_eeram_.a16, value); Vb_bias_hdwe_ = value; }
-        void get_Vb_scale() { float value; rP_->get(Vb_scale_eeram_.a16, value); Vb_scale_ = value; }
+
+        float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Vb_scale_stored
+
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
         uint16_t next() { return next_; }
@@ -831,6 +834,7 @@ public:
         float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
         double get_Ib_select() { return Ib_select_p->get(); }
         uint8_t get_Modeling() { return Modeling_p->get(); }
+        float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Ib_bias_stored
     #endif
     //
     void mem_print();
@@ -886,7 +890,9 @@ public:
         void put_t_last_model(const float input) { t_last_model_ = input; }
         void put_t_last_model() {}
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_ = input; }
-        void put_Vb_scale(const float input) { Vb_scale_ = input; }
+
+        void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
+
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #else
         void put_all_dynamic();
@@ -930,7 +936,9 @@ public:
         void put_t_last_model(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model_ = input; }
         void put_t_last_model() { rP_->put(t_last_model_eeram_.a16, t_last_model_); }
         void put_Vb_bias_hdwe(const float input) { rP_->put(Vb_bias_hdwe_eeram_.a16, input); Vb_bias_hdwe_ = input; }
-        void put_Vb_scale(const float input) { rP_->put(Vb_scale_eeram_.a16, input); Vb_scale_ = input; }
+
+        void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
+
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
     #endif
     //
@@ -951,6 +959,7 @@ public:
     FloatStorage *Ib_scale_noa_p;
     Int8tStorage *Ib_select_p;
     Uint8tStorage *Modeling_p;
+    FloatStorage *Vb_scale_p;
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
     float Amp_stored;
@@ -967,6 +976,7 @@ public:
     float Ib_scale_amp_stored;
     float Ib_scale_noa_stored;
     uint8_t Modeling_stored;
+    float Vb_scale_stored;
 
 protected:
     // float Ib_bias_all_;     // Bias on all shunt sensors, A

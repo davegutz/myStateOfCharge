@@ -62,6 +62,7 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Ib_scale_noa_p      = new FloatStorage(  "SB", "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_stored, CURR_SCALE_NOA);
     Ib_select_p         = new Int8tStorage(  "si", "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
     Modeling_p          = new Uint8tStorage( "Xm", "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
+    Vb_scale_p          = new FloatStorage(  "SV", "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_stored, VB_SCALE);
 
     // Memory map
     Z_[size_++] = Amp_p;                
@@ -79,6 +80,7 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Z_[size_++] = Ib_scale_noa_p;
     Z_[size_++] = Ib_select_p;
     Z_[size_++] = Modeling_p;
+    Z_[size_++] = Vb_scale_p;
 }
 #else
 SavedPars::SavedPars(SerialRAM *ram)
@@ -103,6 +105,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     Ib_scale_noa_p      = new FloatStorage(  "SB", rP_, "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_stored, CURR_SCALE_NOA);
     Ib_select_p         = new Int8tStorage(  "si", rP_, "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
     Modeling_p          = new Uint8tStorage( "Xm", rP_, "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
+    Vb_scale_p          = new FloatStorage(  "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_stored, VB_SCALE);
 
     // Memory map
     Z_[size_++] = Amp_p;                
@@ -120,6 +123,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     Z_[size_++] = Ib_scale_noa_p;
     Z_[size_++] = Ib_select_p;
     Z_[size_++] = Modeling_p;
+    Z_[size_++] = Vb_scale_p;
 
     iflt_eeram_.a16 =  next_;  next_ += sizeof(iflt_);
     ihis_eeram_.a16 =  next_;  next_ += sizeof(ihis_);
@@ -205,13 +209,11 @@ boolean SavedPars::is_corrupt()
         get_Delta_q();
         get_Delta_q_model();
         get_Freq();
-
         get_Ib_bias_all();
         get_Ib_bias_amp();
         get_Ib_bias_noa();
-        get_ib_scale_amp();
-        get_ib_scale_noa();
-
+        get_Ib_scale_amp();
+        get_Ib_scale_noa();
         get_Ib_select();
 
         get_iflt();
@@ -233,7 +235,9 @@ boolean SavedPars::is_corrupt()
         get_t_last();
         get_t_last_model();
         get_Vb_bias_hdwe();
+
         get_Vb_scale();
+        
         for ( int i=0; i<nflt_; i++ ) fault_[i].get();
         for ( int i=0; i<nhis_; i++ ) history_[i].get();
     }
@@ -277,7 +281,8 @@ int SavedPars::num_diffs()
     if ( float(TEMP_BIAS) != Tb_bias_hdwe_ ) n++;
     if ( uint8_t(0) != type_ ) n++;
     if ( float(VOLT_BIAS) != Vb_bias_hdwe_ ) n++;
-    if ( float(VB_SCALE) != Vb_scale_ ) n++;
+
+    if ( Vb_scale_p->is_off() ) n++;
     return ( n );
 }
 
@@ -314,7 +319,6 @@ void SavedPars::pretty_print(const boolean all)
     if ( all )                                  Serial.printf(" t_last %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_);
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model_);
     if ( all || float(VOLT_BIAS) != Vb_bias_hdwe_ )     Serial.printf(" Vb_bias_hdwe %7.3f  %7.3f *Dc<> V\n", VOLT_BIAS, Vb_bias_hdwe_);
-    if ( all || float(VB_SCALE) != Vb_scale_ )  Serial.printf(" sclr vb       %7.3f    %7.3f *SV<>\n", VB_SCALE, Vb_scale_);
     for (int i=0; i<size_; i++ ) if ( all || Z_[i]->is_off() )  Z_[i]->print();
     // if ( all )
     // {
@@ -440,12 +444,10 @@ void SavedPars::reset_pars()
     Freq_p->set_default();
     Ib_bias_all_p->set_default();
     Ib_bias_all_nan_p->set_default();
-
-    put_Ib_bias_amp(float(CURR_BIAS_AMP));
-    put_Ib_bias_noa(float(CURR_BIAS_NOA));
-    put_Ib_scale_amp(float(CURR_SCALE_AMP));
-    put_Ib_scale_noa(float(CURR_SCALE_NOA));
-
+    Ib_bias_amp_p->set_default();
+    Ib_bias_noa_p->set_default();
+    Ib_scale_amp_p->set_default();
+    Ib_scale_noa_p->set_default();
     Ib_select_p->set_default();
     
     put_iflt(int(-1));
@@ -467,5 +469,6 @@ void SavedPars::reset_pars()
     put_t_last(float(RATED_TEMP));    
     put_t_last_model(float(RATED_TEMP));  
     put_Vb_bias_hdwe(float(VOLT_BIAS));
-    put_Vb_scale(float(VB_SCALE));
+
+    Vb_scale_p->set_default();
  }
