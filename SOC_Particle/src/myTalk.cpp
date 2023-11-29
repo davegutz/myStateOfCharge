@@ -319,19 +319,19 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'A' ):  // * DA<>:  Amp sensor bias
-                Serial.printf("sp.Ib_bias_amp%7.3f to", sp.Ib_bias_amp());
-                Serial1.printf("sp.Ib_bias_amp%7.3f to", sp.Ib_bias_amp());
+                sp.Ib_bias_amp_p->print();
+                sp.Ib_bias_amp_p->print1();
                 sp.put_Ib_bias_amp(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.Ib_bias_amp());
-                Serial1.printf("%7.3f\n", sp.Ib_bias_amp());
+                sp.Ib_bias_amp_p->print();
+                sp.Ib_bias_amp_p->print1();
                 break;
 
               case ( 'B' ):  // * DB<>:  No Amp sensor bias
-                Serial.printf("sp.Ib_bias_noa%7.3f to", sp.Ib_bias_noa());
-                Serial1.printf("sp.Ib_bias_noa%7.3f to", sp.Ib_bias_noa());
+                sp.Ib_bias_noa_p->print();
+                sp.Ib_bias_noa_p->print1();
                 sp.put_Ib_bias_noa(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.Ib_bias_noa());
-                Serial1.printf("%7.3f\n", sp.Ib_bias_noa());
+                sp.Ib_bias_noa_p->print();
+                sp.Ib_bias_noa_p->print1();
                 break;
 
               case ( 'c' ):  // * Dc<>:  Vb bias
@@ -349,11 +349,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'i' ):  // * Di<>:  Bias all current sensors (same way as Da and Db)
-                sp.Ib_bias_all_p->print();
-                sp.Ib_bias_all_p->print1();
-                sp.put_Ib_bias_all(cp.input_str.substring(2).toFloat());
-                sp.Ib_bias_all_p->print();
-                sp.Ib_bias_all_p->print1();
+                chit("DI;", ASAP);  // Occur before reset
                 cp.cmd_reset();
                 break;
 
@@ -363,7 +359,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 sp.put_Ib_bias_all(cp.input_str.substring(2).toFloat());
                 sp.Ib_bias_all_p->print();
                 sp.Ib_bias_all_p->print1();
-                cp.cmd_reset();
                 break;
 
               case ( 'm' ):  //   Dm<>:  Amp signal adder for faults
@@ -465,20 +460,21 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
           case ( 'S' ):
             switch ( cp.input_str.charAt(1) )
             {
+
               case ( 'A' ):  // * SA<>:  Amp sensor scalar
-                Serial.printf("sp.ib_scale_amp%7.3f to ", sp.ib_scale_amp());
-                Serial1.printf("sp.ib_scale_amp%7.3f to ", sp.ib_scale_amp());
-                sp.put_ib_scale_amp(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.ib_scale_amp());
-                Serial1.printf("%7.3f\n", sp.ib_scale_amp());
+                sp.Ib_scale_amp_p->print();
+                sp.Ib_scale_amp_p->print1();
+                sp.put_Ib_scale_amp(cp.input_str.substring(2).toFloat());
+                sp.Ib_scale_amp_p->print();
+                sp.Ib_scale_amp_p->print1();
                 break;
 
               case ( 'B' ):  // * SB<>:  No Amp sensor scalar
-                Serial.printf("sp.ib_scale_noa%7.3f to ", sp.ib_scale_noa());
-                Serial1.printf("sp.ib_scale_noa%7.3f to ", sp.ib_scale_noa());
-                sp.put_ib_scale_noa(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.ib_scale_noa());
-                Serial1.printf("%7.3f\n", sp.ib_scale_noa());
+                sp.Ib_scale_noa_p->print();
+                sp.Ib_scale_noa_p->print1();
+                sp.put_Ib_scale_noa(cp.input_str.substring(2).toFloat());
+                sp.Ib_scale_noa_p->print();
+                sp.Ib_scale_noa_p->print1();
                 break;
 
               case ( 'h' ):  //   Sh<>: scale hysteresis
@@ -1257,13 +1253,14 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("  Cm=  model (& ekf if mod)- '(0-1.1)'\n"); 
 
   Serial.printf("\nD/S<?> Adj e.g.:\n");
-  Serial.printf(" *DA= "); Serial.printf("%6.3f", sp.Ib_bias_amp()); Serial.printf(": del amp, A [%6.3f]\n", CURR_BIAS_AMP);
-  Serial1.printf(" *DA= "); Serial1.printf("%6.3f", sp.Ib_bias_amp()); Serial1.printf(": del amp, A [%6.3f]\n", CURR_BIAS_AMP);
-  Serial.printf(" *DB= "); Serial.printf("%6.3f", sp.Ib_bias_noa()); Serial.printf(": del noa, A [%6.3f]\n", CURR_BIAS_NOA);
-  Serial1.printf(" *DB= "); Serial1.printf("%6.3f", sp.Ib_bias_noa()); Serial1.printf(": del noa, A [%6.3f]\n", CURR_BIAS_NOA);
-
+  sp.Ib_bias_amp_p->print_help();  // *DA
+  sp.Ib_bias_amp_p->print1_help();  // *DA
+  sp.Ib_bias_noa_p->print_help();  // *DB
+  sp.Ib_bias_noa_p->print1_help();  // *DB
   sp.Ib_bias_all_p->print_help();  // *Di
   sp.Ib_bias_all_p->print1_help();  // *Di
+  sp.Ib_bias_all_nan_p->print_help();  // *DI
+  sp.Ib_bias_all_nan_p->print1_help();  // *DI
 
   Serial.printf(" *Dc= "); Serial.printf("%6.3f", sp.Vb_bias_hdwe()); Serial.printf(": del, V [%6.3f]\n", VOLT_BIAS); 
   Serial1.printf(" *Dc= "); Serial1.printf("%6.3f", sp.Vb_bias_hdwe()); Serial1.printf(": del, V [%6.3f]\n", VOLT_BIAS); 
@@ -1277,18 +1274,19 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.printf(": volt fault inj, V [0]\n"); 
 
   sp.Dw_p->print_help();  // *Dw
+  sp.Dw_p->print1_help();  // *Dw
 
-  Serial.printf(" *Dw=  "); Serial.print(sp.Dw()); Serial.printf(": Tab mon adj, V [0]\n"); 
-  Serial1.printf(" *Dw=  "); Serial1.print(sp.Dw()); Serial1.printf(": Tab mon adj, V [%6.3f]\n", VTAB_BIAS); 
   Serial.printf("  Dy=  "); Serial.print(Sen->Sim->Dv()); Serial.printf(": Tab sim adj, V [0]\n"); 
   Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise, deg C pk-pk [%6.3f]\n", TB_NOISE); 
   Serial.printf("  DV= "); Serial.printf("%6.3f", Sen->Vb_noise_amp()); Serial.printf(": noise, V pk-pk [%6.3f]\n", VB_NOISE); 
   Serial.printf("  DM= "); Serial.printf("%6.3f", Sen->Ib_amp_noise_amp()); Serial.printf(": amp noise, A pk-pk [%6.3f]\n", IB_AMP_NOISE); 
   Serial.printf("  DN= "); Serial.printf("%6.3f", Sen->Ib_noa_noise_amp()); Serial.printf(": noa noise, A pk-pk [%6.3f]\n", IB_NOA_NOISE); 
-  Serial.printf(" *SA= "); Serial.printf("%6.3f", sp.ib_scale_amp()); Serial.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
-  Serial1.printf(" *SA= "); Serial1.printf("%6.3f", sp.ib_scale_amp()); Serial1.printf(": scale amp [%6.3f]\n", CURR_SCALE_AMP); 
-  Serial.printf(" *SB= "); Serial.printf("%6.3f", sp.ib_scale_noa()); Serial.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
-  Serial1.printf(" *SB= "); Serial1.printf("%6.3f", sp.ib_scale_noa()); Serial1.printf(": scale noa [%6.3f]\n", CURR_SCALE_NOA); 
+
+  sp.Ib_scale_amp_p->print_help();  // *SA
+  sp.Ib_scale_amp_p->print1_help();  // *SA
+  sp.Ib_scale_noa_p->print_help();  // *SB
+  sp.Ib_scale_noa_p->print1_help();  // *SB
+  
   Serial.printf("  Sh= "); Serial.printf("%6.3f", Sen->Sim->hys_scale()); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
   Serial.printf("  SH= "); Serial.printf("%6.3f", Sen->Sim->hys_state()); Serial.printf(": hys states [0]\n");
   Serial.printf(" *Sq=  "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.printf(": sp. Scalar cap sim\n"); 
@@ -1414,7 +1412,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
   sp.Amp_p->print_help();  // *Xa
   sp.Freq_p->print_help();  // *Xf
-  sp.Ib_bias_all_p->print_help();  // *Di
 
   Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.printf(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))\n");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 

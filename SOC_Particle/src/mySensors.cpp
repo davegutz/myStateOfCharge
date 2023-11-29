@@ -725,8 +725,8 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
   this->T_filt = T;
   this->T_temp = T_temp;
   #ifdef CONFIG_TSC2010
-    this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_, &sp.Ib_bias_amp_, SHUNT_AMP_GAIN, pins->Vom_pin);
-    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_, &sp.Ib_bias_noa_, SHUNT_NOA_GAIN, pins->Von_pin);
+    this->ShuntAmp = new Shunt("Amp", 0x49, &sp.Ib_scale_amp_stored, &sp.Ib_bias_amp_stored, SHUNT_AMP_GAIN, pins->Vom_pin);
+    this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.Ib_scale_noa_stored, &sp.Ib_bias_noa_stored, SHUNT_NOA_GAIN, pins->Von_pin);
   #else
     this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_, &sp.Ib_bias_amp_, SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_, &sp.Ib_bias_noa_, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin);

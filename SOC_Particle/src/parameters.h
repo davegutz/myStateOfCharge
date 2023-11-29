@@ -151,13 +151,13 @@ public:
     
     void print()
     {
-        sprintf(cp.buffer, "%-20s %9.1f -> %9.1f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, " %-20s %9.1f -> %9.1f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
         Serial.printf("%s\n", cp.buffer);
     }
 
     void print1()
     {
-        sprintf(cp.buffer, "%-20s %9.1f -> %9.1f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, " %-20s %9.1f -> %9.1f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
         Serial1.printf("%s\n", cp.buffer);
     }
     
@@ -255,13 +255,13 @@ public:
     
     void print()
     {
-        sprintf(cp.buffer, "%-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, " %-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
         Serial.printf("%s\n", cp.buffer);
     }
 
     void print1()
     {
-        sprintf(cp.buffer, "%-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, " %-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
         Serial1.printf("%s\n", cp.buffer);
     }
     
@@ -292,6 +292,71 @@ public:
 
 protected:
     float *val_;
+    float default_;
+    float min_;
+    float max_;
+};
+
+
+class FloatNoStorage: public Storage
+{
+public:
+    FloatNoStorage(){}
+
+    FloatNoStorage(const String &code, const String &description, const String &units, const float min, const float max, const float _default=0):
+        Storage(code, description, units, false)
+    {
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
+    }
+
+    FloatNoStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max, const float _default=0):
+        Storage(code, ram, description, units, false)
+    {
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
+    }
+
+    ~FloatNoStorage(){}
+
+    uint16_t assign_addr(uint16_t next)
+    {
+        return next;
+    }
+
+    float max_of() { return max_; }
+
+    float min_of() { return min_; }
+
+    float nominal() { return default_; }
+    
+    void print()
+    {
+        sprintf(cp.buffer, " %-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, NAN, units_.c_str(), code_.c_str());
+        Serial.printf("%s\n", cp.buffer);
+    }
+
+    void print1()
+    {
+        sprintf(cp.buffer, " %-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, NAN, units_.c_str(), code_.c_str());
+        Serial1.printf("%s\n", cp.buffer);
+    }
+    
+    void print_help()
+    {
+      Serial.printf(" *%s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
+    }
+
+    void print1_help()
+    {
+      Serial1.printf(" *%s= %9.3f: %s, %s (%9.3f - %9.3f) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
+    }
+
+    void set_default(){}
+
+protected:
     float default_;
     float min_;
     float max_;
@@ -359,13 +424,13 @@ public:
     
     void print()
     {
-        sprintf(cp.buffer, "%-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
         Serial.printf("%s\n", cp.buffer);
     }
     
     void print1()
     {
-        sprintf(cp.buffer, "%-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
         Serial1.printf("%s\n", cp.buffer);
     }
 
@@ -463,13 +528,13 @@ public:
     
     void print()
     {
-        sprintf(cp.buffer, "%-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
         Serial.printf("%s\n", cp.buffer);
     }
     
     void print1()
     {
-        sprintf(cp.buffer, "%-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
         Serial1.printf("%s\n", cp.buffer);
     }
 
@@ -565,13 +630,13 @@ public:
     
     void print()
     {
-        sprintf(cp.buffer, "%-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
         Serial.printf("%s\n", cp.buffer);
     }
     
     void print1()
     {
-        sprintf(cp.buffer, "%-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
         Serial1.printf("%s\n", cp.buffer);
     }
 
@@ -671,11 +736,10 @@ public:
     float t_last_model() { return t_last_model_; }
 
     float Ib_bias_all() { return Ib_bias_all_stored; }
-
-    float Ib_bias_amp() { return Ib_bias_amp_; }
-    float Ib_bias_noa() { return Ib_bias_noa_; }
-    float ib_scale_amp() { return ib_scale_amp_; }
-    float ib_scale_noa() { return ib_scale_noa_; }
+    float Ib_bias_amp() { return Ib_bias_amp_stored; }
+    float Ib_bias_noa() { return Ib_bias_noa_stored; }
+    float ib_scale_amp() { return Ib_scale_amp_stored; }
+    float ib_scale_noa() { return Ib_scale_noa_stored; }
 
     int8_t Ib_select() { return Ib_select_stored; }
 
@@ -725,12 +789,10 @@ public:
         float get_Dw() { return Dw_p->get(); }
         float get_Freq() { return Freq_p->get(); }
         float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
-
-        void get_Ib_bias_amp() { float value; rP_->get(Ib_bias_amp_eeram_.a16, value); Ib_bias_amp_ = value; }
-        void get_Ib_bias_noa() { float value; rP_->get(Ib_bias_noa_eeram_.a16, value); Ib_bias_noa_ = value; }
-        void get_ib_scale_amp() { float value; rP_->get(ib_scale_amp_eeram_.a16, value); ib_scale_amp_ = value; }
-        void get_ib_scale_noa() { float value; rP_->get(ib_scale_noa_eeram_.a16, value); ib_scale_noa_ = value; }
-
+        float get_Ib_bias_amp() { return Ib_bias_amp_p->get(); }
+        float get_Ib_bias_noa() { return Ib_bias_noa_p->get(); }
+        float get_Ib_scale_amp() { return Ib_scale_amp_p->get(); }
+        float get_Ib_scale_noa() { return Ib_scale_noa_p->get(); }
         int8_t get_Ib_select() { return Ib_select_p->get(); }
         
         void get_iflt() { int value; rP_->get(iflt_eeram_.a16, value); iflt_ = value; }
@@ -794,12 +856,10 @@ public:
         void put_Dw(const float input) { Dw_p->set(input); }
         void put_Freq(const float input) { Freq_p->set(input); }
         void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
-
-        void put_Ib_bias_amp(const float input) { Ib_bias_amp_ = input; }
-        void put_Ib_bias_noa(const float input) { Ib_bias_noa_ = input; }
-        void put_ib_scale_amp(const float input) { ib_scale_amp_ = input; }
-        void put_ib_scale_noa(const float input) { ib_scale_noa_ = input; }
-
+        void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->set(input); }
+        void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->set(input); }
+        void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
+        void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
         void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
 
         void put_iflt(const int input) { iflt_ = input; }
@@ -840,12 +900,10 @@ public:
         void put_Dw(const float input) { Dw_p->set(input); }
         void put_Freq(const float input) { Freq_p->set(input); }
         void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
-
-        void put_Ib_bias_amp(const float input) { rP_->put(Ib_bias_amp_eeram_.a16, input); Ib_bias_amp_ = input; }
-        void put_Ib_bias_noa(const float input) { rP_->put(Ib_bias_noa_eeram_.a16, input); Ib_bias_noa_ = input; }
-        void put_ib_scale_amp(const float input) { rP_->put(ib_scale_amp_eeram_.a16, input); ib_scale_amp_ = input; }
-        void put_ib_scale_noa(const float input) { rP_->put(ib_scale_noa_eeram_.a16, input); ib_scale_noa_ = input; }
-
+        void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->set(input); }
+        void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->set(input); }
+        void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
+        void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
         void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
         
         void put_iflt(const int input) { rP_->put(iflt_eeram_.a16, input); iflt_ = input; }
@@ -886,6 +944,11 @@ public:
     FloatStorage *Dw_p;
     FloatStorage *Freq_p;
     FloatStorage *Ib_bias_all_p;
+    FloatNoStorage *Ib_bias_all_nan_p;
+    FloatStorage *Ib_bias_amp_p;
+    FloatStorage *Ib_bias_noa_p;
+    FloatStorage *Ib_scale_amp_p;
+    FloatStorage *Ib_scale_noa_p;
     Int8tStorage *Ib_select_p;
     Uint8tStorage *Modeling_p;
 
@@ -899,14 +962,18 @@ public:
     float Freq_stored;
     float Ib_bias_all_stored;
     int8_t Ib_select_stored;
+    float Ib_bias_amp_stored;
+    float Ib_bias_noa_stored;
+    float Ib_scale_amp_stored;
+    float Ib_scale_noa_stored;
     uint8_t Modeling_stored;
 
 protected:
-    float Ib_bias_all_;     // Bias on all shunt sensors, A
-    float Ib_bias_amp_;     // Calibration adder of amplified shunt sensor, A
-    float Ib_bias_noa_;     // Calibration adder of non-amplified shunt sensor, A
-    float ib_scale_amp_;    // Calibration scalar of amplified shunt sensor
-    float ib_scale_noa_;    // Calibration scalar of non-amplified shunt sensor
+    // float Ib_bias_all_;     // Bias on all shunt sensors, A
+    // float Ib_bias_amp_;     // Calibration adder of amplified shunt sensor, A
+    // float Ib_bias_noa_;     // Calibration adder of non-amplified shunt sensor, A
+    // float ib_scale_amp_;    // Calibration scalar of amplified shunt sensor
+    // float ib_scale_noa_;    // Calibration scalar of non-amplified shunt sensor
     int iflt_;              // Fault snap location.   Begins at -1 because first action is to increment iflt
     int ihis_;              // History location.   Begins at -1 because first action is to increment ihis
     float inj_bias_;        // Constant bias, A
@@ -931,11 +998,6 @@ protected:
         Flt_st *history_;
     #else
         address16b hys_scale_eeram_;
-        address16b Ib_bias_all_eeram_;
-        address16b Ib_bias_amp_eeram_;
-        address16b Ib_bias_noa_eeram_;
-        address16b ib_scale_amp_eeram_;
-        address16b ib_scale_noa_eeram_;
         address16b iflt_eeram_;
         address16b ihis_eeram_;
         address16b inj_bias_eeram_;
