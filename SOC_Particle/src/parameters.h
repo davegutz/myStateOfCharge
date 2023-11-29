@@ -792,9 +792,9 @@ public:
     int isum() { return isum_; }
 
     uint8_t Modeling() { return Modeling_stored; }
+    float nP() { return nP_stored; }
+    float nS() { return nS_stored; }
 
-    float nP() { return nP_; }
-    float nS() { return nS_; }
     uint8_t preserving() { return preserving_; }
 
     float Tb_bias_hdwe() { return Tb_bias_hdwe_stored; }
@@ -848,9 +848,9 @@ public:
         
         uint8_t get_Modeling() { return Modeling_p->get(); }
         uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
+        uint8_t get_nP() { return nP_p->get(); }
+        uint8_t get_nS() { return nS_p->get(); }
         
-        void get_nP() { float value; rP_->get(nP_eeram_.a16, value); nP_ = value; }
-        void get_nS() { float value; rP_->get(nS_eeram_.a16, value); nS_ = value; }
         void get_preserving() { preserving_ = rP_->read(preserving_eeram_.a16); }
 
         uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
@@ -884,6 +884,8 @@ public:
         float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
         double get_Ib_select() { return Ib_select_p->get(); }
         uint8_t get_Modeling() { return Modeling_p->get(); }
+        uint8_t get_nP() { return nP_p->get(); }
+        uint8_t get_nS() { return nS_p->get(); }
         uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
         float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
@@ -931,9 +933,9 @@ public:
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); Modeling_stored = Modeling();}
         void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
         void put_Mon_chm() {}
+        void put_nP(const float input) { nP_p->set(input); }
+        void put_nS(const float input) { nS_p->set(input); }
 
-        void put_nP(const float input) { nP_ = input; }
-        void put_nS(const float input) { nS_ = input; }
         void put_preserving(const uint8_t input) { preserving_ = input; }
 
         void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
@@ -981,9 +983,9 @@ public:
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); }
         void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
         void put_Mon_chm() {}
+        void put_nP(const float input) { nP_p->set(input); }
+        void put_nS(const float input) { nS_p->set(input); }
 
-        void put_nP(const float input) { rP_->put(nP_eeram_.a16, input); nP_ = input; }
-        void put_nS(const float input) { rP_->put(nS_eeram_.a16, input); nS_ = input; }
         void put_preserving(const uint8_t input) { rP_->write(preserving_eeram_.a16, input); preserving_ = input; }
 
         void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
@@ -1025,6 +1027,8 @@ public:
     Int8tStorage *Ib_select_p;
     Uint8tStorage *Modeling_p;
     Uint8tStorage *Mon_chm_p;
+    FloatStorage *nP_p;
+    FloatStorage *nS_p;
     FloatStorage *S_cap_mon_p;
     FloatStorage *S_cap_sim_p;
     Uint8tStorage *Sim_chm_p;
@@ -1049,6 +1053,8 @@ public:
     float Ib_scale_noa_stored;
     uint8_t Modeling_stored;
     uint8_t Mon_chm_stored;
+    float nP_stored;
+    float nS_stored;
     float S_cap_mon_stored;
     float S_cap_sim_stored;
     uint8_t Sim_chm_stored;
@@ -1062,8 +1068,6 @@ protected:
     int ihis_;              // History location.   Begins at -1 because first action is to increment ihis
     float inj_bias_;        // Constant bias, A
     int isum_;              // Summary location.   Begins at -1 because first action is to increment isum
-    float nP_;              // Number of parallel batteries in bank, e.g. '2P1S'
-    float nS_;              // Number of series batteries in bank, e.g. '2P1S'
     uint8_t preserving_;    // Preserving fault buffer
     time_t time_now_;       // Time now, Unix time since epoch
     float t_last_;          // Updated value of battery temperature injection when sp.Modeling() and proper wire connections made, deg C
@@ -1077,8 +1081,6 @@ protected:
         address16b ihis_eeram_;
         address16b inj_bias_eeram_;
         address16b isum_eeram_;
-        address16b nP_eeram_;
-        address16b nS_eeram_;
         address16b preserving_eeram_;
         address16b time_now_eeram_;
         address16b t_last_eeram_;
