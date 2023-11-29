@@ -65,6 +65,7 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     S_cap_mon_p         = new FloatStorage(  "SQ", "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_stored, 1.);
     S_cap_sim_p         = new FloatStorage(  "Sq", "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
     Tb_bias_hdwe_p      = new FloatStorage(  "Dt", "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
+    Type_p              = new Uint8tStorage( "Xt", "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
     Vb_bias_hdwe_p      = new FloatStorage(  "Dc", "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_stored, VOLT_BIAS);
     Vb_scale_p          = new FloatStorage(  "SV", "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_stored, VB_SCALE);
 
@@ -87,6 +88,7 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Z_[size_++] = S_cap_mon_p;
     Z_[size_++] = S_cap_sim_p;
     Z_[size_++] = Tb_bias_hdwe_p;
+    Z_[size_++] = Type_p;
     Z_[size_++] = Vb_bias_hdwe_p;
     Z_[size_++] = Vb_scale_p;
 }
@@ -116,6 +118,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     S_cap_mon_p         = new FloatStorage(  "SQ", rP_, "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_stored, 1.);
     S_cap_sim_p         = new FloatStorage(  "Sq", rP_, "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
     Tb_bias_hdwe_p      = new FloatStorage(  "Dt", rP_, "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
+    Type_p              = new Uint8tStorage( "Xt", rP_, "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
     Vb_bias_hdwe_p      = new FloatStorage(  "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_stored, VOLT_BIAS);
     Vb_scale_p          = new FloatStorage(  "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_stored, VB_SCALE);
 
@@ -138,6 +141,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     Z_[size_++] = S_cap_mon_p;
     Z_[size_++] = S_cap_sim_p;
     Z_[size_++] = Tb_bias_hdwe_p;
+    Z_[size_++] = Type_p;
     Z_[size_++] = Vb_bias_hdwe_p;
     Z_[size_++] = Vb_scale_p;
 
@@ -154,7 +158,6 @@ SavedPars::SavedPars(SerialRAM *ram)
     preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving_);
     sim_chm_eeram_.a16 =  next_;  next_ += sizeof(sim_chm_);
     time_now_eeram_.a16 = next_; next_ += sizeof(time_now_);
-    type_eeram_.a16 =  next_;  next_ += sizeof(type_);
     t_last_eeram_.a16 =  next_;  next_ += sizeof(t_last_);
     t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model_);
     nflt_ = int( NFLT ); 
@@ -193,7 +196,6 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(preserving_, uint8_t(0), uint8_t(1)) ||
         is_val_corrupt(sim_chm_, uint8_t(0), uint8_t(10)) ||
         // is_val_corrupt(time_now_, 0UL, 0UL) ||
-        is_val_corrupt(type_, uint8_t(0), uint8_t(10)) ||
         is_val_corrupt(t_last_, float(-10.), float(70.)) ||
         is_val_corrupt(t_last_model_, float(-10.), float(70.));
     if ( corruption )
@@ -239,7 +241,9 @@ boolean SavedPars::is_corrupt()
         get_Tb_bias_hdwe();
 
         get_time_now();
-        get_type();
+
+        get_Type();
+
         get_t_last();
         get_t_last_model();
 
@@ -284,11 +288,11 @@ int SavedPars::num_diffs()
     if ( float(NP) != nP_ ) n++;
     if ( float(NS) != nS_ ) n++;
     if ( uint8_t(SIM_CHEM) != sim_chm_ ) n++;
-    if ( uint8_t(0) != type_ ) n++;
 
     if ( S_cap_mon_p->is_off() ) n++;
     if ( S_cap_sim_p->is_off() ) n++;
     if ( Tb_bias_hdwe_p->is_off() ) n++;
+    if ( Type_p->is_off() ) n++;
     if ( Vb_bias_hdwe_p->is_off() ) n++;
     if ( Vb_scale_p->is_off() ) n++;
     return ( n );
@@ -320,7 +324,6 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || float(NS) != nS_ )              Serial.printf(" nS            %7.3f    %7.3f *BS<> eg '2P1S'\n", NS, nS_);
     if ( all || SIM_CHEM != sim_chm_ )          Serial.printf(" sim chem            %d          %d *Bs<>\n", SIM_CHEM, sim_chm_);
     if ( all )                                  Serial.printf(" time_now %d %s *U<> Unix time\n", (int)Time.now(), Time.timeStr().c_str());
-    if ( all || uint8_t(0) != type_ )           Serial.printf(" type inj %d  %d *Xt<> 1=sin, 2=sq, 3=tri, 4=1C, 5=-1C, 8=cos\n", 0, type_);
     if ( all )                                  Serial.printf(" t_last %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_);
     if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model_);
     for (int i=0; i<size_; i++ ) if ( all || Z_[i]->is_off() )  Z_[i]->print();
@@ -453,7 +456,7 @@ void SavedPars::reset_pars()
     Ib_scale_amp_p->set_default();
     Ib_scale_noa_p->set_default();
     Ib_select_p->set_default();
-    
+
     put_iflt(int(-1));
     put_ihis(int(-1));
     put_inj_bias(float(0.));
@@ -470,8 +473,8 @@ void SavedPars::reset_pars()
     S_cap_mon_p->set_default();
     S_cap_sim_p->set_default();
     Tb_bias_hdwe_p->set_default();
+    Type_p->set_default();
 
-    put_type(uint8_t(0));    
     put_t_last(float(RATED_TEMP));    
     put_t_last_model(float(RATED_TEMP));  
 

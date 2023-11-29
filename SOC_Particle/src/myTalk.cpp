@@ -538,7 +538,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 Serial.printf("%7.3f\n", Sen->Flt->ib_diff_sclr());
                 break;
 
-              case ( 'f' ):  //   Ff<>:  fake faults
+              case ( 'f' ):  //* si, Ff<>:  fake faults
                 INT_in = cp.input_str.substring(2).toInt();
                 Serial.printf("cp.fake_faults, sp.ib_select %d, %d to ", cp.fake_faults, sp.Ib_select());
                 cp.fake_faults = INT_in;
@@ -907,37 +907,37 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 switch ( cp.input_str.charAt(2) )
                 {
                   case ( 'n' ):  // Xtn:  none
-                    sp.put_type(0);
+                    sp.put_Type(0);
                     Serial.printf("Set none. sp.type() %d\n", sp.type());
                     break;
 
                   case ( 's' ):  // Xts:  sine
-                    sp.put_type(1);
+                    sp.put_Type(1);
                     Serial.printf("Set sin. sp.type() %d\n", sp.type());
                     break;
 
                   case ( 'q' ):  // Xtq:  square
-                    sp.put_type(2);
+                    sp.put_Type(2);
                     Serial.printf("Set square. sp.type() %d\n", sp.type());
                     break;
 
                   case ( 't' ):  // Xtt:  triangle
-                    sp.put_type(3);
+                    sp.put_Type(3);
                     Serial.printf("Set tri. sp.type() %d\n", sp.type());
                     break;
 
                   case ( 'c' ):  // Xtc:  charge rate
-                    sp.put_type(4);
+                    sp.put_Type(4);
                     Serial.printf("Set 1C charge. sp.type() %d\n", sp.type());
                     break;
 
                   case ( 'd' ):  // Xtd:  discharge rate
-                    sp.put_type(5);
+                    sp.put_Type(5);
                     Serial.printf("Set 1C disch. sp.type() %d\n", sp.type());
                     break;
 
                   case ( 'o' ):  // Xto:  cosine
-                    sp.put_type(8);
+                    sp.put_Type(8);
                     Serial.printf("Set cos. sp.type() %d\n", sp.type());
                     break;
 
@@ -1235,7 +1235,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   sp.S_cap_mon_p->print1_help();  //* SQ
   sp.S_cap_sim_p->print_help();  //* Sq
   sp.S_cap_sim_p->print1_help();  //* Sq
-
   sp.Cutback_gain_sclr_p->print_help();  //* Sk
   sp.Vb_scale_p->print_help();  //* SV
   sp.Vb_scale_p->print1_help();  //* SV
@@ -1354,7 +1353,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   sp.Amp_p->print_help();  //* Xa
   sp.Freq_p->print_help();  //* Xf
 
-  Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.printf(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))\n");
+  sp.Type_p->print_help();  //* Xt
+  // Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.printf(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))\n");
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
   Serial.printf("  Xp-1: Off, modeling false\n");
   Serial.printf("  Xp0: reset tests\n");

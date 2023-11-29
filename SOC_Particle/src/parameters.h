@@ -804,8 +804,8 @@ public:
     float Tb_bias_hdwe() { return Tb_bias_hdwe_stored; }
 
     time_t time_now() { return time_now_; }
-    uint8_t type() { return type_; }
 
+    uint8_t type() { return Type_stored; }
     float Vb_bias_hdwe() { return Vb_bias_hdwe_stored; }
     float Vb_scale() { return Vb_scale_stored; }
 
@@ -863,7 +863,9 @@ public:
         float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
 
         void get_time_now() { time_t value; rP_->get(time_now_eeram_.a16, value); time_now_ = value; Time.setTime(value); }
-        void get_type() { type_ = rP_->read(type_eeram_.a16); }
+
+        uint8_t get_Type() { return Type_p->get(); }
+
         void get_t_last() { float value; rP_->get(t_last_eeram_.a16, value); t_last_ = value; }
         void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model_ = value; }
 
@@ -888,6 +890,7 @@ public:
         float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
         float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
+        uint8_t get_Type() { return Type_p->get(); }  // TODO:  should these be Type_stored
         float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
         float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Ib_bias_stored
     #endif
@@ -941,7 +944,9 @@ public:
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
 
         void put_time_now(const time_t input) { time_now_ = input; }
-        void put_type(const uint8_t input) { type_ = input; }
+
+        void put_Type(const uint8_t input) { Type_p->set(input); }
+
         void put_t_last(const float input) { t_last_ = input; }
         void put_t_last() {}
         void put_t_last_model(const float input) { t_last_model_ = input; }
@@ -989,7 +994,9 @@ public:
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
 
         void put_time_now(const time_t input) { rP_->put(time_now_eeram_.a16, input); time_now_ = input; Time.setTime(time_now_); }
-        void put_type(const uint8_t input) { rP_->write(type_eeram_.a16, input); type_ = input; }
+
+        void put_Type(const uint8_t input) { Type_p->set(input); }
+
         void put_t_last(const float input) { rP_->put(t_last_eeram_.a16, input); t_last_ = input; }
         void put_t_last() { rP_->put(t_last_eeram_.a16, t_last_); }
         void put_t_last_model(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model_ = input; }
@@ -1021,6 +1028,7 @@ public:
     FloatStorage *S_cap_mon_p;
     FloatStorage *S_cap_sim_p;
     FloatStorage *Tb_bias_hdwe_p;
+    Uint8tStorage *Type_p;
     FloatStorage *Vb_bias_hdwe_p;
     FloatStorage *Vb_scale_p;
 
@@ -1042,6 +1050,7 @@ public:
     float S_cap_mon_stored;
     float S_cap_sim_stored;
     float Tb_bias_hdwe_stored;
+    uint8_t Type_stored;
     float Vb_bias_hdwe_stored;
     float Vb_scale_stored;
 
@@ -1055,10 +1064,7 @@ protected:
     float nS_;              // Number of series batteries in bank, e.g. '2P1S'
     uint8_t preserving_;    // Preserving fault buffer
     uint8_t sim_chm_;       // Simulation battery chemistry type
-    // float s_cap_mon_;       // Scalar on battery monitor size
-    // float s_cap_sim_;       // Scalar on battery model size
     time_t time_now_;       // Time now, Unix time since epoch
-    uint8_t type_;          // Injected waveform type.   0=sine, 1=square, 2=triangle
     float t_last_;          // Updated value of battery temperature injection when sp.Modeling() and proper wire connections made, deg C
     float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
     #ifndef CONFIG_47L16
@@ -1076,7 +1082,6 @@ protected:
         address16b preserving_eeram_;
         address16b sim_chm_eeram_;
         address16b time_now_eeram_;
-        address16b type_eeram_;
         address16b t_last_eeram_;
         address16b t_last_model_eeram_;
         SerialRAM *rP_;
