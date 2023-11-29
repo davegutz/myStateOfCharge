@@ -319,27 +319,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'A' ):  //*  DA<>:  Amp sensor bias
-                sp.Ib_bias_amp_p->print();
-                sp.Ib_bias_amp_p->print1();
-                sp.put_Ib_bias_amp(cp.input_str.substring(2).toFloat());
-                sp.Ib_bias_amp_p->print();
-                sp.Ib_bias_amp_p->print1();
+                sp.Ib_bias_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'B' ):  //*  DB<>:  No Amp sensor bias
-                sp.Ib_bias_noa_p->print();
-                sp.Ib_bias_noa_p->print1();
-                sp.put_Ib_bias_noa(cp.input_str.substring(2).toFloat());
-                sp.Ib_bias_noa_p->print();
-                sp.Ib_bias_noa_p->print1();
+                sp.Ib_bias_noa_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'c' ):  //*  Dc<>:  Vb bias
-                sp.Vb_bias_hdwe_p->print();
-                sp.Vb_bias_hdwe_p->print1();
-                sp.put_Vb_bias_hdwe(cp.input_str.substring(2).toFloat());
-                sp.Vb_bias_hdwe_p->print();
-                sp.Vb_bias_hdwe_p->print1();
+                sp.Vb_bias_hdwe_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'E' ):  //   DE<>:  EKF execution frame multiplier
@@ -354,11 +342,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'I' ):  //*  DI<>:  Bias all current sensors without reset (same way as Da and Db)
-                sp.Ib_bias_all_p->print();
-                sp.Ib_bias_all_p->print1();
-                sp.put_Ib_bias_all(cp.input_str.substring(2).toFloat());
-                sp.Ib_bias_all_p->print();
-                sp.Ib_bias_all_p->print1();
+                sp.Ib_bias_all_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'm' ):  //   Dm<>:  Amp signal adder for faults
@@ -392,11 +376,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 't' ):  //*  Dt<>:  Temp bias change hardware
-                sp.Tb_bias_hdwe_p->print();
-                sp.Tb_bias_hdwe_p->print1();
-                sp.put_Tb_bias_hdwe(cp.input_str.substring(2).toFloat());
-                sp.Tb_bias_hdwe_p->print();
-                sp.Tb_bias_hdwe_p->print1();
+                sp.Tb_bias_hdwe_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 cp.cmd_reset();
                 break;
 
@@ -415,11 +395,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'w' ):  //   * Dw<>:
-                sp.Dw_p->print();
-                sp.Dw_p->print1();
-                sp.put_Dw(cp.input_str.substring(2).toFloat());
-                sp.Dw_p->print();
-                sp.Dw_p->print1();
+                sp.Dw_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'y' ):  //   Dy<>:
@@ -462,19 +438,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             {
 
               case ( 'A' ):  //*  SA<>:  Amp sensor scalar
-                sp.Ib_scale_amp_p->print();
-                sp.Ib_scale_amp_p->print1();
-                sp.put_Ib_scale_amp(cp.input_str.substring(2).toFloat());
-                sp.Ib_scale_amp_p->print();
-                sp.Ib_scale_amp_p->print1();
+                sp.Ib_scale_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'B' ):  //*  SB<>:  No Amp sensor scalar
-                sp.Ib_scale_noa_p->print();
-                sp.Ib_scale_noa_p->print1();
-                sp.put_Ib_scale_noa(cp.input_str.substring(2).toFloat());
-                sp.Ib_scale_noa_p->print();
-                sp.Ib_scale_noa_p->print1();
+                sp.Ib_scale_noa_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'h' ):  //   Sh<>: scale hysteresis
@@ -505,17 +473,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'q' ):  //*  Sq<>: scale capacity sim
-                Serial.printf("sp.s_cap_sim%7.3f to ", sp.s_cap_sim());
-                Serial1.printf("sp.s_cap_sim%7.3f to ", sp.s_cap_sim());
                 scale = cp.input_str.substring(2).toFloat();
-                sp.put_s_cap_sim(scale);
-                Serial.printf("%7.3f\n", sp.s_cap_sim());
-                Serial1.printf("%7.3f\n", sp.s_cap_sim());
+                sp.S_cap_sim_p->print_adj_print(scale);
             
                 Serial.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_rated_scaled());
                 Serial1.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_rated_scaled());
             
-                Sen->Sim->apply_cap_scale(sp.s_cap_sim());
+                Sen->Sim->apply_cap_scale(sp.S_cap_sim());
                 if ( sp.Modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
             
                 Serial.printf("%7.3f\n", Sen->Sim->q_cap_rated_scaled());
@@ -525,16 +489,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
             
               case ( 'Q' ):  //*  SQ<>: scale capacity mon
-                Serial.printf("sp.s_cap_mon%7.3f to ", sp.s_cap_mon());
                 scale = cp.input_str.substring(2).toFloat();
-                sp.put_s_cap_mon(scale);
-                Serial.printf("%7.3f\n", sp.s_cap_mon());
+                sp.S_cap_mon_p->print_adj_print(scale);
             
-                Serial.printf("Mon.q_cap_rated%7.3f %7.3f to ", scale, Mon->q_cap_rated_scaled());
-            
-                Mon->apply_cap_scale(sp.s_cap_mon());
-                // if ( sp.Modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
-            
+                Mon->apply_cap_scale(sp.S_cap_mon());
                 Serial.printf("%7.3f\n", Mon->q_cap_rated_scaled());
                 Serial.printf("Mon:"); Mon->pretty_print(Sen); Mon->Coulombs::pretty_print();
                 break;
@@ -550,20 +508,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
             
               case ( 'k' ):  //*  Sk<>:  scale cutback gain for sim rep of BMS
-                scale = cp.input_str.substring(2).toFloat();
-                sp.Cutback_gain_sclr_p->print();
-                sp.Cutback_gain_sclr_p->print1();
-                sp.put_Cutback_gain_sclr(scale);
-                sp.Cutback_gain_sclr_p->print();
-                sp.Cutback_gain_sclr_p->print1();
+                sp.Cutback_gain_sclr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
             
               case ( 'V' ):  //*  SV<>:  Vb sensor scalar
-                sp.Vb_scale_p->print();
-                sp.Vb_scale_p->print1();
-                sp.put_Vb_scale(cp.input_str.substring(2).toFloat());
-                sp.Vb_scale_p->print();
-                sp.Vb_scale_p->print1();
+                sp.Vb_scale_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               default:
@@ -847,9 +796,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'i' ):  //* si:  selection battery  mode
-                sp.put_Ib_select(cp.input_str.substring(1).toInt());
-                sp.Ib_select_p->print();
-                sp.Ib_select_p->print1();
+                sp.Ib_select_p->print_adj_print(cp.input_str.substring(1).toInt());
                 break;
 
               default:
@@ -866,11 +813,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             break;
 
           case ( 'v' ):  //*  v<>:  verbose level
-            sp.Debug_p->print();
-            sp.Debug_p->print1();
-            sp.put_Debug(cp.input_str.substring(1).toInt());
-            sp.Debug_p->print();
-            sp.Debug_p->print1();
+            sp.Debug_p->print_adj_print(cp.input_str.substring(1).toInt());
             break;
 
           case ( 'V' ):
@@ -934,10 +877,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
               case ( 'm' ):  // Xm<>:  code for modeling level
                 INT_in =  cp.input_str.substring(2).toInt();
-                sp.Modeling_p->print();
                 reset = sp.Modeling() != INT_in;
-                sp.put_Modeling(INT_in);
-                sp.Modeling_p->print();
+                sp.Modeling_p->print_adj_print(INT_in);
                 if ( reset )
                 {
                   Serial.printf("Chg...reset\n");
@@ -952,10 +893,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'f' ): //*  Xf<>:  injection frequency
-                sp.put_Freq(max(min(cp.input_str.substring(2).toFloat(), 2.0), 0.0));
-                sp.Freq_p->print();  sp.Freq_p->print1();
-                sp.put_Freq( sp.Freq()*(2. * PI) );
-                sp.Freq_p->print();  sp.Freq_p->print1();
+                sp.Freq_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                sp.Freq_p->print_adj_print(sp.Freq()*(2. * PI));
                 break;
 
               case ( 'b' ): //*  Xb<>:  injection bias
@@ -1291,10 +1230,11 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   
   Serial.printf("  Sh= "); Serial.printf("%6.3f", Sen->Sim->hys_scale()); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
   Serial.printf("  SH= "); Serial.printf("%6.3f", Sen->Sim->hys_state()); Serial.printf(": hys states [0]\n");
-  Serial.printf(" *Sq=  "); Serial.print(Sen->Sim->q_capacity()/Mon->q_capacity()); Serial.printf(": sp. Scalar cap sim\n"); 
-  Serial.printf(" *SQ=  "); Serial.print(Mon->q_capacity()/Mon->q_capacity()); Serial.printf(": sp. Scalar cap mon\n"); 
-  Serial1.printf(" *SQ=  "); Serial1.print(Mon->q_capacity()/Mon->q_capacity()); Serial1.printf(": sp. Scalar cap mon\n"); 
-  Serial.printf("  Sr=  "); Serial.print(Sen->Sim->Sr()); Serial.printf(": Scalar res sim\n");
+
+  sp.S_cap_mon_p->print_help();  //* SQ
+  sp.S_cap_mon_p->print1_help();  //* SQ
+  sp.S_cap_sim_p->print_help();  //* Sq
+  sp.S_cap_sim_p->print1_help();  //* Sq
 
   sp.Cutback_gain_sclr_p->print_help();  //* Sk
   sp.Vb_scale_p->print_help();  //* SV

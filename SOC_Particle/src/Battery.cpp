@@ -445,7 +445,7 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("  voc_soc%7.3f V\n", voc_soc_);
     Serial.printf("  voc_stat%7.3f V\n", voc_stat_);
     Serial.printf("  y_filt%7.3f Res EKF, V\n", y_filt_);
-    Serial.printf(" *sp_s_cap_mon%7.3f Slr\n", sp.s_cap_mon());
+    Serial.printf(" *sp_s_cap_mon%7.3f Slr\n", sp.S_cap_mon());
     Serial.printf("  vb_model_rev%7.3f V\n", vb_model_rev_);
 #else
      Serial.printf("BatteryMonitor: silent DEPLOY\n");
@@ -852,7 +852,7 @@ void BatterySim::pretty_print(void)
     Serial.printf("  sat_cb_gn%7.1f\n", sat_cutback_gain_);
     Serial.printf("  sat_ib_max%7.3f, A\n", sat_ib_max_);
     Serial.printf("  sat_ib_null%7.3f, A\n", sat_ib_null_);
-    Serial.printf(" *sp_s_cap_sim%7.3f Slr\n", sp.s_cap_sim());
+    Serial.printf(" *sp_s_cap_sim%7.3f Slr\n", sp.S_cap_sim());
     hys_->pretty_print();
 #else
      Serial.printf("BatterySim: silent DEPLOY\n");
