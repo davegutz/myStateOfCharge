@@ -358,11 +358,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'I' ):  // * DI<>:  Bias all current sensors without reset (same way as Da and Db)
-                Serial.printf("sp.Ib_bias_all%7.3f to", sp.Ib_bias_all());
-                Serial1.printf("sp.Ib_bias_all%7.3f to", sp.Ib_bias_all());
+                sp.Ib_bias_all_p->print();
+                sp.Ib_bias_all_p->print1();
                 sp.put_Ib_bias_all(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\nreset\n", sp.Ib_bias_all());
-                Serial1.printf("%7.3f\nreset\n", sp.Ib_bias_all());
+                sp.Ib_bias_all_p->print();
+                sp.Ib_bias_all_p->print1();
+                cp.cmd_reset();
                 break;
 
               case ( 'm' ):  //   Dm<>:  Amp signal adder for faults
@@ -419,11 +420,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'w' ):  //   * Dw<>:
-                Serial.printf("sp.vb_table_bias%7.3f to", sp.Dw());
-                Serial1.printf("sp.vb_table_bias%7.3f to", sp.Dw());
+                sp.Dw_p->print();
+                sp.Dw_p->print1();
                 sp.put_Dw(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.Dw());
-                Serial1.printf("%7.3f\n", sp.Dw());
+                sp.Dw_p->print();
+                sp.Dw_p->print1();
                 break;
 
               case ( 'y' ):  //   Dy<>:
