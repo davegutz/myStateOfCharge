@@ -73,8 +73,8 @@ public:
 
     const char* units() { return units_.c_str(); }
 
-    virtual boolean is_corrupt(){return true;};
-    virtual boolean is_off(){return true;};
+    virtual boolean is_corrupt(){return false;};
+    virtual boolean is_off(){return false;};
     virtual void print(){};
     virtual void set_default(){};
 

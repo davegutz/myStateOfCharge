@@ -225,6 +225,9 @@ void setup()
   Serial.printf("Check corruption......");
   if ( sp.is_corrupt() ) 
   {
+    Serial.printf("\n\n");
+    sp.pretty_print( false );
+    Serial.printf("\n\n");
     sp.reset_pars();
     Serial.printf("Fixed corruption\n");
     sp.pretty_print(true);
