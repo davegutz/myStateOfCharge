@@ -51,8 +51,8 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Amp_p               = new FloatStorage(  "Xf", "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_stored, 0.);
     Cutback_gain_sclr_p = new FloatStorage(  "Sk", "Cutback gain scalar", "slr",      -1e6, 1e6, &Cutback_gain_sclr_stored, 1.);
     Debug_p             = new IntStorage(    "v",  "Verbosity",           "int",      -128, 128, &Debug_stored, 0);
-    Delta_q_p           = new DoubleStorage( "na", "Charge chg",          "C",        -1e8, 1e5, &Delta_q_stored, 0.);
-    Delta_q_model_p     = new DoubleStorage( "na", "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_stored, 0.);
+    Delta_q_p           = new DoubleStorage( "na", "Charge chg",          "C",        -1e8, 1e5, &Delta_q_stored, 0., true);
+    Delta_q_model_p     = new DoubleStorage( "na", "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_stored, 0., true);
     Dw_p                = new FloatStorage(  "Dw", "Tab mon adj",         "v",        -1e2, 1e2, &Dw_stored, VTAB_BIAS);
     Freq_p              = new FloatStorage(  "Xf", "Inj freq",            "Hz",        0.,  2.,  &Freq_stored, 0.);
     Ib_bias_all_p       = new FloatStorage(  "DI", "Add all",             "A",        -1e5, 1e5, &Ib_bias_all_stored, CURR_BIAS_ALL);
@@ -70,7 +70,10 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     S_cap_sim_p         = new FloatStorage(  "Sq", "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
     Sim_chm_p           = new Uint8tStorage( "Bs", "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_stored, SIM_CHEM);
     Tb_bias_hdwe_p      = new FloatStorage(  "Dt", "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
+    Time_now_p          = new TimetStorage(  "UT", "UNIX time since epoch","sec",     0UL,  2869033880UL, &Time_now_stored, 1669801880UL, false);
     Type_p              = new Uint8tStorage( "Xt", "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
+    T_last_p            = new FloatStorage(  "na", "Tb rate lim mem",     "dg C",     -10,  70,  &T_last_stored, RATED_TEMP, false);
+    T_last_model_p      = new FloatStorage(  "na", "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_last_model_stored, RATED_TEMP, false);
     Vb_bias_hdwe_p      = new FloatStorage(  "Dc", "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_stored, VOLT_BIAS);
     Vb_scale_p          = new FloatStorage(  "SV", "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_stored, VB_SCALE);
 
@@ -97,7 +100,10 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Z_[size_++] = S_cap_sim_p;
     Z_[size_++] = Sim_chm_p;
     Z_[size_++] = Tb_bias_hdwe_p;
+    Z_[size_++] = Time_now_p;
     Z_[size_++] = Type_p;
+    Z_[size_++] = T_last_p;
+    Z_[size_++] = T_last_model_p;
     Z_[size_++] = Vb_bias_hdwe_p;
     Z_[size_++] = Vb_scale_p;
 }
@@ -112,8 +118,8 @@ SavedPars::SavedPars(SerialRAM *ram)
     Amp_p               = new FloatStorage(  "Xf", rP_, "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_stored, 0.);
     Cutback_gain_sclr_p = new FloatStorage(  "Sk", rP_, "Cutback gain scalar", "slr",      -1e6, 1e6, &Cutback_gain_sclr_stored, 1.);
     Debug_p             = new IntStorage(    "v",  rP_, "Verbosity",           "int",      -128, 128, &Debug_stored, 0);
-    Delta_q_p           = new DoubleStorage( "na", rP_, "Charge chg",          "C",        -1e8, 1e5, &Delta_q_stored, 0.);
-    Delta_q_model_p     = new DoubleStorage( "na", rP_, "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_stored, 0.);
+    Delta_q_p           = new DoubleStorage( "na", rP_, "Charge chg",          "C",        -1e8, 1e5, &Delta_q_stored, 0., true);
+    Delta_q_model_p     = new DoubleStorage( "na", rP_, "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_stored, 0., true);
     Dw_p                = new FloatStorage(  "Dw", rP_, "Tab mon adj",         "v",        -1e2, 1e2, &Dw_stored, VTAB_BIAS);
     Freq_p              = new FloatStorage(  "Xf", rP_, "Inj freq",            "Hz",        0.,  2.,  &Freq_stored, 0.);
     Ib_bias_all_p       = new FloatStorage(  "DI", rP_, "Del all",             "A",        -1e5, 1e5, &Ib_bias_all_stored, CURR_BIAS_ALL);
@@ -131,7 +137,10 @@ SavedPars::SavedPars(SerialRAM *ram)
     S_cap_sim_p         = new FloatStorage(  "Sq", rP_, "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
     Sim_chm_p           = new Uint8tStorage( "Bs", rP_, "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_stored, SIM_CHEM);
     Tb_bias_hdwe_p      = new FloatStorage(  "Dt", rP_, "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
+    Time_now_p          = new TimetStorage(  "UT", rP_, "UNIX time since epoch","sec",     0UL,  2869033880UL, &Time_now_stored, 1669801880UL, false);
     Type_p              = new Uint8tStorage( "Xt", rP_, "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
+    T_last_p            = new FloatStorage(  "na", rP_, "Tb rate lim mem",     "dg C",     -10,  70,  &T_last_stored, RATED_TEMP, false);
+    T_last_model_p      = new FloatStorage(  "na", rP_, "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_last_model_stored, RATED_TEMP, false);
     Vb_bias_hdwe_p      = new FloatStorage(  "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_stored, VOLT_BIAS);
     Vb_scale_p          = new FloatStorage(  "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_stored, VB_SCALE);
 
@@ -158,6 +167,9 @@ SavedPars::SavedPars(SerialRAM *ram)
     Z_[size_++] = S_cap_sim_p;
     Z_[size_++] = Sim_chm_p;
     Z_[size_++] = Tb_bias_hdwe_p;
+    Z_[size_++] = Time_now_p;
+    Z_[size_++] = T_last_p;
+    Z_[size_++] = T_last_model_p;
     Z_[size_++] = Type_p;
     Z_[size_++] = Vb_bias_hdwe_p;
     Z_[size_++] = Vb_scale_p;
@@ -166,15 +178,8 @@ SavedPars::SavedPars(SerialRAM *ram)
     ihis_eeram_.a16 =  next_;  next_ += sizeof(ihis_);
     inj_bias_eeram_.a16 =  next_;  next_ += sizeof(inj_bias_);
     isum_eeram_.a16 =  next_;  next_ += sizeof(isum_);
-
-    next_ = Modeling_p->assign_addr(next_);
-    next_ = nP_p->assign_addr(next_);
-    next_ = nS_p->assign_addr(next_);
-
     preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving_);
-    time_now_eeram_.a16 = next_; next_ += sizeof(time_now_);
-    t_last_eeram_.a16 =  next_;  next_ += sizeof(t_last_);
-    t_last_model_eeram_.a16 =  next_; next_ += sizeof(t_last_model_);
+
     nflt_ = int( NFLT ); 
     fault_ = new Flt_ram[nflt_];
     for ( int i=0; i<nflt_; i++ )
@@ -205,10 +210,7 @@ boolean SavedPars::is_corrupt()
         is_val_corrupt(ihis_, -1, nhis_+1) ||
         is_val_corrupt(inj_bias_, float(-100.), float(100.)) ||
         is_val_corrupt(isum_, -1, NSUM+1) ||
-        is_val_corrupt(preserving_, uint8_t(0), uint8_t(1)) ||
-        // is_val_corrupt(time_now_, 0UL, 0UL) ||
-        is_val_corrupt(t_last_, float(-10.), float(70.)) ||
-        is_val_corrupt(t_last_model_, float(-10.), float(70.));
+        is_val_corrupt(preserving_, uint8_t(0), uint8_t(1));
     if ( corruption )
     {
         Serial.printf("corrupt****\n");
@@ -250,14 +252,10 @@ boolean SavedPars::is_corrupt()
         get_S_cap_mon();
         get_S_cap_sim();
         get_Tb_bias_hdwe();
-
-        get_time_now();
-
+        get_Time_now();
         get_Type();
-
-        get_t_last();
-        get_t_last_model();
-
+        get_T_last();
+        get_T_last_model();
         get_Vb_bias_hdwe();
         get_Vb_scale();
         
@@ -271,18 +269,15 @@ int SavedPars::num_diffs()
 {
     int n = 0;
     // Don't count memories
-    // if ( float(RATED_TEMP) != t_last_ )    //   n++;
-    // if ( float(RATED_TEMP) != t_last_model_ )    //   n++;
-    // if ( Delta_q_p->is_off() ) n++;
-    // if ( Delta_q_model_p->is_off() ) n++;
     // if ( int(-1) != iflt_ )    //     n++;
     // if ( int(-1) != isum_ )    //     n++;
     // if ( uint8_t(0) != preserving_ )    //     n++;
-    // if ( 0UL < time_now ) n++;
     if ( Amp_p->is_off() ) n++;
     if ( Cutback_gain_sclr_p->is_off() ) n++;
     if ( Dw_p->is_off() ) n++;
     if ( Debug_p->is_off() ) n++;
+    if ( Delta_q_p->is_off() ) n++;
+    if ( Delta_q_model_p->is_off() ) n++;
     if ( Freq_p->is_off() ) n++;
     if ( Ib_bias_all_p->is_off() ) n++;
     if ( Ib_bias_amp_p->is_off() ) n++;
@@ -301,6 +296,9 @@ int SavedPars::num_diffs()
     if ( S_cap_sim_p->is_off() ) n++;
     if ( Sim_chm_p->is_off() ) n++;
     if ( Tb_bias_hdwe_p->is_off() ) n++;
+    if ( Time_now_p->is_off() ) n++;
+    if ( T_last_p->is_off() ) n++;
+    if ( T_last_model_p->is_off() ) n++;
     if ( Type_p->is_off() ) n++;
     if ( Vb_bias_hdwe_p->is_off() ) n++;
     if ( Vb_scale_p->is_off() ) n++;
@@ -328,9 +326,7 @@ void SavedPars::pretty_print(const boolean all)
     if ( all || float(0.) != inj_bias_ )        Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias_);
     if ( all )                                  Serial.printf(" isum                           %d tbl ptr\n", isum_);
     if ( all )                                  Serial.printf(" preserving %d  %d *Xm<>\n", uint8_t(0), preserving_);
-    if ( all )                                  Serial.printf(" time_now %d %s *U<> Unix time\n", (int)Time.now(), Time.timeStr().c_str());
-    if ( all )                                  Serial.printf(" t_last %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_);
-    if ( all )                                  Serial.printf(" t_last_sim %5.2f  %5.2f dg C\n", float(RATED_TEMP), t_last_model_);
+    // if ( all )                                  Serial.printf(" time_now %d %s *U<> Unix time\n", (int)Time.now(), Time.timeStr().c_str());
     for (int i=0; i<size_; i++ ) if ( all || Z_[i]->is_off() )  Z_[i]->print();
     // if ( all )
     // {
@@ -403,15 +399,15 @@ void SavedPars::put_all_dynamic()
             break;
 
         case ( 4 ):
-            put_t_last();
+            put_T_last();
             break;
 
         case ( 5 ):
-            put_t_last_model();
+            put_T_last_model();
             break;
 
         case ( 6 ):
-            put_time_now(Time.now());  // If happen to connect to wifi (assume updated automatically), save new time
+            put_Time_now(Time.now());  // If happen to connect to wifi (assume updated automatically), save new time
             blink = 0;
             break;
 
@@ -481,8 +477,8 @@ void SavedPars::reset_pars()
     // Tb_bias_hdwe_p->set_default();
     // Type_p->set_default();
 
-    put_t_last(float(RATED_TEMP));    
-    put_t_last_model(float(RATED_TEMP));  
+    // put_t_last(float(RATED_TEMP));    
+    // put_t_last_model(float(RATED_TEMP));  
 
     // Vb_bias_hdwe_p->set_default();
     // Vb_scale_p->set_default();

@@ -793,12 +793,16 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             }
             break;
 
-          case ( 'U' ):  //*  U<>:  Unix time since epoch
-            Serial.printf("Time.now() %d --> %s to:::> ", (int)Time.now(), Time.timeStr().c_str());
-            Serial1.printf("Time.now() %d --> %s to:::> ", (int)Time.now(), Time.timeStr().c_str());
-            sp.put_time_now((time_t)cp.input_str.substring(1).toInt());
-            Serial.printf("%d --> %s\n", (int)Time.now(), Time.timeStr().c_str());
-            Serial1.printf("%d --> %s\n", (int)Time.now(), Time.timeStr().c_str());
+          case ( 'U' ):
+            switch ( cp.input_str.charAt(1) )
+            {
+              case ( 'T' ):  //*  UT<>:  Unix time since epoch
+              sp.Time_now_p->print_adj_print((time_t)cp.input_str.substring(1).toInt());
+              break;
+
+            default:
+                Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
+            }
             break;
 
           case ( 'v' ):  //*  v<>:  verbose level
@@ -1268,10 +1272,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   Serial.printf("  RS= "); Serial.printf("SavedPars: Reinitialize saved\n");
 
   sp.Ib_select_p->print_help();  //* si
-
-  Serial.printf(" \n*U= "); Serial.printf("%ld", Time.now()); Serial.printf(": Unix time [auto when wifi]\n"); 
-  Serial1.printf(" \n*U= "); Serial1.printf("%ld", Time.now()); Serial1.printf(": Unix time [auto when wifi]\n"); 
-
+  sp.Time_now_p->print_help();  //* UT
+  sp.Time_now_p->print1_help();  //* UT
   sp.Debug_p->print_help();  // v
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
   Serial.printf("  v-2: ADS counts for throughput meas\n");

@@ -94,23 +94,27 @@ class DoubleStorage: public Storage
 public:
     DoubleStorage(){}
 
-    DoubleStorage(const String &code, const String &description, const String &units, const double min, const double max, double *store, const double _default=0):
+    DoubleStorage(const String &code, const String &description, const String &units, const double min, const double max, double *store,
+        const double _default=0, const boolean check_off=false):
         Storage(code, description, units, false)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
+        check_off_ = check_off;
         set(*val_); // retained
     }
 
-    DoubleStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, double *store, const double _default=0):
+    DoubleStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max,
+    double *store, const double _default=0, const boolean check_off=false):
         Storage(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
+        check_off_ = check_off;
     }
 
     ~DoubleStorage(){}
@@ -139,7 +143,7 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_;
+        return *val_ != default_ && !check_off_;
     }
 
     double max_of() { return max_; }
@@ -199,6 +203,7 @@ protected:
     double default_;
     double min_;
     double max_;
+    boolean check_off_;
 };
 
 
@@ -207,23 +212,27 @@ class FloatStorage: public Storage
 public:
     FloatStorage(){}
 
-    FloatStorage(const String &code, const String &description, const String &units, const float min, const float max, float *store, const float _default=0):
+    FloatStorage(const String &code, const String &description, const String &units, const float min, const float max, float *store,
+    const float _default=0, const boolean check_off=false):
         Storage(code, description, units, false)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
         val_ = store;
+        check_off_ = check_off;
         set(*val_); // retained
     }
 
-    FloatStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max, float *store, const float _default=0):
+    FloatStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+    float *store, const float _default=0, const boolean check_off=false):
         Storage(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
+        check_off_ = check_off;
     }
 
     ~FloatStorage(){}
@@ -252,7 +261,7 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_;
+        return *val_ != default_ && !check_off_;
     }
 
     float max_of() { return max_; }
@@ -312,6 +321,7 @@ protected:
     float default_;
     float min_;
     float max_;
+    boolean check_off_;
 };
 
 
@@ -320,7 +330,8 @@ class FloatNoStorage: public Storage
 public:
     FloatNoStorage(){}
 
-    FloatNoStorage(const String &code, const String &description, const String &units, const float min, const float max, const float _default=0):
+    FloatNoStorage(const String &code, const String &description, const String &units, const float min, const float max,
+    const float _default=0):
         Storage(code, description, units, false)
     {
         min_ = min;
@@ -328,7 +339,8 @@ public:
         default_ = max(min(_default, max_), min_);
     }
 
-    FloatNoStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max, const float _default=0):
+    FloatNoStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+    const float _default=0):
         Storage(code, ram, description, units, false)
     {
         min_ = min;
@@ -385,23 +397,27 @@ class IntStorage: public Storage
 public:
     IntStorage(){}
 
-    IntStorage(const String &code, const String &description, const String &units, const int min, const int max, int *store, const int _default=0):
+    IntStorage(const String &code, const String &description, const String &units, const int min, const int max, int *store,
+    const int _default=0, const boolean check_off=false):
         Storage(code, description, units, false)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
         val_ = store;
+        check_off_ = check_off;
         set(*val_); // retained
     }
 
-    IntStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store, const int _default=0):
+    IntStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
+    const int _default=0, const boolean check_off=false):
         Storage(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
+        check_off_ = check_off;
     }
 
     ~IntStorage(){}
@@ -430,7 +446,7 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_;
+        return *val_ != default_ && !check_off_;
     }
 
     int max_of() { return max_; }
@@ -490,6 +506,7 @@ protected:
     int min_;
     int max_;
     int default_;
+    boolean check_off_;
 };
 
 
@@ -498,23 +515,27 @@ class Int8tStorage: public Storage
 public:
     Int8tStorage(){}
 
-    Int8tStorage(const String &code, const String &description, const String &units, const int8_t min, const int8_t max, int8_t *store, const int8_t _default=0):
+    Int8tStorage(const String &code, const String &description, const String &units, const int8_t min, const int8_t max, int8_t *store,
+    const int8_t _default=0, const boolean check_off=false):
         Storage(code, description, units, false)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
         val_ = store;
+        check_off_ = check_off;
         set(*val_); // retained
     }
 
-    Int8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max, int8_t *store, const int8_t _default=0):
+    Int8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
+    int8_t *store, const int8_t _default=0, const boolean check_off=false):
         Storage(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
+        check_off_ = check_off;
     }
 
     ~Int8tStorage(){}
@@ -543,7 +564,7 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_;
+        return *val_ != default_ && !check_off_;
     }
 
     int8_t max_of() { return max_; }
@@ -603,6 +624,7 @@ protected:
     int8_t min_;
     int8_t max_;
     int8_t default_;
+    boolean check_off_;
 };
 
 
@@ -611,23 +633,27 @@ class Uint8tStorage: public Storage
 public:
     Uint8tStorage(){}
 
-    Uint8tStorage(const String &code, const String &description, const String &units, const uint8_t min, const uint8_t max, uint8_t *store, const uint8_t _default=0):
+    Uint8tStorage(const String &code, const String &description, const String &units, const uint8_t min, const uint8_t max, uint8_t *store,
+    const uint8_t _default=0, const boolean check_off=false):
         Storage(code, description, units, true)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
         val_ = store;
+        check_off_ = check_off;
         set(*val_); // retained
     }
 
-    Uint8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max, uint8_t *store, const uint8_t _default=0):
+    Uint8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
+    uint8_t *store, const uint8_t _default=0, const boolean check_off=false):
         Storage(code, ram, description, units, true)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
+        check_off_ = check_off;
     }
 
     ~Uint8tStorage(){}
@@ -654,7 +680,7 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_;
+        return *val_ != default_ && !check_off_;
     }
 
     uint8_t max_of() { return max_; }
@@ -677,12 +703,12 @@ public:
 
     void print_help()
     {
-      Serial.printf("* %s= %d: %s, %s (%df - %df) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print1_help()
     {
-      Serial1.printf("* %s= %d: %s, %s (%df - %df) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial1.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print_adj_print(const uint8_t input)
@@ -714,7 +740,125 @@ protected:
     uint8_t min_;
     uint8_t max_;
     uint8_t default_;
+    boolean check_off_;
 };
+
+class TimetStorage: public Storage
+{
+public:
+    TimetStorage(){}
+
+    TimetStorage(const String &code, const String &description, const String &units, const time_t min, const time_t max, time_t *store,
+    const time_t _default=0, const boolean check_off=true):
+        Storage(code, description, units, true)
+    {
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
+        val_ = store;
+        check_off_ = check_off;
+        set(*val_); // retained
+    }
+
+
+    TimetStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const time_t min, const time_t max,
+    time_t *store, const time_t _default=0, const boolean check_off=true):
+        Storage(code, ram, description, units, true)
+    {
+        min_ = min;
+        max_ = max;
+        val_ = store;
+        default_ = max(min(_default, max_), min_);
+        check_off_ = check_off;
+    }
+
+    ~TimetStorage(){}
+
+    uint16_t assign_addr(uint16_t next)
+    {
+        addr_.a16 = next;
+        return next + sizeof(time_t);
+    }
+
+    time_t get()
+    {
+        if ( is_eeram_ )
+            *val_ = rP_->read(addr_.a16);
+        return *val_;
+    }
+
+    virtual boolean is_corrupt()
+    {
+        boolean corrupt = *val_ > max_ || *val_ < min_;
+        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        return corrupt;
+    }
+
+    virtual boolean is_off()
+    {
+        return *val_ != default_ && !check_off_;
+    }
+
+    time_t max_of() { return max_; }
+
+    time_t min_of() { return min_; }
+
+    time_t nominal() { return default_; }
+    
+    void print()
+    {
+        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), code_.c_str());
+        Serial.printf("%s\n", cp.buffer);
+    }
+    
+    void print1()
+    {
+        // sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), code_.c_str());
+        // Serial1.printf("%s\n", cp.buffer);
+    }
+
+    void print_help()
+    {
+    //   Serial.printf("* %s= %d: %s, %s (%d - %d) [%lld]\n", code_.c_str(), (int)*val_, description_.c_str(), units_.c_str(), (int)min_, (int)max_, (int)default_);
+    }
+
+    void print1_help()
+    {
+    //   Serial1.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), (int)*val_, description_.c_str(), units_.c_str(), (int)min_, (int)max_, (int)default_);
+    }
+
+    void print_adj_print(const time_t input)
+    {
+        print();
+        print1();
+        set(input);
+        print();
+        print1();
+    }
+   
+    void set(time_t val)
+    {
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        else
+        {
+            *val_ = val;
+            if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
+        }
+    }
+
+    virtual void set_default()
+    {
+        set(default_);
+    }
+
+protected:
+    time_t *val_;
+    time_t min_;
+    time_t max_;
+    time_t default_;
+    boolean check_off_;
+};
+
 
 // class FloatVariable : public Storage <float>
 // {
@@ -775,10 +919,6 @@ public:
     float S_cap_mon() { return S_cap_mon_stored; }
     float S_cap_sim() { return S_cap_sim_stored; }
     uint8_t Sim_chm() { return Sim_chm_stored; }
-
-    float t_last() { return t_last_; }
-    float t_last_model() { return t_last_model_; }
-
     float Ib_bias_all() { return Ib_bias_all_stored; }
     float Ib_bias_amp() { return Ib_bias_amp_stored; }
     float Ib_bias_noa() { return Ib_bias_noa_stored; }
@@ -798,10 +938,10 @@ public:
     uint8_t preserving() { return preserving_; }
 
     float Tb_bias_hdwe() { return Tb_bias_hdwe_stored; }
-
-    time_t time_now() { return time_now_; }
-
+    time_t Time_now() { return Time_now_stored; }
     uint8_t type() { return Type_stored; }
+    float T_last() { return T_last_stored; }
+    float T_last_model() { return T_last_model_stored; }
     float Vb_bias_hdwe() { return Vb_bias_hdwe_stored; }
     float Vb_scale() { return Vb_scale_stored; }
 
@@ -858,14 +998,10 @@ public:
         float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
         float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
-
-        void get_time_now() { time_t value; rP_->get(time_now_eeram_.a16, value); time_now_ = value; Time.setTime(value); }
-
+        time_t get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
         uint8_t get_Type() { return Type_p->get(); }
-
-        void get_t_last() { float value; rP_->get(t_last_eeram_.a16, value); t_last_ = value; }
-        void get_t_last_model() { float value; rP_->get(t_last_model_eeram_.a16, value); t_last_model_ = value; }
-
+        float get_T_last() { return T_last_p->get(); }
+        float get_T_last_model() { return T_last_model_p->get(); }
         float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
         float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Vb_scale_stored
 
@@ -891,7 +1027,10 @@ public:
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
         uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
         float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
+        time_t get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
         uint8_t get_Type() { return Type_p->get(); }  // TODO:  should these be Type_stored
+        float get_T_last() { return T_last_p->get(); }
+        float get_T_last_model() { return T_last_model_p->get(); }
         float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
         float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Ib_bias_stored
     #endif
@@ -943,16 +1082,13 @@ public:
         void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
         void put_Sim_chm() {}
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
-
-        void put_time_now(const time_t input) { time_now_ = input; }
-
+        void put_Time_now(const float input) { Time_now_p->set(input); }
         void put_Type(const uint8_t input) { Type_p->set(input); }
 
-        void put_t_last(const float input) { t_last_ = input; }
-        void put_t_last() {}
-        void put_t_last_model(const float input) { t_last_model_ = input; }
-        void put_t_last_model() {}
-
+        void put_T_last(const float input) { T_last_p->set(input); }
+        void put_T_last() {}
+        void put_T_last_model(const float input) { T_last_model_p->set(input); }
+        void put_T_last_model() {}
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
         void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
 
@@ -993,16 +1129,12 @@ public:
         void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
         void put_Sim_chm() {}
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
-
-        void put_time_now(const time_t input) { rP_->put(time_now_eeram_.a16, input); time_now_ = input; Time.setTime(time_now_); }
-
+        void put_Time_now(const float input) { Time_now_p->set(input); }
         void put_Type(const uint8_t input) { Type_p->set(input); }
-
-        void put_t_last(const float input) { rP_->put(t_last_eeram_.a16, input); t_last_ = input; }
-        void put_t_last() { rP_->put(t_last_eeram_.a16, t_last_); }
-        void put_t_last_model(const float input) { rP_->put(t_last_model_eeram_.a16, input); t_last_model_ = input; }
-        void put_t_last_model() { rP_->put(t_last_model_eeram_.a16, t_last_model_); }
-
+        void put_T_last(const float input) { T_last_p->set(input); }
+        void put_T_last() { T_last_p->set(T_last_stored); }
+        void put_T_last_model(const float input) { T_last_model_p->set(input); }
+        void put_T_last_model() { T_last_p->set(T_last_model_stored); }
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
         void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
 
@@ -1033,6 +1165,9 @@ public:
     FloatStorage *S_cap_sim_p;
     Uint8tStorage *Sim_chm_p;
     FloatStorage *Tb_bias_hdwe_p;
+    TimetStorage *Time_now_p;
+    FloatStorage *T_last_p;
+    FloatStorage *T_last_model_p;
     Uint8tStorage *Type_p;
     FloatStorage *Vb_bias_hdwe_p;
     FloatStorage *Vb_scale_p;
@@ -1059,7 +1194,10 @@ public:
     float S_cap_sim_stored;
     uint8_t Sim_chm_stored;
     float Tb_bias_hdwe_stored;
+    time_t Time_now_stored;
     uint8_t Type_stored;
+    float T_last_stored;
+    float T_last_model_stored;
     float Vb_bias_hdwe_stored;
     float Vb_scale_stored;
 
@@ -1069,9 +1207,6 @@ protected:
     float inj_bias_;        // Constant bias, A
     int isum_;              // Summary location.   Begins at -1 because first action is to increment isum
     uint8_t preserving_;    // Preserving fault buffer
-    time_t time_now_;       // Time now, Unix time since epoch
-    float t_last_;          // Updated value of battery temperature injection when sp.Modeling() and proper wire connections made, deg C
-    float t_last_model_;    // Battery temperature past value for rate limit memory, deg C
     #ifndef CONFIG_47L16
         Flt_st *fault_;
         Flt_st *history_;
@@ -1082,9 +1217,6 @@ protected:
         address16b inj_bias_eeram_;
         address16b isum_eeram_;
         address16b preserving_eeram_;
-        address16b time_now_eeram_;
-        address16b t_last_eeram_;
-        address16b t_last_model_eeram_;
         SerialRAM *rP_;
         Flt_ram *fault_;
         Flt_ram *history_;
