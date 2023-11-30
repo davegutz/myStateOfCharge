@@ -86,7 +86,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   boolean reset = false;
   urgency request;
 
-  // Serial event  (terminate Send String data with 0A using CoolTerm)
+  // Serial event
   if (cp.token)
   {
     // Categorize the requests

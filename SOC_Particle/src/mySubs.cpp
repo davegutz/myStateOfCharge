@@ -653,23 +653,24 @@ void serialEvent()
     // get the new byte:
     char inChar = (char)Serial.read();
 
-    // add it to the cp.input_str:
-    cp.input_str += inChar;
+    // Deal with backspace = deletion
+    if ( inChar == '\b' &&  cp.input_str.length() > 0 )
+    {
+        cp.input_str.remove(cp.input_str.length()-1);
+
+    }
+    else      
+      cp.input_str += inChar;  // add it to the cp.input_str:
     
-    // if (inChar == '\n') Serial.printf("<CR>");
-    // else if (inChar == '\0') Serial.printf("<EOL>");
-    // else Serial.printf("%c", inChar);
     if ( inChar=='\r' ) Serial.printf("\n");
 
-    // if the incoming character is a newline, set a flag
-    // so the main loop can do something about it:
+    // if the incoming character is a newline, set a flag so the main loop can do something about it:
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
     {
       finish_request();
       break;  // enable reading multiple inputs
     }
   }
-  // if ( cp.token ) Serial.printf("serialEvent:  %s\n", cp.input_str.c_str());
 }
 
 /*
@@ -685,13 +686,16 @@ void serialEvent1()
   {
     // get the new byte:
     char inChar = (char)Serial1.read();
-    // add it to the cp.input_str:
-    cp.input_str += inChar;
+
+    // Deal with backspace = deletion
+    if ( inChar == '\b' &&  cp.input_str.length() > 0 )
+        cp.input_str.remove(cp.input_str.length()-1);
+    else
+      cp.input_str += inChar;  // add it to the cp.input_str:
 
     if ( inChar=='\r' ) Serial.printf("\n");
 
-    // if the incoming character is a newline, set a flag
-    // so the main loop can do something about it:
+    // if the incoming character is a newline, set a flag so the main loop can do something about it:
     if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
     {
       finish_request();
