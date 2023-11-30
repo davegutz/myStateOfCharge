@@ -162,10 +162,13 @@ void setup()
 
   // EERAM
   #ifdef CONFIG_47L16
+Serial.printf("before ram.begin Time.now %ld\n", (unsigned long)Time.now());
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
+Serial.printf("before load_all Time.now %ld\n", (unsigned long)Time.now());
     sp.load_all();
+Serial.printf("after load_all Time.now %ld\n", (unsigned long)Time.now());
   #endif
 
   // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
@@ -251,7 +254,6 @@ void setup()
     delay(1);
     millis_flip = millis()%1000;
   }
-  Serial.printf("millis_flip%ld count%d\n", millis_flip, count);
 
   // Enable and print stored history
   #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)  // TODO: test that ARGON still works with the #if in place

@@ -153,27 +153,42 @@ public:
     double min_of() { return min_; }
 
     double nominal() { return default_; }
+
+    void print_str()
+    {
+        if ( !check_off_ )
+            sprintf(cp.buffer, " %-20s %9.1f -> %9.1f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        else
+            sprintf(cp.buffer, " %-33s %9.1f, %10s (* %s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+    }
     
     void print()
     {
-        sprintf(cp.buffer, " %-20s %9.1f -> %9.1f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial.printf("%s\n", cp.buffer);
     }
 
     void print1()
     {
-        sprintf(cp.buffer, " %-20s %9.1f -> %9.1f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial1.printf("%s\n", cp.buffer);
+    }
+
+    void print_help_str()
+    {
+        sprintf(cp.buffer, "* %s= %9.1f: %s, %s (%9.1f - %9.1f) [%9.1f]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
     
     void print_help()
     {
-      Serial.printf("* %s= %9.1f: %s, %s (%9.1f - %9.1f) [%9.1f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial.printf("%s\n", cp.buffer);
     }
 
     void print1_help()
     {
-      Serial1.printf("* %s= %9.1f: %s, %s (%9.1f - %9.1f) [%9.1f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial1.printf("%s\n", cp.buffer);
     }
 
     void print_adj_print(const double input)
@@ -272,26 +287,41 @@ public:
 
     float nominal() { return default_; }
     
+    void print_str()
+    {
+        if ( !check_off_ )
+            sprintf(cp.buffer, " %-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        else
+            sprintf(cp.buffer, " %-33s %9.3f, %10s (* %s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+    }
+
     void print()
     {
-        sprintf(cp.buffer, " %-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial.printf("%s\n", cp.buffer);
     }
 
     void print1()
     {
-        sprintf(cp.buffer, " %-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial1.printf("%s\n", cp.buffer);
     }
     
+    void print_help_str()
+    {
+        sprintf(cp.buffer, "* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+    }
+
     void print_help()
     {
-      Serial.printf("* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial.printf("%s\n", cp.buffer);
     }
 
     void print1_help()
     {
-      Serial1.printf("* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial1.printf("%s\n", cp.buffer);
     }
 
     void print_adj_print(const float input)
@@ -363,26 +393,39 @@ public:
 
     float nominal() { return default_; }
     
-    void print()
+    void print_str()
     {
         sprintf(cp.buffer, " %-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, NAN, units_.c_str(), code_.c_str());
         Serial.printf("%s\n", cp.buffer);
     }
 
+    void print()
+    {
+        print_str();
+        Serial.printf("%s\n", cp.buffer);
+    }
+
     void print1()
     {
-        sprintf(cp.buffer, " %-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, NAN, units_.c_str(), code_.c_str());
+        print_str();
         Serial1.printf("%s\n", cp.buffer);
+    }
+
+    void print_help_str()
+    {
+        sprintf(cp.buffer, "* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
     
     void print_help()
     {
-      Serial.printf("* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial.printf("%s\n", cp.buffer);
     }
 
     void print1_help()
     {
-      Serial1.printf("* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]\n", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial.printf("%s\n", cp.buffer);
     }
 
     virtual void set_default(){}
@@ -457,26 +500,40 @@ public:
 
     int nominal() { return default_; }
     
+    void print_str()
+    {
+        if ( !check_off_ )
+            sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        else
+            sprintf(cp.buffer, " %-33s %9d, %10s (* %s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+    }
     void print()
     {
-        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial.printf("%s\n", cp.buffer);
     }
     
     void print1()
     {
-        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial1.printf("%s\n", cp.buffer);
+    }
+
+    void print_help_str()
+    {
+      Serial.printf("* %s= %d: %s, %s (%d - %d) [%d]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print_help()
     {
-      Serial.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial.printf("%s\n", cp.buffer);
     }
     
     void print1_help()
     {
-      Serial1.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial1.printf("%s\n", cp.buffer);
     }
     
     void print_adj_print(const int input)
@@ -575,26 +632,41 @@ public:
 
     int8_t nominal() { return default_; }
     
+    void print_str()
+    {
+        if ( !check_off_ )
+            sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        else
+            sprintf(cp.buffer, " %-33s %9d, %10s (* %s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+    }
+
     void print()
     {
-        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial.printf("%s\n", cp.buffer);
     }
     
     void print1()
     {
-        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial1.printf("%s\n", cp.buffer);
+    }
+
+    void print_help_str()
+    {
+      sprintf(cp.buffer, "* %s= %d: %s, %s (%d - %d) [%d]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print_help()
     {
-      Serial.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial.printf("%s\n", cp.buffer);
     }
     
     void print1_help()
     {
-      Serial1.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial1.printf("%s\n", cp.buffer);
     }
     
     void print_adj_print(const int8_t input)
@@ -691,26 +763,41 @@ public:
 
     uint8_t nominal() { return default_; }
     
+    void print_str()
+    {
+        if ( !check_off_ )
+            sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        else
+            sprintf(cp.buffer, " %-33s %9d, %10s (* %s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+    }
+
     void print()
     {
-        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial.printf("%s\n", cp.buffer);
     }
     
     void print1()
     {
-        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial1.printf("%s\n", cp.buffer);
+    }
+
+    void print_help_str()
+    {
+        sprintf(cp.buffer, "* %s= %d: %s, %s (%d - %d) [%d]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
     }
 
     void print_help()
     {
-      Serial.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial.printf("%s\n", cp.buffer);
     }
 
     void print1_help()
     {
-      Serial1.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        print_help_str();
+        Serial1.printf("%s\n", cp.buffer);
     }
 
     void print_adj_print(const uint8_t input)
@@ -785,7 +872,10 @@ public:
     unsigned long get()
     {
         if ( is_eeram_ )
-            *val_ = rP_->read(addr_.a16);
+        {
+            rP_->get(addr_.a16, *val_);
+            Time.setTime(*val_);
+        }
         return *val_;
     }
 
@@ -806,27 +896,43 @@ public:
     unsigned long min_of() { return min_; }
 
     unsigned long nominal() { return default_; }
+
+    void print_str()
+    {
+        if ( !check_off_ )
+            sprintf(cp.buffer, " %-18s %10d -> %10d, %10s (* %s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), code_.c_str());
+        else
+            sprintf(cp.buffer, " %-32s %10d, %10s (* %s)", description_.c_str(), (int)*val_, units_.c_str(), code_.c_str());
+    }
     
     void print()
     {
-        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial.printf("%s\n", cp.buffer);
     }
     
     void print1()
     {
-        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), code_.c_str());
+        print_str();
         Serial1.printf("%s\n", cp.buffer);
+    }
+
+    void print_help_str()
+    {
+        sprintf(cp.buffer, "* %s= %d: %s, %s (%d - %d) [%d]", code_.c_str(), (int)*val_, description_.c_str(), units_.c_str(), (int)min_, (int)max_, (int)default_);
+
     }
 
     void print_help()
     {
-      Serial.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), (int)*val_, description_.c_str(), units_.c_str(), (int)min_, (int)max_, (int)default_);
+        print_help_str();
+        Serial.printf("%s\n", cp.buffer);
     }
 
     void print1_help()
     {
-      Serial1.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), (int)*val_, description_.c_str(), units_.c_str(), (int)min_, (int)max_, (int)default_);
+        print_help_str();
+        Serial1.printf("%s\n", cp.buffer);
     }
 
     void print_adj_print(const unsigned long input)
@@ -844,7 +950,7 @@ public:
         else
         {
             *val_ = val;
-            if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
+            if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
         }
         Time.setTime(*val_);
     }
@@ -943,8 +1049,8 @@ public:
     float Tb_bias_hdwe() { return Tb_bias_hdwe_stored; }
     unsigned long Time_now() { return Time_now_stored; }
     uint8_t type() { return Type_stored; }
-    float T_last() { return T_last_stored; }
-    float T_last_model() { return T_last_model_stored; }
+    float T_state() { return T_state_stored; }
+    float T_state_model() { return T_state_model_stored; }
     float Vb_bias_hdwe() { return Vb_bias_hdwe_stored; }
     float Vb_scale() { return Vb_scale_stored; }
 
@@ -1003,8 +1109,8 @@ public:
         float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
         unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
         uint8_t get_Type() { return Type_p->get(); }
-        float get_T_last() { return T_last_p->get(); }
-        float get_T_last_model() { return T_last_model_p->get(); }
+        float get_T_state() { return T_state_p->get(); }
+        float get_T_state_model() { return T_state_model_p->get(); }
         float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
         float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Vb_scale_stored
 
@@ -1032,8 +1138,8 @@ public:
         float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
         unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
         uint8_t get_Type() { return Type_p->get(); }  // TODO:  should these be Type_stored
-        float get_T_last() { return T_last_p->get(); }
-        float get_T_last_model() { return T_last_model_p->get(); }
+        float get_T_state() { return T_state_p->get(); }
+        float get_T_state_model() { return T_state_model_p->get(); }
         float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
         float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Ib_bias_stored
     #endif
@@ -1088,10 +1194,10 @@ public:
         void put_Time_now(const unsigned long input) { Time_now_p->set(input); }
         void put_Type(const uint8_t input) { Type_p->set(input); }
 
-        void put_T_last(const float input) { T_last_p->set(input); }
-        void put_T_last() {}
-        void put_T_last_model(const float input) { T_last_model_p->set(input); }
-        void put_T_last_model() {}
+        void put_T_state(const float input) { T_state_p->set(input); }
+        void put_T_state() {}
+        void put_T_state_model(const float input) { T_state_model_p->set(input); }
+        void put_T_state_model() {}
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
         void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
 
@@ -1134,10 +1240,10 @@ public:
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
         void put_Time_now(const float input) { Time_now_p->set(input); }
         void put_Type(const uint8_t input) { Type_p->set(input); }
-        void put_T_last(const float input) { T_last_p->set(input); }
-        void put_T_last() { T_last_p->set(T_last_stored); }
-        void put_T_last_model(const float input) { T_last_model_p->set(input); }
-        void put_T_last_model() { T_last_p->set(T_last_model_stored); }
+        void put_T_state(const float input) { T_state_p->set(input); }
+        void put_T_state() { T_state_p->set(T_state_stored); }
+        void put_T_state_model(const float input) { T_state_model_p->set(input); }
+        void put_T_state_model() { T_state_p->set(T_state_model_stored); }
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
         void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
 
@@ -1169,8 +1275,8 @@ public:
     Uint8tStorage *Sim_chm_p;
     FloatStorage *Tb_bias_hdwe_p;
     ULongStorage *Time_now_p;
-    FloatStorage *T_last_p;
-    FloatStorage *T_last_model_p;
+    FloatStorage *T_state_p;
+    FloatStorage *T_state_model_p;
     Uint8tStorage *Type_p;
     FloatStorage *Vb_bias_hdwe_p;
     FloatStorage *Vb_scale_p;
@@ -1199,8 +1305,8 @@ public:
     float Tb_bias_hdwe_stored;
     unsigned long Time_now_stored;
     uint8_t Type_stored;
-    float T_last_stored;
-    float T_last_model_stored;
+    float T_state_stored;
+    float T_state_model_stored;
     float Vb_bias_hdwe_stored;
     float Vb_scale_stored;
 
