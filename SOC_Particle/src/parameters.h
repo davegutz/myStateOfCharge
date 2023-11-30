@@ -425,7 +425,7 @@ public:
     void print1_help()
     {
         print_help_str();
-        Serial.printf("%s\n", cp.buffer);
+        Serial1.printf("%s\n", cp.buffer);
     }
 
     virtual void set_default(){}
@@ -919,7 +919,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %d: %s, %s (%d - %d) [%d]", code_.c_str(), (int)*val_, description_.c_str(), units_.c_str(), (int)min_, (int)max_, (int)default_);
+        sprintf(cp.buffer, "* %s= %ld: %s, %s (%ld - %ld) [%ld]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
 
     }
 
