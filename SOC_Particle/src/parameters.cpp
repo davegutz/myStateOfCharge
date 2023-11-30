@@ -70,7 +70,7 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     S_cap_sim_p         = new FloatStorage(  "Sq", "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
     Sim_chm_p           = new Uint8tStorage( "Bs", "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_stored, SIM_CHEM);
     Tb_bias_hdwe_p      = new FloatStorage(  "Dt", "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
-    Time_now_p          = new TimetStorage(  "UT", "UNIX time since epoch","sec",     0UL,  2869033880UL, &Time_now_stored, 1669801880UL, false);
+    Time_now_p          = new ULongStorage(  "UT", "UNIX time since epoch","sec",     0UL,  3400000000UL, &Time_now_stored, 1669801880UL, true);
     Type_p              = new Uint8tStorage( "Xt", "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
     T_last_p            = new FloatStorage(  "na", "Tb rate lim mem",     "dg C",     -10,  70,  &T_last_stored, RATED_TEMP, false);
     T_last_model_p      = new FloatStorage(  "na", "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_last_model_stored, RATED_TEMP, false);
@@ -137,7 +137,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     S_cap_sim_p         = new FloatStorage(  "Sq", rP_, "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
     Sim_chm_p           = new Uint8tStorage( "Bs", rP_, "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_stored, SIM_CHEM);
     Tb_bias_hdwe_p      = new FloatStorage(  "Dt", rP_, "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
-    Time_now_p          = new TimetStorage(  "UT", rP_, "UNIX time since epoch","sec",     0UL,  2869033880UL, &Time_now_stored, 1669801880UL, false);
+    Time_now_p          = new ULongStorage(  "UT", rP_, "UNIX time since epoch","sec",     0UL,  3400000000UL, &Time_now_stored, 1669801880UL, true);
     Type_p              = new Uint8tStorage( "Xt", rP_, "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
     T_last_p            = new FloatStorage(  "na", rP_, "Tb rate lim mem",     "dg C",     -10,  70,  &T_last_stored, RATED_TEMP, false);
     T_last_model_p      = new FloatStorage(  "na", rP_, "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_last_model_stored, RATED_TEMP, false);
@@ -173,7 +173,10 @@ SavedPars::SavedPars(SerialRAM *ram)
     Z_[size_++] = Type_p;
     Z_[size_++] = Vb_bias_hdwe_p;
     Z_[size_++] = Vb_scale_p;
-
+    for ( int i=0; i<size_; i++ )
+    {
+        next_ = Z_[i]->assign_addr(next_);
+    }
     iflt_eeram_.a16 =  next_;  next_ += sizeof(iflt_);
     ihis_eeram_.a16 =  next_;  next_ += sizeof(ihis_);
     inj_bias_eeram_.a16 =  next_;  next_ += sizeof(inj_bias_);
@@ -407,7 +410,7 @@ void SavedPars::put_all_dynamic()
             break;
 
         case ( 6 ):
-            put_Time_now(Time.now());  // If happen to connect to wifi (assume updated automatically), save new time
+            put_Time_now((unsigned long)Time.now());  // If happen to connect to wifi (assume updated automatically), save new time
             blink = 0;
             break;
 

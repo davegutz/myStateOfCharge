@@ -797,7 +797,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'T' ):  //*  UT<>:  Unix time since epoch
-              sp.Time_now_p->print_adj_print((time_t)cp.input_str.substring(1).toInt());
+              sp.Time_now_p->print_adj_print(cp.input_str.substring(2).toInt());
               break;
 
             default:

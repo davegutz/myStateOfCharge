@@ -73,6 +73,8 @@ public:
 
     const char* units() { return units_.c_str(); }
 
+    // Placeholders
+    virtual uint16_t assign_addr(uint16_t next){return next;}
     virtual boolean is_corrupt(){return false;};
     virtual boolean is_off(){return false;};
     virtual void print(){};
@@ -137,7 +139,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -195,7 +197,7 @@ public:
 
     virtual void set_default()
     {
-        set(default_);
+        if ( !check_off_ ) set(default_);
     }
 
 protected:
@@ -255,7 +257,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -313,7 +315,7 @@ public:
 
     virtual void set_default()
     {
-        set(default_);
+        if ( !check_off_ ) set(default_);
     }
 
 protected:
@@ -440,7 +442,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -498,7 +500,7 @@ public:
 
     virtual void set_default()
     {
-        set(default_);
+        if ( !check_off_ ) set(default_);
     }
 
 protected:
@@ -558,7 +560,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -616,7 +618,7 @@ public:
 
     virtual void set_default()
     {
-        set(default_);
+        if ( !check_off_ ) set(default_);
     }
 
 protected:
@@ -674,7 +676,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -732,7 +734,7 @@ public:
 
     virtual void set_default()
     {
-        set(default_);
+        if ( !check_off_ ) set(default_);
     }
 
 protected:
@@ -743,13 +745,13 @@ protected:
     boolean check_off_;
 };
 
-class TimetStorage: public Storage
+class ULongStorage: public Storage
 {
 public:
-    TimetStorage(){}
+    ULongStorage(){}
 
-    TimetStorage(const String &code, const String &description, const String &units, const time_t min, const time_t max, time_t *store,
-    const time_t _default=0, const boolean check_off=true):
+    ULongStorage(const String &code, const String &description, const String &units, const unsigned long min, const unsigned long max, unsigned long *store,
+    const unsigned long _default=0, const boolean check_off=true):
         Storage(code, description, units, true)
     {
         min_ = min;
@@ -761,8 +763,8 @@ public:
     }
 
 
-    TimetStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const time_t min, const time_t max,
-    time_t *store, const time_t _default=0, const boolean check_off=true):
+    ULongStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
+    unsigned long *store, const unsigned long _default=0, const boolean check_off=true):
         Storage(code, ram, description, units, true)
     {
         min_ = min;
@@ -772,15 +774,15 @@ public:
         check_off_ = check_off;
     }
 
-    ~TimetStorage(){}
+    ~ULongStorage(){}
 
     uint16_t assign_addr(uint16_t next)
     {
         addr_.a16 = next;
-        return next + sizeof(time_t);
+        return next + sizeof(unsigned long);
     }
 
-    time_t get()
+    unsigned long get()
     {
         if ( is_eeram_ )
             *val_ = rP_->read(addr_.a16);
@@ -790,7 +792,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s corrupt\n", description_.c_str());
+        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -799,11 +801,11 @@ public:
         return *val_ != default_ && !check_off_;
     }
 
-    time_t max_of() { return max_; }
+    unsigned long max_of() { return max_; }
 
-    time_t min_of() { return min_; }
+    unsigned long min_of() { return min_; }
 
-    time_t nominal() { return default_; }
+    unsigned long nominal() { return default_; }
     
     void print()
     {
@@ -813,21 +815,21 @@ public:
     
     void print1()
     {
-        // sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), code_.c_str());
-        // Serial1.printf("%s\n", cp.buffer);
+        sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), code_.c_str());
+        Serial1.printf("%s\n", cp.buffer);
     }
 
     void print_help()
     {
-    //   Serial.printf("* %s= %d: %s, %s (%d - %d) [%lld]\n", code_.c_str(), (int)*val_, description_.c_str(), units_.c_str(), (int)min_, (int)max_, (int)default_);
+      Serial.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), (int)*val_, description_.c_str(), units_.c_str(), (int)min_, (int)max_, (int)default_);
     }
 
     void print1_help()
     {
-    //   Serial1.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), (int)*val_, description_.c_str(), units_.c_str(), (int)min_, (int)max_, (int)default_);
+      Serial1.printf("* %s= %d: %s, %s (%d - %d) [%d]\n", code_.c_str(), (int)*val_, description_.c_str(), units_.c_str(), (int)min_, (int)max_, (int)default_);
     }
 
-    void print_adj_print(const time_t input)
+    void print_adj_print(const unsigned long input)
     {
         print();
         print1();
@@ -836,7 +838,7 @@ public:
         print1();
     }
    
-    void set(time_t val)
+    void set(unsigned long val)
     {
         if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
         else
@@ -844,18 +846,19 @@ public:
             *val_ = val;
             if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
         }
+        Time.setTime(*val_);
     }
 
     virtual void set_default()
     {
-        set(default_);
+        if ( !check_off_ ) set(default_);
     }
 
 protected:
-    time_t *val_;
-    time_t min_;
-    time_t max_;
-    time_t default_;
+    unsigned long *val_;
+    unsigned long min_;
+    unsigned long max_;
+    unsigned long default_;
     boolean check_off_;
 };
 
@@ -938,7 +941,7 @@ public:
     uint8_t preserving() { return preserving_; }
 
     float Tb_bias_hdwe() { return Tb_bias_hdwe_stored; }
-    time_t Time_now() { return Time_now_stored; }
+    unsigned long Time_now() { return Time_now_stored; }
     uint8_t type() { return Type_stored; }
     float T_last() { return T_last_stored; }
     float T_last_model() { return T_last_model_stored; }
@@ -998,7 +1001,7 @@ public:
         float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
         float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
-        time_t get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
+        unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
         uint8_t get_Type() { return Type_p->get(); }
         float get_T_last() { return T_last_p->get(); }
         float get_T_last_model() { return T_last_model_p->get(); }
@@ -1027,7 +1030,7 @@ public:
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
         uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
         float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
-        time_t get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
+        unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
         uint8_t get_Type() { return Type_p->get(); }  // TODO:  should these be Type_stored
         float get_T_last() { return T_last_p->get(); }
         float get_T_last_model() { return T_last_model_p->get(); }
@@ -1082,7 +1085,7 @@ public:
         void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
         void put_Sim_chm() {}
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
-        void put_Time_now(const float input) { Time_now_p->set(input); }
+        void put_Time_now(const unsigned long input) { Time_now_p->set(input); }
         void put_Type(const uint8_t input) { Type_p->set(input); }
 
         void put_T_last(const float input) { T_last_p->set(input); }
@@ -1165,7 +1168,7 @@ public:
     FloatStorage *S_cap_sim_p;
     Uint8tStorage *Sim_chm_p;
     FloatStorage *Tb_bias_hdwe_p;
-    TimetStorage *Time_now_p;
+    ULongStorage *Time_now_p;
     FloatStorage *T_last_p;
     FloatStorage *T_last_model_p;
     Uint8tStorage *Type_p;
@@ -1194,7 +1197,7 @@ public:
     float S_cap_sim_stored;
     uint8_t Sim_chm_stored;
     float Tb_bias_hdwe_stored;
-    time_t Time_now_stored;
+    unsigned long Time_now_stored;
     uint8_t Type_stored;
     float T_last_stored;
     float T_last_model_stored;
