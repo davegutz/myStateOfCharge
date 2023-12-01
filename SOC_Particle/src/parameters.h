@@ -176,7 +176,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %9.1f: (%-6.1f - %6.1f) [%6.1f] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(cp.buffer, "* %s= %6.1f: (%-6.1f-%6.1f) [%6.1f] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
     
     void print_help()
@@ -309,7 +309,7 @@ public:
     
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %9.3f: (%-6.3g-%6.3g) [%6.3f] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(cp.buffer, "* %s= %6.3f: (%-6.3g-%6.3g) [%6.3f] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -412,7 +412,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %9.3f: (%-6.3g-%6.3g) [%6.3f] %s, %s", code_.c_str(), NAN, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(cp.buffer, "* %s= %6.3f: (%-6.3g-%6.3g) [%6.3f] %s, %s", code_.c_str(), NAN, min_, max_, default_, description_.c_str(), units_.c_str());
     }
     
     void print_help()
@@ -520,7 +520,7 @@ public:
 
     void print_help_str()
     {
-      Serial.printf("* %s= %d: (%-6d - %6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+      Serial.printf("* %s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -654,7 +654,7 @@ public:
 
     void print_help_str()
     {
-      sprintf(cp.buffer, "* %s= %d: (%-6d - %6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+      sprintf(cp.buffer, "* %s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -785,7 +785,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %d: (%-6d - %6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(cp.buffer, "* %s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -919,7 +919,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %ld: (%-6ld - %6ld) [%6ld] %s, %s", code_.c_str(), min_, max_, default_, *val_, description_.c_str(), units_.c_str());
+        sprintf(cp.buffer, "* %s= %6ld: (%-6ld-%6ld) [%6ld] %s, %s", code_.c_str(), min_, max_, default_, *val_, description_.c_str(), units_.c_str());
 
     }
 
