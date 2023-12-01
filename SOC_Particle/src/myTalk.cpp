@@ -759,11 +759,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 cp.cmd_reset();
                 chit("HR;", SOON);
                 chit("Rf;", SOON);
-                chit("W3;", SOON);
+                // chit("W3;", SOON);
                 chit("Hs;", SOON);
                 chit("Pf;", SOON);
-                Serial.printf("Clean. Deploy\n");
-                Serial1.printf("Clean. Deploy\n");
                 break;
 
               case ( 's' ):  // Rs:  small reset filters
