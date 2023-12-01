@@ -66,11 +66,13 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Ib_select_p         = new Int8tStorage(  "si", "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
     Iflt_p              = new IntStorage(    "na", "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_stored, -1, true);
     Ihis_p              = new IntStorage(    "na", "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_stored, -1, true);
+    Inj_bias_p          = new FloatStorage(  "Xb", "Injection bias",      "A",        -100, 100, &Inj_bias_stored, 0.);
     Isum_p              = new IntStorage(    "na", "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_stored, -1, true);
     Modeling_p          = new Uint8tStorage( "Xm", "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
     Mon_chm_p           = new Uint8tStorage( "Bm", "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_stored, MON_CHEM);
     nP_p                = new FloatStorage(  "BP", "Number parallel",     "units",     1e-6, 100, &nP_stored, NP);
     nS_p                = new FloatStorage(  "BS", "Number series",       "units",     1e-6, 100, &nS_stored, NS);
+    Preserving_p        = new Uint8tStorage( "X?", "Preserving fault",    "T=Preserve", 0, 1, &Preserving_stored, 0, true);
     S_cap_mon_p         = new FloatStorage(  "SQ", "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_stored, 1.);
     S_cap_sim_p         = new FloatStorage(  "Sq", "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
     Sim_chm_p           = new Uint8tStorage( "Bs", "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_stored, SIM_CHEM);
@@ -99,11 +101,13 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Z_[size_++] = Ib_select_p;
     Z_[size_++] = Iflt_p;
     Z_[size_++] = Ihis_p;
+    Z_[size_++] = Inj_bias_p;
     Z_[size_++] = Isum_p;
     Z_[size_++] = Modeling_p;
     Z_[size_++] = Mon_chm_p;
     Z_[size_++] = nP_p;
     Z_[size_++] = nS_p;
+    Z_[size_++] = Preserving_p;
     Z_[size_++] = S_cap_mon_p;
     Z_[size_++] = S_cap_sim_p;
     Z_[size_++] = Sim_chm_p;
@@ -139,11 +143,13 @@ SavedPars::SavedPars(SerialRAM *ram)
     Ib_select_p         = new Int8tStorage(  "si", rP_, "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
     Iflt_p              = new IntStorage(    "na", rP_, "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_stored, -1, true);
     Ihis_p              = new IntStorage(    "na", rP_, "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_stored, -1, true);
+    Inj_bias_p          = new FloatStorage(  "Xb", rP_, "Injection bias",      "A",        -100, 100, &Inj_bias_stored, 0.);
     Isum_p              = new IntStorage(    "na", rP_, "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_stored, -1, true);
     Modeling_p          = new Uint8tStorage( "Xm", rP_, "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
     Mon_chm_p           = new Uint8tStorage( "Bm", rP_, "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_stored, MON_CHEM);
     nP_p                = new FloatStorage(  "BP", rP_, "Number parallel",     "units",     1e-6, 100, &nP_stored, NP);
     nS_p                = new FloatStorage(  "BS", rP_, "Number series",       "units",     1e-6, 100, &nS_stored, NS);
+    Preserving_p        = new Uint8tStorage( "X?", rP_, "Preserving fault",    "T=Preserve", 0, 1, &Preserving_stored, 0, true);
     S_cap_mon_p         = new FloatStorage(  "SQ", rP_, "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_stored, 1.);
     S_cap_sim_p         = new FloatStorage(  "Sq", rP_, "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
     Sim_chm_p           = new Uint8tStorage( "Bs", rP_, "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_stored, SIM_CHEM);
@@ -172,11 +178,13 @@ SavedPars::SavedPars(SerialRAM *ram)
     Z_[size_++] = Ib_select_p;
     Z_[size_++] = Iflt_p;
     Z_[size_++] = Ihis_p;
+    Z_[size_++] = Inj_bias_p;
     Z_[size_++] = Isum_p;
     Z_[size_++] = Modeling_p;
     Z_[size_++] = Mon_chm_p;
     Z_[size_++] = nP_p;
     Z_[size_++] = nS_p;
+    Z_[size_++] = Preserving_p;
     Z_[size_++] = S_cap_mon_p;
     Z_[size_++] = S_cap_sim_p;
     Z_[size_++] = Sim_chm_p;
@@ -191,9 +199,6 @@ SavedPars::SavedPars(SerialRAM *ram)
     {
         next_ = Z_[i]->assign_addr(next_);
     }
-    inj_bias_eeram_.a16 =  next_;  next_ += sizeof(inj_bias_);
-    preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving_);
-
     nflt_ = int( NFLT ); 
     fault_ = new Flt_ram[nflt_];
     for ( int i=0; i<nflt_; i++ )
@@ -219,12 +224,6 @@ boolean SavedPars::is_corrupt()
 {
     boolean corruption = false;
     for ( int i=0; i<size_; i++ ) corruption |= Z_[i]->is_corrupt();
-    corruption = corruption ||
-        is_val_corrupt(iflt_, -1, nflt_+1) ||
-        is_val_corrupt(ihis_, -1, nhis_+1) ||
-        is_val_corrupt(inj_bias_, float(-100.), float(100.)) ||
-        is_val_corrupt(isum_, -1, NSUM+1) ||
-        is_val_corrupt(preserving_, uint8_t(0), uint8_t(1));
     if ( corruption )
     {
         Serial.printf("corrupt****\n");
@@ -252,18 +251,13 @@ boolean SavedPars::is_corrupt()
         get_Ib_select();
         get_Iflt();
         get_Ihis();
-
-        get_inj_bias();
-
+        get_Inj_bias();
         get_Isum();
-
         get_Modeling();
         get_Mon_chm();
         get_nP();
         get_nS();
-
-        get_preserving();
-
+        get_Preserving();
         get_Sim_chm();
         get_S_cap_mon();
         get_S_cap_sim();
@@ -284,10 +278,6 @@ boolean SavedPars::is_corrupt()
 int SavedPars::num_diffs()
 {
     int n = 0;
-    // Don't count memories
-    // if ( int(-1) != iflt_ )    //     n++;
-    // if ( int(-1) != isum_ )    //     n++;
-    // if ( uint8_t(0) != preserving_ )    //     n++;
     if ( Amp_p->is_off() ) n++;
     if ( Cutback_gain_sclr_p->is_off() ) n++;
     if ( Dw_p->is_off() ) n++;
@@ -304,12 +294,11 @@ int SavedPars::num_diffs()
     if ( Ib_select_p->is_off() ) n++;
     if ( Iflt_p->is_off() ) n++;
     if ( Ihis_p->is_off() ) n++;
+    if ( Inj_bias_p->is_off() ) n++;
     if ( Isum_p->is_off() ) n++;
-    
-    if ( float(0.) != inj_bias_ ) n++;
-    
     if ( Modeling_p->is_off() ) n++;
     if ( Mon_chm_p->is_off() ) n++;
+    if ( Preserving_p->is_off() ) n++;
     if ( nP_p->is_off() ) n++;
     if ( nS_p->is_off() ) n++;
     if ( S_cap_mon_p->is_off() ) n++;
@@ -342,13 +331,7 @@ void SavedPars::pretty_print(const boolean all)
 {
     Serial.printf("saved (sp): all=%d\n", all);
     Serial.printf("             defaults    current EERAM values\n");
-
-    if ( all || float(0.) != inj_bias_ )        Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias_);
-
-    if ( all )                                  Serial.printf(" preserving %d  %d *Xm<>\n", uint8_t(0), preserving_);
-
     for (int i=0; i<size_; i++ ) if ( all || Z_[i]->is_off() )  Z_[i]->print();
-
     if ( all )
     {
         Serial.printf("history array (%d):\n", nhis_);

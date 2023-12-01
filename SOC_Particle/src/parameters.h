@@ -1036,16 +1036,12 @@ public:
     int8_t Ib_select() { return Ib_select_stored; }
     int Iflt() { return Iflt_stored; }
     int Ihis() { return Ihis_stored; }
+    float Inj_bias() { return Inj_bias_stored; }
     int Isum() { return Isum_stored; }
-
-    float inj_bias() { return inj_bias_; }
-
     uint8_t Modeling() { return Modeling_stored; }
     float nP() { return nP_stored; }
     float nS() { return nS_stored; }
-
-    uint8_t preserving() { return preserving_; }
-
+    uint8_t Preserving() { return Preserving_stored; }
     float Tb_bias_hdwe() { return Tb_bias_hdwe_stored; }
     unsigned long Time_now() { return Time_now_stored; }
     uint8_t type() { return Type_stored; }
@@ -1092,16 +1088,12 @@ public:
         int get_Iflt() { return Iflt_stored; }
         int get_Ihis() { return Ihis_stored; }
         int get_Isum() { return Isum_stored; }
-
-        void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias_ = value; }
-        
+        float get_Inj_bias() { return Inj_bias_stored; }
         uint8_t get_Modeling() { return Modeling_p->get(); }
         uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
         uint8_t get_nP() { return nP_p->get(); }
         uint8_t get_nS() { return nS_p->get(); }
-        
-        void get_preserving() { preserving_ = rP_->read(preserving_eeram_.a16); }
-
+        uint8_t get_Preserving() { return Preserving_stored; }
         uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
         float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
@@ -1129,11 +1121,13 @@ public:
         double get_Ib_select() { return Ib_select_p->get(); }
         int get_Iflt() { return Iflt_stored; }
         int get_Ihis() { return Ihis_stored; }
+        float get_Inj_bias() { return Inj_bias_stored; }
         int get_Isum() { return Isum_stored; }
         uint8_t get_Modeling() { return Modeling_p->get(); }
+        uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
         uint8_t get_nP() { return nP_p->get(); }
         uint8_t get_nS() { return nS_p->get(); }
-        uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
+        uint8_t get_Preserving() { return Preserving_p->get(); }
         float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
         uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
@@ -1179,17 +1173,13 @@ public:
         void put_Ihis(const int input) { Ihis_p->set(input); }
         void put_Isum(const int input) { Isum_p->set(input); }
         void put_isum(const int input) { isum_ = input; }
-
-        void put_inj_bias(const float input) { inj_bias_ = input; }
-
+        void put_Inj_bias(const float input) { Inj_bias_p->set(input); }
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); Modeling_stored = Modeling();}
         void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
         void put_Mon_chm() {}
         void put_nP(const float input) { nP_p->set(input); }
         void put_nS(const float input) { nS_p->set(input); }
-
-        void put_preserving(const uint8_t input) { preserving_ = input; }
-
+        void put_Preserving(const uint8_t input) { Preserving_p->set(input); }
         void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
         void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
         void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
@@ -1197,7 +1187,6 @@ public:
         void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
         void put_Time_now(const unsigned long input) { Time_now_p->set(input); }
         void put_Type(const uint8_t input) { Type_p->set(input); }
-
         void put_T_state(const float input) { T_state_p->set(input); }
         void put_T_state() {}
         void put_T_state_model(const float input) { T_state_model_p->set(input); }
@@ -1226,17 +1215,13 @@ public:
         void put_Iflt(const int input) { Iflt_p->set(input); }
         void put_Ihis(const int input) { Ihis_p->set(input); }
         void put_Isum(const int input) { Isum_p->set(input); }
-
-        void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias_ = input; }
-
+        void put_Inj_bias(const float input) { Inj_bias_p->set(input); }
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); }
         void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
         void put_Mon_chm() {}
         void put_nP(const float input) { nP_p->set(input); }
         void put_nS(const float input) { nS_p->set(input); }
-
-        void put_preserving(const uint8_t input) { rP_->write(preserving_eeram_.a16, input); preserving_ = input; }
-
+        void put_Preserving(const uint8_t input) { Preserving_p->set(input); }
         void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
         void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
         void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
@@ -1272,11 +1257,13 @@ public:
     Int8tStorage *Ib_select_p;
     IntStorage *Iflt_p;
     IntStorage *Ihis_p;
+    FloatStorage *Inj_bias_p;
     IntStorage *Isum_p;
     Uint8tStorage *Modeling_p;
     Uint8tStorage *Mon_chm_p;
     FloatStorage *nP_p;
     FloatStorage *nS_p;
+    Uint8tStorage *Preserving_p;
     FloatStorage *S_cap_mon_p;
     FloatStorage *S_cap_sim_p;
     Uint8tStorage *Sim_chm_p;
@@ -1304,11 +1291,13 @@ public:
     float Ib_scale_noa_stored;
     int Iflt_stored;
     int Ihis_stored;
+    float Inj_bias_stored;
     int Isum_stored;
     uint8_t Modeling_stored;
     uint8_t Mon_chm_stored;
     float nP_stored;
     float nS_stored;
+    uint8_t Preserving_stored;
     float S_cap_mon_stored;
     float S_cap_sim_stored;
     uint8_t Sim_chm_stored;
