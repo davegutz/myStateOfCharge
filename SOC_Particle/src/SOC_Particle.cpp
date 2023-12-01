@@ -101,7 +101,7 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
 
 #ifdef CONFIG_DS2482
   #include "DS2482-RK.h"
-  // SerialLogHandler logHandler;
+  SerialLogHandler logHandler;
   DS2482 ds(Wire, 0);
   DS2482DeviceListStatic<10> deviceList;
 #endif

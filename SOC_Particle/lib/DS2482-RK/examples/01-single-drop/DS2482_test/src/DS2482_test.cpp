@@ -18,18 +18,7 @@ unsigned long lastCheck = 5000 - CHECK_PERIOD;
 
 void setup()
 {
-	Serial.begin(9600);
-
-  	WiFi.disconnect();
-  	delay(2000);
-  	WiFi.off();
-  	delay(1000);
-  	Serial.printf("Done WiFi\n");
-  	Serial.printf("done CLOUD\n");
-
- 	Wire.setSpeed(CLOCK_SPEED_100KHZ);
-    Wire.begin();
- 
+	Serial.begin(230400);
 
 	ds.setup();
 
