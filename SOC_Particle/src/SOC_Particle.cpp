@@ -166,6 +166,8 @@ void setup()
     delay(1000);
     sp.load_all();
   #endif
+  sp.Time_now_p->set(max(sp.Time_now_stored, (unsigned long)Time.now()));  // Synch with web when possible
+  Time.setTime(sp.Time_now_stored);
 
   // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
   #ifdef CONFIG_USE_BLE
