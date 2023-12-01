@@ -135,7 +135,6 @@ Adafruit_SSD1306 *display;      // Main OLED display
 // Setup
 void setup()
 {
-
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
   Serial.begin(230400);
@@ -153,13 +152,10 @@ void setup()
 
   // EERAM
   #ifdef CONFIG_47L16
-Serial.printf("before ram.begin Time.now %ld\n", (unsigned long)Time.now());
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
-Serial.printf("before load_all Time.now %ld\n", (unsigned long)Time.now());
     sp.load_all();
-Serial.printf("after load_all Time.now %ld\n", (unsigned long)Time.now());
   #endif
 
   // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
@@ -201,14 +197,14 @@ Serial.printf("after load_all Time.now %ld\n", (unsigned long)Time.now());
 
   // Display
   display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-  Serial.println("Init DISPLAY");
+  Serial.printf("Init DISP\n");
   if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
   {
-    Serial.println(F("DISP FAIL"));
+    Serial.printf("FAIL. Use BT\n");
     // Can Use Bluetooth as workaround
   }
   else
-    Serial.println("DISP allocated");
+    Serial.printf("DISP ok\n");
   #ifndef CONFIG_BARE
     display->clearDisplay();
   #endif
@@ -269,8 +265,6 @@ Serial.printf("after load_all Time.now %ld\n", (unsigned long)Time.now());
       Serial.printf(" No diffs in retained...\n\n"); Serial1.printf(" No diffs in retained...\n\n");
     }
   }
-
-delay(2000); Serial.printf("end setup\n"); delay(2000);
 
   Serial.printf("End setup()\n\n");
 } // setup
@@ -478,7 +472,7 @@ void loop()
   if ( read ) reset = false;
   if ( read_temp && elapsed>TEMP_INIT_DELAY && reset_temp )
   {
-    Serial.printf("temp init complete...");
+    Serial.printf("temp init complete\n");
     reset_temp = false;
   }
   if ( cp.publishS ) reset_publish = false;

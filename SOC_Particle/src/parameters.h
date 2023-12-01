@@ -176,7 +176,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %9.1f: %s, %s (%9.1f - %9.1f) [%9.1f]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        sprintf(cp.buffer, "* %s= %9.1f: (%9.1f - %9.1f) [%9.1f] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
     
     void print_help()
@@ -309,7 +309,7 @@ public:
     
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        sprintf(cp.buffer, "* %s= %9.3f: (%-7.3g-%7.3g) [%9.3f] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -396,7 +396,6 @@ public:
     void print_str()
     {
         sprintf(cp.buffer, " %-20s %9.3f -> %9.3f, %10s (* %s)", description_.c_str(), default_, NAN, units_.c_str(), code_.c_str());
-        Serial.printf("%s\n", cp.buffer);
     }
 
     void print()
@@ -413,7 +412,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %9.3f: %s, %s (%-7.3g-%7.3g) [%9.3f]", code_.c_str(), NAN, description_.c_str(), units_.c_str(), min_, max_, default_);
+        sprintf(cp.buffer, "* %s= %9.3f: (%-7.3g-%7.3g) [%9.3f] %s, %s", code_.c_str(), NAN, min_, max_, default_, description_.c_str(), units_.c_str());
     }
     
     void print_help()
@@ -521,7 +520,7 @@ public:
 
     void print_help_str()
     {
-      Serial.printf("* %s= %d: %s, %s (%d - %d) [%d]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      Serial.printf("* %s= %d: (%d - %d) [%d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -547,7 +546,8 @@ public:
 
     void set(int val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        if ( val>max_ || val<min_ )
+            Serial.printf("%s set:: out of range\n", description_.c_str());
         else
         {
             *val_ = val;
@@ -654,7 +654,7 @@ public:
 
     void print_help_str()
     {
-      sprintf(cp.buffer, "* %s= %d: %s, %s (%d - %d) [%d]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+      sprintf(cp.buffer, "* %s= %d: (%d - %d) [%d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -785,7 +785,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %d: %s, %s (%d - %d) [%d]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        sprintf(cp.buffer, "* %s= %d: (%d - %d) [%d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -919,7 +919,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(cp.buffer, "* %s= %ld: %s, %s (%ld - %ld) [%ld]", code_.c_str(), *val_, description_.c_str(), units_.c_str(), min_, max_, default_);
+        sprintf(cp.buffer, "* %s= %ld: (%ld - %ld) [%ld] %s, %s", code_.c_str(), min_, max_, default_, *val_, description_.c_str(), units_.c_str());
 
     }
 
@@ -1319,13 +1319,7 @@ protected:
         Flt_st *fault_;
         Flt_st *history_;
     #else
-        address16b hys_scale_eeram_;
-        // address16b iflt_eeram_;
-        // address16b ihis_eeram_;
-        address16b inj_bias_eeram_;
-        // address16b isum_eeram_;
-        address16b preserving_eeram_;
-        // SerialRAM *rP_;
+        SerialRAM *rP_;
         Flt_ram *fault_;
         Flt_ram *history_;
     #endif

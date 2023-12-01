@@ -881,8 +881,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
               case ( 'a' ): // Xa<>:  injection amplitude
                 sp.put_Amp(cp.input_str.substring(2).toFloat()*sp.nP());
-                // Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.Amp(), sp.inj_bias());
-                Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.inj_bias());
+                // Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.Amp(), sp.Inj_bias());
+                Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
                 break;
 
               case ( 'f' ): //*  Xf<>:  injection frequency
@@ -891,9 +891,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'b' ): //*  Xb<>:  injection bias
-                Serial.printf("Inj_bias set%7.3f to ", sp.inj_bias());
-                sp.put_inj_bias(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.inj_bias());
+                Serial.printf("Inj_bias set%7.3f to ", sp.Inj_bias());
+                sp.put_Inj_bias(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", sp.Inj_bias());
                 break;
 
               case ( 't' ): //*  Xt<>:  injection type

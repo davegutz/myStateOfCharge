@@ -690,7 +690,7 @@ float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const fl
     if ( now== 0UL )
     {
         duty_ = 0UL;
-        sp.put_inj_bias(0.);
+        sp.put_Inj_bias(0.);
         return(duty_);
     }
 
@@ -702,7 +702,7 @@ float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const fl
     switch ( type )
     {
         case ( 0 ):   // Nothing
-            inj_bias = sp.inj_bias();
+            inj_bias = sp.Inj_bias();
             break;
         case ( 1 ):   // Sine wave
             inj_bias = Sin_inj_->signal(amp, freq, t, 0.0) - sp.Amp();
@@ -714,7 +714,7 @@ float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const fl
             inj_bias = Tri_inj_->signal(amp, freq, t, 0.0);
             break;
         case ( 4 ): case ( 5 ): // Software biases only
-            inj_bias = sp.inj_bias() - sp.Amp();
+            inj_bias = sp.Inj_bias() - sp.Amp();
             break;
         case ( 6 ):   // Positve bias
             inj_bias = amp - sp.Amp();
@@ -726,7 +726,7 @@ float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const fl
             inj_bias = -sp.Amp();
             break;
     }
-    sp.put_inj_bias(inj_bias);
+    sp.put_Inj_bias(inj_bias);
     return ( inj_bias );
 }
 

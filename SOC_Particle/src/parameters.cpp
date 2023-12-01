@@ -66,7 +66,7 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Ib_select_p         = new Int8tStorage(  "si", "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
     Iflt_p              = new IntStorage(    "na", "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_stored, -1, true);
     Ihis_p              = new IntStorage(    "na", "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_stored, -1, true);
-    Inj_bias_p          = new FloatStorage(  "Xb", "Injection bias",      "A",        -100, 100, &Inj_bias_stored, 0.);
+    Inj_bias_p          = new FloatStorage(  "Xb", "Injection bias",      "A",        -1e5, 1e5, &Inj_bias_stored, 0.);
     Isum_p              = new IntStorage(    "na", "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_stored, -1, true);
     Modeling_p          = new Uint8tStorage( "Xm", "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
     Mon_chm_p           = new Uint8tStorage( "Bm", "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_stored, MON_CHEM);
@@ -125,6 +125,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     next_ = 0x000;
     rP_ = ram;
     size_ = 0;
+    nflt_ = int( NFLT ); 
 
     // Input definitions
     Amp_p               = new FloatStorage(  "Xf", rP_, "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_stored, 0.);
@@ -143,7 +144,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     Ib_select_p         = new Int8tStorage(  "si", rP_, "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
     Iflt_p              = new IntStorage(    "na", rP_, "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_stored, -1, true);
     Ihis_p              = new IntStorage(    "na", rP_, "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_stored, -1, true);
-    Inj_bias_p          = new FloatStorage(  "Xb", rP_, "Injection bias",      "A",        -100, 100, &Inj_bias_stored, 0.);
+    Inj_bias_p          = new FloatStorage(  "Xb", rP_, "Injection bias",      "A",        -1e5, 1e5, &Inj_bias_stored, 0.);
     Isum_p              = new IntStorage(    "na", rP_, "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_stored, -1, true);
     Modeling_p          = new Uint8tStorage( "Xm", rP_, "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
     Mon_chm_p           = new Uint8tStorage( "Bm", rP_, "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_stored, MON_CHEM);
@@ -199,7 +200,6 @@ SavedPars::SavedPars(SerialRAM *ram)
     {
         next_ = Z_[i]->assign_addr(next_);
     }
-    nflt_ = int( NFLT ); 
     fault_ = new Flt_ram[nflt_];
     for ( int i=0; i<nflt_; i++ )
     {
@@ -450,7 +450,7 @@ void SavedPars::reset_pars()
 {
     for ( int i=0; i<size_; i++ ) Z_[i]->set_default();
 
-    put_inj_bias(float(0.));
+    put_Inj_bias(float(0.));
 
-    put_preserving(uint8_t(0));
+    put_Preserving(uint8_t(0));
  }

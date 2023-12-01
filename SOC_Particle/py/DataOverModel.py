@@ -517,7 +517,7 @@ class SavedData:
             self.dt = np.array(data.dt[:i_end])
             self.time = np.array(self.time[:i_end])
             self.ib = np.array(data.ib[:i_end])
-            self.ioc = np.array(data.ioc[:i_end])
+            self.ioc = np.array(data.ib[:i_end])
             self.voc_soc = np.array(data.voc_soc[:i_end])
             self.vb = np.array(data.vb[:i_end])
             self.chm = np.array(data.chm[:i_end])

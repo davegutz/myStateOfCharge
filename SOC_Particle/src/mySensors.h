@@ -229,7 +229,7 @@ public:
   void latched_fail_fake(const boolean cmd) { latched_fail_fake_ = cmd; };
   boolean no_fails() { return !latched_fail_; };
   boolean no_fails_fake() { return !latched_fail_fake_; };
-  void preserving(const boolean cmd) {  sp.put_preserving(cmd); }; // TODO:  Parameter class with = operator --> put. Then *sp_preserving = cmd
+  void preserving(const boolean cmd) {  sp.put_Preserving(cmd); }; // TODO:  Parameter class with = operator --> put. Then *sp_preserving = cmd
   boolean preserving() { return *sp_preserving_; };
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);

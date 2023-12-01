@@ -933,7 +933,7 @@ float Sensors::Ib_noa_noise()
 void Sensors::shunt_print()
 {
     Serial.printf("reset,T,select,inj_bias,  vim,Vsm,Vcm,Vom,Ibhm,  vin,Vsn,Vcn,Von,Ibhn,  Ib_hdwe,T,Ib_amp_fault,Ib_amp_fail,Ib_noa_fault,Ib_noa_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,%7.3f,%7.3f,    %d,%7.3f,%7.3f,%7.3f,%7.3f,    %7.3f,%7.3f, %d,%d,  %d,%d,\n",
-        reset, T, sp.Ib_select(), sp.inj_bias(),
+        reset, T, sp.Ib_select(), sp.Inj_bias(),
         ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->Vc(), ShuntAmp->Vo(), ShuntAmp->Ishunt_cal(),
         ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(), ShuntNoAmp->Vc(), ShuntNoAmp->Vo(), ShuntNoAmp->Ishunt_cal(),
         Ib_hdwe, T,
@@ -955,13 +955,13 @@ void Sensors::shunt_select_initial(const boolean reset)
     if ( !sp.mod_ib() )
     {
       mod_add = 0.;
-      hdwe_add = sp.Ib_bias_all() + sp.inj_bias();
+      hdwe_add = sp.Ib_bias_all() + sp.Inj_bias();
     }
     else
     {
-      mod_add = sp.inj_bias() + sp.Ib_bias_all();
+      mod_add = sp.Inj_bias() + sp.Ib_bias_all();
       if ( sp.tweak_test() )
-        hdwe_add = sp.inj_bias();
+        hdwe_add = sp.Inj_bias();
       else
         hdwe_add = 0.;
     }
