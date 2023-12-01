@@ -587,7 +587,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             {
               case ( 'd' ):  // Hd: History dump
                 Serial.printf("\n");
-                print_all_fault_buffer("unit_h", mySum, sp.isum(), NSUM);
+                print_all_fault_buffer("unit_h", mySum, sp.Isum(), sp.nsum());
                 sp.print_fault_header();
                 chit("Pr;Q;", QUEUE);
                 Serial.printf("\n");

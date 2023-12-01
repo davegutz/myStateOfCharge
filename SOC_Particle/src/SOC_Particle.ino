@@ -460,15 +460,15 @@ void loop()
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
   if ( (!boot_wait && summarizing) || cp.write_summary )
   {
-    sp.put_ihis(sp.ihis()+1);
-    if ( sp.ihis()>sp.nhis()-1 ) sp.put_ihis(0);  // wrap buffer
+    sp.put_Ihis(sp.Ihis()+1);
+    if ( sp.Ihis()>sp.nhis()-1 ) sp.put_Ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
     hist_snap.assign(time_now, Mon, Sen);
-    hist_bounced = sp.put_history(hist_snap, sp.ihis());
+    hist_bounced = sp.put_history(hist_snap, sp.Ihis());
 
-    sp.put_isum(sp.isum()+1);
-    if ( sp.isum()>NSUM-1 ) sp.put_isum(0);
-    mySum[sp.isum()].copy_to_Flt_ram_from(hist_bounced);
+    sp.put_Isum(sp.Isum()+1);
+    if ( sp.Isum()>NSUM-1 ) sp.put_Isum(0);
+    mySum[sp.Isum()].copy_to_Flt_ram_from(hist_bounced);
 
     Serial.printf("Summ...\n");
     cp.write_summary = false;

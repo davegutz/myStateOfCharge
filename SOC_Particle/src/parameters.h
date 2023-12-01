@@ -1034,11 +1034,11 @@ public:
     float ib_scale_amp() { return Ib_scale_amp_stored; }
     float ib_scale_noa() { return Ib_scale_noa_stored; }
     int8_t Ib_select() { return Ib_select_stored; }
+    int Iflt() { return Iflt_stored; }
+    int Ihis() { return Ihis_stored; }
+    int Isum() { return Isum_stored; }
 
-    int iflt() { return iflt_; }
-    int ihis() { return ihis_; }
     float inj_bias() { return inj_bias_; }
-    int isum() { return isum_; }
 
     uint8_t Modeling() { return Modeling_stored; }
     float nP() { return nP_stored; }
@@ -1089,11 +1089,11 @@ public:
         float get_Ib_scale_amp() { return Ib_scale_amp_p->get(); }
         float get_Ib_scale_noa() { return Ib_scale_noa_p->get(); }
         int8_t get_Ib_select() { return Ib_select_p->get(); }
-        
-        void get_iflt() { int value; rP_->get(iflt_eeram_.a16, value); iflt_ = value; }
-        void get_ihis() { int value; rP_->get(ihis_eeram_.a16, value); ihis_ = value; }
+        int get_Iflt() { return Iflt_stored; }
+        int get_Ihis() { return Ihis_stored; }
+        int get_Isum() { return Isum_stored; }
+
         void get_inj_bias() { float value; rP_->get(inj_bias_eeram_.a16, value); inj_bias_ = value; }
-        void get_isum() { int value; rP_->get(isum_eeram_.a16, value); isum_ = value; }
         
         uint8_t get_Modeling() { return Modeling_p->get(); }
         uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
@@ -1103,7 +1103,6 @@ public:
         void get_preserving() { preserving_ = rP_->read(preserving_eeram_.a16); }
 
         uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
-
         float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
         float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
         float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
@@ -1128,6 +1127,9 @@ public:
         float get_Freq() { return Freq_p->get(); }
         float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
         double get_Ib_select() { return Ib_select_p->get(); }
+        int get_Iflt() { return Iflt_stored; }
+        int get_Ihis() { return Ihis_stored; }
+        int get_Isum() { return Isum_stored; }
         uint8_t get_Modeling() { return Modeling_p->get(); }
         uint8_t get_nP() { return nP_p->get(); }
         uint8_t get_nS() { return nS_p->get(); }
@@ -1147,6 +1149,7 @@ public:
     void mem_print();
     uint16_t nflt() { return nflt_; }
     uint16_t nhis() { return nhis_; }
+    uint16_t nsum() { return nsum_; }
     void nominalize_fault_array();
     void nominalize_history_array();
     int num_diffs();
@@ -1172,11 +1175,12 @@ public:
         void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
         void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
         void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
-
-        void put_iflt(const int input) { iflt_ = input; }
-        void put_ihis(const int input) { ihis_ = input; }
-        void put_inj_bias(const float input) { inj_bias_ = input; }
+        void put_Iflt(const int input) { Iflt_p->set(input); }
+        void put_Ihis(const int input) { Ihis_p->set(input); }
+        void put_Isum(const int input) { Isum_p->set(input); }
         void put_isum(const int input) { isum_ = input; }
+
+        void put_inj_bias(const float input) { inj_bias_ = input; }
 
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); Modeling_stored = Modeling();}
         void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
@@ -1219,11 +1223,11 @@ public:
         void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
         void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
         void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
-        
-        void put_iflt(const int input) { rP_->put(iflt_eeram_.a16, input); iflt_ = input; }
-        void put_ihis(const int input) { rP_->put(ihis_eeram_.a16, input); ihis_ = input; }
+        void put_Iflt(const int input) { Iflt_p->set(input); }
+        void put_Ihis(const int input) { Ihis_p->set(input); }
+        void put_Isum(const int input) { Isum_p->set(input); }
+
         void put_inj_bias(const float input) { rP_->put(inj_bias_eeram_.a16, input); inj_bias_ = input; }
-        void put_isum(const int input) { rP_->put(isum_eeram_.a16, input); isum_ = input; }
 
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); }
         void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
@@ -1266,6 +1270,9 @@ public:
     FloatStorage *Ib_scale_amp_p;
     FloatStorage *Ib_scale_noa_p;
     Int8tStorage *Ib_select_p;
+    IntStorage *Iflt_p;
+    IntStorage *Ihis_p;
+    IntStorage *Isum_p;
     Uint8tStorage *Modeling_p;
     Uint8tStorage *Mon_chm_p;
     FloatStorage *nP_p;
@@ -1295,6 +1302,9 @@ public:
     float Ib_bias_noa_stored;
     float Ib_scale_amp_stored;
     float Ib_scale_noa_stored;
+    int Iflt_stored;
+    int Ihis_stored;
+    int Isum_stored;
     uint8_t Modeling_stored;
     uint8_t Mon_chm_stored;
     float nP_stored;
@@ -1321,18 +1331,19 @@ protected:
         Flt_st *history_;
     #else
         address16b hys_scale_eeram_;
-        address16b iflt_eeram_;
-        address16b ihis_eeram_;
+        // address16b iflt_eeram_;
+        // address16b ihis_eeram_;
         address16b inj_bias_eeram_;
-        address16b isum_eeram_;
+        // address16b isum_eeram_;
         address16b preserving_eeram_;
-        SerialRAM *rP_;
+        // SerialRAM *rP_;
         Flt_ram *fault_;
         Flt_ram *history_;
     #endif
     uint16_t next_;
-    uint16_t nflt_;         // Length of Flt_ram array for faults
-    uint16_t nhis_;         // Length of Flt_ram array for history
+    uint16_t nflt_;         // Length of Flt_ram array for fault snapshot
+    uint16_t nhis_;         // Length of Flt_ram array for fault history
+    uint16_t nsum_;         // Length of Sum array for history
     uint16_t size_;
     Storage *Z_[50];
 };

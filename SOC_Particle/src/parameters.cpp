@@ -36,13 +36,15 @@ SavedPars::SavedPars()
 {
   nflt_ = int( NFLT ); 
   nhis_ = int( NHIS ); 
+  nsum_ = int( NSUM ); 
 }
 
 #ifndef CONFIG_47L16
 SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
 {
-    nhis_ = nhis;
     nflt_ = nflt;
+    nhis_ = nhis;
+    nsum_ = int( NSUM ); 
     history_ = hist;
     fault_ = faults;
     size_ = 0;
@@ -62,6 +64,9 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Ib_scale_amp_p      = new FloatStorage(  "SA", "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_stored, CURR_SCALE_AMP);
     Ib_scale_noa_p      = new FloatStorage(  "SB", "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_stored, CURR_SCALE_NOA);
     Ib_select_p         = new Int8tStorage(  "si", "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
+    Iflt_p              = new IntStorage(    "na", "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_stored, -1, true);
+    Ihis_p              = new IntStorage(    "na", "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_stored, -1, true);
+    Isum_p              = new IntStorage(    "na", "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_stored, -1, true);
     Modeling_p          = new Uint8tStorage( "Xm", "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
     Mon_chm_p           = new Uint8tStorage( "Bm", "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_stored, MON_CHEM);
     nP_p                = new FloatStorage(  "BP", "Number parallel",     "units",     1e-6, 100, &nP_stored, NP);
@@ -72,8 +77,8 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Tb_bias_hdwe_p      = new FloatStorage(  "Dt", "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
     Time_now_p          = new ULongStorage(  "UT", "UNIX tim since epoch","sec",       0UL, 2100000000UL, &Time_now_stored, 1669801880UL, true);
     Type_p              = new Uint8tStorage( "Xt", "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
-    T_state_p            = new FloatStorage(  "na", "Tb rate lim mem",     "dg C",     -10,  70,  &T_state_stored, RATED_TEMP, false);
-    T_state_model_p      = new FloatStorage(  "na", "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_state_model_stored, RATED_TEMP, false);
+    T_state_p           = new FloatStorage(  "na", "Tb rate lim mem",     "dg C",     -10,  70,  &T_state_stored, RATED_TEMP, false);
+    T_state_model_p     = new FloatStorage(  "na", "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_state_model_stored, RATED_TEMP, false);
     Vb_bias_hdwe_p      = new FloatStorage(  "Dc", "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_stored, VOLT_BIAS);
     Vb_scale_p          = new FloatStorage(  "SV", "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_stored, VB_SCALE);
 
@@ -92,6 +97,9 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Z_[size_++] = Ib_scale_amp_p;
     Z_[size_++] = Ib_scale_noa_p;
     Z_[size_++] = Ib_select_p;
+    Z_[size_++] = Iflt_p;
+    Z_[size_++] = Ihis_p;
+    Z_[size_++] = Isum_p;
     Z_[size_++] = Modeling_p;
     Z_[size_++] = Mon_chm_p;
     Z_[size_++] = nP_p;
@@ -129,6 +137,9 @@ SavedPars::SavedPars(SerialRAM *ram)
     Ib_scale_amp_p      = new FloatStorage(  "SA", rP_, "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_stored, CURR_SCALE_AMP);
     Ib_scale_noa_p      = new FloatStorage(  "SB", rP_, "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_stored, CURR_SCALE_NOA);
     Ib_select_p         = new Int8tStorage(  "si", rP_, "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
+    Iflt_p              = new IntStorage(    "na", rP_, "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_stored, -1, true);
+    Ihis_p              = new IntStorage(    "na", rP_, "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_stored, -1, true);
+    Isum_p              = new IntStorage(    "na", rP_, "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_stored, -1, true);
     Modeling_p          = new Uint8tStorage( "Xm", rP_, "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
     Mon_chm_p           = new Uint8tStorage( "Bm", rP_, "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_stored, MON_CHEM);
     nP_p                = new FloatStorage(  "BP", rP_, "Number parallel",     "units",     1e-6, 100, &nP_stored, NP);
@@ -139,8 +150,8 @@ SavedPars::SavedPars(SerialRAM *ram)
     Tb_bias_hdwe_p      = new FloatStorage(  "Dt", rP_, "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
     Time_now_p          = new ULongStorage(  "UT", rP_, "UNIX tim since epoch","sec",       0UL, 2100000000UL, &Time_now_stored, 1669801880UL, true);
     Type_p              = new Uint8tStorage( "Xt", rP_, "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
-    T_state_p            = new FloatStorage(  "na", rP_, "Tb rate lim mem",     "dg C",    -10,  70,  &T_state_stored, RATED_TEMP, false);
-    T_state_model_p      = new FloatStorage(  "na", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_stored, RATED_TEMP, false);
+    T_state_p           = new FloatStorage(  "na", rP_, "Tb rate lim mem",     "dg C",    -10,  70,  &T_state_stored, RATED_TEMP, false);
+    T_state_model_p     = new FloatStorage(  "na", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_stored, RATED_TEMP, false);
     Vb_bias_hdwe_p      = new FloatStorage(  "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_stored, VOLT_BIAS);
     Vb_scale_p          = new FloatStorage(  "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_stored, VB_SCALE);
 
@@ -159,6 +170,9 @@ SavedPars::SavedPars(SerialRAM *ram)
     Z_[size_++] = Ib_scale_amp_p;
     Z_[size_++] = Ib_scale_noa_p;
     Z_[size_++] = Ib_select_p;
+    Z_[size_++] = Iflt_p;
+    Z_[size_++] = Ihis_p;
+    Z_[size_++] = Isum_p;
     Z_[size_++] = Modeling_p;
     Z_[size_++] = Mon_chm_p;
     Z_[size_++] = nP_p;
@@ -177,10 +191,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     {
         next_ = Z_[i]->assign_addr(next_);
     }
-    iflt_eeram_.a16 =  next_;  next_ += sizeof(iflt_);
-    ihis_eeram_.a16 =  next_;  next_ += sizeof(ihis_);
     inj_bias_eeram_.a16 =  next_;  next_ += sizeof(inj_bias_);
-    isum_eeram_.a16 =  next_;  next_ += sizeof(isum_);
     preserving_eeram_.a16 =  next_;  next_ += sizeof(preserving_);
 
     nflt_ = int( NFLT ); 
@@ -239,10 +250,12 @@ boolean SavedPars::is_corrupt()
         get_Ib_scale_amp();
         get_Ib_scale_noa();
         get_Ib_select();
+        get_Iflt();
+        get_Ihis();
 
-        get_iflt();
         get_inj_bias();
-        get_isum();
+
+        get_Isum();
 
         get_Modeling();
         get_Mon_chm();
@@ -283,11 +296,15 @@ int SavedPars::num_diffs()
     if ( Delta_q_model_p->is_off() ) n++;
     if ( Freq_p->is_off() ) n++;
     if ( Ib_bias_all_p->is_off() ) n++;
+    if ( Ib_bias_all_nan_p->is_off() ) n++;
     if ( Ib_bias_amp_p->is_off() ) n++;
     if ( Ib_bias_noa_p->is_off() ) n++;
     if ( Ib_scale_amp_p->is_off() ) n++;
     if ( Ib_scale_noa_p->is_off() ) n++;
     if ( Ib_select_p->is_off() ) n++;
+    if ( Iflt_p->is_off() ) n++;
+    if ( Ihis_p->is_off() ) n++;
+    if ( Isum_p->is_off() ) n++;
     
     if ( float(0.) != inj_bias_ ) n++;
     
@@ -325,21 +342,23 @@ void SavedPars::pretty_print(const boolean all)
 {
     Serial.printf("saved (sp): all=%d\n", all);
     Serial.printf("             defaults    current EERAM values\n");
-    if ( all )                                  Serial.printf(" iflt                           %d flt ptr\n", iflt_);
+
     if ( all || float(0.) != inj_bias_ )        Serial.printf(" inj_bias%7.3f  %7.3f *Xb<> A\n", 0., inj_bias_);
-    if ( all )                                  Serial.printf(" isum                           %d tbl ptr\n", isum_);
+
     if ( all )                                  Serial.printf(" preserving %d  %d *Xm<>\n", uint8_t(0), preserving_);
-    // if ( all )                                  Serial.printf(" time_now %d %s *U<> Unix time\n", (int)Time.now(), Time.timeStr().c_str());
+
     for (int i=0; i<size_; i++ ) if ( all || Z_[i]->is_off() )  Z_[i]->print();
-    // if ( all )
-    // {
-    //     Serial.printf("history array (%d):\n", nhis_);
-    //     print_history_array();
-    //     print_fault_header();
-    //     Serial.printf("fault array (%d):\n", nflt_);
-    //     print_fault_array();
-    //     print_fault_header();
-    // }
+
+    if ( all )
+    {
+        Serial.printf("history array (%d):\n", nhis_);
+        print_history_array();
+        print_fault_header();
+        Serial.printf("fault array (%d):\n", nflt_);
+        print_fault_array();
+        print_fault_header();
+    }
+
     #ifdef CONFIG_47L16
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         // Serial.printf("Temp mem map print\n");
@@ -350,7 +369,7 @@ void SavedPars::pretty_print(const boolean all)
 // Print faults
 void SavedPars::print_fault_array()
 {
-  int i = iflt_;  // Last one written was iflt
+  int i = Iflt_stored;  // Last one written was iflt
   int n = -1;
   while ( ++n < nflt_ )
   {
@@ -369,7 +388,7 @@ void SavedPars::print_fault_header()
 // Print history
 void SavedPars::print_history_array()
 {
-  int i = ihis_;  // Last one written was ihis
+  int i = Ihis_stored;  // Last one written was ihis
   int n = -1;
   while ( ++n < nhis_ )
   {
@@ -447,42 +466,8 @@ void SavedPars::reset_his()
 void SavedPars::reset_pars()
 {
     for ( int i=0; i<size_; i++ ) Z_[i]->set_default();
-    // Amp_p->set_default();
-    // Cutback_gain_sclr_p->set_default();
-    // Debug_p->set_default();
-    // Delta_q_p->set_default();
-    // Delta_q_model_p->set_default();
-    // Dw_p->set_default();
-    // Freq_p->set_default();
-    // Ib_bias_all_p->set_default();
-    // Ib_bias_all_nan_p->set_default();
-    // Ib_bias_amp_p->set_default();
-    // Ib_bias_noa_p->set_default();
-    // Ib_scale_amp_p->set_default();
-    // Ib_scale_noa_p->set_default();
-    // Ib_select_p->set_default();
 
-    put_iflt(int(-1));
-    put_ihis(int(-1));
     put_inj_bias(float(0.));
-    put_isum(int(-1));
-    
-    // Modeling_p->set_default();
-    // Mon_chm_p->set_default();
-    
-    // put_nP(float(NP));
-    // put_nS(float(NS));
+
     put_preserving(uint8_t(0));
-
-    // Sim_chm_p->set_default();
-    // S_cap_mon_p->set_default();
-    // S_cap_sim_p->set_default();
-    // Tb_bias_hdwe_p->set_default();
-    // Type_p->set_default();
-
-    // put_t_last(float(RATED_TEMP));    
-    // put_t_last_model(float(RATED_TEMP));  
-
-    // Vb_bias_hdwe_p->set_default();
-    // Vb_scale_p->set_default();
  }
