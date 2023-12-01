@@ -1,0 +1,50 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2023.12.01 09:51:43 =~=~=~=~=~=~=~=~=~=~=~=
+0000003338 [hal] INFO: WiFi on
+0000003342 [ncp.rltk.client] INFO: Try to connect to ssid: OurHappyHomeGuest5g
+0000003345 [net.lwip_rltk] INFO: is_promisc_enabled
+0000003347 [net.lwip_rltk] INFO: get_eap_phase
+Hi!
+DS2482 setup complete
+Init DISP
+DISP ok
+0000007039 [net.ifapi] INFO: Netif wl3 state DOWN
+0000007043 [hal] INFO: DNS server list changed
+0000007048 [hal] INFO: DNS server list changed
+0000007053 [system.nm] INFO: State changed: IFACE_UP -> IFACE_REQUEST_DOWN
+0000007060 [system.nm] INFO: State changed: IFACE_REQUEST_DOWN -> IFACE_DOWN
+0000007069 [system.nm] INFO: State changed: IFACE_DOWN -> IFACE_REQUEST_UP
+0000007077 [net.ifapi] INFO: Netif wl3 state UP
+0000007081 [system.nm] INFO: State changed: IFACE_REQUEST_UP -> IFACE_UP
+0000007838 [net.lwip_rltk] INFO: get_eap_phase
+0000007953 [net.lwip_rltk] INFO: get_eap_phase
+0000007985 [ncp.rltk.client] INFO: Try to connect to ssid: OurHappyHomeGuest5g
+0000007988 [net.lwip_rltk] INFO: is_promisc_enabled
+0000007990 [ncp.rltk.client] INFO: disconnected
+0000007993 [net.lwip_rltk] INFO: get_eap_phase
+0000009039 [net.ifapi] INFO: Netif wl3 state DOWN
+0000009043 [hal] INFO: DNS server list changed
+0000009047 [hal] INFO: DNS server list changed
+0000009051 [system.nm] INFO: State changed: IFACE_UP -> IFACE_REQUEST_DOWN
+0000009058 [system.nm] INFO: State changed: IFACE_REQUEST_DOWN -> IFACE_DOWN
+0000009064 [system.nm] INFO: State changed: IFACE_DOWN -> DISABLED
+Done WiFi
+done CLOUD
+Check corruption......na Summ buffer indx corrupt
+corrupt****
+
+End setup()
+
+Ib Amp sense ADC pin 13 started using TSC2010
+Ib No Amp sense ADC pin 11 started using TSC2010
+DS18 1-wire Tb started
+Vb sense ADC pin started
+0000012478 [net.lwip_rltk] INFO: get_eap_phase
+0000012593 [net.lwip_rltk] INFO: get_eap_phase
+0000012623 [net.rltkncp] ERROR: Failed to turn off NCP client: -210
+0000012625 [ncp.rltk.client] INFO: rltkOff
+0000012830 [ncp.rltk.client] INFO: disconnected
+no devices found
+0000013115 [net.lwip_rltk] INFO: promisc_deinit TODO
+0000013119 [hal] INFO: WiFi off
+0000013120 [ncp.rltk.client] INFO: rltkOff done
+no devices found

@@ -24,11 +24,12 @@
   * 26-Nov-2022   First Beta release v20221028.   Branch GitHub repository.  Various debugging fixes hysteresis.
   * 12-Dec-2022   RetainedPars-->SavedPars to support Argon with 47L16 EERAM device
   * 22-Dec-2022   Dual amplifier replaces dual ADS.  Beta release v20221220.  ADS still used on Photon.
+  * 01-Dec-2023   g20231111 Photon 2, DS2482
   * 
 //
 // MIT License
 //
-// Copyright (C) 2022 - Dave Gutz
+// Copyright (C) 2023 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -89,6 +90,13 @@
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
+#ifdef CONFIG_DS2482
+  #include "DS2482-RK.h"
+  // SerialLogHandler logHandler;
+  DS2482 ds(Wire, 0);
+  DS2482DeviceListStatic<10> deviceList;
+#endif
+
 #ifdef CONFIG_47L16
   #include "hardware/SerialRAM.h"
   SerialRAM ram;
@@ -122,7 +130,9 @@ unsigned long last_sync = millis();   // Timekeeping
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
-Adafruit_SSD1306 *display;      // Main OLED display
+#ifdef CONFIG_SSD1306
+  Adafruit_SSD1306 *display;      // Main OLED display
+#endif
 
 #ifdef CONFIG_USE_BLE
   // First parameter is the transmit buffer size, second parameter is the receive buffer size
@@ -139,8 +149,9 @@ void setup()
   // Serial.blockOnOverrun(false);  doesn't work
   Serial.begin(230400);
   Serial.flush();
-  delay(1000);          // Ensures a clean display on Serial startup on CoolTerm
-  Serial.println("Hi!");
+  delay(1000);          // Ensures a clean display
+delay(4000);
+  Serial.printf("Hi!\n");
 
   // EERAM and Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.
   // TX of HC-06 
@@ -150,7 +161,7 @@ void setup()
   Serial1.begin(S1BAUD);
   Serial1.flush();
 
-  // EERAM
+  // EERAM chip card for I2C
   #ifdef CONFIG_47L16
     ram.begin(0, 0);
     ram.setAutoStore(true);
@@ -174,6 +185,7 @@ void setup()
   // A2 - Primary Ib amp (called by old ADS name Amplified, amp)
   // A3 - Backup Ib amp (called by old ADS name Non Amplified, noa)
   // A4 - Ib amp common
+
   // Peripherals (Photon2)
   // D3 - one-wire temp sensor ******** to be replaced by I2C device
   // D7 - status led heartbeat
@@ -182,6 +194,7 @@ void setup()
   // A3->A2->D13 - Backup Ib amp (called by old ADS name Non Amplified, noa)
   // A4 - not available
   // A5-->D14 - spare
+  
   #ifdef CONFIG_PHOTON2
     myPins = new Pins(D3, D7, D12, D11, D13);
     // pinMode(D3, INPUT_PULLUP);
@@ -191,24 +204,62 @@ void setup()
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
 
-  // I2C for OLED, ADS, backup EERAM
+  // I2C for OLED, ADS, backup EERAM, DS2482
   #ifndef CONFIG_BARE
-    Wire.setSpeed(CLOCK_SPEED_100KHZ);
-    Wire.begin();
+    #ifdef CONFIG_ADS1013
+      Wire.setSpeed(CLOCK_SPEED_100KHZ);
+      Serial.printf("High speed Wire setup for ADS1013\n");
+    #endif
+    #if defined(CONFIG_ADS1013) || defined(CONFIG_SSD1306) || defined(CONFIG_DS2482)
+      Wire.begin();
+      Serial.printf("Wire started\n");
+    #endif
   #endif
 
-  // Display
-  display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-  Serial.printf("Init DISP\n");
-  if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
-  {
-    Serial.printf("FAIL. Use BT\n");
-    // Can Use Bluetooth as workaround
-  }
-  else
-    Serial.printf("DISP ok\n");
-  #ifndef CONFIG_BARE
-    display->clearDisplay();
+  // Display (after start Wire)
+  #ifdef CONFIG_SSD1306
+    display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+    Serial.printf("Init DISP\n");
+    if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
+    {
+      Serial.printf("FAIL. Use BT\n");
+      // Can Use Bluetooth as workaround
+    }
+    else
+      Serial.printf("DISP ok\n");
+    #ifndef CONFIG_BARE
+      display->clearDisplay();
+    #endif
+  #endif
+
+  // 1-Wire chip card for I2C (after start Wire)
+  #ifdef CONFIG_DS2482
+    ds.setup();
+    #ifdef CONFIG_DS2482
+      #if !defined(CONFIG_ADS1013) && !defined(CONFIG_SSD1306)
+        // Single drop
+        DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status)
+        {
+          Serial.printlnf("deviceReset=%d", status);
+        });
+        Serial.printf("DS2482 single-drop setup complete\n");
+      #else
+        // Multidrop
+        DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status) {
+          Serial.printlnf("deviceReset=%d", status);
+          DS2482SearchBusCommand::run(ds, deviceList, [](DS2482SearchBusCommand &obj, int status) {
+
+            if (status != DS2482Command::RESULT_DONE) {
+              Serial.printlnf("DS2482SearchBusCommand status=%d", status);
+              return;
+            }
+
+            Serial.printlnf("Found %u devices", deviceList.getDeviceCount());
+          });
+        });
+        Serial.printf("DS2482 multi-drop setup complete\n");
+      #endif
+    #endif
   #endif
 
   // Synchronize clock
@@ -259,7 +310,11 @@ void setup()
   {
     if ( sp.num_diffs() )
     {
-      wait_on_user_input(display);
+      #ifdef CONFIG_SSD1306
+        wait_on_user_input(display);
+      #else
+        wait_on_user_input();
+      #endif
     }
     else
     {
@@ -350,6 +405,54 @@ void loop()
   {
     Sen->T_temp = ReadTemp->updateTime();
     Sen->temp_load_and_filter(Sen, reset_temp);
+
+    #ifdef CONFIG_DS2482
+      #if !defined(CONFIG_ADS1013) && !defined(CONFIG_SSD1306)
+        // Singledrop Wire I2C
+        // For single-drop you can pass an empty address to get the temperature of the only
+        // sensor on the 1-wire bus
+        DS24821WireAddress addr;
+        DS2482GetTemperatureCommand::run(ds, addr, [](DS2482GetTemperatureCommand&, int status, float tempC)
+        {
+          if (status == DS2482Command::RESULT_DONE) {
+            Serial.printf("%.4f\n", tempC);
+          }
+          else {
+            Serial.printf("DS2482GetTemperatureCommand failed status=%d\n", status);
+          }
+        });
+        Serial.printf("Single-drop I2C sample DS2482 1-Wire temp\n");
+      #else
+        // Multidrop Wire I2C
+        if (deviceList.getDeviceCount() > 0)
+        {
+          DS2482GetTemperatureForListCommand::run(ds, deviceList, [](DS2482GetTemperatureForListCommand&, int status, DS2482DeviceList &deviceList)
+          {
+            if (status != DS2482Command::RESULT_DONE)
+            {
+              Serial.printlnf("DS2482GetTemperatureForListCommand status=%d", status);
+              return;
+            }
+
+            Serial.printlnf("got temperatures!");
+
+            for(size_t ii = 0; ii < deviceList.getDeviceCount(); ii++) {
+              Serial.printlnf("%s valid=%d C=%f F=%f",
+                  deviceList.getAddressByIndex(ii).toString().c_str(),
+                  deviceList.getDeviceByIndex(ii).getValid(),
+                  deviceList.getDeviceByIndex(ii).getTemperatureC(),
+                  deviceList.getDeviceByIndex(ii).getTemperatureF());
+            }
+
+          });
+        }
+        else
+        {
+          Serial.printlnf("no devices found");
+        }
+        Serial.printf("Multi-drop I2C sample DS2482 1-Wire temp\n");
+      #endif
+    #endif
   }
 
   // Sample Ib
@@ -429,7 +532,11 @@ void loop()
   // OLED and Bluetooth display drivers.   Also convenient update time for saving parameters (remember)
   if ( display_and_remember )
   {
-    oled_display(display, Sen, Mon);
+    #ifdef CoNFIG_SSD1306
+      oled_display(display, Sen, Mon);
+    #else
+      oled_display(Sen, Mon);
+    #endif
 
     #ifdef CONFIG_47L16
       // Save EERAM dynamic parameters.  Saves critical few state parameters

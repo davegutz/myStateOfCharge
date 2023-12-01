@@ -37,6 +37,9 @@
 #undef DEPLOY_PHOTON
 #undef CONFIG_TSC2010
 #undef CONFIG_DS18B20
+#undef CONFIG_DS2482
+#undef CONFIG_SSD1306
+
 #include "local_config.h"       // this is not in GitHub repository.  Copy appropriate local_config??.h to match configure
 
 // Constants always defined

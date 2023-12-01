@@ -5,15 +5,8 @@
 const String unit = version + "_pro2p2";
 
 // Features config
-#define CONFIG_BARE
 #define CONFIG_PHOTON2
-#undef CONFIG_ARGON
-#undef CONFIG_47L16
-#undef CONFIG_USE_BLE
-#undef CONFIG_ADS1013
-#undef CONFIG_PHOTON
-#undef DEPLOY_PHOTON
-#define CONFIG_DS18B20
+#define CONFIG_BARE
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

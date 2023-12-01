@@ -6,6 +6,7 @@ const String unit = version + "_soc0p";
 
 // Features config
 #define CONFIG_PHOTON
+#define CONFIG_SSD1306
 #define CONFIG_ADS1013
 #define DEPLOY_PHOTON
 #define CONFIG_DS18B20

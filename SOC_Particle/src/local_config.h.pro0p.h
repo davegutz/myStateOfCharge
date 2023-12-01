@@ -6,6 +6,7 @@ const String unit = version + "_pro0p";
 
 // Features config
 #define CONFIG_PHOTON
+#define CONFIG_SSD1306
 #define CONFIG_ADS1013
 #define CONFIG_DS18B20
 

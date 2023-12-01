@@ -1,0 +1,94 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2023.12.01 09:56:06 =~=~=~=~=~=~=~=~=~=~=~=
+0000002566 [net.lwip_rltk] INFO: promisc_deinit TODO
+0000002570 [hal] INFO: WiFi off
+0000002571 [ncp.rltk.client] INFO: rltkOff done
+0000002581 [hal] INFO: rltk_wlan_set_netif_info: 0, 94:94:4a:04:2a:dc
+0000002785 [hal] INFO: WiFi on
+0000002789 [ncp.rltk.client] INFO: Try to connect to ssid: OurHappyHomeGuest5g
+0000002792 [net.lwip_rltk] INFO: is_promisc_enabled
+0000002794 [net.lwip_rltk] INFO: get_eap_phase
+0000007285 [net.lwip_rltk] INFO: get_eap_phase
+0000007404 [net.lwip_rltk] INFO: get_eap_phase
+0000007436 [net.ifapi] INFO: Netif wl3 link UP, profile=OurHappyHomeGuest5g
+0000007447 [system.nm] INFO: State changed: IFACE_UP -> IFACE_LINK_UP
+0000008489 [hal] INFO: DNS server list changed
+0000008495 [system.nm] INFO: State changed: IFACE_LINK_UP -> IP_CONFIGURED
+0000008504 [system] INFO: Cloud: connecting
+0000008510 [system] INFO: Read Server Address = type:1,domain:$id.udp.particle.io
+0000008517 [system] INFO: Loaded cloud server address and port from session data
+0000008525 [system] INFO: Cloud socket=0, connecting to 3.215.122.234#5684
+0000008532 [system] INFO: Cloud socket connected
+0000008536 [system] INFO: Starting handshake: presense_announce=0
+0000008541 [comm.protocol.handshake] INFO: Establish secure connection
+0000008548 [comm.dtls] INFO: session has 0 uses
+0000008556 [comm.dtls] INFO: (CMPL,RENEG,NO_SESS,ERR) restoreStatus=0
+0000008562 [comm.dtls] INFO: out_ctr 0,1,0,0,0,0,0,170, next_coap_id=a1
+0000008568 [comm.dtls] INFO: restored session from persisted session data. next_msg_id=161
+0000008576 [comm.dtls] INFO: session cmd (CLS,DIS,MOV,LOD,SAV): 2
+0000008959 [comm.dtls] INFO: session cmd (CLS,DIS,MOV,LOD,SAV): 4
+0000008965 [comm.dtls] INFO: session cmd (CLS,DIS,MOV,LOD,SAV): 3
+0000008971 [comm.protocol.handshake] INFO: Sending HELLO message
+0000009014 [comm.dtls] INFO: session cmd (CLS,DIS,MOV,LOD,SAV): 4
+0000009020 [comm.protocol.handshake] INFO: Handshake completed
+0000009026 [comm.dtls] INFO: session cmd (CLS,DIS,MOV,LOD,SAV): 4
+0000009032 [comm.dtls] INFO: session cmd (CLS,DIS,MOV,LOD,SAV): 3
+0000009389 [system] INFO: Send spark/device/last_reset event
+0000009399 [comm] INFO: Sending TIME request
+0000009415 [comm.dtls] INFO: session cmd (CLS,DIS,MOV,LOD,SAV): 4
+0000009793 [comm.dtls] INFO: session cmd (CLS,DIS,MOV,LOD,SAV): 3
+0000009802 [system] INFO: All handshake messages have been processed
+0000009808 [comm.protocol] INFO: Received TIME response: 1701442575
+0000009815 [system] INFO: Cloud connected
+0000009821 [net.ifapi] INFO: Netif wl3 state DOWN
+0000009826 [hal] INFO: DNS server list changed
+0000009831 [system.nm] INFO: State changed: IP_CONFIGURED -> IFACE_LINK_UP
+0000009838 [hal] INFO: DNS server list changed
+0000009843 [ncp.rltk.client] INFO: disconnected
+0000009847 [net.ifapi] INFO: Netif wl3 link DOWN, profile=NONE
+0000009850 [net.rltkncp] ERROR: linkOutput up=0 link_up=0
+0000009852 [hal] INFO: DNS server list changed
+0000009854 [hal] INFO: DNS server list changed
+0000009857 [system.nm] INFO: State changed: IFACE_LINK_UP -> IFACE_UP
+0000009860 [system.nm] INFO: State changed: IFACE_UP -> IFACE_REQUEST_DOWN
+0000009867 [system.nm] INFO: State changed: IFACE_REQUEST_DOWN -> IFACE_DOWN
+0000009879 [system.nm] INFO: State changed: IFACE_DOWN -> IFACE_REQUEST_UP
+0000009888 [net.ifapi] INFO: Netif wl3 state UP
+0000009893 [system.nm] INFO: State changed: IFACE_REQUEST_UP -> IFACE_UP
+0000009904 [ncp.rltk.client] INFO: Try to connect to ssid: OurHappyHomeGuest5g
+0000009907 [net.lwip_rltk] INFO: is_promisc_enabled
+0000009908 [net.lwip_rltk] INFO: get_eap_phase
+0000010600 [net.rltkncp] ERROR: linkOutput up=1 link_up=0
+0000011600 [net.rltkncp] ERROR: linkOutput up=1 link_up=0
+0000011877 [net.ifapi] INFO: Netif wl3 state DOWN
+0000011881 [hal] INFO: DNS server list changed
+0000011886 [hal] INFO: DNS server list changed
+0000011890 [system.nm] INFO: State changed: IFACE_UP -> IFACE_REQUEST_DOWN
+0000011897 [system.nm] INFO: State changed: IFACE_REQUEST_DOWN -> IFACE_DOWN
+0000011904 [system] INFO: Cloud: disconnecting
+0000011909 [system] INFO: Cloud: disconnected
+0000011913 [system.nm] INFO: State changed: IFACE_DOWN -> DISABLED
+Done WiFi
+done CLOUD
+setup complete
+0000012945 [app] INFO: DeviceReset status=1
+deviceReset=1
+0000012953 [app] INFO: 1WireReset status=1
+0000013712 [app] INFO: ConvertT status=1
+0000013719 [app] INFO: 1WireReset status=1
+0000013753 [app] INFO: ReadScratchpad completed status=1
+0000013759 [app] INFO: GetTemperature status=1 temperatureC=19.000000
+temperature=19.0000 deg C
+0000013981 [net.lwip_rltk] INFO: get_eap_phase
+0000014098 [net.lwip_rltk] INFO: get_eap_phase
+0000014126 [net.rltkncp] ERROR: Failed to turn off NCP client: -210
+0000014129 [ncp.rltk.client] INFO: rltkOff
+0000014333 [ncp.rltk.client] INFO: disconnected
+0000014620 [net.lwip_rltk] INFO: promisc_deinit TODO
+0000014622 [hal] INFO: WiFi off
+0000014623 [ncp.rltk.client] INFO: rltkOff done
+0000017946 [app] INFO: 1WireReset status=1
+0000018705 [app] INFO: ConvertT status=1
+0000018711 [app] INFO: 1WireReset status=1
+0000018745 [app] INFO: ReadScratchpad completed status=1
+0000018751 [app] INFO: GetTemperature status=1 temperatureC=19.000000
+temperature=19.0000 deg C

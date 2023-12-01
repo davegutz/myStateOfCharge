@@ -92,6 +92,7 @@ void load_ib_vb(const boolean reset, const boolean reset_temp, Sensors *Sen, Pin
 void monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon);
+void oled_display(Sensors *Sen, BatteryMonitor *Mon);
 void print_all_header(void);
 void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
 void print_serial_header(void);
@@ -105,5 +106,6 @@ String time_long_2_str(const unsigned long current_time, char *tempStr);
 String tryExtractString(String str, const char* start, const char* end);
 void rapid_print(Sensors *Sen, BatteryMonitor *Mon);
 void wait_on_user_input(Adafruit_SSD1306 *display);
+void wait_on_user_input();
 
 #endif

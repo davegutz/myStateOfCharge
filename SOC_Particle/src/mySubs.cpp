@@ -482,6 +482,92 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   blink += 1;
   if (blink>3) blink = 0;
 }
+void oled_display(Sensors *Sen, BatteryMonitor *Mon)
+{
+  static uint8_t blink = 0;
+  String disp_0, disp_1, disp_2;
+
+  // ---------- Top Line of Display -------------------------------------------
+  // Tb
+  sprintf(cp.buffer, "%3.0f", pp.pubList.Tb);
+  disp_0 = cp.buffer;
+  if ( Sen->Flt->tb_fa() && (blink==0 || blink==1) )
+    disp_0 = "***";
+
+  // Voc
+  sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
+  disp_1 = cp.buffer;
+  if ( Sen->Flt->vb_sel_stat()==0 && (blink==1 || blink==2) )
+    disp_1 = "*fail";
+  else if ( Sen->bms_off )
+    disp_1 = " off ";
+
+  // Ib
+  sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);
+  disp_2 = cp.buffer;
+  if ( blink==2 )
+  {
+    if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
+      disp_2 = "*fail";
+    else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
+      disp_2 = " conn ";
+    else if ( Sen->Flt->ib_diff_fa() )
+      disp_2 = " diff ";
+    else if ( Sen->Flt->red_loss() )
+      disp_2 = " redl ";
+  }
+  else if ( blink==3 )
+  {
+    if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
+      disp_2 = "*fail";
+    else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
+      disp_2 = " conn ";
+  }
+  String disp_Tbop = disp_0.substring(0, 4) + " " + disp_1.substring(0, 6) + " " + disp_2.substring(0, 7);
+
+  // --------------------- Bottom line of Display ------------------------------
+  // Hrs EHK
+  sprintf(cp.buffer, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
+  disp_0 = cp.buffer;
+  if ( blink==0 || blink==1 || blink==2 )
+  {
+    if ( Sen->Flt->cc_diff_fa() )
+      disp_0 = "---";
+  }
+
+  // t charge
+  if ( abs(pp.pubList.tcharge) < 24. )
+  {
+    sprintf(cp.buffer, "%5.1f", pp.pubList.tcharge);
+  }
+  else
+  {
+    sprintf(cp.buffer, " --- ");
+  }  
+  disp_1 = cp.buffer;
+
+  // Hrs large
+  if ( blink==1 || blink==3 || !Sen->saturated )
+  {
+    sprintf(cp.buffer, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
+    disp_2 = cp.buffer;
+  }
+  else if (Sen->saturated)
+    disp_2 = "SAT";
+  String dispBot = disp_0 + disp_1 + " " + disp_2;
+
+  // Text basic Bluetooth (use serial bluetooth app)
+  if ( sp.Debug()==99 ) // Calibration mode
+    debug_99(Mon, Sen);
+  else if ( sp.Debug()!=4 && sp.Debug()!=-2 )  // Normal display
+    Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
+      disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
+
+  if ( sp.Debug()==5 ) debug_5(Mon, Sen);  // Charge time display on UART
+
+  blink += 1;
+  if (blink>3) blink = 0;
+}
 
 // Read sensors, model signals, select between them.
 // Sim used for any missing signals (Tb, Vb, Ib)
@@ -790,6 +876,68 @@ void wait_on_user_input(Adafruit_SSD1306 *display)
   display->setCursor(0,0);              // Start at top-left corner    sp.print_versus_local_config();
   display->println("Waiting for USB/BT talk\n\nignores after 120s");
   display->display();
+  uint8_t count = 0;
+  uint16_t answer = '\r';
+  // Get user input but timeout at 120 seconds if no response
+  while ( count<30 && answer!='Y' && answer!='n' && answer!='N' )
+  {
+    if ( answer=='\r')
+    {
+      count++;
+      if ( count>1 ) delay(4000);
+    }
+    else delay(100);
+
+    if ( Serial.available() )
+      answer=Serial.read();
+    else if ( Serial1.available() )
+      answer=Serial1.read();
+
+    if ( answer=='\r')
+    {
+      Serial.printf("\n\n");
+      sp.pretty_print( false );
+      Serial.printf("Reset to defaults? [Y/n]:"); Serial1.printf("Reset to defaults? [Y/n]:");
+    }
+    else  // User is typing.  Ignore him until they answer 'Y', 'N', or 'n'.  But timeout at 30 seconds if they don't
+    {
+      while ( answer!='Y' && answer!='N' && answer!='n' && count<30 )
+      {
+        if ( Serial.available() )
+          answer=Serial.read();
+
+        else if ( Serial1.available() )
+          answer=Serial1.read();
+
+        else
+        {
+          Serial.printf("?");
+          count++;
+          delay(1000);
+        }
+      }
+    }
+
+  }
+
+  // Wrap it up
+  if ( answer=='Y' )
+  {
+    Serial.printf("  Y\n\n"); Serial1.printf("  Y\n\n");
+    sp.reset_pars();
+    sp.pretty_print( true );
+    #ifdef CONFIG_PHOTON2
+      System.backupRamSync();
+    #endif
+  }
+  else if ( answer=='n' || answer=='N' || count==30 )
+  {
+    Serial.printf(" N.  moving on...\n\n"); Serial1.printf(" N.  moving on...\n\n");
+  }
+
+}
+void wait_on_user_input()
+{
   uint8_t count = 0;
   uint16_t answer = '\r';
   // Get user input but timeout at 120 seconds if no response
