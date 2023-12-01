@@ -33,12 +33,12 @@ void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
   time_long_2_str(now, buffer);
   this->t = now;
   this->Tb_hdwe = int16_t(Sen->Tb_hdwe*600.);
-  this->vb_hdwe = int16_t(Sen->Vb/sp.nS()*1200.);
-  this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/sp.nP()*600.);
-  this->ib_noa_hdwe = int16_t(Sen->Ib_noa_hdwe/sp.nP()*600.);
+  this->vb_hdwe = int16_t(Sen->Vb/sp.nS_z*1200.);
+  this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/sp.nP_z*600.);
+  this->ib_noa_hdwe = int16_t(Sen->Ib_noa_hdwe/sp.nP_z*600.);
   this->Tb = int16_t(Sen->Tb*600.);
-  this->vb = int16_t(Sen->Vb/sp.nS()*1200.);
-  this->ib = int16_t(Sen->Ib/sp.nP()*600.);
+  this->vb = int16_t(Sen->Vb/sp.nS_z*1200.);
+  this->ib = int16_t(Sen->Ib/sp.nP_z*600.);
   this->soc = int16_t(Mon->soc()*16000.);
   this->soc_min = int16_t(Mon->soc_min()*16000.);
   this->soc_ekf = int16_t(Mon->soc_ekf()*16000.);

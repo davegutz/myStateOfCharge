@@ -28,7 +28,7 @@
 #include "Variable.h"
 
 /* Using pointers in building class so all that stuff does not get saved by 'retained' keyword in SOC_Particle.ino.
-    Only the *_stored parameters at the bottom of Parameters.h are stored in SRAM
+    Only the *_z parameters at the bottom of Parameters.h are stored in SRAM
 */
 
 // class SavedPars 
@@ -50,39 +50,39 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     size_ = 0;
 
     // Input definitions
-    Amp_p               = new FloatStorage(  "Xf", "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_stored, 0.);
-    Cutback_gain_sclr_p = new FloatStorage(  "Sk", "Cutback gain scalar", "slr",      -1e6, 1e6, &Cutback_gain_sclr_stored, 1.);
-    Debug_p             = new IntStorage(    "v",  "Verbosity",           "int",      -128, 128, &Debug_stored, 0);
-    Delta_q_p           = new DoubleStorage( "na", "Charge chg",          "C",        -1e8, 1e5, &Delta_q_stored, 0., true);
-    Delta_q_model_p     = new DoubleStorage( "na", "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_stored, 0., true);
-    Dw_p                = new FloatStorage(  "Dw", "Tab mon adj",         "v",        -1e2, 1e2, &Dw_stored, VTAB_BIAS);
-    Freq_p              = new FloatStorage(  "Xf", "Inj freq",            "Hz",        0.,  2.,  &Freq_stored, 0.);
-    Ib_bias_all_p       = new FloatStorage(  "DI", "Add all",             "A",        -1e5, 1e5, &Ib_bias_all_stored, CURR_BIAS_ALL);
+    Amp_p               = new FloatStorage(  "Xf", "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_z, 0.);
+    Cutback_gain_sclr_p = new FloatStorage(  "Sk", "Cutback gain scalar", "slr",      -1e6, 1e6, &Cutback_gain_sclr_z, 1.);
+    Debug_p             = new IntStorage(    "v",  "Verbosity",           "int",      -128, 128, &Debug_z, 0);
+    Delta_q_p           = new DoubleStorage( "na", "Charge chg",          "C",        -1e8, 1e5, &Delta_q_z, 0., true);
+    Delta_q_model_p     = new DoubleStorage( "na", "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_z, 0., true);
+    Dw_p                = new FloatStorage(  "Dw", "Tab mon adj",         "v",        -1e2, 1e2, &Dw_z, VTAB_BIAS);
+    Freq_p              = new FloatStorage(  "Xf", "Inj freq",            "Hz",        0.,  2.,  &Freq_z, 0.);
+    Ib_bias_all_p       = new FloatStorage(  "DI", "Add all",             "A",        -1e5, 1e5, &Ib_bias_all_z, CURR_BIAS_ALL);
     Ib_bias_all_nan_p   = new FloatNoStorage("Di", "DI + reset",          "A",        -1e5, 1e5, CURR_BIAS_ALL);
-    Ib_bias_amp_p       = new FloatStorage(  "DA", "Add amp",             "A",        -1e5, 1e5, &Ib_bias_amp_stored, CURR_BIAS_AMP);
-    Ib_bias_noa_p       = new FloatStorage(  "DB", "Add noa",             "A",        -1e5, 1e5, &Ib_bias_noa_stored, CURR_BIAS_NOA);
-    Ib_scale_amp_p      = new FloatStorage(  "SA", "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_stored, CURR_SCALE_AMP);
-    Ib_scale_noa_p      = new FloatStorage(  "SB", "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_stored, CURR_SCALE_NOA);
-    Ib_select_p         = new Int8tStorage(  "si", "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
-    Iflt_p              = new IntStorage(    "na", "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_stored, -1, true);
-    Ihis_p              = new IntStorage(    "na", "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_stored, -1, true);
-    Inj_bias_p          = new FloatStorage(  "Xb", "Injection bias",      "A",        -1e5, 1e5, &Inj_bias_stored, 0.);
-    Isum_p              = new IntStorage(    "na", "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_stored, -1, true);
-    Modeling_p          = new Uint8tStorage( "Xm", "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
-    Mon_chm_p           = new Uint8tStorage( "Bm", "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_stored, MON_CHEM);
-    nP_p                = new FloatStorage(  "BP", "Number parallel",     "units",     1e-6, 100, &nP_stored, NP);
-    nS_p                = new FloatStorage(  "BS", "Number series",       "units",     1e-6, 100, &nS_stored, NS);
-    Preserving_p        = new Uint8tStorage( "X?", "Preserving fault",    "T=Preserve", 0, 1, &Preserving_stored, 0, true);
-    S_cap_mon_p         = new FloatStorage(  "SQ", "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_stored, 1.);
-    S_cap_sim_p         = new FloatStorage(  "Sq", "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
-    Sim_chm_p           = new Uint8tStorage( "Bs", "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_stored, SIM_CHEM);
-    Tb_bias_hdwe_p      = new FloatStorage(  "Dt", "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
-    Time_now_p          = new ULongStorage(  "UT", "UNIX tim since epoch","sec",       0UL, 2100000000UL, &Time_now_stored, 1669801880UL, true);
-    Type_p              = new Uint8tStorage( "Xt", "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
-    T_state_p           = new FloatStorage(  "na", "Tb rate lim mem",     "dg C",     -10,  70,  &T_state_stored, RATED_TEMP, false);
-    T_state_model_p     = new FloatStorage(  "na", "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_state_model_stored, RATED_TEMP, false);
-    Vb_bias_hdwe_p      = new FloatStorage(  "Dc", "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_stored, VOLT_BIAS);
-    Vb_scale_p          = new FloatStorage(  "SV", "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_stored, VB_SCALE);
+    Ib_bias_amp_p       = new FloatStorage(  "DA", "Add amp",             "A",        -1e5, 1e5, &Ib_bias_amp_z, CURR_BIAS_AMP);
+    Ib_bias_noa_p       = new FloatStorage(  "DB", "Add noa",             "A",        -1e5, 1e5, &Ib_bias_noa_z, CURR_BIAS_NOA);
+    Ib_scale_amp_p      = new FloatStorage(  "SA", "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_z, CURR_SCALE_AMP);
+    Ib_scale_noa_p      = new FloatStorage(  "SB", "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_z, CURR_SCALE_NOA);
+    Ib_select_p         = new Int8tStorage(  "si", "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS));
+    Iflt_p              = new IntStorage(    "na", "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_z, -1, true);
+    Ihis_p              = new IntStorage(    "na", "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_z, -1, true);
+    Inj_bias_p          = new FloatStorage(  "Xb", "Injection bias",      "A",        -1e5, 1e5, &Inj_bias_z, 0.);
+    Isum_p              = new IntStorage(    "na", "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_z, -1, true);
+    Modeling_p          = new Uint8tStorage( "Xm", "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_z, MODELING);
+    Mon_chm_p           = new Uint8tStorage( "Bm", "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_z, MON_CHEM);
+    nP_p                = new FloatStorage(  "BP", "Number parallel",     "units",     1e-6, 100, &nP_z, NP);
+    nS_p                = new FloatStorage(  "BS", "Number series",       "units",     1e-6, 100, &nS_z, NS);
+    Preserving_p        = new Uint8tStorage( "X?", "Preserving fault",    "T=Preserve", 0, 1, &Preserving_z, 0, true);
+    S_cap_mon_p         = new FloatStorage(  "SQ", "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_z, 1.);
+    S_cap_sim_p         = new FloatStorage(  "Sq", "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_z, 1.);
+    Sim_chm_p           = new Uint8tStorage( "Bs", "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_z, SIM_CHEM);
+    Tb_bias_hdwe_p      = new FloatStorage(  "Dt", "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_z, TEMP_BIAS);
+    Time_now_p          = new ULongStorage(  "UT", "UNIX tim since epoch","sec",       0UL, 2100000000UL, &Time_now_z, 1669801880UL, true);
+    Type_p              = new Uint8tStorage( "Xt", "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_z, 0);
+    T_state_p           = new FloatStorage(  "na", "Tb rate lim mem",     "dg C",     -10,  70,  &T_state_z, RATED_TEMP, false);
+    T_state_model_p     = new FloatStorage(  "na", "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_state_model_z, RATED_TEMP, false);
+    Vb_bias_hdwe_p      = new FloatStorage(  "Dc", "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_z, VOLT_BIAS);
+    Vb_scale_p          = new FloatStorage(  "SV", "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
 
     // Memory map
     Z_[size_++] = Amp_p;                
@@ -128,39 +128,39 @@ SavedPars::SavedPars(SerialRAM *ram)
     nflt_ = int( NFLT ); 
 
     // Input definitions
-    Amp_p               = new FloatStorage(  "Xf", rP_, "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_stored, 0.);
-    Cutback_gain_sclr_p = new FloatStorage(  "Sk", rP_, "Cutback gain scalar", "slr",      -1e6, 1e6, &Cutback_gain_sclr_stored, 1.);
-    Debug_p             = new IntStorage(    "v",  rP_, "Verbosity",           "int",      -128, 128, &Debug_stored, 0);
-    Delta_q_p           = new DoubleStorage( "na", rP_, "Charge chg",          "C",        -1e8, 1e5, &Delta_q_stored, 0., true);
-    Delta_q_model_p     = new DoubleStorage( "na", rP_, "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_stored, 0., true);
-    Dw_p                = new FloatStorage(  "Dw", rP_, "Tab mon adj",         "v",        -1e2, 1e2, &Dw_stored, VTAB_BIAS);
-    Freq_p              = new FloatStorage(  "Xf", rP_, "Inj freq",            "Hz",        0.,  2.,  &Freq_stored, 0.);
-    Ib_bias_all_p       = new FloatStorage(  "DI", rP_, "Del all",             "A",        -1e5, 1e5, &Ib_bias_all_stored, CURR_BIAS_ALL);
+    Amp_p               = new FloatStorage(  "Xf", rP_, "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_z, 0.);
+    Cutback_gain_sclr_p = new FloatStorage(  "Sk", rP_, "Cutback gain scalar", "slr",      -1e6, 1e6, &Cutback_gain_sclr_z, 1.);
+    Debug_p             = new IntStorage(    "v",  rP_, "Verbosity",           "int",      -128, 128, &Debug_z, 0);
+    Delta_q_p           = new DoubleStorage( "na", rP_, "Charge chg",          "C",        -1e8, 1e5, &Delta_q_z, 0., true);
+    Delta_q_model_p     = new DoubleStorage( "na", rP_, "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_z, 0., true);
+    Dw_p                = new FloatStorage(  "Dw", rP_, "Tab mon adj",         "v",        -1e2, 1e2, &Dw_z, VTAB_BIAS);
+    Freq_p              = new FloatStorage(  "Xf", rP_, "Inj freq",            "Hz",        0.,  2.,  &Freq_z, 0.);
+    Ib_bias_all_p       = new FloatStorage(  "DI", rP_, "Del all",             "A",        -1e5, 1e5, &Ib_bias_all_z, CURR_BIAS_ALL);
     Ib_bias_all_nan_p   = new FloatNoStorage("Di",      "DI + reset",          "A",        -1e5, 1e5, CURR_BIAS_ALL);
-    Ib_bias_amp_p       = new FloatStorage(  "DA", rP_, "Add amp",             "A",        -1e5, 1e5, &Ib_bias_amp_stored, CURR_BIAS_AMP);
-    Ib_bias_noa_p       = new FloatStorage(  "DB", rP_, "Add noa",             "A",        -1e5, 1e5, &Ib_bias_noa_stored, CURR_BIAS_NOA);
-    Ib_scale_amp_p      = new FloatStorage(  "SA", rP_, "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_stored, CURR_SCALE_AMP);
-    Ib_scale_noa_p      = new FloatStorage(  "SB", rP_, "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_stored, CURR_SCALE_NOA);
-    Ib_select_p         = new Int8tStorage(  "si", rP_, "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_stored, int8_t(FAKE_FAULTS));
-    Iflt_p              = new IntStorage(    "na", rP_, "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_stored, -1, true);
-    Ihis_p              = new IntStorage(    "na", rP_, "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_stored, -1, true);
-    Inj_bias_p          = new FloatStorage(  "Xb", rP_, "Injection bias",      "A",        -1e5, 1e5, &Inj_bias_stored, 0.);
-    Isum_p              = new IntStorage(    "na", rP_, "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_stored, -1, true);
-    Modeling_p          = new Uint8tStorage( "Xm", rP_, "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_stored, MODELING);
-    Mon_chm_p           = new Uint8tStorage( "Bm", rP_, "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_stored, MON_CHEM);
-    nP_p                = new FloatStorage(  "BP", rP_, "Number parallel",     "units",     1e-6, 100, &nP_stored, NP);
-    nS_p                = new FloatStorage(  "BS", rP_, "Number series",       "units",     1e-6, 100, &nS_stored, NS);
-    Preserving_p        = new Uint8tStorage( "X?", rP_, "Preserving fault",    "T=Preserve", 0, 1, &Preserving_stored, 0, true);
-    S_cap_mon_p         = new FloatStorage(  "SQ", rP_, "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_stored, 1.);
-    S_cap_sim_p         = new FloatStorage(  "Sq", rP_, "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_stored, 1.);
-    Sim_chm_p           = new Uint8tStorage( "Bs", rP_, "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_stored, SIM_CHEM);
-    Tb_bias_hdwe_p      = new FloatStorage(  "Dt", rP_, "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_stored, TEMP_BIAS);
-    Time_now_p          = new ULongStorage(  "UT", rP_, "UNIX tim since epoch","sec",       0UL, 2100000000UL, &Time_now_stored, 1669801880UL, true);
-    Type_p              = new Uint8tStorage( "Xt", rP_, "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_stored, 0);
-    T_state_p           = new FloatStorage(  "na", rP_, "Tb rate lim mem",     "dg C",    -10,  70,  &T_state_stored, RATED_TEMP, false);
-    T_state_model_p     = new FloatStorage(  "na", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_stored, RATED_TEMP, false);
-    Vb_bias_hdwe_p      = new FloatStorage(  "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_stored, VOLT_BIAS);
-    Vb_scale_p          = new FloatStorage(  "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_stored, VB_SCALE);
+    Ib_bias_amp_p       = new FloatStorage(  "DA", rP_, "Add amp",             "A",        -1e5, 1e5, &Ib_bias_amp_z, CURR_BIAS_AMP);
+    Ib_bias_noa_p       = new FloatStorage(  "DB", rP_, "Add noa",             "A",        -1e5, 1e5, &Ib_bias_noa_z, CURR_BIAS_NOA);
+    Ib_scale_amp_p      = new FloatStorage(  "SA", rP_, "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_z, CURR_SCALE_AMP);
+    Ib_scale_noa_p      = new FloatStorage(  "SB", rP_, "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_z, CURR_SCALE_NOA);
+    Ib_select_p         = new Int8tStorage(  "si", rP_, "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS));
+    Iflt_p              = new IntStorage(    "na", rP_, "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_z, -1, true);
+    Ihis_p              = new IntStorage(    "na", rP_, "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_z, -1, true);
+    Inj_bias_p          = new FloatStorage(  "Xb", rP_, "Injection bias",      "A",        -1e5, 1e5, &Inj_bias_z, 0.);
+    Isum_p              = new IntStorage(    "na", rP_, "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_z, -1, true);
+    Modeling_p          = new Uint8tStorage( "Xm", rP_, "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_z, MODELING);
+    Mon_chm_p           = new Uint8tStorage( "Bm", rP_, "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_z, MON_CHEM);
+    nP_p                = new FloatStorage(  "BP", rP_, "Number parallel",     "units",     1e-6, 100, &nP_z, NP);
+    nS_p                = new FloatStorage(  "BS", rP_, "Number series",       "units",     1e-6, 100, &nS_z, NS);
+    Preserving_p        = new Uint8tStorage( "X?", rP_, "Preserving fault",    "T=Preserve", 0, 1, &Preserving_z, 0, true);
+    S_cap_mon_p         = new FloatStorage(  "SQ", rP_, "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_z, 1.);
+    S_cap_sim_p         = new FloatStorage(  "Sq", rP_, "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_z, 1.);
+    Sim_chm_p           = new Uint8tStorage( "Bs", rP_, "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_z, SIM_CHEM);
+    Tb_bias_hdwe_p      = new FloatStorage(  "Dt", rP_, "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_z, TEMP_BIAS);
+    Time_now_p          = new ULongStorage(  "UT", rP_, "UNIX tim since epoch","sec",       0UL, 2100000000UL, &Time_now_z, 1669801880UL, true);
+    Type_p              = new Uint8tStorage( "Xt", rP_, "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_z, 0);
+    T_state_p           = new FloatStorage(  "na", rP_, "Tb rate lim mem",     "dg C",    -10,  70,  &T_state_z, RATED_TEMP, false);
+    T_state_model_p     = new FloatStorage(  "na", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_z, RATED_TEMP, false);
+    Vb_bias_hdwe_p      = new FloatStorage(  "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_z, VOLT_BIAS);
+    Vb_scale_p          = new FloatStorage(  "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
 
     // Memory map
     Z_[size_++] = Amp_p;                
@@ -332,15 +332,15 @@ void SavedPars::pretty_print(const boolean all)
     Serial.printf("saved (sp): all=%d\n", all);
     Serial.printf("             defaults    current EERAM values\n");
     for (int i=0; i<size_; i++ ) if ( all || Z_[i]->is_off() )  Z_[i]->print();
-    if ( all )
-    {
-        Serial.printf("history array (%d):\n", nhis_);
-        print_history_array();
-        print_fault_header();
-        Serial.printf("fault array (%d):\n", nflt_);
-        print_fault_array();
-        print_fault_header();
-    }
+    // if ( all )
+    // {
+    //     Serial.printf("history array (%d):\n", nhis_);
+    //     print_history_array();
+    //     print_fault_header();
+    //     Serial.printf("fault array (%d):\n", nflt_);
+    //     print_fault_array();
+    //     print_fault_header();
+    // }
 
     #ifdef CONFIG_47L16
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
@@ -352,7 +352,7 @@ void SavedPars::pretty_print(const boolean all)
 // Print faults
 void SavedPars::print_fault_array()
 {
-  int i = Iflt_stored;  // Last one written was iflt
+  int i = Iflt_z;  // Last one written was iflt
   int n = -1;
   while ( ++n < nflt_ )
   {
@@ -371,7 +371,7 @@ void SavedPars::print_fault_header()
 // Print history
 void SavedPars::print_history_array()
 {
-  int i = Ihis_stored;  // Last one written was ihis
+  int i = Ihis_z;  // Last one written was ihis
   int n = -1;
   while ( ++n < nhis_ )
   {

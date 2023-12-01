@@ -37,9 +37,9 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   Sensors* Sen, const int num_timeouts, BatteryMonitor* Mon)
 {
   String batt;
-  if ( sp.Mon_chm() == 0 )
+  if ( sp.Mon_chm_z == 0 )
     batt = "_bb";
-  else if ( sp.Mon_chm() == 1 )
+  else if ( sp.Mon_chm_z == 1 )
     batt = "_ch";
   else
     batt = "_un";
@@ -49,8 +49,8 @@ void assign_publist(Publish* pubList, const unsigned long now, const String unit
   pubList->Tb = Sen->Tb;
   pubList->Ib = Sen->Ib;
   pubList->tcharge = Mon->tcharge();
-  pubList->Voc = Mon->voc()*sp.nS();
+  pubList->Voc = Mon->voc()*sp.nS_z;
   pubList->sat = Mon->sat();
-  pubList->Amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf()*sp.nS()*sp.nP();
-  pubList->Amp_hrs_remaining_soc = Mon->amp_hrs_remaining_soc()*sp.nS()*sp.nP();
+  pubList->Amp_hrs_remaining_ekf = Mon->amp_hrs_remaining_ekf()*sp.nS_z*sp.nP_z;
+  pubList->Amp_hrs_remaining_soc = Mon->amp_hrs_remaining_soc()*sp.nS_z*sp.nP_z;
 }

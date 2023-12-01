@@ -38,7 +38,7 @@ extern CommandPars cp;            // Various parameters shared at system level
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
 /* Using pointers in building class so all that stuff does not get saved by 'retained' keyword in SOC_Particle.ino.
-    Only the *_stored parameters at the bottom of Parameters.h are stored in SRAM.  Class initialized by *init in arg list.
+    Only the *_z parameters at the bottom of Parameters.h are stored in SRAM.  Class initialized by *init in arg list.
 */
 class Storage
 {
@@ -1015,130 +1015,32 @@ public:
 
     // operators
 
-    // parameter list
-    float Amp() { return Amp_stored; }
-    float Cutback_gain_sclr() { return Cutback_gain_sclr_stored; }
-    int Debug() { return Debug_stored;}
-    double Delta_q() { return Delta_q_stored;}
-    double Delta_q_model() { return Delta_q_model_stored;}
-    float Dw() { return Dw_stored; }
-    float Freq() { return Freq_stored; }
-    uint8_t Mon_chm() { return Mon_chm_stored; }
-    float S_cap_mon() { return S_cap_mon_stored; }
-    float S_cap_sim() { return S_cap_sim_stored; }
-    uint8_t Sim_chm() { return Sim_chm_stored; }
-    float Ib_bias_all() { return Ib_bias_all_stored; }
-    float Ib_bias_amp() { return Ib_bias_amp_stored; }
-    float Ib_bias_noa() { return Ib_bias_noa_stored; }
-    float ib_scale_amp() { return Ib_scale_amp_stored; }
-    float ib_scale_noa() { return Ib_scale_noa_stored; }
-    int8_t Ib_select() { return Ib_select_stored; }
-    int Iflt() { return Iflt_stored; }
-    int Ihis() { return Ihis_stored; }
-    float Inj_bias() { return Inj_bias_stored; }
-    int Isum() { return Isum_stored; }
-    uint8_t Modeling() { return Modeling_stored; }
-    float nP() { return nP_stored; }
-    float nS() { return nS_stored; }
-    uint8_t Preserving() { return Preserving_stored; }
-    float Tb_bias_hdwe() { return Tb_bias_hdwe_stored; }
-    unsigned long Time_now() { return Time_now_stored; }
-    uint8_t type() { return Type_stored; }
-    float T_state() { return T_state_stored; }
-    float T_state_model() { return T_state_model_stored; }
-    float Vb_bias_hdwe() { return Vb_bias_hdwe_stored; }
-    float Vb_scale() { return Vb_scale_stored; }
-
     // functions
     boolean is_corrupt();
     void large_reset() { reset_pars(); reset_flt(); reset_his(); }
     void reset_flt();
     void reset_his();
     void reset_pars();
-    boolean mod_all_dscn() { return ( 111<Modeling() ); }                // Bare all
+    boolean mod_all_dscn() { return ( 111<Modeling_z ); }                // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
-    boolean mod_any_dscn() { return ( 15<Modeling() ); }                 // Bare any
-    boolean mod_ib() { return ( 1<<2 & Modeling() || mod_ib_all_dscn() ); }  // Using Sim as source of ib
-    boolean mod_ib_all_dscn() { return ( 191<Modeling() ); }             // Nothing connected to ib sensors in I2C on SDA/SCL
-    boolean mod_ib_amp_dscn() { return ( 1<<6 & Modeling() ); }          // Nothing connected to amp ib sensors in I2C on SDA/SCL
+    boolean mod_any_dscn() { return ( 15<Modeling_z ); }                 // Bare any
+    boolean mod_ib() { return ( 1<<2 & Modeling_z || mod_ib_all_dscn() ); }  // Using Sim as source of ib
+    boolean mod_ib_all_dscn() { return ( 191<Modeling_z ); }             // Nothing connected to ib sensors in I2C on SDA/SCL
+    boolean mod_ib_amp_dscn() { return ( 1<<6 & Modeling_z ); }          // Nothing connected to amp ib sensors in I2C on SDA/SCL
     boolean mod_ib_any_dscn() { return ( mod_ib_amp_dscn() || mod_ib_noa_dscn() ); }  // Nothing connected to ib sensors in I2C on SDA/SCL
-    boolean mod_ib_noa_dscn() { return ( 1<<7 & Modeling() ); }          // Nothing connected to noa ib sensors in I2C on SDA/SCL
-    boolean mod_none() { return ( 0==Modeling() ); }                     // Using all
-    boolean mod_none_dscn() { return ( 16>Modeling() ); }                // Bare nothing
-    boolean mod_tb() { return ( 1<<0 & Modeling() || mod_tb_dscn() ); }  // Using Sim as source of tb
-    boolean mod_tb_dscn() { return ( 1<<4 & Modeling() ); }              // Nothing connected to one-wire Tb sensor on D6
-    boolean mod_vb() { return ( 1<<1 & Modeling() || mod_vb_dscn() ); }  // Using Sim as source of vb
-    boolean mod_vb_dscn() { return ( 1<<5 & Modeling() ); }              // Nothing connected to vb on A1
-    // get
+    boolean mod_ib_noa_dscn() { return ( 1<<7 & Modeling_z ); }          // Nothing connected to noa ib sensors in I2C on SDA/SCL
+    boolean mod_none() { return ( 0==Modeling_z ); }                     // Using all
+    boolean mod_none_dscn() { return ( 16>Modeling_z ); }                // Bare nothing
+    boolean mod_tb() { return ( 1<<0 & Modeling_z || mod_tb_dscn() ); }  // Using Sim as source of tb
+    boolean mod_tb_dscn() { return ( 1<<4 & Modeling_z ); }              // Nothing connected to one-wire Tb sensor on D6
+    boolean mod_vb() { return ( 1<<1 & Modeling_z || mod_vb_dscn() ); }  // Using Sim as source of vb
+    boolean mod_vb_dscn() { return ( 1<<5 & Modeling_z ); }              // Nothing connected to vb on A1
     #ifdef CONFIG_47L16
-        float get_Amp() { return Amp_p->get(); }
-        float get_Cutback_gain_sclr() { return Cutback_gain_sclr_p->get(); }
-        int get_Debug() { return Debug_p->get(); }
-        double get_Delta_q() { return Delta_q_p->get(); }
-        double get_Delta_q_model() { return Delta_q_model_p->get(); }
-        float get_Dw() { return Dw_p->get(); }
-        float get_Freq() { return Freq_p->get(); }
-        float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
-        float get_Ib_bias_amp() { return Ib_bias_amp_p->get(); }
-        float get_Ib_bias_noa() { return Ib_bias_noa_p->get(); }
-        float get_Ib_scale_amp() { return Ib_scale_amp_p->get(); }
-        float get_Ib_scale_noa() { return Ib_scale_noa_p->get(); }
-        int8_t get_Ib_select() { return Ib_select_p->get(); }
-        int get_Iflt() { return Iflt_stored; }
-        int get_Ihis() { return Ihis_stored; }
-        int get_Isum() { return Isum_stored; }
-        float get_Inj_bias() { return Inj_bias_stored; }
-        uint8_t get_Modeling() { return Modeling_p->get(); }
-        uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
-        uint8_t get_nP() { return nP_p->get(); }
-        uint8_t get_nS() { return nS_p->get(); }
-        uint8_t get_Preserving() { return Preserving_stored; }
-        uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
-        float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
-        float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
-        float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
-        unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
-        uint8_t get_Type() { return Type_p->get(); }
-        float get_T_state() { return T_state_p->get(); }
-        float get_T_state_model() { return T_state_model_p->get(); }
-        float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
-        float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Vb_scale_stored
-
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
         uint16_t next() { return next_; }
         void load_all();
-    #else
-        float get_Amp() { return Amp_p->get(); }
-        float get_Cutback_gain_sclr() { return Cutback_gain_sclr_p->get(); }
-        int get_Debug() { return Debug_p->get(); }
-        double get_Delta_q() { return Delta_q_p->get(); }
-        double get_Delta_q_model() { return Delta_q_model_p->get(); }
-        float get_Dw() { return Dw_p->get(); }
-        float get_Freq() { return Freq_p->get(); }
-        float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
-        double get_Ib_select() { return Ib_select_p->get(); }
-        int get_Iflt() { return Iflt_stored; }
-        int get_Ihis() { return Ihis_stored; }
-        float get_Inj_bias() { return Inj_bias_stored; }
-        int get_Isum() { return Isum_stored; }
-        uint8_t get_Modeling() { return Modeling_p->get(); }
-        uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
-        uint8_t get_nP() { return nP_p->get(); }
-        uint8_t get_nS() { return nS_p->get(); }
-        uint8_t get_Preserving() { return Preserving_p->get(); }
-        float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
-        float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
-        uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
-        float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
-        unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
-        uint8_t get_Type() { return Type_p->get(); }  // TODO:  should these be Type_stored
-        float get_T_state() { return T_state_p->get(); }
-        float get_T_state_model() { return T_state_model_p->get(); }
-        float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
-        float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Ib_bias_stored
     #endif
-    //
     void mem_print();
     uint16_t nflt() { return nflt_; }
     uint16_t nhis() { return nhis_; }
@@ -1150,96 +1052,50 @@ public:
     void print_fault_array();
     void print_fault_header();
     void print_history_array();
-    // put
-    #ifndef CONFIG_47L16
-        void put_all_dynamic();
-        void put_Amp(const float input) { Amp_p->set(input); }
-        void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_p->set(input); }
-        void put_Debug(const int input) { Debug_p->set(input); }
-        void put_Delta_q(const double input) { Delta_q_p->set(input); }
-        void put_Delta_q() {}
-        void put_Delta_q_model(const double input) { Delta_q_model_p->set(input); }
-        void put_Delta_q_model() {}
-        void put_Dw(const float input) { Dw_p->set(input); }
-        void put_Freq(const float input) { Freq_p->set(input); }
-        void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
-        void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->set(input); }
-        void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->set(input); }
-        void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
-        void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
-        void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
-        void put_Iflt(const int input) { Iflt_p->set(input); }
-        void put_Ihis(const int input) { Ihis_p->set(input); }
-        void put_Isum(const int input) { Isum_p->set(input); }
-        void put_isum(const int input) { isum_ = input; }
-        void put_Inj_bias(const float input) { Inj_bias_p->set(input); }
-        void put_Modeling(const uint8_t input) { Modeling_p->set(input); Modeling_stored = Modeling();}
-        void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
-        void put_Mon_chm() {}
-        void put_nP(const float input) { nP_p->set(input); }
-        void put_nS(const float input) { nS_p->set(input); }
-        void put_Preserving(const uint8_t input) { Preserving_p->set(input); }
-        void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
-        void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
-        void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
-        void put_Sim_chm() {}
-        void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
-        void put_Time_now(const unsigned long input) { Time_now_p->set(input); }
-        void put_Type(const uint8_t input) { Type_p->set(input); }
-        void put_T_state(const float input) { T_state_p->set(input); }
-        void put_T_state() {}
-        void put_T_state_model(const float input) { T_state_model_p->set(input); }
-        void put_T_state_model() {}
-        void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
-        void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
+    void put_all_dynamic();
+    void put_Amp(const float input) { Amp_p->set(input); }
+    void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_p->set(input); }
+    void put_Debug(const int input) { Debug_p->set(input); }
+    void put_Delta_q(const double input) { Delta_q_p->set(input); }
+    void put_Delta_q() {}
+    void put_Delta_q_model(const double input) { Delta_q_model_p->set(input); }
+    void put_Delta_q_model() {}
+    void put_Dw(const float input) { Dw_p->set(input); }
+    void put_Freq(const float input) { Freq_p->set(input); }
+    void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
+    void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->set(input); }
+    void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->set(input); }
+    void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
+    void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
+    void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
+    void put_Iflt(const int input) { Iflt_p->set(input); }
+    void put_Ihis(const int input) { Ihis_p->set(input); }
+    void put_Isum(const int input) { Isum_p->set(input); }
+    void put_Inj_bias(const float input) { Inj_bias_p->set(input); }
+    void put_Modeling(const uint8_t input) { Modeling_p->set(input); }
+    void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
+    void put_Mon_chm() {}
+    void put_nP(const float input) { nP_p->set(input); }
+    void put_nS(const float input) { nS_p->set(input); }
+    void put_Preserving(const uint8_t input) { Preserving_p->set(input); }
+    void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
+    void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
+    void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
+    void put_Sim_chm() {}
+    void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
+    void put_Time_now(const float input) { Time_now_p->set(input); }
+    void put_Type(const uint8_t input) { Type_p->set(input); }
+    void put_T_state(const float input) { T_state_p->set(input); }
+    void put_T_state() { T_state_p->set(T_state_z); }
+    void put_T_state_model(const float input) { T_state_model_p->set(input); }
+    void put_T_state_model() { T_state_p->set(T_state_model_z); }
+    void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
+    void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
+    void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
 
-        void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
-    #else
-        void put_all_dynamic();
-        void put_Amp(const float input) { Amp_p->set(input); }
-        void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_p->set(input); }
-        void put_Debug(const int input) { Debug_p->set(input); }
-        void put_Delta_q(const double input) { Delta_q_p->set(input); }
-        void put_Delta_q() {}
-        void put_Delta_q_model(const double input) { Delta_q_model_p->set(input); }
-        void put_Delta_q_model() {}
-        void put_Dw(const float input) { Dw_p->set(input); }
-        void put_Freq(const float input) { Freq_p->set(input); }
-        void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
-        void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->set(input); }
-        void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->set(input); }
-        void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
-        void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
-        void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
-        void put_Iflt(const int input) { Iflt_p->set(input); }
-        void put_Ihis(const int input) { Ihis_p->set(input); }
-        void put_Isum(const int input) { Isum_p->set(input); }
-        void put_Inj_bias(const float input) { Inj_bias_p->set(input); }
-        void put_Modeling(const uint8_t input) { Modeling_p->set(input); }
-        void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
-        void put_Mon_chm() {}
-        void put_nP(const float input) { nP_p->set(input); }
-        void put_nS(const float input) { nS_p->set(input); }
-        void put_Preserving(const uint8_t input) { Preserving_p->set(input); }
-        void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
-        void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
-        void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
-        void put_Sim_chm() {}
-        void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
-        void put_Time_now(const float input) { Time_now_p->set(input); }
-        void put_Type(const uint8_t input) { Type_p->set(input); }
-        void put_T_state(const float input) { T_state_p->set(input); }
-        void put_T_state() { T_state_p->set(T_state_stored); }
-        void put_T_state_model(const float input) { T_state_model_p->set(input); }
-        void put_T_state_model() { T_state_p->set(T_state_model_stored); }
-        void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
-        void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
-
-        void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
-    #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
-    boolean tweak_test() { return ( 1<<3 & Modeling() ); } // Driving signal injection completely using software inj_bias 
+    boolean tweak_test() { return ( 1<<3 & Modeling_z ); } // Driving signal injection completely using software inj_bias 
     FloatStorage *Amp_p;
     FloatStorage *Cutback_gain_sclr_p;
     IntStorage *Debug_p;
@@ -1275,45 +1131,40 @@ public:
     FloatStorage *Vb_scale_p;
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
-    float Amp_stored;
-    float Cutback_gain_sclr_stored;
-    int Debug_stored;
-    double Delta_q_stored;
-    double Delta_q_model_stored;
-    float Dw_stored;
-    float Freq_stored;
-    float Ib_bias_all_stored;
-    int8_t Ib_select_stored;
-    float Ib_bias_amp_stored;
-    float Ib_bias_noa_stored;
-    float Ib_scale_amp_stored;
-    float Ib_scale_noa_stored;
-    int Iflt_stored;
-    int Ihis_stored;
-    float Inj_bias_stored;
-    int Isum_stored;
-    uint8_t Modeling_stored;
-    uint8_t Mon_chm_stored;
-    float nP_stored;
-    float nS_stored;
-    uint8_t Preserving_stored;
-    float S_cap_mon_stored;
-    float S_cap_sim_stored;
-    uint8_t Sim_chm_stored;
-    float Tb_bias_hdwe_stored;
-    unsigned long Time_now_stored;
-    uint8_t Type_stored;
-    float T_state_stored;
-    float T_state_model_stored;
-    float Vb_bias_hdwe_stored;
-    float Vb_scale_stored;
+    float Amp_z;
+    float Cutback_gain_sclr_z;
+    int Debug_z;
+    double Delta_q_z;
+    double Delta_q_model_z;
+    float Dw_z;
+    float Freq_z;
+    float Ib_bias_all_z;
+    int8_t Ib_select_z;
+    float Ib_bias_amp_z;
+    float Ib_bias_noa_z;
+    float Ib_scale_amp_z;
+    float Ib_scale_noa_z;
+    int Iflt_z;
+    int Ihis_z;
+    float Inj_bias_z;
+    int Isum_z;
+    uint8_t Modeling_z;
+    uint8_t Mon_chm_z;
+    float nP_z;
+    float nS_z;
+    uint8_t Preserving_z;
+    float S_cap_mon_z;
+    float S_cap_sim_z;
+    uint8_t Sim_chm_z;
+    float Tb_bias_hdwe_z;
+    unsigned long Time_now_z;
+    uint8_t Type_z;
+    float T_state_z;
+    float T_state_model_z;
+    float Vb_bias_hdwe_z;
+    float Vb_scale_z;
 
 protected:
-    int iflt_;              // Fault snap location.   Begins at -1 because first action is to increment iflt
-    int ihis_;              // History location.   Begins at -1 because first action is to increment ihis
-    float inj_bias_;        // Constant bias, A
-    int isum_;              // Summary location.   Begins at -1 because first action is to increment isum
-    uint8_t preserving_;    // Preserving fault buffer
     #ifndef CONFIG_47L16
         Flt_st *fault_;
         Flt_st *history_;

@@ -177,8 +177,8 @@ delay(4000);
     delay(1000);
     sp.load_all();
   #endif
-  sp.Time_now_p->set(max(sp.Time_now_stored, (unsigned long)Time.now()));  // Synch with web when possible
-  Time.setTime(sp.Time_now_stored);
+  sp.Time_now_p->set(max(sp.Time_now_z, (unsigned long)Time.now()));  // Synch with web when possible
+  Time.setTime(sp.Time_now_z);
 
   // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
   #ifdef CONFIG_USE_BLE
@@ -307,7 +307,7 @@ delay(4000);
   #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)  // TODO: test that ARGON still works with the #if in place
     System.enableFeature(FEATURE_RETAINED_MEMORY);
   #endif
-  if ( sp.Debug()==1 || sp.Debug()==2 || sp.Debug()==3 || sp.Debug()==4 )
+  if ( sp.Debug_z==1 || sp.Debug_z==2 || sp.Debug_z==3 || sp.Debug_z==4 )
   {
     sp.print_history_array();
     sp.print_fault_header();
@@ -388,7 +388,7 @@ void loop()
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);
   display_and_remember = DisplayUserSync->update(millis(), reset);
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.Modeling();
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.Modeling_z;;
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
   summarizing = Summarize->update(millis(), false);
   summarizing = summarizing || boot_summ;
@@ -510,11 +510,11 @@ void loop()
     Mon->regauge(Sen->Tb_filt);
 
     // Empty battery
-    if ( sp.Modeling() && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
+    if ( sp.Modeling_z && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
     #ifndef CONFIG_PHOTON
-      if ( sp.Debug()==12 ) debug_12(Mon, Sen);
+      if ( sp.Debug_z==12 ) debug_12(Mon, Sen);
     #endif
     
     // Publish for variable print rate
@@ -568,15 +568,15 @@ void loop()
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
   if ( (!boot_wait && summarizing) || cp.write_summary )
   {
-    sp.put_Ihis(sp.Ihis()+1);
-    if ( sp.Ihis()>sp.nhis()-1 ) sp.put_Ihis(0);  // wrap buffer
+    sp.put_Ihis(sp.Ihis_z + 1);
+    if ( sp.Ihis_z > (sp.nhis() - 1) ) sp.put_Ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
     hist_snap.assign(time_now, Mon, Sen);
-    hist_bounced = sp.put_history(hist_snap, sp.Ihis());
+    hist_bounced = sp.put_history(hist_snap, sp.Ihis_z);
 
-    sp.put_Isum(sp.Isum()+1);
-    if ( sp.Isum()>NSUM-1 ) sp.put_Isum(0);
-    mySum[sp.Isum()].copy_to_Flt_ram_from(hist_bounced);
+    sp.put_Isum(sp.Isum_z+1);
+    if ( sp.Isum_z > NSUM-1 ) sp.put_Isum(0);
+    mySum[sp.Isum_z].copy_to_Flt_ram_from(hist_bounced);
 
     Serial.printf("Summ...\n");
     cp.write_summary = false;

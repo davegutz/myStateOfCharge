@@ -28,7 +28,7 @@
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
 #ifndef CONFIG_PHOTON
-  // sp.Debug()==12 EKF
+  // sp.Debug_z==12 EKF
   void debug_12(BatteryMonitor *Mon, Sensors *Sen)
   {
     Serial.printf("ib,ib_mod,   vb,vb_mod,  voc,voc_stat_mod,voc_mod,   K, y,    SOC_mod, SOC_ekf, SOC,   %7.3f,%7.3f,   %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,    %7.3f,%7.3f,   %7.3f,%7.3f,%7.3f,\n",
@@ -39,19 +39,19 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
     Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
   }
 
-  // sp.Debug()==-13 ib_dscn for Arduino.
+  // sp.Debug_z==-13 ib_dscn for Arduino.
   // Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
   void debug_m13(Sensors *Sen)
   {
 
     // Arduinio header
     static int8_t last_call = 0;
-    if ( sp.Debug()!=last_call && sp.Debug()==-13 )
+    if ( sp.Debug_z!=last_call && sp.Debug_z==-13 )
       Serial.printf("ib_sel_st:, ib_amph:, ib_noah:, ib_rate:, ib_quiet:,  dscn_flt:, dscn_fa:\n");
-    last_call = sp.Debug();
+    last_call = sp.Debug_z;
 
     // Plot
-    if ( sp.Debug()!=-13)
+    if ( sp.Debug_z!=-13)
       return;
     else
         Serial.printf("%d, %7.3f,%7.3f,  %7.3f,%7.3f,   %d,%d\n",
@@ -61,44 +61,44 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
     Sen->Flt->ib_dscn_fa(), Sen->Flt->ib_dscn_fa());
   }
 
-  // sp.Debug()==-23 vb for Arduino.
+  // sp.Debug_z==-23 vb for Arduino.
   // Start Arduino serial plotter.  Toggle v like 'v0;v-23;' to produce legend
   void debug_m23(Sensors *Sen)
   {
 
     // Arduinio header
     static int8_t last_call = 0;
-    if ( sp.Debug()!=last_call && sp.Debug()==-23 )
+    if ( sp.Debug_z!=last_call && sp.Debug_z==-23 )
       Serial.printf("Vb_hdwe-Vb_hdwe_f:\n");
-    last_call = sp.Debug();
+    last_call = sp.Debug_z;
 
     // Plot
-    if ( sp.Debug()!=-23)
+    if ( sp.Debug_z!=-23)
       return;
     else
         Serial.printf("%7.3f\n", Sen->Vb_hdwe - Sen->Vb_hdwe_f);
   }
 
-  // sp.Debug()==-24 Vb, Ib for Arduino.
+  // sp.Debug_z==-24 Vb, Ib for Arduino.
   // Start Arduino serial plotter.  Toggle v like 'v0;v-23;' to produce legend
   void debug_m24(Sensors *Sen)
   {
 
     // Arduinio header
     static int8_t last_call = 0;
-    if ( sp.Debug()!=last_call && sp.Debug()==-23 )
+    if ( sp.Debug_z!=last_call && sp.Debug_z==-23 )
       Serial.printf("Vb_hdwe-Vb_hdwe_f:, Ib_hdwe:\n");
-    last_call = sp.Debug();
+    last_call = sp.Debug_z;
 
     // Plot
-    if ( sp.Debug()!=-24)
+    if ( sp.Debug_z!=-24)
       return;
     else
         Serial.printf("%7.3f, %7.3f\n", Sen->Vb_hdwe - Sen->Vb_hdwe_f, Sen->Ib_hdwe);
   }
 #endif
 
-// sp.Debug()==5 Charge time
+// sp.Debug_z==5 Charge time
 void debug_5(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("oled_display: Tb, Vb, Ib, Ahrs_rem_ekf, tcharge, Ahrs_rem_wt, %3.0f, %5.2f, %5.1f,  %3.0f,%5.1f,%3.0f,\n",
@@ -112,7 +112,7 @@ void debug_q(BatteryMonitor *Mon, Sensors *Sen)
 soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling %d\n",
     Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
     Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.Modeling());
+    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.Modeling_z);
   Serial.printf("dq_inf/dq_abs%10.1f/%10.1f %8.4f coul_eff*=%9.6f, DAB+=%9.6f\nDQn%10.1f Tn%10.1f DQp%10.1f Tp%10.1f\n",
     Mon->delta_q_inf(), Mon->delta_q_abs(), Mon->delta_q_inf()/Mon->delta_q_abs(),
     -Mon->delta_q_neg()/Mon->delta_q_pos(),
@@ -123,7 +123,7 @@ soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling %d\n",
 soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling %d\n",
     Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(), Sen->Flt->vb_fail(),
     Mon->temp_c(), Mon->vb(), Mon->voc(), Mon->voc_filt(), Mon->vsat(), Mon->ib(), Sen->Sim->soc(), Mon->soc_ekf(),
-    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.Modeling());
+    Mon->soc(), Mon->soc_min(), Mon->soc_inf(), sp.Modeling_z);
   Serial1.printf("dq_inf/dq_abs%10.1f/%10.1f = %8.4f coul_eff*=%9.6f DAB+=%9.6f\nDQn%10.1f Tn%10.1f DQp%10.1f Tp%10.1f\n",
     Mon->delta_q_inf(), Mon->delta_q_abs(), Mon->delta_q_inf()/Mon->delta_q_abs(),
     -Mon->delta_q_neg()/Mon->delta_q_pos(),
@@ -137,19 +137,21 @@ soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling %d\n",
 void debug_99(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw: %6.2fC %7.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3fv,\n",
-  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa(), sp.Dw());
+  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale_z, sp.Vb_bias_hdwe_z, sp.Ib_scale_amp_z,
+    sp.Ib_bias_amp_z, sp.Ib_scale_noa_z, sp.Ib_bias_noa_z, sp.Dw_z);
   Serial1.printf("Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw: %6.2fC %7.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3fv,\n",
-  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.Ib_bias_amp(), sp.ib_scale_noa(), sp.Ib_bias_noa(), sp.Dw());
+  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale_z, sp.Vb_bias_hdwe_z, sp.Ib_scale_amp_z,
+    sp.Ib_bias_amp_z, sp.Ib_scale_noa_z, sp.Ib_bias_noa_z, sp.Dw_z);
 }
 
 #ifdef DEBUG_INIT
   // Various parameters to debug initialization stuff as needed
   void debug_m1(BatteryMonitor *Mon, Sensors *Sen)
   {
-    Serial.printf("mod %d fake_f %d reset_temp %d Tb%7.3f Tb_f%7.3f Vb%7.3f Ib%7.3f\nTb_s%6.2f Tl_s%6.2f ib_s%7.3f soc_s%8.4f dq_s%10.1f\nTb  %6.2f Tl%6.2f ib%7.3f soc  %8.4f dq  %10.1f soc_ekf%8.4f dq_ekf%10.1f\nvoc_filt %7.3f vsat %7.3f sat %d dq_stored%10.1f\n",
-        sp.Modeling(), cp.fake_faults, Sen->reset_temp(), Sen->Tb, Sen->Tb_filt, Sen->Vb, Sen->Ib,
+    Serial.printf("mod %d fake_f %d reset_temp %d Tb%7.3f Tb_f%7.3f Vb%7.3f Ib%7.3f\nTb_s%6.2f Tl_s%6.2f ib_s%7.3f soc_s%8.4f dq_s%10.1f\nTb  %6.2f Tl%6.2f ib%7.3f soc  %8.4f dq  %10.1f soc_ekf%8.4f dq_ekf%10.1f\nvoc_filt %7.3f vsat %7.3f sat %d dq_z%10.1f\n",
+        sp.Modeling_z, cp.fake_faults, Sen->reset_temp(), Sen->Tb, Sen->Tb_filt, Sen->Vb, Sen->Ib,
         Sen->Sim->Tb(), sp.t_last_model(), Sen->Sim->ib(), Sen->Sim->soc(), Sen->Sim->delta_q(),
         Mon->Tb(), sp.t_last(), Mon->ib(), Mon->soc(), Mon->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf(),
-        Mon->voc_filt(), Mon->vsat(), Mon->sat(), sp.Delta_q_stored);
+        Mon->voc_filt(), Mon->vsat(), Mon->sat(), sp.Delta_q_z);
   }
 #endif
