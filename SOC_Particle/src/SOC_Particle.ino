@@ -206,12 +206,13 @@ delay(4000);
 
   // I2C for OLED, ADS, backup EERAM, DS2482
   #ifndef CONFIG_BARE
+    Wire.begin();
     #ifdef CONFIG_ADS1013
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
       Serial.printf("High speed Wire setup for ADS1013\n");
     #endif
     #if defined(CONFIG_ADS1013) || defined(CONFIG_SSD1306) || defined(CONFIG_DS2482)
-      Wire.begin();
+      Wire.setSpeed(CLOCK_SPEED_100KHZ);
       Serial.printf("Wire started\n");
     #endif
   #endif
@@ -235,30 +236,28 @@ delay(4000);
   // 1-Wire chip card for I2C (after start Wire)
   #ifdef CONFIG_DS2482
     ds.setup();
-    #ifdef CONFIG_DS2482
-      #if !defined(CONFIG_ADS1013) && !defined(CONFIG_SSD1306)
-        // Single drop
-        DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status)
-        {
-          Serial.printlnf("deviceReset=%d", status);
-        });
-        Serial.printf("DS2482 single-drop setup complete\n");
-      #else
-        // Multidrop
-        DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status) {
-          Serial.printlnf("deviceReset=%d", status);
-          DS2482SearchBusCommand::run(ds, deviceList, [](DS2482SearchBusCommand &obj, int status) {
+    #if !defined(CONFIG_ADS1013) && !defined(CONFIG_SSD1306)
+      // Single drop
+      DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status)
+      {
+        Serial.printlnf("deviceReset=%d", status);
+      });
+      Serial.printf("DS2482 single-drop setup complete\n");
+    #else
+      // Multidrop
+      DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status) {
+        Serial.printlnf("deviceReset=%d", status);
+        DS2482SearchBusCommand::run(ds, deviceList, [](DS2482SearchBusCommand &obj, int status) {
 
-            if (status != DS2482Command::RESULT_DONE) {
-              Serial.printlnf("DS2482SearchBusCommand status=%d", status);
-              return;
-            }
+          if (status != DS2482Command::RESULT_DONE) {
+            Serial.printlnf("DS2482SearchBusCommand status=%d", status);
+            return;
+          }
 
-            Serial.printlnf("Found %u devices", deviceList.getDeviceCount());
-          });
+          Serial.printlnf("Found %u devices", deviceList.getDeviceCount());
         });
-        Serial.printf("DS2482 multi-drop setup complete\n");
-      #endif
+      });
+      Serial.printf("DS2482 multi-drop setup complete\n");
     #endif
   #endif
 
@@ -424,7 +423,6 @@ void loop()
             Serial.printf("DS2482GetTemperatureCommand failed status=%d\n", status);
           }
         });
-        Serial.printf("Single-drop I2C sample DS2482 1-Wire temp\n");
       #else
         // Multidrop Wire I2C
         if (deviceList.getDeviceCount() > 0)
@@ -436,15 +434,11 @@ void loop()
               Serial.printlnf("DS2482GetTemperatureForListCommand status=%d", status);
               return;
             }
-
-            Serial.printlnf("got temperatures!");
-
             for(size_t ii = 0; ii < deviceList.getDeviceCount(); ii++) {
-              Serial.printlnf("%s valid=%d C=%f F=%f",
+              Serial.printlnf("%s valid=%d C=%f",
                   deviceList.getAddressByIndex(ii).toString().c_str(),
                   deviceList.getDeviceByIndex(ii).getValid(),
-                  deviceList.getDeviceByIndex(ii).getTemperatureC(),
-                  deviceList.getDeviceByIndex(ii).getTemperatureF());
+                  deviceList.getDeviceByIndex(ii).getTemperatureC());
             }
 
           });
@@ -453,7 +447,6 @@ void loop()
         {
           Serial.printlnf("no devices found");
         }
-        Serial.printf("Multi-drop I2C sample DS2482 1-Wire temp\n");
       #endif
     #endif
   }
@@ -535,7 +528,7 @@ void loop()
   // OLED and Bluetooth display drivers.   Also convenient update time for saving parameters (remember)
   if ( display_and_remember )
   {
-    #ifdef CoNFIG_SSD1306
+    #ifdef CONFIG_SSD1306
       oled_display(display, Sen, Mon);
     #else
       oled_display(Sen, Mon);
