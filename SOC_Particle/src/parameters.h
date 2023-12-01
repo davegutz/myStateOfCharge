@@ -520,7 +520,7 @@ public:
 
     void print_help_str()
     {
-      Serial.printf("* %-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+      sprintf(cp.buffer, "* %-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -920,7 +920,6 @@ public:
     void print_help_str()
     {
         sprintf(cp.buffer, "* %-2s= %6ld: (%-6ld-%6ld) [%6ld] %s, %s", code_.c_str(), min_, max_, default_, *val_, description_.c_str(), units_.c_str());
-
     }
 
     void print_help()

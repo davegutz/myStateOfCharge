@@ -881,7 +881,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 
               case ( 'a' ): // Xa<>:  injection amplitude
                 sp.put_Amp(cp.input_str.substring(2).toFloat()*sp.nP());
-                // Serial.printf("Inj amp set%7.3f & inj_bias set%7.3f\n", sp.Amp(), sp.Inj_bias());
                 Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
                 break;
 
@@ -891,9 +890,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'b' ): //*  Xb<>:  injection bias
-                Serial.printf("Inj_bias set%7.3f to ", sp.Inj_bias());
-                sp.put_Inj_bias(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", sp.Inj_bias());
+                sp.Inj_bias_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
                 break;
 
               case ( 't' ): //*  Xt<>:  injection type
@@ -1275,6 +1273,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   sp.Time_now_p->print_help();  //* UT
   sp.Time_now_p->print1_help();  //* UT
   sp.Debug_p->print_help();  // v
+  sp.Debug_p->print1_help();  // v
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
   Serial.printf("  v-2: ADS counts for throughput meas\n");
   #ifdef DEBUG_INIT
