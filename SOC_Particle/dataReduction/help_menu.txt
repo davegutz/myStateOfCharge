@@ -1,0 +1,170 @@
+Help menu.  Omit '=' and end entry with ';'
+
+b<?>   Manage fault buffer
+  bd= dump fault buffer
+  bh= reset history buffer
+  br= reset fault buffer
+  bR= reset all buffers
+
+B<?> Battery e.g.:
+ *Bm=  0.  Mon chem 0='BB', 1='CH' [0]
+ *Bs=  0.  Sim chem 0='BB', 1='CH' [0]
+ *BP=  1.00.  parallel in bank [1.00]'
+ *BS=  1.00.  series in bank [1.00]'
+
+c  clear talk, esp '-c;'
+
+C<?> Chg SOC e.g.:
+  Ca=  all - '(0-1.1)'
+  Cm=  model (& ekf if mod)- '(0-1.1)'
+
+D/S<?> Adj e.g.:
+* DA= -2.540: (-1e+05- 1e+05) [-2.540] Add amp, A
+* DB= -2.540: (-1e+05- 1e+05) [-2.540] Add noa, A
+* DI=  0.000: (-1e+05- 1e+05) [ 0.000] Add all, A
+* Di=    nan: (-1e+05- 1e+05) [ 0.000] DI + reset, A
+* Dc=  0.000: (-10   -    70) [ 0.000] Bias Vb sensor, v
+  DE= 20: eframe mult Dr [20]
+  DP=  4: print mult Dr [4]
+  Dr=  100: minor frame, ms [100]
+  Ds=  0.00: d_soc to Sim.voc-soc, fraction [0]
+* Dt=  0.000: (-500  -   500) [ 0.000] Bias Tb sensor, dg C
+  D^=  0.000: del model, deg C [ 0.000]
+  Dv=  0.00: volt fault inj, V [0]
+* Dw=  0.000: (-100  -   100) [ 0.000] Tab mon adj, v
+  Dy=  0.00: Tab sim adj, V [0]
+  DT=  0.000: noise, deg C pk-pk [ 0.000]
+  DV=  0.000: noise, V pk-pk [ 0.000]
+  DM=  0.000: amp noise, A pk-pk [ 0.000]
+  DN=  0.000: noa noise, A pk-pk [ 0.000]
+* SA=  1.000: (-1e+05- 1e+05) [ 1.000] Slr amp, A
+* SB=  1.000: (-1e+05- 1e+05) [ 1.000] Slr noa, A
+  Sh=  1.000: hys sclr [ 1.00]
+  SH= -0.300: hys states [0]
+* SQ=  1.000: (0     - 1e+03) [ 1.000] Scalar cap Mon, slr
+* Sq=  1.000: (0     - 1e+03) [ 1.000] Scalar cap Sim, slr
+* Sk=  1.000: (-1e+06- 1e+06) [ 1.000] Cutback gain scalar, slr
+* SV=  1.000: (-1e+05- 1e+05) [ 1.000] Scale Vb sensor, v
+
+F<?>   Faults
+  Fc=  1.000: sclr cc_diff thr ^ [1]
+  Fd=  1.000: sclr ib_diff thr ^ [1]
+  Ff= 1: faults faked (ignored)[1]
+  Fi=  1.000: sclr e_wrap_hi thr ^ [1]
+  Fo=  1.000: sclr e_wrap_lo thr ^ [1]
+  Fq=  1.000: sclr ib_quiet thr v [1]
+  FI=  0: disab Ib rng
+  FT=  0: disab Tb rng
+  FV=  0: disab Vb rng
+
+H<?>   Manage history
+  Hd= dump summ log
+  HR= reset summ log
+  Hs= save and print log
+
+P<?>   Print values
+  Pa= all
+  Pe= ekf
+  Pf= faults
+  Pm= Mon
+  PM= amp shunt
+  PN= noa shunt
+  Pr= retained and command
+  Ps= Sim
+  Px= ib select
+  Pv= vb details
+
+Q      vital stats
+
+R<?>   Reset
+  Rb= batteries to present inputs
+  Rf= fault logic latches
+  Ri= infinite counter
+  Rr= saturate Mon and equalize Sim & Mon
+  RR= DEPLOY
+  Rs= small.  Reinitialize filters
+  RS= SavedPars: Reinitialize saved
+* si=      1: (-1    -     1) [     1] curr sel mode, (-1=n, 0=a
+* UT=      0: (2100000000-1669801880) [1701513371] UNIX tim since epoch, sec
+* v =      0: (-128  -   128) [     0] Verbosity, int
+  -<>: Negative - Arduino plot compatible
+  v-2: ADS counts for throughput meas
+   v1: GP
+   v2: GP, Sim & Sel
+   v3: EKF
+   v4: GP, Sim, Sel, & EKF
+   v5: OLED display
+  v12: EKF
+ v-13: ib_dscn
+  v14: vshunt and Ib raw
+  v15: vb raw
+  v16: Tb
+ v-23: Vb_hdwe_ac
+ v-24: Vb_hdwe_ac, Ib_hdwe
+  v34: EKF detail
+  v35: ChargeTransfer balance
+  v37: EKF short
+  v75: voc_low check mod
+  v76: vb model
+  v78: Batt model sat
+  v79: sat_ib model
+  v99: calibration
+
+V<?> - VOC(SOC) curve deltas
+ Vm=  0.000: Mon soc in [0]
+ Vs=  0.000: Sim soc in[0]
+
+W<?> - iters to wait
+
+w - save * confirm adjustments to SRAM
+
+X<?> - Test Mode.   For example:
+ Xd=  0,   dc-dc charger on [0]
+* Xm=    247: (0     -   255) [   247] Modeling bitmap, [0x0000000
+      0x128=1<<7 ib_noa_dscn 1
+      0x64 =1<<6 ib_amp_dscn 1
+      0x32 =1<<5 vb_dscn 1
+      0x16 =1<<4 temp_dscn 1
+      0x8  =1<<3 tweak_test 0
+      0x4  =1<<2 current 1
+      0x2  =1<<1 voltage 1
+      0x1  =1<<0 temp 1
+bitmap 11110111
+* Xm=    247: (0     -   255) [   247] Modeling bitmap, [0x0000000
+      0x128=1<<7 ib_noa_dscn 1
+      0x64 =1<<6 ib_amp_dscn 1
+      0x32 =1<<5 vb_dscn 1
+      0x16 =1<<4 temp_dscn 1
+      0x8  =1<<3 tweak_test 0
+      0x4  =1<<2 current 1
+      0x2  =1<<1 voltage 1
+      0x1  =1<<0 temp 1
+* Xf=  0.000: (-1e+06- 1e+06) [ 0.000] Inj amp, Amps pk
+* Xf=  0.000: (0     -     2) [ 0.000] Inj freq, Hz
+* Xt=      0: (0     -    10) [     0] Inj type, 1sn 2sq 3t
+ Xp= <?>, scripted tests...
+  Xp-1: Off, modeling false
+  Xp0: reset tests
+  Xp2: -0.4C soft disch, reset xp0 or Di0
+  Xp3: +0.4C soft chg
+  Xp4: -1C soft disch, reset xp0 or Di0
+  Xp5: +1C soft chg
+  Xp6: +/-500 A pulse EKF
+  Xp7: +/-500 A sw pulse SS
+  Xp8: +/-500 A hw pulse SS
+  Xp10:tweak sin
+  Xp11:slow sin
+  Xp12:slow half sin
+  Xp13:tweak tri
+  Xp20:collect fast
+  Xp21:collect slow
+ XC=  0.000 cycles inj
+ XR  RUN inj
+ XS  STOP inj
+ Xs= 1.00 scalar on T_SAT
+ XW=    0.00 s wait start inj
+ XT=    0.00 s tail end inj
+ Xu= 0 T=ignore Tb read
+ Xv= 1.00 scale Tb 1-wire stale persist
+
+urgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE
