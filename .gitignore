@@ -77,3 +77,4 @@ SOC_Particle/src/SOC_Particle.cpp
 SOC_Particle/py/GUI_TestSOC.ini
 DS18B20-master/nul
 BT-AT/nul
+SOC_Particle/lib/DS2482-RK/examples/01-single-drop/DS2482_test/nul
