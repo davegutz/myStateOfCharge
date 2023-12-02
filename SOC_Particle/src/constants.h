@@ -31,14 +31,13 @@
 #undef CONFIG_PHOTON
 #undef CONFIG_ARGON
 #undef CONFIG_PHOTON2
-#undef CONFIG_47L16
-#undef CONFIG_ADS1013
-#undef CONFIG_USE_BLE
+#undef CONFIG_47L16_EERAM
+#undef CONFIG_ADS1013_OPAMP
 #undef DEPLOY_PHOTON
-#undef CONFIG_TSC2010
-#undef CONFIG_DS18B20
-#undef CONFIG_DS2482
-#undef CONFIG_SSD1306
+#undef CONFIG_TSC2010_DIFFAMP
+#undef CONFIG_DS18B20_SWIRE
+#undef CONFIG_DS2482_1WIRE
+#undef CONFIG_SSD1306_OLED
 
 #include "local_config.h"       // this is not in GitHub repository.  Copy appropriate local_config??.h to match configure
 
@@ -71,7 +70,7 @@
 #define F_MAX_T_TEMP          18.0      // Maximum call update time filters (18.0)
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
-#ifndef CONFIG_47L16
+#ifndef CONFIG_47L16_EERAM
     #ifdef CONFIG_PHOTON
         #ifdef DEBUG_INIT
             #ifdef DEPLOY_PHOTON
@@ -172,7 +171,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define HALF_3V3            1.65        // Theoretical center of differential TSC2010
 
 // Conversion gains
-#ifdef CONFIG_ADS1013
+#ifdef CONFIG_ADS1013_OPAMP
     const float SHUNT_NOA_GAIN = SHUNT_GAIN;
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
 #else

@@ -6,10 +6,10 @@ const String unit = version + "_soc0p";
 
 // Features config
 #define CONFIG_PHOTON
-#define CONFIG_SSD1306
-#define CONFIG_ADS1013
+#define CONFIG_SSD1306_OLED
+#define CONFIG_ADS1013_OPAMP
 #define DEPLOY_PHOTON
-#define CONFIG_DS18B20
+#define CONFIG_DS18B20_SWIRE
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

@@ -6,9 +6,9 @@ const String unit = version + "_soc1a";
 
 // Features config
 #define CONFIG_ARGON
-#define CONFIG_SSD1306
-#define CONFIG_47L16
-#define CONFIG_DS18B20
+#define CONFIG_SSD1306_OLED
+#define CONFIG_47L16_EERAM
+#define CONFIG_DS18B20_SWIRE
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

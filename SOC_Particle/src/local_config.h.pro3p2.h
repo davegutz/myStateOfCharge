@@ -6,9 +6,9 @@ const String unit = version + "_pro3p2";
 
 // Hardware config
 #define CONFIG_PHOTON2
-#define CONFIG_SSD1306
-#define CONFIG_TSC2010
-#define CONFIG_DS2482
+#define CONFIG_SSD1306_OLED
+#define CONFIG_TSC2010_DIFFAMP
+#define CONFIG_DS2482_1WIRE
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

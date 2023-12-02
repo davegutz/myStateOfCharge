@@ -108,8 +108,8 @@ protected:
   unsigned long int sample_time_;   // Exact moment of hardware sample
   unsigned long int sample_time_z_; // Exact moment of past hardware sample
   boolean dscn_cmd_;    // User command to ignore hardware, T=ignore
-  uint8_t vc_pin_;      // Common voltage pin, for !CONFIG_ADS1013
-  uint8_t vo_pin_;      // Output voltage pin, for !CONFIG_ADS1013
+  uint8_t vc_pin_;      // Common voltage pin, for !CONFIG_ADS1013_OPAMP
+  uint8_t vo_pin_;      // Output voltage pin, for !CONFIG_ADS1013_OPAMP
   int Vc_raw_;          // Raw analog read, integer       
   float Vc_;            // Sensed Vc, common op amp voltage ref, V
   int Vo_raw_;          // Raw analog read, integer       
@@ -365,21 +365,21 @@ public:
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
   unsigned long int dt_ib(void) { return dt_ib_; };
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
-  float ib() { return Ib / sp.nP_z; };                            // Battery unit current, A
+  float ib() { return Ib / sp.nP(); };                            // Battery unit current, A
   float ib_amp_add() { return ib_amp_add_; };
   void ib_amp_add(const float add) { ib_amp_add_ = add; };
-  float ib_amp_hdwe() { return Ib_amp_hdwe / sp.nP_z; };          // Battery amp unit current, A
-  float ib_amp_model() { return Ib_amp_model / sp.nP_z; };        // Battery amp model unit current, A
+  float ib_amp_hdwe() { return Ib_amp_hdwe / sp.nP(); };          // Battery amp unit current, A
+  float ib_amp_model() { return Ib_amp_model / sp.nP(); };        // Battery amp model unit current, A
   float ib_amp_sclr() { return ib_amp_sclr_; };
   void ib_amp_sclr(const float sclr) { ib_amp_sclr_ = sclr; };
-  float ib_hdwe() { return Ib_hdwe / sp.nP_z; };                  // Battery select hardware unit current, A
-  float ib_hdwe_model() { return Ib_hdwe_model / sp.nP_z; };      // Battery select hardware model unit current, A
-  float ib_model() { return Ib_model / sp.nP_z; };                // Battery select model unit current, A
-  float ib_model_in() { return Ib_model_in / sp.nP_z; };          // Battery select model input unit current, A
+  float ib_hdwe() { return Ib_hdwe / sp.nP(); };                  // Battery select hardware unit current, A
+  float ib_hdwe_model() { return Ib_hdwe_model / sp.nP(); };      // Battery select hardware model unit current, A
+  float ib_model() { return Ib_model / sp.nP(); };                // Battery select model unit current, A
+  float ib_model_in() { return Ib_model_in / sp.nP(); };          // Battery select model input unit current, A
   float ib_noa_add() { return ib_noa_add_; };
   void ib_noa_add(const float add) { ib_noa_add_ = add; };
-  float ib_noa_hdwe() { return Ib_noa_hdwe / sp.nP_z; };          // Battery no amp unit current, A
-  float ib_noa_model() { return Ib_noa_model / sp.nP_z; };        // Battery no amp model unit current, A
+  float ib_noa_hdwe() { return Ib_noa_hdwe / sp.nP(); };          // Battery no amp unit current, A
+  float ib_noa_model() { return Ib_noa_model / sp.nP(); };        // Battery no amp model unit current, A
   float ib_noa_sclr() { return ib_noa_sclr_; };
   void ib_noa_sclr(const float sclr) { ib_noa_sclr_ = sclr; };
   float Ib_amp_add();
@@ -401,12 +401,12 @@ public:
   float Tb_noise();
   float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
   void Tb_noise_amp(const float noise) { Tb_noise_amp_ = noise; };
-  float vb() { return Vb / sp.nS_z; };                            // Battery select unit voltage, V
+  float vb() { return Vb / sp.nS(); };                            // Battery select unit voltage, V
   float vb_add() { return ( vb_add_ ); };
   void vb_add(const float add) { vb_add_ = add; };
-  float vb_hdwe() { return Vb_hdwe / sp.nS_z; };                  // Battery select hardware unit voltage, V
+  float vb_hdwe() { return Vb_hdwe / sp.nS(); };                  // Battery select hardware unit voltage, V
   void vb_load(const uint16_t vb_pin, const boolean reset);       // Analog read of Vb
-  float vb_model() { return (Vb_model / sp.nS_z); };              // Battery select model unit voltage, V
+  float vb_model() { return (Vb_model / sp.nS()); };              // Battery select model unit voltage, V
   float Vb_add();
   float Vb_noise();
   float Vb_noise_amp() { return ( Vb_noise_amp_ ); };

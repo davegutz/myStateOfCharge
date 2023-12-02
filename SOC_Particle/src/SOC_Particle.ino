@@ -90,21 +90,16 @@
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
-#ifdef CONFIG_DS2482
+#ifdef CONFIG_DS2482_1WIRE
   #include "DS2482-RK.h"
   // SerialLogHandler logHandler;
   DS2482 ds(Wire, 0);
   DS2482DeviceListStatic<10> deviceList;
 #endif
 
-#ifdef CONFIG_47L16
+#ifdef CONFIG_47L16_EERAM
   #include "hardware/SerialRAM.h"
   SerialRAM ram;
-#endif
-
-#ifdef CONFIG_USE_BLE
-  #include <BleSerialPeripheralRK.h>
-  SerialLogHandler logHandler;
 #endif
 
 // Globals
@@ -113,7 +108,7 @@ extern CommandPars cp;            // Various parameters to be common at system l
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
-#ifdef CONFIG_47L16
+#ifdef CONFIG_47L16_EERAM
   SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
 #else
   retained Flt_st saved_hist[NHIS];    // For displaying faults
@@ -130,16 +125,8 @@ unsigned long last_sync = millis();   // Timekeeping
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
-#ifdef CONFIG_SSD1306
+#ifdef CONFIG_SSD1306_OLED
   Adafruit_SSD1306 *display;      // Main OLED display
-#endif
-
-#ifdef CONFIG_USE_BLE
-  // First parameter is the transmit buffer size, second parameter is the receive buffer size
-  BleSerialPeripheralStatic<32, 256> bleSerial;
-  const unsigned long TRANSMIT_PERIOD_MS = 2000;
-  unsigned long lastTransmit = 0;
-  int counter = 0;
 #endif
 
 // Setup
@@ -162,21 +149,14 @@ delay(4000);
   Serial1.flush();
 
   // EERAM chip card for I2C
-  #ifdef CONFIG_47L16
+  #ifdef CONFIG_47L16_EERAM
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
     sp.load_all();
   #endif
-  sp.Time_now_p->set(max(sp.Time_now_z, (unsigned long)Time.now()));  // Synch with web when possible
-  Time.setTime(sp.Time_now_z);
-
-  // Argon built-in BLE does not have friendly UART terminal app available.  Using HC-06
-  #ifdef CONFIG_USE_BLE
-    bleSerial.setup();
-    bleSerial.advertise();
-    Serial.printf("BLE mac=>%s\n", BLE.address().toString().c_str());
-  #endif
+  sp.Time_now_p->set(max(sp.Time_now_stored, (unsigned long)Time.now()));  // Synch with web when possible
+  Time.setTime(sp.Time_now_stored);
 
   // Peripherals (non-Photon2)
   // D6 - one-wire temp sensor
@@ -207,18 +187,18 @@ delay(4000);
   // I2C for OLED, ADS, backup EERAM, DS2482
   #ifndef CONFIG_BARE
     Wire.begin();
-    #ifdef CONFIG_ADS1013
+    #ifdef CONFIG_ADS1013_OPAMP
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
       Serial.printf("High speed Wire setup for ADS1013\n");
     #endif
-    #if defined(CONFIG_ADS1013) || defined(CONFIG_SSD1306) || defined(CONFIG_DS2482)
+    #if defined(CONFIG_ADS1013_OPAMP) || defined(CONFIG_SSD1306_OLED) || defined(CONFIG_DS2482_1WIRE)
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
       Serial.printf("Wire started\n");
     #endif
   #endif
 
   // Display (after start Wire)
-  #ifdef CONFIG_SSD1306
+  #ifdef CONFIG_SSD1306_OLED
     display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
     Serial.printf("Init DISP\n");
     if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
@@ -234,9 +214,9 @@ delay(4000);
   #endif
 
   // 1-Wire chip card for I2C (after start Wire)
-  #ifdef CONFIG_DS2482
+  #ifdef CONFIG_DS2482_1WIRE
     ds.setup();
-    #if !defined(CONFIG_ADS1013) && !defined(CONFIG_SSD1306)
+    #if !defined(CONFIG_ADS1013_OPAMP) && !defined(CONFIG_SSD1306_OLED)
       // Single drop
       DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status)
       {
@@ -298,7 +278,7 @@ delay(4000);
   #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)  // TODO: test that ARGON still works with the #if in place
     System.enableFeature(FEATURE_RETAINED_MEMORY);
   #endif
-  if ( sp.Debug_z==1 || sp.Debug_z==2 || sp.Debug_z==3 || sp.Debug_z==4 )
+  if ( sp.Debug_stored==1 || sp.Debug_stored==2 || sp.Debug_stored==3 || sp.Debug_stored==4 )
   {
     sp.print_history_array();
     sp.print_fault_header();
@@ -309,7 +289,7 @@ delay(4000);
   {
     if ( sp.num_diffs() )
     {
-      #ifdef CONFIG_SSD1306
+      #ifdef CONFIG_SSD1306_OLED
         wait_on_user_input(display);
       #else
         wait_on_user_input();
@@ -330,7 +310,7 @@ delay(4000);
 void loop()
 {
   // Synchronization
-  #ifdef CONFIG_DS2482
+  #ifdef CONFIG_DS2482_1WIRE
     ds.loop();
   #endif
   boolean read;
@@ -379,27 +359,10 @@ void loop()
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);
   display_and_remember = DisplayUserSync->update(millis(), reset);
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.Modeling_z;;
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARIZE_WAIT ) && !sp.Modeling_stored;;
   if ( elapsed >= SUMMARIZE_WAIT ) boot_wait = false;
   summarizing = Summarize->update(millis(), false);
   summarizing = summarizing || boot_summ;
-
-  #ifdef CONFIG_USE_BLE
-    // This must be called from loop() on every call to loop.
-    bleSerial.loop();
-    // Print out anything we receive
-    if(bleSerial.available()) {
-        String s = bleSerial.readString();
-        Log.info("received: %s", s.c_str());
-    }
-    if (millis() - lastTransmit >= TRANSMIT_PERIOD_MS) {
-        lastTransmit = millis();
-        // Every two seconds, send something to the other side
-        bleSerial.printlnf("testing %d", ++counter);
-        // Log.info("counter=%d", counter);
-        // Serial.printf("passing argon bleSerial\n");
-    }
-  #endif
 
   // Sample temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt
@@ -408,8 +371,8 @@ void loop()
     Sen->T_temp = ReadTemp->updateTime();
     Sen->temp_load_and_filter(Sen, reset_temp);
 
-    #ifdef CONFIG_DS2482
-      #if !defined(CONFIG_ADS1013) && !defined(CONFIG_SSD1306)
+    #ifdef CONFIG_DS2482_1WIRE
+      #if !defined(CONFIG_ADS1013_OPAMP) && !defined(CONFIG_SSD1306_OLED)
         // Singledrop Wire I2C
         // For single-drop you can pass an empty address to get the temperature of the only
         // sensor on the 1-wire bus
@@ -452,7 +415,7 @@ void loop()
   }
 
   // Sample Ib
-  #ifndef CONFIG_ADS1013
+  #ifndef CONFIG_ADS1013_OPAMP
     if ( read )
     {
       static unsigned int t_us_last = micros();
@@ -501,11 +464,11 @@ void loop()
     Mon->regauge(Sen->Tb_filt);
 
     // Empty battery
-    if ( sp.Modeling_z && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
+    if ( sp.Modeling_stored && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
     #ifndef CONFIG_PHOTON
-      if ( sp.Debug_z==12 ) debug_12(Mon, Sen);
+      if ( sp.Debug_stored==12 ) debug_12(Mon, Sen);
     #endif
     
     // Publish for variable print rate
@@ -528,13 +491,13 @@ void loop()
   // OLED and Bluetooth display drivers.   Also convenient update time for saving parameters (remember)
   if ( display_and_remember )
   {
-    #ifdef CONFIG_SSD1306
+    #ifdef CONFIG_SSD1306_OLED
       oled_display(display, Sen, Mon);
     #else
       oled_display(Sen, Mon);
     #endif
 
-    #ifdef CONFIG_47L16
+    #ifdef CONFIG_47L16_EERAM
       // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
     #endif
@@ -559,15 +522,15 @@ void loop()
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
   if ( (!boot_wait && summarizing) || cp.write_summary )
   {
-    sp.put_Ihis(sp.Ihis_z + 1);
-    if ( sp.Ihis_z > (sp.nhis() - 1) ) sp.put_Ihis(0);  // wrap buffer
+    sp.put_Ihis(sp.Ihis_stored + 1);
+    if ( sp.Ihis_stored > (sp.nhis() - 1) ) sp.put_Ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
     hist_snap.assign(time_now, Mon, Sen);
-    hist_bounced = sp.put_history(hist_snap, sp.Ihis_z);
+    hist_bounced = sp.put_history(hist_snap, sp.Ihis_stored);
 
-    sp.put_Isum(sp.Isum_z+1);
-    if ( sp.Isum_z > NSUM-1 ) sp.put_Isum(0);
-    mySum[sp.Isum_z].copy_to_Flt_ram_from(hist_bounced);
+    sp.put_Isum(sp.Isum_stored+1);
+    if ( sp.Isum_stored > NSUM-1 ) sp.put_Isum(0);
+    mySum[sp.Isum_stored].copy_to_Flt_ram_from(hist_bounced);
 
     Serial.printf("Summ...\n");
     cp.write_summary = false;
