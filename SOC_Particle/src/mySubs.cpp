@@ -608,7 +608,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  States: Sim->soc(past)
   //  Outputs:  Tb_hdwe, Ib_model, Vb_model, sp.inj_bias, Sim.model_saturated
   Sen->Tb_model = Sen->Tb_model_filt = Sen->Sim->temp_c();
-  Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset) + Sen->Vb_add();
+  Sen->Vb_model = Sen->Sim->calculate(Sen, cp.dc_dc_on, reset) * sp.nS() + Sen->Vb_add();
   Sen->Ib_model = Sen->Sim->ib_fut() * sp.nP();
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
