@@ -46,6 +46,7 @@ TempSensor::~TempSensor() {}
 // functions
 float TempSensor::sample(Sensors *Sen)
 {
+  Log.info("top TempSensor::sample");
   // Read Sensor
   // MAXIM conversion 1-wire Tp plenum temperature
   static float Tb_hdwe = 0.;
@@ -989,6 +990,7 @@ void Sensors::shunt_select_initial(const boolean reset)
 // Load and filter Tb
 void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
 {
+  Log.info("top temp_load_and_filter");
   reset_temp_ = reset_temp;
   #ifndef CONFIG_BARE
     Tb_hdwe = SensorTb->sample(Sen);

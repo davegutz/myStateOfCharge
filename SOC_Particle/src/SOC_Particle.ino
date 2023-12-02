@@ -90,9 +90,11 @@
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
+// Turn on Log
+// SerialLogHandler logHandler;
+
 #ifdef CONFIG_DS2482_1WIRE
   #include "DS2482-RK.h"
-  // SerialLogHandler logHandler;
   DS2482 ds(Wire, 0);
   DS2482DeviceListStatic<10> deviceList;
 #endif
