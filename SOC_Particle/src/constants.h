@@ -91,10 +91,10 @@
             #endif
         #endif
     #else
-        #define NSUM 3213
+        #define NSUM 3213               // PHOTON 2
     #endif
 #else
-        #define NSUM              2213  // Number of saved SRAM summaries (2213)
+        #define NSUM              2213  // Number of saved SRAM summaries (2213)   ARGON
                                         //If too large, will get compile error 'Insufficient room for .data and .bss sections!' or flashing red
 #endif
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)
