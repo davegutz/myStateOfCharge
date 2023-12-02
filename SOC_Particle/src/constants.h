@@ -91,7 +91,7 @@
             #endif
         #endif
     #else
-        #define NSUM 1000
+        #define NSUM 3000
     #endif
 #else
         #define NSUM              2200  // Number of saved SRAM summaries (2215)

@@ -1163,10 +1163,10 @@ public:
     float ib_scale_amp() { return Ib_scale_amp_z; }
     float ib_scale_noa() { return Ib_scale_noa_z; }
     int8_t Ib_select() { return Ib_select_z; }
-    int Iflt() { return Iflt_z; }
-    int Ihis() { return Ihis_z; }
+    uint16_t Iflt() { return Iflt_z; }
+    uint16_t Ihis() { return Ihis_z; }
     float Inj_bias() { return Inj_bias_z; }
-    int Isum() { return Isum_z; }
+    uint16_t Isum() { return Isum_z; }
     uint8_t Modeling() { return Modeling_z; }
     float nP() { return nP_z; }
     float nS() { return nS_z; }
@@ -1214,10 +1214,10 @@ public:
     float get_Ib_scale_amp() { return Ib_scale_amp_p->get(); }
     float get_Ib_scale_noa() { return Ib_scale_noa_p->get(); }
     int8_t get_Ib_select() { return Ib_select_p->get(); }
-    int get_Iflt() { return Iflt_z; }
-    int get_Ihis() { return Ihis_z; }
+    uint16_t get_Iflt() { return Iflt_z; }
+    uint16_t get_Ihis() { return Ihis_z; }
     float get_Inj_bias() { return Inj_bias_z; }
-    int get_Isum() { return Isum_z; }
+    uint16_t get_Isum() { return Isum_z; }
     uint8_t get_Modeling() { return Modeling_p->get(); }
     uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
     uint8_t get_nP() { return nP_p->get(); }
@@ -1242,9 +1242,9 @@ public:
 
     //
     void mem_print();
-    int nflt() { return nflt_; }
-    int nhis() { return nhis_; }
-    int nsum() { return nsum_; }
+    uint16_t nflt() { return nflt_; }
+    uint16_t nhis() { return nhis_; }
+    uint16_t nsum() { return nsum_; }
     void nominalize_fault_array();
     void nominalize_history_array();
     int num_diffs();
@@ -1320,10 +1320,10 @@ public:
     FloatZ *Ib_scale_amp_p;
     FloatZ *Ib_scale_noa_p;
     Int8tZ *Ib_select_p;
-    IntZ *Iflt_p;
-    IntZ *Ihis_p;
+    Uint16tZ *Iflt_p;
+    Uint16tZ *Ihis_p;
     FloatZ *Inj_bias_p;
-    IntZ *Isum_p;
+    Uint16tZ *Isum_p;
     Uint8tZ *Modeling_p;
     Uint8tZ *Mon_chm_p;
     FloatZ *nP_p;
@@ -1354,10 +1354,10 @@ public:
     float Ib_scale_amp_z;
     float Ib_scale_noa_z;
     int8_t Ib_select_z;
-    int Iflt_z;
-    int Ihis_z;
+    uint16_t Iflt_z;
+    uint16_t Ihis_z;
     float Inj_bias_z;
-    int Isum_z;
+    uint16_t Isum_z;
     uint8_t Modeling_z;
     uint8_t Mon_chm_z;
     float nP_z;

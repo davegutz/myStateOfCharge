@@ -34,9 +34,9 @@
 // class SavedPars 
 SavedPars::SavedPars()
 {
-  nflt_ = int( NFLT ); 
-  nhis_ = int( NHIS ); 
-  nsum_ = int( NSUM ); 
+  nflt_ = uint16_t( NFLT ); 
+  nhis_ = uint16_t( NHIS ); 
+  nsum_ = uint16_t( NSUM ); 
 }
 
 #ifndef CONFIG_47L16_EERAM
@@ -64,10 +64,10 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Ib_scale_amp_p      = new FloatZ(  "SA", "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_z, CURR_SCALE_AMP);
     Ib_scale_noa_p      = new FloatZ(  "SB", "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_z, CURR_SCALE_NOA);
     Ib_select_p         = new Int8tZ(  "si", "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS));
-    Iflt_p              = new IntZ(    "na", "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_z, -1, true);
-    Ihis_p              = new IntZ(    "na", "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_z, -1, true);
+    Iflt_p              = new Uint16tZ("na", "Fault buffer indx",   "uint",      0, nflt_+1, &Iflt_z, nflt_+1, true);
+    Ihis_p              = new Uint16tZ("na", "Hist buffer indx",    "uint",      0, nhis_+1, &Ihis_z, nhis_+1, true);
     Inj_bias_p          = new FloatZ(  "Xb", "Injection bias",      "A",        -1e5, 1e5, &Inj_bias_z, 0.);
-    Isum_p              = new IntZ(    "na", "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_z, -1, true);
+    Isum_p              = new Uint16tZ("na", "Summ buffer indx",    "uint",      0, NSUM+1,  &Isum_z, NSUM+1, true);
     Modeling_p          = new Uint8tZ( "Xm", "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_z, MODELING);
     Mon_chm_p           = new Uint8tZ( "Bm", "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_z, MON_CHEM);
     nP_p                = new FloatZ(  "BP", "Number parallel",     "units",     1e-6, 100, &nP_z, NP);
@@ -125,7 +125,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     next_ = 0x000;
     rP_ = ram;
     size_ = 0;
-    nflt_ = int( NFLT ); 
+    nflt_ = uint16_t( NFLT ); 
 
     // Input definitions
     Amp_p               = new FloatZ(  "Xf", rP_, "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_z, 0.);
@@ -142,10 +142,10 @@ SavedPars::SavedPars(SerialRAM *ram)
     Ib_scale_amp_p      = new FloatZ(  "SA", rP_, "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_z, CURR_SCALE_AMP);
     Ib_scale_noa_p      = new FloatZ(  "SB", rP_, "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_z, CURR_SCALE_NOA);
     Ib_select_p         = new Int8tZ(  "si", rP_, "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS));
-    Iflt_p              = new IntZ(    "na", rP_, "Fault buffer indx",   "int",      -1, nflt_+1, &Iflt_z, -1, true);
-    Ihis_p              = new IntZ(    "na", rP_, "Hist buffer indx",    "int",      -1, nhis_+1, &Ihis_z, -1, true);
+    Iflt_p              = new Uint16tZ("na", rP_, "Fault buffer indx",   "uint",      0, nflt_+1, &Iflt_z, nflt_+1, true);
+    Ihis_p              = new Uint16tZ("na", rP_, "Hist buffer indx",    "uint",      0, nhis_+1, &Ihis_z, nhis_+1, true);
     Inj_bias_p          = new FloatZ(  "Xb", rP_, "Injection bias",      "A",        -1e5, 1e5, &Inj_bias_z, 0.);
-    Isum_p              = new IntZ(    "na", rP_, "Summ buffer indx",    "int",      -1, NSUM+1,  &Isum_z, -1, true);
+    Isum_p              = new Uint16tZ("na", rP_, "Summ buffer indx",    "uint",      0, NSUM+1,  &Isum_z, NSUM+1, true);
     Modeling_p          = new Uint8tZ( "Xm", rP_, "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_z, MODELING);
     Mon_chm_p           = new Uint8tZ( "Bm", rP_, "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_z, MON_CHEM);
     nP_p                = new FloatZ(  "BP", rP_, "Number parallel",     "units",     1e-6, 100, &nP_z, NP);
@@ -201,13 +201,13 @@ SavedPars::SavedPars(SerialRAM *ram)
         next_ = Z_[i]->assign_addr(next_);
     }
     fault_ = new Flt_ram[nflt_];
-    for ( int i=0; i<nflt_; i++ )
+    for ( uint16_t i=0; i<nflt_; i++ )
     {
         fault_[i].instantiate(rP_, &next_);
     }
-    nhis_ = int( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
+    nhis_ = uint16_t( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
     history_ = new Flt_ram[nhis_];
-    for ( int i=0; i<nhis_; i++ )
+    for ( uint16_t i=0; i<nhis_; i++ )
     {
         history_[i].instantiate(rP_, &next_);
     }
@@ -269,8 +269,8 @@ boolean SavedPars::is_corrupt()
         get_Vb_bias_hdwe();
         get_Vb_scale();
         
-        for ( int i=0; i<nflt_; i++ ) fault_[i].get();
-        for ( int i=0; i<nhis_; i++ ) history_[i].get();
+        for ( uint16_t i=0; i<nflt_; i++ ) fault_[i].get();
+        for ( uint16_t i=0; i<nhis_; i++ ) history_[i].get();
     }
 #endif
 
@@ -352,9 +352,9 @@ void SavedPars::pretty_print(const boolean all)
 // Print faults
 void SavedPars::print_fault_array()
 {
-  int i = Iflt_z;  // Last one written was iflt
-  int n = -1;
-  while ( ++n < nflt_ )
+  uint16_t i = Iflt_z;  // Last one written was iflt
+  uint16_t n = 0;
+  while ( ++n < nflt_+1 )
   {
     if ( ++i > (nflt_-1) ) i = 0; // circular buffer
     fault_[i].print("unit_f");
@@ -434,21 +434,21 @@ Flt_st SavedPars::put_history(Flt_st input, const uint8_t i)
 // Reset arrays
 void SavedPars::reset_flt()
 {
-    for ( int i=0; i<nflt_; i++ )
+    for ( uint16_t i=0; i<nflt_; i++ )
     {
         fault_[i].put_nominal();
     }
  }
 void SavedPars::reset_his()
 {
-    for ( int i=0; i<nhis_; i++ )
+    for ( uint16_t i=0; i<nhis_; i++ )
     {
         history_[i].put_nominal();
     }
  }
 void SavedPars::reset_pars()
 {
-    for ( int i=0; i<size_; i++ ) Z_[i]->set_default();
+    for ( uint16_t i=0; i<size_; i++ ) Z_[i]->set_default();
 
     put_Inj_bias(float(0.));
 
