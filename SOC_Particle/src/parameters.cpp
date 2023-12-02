@@ -85,39 +85,40 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Vb_scale_p          = new FloatZ(  "SV", "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
 
     // Memory map
-    Z_[size_++] = Amp_p;                
-    Z_[size_++] = Cutback_gain_sclr_p;
-    Z_[size_++] = Debug_p;
-    Z_[size_++] = Delta_q_p;
-    Z_[size_++] = Delta_q_model_p;
-    Z_[size_++] = Dw_p;
-    Z_[size_++] = Freq_p;
-    Z_[size_++] = Ib_bias_all_p;
-    Z_[size_++] = Ib_bias_all_nan_p;
-    Z_[size_++] = Ib_bias_amp_p;
-    Z_[size_++] = Ib_bias_noa_p;
-    Z_[size_++] = Ib_scale_amp_p;
-    Z_[size_++] = Ib_scale_noa_p;
-    Z_[size_++] = Ib_select_p;
-    Z_[size_++] = Iflt_p;
-    Z_[size_++] = Ihis_p;
-    Z_[size_++] = Inj_bias_p;
-    Z_[size_++] = Isum_p;
-    Z_[size_++] = Modeling_p;
-    Z_[size_++] = Mon_chm_p;
-    Z_[size_++] = nP_p;
-    Z_[size_++] = nS_p;
-    Z_[size_++] = Preserving_p;
-    Z_[size_++] = S_cap_mon_p;
-    Z_[size_++] = S_cap_sim_p;
-    Z_[size_++] = Sim_chm_p;
-    Z_[size_++] = Tb_bias_hdwe_p;
-    Z_[size_++] = Time_now_p;
-    Z_[size_++] = Type_p;
-    Z_[size_++] = T_state_p;
-    Z_[size_++] = T_state_model_p;
-    Z_[size_++] = Vb_bias_hdwe_p;
-    Z_[size_++] = Vb_scale_p;
+    init_z();
+    // Z_[size_++] = Amp_p;                
+    // Z_[size_++] = Cutback_gain_sclr_p;
+    // Z_[size_++] = Debug_p;
+    // Z_[size_++] = Delta_q_p;
+    // Z_[size_++] = Delta_q_model_p;
+    // Z_[size_++] = Dw_p;
+    // Z_[size_++] = Freq_p;
+    // Z_[size_++] = Ib_bias_all_p;
+    // Z_[size_++] = Ib_bias_all_nan_p;
+    // Z_[size_++] = Ib_bias_amp_p;
+    // Z_[size_++] = Ib_bias_noa_p;
+    // Z_[size_++] = Ib_scale_amp_p;
+    // Z_[size_++] = Ib_scale_noa_p;
+    // Z_[size_++] = Ib_select_p;
+    // Z_[size_++] = Iflt_p;
+    // Z_[size_++] = Ihis_p;
+    // Z_[size_++] = Inj_bias_p;
+    // Z_[size_++] = Isum_p;
+    // Z_[size_++] = Modeling_p;
+    // Z_[size_++] = Mon_chm_p;
+    // Z_[size_++] = nP_p;
+    // Z_[size_++] = nS_p;
+    // Z_[size_++] = Preserving_p;
+    // Z_[size_++] = S_cap_mon_p;
+    // Z_[size_++] = S_cap_sim_p;
+    // Z_[size_++] = Sim_chm_p;
+    // Z_[size_++] = Tb_bias_hdwe_p;
+    // Z_[size_++] = Time_now_p;
+    // Z_[size_++] = Type_p;
+    // Z_[size_++] = T_state_p;
+    // Z_[size_++] = T_state_model_p;
+    // Z_[size_++] = Vb_bias_hdwe_p;
+    // Z_[size_++] = Vb_scale_p;
 }
 #else
 SavedPars::SavedPars(SerialRAM *ram)
@@ -163,6 +164,65 @@ SavedPars::SavedPars(SerialRAM *ram)
     Vb_scale_p          = new FloatZ(  "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
 
     // Memory map
+    init_z();
+    // Z_[size_++] = Amp_p;                
+    // Z_[size_++] = Cutback_gain_sclr_p;
+    // Z_[size_++] = Debug_p;
+    // Z_[size_++] = Delta_q_p;
+    // Z_[size_++] = Delta_q_model_p;
+    // Z_[size_++] = Dw_p;
+    // Z_[size_++] = Freq_p;
+    // Z_[size_++] = Ib_bias_all_p;
+    // Z_[size_++] = Ib_bias_all_nan_p;
+    // Z_[size_++] = Ib_bias_amp_p;
+    // Z_[size_++] = Ib_bias_noa_p;
+    // Z_[size_++] = Ib_scale_amp_p;
+    // Z_[size_++] = Ib_scale_noa_p;
+    // Z_[size_++] = Ib_select_p;
+    // Z_[size_++] = Iflt_p;
+    // Z_[size_++] = Ihis_p;
+    // Z_[size_++] = Inj_bias_p;
+    // Z_[size_++] = Isum_p;
+    // Z_[size_++] = Modeling_p;
+    // Z_[size_++] = Mon_chm_p;
+    // Z_[size_++] = nP_p;
+    // Z_[size_++] = nS_p;
+    // Z_[size_++] = Preserving_p;
+    // Z_[size_++] = S_cap_mon_p;
+    // Z_[size_++] = S_cap_sim_p;
+    // Z_[size_++] = Sim_chm_p;
+    // Z_[size_++] = Tb_bias_hdwe_p;
+    // Z_[size_++] = Time_now_p;
+    // Z_[size_++] = T_state_p;
+    // Z_[size_++] = T_state_model_p;
+    // Z_[size_++] = Type_p;
+    // Z_[size_++] = Vb_bias_hdwe_p;
+    // Z_[size_++] = Vb_scale_p;
+    for ( int i=0; i<size_; i++ )
+    {
+        next_ = Z_[i]->assign_addr(next_);
+    }
+    fault_ = new Flt_ram[nflt_];
+    for ( uint16_t i=0; i<nflt_; i++ )
+    {
+        fault_[i].instantiate(rP_, &next_);
+    }
+    nhis_ = uint16_t( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
+    history_ = new Flt_ram[nhis_];
+    for ( uint16_t i=0; i<nhis_; i++ )
+    {
+        history_[i].instantiate(rP_, &next_);
+    }
+}
+#endif
+
+SavedPars::~SavedPars() {}
+// operators
+// functions
+
+void SavedPars::init_z()
+{
+    // Memory map
     Z_[size_++] = Amp_p;                
     Z_[size_++] = Cutback_gain_sclr_p;
     Z_[size_++] = Debug_p;
@@ -191,32 +251,12 @@ SavedPars::SavedPars(SerialRAM *ram)
     Z_[size_++] = Sim_chm_p;
     Z_[size_++] = Tb_bias_hdwe_p;
     Z_[size_++] = Time_now_p;
+    Z_[size_++] = Type_p;
     Z_[size_++] = T_state_p;
     Z_[size_++] = T_state_model_p;
-    Z_[size_++] = Type_p;
     Z_[size_++] = Vb_bias_hdwe_p;
     Z_[size_++] = Vb_scale_p;
-    for ( int i=0; i<size_; i++ )
-    {
-        next_ = Z_[i]->assign_addr(next_);
-    }
-    fault_ = new Flt_ram[nflt_];
-    for ( uint16_t i=0; i<nflt_; i++ )
-    {
-        fault_[i].instantiate(rP_, &next_);
-    }
-    nhis_ = uint16_t( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
-    history_ = new Flt_ram[nhis_];
-    for ( uint16_t i=0; i<nhis_; i++ )
-    {
-        history_[i].instantiate(rP_, &next_);
-    }
 }
-#endif
-
-SavedPars::~SavedPars() {}
-// operators
-// functions
 
 // Corruption test on bootup.  Needed because retained parameter memory is not managed by the compiler as it relies on
 // battery.  Small compilation changes can change where in this memory the program points, too

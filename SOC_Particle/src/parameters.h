@@ -1180,6 +1180,7 @@ public:
     float Vb_scale() { return Vb_scale_z; }
 
     // functions
+    void init_z();
     boolean is_corrupt();
     void large_reset() { reset_pars(); reset_flt(); reset_his(); }
     void reset_flt();
