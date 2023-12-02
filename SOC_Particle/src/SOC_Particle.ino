@@ -91,7 +91,7 @@
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
 // Turn on Log
-SerialLogHandler logHandler;
+// SerialLogHandler logHandler;
 
 #ifdef CONFIG_DS2482_1WIRE
   #include "DS2482-RK.h"
