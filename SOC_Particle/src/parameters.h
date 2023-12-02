@@ -1330,11 +1330,6 @@ public:
     float Vb_scale_z;
 
 protected:
-    // uint16_t iflt_;              // Fault snap location.   Begins at -1 because first action is to increment iflt
-    // uint16_t ihis_;              // History location.   Begins at -1 because first action is to increment ihis
-    // float inj_bias_;        // Constant bias, A
-    // uint16_t isum_;              // Summary location.   Begins at -1 because first action is to increment isum
-    // uint8_t preserving_;    // Preserving fault buffer
     #ifndef CONFIG_47L16_EERAM
         Flt_st *fault_;
         Flt_st *history_;
