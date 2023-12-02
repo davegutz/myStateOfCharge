@@ -38,14 +38,14 @@ extern CommandPars cp;            // Various parameters shared at system level
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
 /* Using pointers in building class so all that stuff does not get saved by 'retained' keyword in SOC_Particle.ino.
-    Only the *_stored parameters at the bottom of Parameters.h are stored in SRAM.  Class initialized by *init in arg list.
+    Only the *_z parameters at the bottom of Parameters.h are stored in SRAM.  Class initialized by *init in arg list.
 */
-class Storage
+class Z
 {
 public:
-    Storage(){}
+    Z(){}
 
-    Storage(const String &code, const String &description, const String &units, const boolean _uint8=false)
+    Z(const String &code, const String &description, const String &units, const boolean _uint8=false)
     {
         code_ = code;
         description_ = description.substring(0, 20);
@@ -55,7 +55,7 @@ public:
         is_uint8_t_ = _uint8;
     }
 
-    Storage(const String &code, SerialRAM *ram, const String &description, const String &units, boolean _uint8=false)
+    Z(const String &code, SerialRAM *ram, const String &description, const String &units, boolean _uint8=false)
     {
         code_ = code;
         description_ = description.substring(0, 20);
@@ -65,7 +65,7 @@ public:
         is_uint8_t_ = _uint8;
     }
 
-    ~Storage(){}
+    ~Z(){}
 
     String code() { return code_; }
 
@@ -91,14 +91,14 @@ protected:
 };
 
 
-class DoubleStorage: public Storage
+class DoubleZ: public Z
 {
 public:
-    DoubleStorage(){}
+    DoubleZ(){}
 
-    DoubleStorage(const String &code, const String &description, const String &units, const double min, const double max, double *store,
+    DoubleZ(const String &code, const String &description, const String &units, const double min, const double max, double *store,
         const double _default=0, const boolean check_off=false):
-        Storage(code, description, units, false)
+        Z(code, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -108,9 +108,9 @@ public:
         set(*val_); // retained
     }
 
-    DoubleStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max,
+    DoubleZ(const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max,
     double *store, const double _default=0, const boolean check_off=false):
-        Storage(code, ram, description, units, false)
+        Z(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -119,7 +119,7 @@ public:
         check_off_ = check_off;
     }
 
-    ~DoubleStorage(){}
+    ~DoubleZ(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -224,14 +224,14 @@ protected:
 };
 
 
-class FloatStorage: public Storage
+class FloatZ: public Z
 {
 public:
-    FloatStorage(){}
+    FloatZ(){}
 
-    FloatStorage(const String &code, const String &description, const String &units, const float min, const float max, float *store,
+    FloatZ(const String &code, const String &description, const String &units, const float min, const float max, float *store,
     const float _default=0, const boolean check_off=false):
-        Storage(code, description, units, false)
+        Z(code, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -241,9 +241,9 @@ public:
         set(*val_); // retained
     }
 
-    FloatStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+    FloatZ(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
     float *store, const float _default=0, const boolean check_off=false):
-        Storage(code, ram, description, units, false)
+        Z(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -252,7 +252,7 @@ public:
         check_off_ = check_off;
     }
 
-    ~FloatStorage(){}
+    ~FloatZ(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -357,30 +357,30 @@ protected:
 };
 
 
-class FloatNoStorage: public Storage
+class FloatNoZ: public Z
 {
 public:
-    FloatNoStorage(){}
+    FloatNoZ(){}
 
-    FloatNoStorage(const String &code, const String &description, const String &units, const float min, const float max,
+    FloatNoZ(const String &code, const String &description, const String &units, const float min, const float max,
     const float _default=0):
-        Storage(code, description, units, false)
+        Z(code, description, units, false)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
     }
 
-    FloatNoStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+    FloatNoZ(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
     const float _default=0):
-        Storage(code, ram, description, units, false)
+        Z(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
     }
 
-    ~FloatNoStorage(){}
+    ~FloatNoZ(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -436,14 +436,14 @@ protected:
 };
 
 
-class IntStorage: public Storage
+class IntZ: public Z
 {
 public:
-    IntStorage(){}
+    IntZ(){}
 
-    IntStorage(const String &code, const String &description, const String &units, const int min, const int max, int *store,
+    IntZ(const String &code, const String &description, const String &units, const int min, const int max, int *store,
     const int _default=0, const boolean check_off=false):
-        Storage(code, description, units, false)
+        Z(code, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -453,9 +453,9 @@ public:
         set(*val_); // retained
     }
 
-    IntStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
+    IntZ(const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
     const int _default=0, const boolean check_off=false):
-        Storage(code, ram, description, units, false)
+        Z(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -464,7 +464,7 @@ public:
         check_off_ = check_off;
     }
 
-    ~IntStorage(){}
+    ~IntZ(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -569,14 +569,14 @@ protected:
 };
 
 
-class Int8tStorage: public Storage
+class Int8tZ: public Z
 {
 public:
-    Int8tStorage(){}
+    Int8tZ(){}
 
-    Int8tStorage(const String &code, const String &description, const String &units, const int8_t min, const int8_t max, int8_t *store,
+    Int8tZ(const String &code, const String &description, const String &units, const int8_t min, const int8_t max, int8_t *store,
     const int8_t _default=0, const boolean check_off=false):
-        Storage(code, description, units, false)
+        Z(code, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -586,9 +586,9 @@ public:
         set(*val_); // retained
     }
 
-    Int8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
+    Int8tZ(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
     int8_t *store, const int8_t _default=0, const boolean check_off=false):
-        Storage(code, ram, description, units, false)
+        Z(code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -597,7 +597,7 @@ public:
         check_off_ = check_off;
     }
 
-    ~Int8tStorage(){}
+    ~Int8tZ(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -702,14 +702,14 @@ protected:
 };
 
 
-class Uint8tStorage: public Storage
+class Uint8tZ: public Z
 {
 public:
-    Uint8tStorage(){}
+    Uint8tZ(){}
 
-    Uint8tStorage(const String &code, const String &description, const String &units, const uint8_t min, const uint8_t max, uint8_t *store,
+    Uint8tZ(const String &code, const String &description, const String &units, const uint8_t min, const uint8_t max, uint8_t *store,
     const uint8_t _default=0, const boolean check_off=false):
-        Storage(code, description, units, true)
+        Z(code, description, units, true)
     {
         min_ = min;
         max_ = max;
@@ -719,9 +719,9 @@ public:
         set(*val_); // retained
     }
 
-    Uint8tStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
+    Uint8tZ(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
     uint8_t *store, const uint8_t _default=0, const boolean check_off=false):
-        Storage(code, ram, description, units, true)
+        Z(code, ram, description, units, true)
     {
         min_ = min;
         max_ = max;
@@ -730,7 +730,7 @@ public:
         check_off_ = check_off;
     }
 
-    ~Uint8tStorage(){}
+    ~Uint8tZ(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -832,14 +832,14 @@ protected:
     boolean check_off_;
 };
 
-class ULongStorage: public Storage
+class ULongZ: public Z
 {
 public:
-    ULongStorage(){}
+    ULongZ(){}
 
-    ULongStorage(const String &code, const String &description, const String &units, const unsigned long min, const unsigned long max, unsigned long *store,
+    ULongZ(const String &code, const String &description, const String &units, const unsigned long min, const unsigned long max, unsigned long *store,
     const unsigned long _default=0, const boolean check_off=true):
-        Storage(code, description, units, true)
+        Z(code, description, units, true)
     {
         min_ = min;
         max_ = max;
@@ -850,9 +850,9 @@ public:
     }
 
 
-    ULongStorage(const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
+    ULongZ(const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
     unsigned long *store, const unsigned long _default=0, const boolean check_off=true):
-        Storage(code, ram, description, units, true)
+        Z(code, ram, description, units, true)
     {
         min_ = min;
         max_ = max;
@@ -861,7 +861,7 @@ public:
         check_off_ = check_off;
     }
 
-    ~ULongStorage(){}
+    ~ULongZ(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -968,19 +968,19 @@ protected:
 };
 
 
-// class FloatVariable : public Storage <float>
+// class FloatVariable : public Z <float>
 // {
 // public:
 //     FloatVariable(){}
 
 //     FloatVariable(const String &description, const String &units, const float _default)
 //     {
-//         Storage <float>(description, units, _default, false);
+//         Z <float>(description, units, _default, false);
 //     }
 
 //     FloatVariable(SerialRAM *ram, const String &description, const String &units, const float _default)
 //     {
-//         Storage <float>(ram, description, units, _default, false);
+//         Z <float>(ram, description, units, _default, false);
 //     }
 
 //     ~FloatVariable(){}
@@ -1016,38 +1016,38 @@ public:
     // operators
 
     // parameter list
-    float Amp() { return Amp_stored; }
-    float Cutback_gain_sclr() { return Cutback_gain_sclr_stored; }
-    int Debug() { return Debug_stored;}
-    double Delta_q() { return Delta_q_stored;}
-    double Delta_q_model() { return Delta_q_model_stored;}
-    float Dw() { return Dw_stored; }
-    float Freq() { return Freq_stored; }
-    uint8_t Mon_chm() { return Mon_chm_stored; }
-    float S_cap_mon() { return S_cap_mon_stored; }
-    float S_cap_sim() { return S_cap_sim_stored; }
-    uint8_t Sim_chm() { return Sim_chm_stored; }
-    float Ib_bias_all() { return Ib_bias_all_stored; }
-    float Ib_bias_amp() { return Ib_bias_amp_stored; }
-    float Ib_bias_noa() { return Ib_bias_noa_stored; }
-    float ib_scale_amp() { return Ib_scale_amp_stored; }
-    float ib_scale_noa() { return Ib_scale_noa_stored; }
-    int8_t Ib_select() { return Ib_select_stored; }
-    int Iflt() { return Iflt_stored; }
-    int Ihis() { return Ihis_stored; }
-    float Inj_bias() { return Inj_bias_stored; }
-    int Isum() { return Isum_stored; }
-    uint8_t Modeling() { return Modeling_stored; }
-    float nP() { return nP_stored; }
-    float nS() { return nS_stored; }
-    uint8_t Preserving() { return Preserving_stored; }
-    float Tb_bias_hdwe() { return Tb_bias_hdwe_stored; }
-    unsigned long Time_now() { return Time_now_stored; }
-    uint8_t type() { return Type_stored; }
-    float T_state() { return T_state_stored; }
-    float T_state_model() { return T_state_model_stored; }
-    float Vb_bias_hdwe() { return Vb_bias_hdwe_stored; }
-    float Vb_scale() { return Vb_scale_stored; }
+    float Amp() { return Amp_z; }
+    float Cutback_gain_sclr() { return Cutback_gain_sclr_z; }
+    int Debug() { return Debug_z;}
+    double Delta_q() { return Delta_q_z;}
+    double Delta_q_model() { return Delta_q_model_z;}
+    float Dw() { return Dw_z; }
+    float Freq() { return Freq_z; }
+    uint8_t Mon_chm() { return Mon_chm_z; }
+    float S_cap_mon() { return S_cap_mon_z; }
+    float S_cap_sim() { return S_cap_sim_z; }
+    uint8_t Sim_chm() { return Sim_chm_z; }
+    float Ib_bias_all() { return Ib_bias_all_z; }
+    float Ib_bias_amp() { return Ib_bias_amp_z; }
+    float Ib_bias_noa() { return Ib_bias_noa_z; }
+    float ib_scale_amp() { return Ib_scale_amp_z; }
+    float ib_scale_noa() { return Ib_scale_noa_z; }
+    int8_t Ib_select() { return Ib_select_z; }
+    int Iflt() { return Iflt_z; }
+    int Ihis() { return Ihis_z; }
+    float Inj_bias() { return Inj_bias_z; }
+    int Isum() { return Isum_z; }
+    uint8_t Modeling() { return Modeling_z; }
+    float nP() { return nP_z; }
+    float nS() { return nS_z; }
+    uint8_t Preserving() { return Preserving_z; }
+    float Tb_bias_hdwe() { return Tb_bias_hdwe_z; }
+    unsigned long Time_now() { return Time_now_z; }
+    uint8_t type() { return Type_z; }
+    float T_state() { return T_state_z; }
+    float T_state_model() { return T_state_model_z; }
+    float Vb_bias_hdwe() { return Vb_bias_hdwe_z; }
+    float Vb_scale() { return Vb_scale_z; }
 
     // functions
     boolean is_corrupt();
@@ -1078,31 +1078,31 @@ public:
         double get_Delta_q_model() { return Delta_q_model_p->get(); }
         float get_Dw() { return Dw_p->get(); }
         float get_Freq() { return Freq_p->get(); }
-        float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
+        float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_z
         float get_Ib_bias_amp() { return Ib_bias_amp_p->get(); }
         float get_Ib_bias_noa() { return Ib_bias_noa_p->get(); }
         float get_Ib_scale_amp() { return Ib_scale_amp_p->get(); }
         float get_Ib_scale_noa() { return Ib_scale_noa_p->get(); }
         int8_t get_Ib_select() { return Ib_select_p->get(); }
-        int get_Iflt() { return Iflt_stored; }
-        int get_Ihis() { return Ihis_stored; }
-        int get_Isum() { return Isum_stored; }
-        float get_Inj_bias() { return Inj_bias_stored; }
+        int get_Iflt() { return Iflt_z; }
+        int get_Ihis() { return Ihis_z; }
+        int get_Isum() { return Isum_z; }
+        float get_Inj_bias() { return Inj_bias_z; }
         uint8_t get_Modeling() { return Modeling_p->get(); }
         uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
         uint8_t get_nP() { return nP_p->get(); }
         uint8_t get_nS() { return nS_p->get(); }
-        uint8_t get_Preserving() { return Preserving_stored; }
+        uint8_t get_Preserving() { return Preserving_z; }
         uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
-        float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
-        float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
-        float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
-        unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
+        float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_z
+        float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_z
+        float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_z
+        unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_z
         uint8_t get_Type() { return Type_p->get(); }
         float get_T_state() { return T_state_p->get(); }
         float get_T_state_model() { return T_state_model_p->get(); }
-        float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
-        float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Vb_scale_stored
+        float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_z
+        float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Vb_scale_z
 
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
@@ -1116,27 +1116,27 @@ public:
         double get_Delta_q_model() { return Delta_q_model_p->get(); }
         float get_Dw() { return Dw_p->get(); }
         float get_Freq() { return Freq_p->get(); }
-        float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_stored
+        float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_z
         double get_Ib_select() { return Ib_select_p->get(); }
-        int get_Iflt() { return Iflt_stored; }
-        int get_Ihis() { return Ihis_stored; }
-        float get_Inj_bias() { return Inj_bias_stored; }
-        int get_Isum() { return Isum_stored; }
+        int get_Iflt() { return Iflt_z; }
+        int get_Ihis() { return Ihis_z; }
+        float get_Inj_bias() { return Inj_bias_z; }
+        int get_Isum() { return Isum_z; }
         uint8_t get_Modeling() { return Modeling_p->get(); }
         uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
         uint8_t get_nP() { return nP_p->get(); }
         uint8_t get_nS() { return nS_p->get(); }
         uint8_t get_Preserving() { return Preserving_p->get(); }
-        float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_stored
-        float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_stored
+        float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_z
+        float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_z
         uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
-        float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_stored
-        unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_stored
-        uint8_t get_Type() { return Type_p->get(); }  // TODO:  should these be Type_stored
+        float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_z
+        unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_z
+        uint8_t get_Type() { return Type_p->get(); }  // TODO:  should these be Type_z
         float get_T_state() { return T_state_p->get(); }
         float get_T_state_model() { return T_state_model_p->get(); }
-        float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_stored
-        float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Ib_bias_stored
+        float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_z
+        float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Ib_bias_z
     #endif
     //
     void mem_print();
@@ -1173,7 +1173,7 @@ public:
         void put_Isum(const int input) { Isum_p->set(input); }
         void put_isum(const int input) { isum_ = input; }
         void put_Inj_bias(const float input) { Inj_bias_p->set(input); }
-        void put_Modeling(const uint8_t input) { Modeling_p->set(input); Modeling_stored = Modeling();}
+        void put_Modeling(const uint8_t input) { Modeling_p->set(input); Modeling_z = Modeling();}
         void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
         void put_Mon_chm() {}
         void put_nP(const float input) { nP_p->set(input); }
@@ -1229,9 +1229,9 @@ public:
         void put_Time_now(const float input) { Time_now_p->set(input); }
         void put_Type(const uint8_t input) { Type_p->set(input); }
         void put_T_state(const float input) { T_state_p->set(input); }
-        void put_T_state() { T_state_p->set(T_state_stored); }
+        void put_T_state() { T_state_p->set(T_state_z); }
         void put_T_state_model(const float input) { T_state_model_p->set(input); }
-        void put_T_state_model() { T_state_p->set(T_state_model_stored); }
+        void put_T_state_model() { T_state_p->set(T_state_model_z); }
         void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
         void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
 
@@ -1240,73 +1240,73 @@ public:
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
     boolean tweak_test() { return ( 1<<3 & Modeling() ); } // Driving signal injection completely using software inj_bias 
-    FloatStorage *Amp_p;
-    FloatStorage *Cutback_gain_sclr_p;
-    IntStorage *Debug_p;
-    DoubleStorage *Delta_q_p;
-    DoubleStorage *Delta_q_model_p;
-    FloatStorage *Dw_p;
-    FloatStorage *Freq_p;
-    FloatStorage *Ib_bias_all_p;
-    FloatNoStorage *Ib_bias_all_nan_p;
-    FloatStorage *Ib_bias_amp_p;
-    FloatStorage *Ib_bias_noa_p;
-    FloatStorage *Ib_scale_amp_p;
-    FloatStorage *Ib_scale_noa_p;
-    Int8tStorage *Ib_select_p;
-    IntStorage *Iflt_p;
-    IntStorage *Ihis_p;
-    FloatStorage *Inj_bias_p;
-    IntStorage *Isum_p;
-    Uint8tStorage *Modeling_p;
-    Uint8tStorage *Mon_chm_p;
-    FloatStorage *nP_p;
-    FloatStorage *nS_p;
-    Uint8tStorage *Preserving_p;
-    FloatStorage *S_cap_mon_p;
-    FloatStorage *S_cap_sim_p;
-    Uint8tStorage *Sim_chm_p;
-    FloatStorage *Tb_bias_hdwe_p;
-    ULongStorage *Time_now_p;
-    FloatStorage *T_state_p;
-    FloatStorage *T_state_model_p;
-    Uint8tStorage *Type_p;
-    FloatStorage *Vb_bias_hdwe_p;
-    FloatStorage *Vb_scale_p;
+    FloatZ *Amp_p;
+    FloatZ *Cutback_gain_sclr_p;
+    IntZ *Debug_p;
+    DoubleZ *Delta_q_p;
+    DoubleZ *Delta_q_model_p;
+    FloatZ *Dw_p;
+    FloatZ *Freq_p;
+    FloatZ *Ib_bias_all_p;
+    FloatNoZ *Ib_bias_all_nan_p;
+    FloatZ *Ib_bias_amp_p;
+    FloatZ *Ib_bias_noa_p;
+    FloatZ *Ib_scale_amp_p;
+    FloatZ *Ib_scale_noa_p;
+    Int8tZ *Ib_select_p;
+    IntZ *Iflt_p;
+    IntZ *Ihis_p;
+    FloatZ *Inj_bias_p;
+    IntZ *Isum_p;
+    Uint8tZ *Modeling_p;
+    Uint8tZ *Mon_chm_p;
+    FloatZ *nP_p;
+    FloatZ *nS_p;
+    Uint8tZ *Preserving_p;
+    FloatZ *S_cap_mon_p;
+    FloatZ *S_cap_sim_p;
+    Uint8tZ *Sim_chm_p;
+    FloatZ *Tb_bias_hdwe_p;
+    ULongZ *Time_now_p;
+    FloatZ *T_state_p;
+    FloatZ *T_state_model_p;
+    Uint8tZ *Type_p;
+    FloatZ *Vb_bias_hdwe_p;
+    FloatZ *Vb_scale_p;
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
-    float Amp_stored;
-    float Cutback_gain_sclr_stored;
-    int Debug_stored;
-    double Delta_q_stored;
-    double Delta_q_model_stored;
-    float Dw_stored;
-    float Freq_stored;
-    float Ib_bias_all_stored;
-    int8_t Ib_select_stored;
-    float Ib_bias_amp_stored;
-    float Ib_bias_noa_stored;
-    float Ib_scale_amp_stored;
-    float Ib_scale_noa_stored;
-    int Iflt_stored;
-    int Ihis_stored;
-    float Inj_bias_stored;
-    int Isum_stored;
-    uint8_t Modeling_stored;
-    uint8_t Mon_chm_stored;
-    float nP_stored;
-    float nS_stored;
-    uint8_t Preserving_stored;
-    float S_cap_mon_stored;
-    float S_cap_sim_stored;
-    uint8_t Sim_chm_stored;
-    float Tb_bias_hdwe_stored;
-    unsigned long Time_now_stored;
-    uint8_t Type_stored;
-    float T_state_stored;
-    float T_state_model_stored;
-    float Vb_bias_hdwe_stored;
-    float Vb_scale_stored;
+    float Amp_z;
+    float Cutback_gain_sclr_z;
+    int Debug_z;
+    double Delta_q_z;
+    double Delta_q_model_z;
+    float Dw_z;
+    float Freq_z;
+    float Ib_bias_all_z;
+    int8_t Ib_select_z;
+    float Ib_bias_amp_z;
+    float Ib_bias_noa_z;
+    float Ib_scale_amp_z;
+    float Ib_scale_noa_z;
+    int Iflt_z;
+    int Ihis_z;
+    float Inj_bias_z;
+    int Isum_z;
+    uint8_t Modeling_z;
+    uint8_t Mon_chm_z;
+    float nP_z;
+    float nS_z;
+    uint8_t Preserving_z;
+    float S_cap_mon_z;
+    float S_cap_sim_z;
+    uint8_t Sim_chm_z;
+    float Tb_bias_hdwe_z;
+    unsigned long Time_now_z;
+    uint8_t Type_z;
+    float T_state_z;
+    float T_state_model_z;
+    float Vb_bias_hdwe_z;
+    float Vb_scale_z;
 
 protected:
     int iflt_;              // Fault snap location.   Begins at -1 because first action is to increment iflt
@@ -1327,7 +1327,7 @@ protected:
     uint16_t nhis_;         // Length of Flt_ram array for fault history
     uint16_t nsum_;         // Length of Sum array for history
     uint16_t size_;
-    Storage *Z_[50];
+    Z *Z_[50];
 };
 
 #endif
