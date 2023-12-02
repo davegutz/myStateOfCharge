@@ -91,7 +91,7 @@
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
 // Turn on Log
-// SerialLogHandler logHandler;
+SerialLogHandler logHandler;
 
 #ifdef CONFIG_DS2482_1WIRE
   #include "DS2482-RK.h"
@@ -134,12 +134,12 @@ Pins *myPins;                   // Photon hardware pin mapping used
 // Setup
 void setup()
 {
+  Log.info("begin setup");
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
   Serial.begin(230400);
   Serial.flush();
   delay(1000);          // Ensures a clean display
-delay(4000);
   Serial.printf("Hi!\n");
 
   // EERAM and Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.
@@ -152,6 +152,7 @@ delay(4000);
 
   // EERAM chip card for I2C
   #ifdef CONFIG_47L16_EERAM
+    Log.info("setup EERAM");
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
@@ -177,6 +178,7 @@ delay(4000);
   // A4 - not available
   // A5-->D14 - spare
   
+  Log.info("setup Pins");
   #ifdef CONFIG_PHOTON2
     myPins = new Pins(D3, D7, D12, D11, D13);
     // pinMode(D3, INPUT_PULLUP);
@@ -188,6 +190,7 @@ delay(4000);
 
   // I2C for OLED, ADS, backup EERAM, DS2482
   #ifndef CONFIG_BARE
+    Log.info("setup I2C Wire");
     Wire.begin();
     #ifdef CONFIG_ADS1013_OPAMP
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
@@ -201,6 +204,7 @@ delay(4000);
 
   // Display (after start Wire)
   #ifdef CONFIG_SSD1306_OLED
+    Log.info("setup display");
     display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
     Serial.printf("Init DISP\n");
     if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
@@ -217,6 +221,7 @@ delay(4000);
 
   // 1-Wire chip card for I2C (after start Wire)
   #ifdef CONFIG_DS2482_1WIRE
+    Log.info("setup DS2482 special 1-wire");
     ds.setup();
     #if !defined(CONFIG_ADS1013_OPAMP) && !defined(CONFIG_SSD1306_OLED)
       // Single drop
@@ -246,6 +251,7 @@ delay(4000);
   // Synchronize clock
   // Device needs to be configured for wifi (hold setup 3 sec run Particle app) and in range of wifi
   // Phone hotspot is very convenient
+  Log.info("setup WiFi or lack of");
   WiFi.disconnect();
   delay(2000);
   WiFi.off();
@@ -289,6 +295,7 @@ delay(4000);
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
   {
+    Log.info("setup renominalize");
     if ( sp.num_diffs() )
     {
       #ifdef CONFIG_SSD1306_OLED
@@ -304,6 +311,7 @@ delay(4000);
     }
   }
 
+  Log.info("setup end");
   Serial.printf("End setup()\n\n");
 } // setup
 
