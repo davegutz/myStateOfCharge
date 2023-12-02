@@ -640,8 +640,8 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     else fails_repeated = min(fails_repeated + 1, 99);
     if ( fails_repeated < 3 )
     {
-      sp.put_Iflt(sp.Iflt()+1);
-      if ( sp.Iflt()>sp.nflt()-1 ) sp.put_Iflt(0);  // wrap buffer
+      sp.put_Iflt(sp.Iflt() + 1);
+      if ( sp.Iflt()>sp.nflt() - 1 ) sp.put_Iflt(0);  // wrap buffer
       Flt_st fault_snap;
       fault_snap.assign(Time.now(), Mon, Sen);
       sp.put_fault(fault_snap, sp.Iflt());

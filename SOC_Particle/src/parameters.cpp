@@ -53,8 +53,8 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Amp_p               = new FloatZ(  "Xf", "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_z, 0.);
     Cutback_gain_sclr_p = new FloatZ(  "Sk", "Cutback gain scalar", "slr",      -1e6, 1e6, &Cutback_gain_sclr_z, 1.);
     Debug_p             = new IntZ(    "v",  "Verbosity",           "int",      -128, 128, &Debug_z, 0);
-    Delta_q_p           = new DoubleZ( "na", "Charge chg",          "C",        -1e8, 1e5, &Delta_q_z, 0., true);
-    Delta_q_model_p     = new DoubleZ( "na", "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_z, 0., true);
+    Delta_q_p           = new DoubleZ( "qm", "Charge chg",          "C",        -1e8, 1e5, &Delta_q_z, 0., true);
+    Delta_q_model_p     = new DoubleZ( "qs", "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_z, 0., true);
     Dw_p                = new FloatZ(  "Dw", "Tab mon adj",         "v",        -1e2, 1e2, &Dw_z, VTAB_BIAS);
     Freq_p              = new FloatZ(  "Xf", "Inj freq",            "Hz",        0.,  2.,  &Freq_z, 0.);
     Ib_bias_all_p       = new FloatZ(  "DI", "Add all",             "A",        -1e5, 1e5, &Ib_bias_all_z, CURR_BIAS_ALL);
@@ -79,8 +79,8 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
     Tb_bias_hdwe_p      = new FloatZ(  "Dt", "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_z, TEMP_BIAS);
     Time_now_p          = new ULongZ(  "UT", "UNIX tim since epoch","sec",       0UL, 2100000000UL, &Time_now_z, 1669801880UL, true);
     Type_p              = new Uint8tZ( "Xt", "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_z, 0);
-    T_state_p           = new FloatZ(  "na", "Tb rate lim mem",     "dg C",     -10,  70,  &T_state_z, RATED_TEMP, false);
-    T_state_model_p     = new FloatZ(  "na", "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_state_model_z, RATED_TEMP, false);
+    T_state_p           = new FloatZ(  "tm", "Tb rate lim mem",     "dg C",     -10,  70,  &T_state_z, RATED_TEMP, false);
+    T_state_model_p     = new FloatZ(  "ts", "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_state_model_z, RATED_TEMP, false);
     Vb_bias_hdwe_p      = new FloatZ(  "Dc", "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_z, VOLT_BIAS);
     Vb_scale_p          = new FloatZ(  "SV", "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
 
@@ -226,7 +226,7 @@ boolean SavedPars::is_corrupt()
     for ( int i=0; i<size_; i++ ) corruption |= Z_[i]->is_corrupt();
     if ( corruption )
     {
-        Serial.printf("corrupt****\n");
+        Serial.printf("\ncorrupt****\n");
         pretty_print(true);
     }
     return corruption;

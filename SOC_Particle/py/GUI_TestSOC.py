@@ -470,7 +470,6 @@ def grab_reset():
     init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     reset_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
-    start_timer()
 
 
 def grab_start():
@@ -483,6 +482,7 @@ def grab_start():
     init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    start_timer()
 
 
 def handle_modeling(*args):

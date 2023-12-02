@@ -139,7 +139,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
+        if ( corrupt ) Serial.printf("\n%s %s corrupt", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -202,7 +202,7 @@ public:
 
     void set(double val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -272,7 +272,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
+        if ( corrupt ) Serial.printf("\n%s %s corrupt", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -335,7 +335,7 @@ public:
 
     void set(float val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -484,7 +484,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
+        if ( corrupt ) Serial.printf("\n%s %s corrupt", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -546,8 +546,7 @@ public:
 
     void set(int val)
     {
-        if ( val>max_ || val<min_ )
-            Serial.printf("%s set:: out of range\n", description_.c_str());
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %d (%-d, %d)\n", code_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -617,7 +616,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
+        if ( corrupt ) Serial.printf("\n%s %s corrupt", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -680,7 +679,7 @@ public:
 
     void set(int8_t val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %d (%-d, %d)\n", code_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -701,6 +700,136 @@ protected:
     boolean check_off_;
 };
 
+
+class Uint16tZ: public Z
+{
+public:
+    Uint16tZ(){}
+
+    Uint16tZ(const String &code, const String &description, const String &units, const uint16_t min, const uint16_t max, uint16_t *store,
+    const uint16_t _default=0, const boolean check_off=false):
+        Z(code, description, units, true)
+    {
+        min_ = min;
+        max_ = max;
+        default_ = max(min(_default, max_), min_);
+        val_ = store;
+        check_off_ = check_off;
+        set(*val_); // retained
+    }
+
+    Uint16tZ(const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
+    uint16_t *store, const uint16_t _default=0, const boolean check_off=false):
+        Z(code, ram, description, units, true)
+    {
+        min_ = min;
+        max_ = max;
+        val_ = store;
+        default_ = max(min(_default, max_), min_);
+        check_off_ = check_off;
+    }
+
+    ~Uint16tZ(){}
+
+    uint16_t assign_addr(uint16_t next)
+    {
+        addr_.a16 = next;
+        return next + sizeof(uint16_t);
+    }
+
+    uint16_t get()
+    {
+        if ( is_eeram_ )
+            *val_ = rP_->read(addr_.a16);
+        return *val_;
+    }
+
+    virtual boolean is_corrupt()
+    {
+        boolean corrupt = *val_ > max_ || *val_ < min_;
+        if ( corrupt ) Serial.printf("\n%s %s corrupt", code_.c_str(), description_.c_str());
+        return corrupt;
+    }
+
+    virtual boolean is_off()
+    {
+        return *val_ != default_ && !check_off_;
+    }
+
+    uint16_t max_of() { return max_; }
+
+    uint16_t min_of() { return min_; }
+
+    uint16_t nominal() { return default_; }
+    
+    void print_str()
+    {
+        if ( !check_off_ )
+            sprintf(cp.buffer, " %-20s %9d -> %9d, %10s (* %-2s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        else
+            sprintf(cp.buffer, " %-33s %9d, %10s (* %-2s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+    }
+
+    void print()
+    {
+        print_str();
+        Serial.printf("%s\n", cp.buffer);
+    }
+    
+    void print1()
+    {
+        print_str();
+        Serial1.printf("%s\n", cp.buffer);
+    }
+
+    void print_help_str()
+    {
+        sprintf(cp.buffer, "* %-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+    }
+
+    void print_help()
+    {
+        print_help_str();
+        Serial.printf("%s\n", cp.buffer);
+    }
+
+    void print1_help()
+    {
+        print_help_str();
+        Serial1.printf("%s\n", cp.buffer);
+    }
+
+    void print_adj_print(const uint16_t input)
+    {
+        print();
+        print1();
+        set(input);
+        print();
+        print1();
+    }
+   
+    void set(uint16_t val)
+    {
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %d (%-d, %d)\n", code_.c_str(), val, min_, max_);
+        else
+        {
+            *val_ = val;
+            if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
+        }
+    }
+
+    virtual void set_default()
+    {
+        if ( !check_off_ ) set(default_);
+    }
+
+protected:
+    uint16_t *val_;
+    uint16_t min_;
+    uint16_t max_;
+    uint16_t default_;
+    boolean check_off_;
+};
 
 class Uint8tZ: public Z
 {
@@ -748,7 +877,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
+        if ( corrupt ) Serial.printf("\n%s %s corrupt", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -811,7 +940,7 @@ public:
    
     void set(uint8_t val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %d (%-d, %d)\n", code_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -831,6 +960,7 @@ protected:
     uint8_t default_;
     boolean check_off_;
 };
+
 
 class ULongZ: public Z
 {
@@ -882,7 +1012,7 @@ public:
     virtual boolean is_corrupt()
     {
         boolean corrupt = *val_ > max_ || *val_ < min_;
-        if ( corrupt ) Serial.printf("%s %s corrupt\n", code_.c_str(), description_.c_str());
+        if ( corrupt ) Serial.printf("\n%s %s corrupt", code_.c_str(), description_.c_str());
         return corrupt;
     }
 
@@ -945,7 +1075,7 @@ public:
    
     void set(unsigned long val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out of range\n", description_.c_str());
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %ld (%-ld, %ld)\n", code_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -1069,80 +1199,52 @@ public:
     boolean mod_tb_dscn() { return ( 1<<4 & Modeling() ); }              // Nothing connected to one-wire Tb sensor on D6
     boolean mod_vb() { return ( 1<<1 & Modeling() || mod_vb_dscn() ); }  // Using Sim as source of vb
     boolean mod_vb_dscn() { return ( 1<<5 & Modeling() ); }              // Nothing connected to vb on A1
-    // get
-    #ifdef CONFIG_47L16_EERAM
-        float get_Amp() { return Amp_p->get(); }
-        float get_Cutback_gain_sclr() { return Cutback_gain_sclr_p->get(); }
-        int get_Debug() { return Debug_p->get(); }
-        double get_Delta_q() { return Delta_q_p->get(); }
-        double get_Delta_q_model() { return Delta_q_model_p->get(); }
-        float get_Dw() { return Dw_p->get(); }
-        float get_Freq() { return Freq_p->get(); }
-        float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_z
-        float get_Ib_bias_amp() { return Ib_bias_amp_p->get(); }
-        float get_Ib_bias_noa() { return Ib_bias_noa_p->get(); }
-        float get_Ib_scale_amp() { return Ib_scale_amp_p->get(); }
-        float get_Ib_scale_noa() { return Ib_scale_noa_p->get(); }
-        int8_t get_Ib_select() { return Ib_select_p->get(); }
-        int get_Iflt() { return Iflt_z; }
-        int get_Ihis() { return Ihis_z; }
-        int get_Isum() { return Isum_z; }
-        float get_Inj_bias() { return Inj_bias_z; }
-        uint8_t get_Modeling() { return Modeling_p->get(); }
-        uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
-        uint8_t get_nP() { return nP_p->get(); }
-        uint8_t get_nS() { return nS_p->get(); }
-        uint8_t get_Preserving() { return Preserving_z; }
-        uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
-        float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_z
-        float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_z
-        float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_z
-        unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_z
-        uint8_t get_Type() { return Type_p->get(); }
-        float get_T_state() { return T_state_p->get(); }
-        float get_T_state_model() { return T_state_model_p->get(); }
-        float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_z
-        float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Vb_scale_z
 
+    // get
+    float get_Amp() { return Amp_p->get(); }
+    float get_Cutback_gain_sclr() { return Cutback_gain_sclr_p->get(); }
+    int get_Debug() { return Debug_p->get(); }
+    double get_Delta_q() { return Delta_q_p->get(); }
+    double get_Delta_q_model() { return Delta_q_model_p->get(); }
+    float get_Dw() { return Dw_p->get(); }
+    float get_Freq() { return Freq_p->get(); }
+    float get_Ib_bias_all() { return Ib_bias_all_p->get(); }
+    float get_Ib_bias_amp() { return Ib_bias_amp_p->get(); }
+    float get_Ib_bias_noa() { return Ib_bias_noa_p->get(); }
+    float get_Ib_scale_amp() { return Ib_scale_amp_p->get(); }
+    float get_Ib_scale_noa() { return Ib_scale_noa_p->get(); }
+    int8_t get_Ib_select() { return Ib_select_p->get(); }
+    int get_Iflt() { return Iflt_z; }
+    int get_Ihis() { return Ihis_z; }
+    float get_Inj_bias() { return Inj_bias_z; }
+    int get_Isum() { return Isum_z; }
+    uint8_t get_Modeling() { return Modeling_p->get(); }
+    uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
+    uint8_t get_nP() { return nP_p->get(); }
+    uint8_t get_nS() { return nS_p->get(); }
+    uint8_t get_Preserving() { return Preserving_p->get(); }
+    uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
+    float get_S_cap_mon() { return S_cap_mon_p->get(); }
+    float get_S_cap_sim() { return S_cap_sim_p->get(); }
+    float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }
+    unsigned long get_Time_now() { return Time_now_p->get(); }
+    uint8_t get_Type() { return Type_p->get(); }
+    float get_T_state() { return T_state_p->get(); }
+    float get_T_state_model() { return T_state_model_p->get(); }
+    float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }
+    float get_Vb_scale() { return Vb_scale_p->get(); }
+    #ifdef CONFIG_47L16_EERAM
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
         uint16_t next() { return next_; }
         void load_all();
-    #else
-        float get_Amp() { return Amp_p->get(); }
-        float get_Cutback_gain_sclr() { return Cutback_gain_sclr_p->get(); }
-        int get_Debug() { return Debug_p->get(); }
-        double get_Delta_q() { return Delta_q_p->get(); }
-        double get_Delta_q_model() { return Delta_q_model_p->get(); }
-        float get_Dw() { return Dw_p->get(); }
-        float get_Freq() { return Freq_p->get(); }
-        float get_Ib_bias_all() { return Ib_bias_all_p->get(); }  // TODO:  should these be Ib_bias_z
-        double get_Ib_select() { return Ib_select_p->get(); }
-        int get_Iflt() { return Iflt_z; }
-        int get_Ihis() { return Ihis_z; }
-        float get_Inj_bias() { return Inj_bias_z; }
-        int get_Isum() { return Isum_z; }
-        uint8_t get_Modeling() { return Modeling_p->get(); }
-        uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
-        uint8_t get_nP() { return nP_p->get(); }
-        uint8_t get_nS() { return nS_p->get(); }
-        uint8_t get_Preserving() { return Preserving_p->get(); }
-        float get_S_cap_mon() { return S_cap_mon_p->get(); }  // TODO:  should these be S_cap_mon_z
-        float get_S_cap_sim() { return S_cap_sim_p->get(); }  // TODO:  should these be S_cap_sim_z
-        uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
-        float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }  // TODO:  should these be Tb_bias_hdwe_z
-        unsigned long get_Time_now() { return Time_now_p->get(); }  // TODO:  should these be Time_now_z
-        uint8_t get_Type() { return Type_p->get(); }  // TODO:  should these be Type_z
-        float get_T_state() { return T_state_p->get(); }
-        float get_T_state_model() { return T_state_model_p->get(); }
-        float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }  // TODO:  should these be Vb_bias_hdwe_z
-        float get_Vb_scale() { return Vb_scale_p->get(); }  // TODO:  should these be Ib_bias_z
     #endif
+
     //
     void mem_print();
-    uint16_t nflt() { return nflt_; }
-    uint16_t nhis() { return nhis_; }
-    uint16_t nsum() { return nsum_; }
+    int nflt() { return nflt_; }
+    int nhis() { return nhis_; }
+    int nsum() { return nsum_; }
     void nominalize_fault_array();
     void nominalize_history_array();
     int num_diffs();
@@ -1150,90 +1252,54 @@ public:
     void print_fault_array();
     void print_fault_header();
     void print_history_array();
+
     // put
+    void put_all_dynamic();
+    void put_Amp(const float input) { Amp_p->set(input); }
+    void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_p->set(input); }
+    void put_Debug(const int input) { Debug_p->set(input); }
+    void put_Delta_q(const double input) { Delta_q_p->set(input); }
+    void put_Delta_q() {}
+    void put_Delta_q_model(const double input) { Delta_q_model_p->set(input); }
+    void put_Delta_q_model() {}
+    void put_Dw(const float input) { Dw_p->set(input); }
+    void put_Freq(const float input) { Freq_p->set(input); }
+    void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
+    void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->set(input); }
+    void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->set(input); }
+    void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
+    void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
+    void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
+    void put_Iflt(const int input) { Iflt_p->set(input); }
+    void put_Ihis(const int input) { Ihis_p->set(input); }
+    void put_Isum(const int input) { Isum_p->set(input); }
+    void put_Inj_bias(const float input) { Inj_bias_p->set(input); }
+    void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
+    void put_Mon_chm() {}
+    void put_nP(const float input) { nP_p->set(input); }
+    void put_nS(const float input) { nS_p->set(input); }
+    void put_Preserving(const uint8_t input) { Preserving_p->set(input); }
+    void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
+    void put_Sim_chm() {}
+    void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
+    void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
+    void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
+    void put_Time_now(const float input) { Time_now_p->set(input); }
+    void put_Type(const uint8_t input) { Type_p->set(input); }
+    void put_T_state(const float input) { T_state_p->set(input); }
+    void put_T_state_model(const float input) { T_state_model_p->set(input); }
+    void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
+    void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
     #ifndef CONFIG_47L16_EERAM
-        void put_all_dynamic();
-        void put_Amp(const float input) { Amp_p->set(input); }
-        void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_p->set(input); }
-        void put_Debug(const int input) { Debug_p->set(input); }
-        void put_Delta_q(const double input) { Delta_q_p->set(input); }
-        void put_Delta_q() {}
-        void put_Delta_q_model(const double input) { Delta_q_model_p->set(input); }
-        void put_Delta_q_model() {}
-        void put_Dw(const float input) { Dw_p->set(input); }
-        void put_Freq(const float input) { Freq_p->set(input); }
-        void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
-        void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->set(input); }
-        void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->set(input); }
-        void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
-        void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
-        void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
-        void put_Iflt(const int input) { Iflt_p->set(input); }
-        void put_Ihis(const int input) { Ihis_p->set(input); }
-        void put_Isum(const int input) { Isum_p->set(input); }
-        void put_isum(const int input) { isum_ = input; }
-        void put_Inj_bias(const float input) { Inj_bias_p->set(input); }
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); Modeling_z = Modeling();}
-        void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
-        void put_Mon_chm() {}
-        void put_nP(const float input) { nP_p->set(input); }
-        void put_nS(const float input) { nS_p->set(input); }
-        void put_Preserving(const uint8_t input) { Preserving_p->set(input); }
-        void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
-        void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
-        void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
-        void put_Sim_chm() {}
-        void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
-        void put_Time_now(const unsigned long input) { Time_now_p->set(input); }
-        void put_Type(const uint8_t input) { Type_p->set(input); }
-        void put_T_state(const float input) { T_state_p->set(input); }
         void put_T_state() {}
-        void put_T_state_model(const float input) { T_state_model_p->set(input); }
         void put_T_state_model() {}
-        void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
-        void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
 
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #else
-        void put_all_dynamic();
-        void put_Amp(const float input) { Amp_p->set(input); }
-        void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_p->set(input); }
-        void put_Debug(const int input) { Debug_p->set(input); }
-        void put_Delta_q(const double input) { Delta_q_p->set(input); }
-        void put_Delta_q() {}
-        void put_Delta_q_model(const double input) { Delta_q_model_p->set(input); }
-        void put_Delta_q_model() {}
-        void put_Dw(const float input) { Dw_p->set(input); }
-        void put_Freq(const float input) { Freq_p->set(input); }
-        void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
-        void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->set(input); }
-        void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->set(input); }
-        void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
-        void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
-        void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
-        void put_Iflt(const int input) { Iflt_p->set(input); }
-        void put_Ihis(const int input) { Ihis_p->set(input); }
-        void put_Isum(const int input) { Isum_p->set(input); }
-        void put_Inj_bias(const float input) { Inj_bias_p->set(input); }
         void put_Modeling(const uint8_t input) { Modeling_p->set(input); }
-        void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
-        void put_Mon_chm() {}
-        void put_nP(const float input) { nP_p->set(input); }
-        void put_nS(const float input) { nS_p->set(input); }
-        void put_Preserving(const uint8_t input) { Preserving_p->set(input); }
-        void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
-        void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
-        void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
-        void put_Sim_chm() {}
-        void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
-        void put_Time_now(const float input) { Time_now_p->set(input); }
-        void put_Type(const uint8_t input) { Type_p->set(input); }
-        void put_T_state(const float input) { T_state_p->set(input); }
         void put_T_state() { T_state_p->set(T_state_z); }
-        void put_T_state_model(const float input) { T_state_model_p->set(input); }
         void put_T_state_model() { T_state_p->set(T_state_model_z); }
-        void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
-        void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
 
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
     #endif
@@ -1263,9 +1329,9 @@ public:
     FloatZ *nP_p;
     FloatZ *nS_p;
     Uint8tZ *Preserving_p;
+    Uint8tZ *Sim_chm_p;
     FloatZ *S_cap_mon_p;
     FloatZ *S_cap_sim_p;
-    Uint8tZ *Sim_chm_p;
     FloatZ *Tb_bias_hdwe_p;
     ULongZ *Time_now_p;
     FloatZ *T_state_p;
@@ -1283,11 +1349,11 @@ public:
     float Dw_z;
     float Freq_z;
     float Ib_bias_all_z;
-    int8_t Ib_select_z;
     float Ib_bias_amp_z;
     float Ib_bias_noa_z;
     float Ib_scale_amp_z;
     float Ib_scale_noa_z;
+    int8_t Ib_select_z;
     int Iflt_z;
     int Ihis_z;
     float Inj_bias_z;
@@ -1297,9 +1363,9 @@ public:
     float nP_z;
     float nS_z;
     uint8_t Preserving_z;
+    uint8_t Sim_chm_z;
     float S_cap_mon_z;
     float S_cap_sim_z;
-    uint8_t Sim_chm_z;
     float Tb_bias_hdwe_z;
     unsigned long Time_now_z;
     uint8_t Type_z;
@@ -1309,11 +1375,11 @@ public:
     float Vb_scale_z;
 
 protected:
-    int iflt_;              // Fault snap location.   Begins at -1 because first action is to increment iflt
-    int ihis_;              // History location.   Begins at -1 because first action is to increment ihis
-    float inj_bias_;        // Constant bias, A
-    int isum_;              // Summary location.   Begins at -1 because first action is to increment isum
-    uint8_t preserving_;    // Preserving fault buffer
+    // uint16_t iflt_;              // Fault snap location.   Begins at -1 because first action is to increment iflt
+    // uint16_t ihis_;              // History location.   Begins at -1 because first action is to increment ihis
+    // float inj_bias_;        // Constant bias, A
+    // uint16_t isum_;              // Summary location.   Begins at -1 because first action is to increment isum
+    // uint8_t preserving_;    // Preserving fault buffer
     #ifndef CONFIG_47L16_EERAM
         Flt_st *fault_;
         Flt_st *history_;
@@ -1327,7 +1393,7 @@ protected:
     uint16_t nhis_;         // Length of Flt_ram array for fault history
     uint16_t nsum_;         // Length of Sum array for history
     uint16_t size_;
-    Z *Z_[50];
+    Z *Z_[40];
 };
 
 #endif
