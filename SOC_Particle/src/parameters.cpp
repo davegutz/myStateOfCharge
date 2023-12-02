@@ -86,39 +86,6 @@ SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uin
 
     // Memory map
     init_z();
-    // Z_[size_++] = Amp_p;                
-    // Z_[size_++] = Cutback_gain_sclr_p;
-    // Z_[size_++] = Debug_p;
-    // Z_[size_++] = Delta_q_p;
-    // Z_[size_++] = Delta_q_model_p;
-    // Z_[size_++] = Dw_p;
-    // Z_[size_++] = Freq_p;
-    // Z_[size_++] = Ib_bias_all_p;
-    // Z_[size_++] = Ib_bias_all_nan_p;
-    // Z_[size_++] = Ib_bias_amp_p;
-    // Z_[size_++] = Ib_bias_noa_p;
-    // Z_[size_++] = Ib_scale_amp_p;
-    // Z_[size_++] = Ib_scale_noa_p;
-    // Z_[size_++] = Ib_select_p;
-    // Z_[size_++] = Iflt_p;
-    // Z_[size_++] = Ihis_p;
-    // Z_[size_++] = Inj_bias_p;
-    // Z_[size_++] = Isum_p;
-    // Z_[size_++] = Modeling_p;
-    // Z_[size_++] = Mon_chm_p;
-    // Z_[size_++] = nP_p;
-    // Z_[size_++] = nS_p;
-    // Z_[size_++] = Preserving_p;
-    // Z_[size_++] = S_cap_mon_p;
-    // Z_[size_++] = S_cap_sim_p;
-    // Z_[size_++] = Sim_chm_p;
-    // Z_[size_++] = Tb_bias_hdwe_p;
-    // Z_[size_++] = Time_now_p;
-    // Z_[size_++] = Type_p;
-    // Z_[size_++] = T_state_p;
-    // Z_[size_++] = T_state_model_p;
-    // Z_[size_++] = Vb_bias_hdwe_p;
-    // Z_[size_++] = Vb_scale_p;
 }
 #else
 SavedPars::SavedPars(SerialRAM *ram)
@@ -165,39 +132,6 @@ SavedPars::SavedPars(SerialRAM *ram)
 
     // Memory map
     init_z();
-    // Z_[size_++] = Amp_p;                
-    // Z_[size_++] = Cutback_gain_sclr_p;
-    // Z_[size_++] = Debug_p;
-    // Z_[size_++] = Delta_q_p;
-    // Z_[size_++] = Delta_q_model_p;
-    // Z_[size_++] = Dw_p;
-    // Z_[size_++] = Freq_p;
-    // Z_[size_++] = Ib_bias_all_p;
-    // Z_[size_++] = Ib_bias_all_nan_p;
-    // Z_[size_++] = Ib_bias_amp_p;
-    // Z_[size_++] = Ib_bias_noa_p;
-    // Z_[size_++] = Ib_scale_amp_p;
-    // Z_[size_++] = Ib_scale_noa_p;
-    // Z_[size_++] = Ib_select_p;
-    // Z_[size_++] = Iflt_p;
-    // Z_[size_++] = Ihis_p;
-    // Z_[size_++] = Inj_bias_p;
-    // Z_[size_++] = Isum_p;
-    // Z_[size_++] = Modeling_p;
-    // Z_[size_++] = Mon_chm_p;
-    // Z_[size_++] = nP_p;
-    // Z_[size_++] = nS_p;
-    // Z_[size_++] = Preserving_p;
-    // Z_[size_++] = S_cap_mon_p;
-    // Z_[size_++] = S_cap_sim_p;
-    // Z_[size_++] = Sim_chm_p;
-    // Z_[size_++] = Tb_bias_hdwe_p;
-    // Z_[size_++] = Time_now_p;
-    // Z_[size_++] = T_state_p;
-    // Z_[size_++] = T_state_model_p;
-    // Z_[size_++] = Type_p;
-    // Z_[size_++] = Vb_bias_hdwe_p;
-    // Z_[size_++] = Vb_scale_p;
     for ( int i=0; i<size_; i++ )
     {
         next_ = Z_[i]->assign_addr(next_);
@@ -276,38 +210,7 @@ boolean SavedPars::is_corrupt()
 #ifdef CONFIG_47L16_EERAM
     void SavedPars::load_all()
     {
-        get_Amp();
-        get_Cutback_gain_sclr();
-        get_Dw();
-        get_Debug();
-        get_Delta_q();
-        get_Delta_q_model();
-        get_Freq();
-        get_Ib_bias_all();
-        get_Ib_bias_amp();
-        get_Ib_bias_noa();
-        get_Ib_scale_amp();
-        get_Ib_scale_noa();
-        get_Ib_select();
-        get_Iflt();
-        get_Ihis();
-        get_Inj_bias();
-        get_Isum();
-        get_Modeling();
-        get_Mon_chm();
-        get_nP();
-        get_nS();
-        get_Preserving();
-        get_Sim_chm();
-        get_S_cap_mon();
-        get_S_cap_sim();
-        get_Tb_bias_hdwe();
-        get_Time_now();
-        get_Type();
-        get_T_state();
-        get_T_state_model();
-        get_Vb_bias_hdwe();
-        get_Vb_scale();
+        for (int i=0; i<size_; i++ ) Z_[i]->get();
         
         for ( uint16_t i=0; i<nflt_; i++ ) fault_[i].get();
         for ( uint16_t i=0; i<nhis_; i++ ) history_[i].get();
@@ -318,39 +221,7 @@ boolean SavedPars::is_corrupt()
 int SavedPars::num_diffs()
 {
     int n = 0;
-    if ( Amp_p->is_off() ) n++;
-    if ( Cutback_gain_sclr_p->is_off() ) n++;
-    if ( Dw_p->is_off() ) n++;
-    if ( Debug_p->is_off() ) n++;
-    if ( Delta_q_p->is_off() ) n++;
-    if ( Delta_q_model_p->is_off() ) n++;
-    if ( Freq_p->is_off() ) n++;
-    if ( Ib_bias_all_p->is_off() ) n++;
-    if ( Ib_bias_all_nan_p->is_off() ) n++;
-    if ( Ib_bias_amp_p->is_off() ) n++;
-    if ( Ib_bias_noa_p->is_off() ) n++;
-    if ( Ib_scale_amp_p->is_off() ) n++;
-    if ( Ib_scale_noa_p->is_off() ) n++;
-    if ( Ib_select_p->is_off() ) n++;
-    if ( Iflt_p->is_off() ) n++;
-    if ( Ihis_p->is_off() ) n++;
-    if ( Inj_bias_p->is_off() ) n++;
-    if ( Isum_p->is_off() ) n++;
-    if ( Modeling_p->is_off() ) n++;
-    if ( Mon_chm_p->is_off() ) n++;
-    if ( Preserving_p->is_off() ) n++;
-    if ( nP_p->is_off() ) n++;
-    if ( nS_p->is_off() ) n++;
-    if ( S_cap_mon_p->is_off() ) n++;
-    if ( S_cap_sim_p->is_off() ) n++;
-    if ( Sim_chm_p->is_off() ) n++;
-    if ( Tb_bias_hdwe_p->is_off() ) n++;
-    if ( Time_now_p->is_off() ) n++;
-    if ( T_state_p->is_off() ) n++;
-    if ( T_state_model_p->is_off() ) n++;
-    if ( Type_p->is_off() ) n++;
-    if ( Vb_bias_hdwe_p->is_off() ) n++;
-    if ( Vb_scale_p->is_off() ) n++;
+    for (int i=0; i<size_; i++ ) if ( Z_[i]->is_off() )  n++;
     return ( n );
 }
 
@@ -452,7 +323,7 @@ void SavedPars::put_all_dynamic()
             break;
 
         case ( 6 ):
-            put_Time_now((unsigned long)Time.now());  // If happen to connect to wifi (assume updated automatically), save new time
+            put_Time_now(max( Time_now_z, (unsigned long)Time.now()));  // If happen to connect to wifi (assume updated automatically), save new time
             blink = 0;
             break;
 

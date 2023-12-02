@@ -68,13 +68,12 @@ public:
     ~Z(){}
 
     String code() { return code_; }
-
     const char* description() { return description_.c_str(); }
-
     const char* units() { return units_.c_str(); }
 
     // Placeholders
     virtual uint16_t assign_addr(uint16_t next){return next;}
+    virtual void get(){};
     virtual boolean is_corrupt(){return false;};
     virtual boolean is_off(){return false;};
     virtual void print(){};
@@ -127,13 +126,12 @@ public:
         return next + sizeof(double);
     }
 
-    double get()
+    virtual void get()
     {
         if ( is_eeram_ )
         {
             rP_->get(addr_.a16, *val_);
         }
-        return *val_;
     }
 
     virtual boolean is_corrupt()
@@ -260,13 +258,12 @@ public:
         return next + sizeof(float);
     }
 
-    float get()
+    virtual void get()
     {
         if ( is_eeram_ )
         {
             rP_->get(addr_.a16, *val_);
         }
-        return *val_;
     }
 
     virtual boolean is_corrupt()
@@ -472,13 +469,12 @@ public:
         return next + sizeof(int);
     }
 
-    int get()
+    virtual void get()
     {
         if ( is_eeram_ )
         {
             rP_->get(addr_.a16, *val_);
         }
-        return *val_;
     }
 
     virtual boolean is_corrupt()
@@ -604,13 +600,12 @@ public:
         return next + sizeof(int8_t);
     }
 
-    int8_t get()
+    virtual void get()
     {
         if ( is_eeram_ )
         {
             rP_->get(addr_.a16, *val_);
         }
-        return *val_;
     }
 
     virtual boolean is_corrupt()
@@ -737,11 +732,9 @@ public:
         return next + sizeof(uint16_t);
     }
 
-    uint16_t get()
+    virtual void get()
     {
-        if ( is_eeram_ )
-            *val_ = rP_->read(addr_.a16);
-        return *val_;
+        if ( is_eeram_ ) *val_ = rP_->read(addr_.a16);
     }
 
     virtual boolean is_corrupt()
@@ -867,11 +860,9 @@ public:
         return next + sizeof(uint8_t);
     }
 
-    uint8_t get()
+    virtual void get()
     {
-        if ( is_eeram_ )
-            *val_ = rP_->read(addr_.a16);
-        return *val_;
+        if ( is_eeram_ ) *val_ = rP_->read(addr_.a16);
     }
 
     virtual boolean is_corrupt()
@@ -999,14 +990,12 @@ public:
         return next + sizeof(unsigned long);
     }
 
-    unsigned long get()
+    virtual void get()
     {
         if ( is_eeram_ )
         {
             rP_->get(addr_.a16, *val_);
-            // Time.setTime(*val_);
         }
-        return *val_;
     }
 
     virtual boolean is_corrupt()
@@ -1081,7 +1070,6 @@ public:
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
         }
-        // Time.setTime(*val_);
     }
 
     virtual void set_default()
@@ -1201,39 +1189,6 @@ public:
     boolean mod_vb() { return ( 1<<1 & Modeling() || mod_vb_dscn() ); }  // Using Sim as source of vb
     boolean mod_vb_dscn() { return ( 1<<5 & Modeling() ); }              // Nothing connected to vb on A1
 
-    // get
-    float get_Amp() { return Amp_p->get(); }
-    float get_Cutback_gain_sclr() { return Cutback_gain_sclr_p->get(); }
-    int get_Debug() { return Debug_p->get(); }
-    double get_Delta_q() { return Delta_q_p->get(); }
-    double get_Delta_q_model() { return Delta_q_model_p->get(); }
-    float get_Dw() { return Dw_p->get(); }
-    float get_Freq() { return Freq_p->get(); }
-    float get_Ib_bias_all() { return Ib_bias_all_p->get(); }
-    float get_Ib_bias_amp() { return Ib_bias_amp_p->get(); }
-    float get_Ib_bias_noa() { return Ib_bias_noa_p->get(); }
-    float get_Ib_scale_amp() { return Ib_scale_amp_p->get(); }
-    float get_Ib_scale_noa() { return Ib_scale_noa_p->get(); }
-    int8_t get_Ib_select() { return Ib_select_p->get(); }
-    uint16_t get_Iflt() { return Iflt_z; }
-    uint16_t get_Ihis() { return Ihis_z; }
-    float get_Inj_bias() { return Inj_bias_z; }
-    uint16_t get_Isum() { return Isum_z; }
-    uint8_t get_Modeling() { return Modeling_p->get(); }
-    uint8_t get_Mon_chm() { return Mon_chm_p->get(); }
-    uint8_t get_nP() { return nP_p->get(); }
-    uint8_t get_nS() { return nS_p->get(); }
-    uint8_t get_Preserving() { return Preserving_p->get(); }
-    uint8_t get_Sim_chm() { return Sim_chm_p->get(); }
-    float get_S_cap_mon() { return S_cap_mon_p->get(); }
-    float get_S_cap_sim() { return S_cap_sim_p->get(); }
-    float get_Tb_bias_hdwe() { return Tb_bias_hdwe_p->get(); }
-    unsigned long get_Time_now() { return Time_now_p->get(); }
-    uint8_t get_Type() { return Type_p->get(); }
-    float get_T_state() { return T_state_p->get(); }
-    float get_T_state_model() { return T_state_model_p->get(); }
-    float get_Vb_bias_hdwe() { return Vb_bias_hdwe_p->get(); }
-    float get_Vb_scale() { return Vb_scale_p->get(); }
     #ifdef CONFIG_47L16_EERAM
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
@@ -1241,7 +1196,6 @@ public:
         void load_all();
     #endif
 
-    //
     void mem_print();
     uint16_t nflt() { return nflt_; }
     uint16_t nhis() { return nhis_; }

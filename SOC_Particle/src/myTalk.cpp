@@ -604,7 +604,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 break;
 
               case ( 'R' ):  // HR: History reset
-                Serial.printf("Resetting history...");
+                Serial.printf("Reset his & flt...");
                 sp.reset_his();
                 sp.reset_flt();
                 Serial.printf("done\n");
@@ -795,7 +795,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'T' ):  //*  UT<>:  Unix time since epoch
-              sp.Time_now_p->print_adj_print(cp.input_str.substring(2).toInt());
+              sp.Time_now_p->print_adj_print((unsigned long)cp.input_str.substring(2).toInt());
               break;
 
             default:
