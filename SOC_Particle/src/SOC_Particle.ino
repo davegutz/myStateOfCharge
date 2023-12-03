@@ -93,9 +93,9 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
 // Turn on Log
 // SerialLogHandler logHandler;
 
-#include "myDS2482.h"  // TODO:  add to command.h instead of threading it through a bunch of call statements
-MyDs2482_Class Ds2482(0);
 #ifdef CONFIG_DS2482_1WIRE
+  #include "myDS2482.h"
+  MyDs2482_Class Ds2482(0);
   DS2482 ds(Wire, 0);
   DS2482DeviceListStatic<10> deviceList;
 #endif
