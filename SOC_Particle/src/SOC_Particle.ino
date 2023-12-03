@@ -223,7 +223,7 @@ void setup()
   #ifdef CONFIG_DS2482_1WIRE
     //Log.info("setup DS2482 special 1-wire");
     ds.setup();
-    #if !defined(CONFIG_ADS1013_OPAMP) && !defined(CONFIG_SSD1306_OLED)
+    #if defined(CONFIG_SINGLE_DS2482) || (!defined(CONFIG_ADS1013_OPAMP) && !defined(CONFIG_SSD1306_OLED))
       // Single drop
       DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status)
       {

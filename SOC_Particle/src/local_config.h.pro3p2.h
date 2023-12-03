@@ -9,6 +9,7 @@ const String unit = version + "_pro3p2";
 #define CONFIG_SSD1306_OLED
 #define CONFIG_TSC2010_DIFFAMP
 #define CONFIG_DS2482_1WIRE
+// #define CONFIG_SINGLE_DS2482
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

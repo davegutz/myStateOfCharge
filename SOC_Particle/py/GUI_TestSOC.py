@@ -294,6 +294,7 @@ class Exec:
             self.key_label.config(bg='lightgreen')
         else:
             self.key_label.config(bg='pink')
+        test_filename.set(putty_connection.get(Test.unit))
 
 
 # Global methods
@@ -812,6 +813,7 @@ if __name__ == '__main__':
     Test.unit_button.pack(pady=2)
     Ref.unit_button = myButton(top_panel_right, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
     Ref.unit_button.pack(pady=2)
+    test_filename = tk.StringVar(master, putty_connection.get(Test.unit))
 
     # Battery row
     tk.Label(top_panel_left, text="Battery", font=label_font).pack(pady=2, expand=True, fill='both')
@@ -965,7 +967,6 @@ if __name__ == '__main__':
                                      fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT, font=butt_font)
     run_run_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-    test_filename = tk.StringVar(master, putty_connection.get(Test.unit))
 
     # Begin
     handle_modeling()
