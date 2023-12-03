@@ -952,7 +952,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                     chit("Xf0;Xa0;Xtn;", ASAP);
                     if ( !sp.tweak_test() ) chit("Xb0;", ASAP);
                     chit("Mk1;Nk1;", ASAP);  // Stop any injection
-                    chit("Di0;Dm0;Dn0;Dv0;DT0;DV0;DI0;Xu0;Xv1;Dr100;", ASAP);
+                    // chit("Di0;Dm0;Dn0;Dv0;DT0;DV0;DI0;Xu0;Xv1;Dr100;", ASAP); // something in this causes panic pro3p2 CONFIG_DS2482_1WIRE
+                    chit("Di0;Dm0;Dn0;Dv0;DT0;DV0;DI0;Xu0;Xv1;Dr100;", SOON);
                     break;
 
                   #ifndef CONFIG_PHOTON

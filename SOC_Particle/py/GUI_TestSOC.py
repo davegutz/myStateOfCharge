@@ -50,20 +50,20 @@ sel_list = ['custom', 'init1', 'ampHiFail', 'rapidTweakRegression', 'rapidTweakR
             'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
             'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf',
             'pulseEKF', 'pulseSS', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim']
-lookup = {'init': ('v0;XS;Xp0;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '', ('',), 0),
-          'init1': ('v0;XS;Xp0;Ca1;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;v2;', 'v0;', ('Observe effects of initialization',), 15),
+lookup = {'init': ('v0;XS;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '', ('',), 0),
+# lookup = {'init': ('v0;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '',('',), 0),                    'init1': ('v0;XS;Xp0;Ca1;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;v2;', 'v0;', ('Observe effects of initialization',), 15),
           'custom': ('', '', ("For general purpose data collection", "'save data' will present a choice of file name", ""), 60),
           'ampHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 20),
-          'rapidTweakRegression': ('Ff0;HR;Xp10;', 'wait timer', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 160),
-          'rapidTweakRegressionH0': ('Sh0;SH0;Ff0;HR;Xp10;', 'wait timer', ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!'), 160),
+          'rapidTweakRegression': ('Ff0;HR;Xp10;', 'wait timer', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 168),
+          'rapidTweakRegressionH0': ('Sh0;SH0;Ff0;HR;Xp10;', 'wait timer', ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!'), 168),
           'offSitHysBmsBB': ('Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;', ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',), 568),
           'offSitHysBmsCH': ('Ff0;D^0;Xp0;Xm247;Ca0.103;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;Ca.103;W5;Pf;Rf;Pf;v0;DP4;', ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',), 568),
-          'triTweakDisch': ('Ff0;HR;Xp13;', 'wait timer', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 160),
+          'triTweakDisch': ('Ff0;HR;Xp13;', 'wait timer', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 168),
           'coldStart': ('Ff0;D^-18;Xp0;Xm247;Fi1000;Fo1000;Ca0.93;Ds0.06;Sk0.5;Rb;Rf;Dr100;DP1;v2;W100;DI40;Fi1;Fo1;', 'DI0;W10;v0;Pf;W5;Pf;Rf;Pf;v0;DP4;D^0;Ds0;Sk1;Fi1;Fo1;Ca0.93;', ("Should charge for a bit after hitting cutback on BMS.   Should see current gradually reduce.   Run until 'SAT' is displayed.   Could take ½ hour.", "The Ds term biases voc(soc) by delta x and makes a different type of saturation experience, to accelerate the test.", "Look at chart 'DOM 1' and verify that e_wrap misses ewlo_thr (thresholds moved as result of previous failures in this transient)", "Don't remember why this problem on cold day only."), 220),
           'ampHiFailFf': ('Ff1;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect but not switch amp current failure. (See 'diff' and current!=0 on OLED).", "Run about 60s. Start by looking at 'DOM 1' fig 3. No fault record (keeps recording).  Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.", "This show when deploy with Fake Faults (Ff) don't throw false trips (it happened)", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 60),
           'ampLoFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm-50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 30),
           'ampHiFailNoise': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Noisy ampHiFail.  Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 30),
-          'rapidTweakRegression40C': ('Ff0;HR;D^15;Xp10;', 'D^0;', ("Should run three very large current discharge/recharge cycles without fault", "Self-terminates"), 160),
+          'rapidTweakRegression40C': ('Ff0;HR;D^15;Xp10;', 'D^0;', ("Should run three very large current discharge/recharge cycles without fault", "Self-terminates"), 168),
           'slowTweakRegression': ('Ff0;HR;Xp11;', 'wait timer', ("Should run one very large slow (~15 min) current discharge/recharge cycle without fault.   It will take 60 seconds to start changing current.",), 622),
           'satSitBB': ('Ff0;D^0;Xp0;Xm247;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",), 600),
           'satSitCH': ('Ff0;D^0;Xp0;Xm247;Ca0.992;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;Ca.992;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",), 600),
@@ -82,6 +82,10 @@ lookup = {'init': ('v0;XS;Xp0;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;D
           'DvMon': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm0.001;Dw-0.8;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;Dw0;DT0;DV0;DM0;DN0;Pf;Xp0;Rf;W50;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa"), 120),
           'DvSim': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm0.001;Dy-0.8;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;Dy0;DT0;DV0;DM0;DN0;Pf;Xp0;Rf;W50;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa"), 120),
           }
+putty_connection = {'': 'test',
+                    'pro0p': 'testpro0p',
+                    'pro1a': 'testpro1a',
+                    'pro3p2': 'testpro3p2'}
 
 
 # Begini - configuration class using .ini files
@@ -580,6 +584,10 @@ def lookup_start():
     timer_val.set(timer_val_)
 
 
+def lookup_test():
+    test_filename = putty_connection.get(Test.unit)
+
+
 def putty_size():
     if os.path.isfile(putty_test_csv_path.get()):
         enter_size = os.path.getsize(putty_test_csv_path.get())  # bytes
@@ -692,6 +700,7 @@ def size_of(path):
 
 
 def start_putty():
+    lookup_test()
     enter_size = putty_size()
     if enter_size >= 64:
         if not save_putty():
@@ -699,7 +708,7 @@ def start_putty():
         enter_size = putty_size()
     if enter_size < 64:
         kill_putty(platform.system())
-        subprocess.Popen(['putty', '-load', 'test'], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
+        subprocess.Popen(['putty', '-load', test_filename.get()], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
         print('restarting putty   putty -load test')
 
 
@@ -955,6 +964,8 @@ if __name__ == '__main__':
     run_run_choose_button = myButton(compare_panel, text='Compare Run Run Choose', command=compare_run_run_choose,
                                      fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT, font=butt_font)
     run_run_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+    test_filename = tk.StringVar(master, putty_connection.get(Test.unit))
 
     # Begin
     handle_modeling()

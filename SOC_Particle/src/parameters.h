@@ -1028,7 +1028,8 @@ class SavedPars
 {
 public:
     SavedPars();
-    SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const uint16_t nflt, SerialRAM *ram);
+    SavedPars(SerialRAM *ram);
+    SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const uint16_t nflt);
     ~SavedPars();
     friend Sensors;
     friend BatteryMonitor;

@@ -39,49 +39,47 @@ SavedPars::SavedPars()
   nsum_ = uint16_t( NSUM ); 
 }
 
-SavedPars::SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const uint16_t nflt, SerialRAM *ram)
+SavedPars::SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const uint16_t nflt)
+{
+    rP_ = NULL;
+    nflt_ = nflt;
+    nhis_ = nhis;
+    nsum_ = int( NSUM );
+    #ifndef CONFIG_47L16_EERAM
+        history_ = hist;
+        fault_ = faults;
+    #endif
+    size_ = 0;
+    // Memory map
+    init_z();
+}
+
+SavedPars::SavedPars(SerialRAM *ram)
 {
     rP_ = ram;
-    if ( rP_ == NULL )
-    {
-        nflt_ = nflt;
-        nhis_ = nhis;
-        nsum_ = int( NSUM );
-        #ifndef CONFIG_47L16_EERAM
-            history_ = hist;
-            fault_ = faults;
-        #endif
-        size_ = 0;
-        // Memory map
-        init_z();
-    }
-    else
-    {
-        next_ = 0x000;
-        size_ = 0;
-        nflt_ = uint16_t( NFLT ); 
-        // Memory map
-        init_z();
+    next_ = 0x000;
+    size_ = 0;
+    nflt_ = uint16_t( NFLT ); 
+    // Memory map
+    init_z();
 
-        #ifdef CONFIG_47L16_EERAM
-            for ( int i=0; i<size_; i++ )
-            {
-                next_ = Z_[i]->assign_addr(next_);
-            }
-            fault_ = new Flt_ram[nflt_];
-            for ( uint16_t i=0; i<nflt_; i++ )
-            {
-                fault_[i].instantiate(rP_, &next_);
-            }
-            nhis_ = uint16_t( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
-            history_ = new Flt_ram[nhis_];
-            for ( uint16_t i=0; i<nhis_; i++ )
-            {
-                history_[i].instantiate(rP_, &next_);
-            }
-        #endif
-    }
-
+    #ifdef CONFIG_47L16_EERAM
+        for ( int i=0; i<size_; i++ )
+        {
+            next_ = Z_[i]->assign_addr(next_);
+        }
+        fault_ = new Flt_ram[nflt_];
+        for ( uint16_t i=0; i<nflt_; i++ )
+        {
+            fault_[i].instantiate(rP_, &next_);
+        }
+        nhis_ = uint16_t( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
+        history_ = new Flt_ram[nhis_];
+        for ( uint16_t i=0; i<nhis_; i++ )
+        {
+            history_[i].instantiate(rP_, &next_);
+        }
+    #endif
 }
 
 SavedPars::~SavedPars() {}
