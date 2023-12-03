@@ -360,7 +360,7 @@ void loop()
         Ds2482.check();
     #endif
     Sen->T_temp = ReadTemp->updateTime();
-    Sen->temp_load_and_filter(Sen, reset_temp, Ds2482.tempC(0));
+    Sen->temp_load_and_filter(Sen, reset_temp, Ds2482.tempC(0), Ds2482.ready());
   }
 
   // Sample Ib
@@ -400,7 +400,7 @@ void loop()
     // Read sensors, model signals, select between them, synthesize injection signals on current
     // Inputs:  sp.config, sp.sim_chm
     // Outputs: Sen->Ib, Sen->Vb, Sen->Tb_filt, sp.inj_bias
-    sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen, Ds2482.tempC(0));
+    sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen, Ds2482.tempC(0), Ds2482.ready());
     Sen->T =  double(Sen->dt_ib())/1000.;
 
     // Calculate Ah remaining`
@@ -465,7 +465,7 @@ void loop()
   {
     chat();         // Work on internal chit-chat
   }
-  talk(Mon, Sen, V, Ds2482.tempC(0));   // Collect user inputs
+  talk(Mon, Sen, V, Ds2482.tempC(0), Ds2482.ready());   // Collect user inputs
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
