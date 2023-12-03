@@ -91,7 +91,7 @@
             #endif
         #endif
     #else
-        #define NSUM 3205               // PHOTON 2
+        #define NSUM 3204               // PHOTON 2
     #endif
 #else
         #define NSUM              2213  // Number of saved SRAM summaries (2213)   ARGON

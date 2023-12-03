@@ -78,7 +78,7 @@ void clear_queues()
 }
 
 // Talk Executive
-void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
+void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V, const float tempC)
 {
   float FP_in = -99.;
   int INT_in = -1;
@@ -267,7 +267,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
                 FP_in = cp.input_str.substring(2).toFloat();
                 if ( FP_in<1.1 )  // Apply crude limit to prevent user error
                 {
-                  initialize_all(Mon, Sen, FP_in, true);
+                  initialize_all(Mon, Sen, FP_in, true, tempC);
                   #ifdef DEBUG_INIT
                     if ( sp.Debug()==-1 ){ Serial.printf("after initialize_all:"); debug_m1(Mon, Sen);}
                   #endif

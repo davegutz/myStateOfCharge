@@ -95,7 +95,7 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
 
 #ifdef CONFIG_DS2482_1WIRE
   #include "myDS2482.h"
-  Ds2482Class Ds2482(0);
+  MyDs2482_Class Ds2482(0);
   DS2482 ds(Wire, 0);
   DS2482DeviceListStatic<10> deviceList;
 #endif
@@ -196,9 +196,7 @@ void setup()
     #ifdef CONFIG_ADS1013_OPAMP
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
       Serial.printf("High speed Wire setup for ADS1013\n");
-    #endif
-    #if defined(CONFIG_ADS1013_OPAMP) || defined(CONFIG_SSD1306_OLED) || defined(CONFIG_DS2482_1WIRE)
-      Wire.setSpeed(CLOCK_SPEED_100KHZ);
+    #else
       Serial.printf("Wire started\n");
     #endif
   #endif
@@ -358,13 +356,11 @@ void loop()
   // Outputs:   Sen->Tb,  Sen->Tb_filt
   if ( read_temp )
   {
-    Sen->T_temp = ReadTemp->updateTime();
-    Sen->temp_load_and_filter(Sen, reset_temp);
-
     #ifdef CONFIG_DS2482_1WIRE
         Ds2482.check();
-        Serial.printf("tempC=%7.2f\n", Ds2482.tempC(0));
     #endif
+    Sen->T_temp = ReadTemp->updateTime();
+    Sen->temp_load_and_filter(Sen, reset_temp, Ds2482.tempC(0));
   }
 
   // Sample Ib
@@ -404,7 +400,7 @@ void loop()
     // Read sensors, model signals, select between them, synthesize injection signals on current
     // Inputs:  sp.config, sp.sim_chm
     // Outputs: Sen->Ib, Sen->Vb, Sen->Tb_filt, sp.inj_bias
-    sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
+    sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen, Ds2482.tempC(0));
     Sen->T =  double(Sen->dt_ib())/1000.;
 
     // Calculate Ah remaining`
@@ -469,7 +465,7 @@ void loop()
   {
     chat();         // Work on internal chit-chat
   }
-  talk(Mon, Sen, V);   // Collect user inputs
+  talk(Mon, Sen, V, Ds2482.tempC(0));   // Collect user inputs
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)

@@ -44,7 +44,7 @@ TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t 
 TempSensor::~TempSensor() {}
 // operators
 // functions
-float TempSensor::sample(Sensors *Sen)
+float TempSensor::sample(Sensors *Sen, const float tempC)
 {
   // Log.info("top TempSensor::sample");
   // Read Sensor
@@ -73,6 +73,11 @@ float TempSensor::sample(Sensors *Sen)
       tb_stale_flt_ = true;
       // Using last-good-value:  no assignment
     }
+  #elif defined(CONFIG_DS2482_1WIRE)
+    Tb_hdwe = tempC;
+    if ( sp.Debug()==16 ) Serial.printf("I:  t=%7.3f Tb_hdwe=%7.3f,\n", tempC, Tb_hdwe);
+  #else
+    Tb_hdwe = 0.;
   #endif
   return ( Tb_hdwe );
 }
@@ -988,12 +993,12 @@ void Sensors::shunt_select_initial(const boolean reset)
 }
 
 // Load and filter Tb
-void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
+void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp, const float tempC)
 {
   // Log.info("top temp_load_and_filter");
   reset_temp_ = reset_temp;
   #ifndef CONFIG_BARE
-    Tb_hdwe = SensorTb->sample(Sen);
+    Tb_hdwe = SensorTb->sample(Sen, tempC);
   #else
     Tb_hdwe = RATED_TEMP;
   #endif

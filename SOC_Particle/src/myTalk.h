@@ -33,7 +33,7 @@ void asap(void);
 void chat(void);
 void chit(const String cmd, const enum urgency when);
 void clear_queues(void);
-void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V);
+void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V, const float tempC);
 void talkH(BatteryMonitor *batt, Sensors *Sen, Vars *V); // Help
 
 #endif
