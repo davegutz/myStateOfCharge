@@ -63,8 +63,8 @@ struct CommandPars
   boolean soft_reset;       // Use talk to reset main
   float s_t_sat;            // Scalar on saturation test time set and reset
   float Tb_bias_model;      // Bias on Tb for model, C
-  boolean write_summary;    // Use talk to issue a write command to summary
   Tb_union tb_info;         // Use cp to pass DS2482 I2C information
+  boolean write_summary;    // Use talk to issue a write command to summary
 
   CommandPars(void)
   {
@@ -128,6 +128,8 @@ struct CommandPars
     Serial.printf(" soft_reset %d\n", soft_reset);
     Serial.printf(" s_t_sat%7.3f\n", s_t_sat);
     Serial.printf(" tb_bias_mod%7.3f\n", Tb_bias_model);
+    Serial.printf(" tb_info.t_c %7.3f\n", tb_info.t_c);
+    Serial.printf(" tb_info.ready %d\n", tb_info.ready);
     Serial.printf(" write_summary %d\n", write_summary);
   }
 

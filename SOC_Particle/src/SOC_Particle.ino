@@ -491,7 +491,7 @@ void loop()
   if ( read ) reset = false;
   if ( read_temp && elapsed>TEMP_INIT_DELAY && reset_temp )
   {
-    Serial.printf("temp init complete\n");
+    Serial.printf("\ntemp init complete\n");
     reset_temp = false;
   }
   if ( cp.publishS ) reset_publish = false;
