@@ -119,8 +119,8 @@ void SavedPars::init_z()
     Tb_bias_hdwe_p      = new FloatZ(  "Dt", rP_, "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_z, TEMP_BIAS);
     Time_now_p          = new ULongZ(  "UT", rP_, "UNIX tim since epoch","sec",       0UL, 2100000000UL, &Time_now_z, 1669801880UL, true);
     Type_p              = new Uint8tZ( "Xt", rP_, "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_z, 0);
-    T_state_p           = new FloatZ(  "na", rP_, "Tb rate lim mem",     "dg C",    -10,  70,  &T_state_z, RATED_TEMP, false);
-    T_state_model_p     = new FloatZ(  "na", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_z, RATED_TEMP, false);
+    T_state_p           = new FloatZ(  "na", rP_, "Tb rate lim mem",     "dg C",    -10,  70,  &T_state_z, RATED_TEMP, true);
+    T_state_model_p     = new FloatZ(  "na", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_z, RATED_TEMP, true);
     Vb_bias_hdwe_p      = new FloatZ(  "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_z, VOLT_BIAS);
     Vb_scale_p          = new FloatZ(  "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
     Z_[size_++] = Amp_p;                
