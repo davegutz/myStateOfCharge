@@ -39,61 +39,46 @@ SavedPars::SavedPars()
   nsum_ = uint16_t( NSUM ); 
 }
 
-#ifndef CONFIG_47L16_EERAM
-SavedPars::SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt)
+SavedPars::SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const uint16_t nflt, SerialRAM *ram)
 {
-    nflt_ = nflt;
-    nhis_ = nhis;
-    nsum_ = int( NSUM ); 
-    history_ = hist;
-    fault_ = faults;
-    size_ = 0;
-
-    // Input definitions
-    Amp_p               = new FloatZ(  "Xf", "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_z, 0.);
-    Cutback_gain_sclr_p = new FloatZ(  "Sk", "Cutback gain scalar", "slr",      -1e6, 1e6, &Cutback_gain_sclr_z, 1.);
-    Debug_p             = new IntZ(    "v",  "Verbosity",           "int",      -128, 128, &Debug_z, 0);
-    Delta_q_p           = new DoubleZ( "qm", "Charge chg",          "C",        -1e8, 1e5, &Delta_q_z, 0., true);
-    Delta_q_model_p     = new DoubleZ( "qs", "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_z, 0., true);
-    Dw_p                = new FloatZ(  "Dw", "Tab mon adj",         "v",        -1e2, 1e2, &Dw_z, VTAB_BIAS);
-    Freq_p              = new FloatZ(  "Xf", "Inj freq",            "Hz",        0.,  2.,  &Freq_z, 0.);
-    Ib_bias_all_p       = new FloatZ(  "DI", "Add all",             "A",        -1e5, 1e5, &Ib_bias_all_z, CURR_BIAS_ALL);
-    Ib_bias_all_nan_p   = new FloatNoZ("Di", "DI + reset",          "A",        -1e5, 1e5, CURR_BIAS_ALL);
-    Ib_bias_amp_p       = new FloatZ(  "DA", "Add amp",             "A",        -1e5, 1e5, &Ib_bias_amp_z, CURR_BIAS_AMP);
-    Ib_bias_noa_p       = new FloatZ(  "DB", "Add noa",             "A",        -1e5, 1e5, &Ib_bias_noa_z, CURR_BIAS_NOA);
-    Ib_scale_amp_p      = new FloatZ(  "SA", "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_z, CURR_SCALE_AMP);
-    Ib_scale_noa_p      = new FloatZ(  "SB", "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_z, CURR_SCALE_NOA);
-    Ib_select_p         = new Int8tZ(  "si", "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS));
-    Iflt_p              = new Uint16tZ("na", "Fault buffer indx",   "uint",      0, nflt_+1, &Iflt_z, nflt_+1, true);
-    Ihis_p              = new Uint16tZ("na", "Hist buffer indx",    "uint",      0, nhis_+1, &Ihis_z, nhis_+1, true);
-    Inj_bias_p          = new FloatZ(  "Xb", "Injection bias",      "A",        -1e5, 1e5, &Inj_bias_z, 0.);
-    Isum_p              = new Uint16tZ("na", "Summ buffer indx",    "uint",      0, NSUM+1,  &Isum_z, NSUM+1, true);
-    Modeling_p          = new Uint8tZ( "Xm", "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_z, MODELING);
-    Mon_chm_p           = new Uint8tZ( "Bm", "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_z, MON_CHEM);
-    nP_p                = new FloatZ(  "BP", "Number parallel",     "units",     1e-6, 100, &nP_z, NP);
-    nS_p                = new FloatZ(  "BS", "Number series",       "units",     1e-6, 100, &nS_z, NS);
-    Preserving_p        = new Uint8tZ( "X?", "Preserving fault",    "T=Preserve", 0, 1, &Preserving_z, 0, true);
-    S_cap_mon_p         = new FloatZ(  "SQ", "Scalar cap Mon",      "slr",       0,  1000, &S_cap_mon_z, 1.);
-    S_cap_sim_p         = new FloatZ(  "Sq", "Scalar cap Sim",      "slr",       0,  1000, &S_cap_sim_z, 1.);
-    Sim_chm_p           = new Uint8tZ( "Bs", "Sim battery",         "0=BB, 1=CH", 0, 1, &Sim_chm_z, SIM_CHEM);
-    Tb_bias_hdwe_p      = new FloatZ(  "Dt", "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_z, TEMP_BIAS);
-    Time_now_p          = new ULongZ(  "UT", "UNIX tim since epoch","sec",       0UL, 2100000000UL, &Time_now_z, 1669801880UL, true);
-    Type_p              = new Uint8tZ( "Xt", "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_z, 0);
-    T_state_p           = new FloatZ(  "tm", "Tb rate lim mem",     "dg C",     -10,  70,  &T_state_z, RATED_TEMP, false);
-    T_state_model_p     = new FloatZ(  "ts", "Tb Sim rate lim mem", "dg C",     -10,  70,  &T_state_model_z, RATED_TEMP, false);
-    Vb_bias_hdwe_p      = new FloatZ(  "Dc", "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_z, VOLT_BIAS);
-    Vb_scale_p          = new FloatZ(  "SV", "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
-
-    // Memory map
-    init_z();
-}
-#else
-SavedPars::SavedPars(SerialRAM *ram)
-{
-    next_ = 0x000;
     rP_ = ram;
-    size_ = 0;
-    nflt_ = uint16_t( NFLT ); 
+    if ( rP_ == NULL )
+    {
+        nflt_ = nflt;
+        nhis_ = nhis;
+        nsum_ = int( NSUM ); 
+        history_ = hist;
+        fault_ = faults;
+        size_ = 0;
+        // Memory map
+        init_z();
+    }
+    else
+    {
+        next_ = 0x000;
+        size_ = 0;
+        nflt_ = uint16_t( NFLT ); 
+        // Memory map
+        init_z();
+
+        #ifdef CONFIG_47L16_EERAM
+            for ( int i=0; i<size_; i++ )
+            {
+                next_ = Z_[i]->assign_addr(next_);
+            }
+            fault_ = new Flt_ram[nflt_];
+            for ( uint16_t i=0; i<nflt_; i++ )
+            {
+                fault_[i].instantiate(rP_, &next_);
+            }
+            nhis_ = uint16_t( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
+            history_ = new Flt_ram[nhis_];
+            for ( uint16_t i=0; i<nhis_; i++ )
+            {
+                history_[i].instantiate(rP_, &next_);
+            }
+        #endif
+    }
 
     // Input definitions
     Amp_p               = new FloatZ(  "Xf", rP_, "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_z, 0.);
@@ -104,7 +89,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     Dw_p                = new FloatZ(  "Dw", rP_, "Tab mon adj",         "v",        -1e2, 1e2, &Dw_z, VTAB_BIAS);
     Freq_p              = new FloatZ(  "Xf", rP_, "Inj freq",            "Hz",        0.,  2.,  &Freq_z, 0.);
     Ib_bias_all_p       = new FloatZ(  "DI", rP_, "Del all",             "A",        -1e5, 1e5, &Ib_bias_all_z, CURR_BIAS_ALL);
-    Ib_bias_all_nan_p   = new FloatNoZ("Di",      "DI + reset",          "A",        -1e5, 1e5, CURR_BIAS_ALL);
+    Ib_bias_all_nan_p   = new FloatNoZ("Di", rP_, "DI + reset",          "A",        -1e5, 1e5, CURR_BIAS_ALL);
     Ib_bias_amp_p       = new FloatZ(  "DA", rP_, "Add amp",             "A",        -1e5, 1e5, &Ib_bias_amp_z, CURR_BIAS_AMP);
     Ib_bias_noa_p       = new FloatZ(  "DB", rP_, "Add noa",             "A",        -1e5, 1e5, &Ib_bias_noa_z, CURR_BIAS_NOA);
     Ib_scale_amp_p      = new FloatZ(  "SA", rP_, "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_z, CURR_SCALE_AMP);
@@ -129,26 +114,7 @@ SavedPars::SavedPars(SerialRAM *ram)
     T_state_model_p     = new FloatZ(  "na", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_z, RATED_TEMP, false);
     Vb_bias_hdwe_p      = new FloatZ(  "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_z, VOLT_BIAS);
     Vb_scale_p          = new FloatZ(  "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
-
-    // Memory map
-    init_z();
-    for ( int i=0; i<size_; i++ )
-    {
-        next_ = Z_[i]->assign_addr(next_);
-    }
-    fault_ = new Flt_ram[nflt_];
-    for ( uint16_t i=0; i<nflt_; i++ )
-    {
-        fault_[i].instantiate(rP_, &next_);
-    }
-    nhis_ = uint16_t( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
-    history_ = new Flt_ram[nhis_];
-    for ( uint16_t i=0; i<nhis_; i++ )
-    {
-        history_[i].instantiate(rP_, &next_);
-    }
 }
-#endif
 
 SavedPars::~SavedPars() {}
 // operators

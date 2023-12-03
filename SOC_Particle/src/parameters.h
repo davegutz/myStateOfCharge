@@ -45,22 +45,13 @@ class Z
 public:
     Z(){}
 
-    Z(const String &code, const String &description, const String &units, const boolean _uint8=false)
-    {
-        code_ = code;
-        description_ = description.substring(0, 20);
-        units_ = units.substring(0, 10);
-        is_eeram_ = false;
-        units_ = units.substring(0, 10);
-        is_uint8_t_ = _uint8;
-    }
-
     Z(const String &code, SerialRAM *ram, const String &description, const String &units, boolean _uint8=false)
     {
         code_ = code;
         description_ = description.substring(0, 20);
         units_ = units.substring(0, 10);
-        is_eeram_ = true;
+        if ( ram==NULL ) is_eeram_ = false;
+        else is_eeram_ = true;
         rP_ = ram;
         is_uint8_t_ = _uint8;
     }
@@ -95,20 +86,8 @@ class DoubleZ: public Z
 public:
     DoubleZ(){}
 
-    DoubleZ(const String &code, const String &description, const String &units, const double min, const double max, double *store,
+    DoubleZ(const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, double *store,
         const double _default=0, const boolean check_off=false):
-        Z(code, description, units, false)
-    {
-        min_ = min;
-        max_ = max;
-        val_ = store;
-        default_ = max(min(_default, max_), min_);
-        check_off_ = check_off;
-        set(*val_); // retained
-    }
-
-    DoubleZ(const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max,
-    double *store, const double _default=0, const boolean check_off=false):
         Z(code, ram, description, units, false)
     {
         min_ = min;
@@ -116,6 +95,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
+        if ( ram==NULL ) set(*val_); // retained
     }
 
     ~DoubleZ(){}
@@ -227,18 +207,6 @@ class FloatZ: public Z
 public:
     FloatZ(){}
 
-    FloatZ(const String &code, const String &description, const String &units, const float min, const float max, float *store,
-    const float _default=0, const boolean check_off=false):
-        Z(code, description, units, false)
-    {
-        min_ = min;
-        max_ = max;
-        default_ = max(min(_default, max_), min_);
-        val_ = store;
-        check_off_ = check_off;
-        set(*val_); // retained
-    }
-
     FloatZ(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
     float *store, const float _default=0, const boolean check_off=false):
         Z(code, ram, description, units, false)
@@ -248,6 +216,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
+        if ( ram==NULL ) set(*val_); // retained
     }
 
     ~FloatZ(){}
@@ -359,15 +328,6 @@ class FloatNoZ: public Z
 public:
     FloatNoZ(){}
 
-    FloatNoZ(const String &code, const String &description, const String &units, const float min, const float max,
-    const float _default=0):
-        Z(code, description, units, false)
-    {
-        min_ = min;
-        max_ = max;
-        default_ = max(min(_default, max_), min_);
-    }
-
     FloatNoZ(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
     const float _default=0):
         Z(code, ram, description, units, false)
@@ -438,18 +398,6 @@ class IntZ: public Z
 public:
     IntZ(){}
 
-    IntZ(const String &code, const String &description, const String &units, const int min, const int max, int *store,
-    const int _default=0, const boolean check_off=false):
-        Z(code, description, units, false)
-    {
-        min_ = min;
-        max_ = max;
-        default_ = max(min(_default, max_), min_);
-        val_ = store;
-        check_off_ = check_off;
-        set(*val_); // retained
-    }
-
     IntZ(const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
     const int _default=0, const boolean check_off=false):
         Z(code, ram, description, units, false)
@@ -459,6 +407,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
+        if ( ram==NULL ) set(*val_); // retained
     }
 
     ~IntZ(){}
@@ -569,18 +518,6 @@ class Int8tZ: public Z
 public:
     Int8tZ(){}
 
-    Int8tZ(const String &code, const String &description, const String &units, const int8_t min, const int8_t max, int8_t *store,
-    const int8_t _default=0, const boolean check_off=false):
-        Z(code, description, units, false)
-    {
-        min_ = min;
-        max_ = max;
-        default_ = max(min(_default, max_), min_);
-        val_ = store;
-        check_off_ = check_off;
-        set(*val_); // retained
-    }
-
     Int8tZ(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
     int8_t *store, const int8_t _default=0, const boolean check_off=false):
         Z(code, ram, description, units, false)
@@ -590,6 +527,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
+        if ( ram==NULL ) set(*val_); // retained
     }
 
     ~Int8tZ(){}
@@ -701,18 +639,6 @@ class Uint16tZ: public Z
 public:
     Uint16tZ(){}
 
-    Uint16tZ(const String &code, const String &description, const String &units, const uint16_t min, const uint16_t max, uint16_t *store,
-    const uint16_t _default=0, const boolean check_off=false):
-        Z(code, description, units, true)
-    {
-        min_ = min;
-        max_ = max;
-        default_ = max(min(_default, max_), min_);
-        val_ = store;
-        check_off_ = check_off;
-        set(*val_); // retained
-    }
-
     Uint16tZ(const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
     uint16_t *store, const uint16_t _default=0, const boolean check_off=false):
         Z(code, ram, description, units, true)
@@ -722,6 +648,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
+        if ( ram==NULL ) set(*val_); // retained
     }
 
     ~Uint16tZ(){}
@@ -829,18 +756,6 @@ class Uint8tZ: public Z
 public:
     Uint8tZ(){}
 
-    Uint8tZ(const String &code, const String &description, const String &units, const uint8_t min, const uint8_t max, uint8_t *store,
-    const uint8_t _default=0, const boolean check_off=false):
-        Z(code, description, units, true)
-    {
-        min_ = min;
-        max_ = max;
-        default_ = max(min(_default, max_), min_);
-        val_ = store;
-        check_off_ = check_off;
-        set(*val_); // retained
-    }
-
     Uint8tZ(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
     uint8_t *store, const uint8_t _default=0, const boolean check_off=false):
         Z(code, ram, description, units, true)
@@ -850,6 +765,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
+        if ( ram==NULL ) set(*val_); // retained
     }
 
     ~Uint8tZ(){}
@@ -958,19 +874,6 @@ class ULongZ: public Z
 public:
     ULongZ(){}
 
-    ULongZ(const String &code, const String &description, const String &units, const unsigned long min, const unsigned long max, unsigned long *store,
-    const unsigned long _default=0, const boolean check_off=true):
-        Z(code, description, units, true)
-    {
-        min_ = min;
-        max_ = max;
-        default_ = max(min(_default, max_), min_);
-        val_ = store;
-        check_off_ = check_off;
-        set(*val_); // retained
-    }
-
-
     ULongZ(const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
     unsigned long *store, const unsigned long _default=0, const boolean check_off=true):
         Z(code, ram, description, units, true)
@@ -980,6 +883,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
+        if ( ram==NULL ) set(*val_); // retained
     }
 
     ~ULongZ(){}
@@ -1124,8 +1028,7 @@ class SavedPars
 {
 public:
     SavedPars();
-    SavedPars(Flt_st *hist, const uint8_t nhis, Flt_st *faults, const uint8_t nflt);
-    SavedPars(SerialRAM *ram);
+    SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const uint16_t nflt, SerialRAM *ram);
     ~SavedPars();
     friend Sensors;
     friend BatteryMonitor;
@@ -1330,11 +1233,11 @@ public:
     float Vb_scale_z;
 
 protected:
+    SerialRAM *rP_;
     #ifndef CONFIG_47L16_EERAM
         Flt_st *fault_;
         Flt_st *history_;
     #else
-        SerialRAM *rP_;
         Flt_ram *fault_;
         Flt_ram *history_;
     #endif

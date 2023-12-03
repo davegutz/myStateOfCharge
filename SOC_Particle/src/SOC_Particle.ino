@@ -111,11 +111,11 @@ extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
 #ifdef CONFIG_47L16_EERAM
-  SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
+  retained SavedPars sp = SavedPars(saved_hist, uint16_t(NHIS), saved_faults, uint16_t(NFLT), &ram);  // Various parameters to be common at system level
 #else
   retained Flt_st saved_hist[NHIS];    // For displaying faults
   retained Flt_st saved_faults[NFLT];  // For displaying faults
-  retained SavedPars sp = SavedPars(saved_hist, NHIS, saved_faults, NFLT);  // Various parameters to be common at system level
+  retained SavedPars sp = SavedPars(saved_hist, uint16_t(NHIS), saved_faults, uint16_t(NFLT), NULL);  // Various parameters to be common at system level
 #endif
 
 Flt_st mySum[NSUM];                   // Summaries
