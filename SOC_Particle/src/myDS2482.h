@@ -26,43 +26,48 @@
 #define _MY_DS2482_H
 #include "DS2482-RK.h"
 
+#define MAX_DS2482 5
 
-class TestClass
+class Ds2482Class
 {
 public:
-	TestClass(int addr);
-	virtual ~TestClass();
-
+	Ds2482Class(int addr);
+	virtual ~Ds2482Class();
+    float tempC(const int i) { return tempC_[i]; }
 	void setup();
 	void loop();
 	void check();
 
 protected:
-	DS2482 ds;
-	DS2482DeviceListStatic<10> deviceList;
+	DS2482 ds_;
+	DS2482DeviceListStatic<10> deviceList_;
+    float tempC_[MAX_DS2482];
 };
 
-TestClass::TestClass(int addr) : ds(Wire, addr) {}
-
-TestClass::~TestClass(){}
-
-void TestClass::setup()
+Ds2482Class::Ds2482Class(int addr) : ds_(Wire, addr)
 {
-	ds.setup();
-	DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status)
+    for ( int ii=0; ii<5; ii++ ) tempC_[ii] = 0.;
+}
+
+Ds2482Class::~Ds2482Class(){}
+
+void Ds2482Class::setup()
+{
+	ds_.setup();
+	DS2482DeviceReset::run(ds_, [](DS2482DeviceReset&, int status)
     {
-		Serial.printf("deviceReset=%d\n", status);
+		Log.info("Ds2482DeviceReset::status %d", status);
 	});
 }
 
-void TestClass::loop()
+void Ds2482Class::loop()
 {
-	ds.loop();
+	ds_.loop();
 }
 
-void TestClass::check()
+void Ds2482Class::check()
 {
-	DS2482SearchBusCommand::run(ds, deviceList, [this](DS2482SearchBusCommand &obj, int status)
+	DS2482SearchBusCommand::run(ds_, deviceList_, [this](DS2482SearchBusCommand &obj, int status)
     {
 		if (status != DS2482Command::RESULT_DONE)
         {
@@ -70,13 +75,13 @@ void TestClass::check()
 			return;
 		}
 
-		if (deviceList.getDeviceCount() == 0)
+		if (deviceList_.getDeviceCount() == 0)
         {
 			Serial.printf("no devices\n");
 			return;
 		}
 
-		DS2482GetTemperatureForListCommand::run(ds, obj.getDeviceList(), [this](DS2482GetTemperatureForListCommand&, int status, DS2482DeviceList &deviceList)
+		DS2482GetTemperatureForListCommand::run(ds_, obj.getDeviceList(), [this](DS2482GetTemperatureForListCommand&, int status, DS2482DeviceList &deviceList_)
         {
 			if (status != DS2482Command::RESULT_DONE)
             {
@@ -84,13 +89,9 @@ void TestClass::check()
 				return;
 			}
 
-			for(size_t ii = 0; ii < deviceList.getDeviceCount(); ii++)
+			for(size_t ii = 0; ii < min((unsigned int)MAX_DS2482, deviceList_.getDeviceCount()); ii++)
             {
-				Serial.printf("%s valid=%d C=%f F=%f\n",
-						deviceList.getAddressByIndex(ii).toString().c_str(),
-						deviceList.getDeviceByIndex(ii).getValid(),
-						deviceList.getDeviceByIndex(ii).getTemperatureC(),
-						deviceList.getDeviceByIndex(ii).getTemperatureF());
+                tempC_[ii] = deviceList_.getDeviceByIndex(ii).getTemperatureC();
 			}
 		});
 	});

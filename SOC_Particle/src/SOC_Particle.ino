@@ -95,7 +95,7 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
 
 #ifdef CONFIG_DS2482_1WIRE
   #include "myDS2482.h"
-  TestClass Ds2482(0);
+  Ds2482Class Ds2482(0);
   DS2482 ds(Wire, 0);
   DS2482DeviceListStatic<10> deviceList;
 #endif
@@ -363,6 +363,7 @@ void loop()
 
     #ifdef CONFIG_DS2482_1WIRE
         Ds2482.check();
+        Serial.printf("tempC=%7.2f\n", Ds2482.tempC(0));
     #endif
   }
 

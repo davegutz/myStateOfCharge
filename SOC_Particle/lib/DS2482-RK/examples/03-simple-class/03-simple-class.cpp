@@ -5,10 +5,10 @@ SerialLogHandler logHandler;
 const unsigned long CHECK_PERIOD = 60000;
 unsigned long lastCheck = 5000 - CHECK_PERIOD;
 
-class TestClass {
+class Ds2482Class {
 public:
-	TestClass(int addr);
-	virtual ~TestClass();
+	Ds2482Class(int addr);
+	virtual ~Ds2482Class();
 
 	void setup();
 	void loop();
@@ -19,15 +19,15 @@ protected:
 	DS2482DeviceListStatic<10> deviceList;
 };
 
-TestClass::TestClass(int addr) : ds(Wire, addr) {
+Ds2482Class::Ds2482Class(int addr) : ds(Wire, addr) {
 
 }
 
-TestClass::~TestClass() {
+Ds2482Class::~Ds2482Class() {
 
 }
 
-void TestClass::setup() {
+void Ds2482Class::setup() {
 	ds.setup();
 
 	DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status) {
@@ -36,11 +36,11 @@ void TestClass::setup() {
 
 }
 
-void TestClass::loop() {
+void Ds2482Class::loop() {
 	ds.loop();
 }
 
-void TestClass::check() {
+void Ds2482Class::check() {
 	DS2482SearchBusCommand::run(ds, deviceList, [this](DS2482SearchBusCommand &obj, int status) {
 
 		if (status != DS2482Command::RESULT_DONE) {
@@ -73,7 +73,7 @@ void TestClass::check() {
 	});
 }
 
-TestClass Ds2482(0);
+Ds2482Class Ds2482(0);
 
 void setup() {
 	Serial.begin(9600);
