@@ -93,9 +93,9 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
 // Turn on Log
 // SerialLogHandler logHandler;
 
+#include "myDS2482.h"  // TODO:  add to command.h instead of threading it through a bunch of call statements
+MyDs2482_Class Ds2482(0);
 #ifdef CONFIG_DS2482_1WIRE
-  #include "myDS2482.h"
-  MyDs2482_Class Ds2482(0);
   DS2482 ds(Wire, 0);
   DS2482DeviceListStatic<10> deviceList;
 #endif
@@ -358,9 +358,11 @@ void loop()
   {
     #ifdef CONFIG_DS2482_1WIRE
         Ds2482.check();
+        cp.tb_info.t_c = Ds2482.tempC(0);
+        cp.tb_info.ready = Ds2482.ready();
     #endif
     Sen->T_temp = ReadTemp->updateTime();
-    Sen->temp_load_and_filter(Sen, reset_temp, Ds2482.tempC(0), Ds2482.ready());
+    Sen->temp_load_and_filter(Sen, reset_temp);
   }
 
   // Sample Ib
@@ -400,7 +402,7 @@ void loop()
     // Read sensors, model signals, select between them, synthesize injection signals on current
     // Inputs:  sp.config, sp.sim_chm
     // Outputs: Sen->Ib, Sen->Vb, Sen->Tb_filt, sp.inj_bias
-    sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen, Ds2482.tempC(0), Ds2482.ready());
+    sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
     Sen->T =  double(Sen->dt_ib())/1000.;
 
     // Calculate Ah remaining`
@@ -465,7 +467,7 @@ void loop()
   {
     chat();         // Work on internal chit-chat
   }
-  talk(Mon, Sen, V, Ds2482.tempC(0), Ds2482.ready());   // Collect user inputs
+  talk(Mon, Sen, V);   // Collect user inputs
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)

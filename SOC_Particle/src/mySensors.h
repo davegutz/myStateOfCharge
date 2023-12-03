@@ -55,7 +55,7 @@ public:
   // operators
   // functions
   boolean tb_stale_flt() { return tb_stale_flt_; };
-  float sample(Sensors *Sen, const float tempC, const boolean tempC_ready);
+  float sample(Sensors *Sen);
   float noise();
 protected:
   SlidingDeadband *SdTb;
@@ -397,7 +397,7 @@ public:
   unsigned long int sample_time_vb(void) { return sample_time_vb_; };
   void shunt_print();         // Print selection result
   void shunt_select_initial(const boolean reset);   // Choose between shunts for model
-  void temp_load_and_filter(Sensors *Sen, const boolean reset_temp, const float tempC, const boolean tempC_ready);
+  void temp_load_and_filter(Sensors *Sen, const boolean reset_temp);
   float Tb_noise();
   float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
   void Tb_noise_amp(const float noise) { Tb_noise_amp_ = noise; };

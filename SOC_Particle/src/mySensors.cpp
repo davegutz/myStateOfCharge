@@ -44,7 +44,7 @@ TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t 
 TempSensor::~TempSensor() {}
 // operators
 // functions
-float TempSensor::sample(Sensors *Sen, const float tempC, const boolean tempC_ready)
+float TempSensor::sample(Sensors *Sen)
 {
   // Log.info("top TempSensor::sample");
   // Read Sensor
@@ -75,15 +75,16 @@ float TempSensor::sample(Sensors *Sen, const float tempC, const boolean tempC_re
     }
   #elif defined(CONFIG_DS2482_1WIRE)
     // Check success
-    if ( tempC_ready && TEMP_RANGE_CHECK<tempC && tempC<TEMP_RANGE_CHECK_MAX && !Sen->Flt->fail_tb() )
+
+    if ( cp.tb_info.ready && TEMP_RANGE_CHECK<cp.tb_info.t_c && cp.tb_info.t_c<TEMP_RANGE_CHECK_MAX && !Sen->Flt->fail_tb() )
     {
-      Tb_hdwe = SdTb->update(tempC);
+      Tb_hdwe = SdTb->update(cp.tb_info.t_c);
       tb_stale_flt_ = false;
-      if ( sp.Debug()==16 ) Serial.printf("I:  t=%7.3f ready=%d, Tb_hdwe=%7.3f,\n", tempC, tempC_ready, Tb_hdwe);
+      if ( sp.Debug()==16 ) Serial.printf("I:  t=%7.3f ready=%d, Tb_hdwe=%7.3f,\n", cp.tb_info.t_c, cp.tb_info.ready, Tb_hdwe);
     }
     else
     {
-      Serial.printf("DS18 1-wire Tb, t=%8.1f, ready=%d, sending Tb_hdwe=%8.1f\n", tempC, tempC_ready, Tb_hdwe);
+      Serial.printf("DS18 1-wire Tb, t=%8.1f, ready=%d, sending Tb_hdwe=%8.1f\n", cp.tb_info.t_c, cp.tb_info.ready, Tb_hdwe);
       tb_stale_flt_ = true;
       // Using last-good-value:  no assignment
     }
@@ -1004,12 +1005,12 @@ void Sensors::shunt_select_initial(const boolean reset)
 }
 
 // Load and filter Tb
-void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp, const float tempC, const boolean tempC_ready)
+void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
 {
   // Log.info("top temp_load_and_filter");
   reset_temp_ = reset_temp;
   #ifndef CONFIG_BARE
-    Tb_hdwe = SensorTb->sample(Sen, tempC, tempC_ready);
+    Tb_hdwe = SensorTb->sample(Sen);
   #else
     Tb_hdwe = RATED_TEMP;
   #endif

@@ -200,7 +200,7 @@ if ( sp.Debug()==-1 ) Serial.printf("exit harvest_temp_change:  Delta_q %10.1f t
 
 // Complete initialization of all parameters in Mon and Sim including EKF
 // Force current to be zero because initial condition undefined otherwise with charge integration
-void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in, const float tempC, const boolean tempC_ready)
+void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in)
 {
   // Sample debug statements
   #ifdef DEBUG_INIT
@@ -220,7 +220,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
     Sen->Ib_model_in = sp.Inj_bias() + sp.Ib_bias_all();
   else
     Sen->Ib_model_in = Sen->Ib_hdwe;
-  Sen->temp_load_and_filter(Sen, true, tempC, tempC_ready);
+  Sen->temp_load_and_filter(Sen, true);
   if ( sp.mod_tb() )
   {
     Sen->Tb = Sen->Tb_model;
@@ -579,7 +579,7 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
 // Outputs: Sim.temp_c_, Sen->Tb_filt, Sen->Ib, Sen->Ib_model,
 //   Sen->Vb_model, Sen->Tb_filt, sp.inj_bias
 void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
-  Pins *myPins, BatteryMonitor *Mon, Sensors *Sen, const float tempC, const boolean tempC_ready)
+  Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
   static unsigned long int last_snap = now;
   boolean storing_fault_data = ( now - last_snap )>SNAP_WAIT;
@@ -598,7 +598,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   if ( reset_temp )
   {
     Sen->Tb_model = Sen->Tb_model_filt = RATED_TEMP + cp.Tb_bias_model;
-    initialize_all(Mon, Sen, 0., false, tempC, tempC_ready);
+    initialize_all(Mon, Sen, 0., false);
   }
   Sen->Sim->apply_delta_q_t(reset);
   Sen->Sim->init_battery_sim(reset, Sen);

@@ -87,7 +87,7 @@ void delay_no_block(const unsigned long int interval);
 void finish_request(void);
 void get_string(String *source);
 void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Sim);
-void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in, const float tempC, const boolean tempC_ready);
+void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in);
 void load_ib_vb(const boolean reset, const boolean reset_temp, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon);
 void monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
@@ -100,7 +100,7 @@ void print_serial_sim_header(void);
 void print_signal_sel_header(void);
 void print_serial_ekf_header(void);
 void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
-  Pins *myPins, BatteryMonitor *Mon, Sensors *Sen, const float tempC, const boolean tempC_ready);
+  Pins *myPins, BatteryMonitor *Mon, Sensors *Sen);
 void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip);
 String time_long_2_str(const unsigned long current_time, char *tempStr);
 String tryExtractString(String str, const char* start, const char* end);

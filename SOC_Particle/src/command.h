@@ -26,6 +26,12 @@
 
 #include "myCloud.h"
 
+// DS2482 data union
+typedef union {
+	float t_c;
+	boolean ready;
+} Tb_union;
+
 // Definition of structure for external control coordination
 struct PublishPars
 {
@@ -58,6 +64,7 @@ struct CommandPars
   float s_t_sat;            // Scalar on saturation test time set and reset
   float Tb_bias_model;      // Bias on Tb for model, C
   boolean write_summary;    // Use talk to issue a write command to summary
+  Tb_union tb_info;         // Use cp to pass DS2482 I2C information
 
   CommandPars(void)
   {
@@ -75,6 +82,8 @@ struct CommandPars
     s_t_sat = 1.;
     Tb_bias_model = 0.;
     write_summary = false;
+    tb_info.t_c = 0.;
+    tb_info.ready = false;
   }
 
   void assign_eframe_mult(const uint8_t count)
