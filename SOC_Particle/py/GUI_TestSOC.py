@@ -50,8 +50,7 @@ sel_list = ['custom', 'init1', 'ampHiFail', 'rapidTweakRegression', 'rapidTweakR
             'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
             'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf',
             'pulseEKF', 'pulseSS', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim']
-# lookup = {'init': ('v0;XS;Xp0;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '', ('',), 0),
-lookup = {'init': ('v0;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '', ('',), 0),
+lookup = {'init': ('v0;XS;Xp0;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '', ('',), 0),
           'init1': ('v0;XS;Xp0;Ca1;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;v2;', 'v0;', ('Observe effects of initialization',), 15),
           'custom': ('', '', ("For general purpose data collection", "'save data' will present a choice of file name", ""), 60),
           'ampHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 20),

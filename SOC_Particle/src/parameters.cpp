@@ -46,9 +46,11 @@ SavedPars::SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const ui
     {
         nflt_ = nflt;
         nhis_ = nhis;
-        nsum_ = int( NSUM ); 
-        history_ = hist;
-        fault_ = faults;
+        nsum_ = int( NSUM );
+        #ifndef CONFIG_47L16_EERAM
+            history_ = hist;
+            fault_ = faults;
+        #endif
         size_ = 0;
         // Memory map
         init_z();
@@ -80,6 +82,15 @@ SavedPars::SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const ui
         #endif
     }
 
+}
+
+SavedPars::~SavedPars() {}
+// operators
+// functions
+
+void SavedPars::init_z()
+{
+    // Memory map
     // Input definitions
     Amp_p               = new FloatZ(  "Xf", rP_, "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_z, 0.);
     Cutback_gain_sclr_p = new FloatZ(  "Sk", rP_, "Cutback gain scalar", "slr",      -1e6, 1e6, &Cutback_gain_sclr_z, 1.);
@@ -114,15 +125,6 @@ SavedPars::SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const ui
     T_state_model_p     = new FloatZ(  "na", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_z, RATED_TEMP, false);
     Vb_bias_hdwe_p      = new FloatZ(  "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_z, VOLT_BIAS);
     Vb_scale_p          = new FloatZ(  "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
-}
-
-SavedPars::~SavedPars() {}
-// operators
-// functions
-
-void SavedPars::init_z()
-{
-    // Memory map
     Z_[size_++] = Amp_p;                
     Z_[size_++] = Cutback_gain_sclr_p;
     Z_[size_++] = Debug_p;
