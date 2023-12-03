@@ -38,7 +38,6 @@
 #undef CONFIG_SSD1306_OLED
 #undef CONFIG_DS18B20_SWIRE
 #undef CONFIG_DS2482_1WIRE
-#undef CONFIG_SINGLE_DS2482
 
 #include "local_config.h"       // this is not in GitHub repository.  Copy appropriate local_config??.h to match configure
 
@@ -92,7 +91,7 @@
             #endif
         #endif
     #else
-        #define NSUM 3213               // PHOTON 2
+        #define NSUM 3205               // PHOTON 2
     #endif
 #else
         #define NSUM              2213  // Number of saved SRAM summaries (2213)   ARGON

@@ -73,23 +73,23 @@ void TestClass::check() {
 	});
 }
 
-TestClass testClass(0);
+TestClass Ds2482(0);
 
 void setup() {
 	Serial.begin(9600);
-	testClass.setup();
+	Ds2482.setup();
 }
 
 
 
 void loop() {
 
-	testClass.loop();
+	Ds2482.loop();
 
 	if (millis() - lastCheck >= CHECK_PERIOD) {
 		lastCheck = millis();
 
-		testClass.check();
+		Ds2482.check();
 	}
 }
 

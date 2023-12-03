@@ -94,7 +94,8 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
 // SerialLogHandler logHandler;
 
 #ifdef CONFIG_DS2482_1WIRE
-  #include "DS2482-RK.h"
+  #include "myDS2482.h"
+  TestClass Ds2482(0);
   DS2482 ds(Wire, 0);
   DS2482DeviceListStatic<10> deviceList;
 #endif
@@ -221,31 +222,10 @@ void setup()
 
   // 1-Wire chip card for I2C (after start Wire)
   #ifdef CONFIG_DS2482_1WIRE
-    //Log.info("setup DS2482 special 1-wire");
+    Log.info("setup DS2482 special 1-wire");
     ds.setup();
-    #if defined(CONFIG_SINGLE_DS2482) || (!defined(CONFIG_ADS1013_OPAMP) && !defined(CONFIG_SSD1306_OLED))
-      // Single drop
-      DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status)
-      {
-        Serial.printlnf("deviceReset=%d", status);
-      });
-      Serial.printf("DS2482 single-drop setup complete\n");
-    #else
-      // Multidrop
-      DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status) {
-        Serial.printlnf("deviceReset=%d", status);
-        DS2482SearchBusCommand::run(ds, deviceList, [](DS2482SearchBusCommand &obj, int status) {
-
-          if (status != DS2482Command::RESULT_DONE) {
-            Serial.printlnf("DS2482SearchBusCommand status=%d", status);
-            return;
-          }
-
-          Serial.printlnf("Found %u devices", deviceList.getDeviceCount());
-        });
-      });
-      Serial.printf("DS2482 multi-drop setup complete\n");
-    #endif
+    Ds2482.setup();
+    Serial.printf("DS2482 multi-drop setup complete\n");
   #endif
 
   // Synchronize clock
@@ -321,7 +301,7 @@ void loop()
 {
   // Synchronization
   #ifdef CONFIG_DS2482_1WIRE
-    ds.loop();
+    Ds2482.loop();
   #endif
   boolean read;
   static Sync *ReadSensors = new Sync(READ_DELAY);
@@ -382,45 +362,7 @@ void loop()
     Sen->temp_load_and_filter(Sen, reset_temp);
 
     #ifdef CONFIG_DS2482_1WIRE
-      #if !defined(CONFIG_ADS1013_OPAMP) && !defined(CONFIG_SSD1306_OLED)
-        // Singledrop Wire I2C
-        // For single-drop you can pass an empty address to get the temperature of the only
-        // sensor on the 1-wire bus
-        DS24821WireAddress addr;
-        DS2482GetTemperatureCommand::run(ds, addr, [](DS2482GetTemperatureCommand&, int status, float tempC)
-        {
-          if (status == DS2482Command::RESULT_DONE) {
-            Serial.printf("%.4f\n", tempC);
-          }
-          else {
-            Serial.printf("DS2482GetTemperatureCommand failed status=%d\n", status);
-          }
-        });
-      #else
-        // Multidrop Wire I2C
-        if (deviceList.getDeviceCount() > 0)
-        {
-          DS2482GetTemperatureForListCommand::run(ds, deviceList, [](DS2482GetTemperatureForListCommand&, int status, DS2482DeviceList &deviceList)
-          {
-            if (status != DS2482Command::RESULT_DONE)
-            {
-              Serial.printlnf("DS2482GetTemperatureForListCommand status=%d", status);
-              return;
-            }
-            for(size_t ii = 0; ii < deviceList.getDeviceCount(); ii++) {
-              Serial.printlnf("%s valid=%d C=%f",
-                  deviceList.getAddressByIndex(ii).toString().c_str(),
-                  deviceList.getDeviceByIndex(ii).getValid(),
-                  deviceList.getDeviceByIndex(ii).getTemperatureC());
-            }
-
-          });
-        }
-        else
-        {
-          Serial.printlnf("no devices found");
-        }
-      #endif
+        Ds2482.check();
     #endif
   }
 
