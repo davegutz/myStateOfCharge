@@ -33,6 +33,18 @@ extern CommandPars cp;  // Various parameters shared at system level
 extern PublishPars pp;  // For publishing
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
+// Print bitmap utility
+void bitMapPrint(char *buf, const int16_t fw, const uint8_t num)
+{
+  for ( int i=0; i<num; i++ )
+  {
+    if ( bitRead(fw, i) ) buf[num-i-1] = '1';
+    else  buf[num-i-1] = '0';
+  }
+  buf[num] = '\0';
+}
+
+
 // class TempSensor
 // constructors
 TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay)
@@ -244,17 +256,6 @@ Fault::Fault(const double T, uint8_t *preserving):
   WrapLo = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   QuietFilt = new General2_Pole(T, WN_Q_FILT, ZETA_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);  // actual update time provided run time
   QuietRate = new RateLagExp(T, TAU_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);
-}
-
-// Print bitmap
-void Fault::bitMapPrint(char *buf, const int16_t fw, const uint8_t num)
-{
-  for ( int i=0; i<num; i++ )
-  {
-    if ( bitRead(fw, i) ) buf[num-i-1] = '1';
-    else  buf[num-i-1] = '0';
-  }
-  buf[num] = '\0';
 }
 
 // Coulomb Counter difference test - failure conditions track poorly

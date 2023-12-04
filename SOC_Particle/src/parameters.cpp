@@ -25,7 +25,6 @@
 #include "Battery.h"
 #include "parameters.h"
 #include "mySensors.h"
-#include "Variable.h"
 
 /* Using pointers in building class so all that stuff does not get saved by 'retained' keyword in SOC_Particle.ino.
     Only the *_z parameters at the bottom of Parameters.h are stored in SRAM
@@ -219,6 +218,7 @@ void SavedPars::pretty_print(const boolean all)
         print_fault_header();
     }
 
+    Serial.printf("Xm:\n");
     pretty_print_modeling();
 
     #ifdef CONFIG_47L16_EERAM
@@ -231,7 +231,7 @@ void SavedPars::pretty_print(const boolean all)
 void SavedPars::pretty_print_modeling()
 {
   bitMapPrint(cp.buffer, sp.Modeling(), 8);
-  Serial.printf("0x%s\n", cp.buffer);
+  Serial.printf(" 0x%s\n", cp.buffer);
   Serial.printf(" 0x128 ib_noa_dscn %d\n", mod_ib_noa_dscn());
   Serial.printf(" 0x64  ib_amp_dscn %d\n", mod_ib_amp_dscn());
   Serial.printf(" 0x32  vb_dscn %d\n", mod_vb_dscn());

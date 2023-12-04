@@ -86,7 +86,7 @@
 #endif
 
 #ifdef CONFIG_ARGON
-    #define NSUM 2213   // Number of saved SRAM summaries (2213)
+    #define NSUM 2225   // Number of saved SRAM summaries (2225)
 #endif
 
 #ifdef CONFIG_PHOTON2

@@ -29,7 +29,6 @@
 #include "parameters.h"
 #include <math.h>
 #include "debug.h"
-#include "Variable.h"
 
 extern CommandPars cp;            // Various parameters shared at system level
 extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
@@ -78,7 +77,7 @@ void clear_queues()
 }
 
 // Talk Executive
-void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
+void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
   float FP_in = -99.;
   int INT_in = -1;
@@ -1144,7 +1143,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
             break;
 
           case ( 'h' ):  // h: help
-            talkH(Mon, Sen, V);
+            talkH(Mon, Sen);
             break;
 
           default:
@@ -1165,7 +1164,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
 #endif
 
 // Talk Help
-void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
+void talkH(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("No help photon for test. Look at code.\n");
   Serial.printf("\n\nHelp menu.  Omit '=' and end entry with ';'\n");
@@ -1340,17 +1339,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen, Vars *V)
   sp.Modeling_p->print_help();  //* Xm
   sp.pretty_print_modeling();
 
-  // bitMapPrint(cp.buffer, sp.Modeling(), 8);
-  // Serial.printf("bitmap %s\n", cp.buffer);
-  // sp.Modeling_p->print_help();  //* Xm
-  // Serial.printf("      0x128=1<<7 ib_noa_dscn %d\n", V->mod_ib_noa_dscn());
-  // Serial.printf("      0x64 =1<<6 ib_amp_dscn %d\n", V->mod_ib_amp_dscn());
-  // Serial.printf("      0x32 =1<<5 vb_dscn %d\n", V->mod_vb_dscn());
-  // Serial.printf("      0x16 =1<<4 temp_dscn %d\n", V->mod_tb_dscn());
-  // Serial.printf("      0x8  =1<<3 tweak_test %d\n", V->tweak_test());
-  // Serial.printf("      0x4  =1<<2 current %d\n", V->mod_ib());
-  // Serial.printf("      0x2  =1<<1 voltage %d\n", V->mod_vb());
-  // Serial.printf("      0x1  =1<<0 temp %d\n", V->mod_tb());
   #endif
 
   sp.Amp_p->print_help();  //* Xa

@@ -156,6 +156,9 @@ protected:
 #define faultAssign(bval, bit) if (bval) bitSet(fltw_, bit); else bitClear(fltw_, bit)
 #define failAssign(bval, bit) if (bval) bitSet(falw_, bit); else bitClear(falw_, bit)
 
+void bitMapPrint(char *buf, const int16_t fw, const uint8_t num);
+
+
 // Detect faults and manage selection
 class Fault
 {
@@ -163,7 +166,6 @@ public:
   Fault();
   Fault(const double T, uint8_t *sp_preserving);
   ~Fault();
-  void bitMapPrint(char *buf, const int16_t fw, const uint8_t num);
   float cc_diff() { return cc_diff_; };
   void cc_diff(Sensors *Sen, BatteryMonitor *Mon);
   void cc_diff_sclr(const float sclr) { cc_diff_sclr_ = sclr; };

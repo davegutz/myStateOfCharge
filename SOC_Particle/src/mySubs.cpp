@@ -27,7 +27,6 @@
 #include <math.h>
 #include "debug.h"
 #include "mySummary.h"
-#include "Variable.h"
 
 extern CommandPars cp;  // Various parameters shared at system level
 extern PublishPars pp;  // For publishing
