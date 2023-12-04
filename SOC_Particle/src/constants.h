@@ -73,32 +73,30 @@
 
 // If NSUM too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
 // For all, there are 40 bytes for each unit of NSUM
-#ifdef CONFIG_PHOTON
+#ifdef CONFIG_PHOTON  // dec ~133500  units: pro0p
     #ifdef DEPLOY_PHOTON
-        #define NSUM 272 // Number of saved SRAM summaries (272)
+        #define NSUM 278 // Number of saved SRAM summaries (278)
     #else
         #ifdef DEBUG_INIT
-            #define NSUM   3 // Number of saved SRAM summaries (3)
+            #define NSUM  67 // Number of saved SRAM summaries (67)
         #else
-            #define NSUM 120 // Number of saved SRAM summaries (120)
+            #define NSUM 124 // Number of saved SRAM summaries (124)
         #endif
     #endif
 #endif
 
-#ifdef CONFIG_ARGON
+#ifdef CONFIG_ARGON  // dec ~222350  units: pro1a, soc1a
     #define NSUM 2225   // Number of saved SRAM summaries (2225)
 #endif
 
-#ifdef CONFIG_PHOTON2
-    #define NSUM 3204   // Number of saved SRAM summaries (3204)
+#ifdef CONFIG_PHOTON2  // dec ~ 276770  units: pro2p2, pro2p3
+    #define NSUM 3205   // Number of saved SRAM summaries (3205)
 #endif
 
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)
 #define NHIS                  56        // Number of saved SRAM history data slices.  If too large, will get compile error BACKUPSRAM (56)
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
-#define HDB_VB             0.05      // Half deadband to filter Vb, V (0.05)
-// #define T_SAT                 10        // Saturation time, sec (10, >=10 for no sat ib lo fault of -100 A)
-// const float T_DESAT =      (T_SAT*2);   // De-saturation time, sec
+#define HDB_VB                0.05      // Half deadband to filter Vb, V (0.05)
 #define T_SAT                 22        // Saturation time, sec (>21 for no SAT with Dv0.82)
 const float T_DESAT =         20;       // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)

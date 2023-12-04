@@ -44,14 +44,28 @@ bg_color = 'lightgray'
 # sys.stdout = open('logs.txt', 'w')
 # sys.stderr = open('logse.txt', 'w')
 
+# Configuration for entire folder selection read with filepaths
+def_dict = {'test': {"version": "g20230530",
+                     "unit": "pro1a",
+                     "battery": "bb",
+                     'dataReduction_folder': '<enter data dataReduction_folder>'},
+            'ref': {"version": "v20230403",
+                    "unit": "pro1a",
+                    "battery": "bb",
+                    'dataReduction_folder': '<enter data dataReduction_folder>'},
+            'others': {"option": "custom",
+                       'modeling': True}
+            }
+
 # Transient string
+unit_list = ['pro0p', 'pro1a', 'pro3p2', 'pro2p2', 'soc0p', 'soc1a']
+batt_ist = ['bb', 'ch']
 sel_list = ['custom', 'init1', 'ampHiFail', 'rapidTweakRegression', 'rapidTweakRegressionH0', 'offSitHysBmsBB',
             'offSitHysBmsCH', 'triTweakDisch', 'coldStart', 'ampHiFailFf', 'ampLoFail', 'ampHiFailNoise',
             'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
             'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf',
             'pulseEKF', 'pulseSS', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim']
 lookup = {'init': ('v0;XS;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '', ('',), 0),
-# lookup = {'init': ('v0;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '',('',), 0),                    'init1': ('v0;XS;Xp0;Ca1;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;v2;', 'v0;', ('Observe effects of initialization',), 15),
           'custom': ('', '', ("For general purpose data collection", "'save data' will present a choice of file name", ""), 60),
           'ampHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 20),
           'rapidTweakRegression': ('Ff0;HR;Xp10;', 'wait timer', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 168),
@@ -534,6 +548,38 @@ def handle_option(*args):
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
+def handle_ref_unit(*args):
+    Ref.unit = ref_unit.get()
+    Ref.cf['ref']['unit'] = Ref.unit
+    Ref.cf.save_to_file()
+    Ref.unit_button.config(text=Ref.unit)
+    Ref.create_file_path_and_key()
+    Ref.update_key_label()
+    Ref.update_file_label()
+    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                            text='save data')
+    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                               text='save data as')
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+
+
+def handle_test_unit(*args):
+    Test.unit = test_unit.get()
+    Test.cf['test']['unit'] = Test.unit
+    Test.cf.save_to_file()
+    Test.unit_button.config(text=Test.unit)
+    Test.create_file_path_and_key()
+    Test.update_key_label()
+    Test.update_file_label()
+    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                            text='save data')
+    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                               text='save data as')
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+
+
 def kill_putty(sys_=None, silent=True):
     command = ''
     if sys_ == 'Linux':
@@ -726,19 +772,6 @@ if __name__ == '__main__':
 
     ex_root = ExRoot()
 
-    # Configuration for entire folder selection read with filepaths
-    def_dict = {'test': {"version": "g20230530",
-                         "unit": "pro1a",
-                         "battery": "bb",
-                         'dataReduction_folder': '<enter data dataReduction_folder>'},
-                'ref':  {"version": "v20230403",
-                         "unit": "pro1a",
-                         "battery": "bb",
-                         'dataReduction_folder': '<enter data dataReduction_folder>'},
-                'others': {"option": "custom",
-                           'modeling': True}
-                }
-
     cf = Begini(__file__, def_dict)
 
     # Define frames
@@ -809,9 +842,17 @@ if __name__ == '__main__':
 
     # Unit row
     tk.Label(top_panel_left, text="Unit", font=label_font).pack(pady=2, expand=True, fill='both')
-    Test.unit_button = myButton(top_panel_left_ctr, text=Test.unit, command=Test.enter_unit, fg="purple", bg=bg_color)
+    # Test.unit_button = myButton(top_panel_left_ctr, text=Test.unit, command=Test.enter_unit, fg="purple", bg=bg_color)
+    test_unit = tk.StringVar(master, Test.unit)
+    print(f"{Test.unit=}")
+    Test.unit_button = tk.OptionMenu(top_panel_left_ctr, test_unit, *unit_list)
+    print(f"{test_unit.get()=}")
+    test_unit.trace_add('write', handle_test_unit)
     Test.unit_button.pack(pady=2)
-    Ref.unit_button = myButton(top_panel_right, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
+    # Ref.unit_button = myButton(top_panel_right, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
+    ref_unit = tk.StringVar(master, Ref.unit)
+    Ref.unit_button = tk.OptionMenu(top_panel_right, ref_unit, *unit_list)
+    ref_unit.trace_add('write', handle_ref_unit)
     Ref.unit_button.pack(pady=2)
     test_filename = tk.StringVar(master, putty_connection.get(Test.unit))
 
@@ -969,6 +1010,8 @@ if __name__ == '__main__':
 
 
     # Begin
+    handle_test_unit()
+    handle_ref_unit()
     handle_modeling()
     handle_option()
     master.mainloop()

@@ -148,8 +148,8 @@ void debug_99(BatteryMonitor *Mon, Sensors *Sen)
   {
     Serial.printf("mod %d fake_f %d reset_temp %d Tb%7.3f Tb_f%7.3f Vb%7.3f Ib%7.3f\nTb_s%6.2f Tl_s%6.2f ib_s%7.3f soc_s%8.4f dq_s%10.1f\nTb  %6.2f Tl%6.2f ib%7.3f soc  %8.4f dq  %10.1f soc_ekf%8.4f dq_ekf%10.1f\nvoc_filt %7.3f vsat %7.3f sat %d dq_z%10.1f\n",
         sp.Modeling(), cp.fake_faults, Sen->reset_temp(), Sen->Tb, Sen->Tb_filt, Sen->Vb, Sen->Ib,
-        Sen->Sim->Tb(), sp.t_last_model(), Sen->Sim->ib(), Sen->Sim->soc(), Sen->Sim->delta_q(),
-        Mon->Tb(), sp.t_last(), Mon->ib(), Mon->soc(), Mon->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf(),
+        Sen->Sim->Tb(), sp.T_state_model(), Sen->Sim->ib(), Sen->Sim->soc(), Sen->Sim->delta_q(),
+        Mon->Tb(), sp.T_state(), Mon->ib(), Mon->soc(), Mon->delta_q(), Mon->soc_ekf(), Mon->delta_q_ekf(),
         Mon->voc_filt(), Mon->vsat(), Mon->sat(), sp.Delta_q_z);
   }
 #endif
