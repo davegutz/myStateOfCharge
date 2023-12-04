@@ -219,11 +219,27 @@ void SavedPars::pretty_print(const boolean all)
         print_fault_header();
     }
 
+    pretty_print_modeling();
+
     #ifdef CONFIG_47L16_EERAM
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         // Serial.printf("Temp mem map print\n");
         // mem_print();
     #endif
+}
+
+void SavedPars::pretty_print_modeling()
+{
+  bitMapPrint(cp.buffer, sp.Modeling(), 8);
+  Serial.printf("0x%s\n", cp.buffer);
+  Serial.printf(" 0x128 ib_noa_dscn %d\n", mod_ib_noa_dscn());
+  Serial.printf(" 0x64  ib_amp_dscn %d\n", mod_ib_amp_dscn());
+  Serial.printf(" 0x32  vb_dscn %d\n", mod_vb_dscn());
+  Serial.printf(" 0x16  temp_dscn %d\n", mod_tb_dscn());
+  Serial.printf(" 0x8   tweak_test %d\n", tweak_test());
+  Serial.printf(" 0x4   current %d\n", mod_ib());
+  Serial.printf(" 0x2   voltage %d\n", mod_vb());
+  Serial.printf(" 0x1   temp %d\n", mod_tb());
 }
 
 // Print faults

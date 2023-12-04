@@ -1108,6 +1108,7 @@ public:
     void nominalize_history_array();
     int num_diffs();
     void pretty_print(const boolean all);
+    void pretty_print_modeling();
     void print_fault_array();
     void print_fault_header();
     void print_history_array();
