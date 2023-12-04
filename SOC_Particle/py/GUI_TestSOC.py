@@ -59,7 +59,7 @@ def_dict = {'test': {"version": "g20230530",
 
 # Transient string
 unit_list = ['pro0p', 'pro1a', 'pro3p2', 'pro2p2', 'soc0p', 'soc1a']
-batt_ist = ['bb', 'ch']
+batt_list = ['bb', 'ch']
 sel_list = ['custom', 'init1', 'ampHiFail', 'rapidTweakRegression', 'rapidTweakRegressionH0', 'offSitHysBmsBB',
             'offSitHysBmsCH', 'triTweakDisch', 'coldStart', 'ampHiFailFf', 'ampLoFail', 'ampHiFailNoise',
             'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
@@ -548,14 +548,43 @@ def handle_option(*args):
     reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
+def handle_ref_batt(*args):
+    Ref.battery = ref_batt.get()
+    Ref.cf['ref']['battery'] = Ref.battery
+    Ref.cf.save_to_file()
+    Ref.create_file_path_and_key()
+    Ref.update_key_label()
+    Ref.update_file_label()
+    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                            text='save data')
+    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                               text='save data as')
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+
+
 def handle_ref_unit(*args):
     Ref.unit = ref_unit.get()
     Ref.cf['ref']['unit'] = Ref.unit
     Ref.cf.save_to_file()
-    Ref.unit_button.config(text=Ref.unit)
     Ref.create_file_path_and_key()
     Ref.update_key_label()
     Ref.update_file_label()
+    save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                            text='save data')
+    save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                               text='save data as')
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+
+
+def handle_test_batt(*args):
+    Test.battery = test_batt.get()
+    Test.cf['ref']['battery'] = Test.battery
+    Test.cf.save_to_file()
+    Test.create_file_path_and_key()
+    Test.update_key_label()
+    Test.update_file_label()
     save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                             text='save data')
     save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
@@ -568,7 +597,6 @@ def handle_test_unit(*args):
     Test.unit = test_unit.get()
     Test.cf['test']['unit'] = Test.unit
     Test.cf.save_to_file()
-    Test.unit_button.config(text=Test.unit)
     Test.create_file_path_and_key()
     Test.update_key_label()
     Test.update_file_label()
@@ -844,9 +872,7 @@ if __name__ == '__main__':
     tk.Label(top_panel_left, text="Unit", font=label_font).pack(pady=2, expand=True, fill='both')
     # Test.unit_button = myButton(top_panel_left_ctr, text=Test.unit, command=Test.enter_unit, fg="purple", bg=bg_color)
     test_unit = tk.StringVar(master, Test.unit)
-    print(f"{Test.unit=}")
     Test.unit_button = tk.OptionMenu(top_panel_left_ctr, test_unit, *unit_list)
-    print(f"{test_unit.get()=}")
     test_unit.trace_add('write', handle_test_unit)
     Test.unit_button.pack(pady=2)
     # Ref.unit_button = myButton(top_panel_right, text=Ref.unit, command=Ref.enter_unit, fg="purple", bg=bg_color)
@@ -858,9 +884,15 @@ if __name__ == '__main__':
 
     # Battery row
     tk.Label(top_panel_left, text="Battery", font=label_font).pack(pady=2, expand=True, fill='both')
-    Test.battery_button = myButton(top_panel_left_ctr, text=Test.battery, command=Test.enter_battery, fg="green", bg=bg_color)
+    # Test.battery_button = myButton(top_panel_left_ctr, text=Test.battery, command=Test.enter_battery, fg="green", bg=bg_color)
+    test_batt = tk.StringVar(master, Test.battery)
+    Test.battery_button = tk.OptionMenu(top_panel_left_ctr, test_batt, *batt_list)
+    test_batt.trace_add('write', handle_test_batt)
     Test.battery_button.pack(pady=2)
-    Ref.battery_button = myButton(top_panel_right, text=Ref.battery, command=Ref.enter_battery, fg="green", bg=bg_color)
+    # Ref.battery_button = myButton(top_panel_right, text=Ref.battery, command=Ref.enter_battery, fg="green", bg=bg_color)
+    ref_batt = tk.StringVar(master, Ref.battery)
+    Ref.battery_button = tk.OptionMenu(top_panel_right, ref_batt, *batt_list)
+    ref_batt.trace_add('write', handle_ref_batt)
     Ref.battery_button.pack(pady=2)
 
     # Key row
@@ -1012,6 +1044,8 @@ if __name__ == '__main__':
     # Begin
     handle_test_unit()
     handle_ref_unit()
+    handle_test_batt()
+    handle_ref_batt()
     handle_modeling()
     handle_option()
     master.mainloop()
