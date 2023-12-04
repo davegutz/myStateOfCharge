@@ -74,27 +74,27 @@
     #ifdef CONFIG_PHOTON
         #ifdef DEBUG_INIT
             #ifdef DEPLOY_PHOTON
-                #define NSUM              128        // Number of saved SRAM summaries (128)
+                #define NSUM              126        // Number of saved SRAM summaries (126)  40 bytes/NSUM
                                                     // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
             #else
-                #define NSUM               5        // ?????????? Number of saved SRAM summaries 
+                #define NSUM               3        // ?????????? Number of saved SRAM summaries   40 bytes/NSUM
                                                     // or go reduce print statments.  I suggest Serial1 in myTalk.cpp.  Not needed when not deployed - use PC.
                                                     // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
             #endif
         #else
             #ifdef DEPLOY_PHOTON
-                #define NSUM              285       // Number of saved SRAM summaries (205)
+                #define NSUM              283       // Number of saved SRAM summaries (283)  40 bytes/NSUM
                                                     // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
             #else
-                #define NSUM              133       // Number of saved SRAM summaries (45)
+                #define NSUM              131       // Number of saved SRAM summaries (131)  40 bytes/NSUM
                                                     // If too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
             #endif
         #endif
     #else
-        #define NSUM 3204               // PHOTON 2
+        #define NSUM 3204               // PHOTON 2  40 bytes/NSUM
     #endif
 #else
-        #define NSUM              2213  // Number of saved SRAM summaries (2213)   ARGON
+        #define NSUM              2213  // Number of saved SRAM summaries (2213)   ARGON     40 bytes/NSUM
                                         //If too large, will get compile error 'Insufficient room for .data and .bss sections!' or flashing red
 #endif
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)

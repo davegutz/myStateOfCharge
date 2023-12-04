@@ -46,7 +46,7 @@ struct PublishPars
 struct CommandPars
 {
   char buffer[280];         // Auxiliary print buffer
-  String input_str;      // Hold incoming data
+  String input_str;         // Hold incoming data
   String queue_str;         // Hold chit_chat queue data - queue with Control pass, 1 per Control pass
   String soon_str;          // Hold chit_chat soon data - priority with next Control pass, 1 per Control pass
   String asap_str;          // Hold chit_chat asap data - no waiting, ASAP all of now_str processed before Control pass
