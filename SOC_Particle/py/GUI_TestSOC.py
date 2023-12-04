@@ -279,8 +279,8 @@ class Exec:
         return self.root_config
 
     def update_battery_stuff(self):
-        # self.cf[self.ind]['unit'] = self.unit
-        # self.cf[self.ind]['battery'] = self.battery
+        self.cf[self.ind]['unit'] = self.unit
+        self.cf[self.ind]['battery'] = self.battery
         self.cf.save_to_file()
         self.create_file_path_and_key()
         self.update_key_label()
@@ -558,28 +558,24 @@ def handle_option(*args):
 
 def handle_ref_batt(*args):
     Ref.battery = ref_batt.get()
-    Ref.cf['ref']['battery'] = Ref.battery
     Ref.update_battery_stuff()
     update_data_buttons()
 
 
 def handle_ref_unit(*args):
     Ref.unit = ref_unit.get()
-    Ref.cf['ref']['unit'] = Ref.unit
     Ref.update_battery_stuff()
     update_data_buttons()
 
 
 def handle_test_batt(*args):
     Test.battery = test_batt.get()
-    Test.cf['test']['battery'] = Test.battery
     Test.update_battery_stuff()
     update_data_buttons()
 
 
 def handle_test_unit(*args):
     Test.unit = test_unit.get()
-    Test.cf['test']['unit'] = Test.unit
     Test.update_battery_stuff()
     update_data_buttons()
 
