@@ -361,6 +361,7 @@ public:
   unsigned long int wait_inj; // Wait before start injection, ms
   unsigned long int end_inj;  // End of print injection, ms
   unsigned long int tail_inj; // Tail after end injection, ms
+  unsigned long int until_q;  // Time until set v0, ms
   float cycles_inj;           // Number of injection cycles
   double control_time;        // Decimal time, seconds since 1/1/2021
   boolean display;            // Use display

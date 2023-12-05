@@ -659,7 +659,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // States: Sim.soc
   Sen->Sim->count_coulombs(Sen, reset_temp, Mon, false);
 
-  // Injection tweak test
+  // Injection test
   if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->end_inj) && (Sen->now > 0UL) ) // in range, test in progress
   {
     // Shift times because sampling is asynchronous: improve repeatibility
@@ -675,16 +675,30 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     // Put a stop to this
     if (Sen->now > Sen->stop_inj) sp.put_Amp(0.);
   }
+
   else if ( Sen->elapsed_inj && sp.tweak_test() )  // Done.  elapsed_inj set to 0 is the reset button
   {
     Serial.printf("STOP echo\n");
     Sen->elapsed_inj = 0UL;
     chit("v0;", ASAP);      // Turn off echo
-    chit("Xm247;", QUEUE);  // Turn off tweak_test
-    chit("Pa;", QUEUE);     // Print all for record.  Last so Pf last and visible
-    chit("Xp0;", QUEUE);    // Reset
+    chit("Pa;", ASAP);     // Print all for record.  Last so Pf last and visible
+    chit("Xm247;", SOON);  // Turn off tweak_test
+    chit("Xp0;", SOON);    // Reset
   }
   Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type(), sp.Amp(), sp.Freq());
+
+  // Quiet logic.   Reset to ready state at soc=0.5; do not change Modeling.  Passes at least once before running chit.
+  static unsigned long int millis_past = millis();
+  static unsigned long int until_q_past = Sen->until_q;
+  if ( Sen->until_q>0UL && until_q_past==0UL ) until_q_past = Sen->until_q;
+  Sen->until_q = (unsigned long) max(0, (long) Sen->until_q  - (long)(millis() - millis_past));
+  if ( Sen->until_q==0UL && until_q_past>0UL )
+  {
+    chit("v0;Hd;Pf;BZ;Rf;", QUEUE);
+  }
+  until_q_past = Sen->until_q;
+  millis_past = millis();
+
 }
 
 // If false token, get new string from source

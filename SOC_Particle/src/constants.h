@@ -44,14 +44,16 @@
 // Constants always defined
 #define ONE_HOUR_MILLIS       3600000UL // Number of milliseconds in one hour (60*60*1000)
 #define ONE_DAY_MILLIS        86400000UL// Number of milliseconds in one day (24*60*60*1000)
-#define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec)
-#define READ_TEMP_DELAY       6000UL    // Sensor read wait, ms (6000UL = 6 sec)
+#define TALK_DELAY            313UL      // Talk wait, ms (10UL = 0.01 sec)
+#define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec) Dr
+#define READ_TEMP_DELAY       6011UL    // Sensor read wait, ms (6000UL = 6 sec)
 #define SUMMARIZE_DELAY       1800000UL // Battery state tracking and reporting, ms (1800000UL = 30 min)
 #define SUMMARIZE_WAIT        60000UL   // Summarize alive time before first save, ms (60000UL = 1 min)
 #define PUBLISH_SERIAL_DELAY  400UL     // Serial print interval (400UL = 0.4 sec)
 #define DISPLAY_USER_DELAY    1200UL    // User display update (1200UL = 1.2 sec)
 #define CONTROL_DELAY         100UL     // Control read wait, ms (100UL = 0.1 sec)
 #define SNAP_WAIT             10000UL   // Interval between fault snapshots (10000UL = 10 sec)
+#define DP_MULT               4         // Multiples of read to capture data DP
 #define GMT                   0         // Enter time different to zulu (does not respect DST) (0)
 #define USE_DST               0         // Whether to apply DST or not, 0 or 1 (0)
 #define TBATT_TEMPCAL         0.56      // Maxim 1-wire plenum temp sense calibrate (0.56), C
@@ -90,7 +92,7 @@
 #endif
 
 #ifdef CONFIG_PHOTON2  // dec ~ 276770  units: pro2p2, pro2p3
-    #define NSUM 3205   // Number of saved SRAM summaries (3205)
+    #define NSUM 3000   // Number of saved SRAM summaries (3205)
 #endif
 
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)

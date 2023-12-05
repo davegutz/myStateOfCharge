@@ -46,7 +46,7 @@ const float EKF_T_RESET = (EKF_T_CONV/2.); // EKF reset retest time, sec ('up 1,
 #define EKF_Q_SD_NORM   0.0015    // Standard deviation of normal EKF process uncertainty, V (0.0015)
 #define EKF_R_SD_NORM   0.5       // Standard deviation of normal EKF state uncertainty, fraction (0-1) (0.5)
 #define EKF_NOM_DT      0.1       // EKF nominal update time, s (initialization; actual value varies)
-#define EKF_EFRAME_MULT 20        // Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100)
+#define EKF_EFRAME_MULT 20        // Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100) DE
 #define DF2             1.2       // Threshold to resest Coulomb Counter if different from ekf, fraction (0.20)
 #define TAU_Y_FILT      5.        // EKF y-filter time constant, sec (5.)
 #define MIN_Y_FILT      -0.5      // EKF y-filter minimum, V (-0.5)

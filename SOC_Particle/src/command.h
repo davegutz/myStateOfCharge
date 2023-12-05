@@ -70,13 +70,13 @@ struct CommandPars
   {
     token = false;
     dc_dc_on = false;
-    eframe_mult = EKF_EFRAME_MULT;
-    fake_faults = FAKE_FAULTS;
+    eframe_mult = EKF_EFRAME_MULT; // DE
+    fake_faults = FAKE_FAULTS; // Ff
     inf_reset = false;
     model_cutback = false;
     model_saturated = false;
     num_v_print = 0UL;
-    print_mult = 4;
+    print_mult = DP_MULT;  // DP
     publishS = false;
     soft_reset = false;
     s_t_sat = 1.;

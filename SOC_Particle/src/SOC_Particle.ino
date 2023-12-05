@@ -90,7 +90,9 @@
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
 // Turn on Log
-// SerialLogHandler logHandler;
+#ifdef LOGHANDLE
+  SerialLogHandler logHandler;
+#endif
 
 #ifdef CONFIG_DS2482_1WIRE
   #include "myDS2482.h"
@@ -189,15 +191,17 @@ void setup()
   digitalWrite(myPins->status_led, LOW);
 
   // I2C for OLED, ADS, backup EERAM, DS2482
+  // Photon2 only accepts 100 and 400 khz
   #ifndef CONFIG_BARE
-    //Log.info("setup I2C Wire");
-    Wire.begin();
+    Log.info("setup I2C Wire");
     #ifdef CONFIG_ADS1013_OPAMP
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
-      Serial.printf("High speed Wire setup for ADS1013\n");
+      Serial.printf("Nominal Wire setup for ADS1013\n");
     #else
+      Wire.setSpeed(CLOCK_SPEED_100KHZ);
       Serial.printf("Wire started\n");
     #endif
+    Wire.begin();
   #endif
 
   // Display (after start Wire)
@@ -297,12 +301,11 @@ void setup()
 void loop()
 {
   // Synchronization
-  #ifdef CONFIG_DS2482_1WIRE
-    Ds2482.loop();
-  #endif
-  boolean read;
+  boolean chitchat = false;
+  static Sync *Talk = new Sync(TALK_DELAY);
+  boolean read = false;
   static Sync *ReadSensors = new Sync(READ_DELAY);
-  boolean read_temp;
+  boolean read_temp = false;
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
   boolean display_and_remember;
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
@@ -332,6 +335,9 @@ void loop()
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
   // Synchronize
+  #ifdef CONFIG_DS2482_1WIRE
+    if ( read || read_temp || reset || reset_temp ) Ds2482.loop();
+  #endif
   now = millis();
   time_now = Time.now();
   if ( now - last_sync > ONE_DAY_MILLIS || reset )  sync_time(now, &last_sync, &millis_flip); 
@@ -340,6 +346,7 @@ void loop()
   hm_string = String(tempStr);
   read_temp = ReadTemp->update(millis(), reset);
   read = ReadSensors->update(millis(), reset);
+  chitchat = Talk->update(millis(), reset);
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);
   display_and_remember = DisplayUserSync->update(millis(), reset);
@@ -457,13 +464,15 @@ void loop()
   // String definitions are below.
   // Control
   if ( control ){} // placeholder
+
+
   // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   asap();
-  if ( read )
+  if ( chitchat )
   {
     chat();         // Work on internal chit-chat
+    talk(Mon, Sen);   // Collect user inputs
   }
-  talk(Mon, Sen);   // Collect user inputs
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)

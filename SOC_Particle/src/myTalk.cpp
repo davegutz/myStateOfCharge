@@ -76,6 +76,60 @@ void clear_queues()
   cp.asap_str = "";
 }
 
+// Clear adjustments that should be benign if done instantly
+void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
+{
+
+  // Snapshots
+  cp.cmd_summarize();  // Hs
+  cp.cmd_summarize();  // Hs
+  cp.cmd_summarize();  // Hs
+  cp.cmd_summarize();  // Hs
+  chit("Pf", ASAP);  // Pf
+
+  // Model
+  Sen->Sim->hys_scale(1);  // Sh 1
+  Sen->Sim->Sr(1);  // Sr
+  Mon->Sr(1);  // Sr 1
+  sp.Cutback_gain_sclr_p->print_adj_print(1); // Sk 1
+  Sen->Sim->hys_state(0);  // SH 0
+  Sen->Flt->wrap_err_filt_state(0);  // SH 0
+
+  // Injection
+  Sen->ib_amp_add(0);  // Dm 0
+  Sen->ib_noa_add(0);  // Dn 0
+  Sen->vb_add(0);  // Dv 0
+  Sen->Sim->ds_voc_soc(0);  // Ds
+  cp.Tb_bias_model = 0;  // D^
+  Sen->Sim->Dv(0);  // Dy
+  Sen->Flt->tb_stale_time_sclr(1);  // Xv 1
+  Sen->Flt->fail_tb(0);  // Xu 0
+
+  // Noise
+  Sen->Tb_noise_amp(0);  // DT 0
+  Sen->Vb_noise_amp(0);  // DV 0
+  Sen->Ib_amp_noise_amp(0);  // DM 0
+  Sen->Ib_noa_noise_amp(0);  // DN 0
+
+  // Intervals
+  cp.assign_eframe_mult(max(min(EKF_EFRAME_MULT, UINT8_MAX), 0)); // DE
+  cp.assign_print_mult(max(min(DP_MULT, UINT8_MAX), 0));  // DP
+  Sen->ReadSensors->delay(READ_DELAY);
+
+  // Fault logic
+  Sen->Flt->cc_diff_sclr(1);  // Fc 1
+  Sen->Flt->ib_diff_sclr(1);  // Fd 1
+  cp.fake_faults = 0;  // Ff 0
+  sp.put_Ib_select(0);  // Ff 0
+  Sen->Flt->ewhi_sclr(1);  // Fi 1
+  Sen->Flt->ewlo_sclr(1);  // Fo 1
+  Sen->Flt->ib_quiet_sclr(1);  // Fq 1
+  Sen->Flt->disab_ib_fa(0);  // FI 0
+  Sen->Flt->disab_tb_fa(0);  // FT 0
+  Sen->Flt->disab_vb_fa(0);  // FV 0
+
+}
+
 // Talk Executive
 void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -250,6 +304,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   Serial.printf("err%5.2f; <=0\n", FP_in);
                 break;
 
+              case ( 'Z' ):  // BZ :  Benign zeroing of settings to make clearing test easier
+                  benign_zero(Mon, Sen);
+                  Serial.printf("Benign Zero\n");
+                break;
+
               default:
                 Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
             }
@@ -273,12 +332,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   if ( sp.Modeling() )
                   {
                     cp.cmd_reset();
-                    chit("W3;", SOON);  // Wait 3 passes of Control
+                    chit("W3;", SOON);  // Wait 10 passes of Control
                   }
                   else
                   {
                     cp.cmd_reset();
-                    chit("W3;", SOON);  // Wait 3 passes of Control
+                    chit("W3;", SOON);  // Wait 10 passes of Control
                   }
                 }
                 else
@@ -891,6 +950,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
                 break;
 
+              case ( 'Q' ): //  XQ<>: time to quiet
+                Sen->until_q = (unsigned long int) cp.input_str.substring(2).toInt();
+                Serial.printf("Going black in %7.1f seconds\n", float(Sen->until_q) / 1000.);
+                break;
+
               case ( 't' ): //*  Xt<>:  injection type
                 switch ( cp.input_str.charAt(2) )
                 {
@@ -951,8 +1015,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xf0;Xa0;Xtn;", ASAP);
                     if ( !sp.tweak_test() ) chit("Xb0;", ASAP);
                     chit("Mk1;Nk1;", ASAP);  // Stop any injection
-                    // chit("Di0;Dm0;Dn0;Dv0;DT0;DV0;DI0;Xu0;Xv1;Dr100;", ASAP); // something in this causes panic pro3p2 CONFIG_DS2482_1WIRE
-                    chit("Di0;Dm0;Dn0;Dv0;DT0;DV0;DI0;Xu0;Xv1;Dr100;", SOON);
+                    chit("BZ;", SOON);
                     break;
 
                   #ifndef CONFIG_PHOTON
@@ -1179,8 +1242,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\nB<?> Battery e.g.:\n");
   Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='CH' [%d]\n", sp.Mon_chm(), MON_CHEM); 
   Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='CH' [%d]\n", sp.Sim_chm(), SIM_CHEM); 
-  Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", sp.nP(), NP); 
-  Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", sp.nS(), NS); 
+  Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", sp.nP(), NP);
+  Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", sp.nS(), NS);
+
+  Serial.printf("\nBZ Benignly zero test settings\n");
   
   Serial.printf("\nc  clear talk, esp '-c;'\n");
 
@@ -1335,6 +1400,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
   Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
+  Serial.printf(" XQ=  "); Serial.printf("%ld,  Time until silent, s [0]\n", Sen->until_q);
 
   sp.Modeling_p->print_help();  //* Xm
   sp.pretty_print_modeling();

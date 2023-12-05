@@ -96,7 +96,8 @@ float TempSensor::sample(Sensors *Sen)
     }
     else
     {
-      Serial.printf("DS18 1-wire Tb, t=%8.1f, ready=%d, sending Tb_hdwe=%8.1f\n", cp.tb_info.t_c, cp.tb_info.ready, Tb_hdwe);
+      if ( sp.Debug()>0 )
+        Serial.printf("DS18 1-wire Tb, t=%8.1f, ready=%d, sending Tb_hdwe=%8.1f\n", cp.tb_info.t_c, cp.tb_info.ready, Tb_hdwe);
       tb_stale_flt_ = true;
       // Using last-good-value:  no assignment
     }
@@ -762,6 +763,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
   this->display = true;
   this->Ib_hdwe_model = 0.;
   Prbn_Tb_ = new PRBS_7(TB_NOISE_SEED);
+  this->until_q = 0UL;
   Prbn_Vb_ = new PRBS_7(VB_NOISE_SEED);
   Prbn_Ib_amp_ = new PRBS_7(IB_AMP_NOISE_SEED);
   Prbn_Ib_noa_ = new PRBS_7(IB_NOA_NOISE_SEED);
@@ -984,8 +986,8 @@ void Sensors::shunt_select_initial(const boolean reset)
       else
         hdwe_add = 0.;
     }
-    Ib_amp_model = Ib_model*ib_amp_sclr() + Ib_amp_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sm/Dm
-    Ib_noa_model = Ib_model*ib_noa_sclr() + Ib_noa_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sn/Dn
+    Ib_amp_model = Ib_model*ib_amp_sclr() + Ib_amp_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sm / Dm
+    Ib_noa_model = Ib_model*ib_noa_sclr() + Ib_noa_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sn / Dn
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
     Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);
     Ib_noa_hdwe = ShuntNoAmp->Ishunt_cal() + hdwe_add;  // Sense fault injection feeds logic, not model
@@ -1029,8 +1031,8 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
   Tb_hdwe += sp.Tb_bias_hdwe();
   Tb_hdwe_filt += sp.Tb_bias_hdwe();
 
-  if ( sp.Debug()==16 || (sp.Debug()==-1 && reset_temp_) ) Serial.printf("reset_temp_,Tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, %d, %7.3f, %7.3f, %7.3f, %7.3f,\n",
-    reset_temp_, sp.Tb_bias_hdwe(), RATED_TEMP, Tb_hdwe, Tb_hdwe_filt );
+  if ( sp.Debug()==16 || (sp.Debug()==-1 && reset_temp_) ) Serial.printf("reset_temp_,Tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, ready %d %7.3f %7.3f %7.3f %7.3f %d\n",
+    reset_temp_, sp.Tb_bias_hdwe(), RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, cp.tb_info.ready);
 
   Flt->tb_stale(reset_temp_, Sen);
 }

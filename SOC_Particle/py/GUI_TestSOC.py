@@ -65,36 +65,36 @@ sel_list = ['custom', 'init1', 'ampHiFail', 'rapidTweakRegression', 'rapidTweakR
             'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
             'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf',
             'pulseEKF', 'pulseSS', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim']
-lookup = {'init': ('v0;XS;Ca0.5;DE20;DP4;Dr100;Ds0;D^0;Dv0;Dy0;DT0;DV0;DM0;DN0;Sh1;Sr1;Fc1;Fd1;Ff0;Fi1;Fo1;Fq1;FI0;FT0;FV0;Rf;', '', ('',), 0),
+lookup = {'init': ('Y;-v0;-XS;Ca0.5;+Rf;+Pf;', '', ('',), 0),
           'custom': ('', '', ("For general purpose data collection", "'save data' will present a choice of file name", ""), 60),
-          'ampHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 20),
-          'rapidTweakRegression': ('Ff0;HR;Xp10;', 'wait timer', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 168),
-          'rapidTweakRegressionH0': ('Sh0;SH0;Ff0;HR;Xp10;', 'wait timer', ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!'), 168),
-          'offSitHysBmsBB': ('Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;', ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',), 568),
-          'offSitHysBmsCH': ('Ff0;D^0;Xp0;Xm247;Ca0.103;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;Ca.103;W5;Pf;Rf;Pf;v0;DP4;', ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',), 568),
-          'triTweakDisch': ('Ff0;HR;Xp13;', 'wait timer', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 168),
-          'coldStart': ('Ff0;D^-18;Xp0;Xm247;Fi1000;Fo1000;Ca0.93;Ds0.06;Sk0.5;Rb;Rf;Dr100;DP1;v2;W100;DI40;Fi1;Fo1;', 'DI0;W10;v0;Pf;W5;Pf;Rf;Pf;v0;DP4;D^0;Ds0;Sk1;Fi1;Fo1;Ca0.93;', ("Should charge for a bit after hitting cutback on BMS.   Should see current gradually reduce.   Run until 'SAT' is displayed.   Could take ½ hour.", "The Ds term biases voc(soc) by delta x and makes a different type of saturation experience, to accelerate the test.", "Look at chart 'DOM 1' and verify that e_wrap misses ewlo_thr (thresholds moved as result of previous failures in this transient)", "Don't remember why this problem on cold day only."), 220),
-          'ampHiFailFf': ('Ff1;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;Hd;Ff0;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect but not switch amp current failure. (See 'diff' and current!=0 on OLED).", "Run about 60s. Start by looking at 'DOM 1' fig 3. No fault record (keeps recording).  Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.", "This show when deploy with Fake Faults (Ff) don't throw false trips (it happened)", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 60),
-          'ampLoFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm-50;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 30),
-          'ampHiFailNoise': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;', 'Hs;Hs;Hs;Hs;Pf;DT0;DV0;DM0;DN0;Xp0;Rf;W200;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Noisy ampHiFail.  Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 30),
-          'rapidTweakRegression40C': ('Ff0;HR;D^15;Xp10;', 'D^0;', ("Should run three very large current discharge/recharge cycles without fault", "Self-terminates"), 168),
-          'slowTweakRegression': ('Ff0;HR;Xp11;', 'wait timer', ("Should run one very large slow (~15 min) current discharge/recharge cycle without fault.   It will take 60 seconds to start changing current.",), 622),
-          'satSitBB': ('Ff0;D^0;Xp0;Xm247;Ca0.9962;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;Ca.9962;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",), 600),
-          'satSitCH': ('Ff0;D^0;Xp0;Xm247;Ca0.992;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;Ca.992;W5;Pf;Rf;Pf;v0;DP4;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",), 600),
-          'flatSitHys': ('Ff0;D^0;Xp0;Xm247;Ca0.9;Rb;Rf;Dr100;DP1;Xts;Xa-81;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;Ca.9;W5;Pf;Rf;Pf;v0;DP4;', ("Operate around 0.9.  For CHINS, will check EKF with flat voc(soc).   Takes about 10 minutes.", "Make sure EKF soc (soc_ekf) tracks actual soc without wandering."), 568),
-          'offSitHysBmsNoiseBB': ('Ff0;D^0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.05;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff."), 568),
-          'offSitHysBmsNoiseCH': ('Ff0;D^0;Xp0;Xm247;Ca0.103;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', 'XS;v0;Pf;Hd;Xp0;DT0;DV0;DM0;DN0;Ca.103;W5;Pf;Rf;Pf;v0;DP4;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff."), 568),
-          'ampHiFailSlow': ('Ff0;D^0;Xm247;Ca0.5;Pf;v2;W2;Dr100;DP1;HR;Dm6;Dn0.0001;Fc0.02;Fd0.5;', 'Hd;Xp0;Pf;Rf;W2;+v0;Dr100;DE20;Fc1;Fd1;Rf;Pf;', ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.", "Run for 6  minutes to see cc_diff_fa"), 400),
-          'vHiFail': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dm0.001;Dv0.82;', 'Dv0;Hd;Pf;Xp0;Rf;W50;+v0;Dr100;Rf;Pf;DP4;', ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION"), 60),
-          'vHiFailH': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;SH.3;W50;Dm0.001;Dv0.82;', 'Dv0;Hd;Pf;Xp0;Rf;SH0;W50;+v0;Dr100;Rf;Pf;DP4;', ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION.  Initial BB shift will be limited by hys table"), 40),
-          'vHiFailFf': ('Ff1;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W50;Dv0.8;', 'Dv0;Ff0;Hd;Xp0;Pf;Rf;W50;+v0;Dr100;Rf;Pf;DP4;', ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.", "Usually shows SAT."), 60),
-          'pulseEKF': ("Xp6; doesn't work", 'n/a', ("Xp6 # TODO: doesn't work now.",), 0),
-          'pulseSS': ("Xp7;", 'n/a', ("Should generate a very short <10 sec data burst with a sw pulse.  Look at plots for good overlay. e_wrap will have a delay.", "This is the shortest of all tests.  Useful for quick checks."), 0),
-          'pulseSSH': ("Xp8;", 'n/a', ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks."), 0),
-          'tbFailMod': ('Ff0;D^0;Ca.5;Xp0;W4;Xm247;DP1;Dr100;W2;HR;Pf;v2;Xv.002;Xu1;W200;Xu0;Xv1;W100;v0;Pf;', 'Hd;Pf;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;', ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.",), 60),
-          'tbFailHdwe': ('Ff0;D^0;Ca.5;Xp0;W4;Xm246;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W200;Xu0;Xv1;W100;v0;Pf;', 'Hd;Pf;Xp0;Xu0;Xv1;Ca.5;v0;Rf;Pf;DP4;', ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.", "'Xp0' in reset puts Xm back to 247."), 60),
-          'DvMon': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm0.001;Dw-0.8;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;Dw0;DT0;DV0;DM0;DN0;Pf;Xp0;Rf;W50;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa"), 120),
-          'DvSim': ('Ff0;D^0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;W30;Dm0.001;Dy-0.8;Dn0.0001;', 'Hs;Hs;Hs;Hs;Pf;Dy0;DT0;DV0;DM0;DN0;Pf;Xp0;Rf;W50;+v0;Ca.5;Dr100;Rf;Pf;DP4;', ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa"), 120),
+          'ampHiFail': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;Dm50;Dn0.0001;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 52),
+          'rapidTweakRegression': ('Ff0;HR;Xp10;', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 180),
+          'rapidTweakRegressionH0': ('Sh0;SH0;Ff0;HR;Xp10;', ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!'), 180),
+          'offSitHysBmsBB': ('Ff0;Xp0;Xm247;Ca0.05;W10;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',), 568),
+          'offSitHysBmsCH': ('Ff0;Xp0;Xm247;Ca0.103;W10;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',), 568),
+          'triTweakDisch': ('Ff0;HR;Xp13;', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 180),
+          'coldStart': ('Ff0;D^-18;Xp0;Xm247;Fi1000;Fo1000;Ca0.93;W10;Ds0.06;Sk0.5;Rb;Rf;Dr100;DP1;v2;W100;DI40;Fi1;Fo1;', ("Should charge for a bit after hitting cutback on BMS.   Should see current gradually reduce.   Run until 'SAT' is displayed.   Could take ½ hour.", "The Ds term biases voc(soc) by delta x and makes a different type of saturation experience, to accelerate the test.", "Look at chart 'DOM 1' and verify that e_wrap misses ewlo_thr (thresholds moved as result of previous failures in this transient)", "Don't remember why this problem on cold day only."), 220),
+          'ampHiFailFf': ('Ff1;Xm247;Ca0.5;W10;Dr100;DP1;HR;Pf;v2;W30;Dm50;Dn0.0001;', ("Should detect but not switch amp current failure. (See 'diff' and current!=0 on OLED).", "Run about 60s. Start by looking at 'DOM 1' fig 3. No fault record (keeps recording).  Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.", "This show when deploy with Fake Faults (Ff) don't throw false trips (it happened)", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 60),
+          'ampLoFail': ('Ff0;Xm247;Ca0.5;W10;Dr100;DP1;HR;Pf;v2;W30;Dm-50;Dn0.0001;', ("Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 56),
+          'ampHiFailNoise': ('Ff0;Xm247;Ca0.5;W10;Dr100;DP1;HR;Pf;v2;W30;DT.05;DV0.05;DM.2;DN2;W50;Dm50;Dn0.0001;Ff0;', ("Noisy ampHiFail.  Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 56),
+          'rapidTweakRegression40C': ('Ff0;HR;D^15;Xp10;', ("Should run three very large current discharge/recharge cycles without fault", "Self-terminates"), 180),
+          'slowTweakRegression': ('Ff0;HR;Xp11;', ("Should run one very large slow (~15 min) current discharge/recharge cycle without fault.   It will take 60 seconds to start changing current.",), 622),
+          'satSitBB': ('Ff0;Xp0;Xm247;Ca0.9962;W10;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",), 600),
+          'satSitCH': ('Ff0;Xp0;Xm247;Ca0.992;W10;Rb;Rf;Dr100;DP1;Xts;Xa17;Xf0.002;XW10;XT10;XC1;W2;HR;Pf;v2;W5;XR;', ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",), 600),
+          'flatSitHys': ('Ff0;Xp0;Xm247;Ca0.9;W10;Rb;Rf;Dr100;DP1;Xts;Xa-81;Xf0.004;XW10;XT10;XC2;W2;Ph;HR;Pf;v2;W5;XR;', ("Operate around 0.9.  For CHINS, will check EKF with flat voc(soc).   Takes about 10 minutes.", "Make sure EKF soc (soc_ekf) tracks actual soc without wandering."), 568),
+          'offSitHysBmsNoiseBB': ('Ff0;Xp0;Xm247;Ca0.05;W10;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff."), 568),
+          'offSitHysBmsNoiseCH': ('Ff0;Xp0;Xm247;Ca0.103;W10;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10;XT10;XC2;W2;DT.05;DV0.10;DM.2;DN2;Ph;HR;Pf;v2;W5;XR;', ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff."), 568),
+          'ampHiFailSlow': ('Ff0;Xm247;Ca0.5;W10;Pf;v2;W2;Dr100;DP1;HR;Dm6;Dn0.0001;Fc0.02;Fd0.5;', ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.", "Run for 6  minutes to see cc_diff_fa"), 400),
+          'vHiFail': ('Ff0;Xm247;Ca0.5;W10;Dr100;DP1;HR;Pf;v2;W50;Dm0.001;Dv0.82;', ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION"), 60),
+          'vHiFailH': ('Ff0;Xm247;Ca0.5;W10;Dr100;DP1;HR;Pf;v2;W50;SH.3;W50;Dm0.001;Dv0.82;', ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION.  Initial BB shift will be limited by hys table"), 40),
+          'vHiFailFf': ('Ff1;Xm247;Ca0.5;W10;Dr100;DP1;HR;Pf;v2;W50;Dv0.8;', ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.", "Usually shows SAT."), 60),
+          'pulseEKF': ("Xp6; doesn't work", ("Xp6 # TODO: doesn't work now.",), 0),
+          'pulseSS': ("Xp7;", ("Should generate a very short <10 sec data burst with a sw pulse.  Look at plots for good overlay. e_wrap will have a delay.", "This is the shortest of all tests.  Useful for quick checks."), 0),
+          'pulseSSH': ("Xp8;", ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks."), 0),
+          'tbFailMod': ('Ff0;Ca.5;W10;Xp0;W4;Xm247;DP1;Dr100;W2;HR;Pf;v2;Xv.002;Xu1;W20;Xu0;Xv1;W100;v0;Pf;', ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.",), 60),
+          'tbFailHdwe': ('Ff0;Ca.5;W10;Xp0;W4;Xm246;DP1;Dr100;W2;HR;Pf;v2;Xv.002;W50;Xu1;W20;Xu0;Xv1;W100;v0;Pf;', ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.", "'Xp0' in reset puts Xm back to 247."), 60),
+          'DvMon': ('Ff0;Xm247;Ca0.5;W10;Dr100;DP1;HR;Pf;v2;W30;Dm0.001;Dw-0.8;Dn0.0001;', ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa"), 120),
+          'DvSim': ('Ff0;Xm247;Ca0.5;W10;Dr100;DP1;HR;Pf;v2;W30;Dm0.001;Dy-0.8;Dn0.0001;', ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa"), 120),
           }
 putty_connection = {'': 'test',
                     'pro0p': 'testpro0p',
@@ -351,7 +351,6 @@ def clear_data(silent=False):
             if not save_putty():
                 if silent is False:
                     tkinter.messagebox.showwarning(message="putty may be open already")
-            reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     else:
         if silent is False:
             print('putty test file non-existent or too small (<64 bytes) probably already done')
@@ -474,7 +473,6 @@ def end_early():
     add_to_clip_board(init.get())
     end_early_butt.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
-    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
@@ -482,21 +480,12 @@ def grab_init():
     add_to_clip_board(init.get())
     end_early_butt.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
     init_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
-    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
-    start_putty()
     clear_data_silent()
     print('cleared putty data file')
     Test.create_file_path_and_key()
     Test.update_key_label()
-
-
-def grab_reset():
-    add_to_clip_board(reset.get())
-    end_early_butt.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
-    init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
-    reset_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
-    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    start_putty()
 
 
 def grab_start():
@@ -508,7 +497,6 @@ def grab_start():
     end_early_butt.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
     init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
-    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_timer()
 
 
@@ -553,7 +541,6 @@ def handle_option(*args):
     save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                                text='save data as')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
-    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def handle_ref_batt(*args):
@@ -605,11 +592,10 @@ def kill_putty(sys_=None, silent=True):
 
 
 def lookup_start():
-    start_val, reset_val, ev_val, timer_val_ = lookup.get(option.get())
-    start.set(start_val)
+    start_val, ev_val, timer_val_ = lookup.get(option.get())
+    start.set(start_val+'XQ'+str(timer_val_*1000)+';')
+    print(f"{start.get()=}")
     start_button.config(text=start.get())
-    reset.set(reset_val)
-    reset_button.config(text=reset.get())
     while len(ev_val) < 4:
         ev_val = ev_val + ('',)
     if ev_val[0]:
@@ -632,7 +618,7 @@ def lookup_start():
 
 
 def lookup_test():
-    test_filename = putty_connection.get(Test.unit)
+    test_filename.set(putty_connection.get(Test.unit))
 
 
 def putty_size():
@@ -684,7 +670,6 @@ def save_data():
         print('putty test file non-existent or too small (<64 bytes) probably already done')
         tkinter.messagebox.showwarning(message="Nothing to save")
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
-    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def save_data_as():
@@ -722,7 +707,6 @@ def save_data_as():
         print('putty test file is too small (<512 bytes) probably already done')
         tkinter.messagebox.showwarning(message="Nothing to save")
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
-    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def save_putty():
@@ -769,7 +753,6 @@ def update_data_buttons():
     save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                                text='save data as')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
-    reset_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 if __name__ == '__main__':
@@ -935,16 +918,6 @@ if __name__ == '__main__':
         start_button = myButton(option_panel_ctr, text='', command=grab_start, fg="purple", bg=bg_color, wraplength=wrap_length,
                                 justify=tk.LEFT, font=butt_font)
     start_button.pack(padx=5, pady=5, expand=True, fill='both')
-    reset = tk.StringVar(master, '')
-    reset_label = tk.Label(option_panel_left, text='copy reset:', font=label_font_gentle)
-    reset_label.pack(padx=5, pady=5)
-    if platform.system() == 'Darwin':
-        reset_button = myButton(option_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color,
-                                justify=tk.LEFT, font=butt_font)
-    else:
-        reset_button = myButton(option_panel_ctr, text='', command=grab_reset, fg="purple", bg=bg_color, wraplength=wrap_length,
-                                justify=tk.LEFT, font=butt_font)
-    reset_button.pack(padx=5, pady=5, expand=True, fill='both')
     timer_val = tk.IntVar(master, 0)
     end_early_butt = myButton(option_panel_right, text='END EARLY', command=end_early, fg="black", bg=bg_color,
                               justify=tk.RIGHT, font=butt_font)
