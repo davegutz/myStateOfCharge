@@ -47,9 +47,9 @@
 // Constants always defined
 #define ONE_HOUR_MILLIS       3600000UL // Number of milliseconds in one hour (60*60*1000)
 #define ONE_DAY_MILLIS        86400000UL// Number of milliseconds in one day (24*60*60*1000)
-#define TALK_DELAY            313UL      // Talk wait, ms (10UL = 0.01 sec)
+#define TALK_DELAY            313UL      // Talk wait, ms (313UL = 0.313 sec)
 #define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec) Dr
-#define READ_TEMP_DELAY       6011UL    // Sensor read wait, ms (6000UL = 6 sec)
+#define READ_TEMP_DELAY       6011UL    // Sensor read wait, ms (6011UL = 6.011 sec)
 #define SUMMARIZE_DELAY       1800000UL // Battery state tracking and reporting, ms (1800000UL = 30 min)
 #define SUMMARIZE_WAIT        60000UL   // Summarize alive time before first save, ms (60000UL = 1 min)
 #define PUBLISH_SERIAL_DELAY  400UL     // Serial print interval (400UL = 0.4 sec)
