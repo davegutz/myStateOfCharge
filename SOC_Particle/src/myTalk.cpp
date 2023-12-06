@@ -170,10 +170,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
   {
     // Categorize the requests
     char key = cp.input_str.charAt(0);
-    if ( key == 'c' || (key == '-' && cp.input_str.charAt(1)!= 'c') )
+    if ( key == 'c' )
     {
-      Serial.printf("***CLEAR QUEUES\n");
-      clear_queues();
+      request = INCOMING;
+    }
+    else if ( key == '-' && cp.input_str.charAt(1)!= 'c')
+    {
+      cp.input_str = cp.input_str.substring(1);  // Delete the leading '-'
+      request = INCOMING;
     }
     else if ( key == '-' )
       request = ASAP;
