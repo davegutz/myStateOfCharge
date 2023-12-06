@@ -169,7 +169,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
   {
     // Categorize the requests
     char key = cp.input_str.charAt(0);
-    if ( key == '-' )
+    if ( key == 'c' || (key == '-' && cp.input_str.charAt(1)!= 'c') )
+    {
+      Serial.printf("***CLEAR QUEUES\n");
+      clear_queues();
+    }
+    else if ( key == '-' )
       request = ASAP;
     else if ( key == '+' )
       request = QUEUE;
@@ -185,7 +190,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
     else
     {
       request = NEW;
-      if ( key == 'c' ) clear_queues();
     }
 
     // Limited echoing of Serial1 commands available
@@ -355,6 +359,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'c' ):  // c:  clear queues
+            Serial.printf("***CLEAR QUEUES\n");
             clear_queues();
             break;
 
