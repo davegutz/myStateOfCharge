@@ -139,7 +139,7 @@ void setup()
   //Log.info("begin setup");
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
-  Serial.begin(230400);
+  Serial.begin(CONFIG_SBAUD);
   Serial.flush();
   delay(1000);          // Ensures a clean display
   Serial.printf("Hi!\n");
@@ -149,7 +149,7 @@ void setup()
   // Compile and flash onto the SOC_Photon target temporarily to set baud rate.  Directions
   // for HC-06 inside SOC_Photon.ino of ../../BT-AT/src.   AT+BAUD8; to set 115200.
   // Serial1.blockOnOverrun(false); doesn't work:  it's a mess; partial lines galore
-  Serial1.begin(S1BAUD);
+  Serial1.begin(CONFIG_S1BAUD);
   Serial1.flush();
 
   // EERAM chip card for I2C

@@ -5,6 +5,8 @@
 const String unit = version + "_soc1a";
 
 // Features config
+#define CONFIG_SBAUD               230400      // Default Serial baud
+#define CONFIG_S1BAUD              230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define CONFIG_ARGON
 #define CONFIG_SSD1306_OLED
 #define CONFIG_47L16_EERAM

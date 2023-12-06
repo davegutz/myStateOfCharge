@@ -25,7 +25,7 @@
 #define _MY_TALK_H
 #include "Battery.h"
 
-enum urgency {INCOMING, ASAP, SOON, QUEUE, NEW};
+enum urgency {INCOMING, ASAP, SOON, QUEUE, NEW, LAST};
 typedef enum urgency urgency;
 
 void benign_zero(BatteryMonitor *Mon, Sensors *Sen);

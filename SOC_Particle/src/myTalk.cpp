@@ -44,21 +44,28 @@ void asap()
 // Process chat strings
 void chat()
 {
-  #ifdef PRINT_QUEUE
-    Serial.printf("shebang [%s]:  ASAP[%s] SOON[%s],QUEUE[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str());
+  #ifdef DEBUG_QUEUE
+    Serial.printf("shebang [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
   #endif
   if ( cp.soon_str.length() )  // Do SOON first
   {
     get_string(&cp.soon_str);
-  #ifdef PRINT_QUEUE
-    if ( cp.token ) Serial.printf("chat (SOON):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str());
+  #ifdef DEBUG_QUEUE
+    if ( cp.token ) Serial.printf("chat (SOON):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
   #endif
   }
-  else  // Do QUEUE only after SOON empty
+  else if ( cp.queue_str.length() ) // Do QUEUE only after SOON empty
   {
     get_string(&cp.queue_str);
-    #ifdef PRINT_QUEUE
-      if ( cp.token ) Serial.printf("chat (QUEUE):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str());
+    #ifdef DEBUG_QUEUE
+      if ( cp.token ) Serial.printf("chat (QUEUE):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+    #endif
+  }
+  else if ( cp.end_str.length() ) // Do QUEUE only after SOON empty
+  {
+    get_string(&cp.end_str);
+    #ifdef DEBUG_QUEUE
+      if ( cp.token ) Serial.printf("chat (QUEUE):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
     #endif
   }
 }
@@ -66,7 +73,7 @@ void chat()
 // Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
 void chit(const String cmd, const urgency when)
 {
-  #ifdef PRINT_QUEUE
+  #ifdef DEBUG_QUEUE
     String When;
     if ( when == NEW) When = "NEW";
     else if ( when == QUEUE) When = "QUEUE";
@@ -75,6 +82,8 @@ void chit(const String cmd, const urgency when)
     else if (when == INCOMING) When = "INCOMING"; 
     Serial.printf("chit cmd=%s [%s]\n", cmd.c_str(), When.c_str());
   #endif
+  if ( when == LAST )
+    cp.end_str += cmd;
   if ( when == QUEUE )
     cp.queue_str += cmd;
   else if ( when == SOON )
@@ -86,6 +95,7 @@ void chit(const String cmd, const urgency when)
 // Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
 void clear_queues()
 {
+  cp.end_str = "";
   cp.queue_str = "";
   cp.soon_str = "";
   cp.asap_str = "";
@@ -165,6 +175,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
       request = QUEUE;
     else if ( key == '*' )
       request = SOON;
+    else if ( key == '<' )
+      request = LAST;
     else if ( key == '>' )
     {
       cp.input_str = cp.input_str.substring(1);  // Delete the leading '>'
@@ -209,6 +221,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
       case ( QUEUE ):
         // Serial.printf("queue:%s,\n", cp.input_str.substring(1).c_str());
         chit( cp.input_str.substring(1)+";", QUEUE);
+        break;
+
+      case ( LAST ):
+        // Serial.printf("last:%s,\n", cp.input_str.substring(1).c_str());
+        chit( cp.input_str.substring(1)+";", LAST);
         break;
 
       case ( INCOMING ):

@@ -5,6 +5,8 @@
 const String unit = version + "_pro2p2";
 
 // Features config
+#define CONFIG_SBAUD               460800      // Default Serial baud
+#define CONFIG_S1BAUD              230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define CONFIG_PHOTON2
 #define CONFIG_BARE
 
