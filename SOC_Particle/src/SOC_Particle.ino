@@ -336,7 +336,12 @@ void loop()
 
   // Synchronize
   #ifdef CONFIG_DS2482_1WIRE
-    if ( read || read_temp || reset || reset_temp ) Ds2482.loop();
+    Ds2482.loop();
+    // if ( read || read_temp || reset || reset_temp )
+    // if ( read_temp || reset_temp )  // never ready=1
+    // {
+    //   Ds2482.loop();
+    // }
   #endif
   now = millis();
   time_now = Time.now();
@@ -359,6 +364,7 @@ void loop()
   // Outputs:   Sen->Tb,  Sen->Tb_filt
   if ( read_temp )
   {
+    Log.info("read_temp");
     #ifdef CONFIG_DS2482_1WIRE
         Ds2482.check();
         cp.tb_info.t_c = Ds2482.tempC(0);
@@ -372,6 +378,7 @@ void loop()
   #ifndef CONFIG_ADS1013_OPAMP
     if ( read )
     {
+      Log.info("Read shunt");
       static unsigned int t_us_last = micros();
       unsigned int t_us_now = micros();
       float T = float(t_us_now - t_us_last) / 1e6;
@@ -384,6 +391,7 @@ void loop()
   // Input all other sensors and do high rate calculations
   if ( read )
   {
+    Log.info("read");
     Sen->reset = reset;
     
     // Check for really slow data capture and run EKF each read frame
@@ -440,11 +448,13 @@ void loop()
     // Print
     print_rapid_data(reset, Sen, Mon);
 
+    Log.info("end read");
   }  // end read (high speed frame)
 
   // OLED and Bluetooth display drivers.   Also convenient update time for saving parameters (remember)
   if ( display_and_remember )
   {
+    Log.info("display and remember");
     #ifdef CONFIG_SSD1306_OLED
       oled_display(display, Sen, Mon);
     #else

@@ -205,18 +205,18 @@ void SavedPars::mem_print()
 // Print
 void SavedPars::pretty_print(const boolean all)
 {
+    if ( all )
+    {
+        // Serial.printf("history array (%d):\n", nhis_);
+        // print_history_array();
+        // print_fault_header();
+        // Serial.printf("fault array (%d):\n", nflt_);
+        // print_fault_array();
+        // print_fault_header();
+    }
     Serial.printf("saved (sp): all=%d\n", all);
     Serial.printf("             defaults    current EERAM values\n");
     for (int i=0; i<size_; i++ ) if ( all || Z_[i]->is_off() )  Z_[i]->print();
-    if ( all )
-    {
-        Serial.printf("history array (%d):\n", nhis_);
-        print_history_array();
-        print_fault_header();
-        Serial.printf("fault array (%d):\n", nflt_);
-        print_fault_array();
-        print_fault_header();
-    }
 
     Serial.printf("Xm:\n");
     pretty_print_modeling();

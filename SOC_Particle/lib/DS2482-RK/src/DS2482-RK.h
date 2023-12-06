@@ -1613,8 +1613,9 @@ private:
 	 */
 	void popCommandList();
 
+	// static const size_t COMMAND_LIST_STACK_SIZE = 4;   dag 12/5/2023
 
-	static const size_t COMMAND_LIST_STACK_SIZE = 4;
+	static const size_t COMMAND_LIST_STACK_SIZE = 12;
 
 	TwoWire &wire;
 	int addr;

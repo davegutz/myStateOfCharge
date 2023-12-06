@@ -72,6 +72,8 @@ void DS2482::setup() {
 }
 
 void DS2482::loop() {
+	if ( commandListIndex > 3 ) Serial.printf("*DS2482 moderate headroom %d of %d\n", commandListIndex, COMMAND_LIST_STACK_SIZE);
+	if ( commandListIndex > COMMAND_LIST_STACK_SIZE-2 ) Serial.printf("******DS2482 low headroom %d of %d\n", commandListIndex, COMMAND_LIST_STACK_SIZE);
 	commandListStack[commandListIndex].loop();
 }
 
