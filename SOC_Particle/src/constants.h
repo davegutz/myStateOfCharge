@@ -38,6 +38,7 @@
 #undef CONFIG_SSD1306_OLED
 #undef CONFIG_DS18B20_SWIRE
 #undef CONFIG_DS2482_1WIRE
+#undef PRINT_QUEUE
 
 #include "local_config.h"       // this is not in GitHub repository.  Copy appropriate local_config??.h to match configure
 

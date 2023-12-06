@@ -44,22 +44,37 @@ void asap()
 // Process chat strings
 void chat()
 {
+  #ifdef PRINT_QUEUE
+    Serial.printf("shebang [%s]:  ASAP[%s] SOON[%s],QUEUE[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str());
+  #endif
   if ( cp.soon_str.length() )  // Do SOON first
   {
     get_string(&cp.soon_str);
-    // if ( cp.token ) Serial.printf("chat (SOON):  talk('%s;')\n", cp.input_str.c_str());
+  #ifdef PRINT_QUEUE
+    if ( cp.token ) Serial.printf("chat (SOON):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str());
+  #endif
   }
   else  // Do QUEUE only after SOON empty
   {
     get_string(&cp.queue_str);
-    // if ( cp.token ) Serial.printf("chat (QUEUE):  talk('%s;')\n", cp.input_str.c_str());
+    #ifdef PRINT_QUEUE
+      if ( cp.token ) Serial.printf("chat (QUEUE):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str());
+    #endif
   }
 }
 
 // Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
 void chit(const String cmd, const urgency when)
 {
-  // Serial.printf("chit cmd=%s\n", cmd.c_str());
+  #ifdef PRINT_QUEUE
+    String When;
+    if ( when == NEW) When = "NEW";
+    else if ( when == QUEUE) When = "QUEUE";
+    else if (when == SOON) When = "SOON";
+    else if (when == ASAP) When = "ASAP";
+    else if (when == INCOMING) When = "INCOMING"; 
+    Serial.printf("chit cmd=%s [%s]\n", cmd.c_str(), When.c_str());
+  #endif
   if ( when == QUEUE )
     cp.queue_str += cmd;
   else if ( when == SOON )
@@ -162,8 +177,16 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
     }
 
     // Limited echoing of Serial1 commands available
-    Serial.printf ("echo: %s, %d\n", cp.input_str.c_str(), request);
-    Serial1.printf("echo: %s, %d\n", cp.input_str.c_str(), request);
+    if ( request==0 )
+    {
+      Serial.printf ("cmd: %s\n", cp.input_str.c_str());
+      Serial1.printf ("cmd: %s\n", cp.input_str.c_str());
+    }
+    else
+    {
+      Serial.printf ("echo: %s, %d\n", cp.input_str.c_str(), request);
+      Serial1.printf("echo: %s, %d\n", cp.input_str.c_str(), request);
+    }
 
     // Deal with each request
     switch ( request )
@@ -1159,12 +1182,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'S' ): // XS:  Stop injection now
+                Serial.printf("STOP\n");
                 Sen->start_inj = 0UL;
                 Sen->stop_inj = 0UL;
                 Sen->end_inj = 0UL;
                 Sen->elapsed_inj = 0UL;
-                chit("Xp0;", QUEUE);  // Reset
-                Serial.printf("STOP\n");
+                chit("v0;", ASAP);     // Turn off echo
+                chit("Pa;", ASAP);     // Print all for record.  Last so Pf last and visible
+                chit("Xm247;", SOON);  // Turn off tweak_test
+                chit("Xp0;", SOON);    // Reset
                 break;
 
               case ( 's' ): // Xs:  scale T_SAT

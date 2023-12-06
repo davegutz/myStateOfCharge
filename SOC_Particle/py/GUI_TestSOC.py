@@ -65,7 +65,7 @@ sel_list = ['custom', 'init1', 'ampHiFail', 'rapidTweakRegression', 'rapidTweakR
             'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
             'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf',
             'pulseEKF', 'pulseSS', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim']
-lookup = {'init': ('Y;-v0;-XS;Ca0.5;+Rf;+Pf;', '', ('',), 0),
+lookup = {'init': ('Y*W;*v0;*XS;*Ca0.5;+Rf;+Pf;', '', ('',), 0),
           'custom': ('', '', ("For general purpose data collection", "'save data' will present a choice of file name", ""), 60),
           'ampHiFail': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;Dm50;Dn0.0001;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 40, 12),
           'rapidTweakRegression': ('Ff0;HR;Xp10;', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 180, 12),
