@@ -165,6 +165,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
   urgency request;
 
   // Serial event
+  request = NEW;
   if (cp.token)
   {
     // Categorize the requests
