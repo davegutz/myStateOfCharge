@@ -475,9 +475,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( '^' ):  //   D^<>:  Temp bias change model for faults
-                Serial.printf("cp.Tb_bias_model%7.3f to", cp.Tb_bias_model);
-                cp.Tb_bias_model = cp.input_str.substring(2).toFloat();
-                Serial.printf("%7.3f\n", cp.Tb_bias_model);
+                cp.Tb_bias_model_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'v' ):  //     Dv<>:  voltage signal adder for faults
@@ -634,10 +632,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'f' ):  //* si, Ff<>:  fake faults
                 INT_in = cp.input_str.substring(2).toInt();
-                Serial.printf("cp.fake_faults, sp.ib_select %d, %d to ", cp.fake_faults, sp.Ib_select());
-                cp.fake_faults = INT_in;
+                cp.fake_faults_p->print_adj_print(INT_in);
+                Serial.printf("sp.ib_select %d to ", sp.Ib_select());
                 sp.put_Ib_select(INT_in);
-                Serial.printf("%d, %d\n", cp.fake_faults, sp.Ib_select());
+                Serial.printf("%d\n", sp.Ib_select());
                 break;
 
               case ( 'I' ):  //   FI<>:  Fault disable ib hard
@@ -1327,7 +1325,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Tb_bias_hdwe_p->print1_help();  //* Dt
   
   #ifndef HELPLESS
-  Serial.printf("  D^= "); Serial.printf("%6.3f", cp.Tb_bias_model); Serial.printf(": del model, deg C [%6.3f]\n", TEMP_BIAS); 
+  cp.Tb_bias_model_p->print_help();  // D^
   Serial.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.printf(": volt fault inj, V [0]\n"); 
   #endif
 
@@ -1364,7 +1362,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   #ifndef HELPLESS
   Serial.printf("  Fc= "); Serial.printf("%6.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 
   Serial.printf("  Fd= "); Serial.printf("%6.3f", Sen->Flt->ib_diff_sclr()); Serial.printf(": sclr ib_diff thr ^ [1]\n"); 
-  Serial.printf("  Ff= "); Serial.printf("%d", cp.fake_faults); Serial.printf(": faults faked (ignored)[%d]\n", FAKE_FAULTS); 
+  cp.fake_faults_p->print_help();  // Ff
+  cp.fake_faults_p->print1_help();  // Ff
   Serial.printf("  Fi= "); Serial.printf("%6.3f", Sen->Flt->ewhi_sclr()); Serial.printf(": sclr e_wrap_hi thr ^ [1]\n"); 
   Serial.printf("  Fo= "); Serial.printf("%6.3f", Sen->Flt->ewlo_sclr()); Serial.printf(": sclr e_wrap_lo thr ^ [1]\n"); 
   Serial.printf("  Fq= "); Serial.printf("%6.3f", Sen->Flt->ib_quiet_sclr()); Serial.printf(": sclr ib_quiet thr v [1]\n"); 

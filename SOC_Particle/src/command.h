@@ -75,7 +75,9 @@ public:
 
   // Adjustment handling structure
   Uint8tZ *eframe_mult_p;
+  BooleanZ *fake_faults_p;
   Uint8tZ *print_mult_p;
+  FloatZ *Tb_bias_model_p;
 
   CommandPars()
   {
@@ -96,7 +98,9 @@ public:
     tb_info.t_c = 0.;
     tb_info.ready = false;
     eframe_mult_p = new Uint8tZ("DE", NULL, "EKF Multiframe rate x Dr",  "uint",  0, UINT8_MAX, &eframe_mult, EKF_EFRAME_MULT, true);
+    fake_faults_p = new BooleanZ("Ff", NULL, "Faults ignored",  "0=False, 1=True",  0, 1, &fake_faults, FAKE_FAULTS, true);
     print_mult_p  = new Uint8tZ("DP", NULL, "Print multiplier x Dr", "uint",  0, UINT8_MAX, &print_mult, DP_MULT, true);
+    Tb_bias_model_p  = new FloatZ("D^", NULL, "Del model", "deg C",  -50, 50, &Tb_bias_model, TEMP_BIAS, true);
   }
 
   void assign_eframe_mult(const uint8_t count) { eframe_mult = count; }

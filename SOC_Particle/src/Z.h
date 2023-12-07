@@ -77,6 +77,124 @@ protected:
 };
 
 
+class BooleanZ: public Z
+{
+public:
+    BooleanZ(){}
+
+    BooleanZ(const String &code, SerialRAM *ram, const String &description, const String &units, const boolean min, const boolean max,
+    boolean *store, const boolean _default=false, const boolean check_off=false):
+        Z(code, ram, description, units, true)
+    {
+        min_ = min;
+        max_ = max;
+        val_ = store;
+        default_ = max(min(_default, max_), min_);
+        check_off_ = check_off;
+        if ( ram==NULL ) set(*val_); // retained
+    }
+
+    ~BooleanZ(){}
+
+    boolean assign_addr(boolean next)
+    {
+        addr_.a16 = next;
+        return next + sizeof(boolean);
+    }
+
+    virtual void get()
+    {
+        if ( is_eeram_ ) *val_ = rP_->read(addr_.a16);
+    }
+
+    virtual boolean is_corrupt()
+    {
+        boolean corrupt = *val_ > max_ || *val_ < min_;
+        if ( corrupt ) Serial.printf("\n%s %s corrupt", code_.c_str(), description_.c_str());
+        return corrupt;
+    }
+
+    virtual boolean is_off()
+    {
+        return *val_ != default_ && !check_off_;
+    }
+
+    boolean max_of() { return max_; }
+
+    boolean min_of() { return min_; }
+
+    boolean nominal() { return default_; }
+    
+    void print_str()
+    {
+        if ( !check_off_ )
+            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (* %-2s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+        else
+            sprintf(pr.buff, " %-33s %9d, %10s (* %-2s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+    }
+
+    void print()
+    {
+        print_str();
+        Serial.printf("%s\n", pr.buff);
+    }
+    
+    void print1()
+    {
+        print_str();
+        Serial1.printf("%s\n", pr.buff);
+    }
+
+    void print_help_str()
+    {
+        sprintf(pr.buff, "* %-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+    }
+
+    void print_help()
+    {
+        print_help_str();
+        Serial.printf("%s\n", pr.buff);
+    }
+
+    void print1_help()
+    {
+        print_help_str();
+        Serial1.printf("%s\n", pr.buff);
+    }
+
+    void print_adj_print(const uint8_t input)
+    {
+        print();
+        print1();
+        set(input);
+        print();
+        print1();
+    }
+   
+    void set(boolean val)
+    {
+        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %d (%-d, %d)\n", code_.c_str(), val, min_, max_);
+        else
+        {
+            *val_ = val;
+            if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
+        }
+    }
+
+    virtual void set_default()
+    {
+        if ( !check_off_ ) set(default_);
+    }
+
+protected:
+    boolean *val_;
+    boolean min_;
+    boolean max_;
+    boolean default_;
+    boolean check_off_;
+};
+
+
 class DoubleZ: public Z
 {
 public:
