@@ -912,7 +912,8 @@ if __name__ == '__main__':
         # input_files = ['g20230530/hist_Dc06_20230715_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
         # input_files = ['g20230530/Hd_Dc06_20230725_soc1a_bb.csv']
         # input_files = ['g20230530/serial_20230929_034438.csv']; chm_in = 0; rated_batt_cap_in = 108.4;  # TODO:  fix this
-        input_files = ['g20230530/serial_20231002_104351.csv']; chm_in = 0; rated_batt_cap_in = 108.4; dvoc_mon_in = -0.3; dvoc_sim_in = dvoc_mon_in
+        input_files = ['g20231111b/ampHiFail_pro3p2_bb.csv']; chm_in = 0
+        # input_files = ['g20230530/serial_20231002_104351.csv']; chm_in = 0; rated_batt_cap_in = 108.4; dvoc_mon_in = -0.3; dvoc_sim_in = dvoc_mon_in
         # input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
         #                'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
         #                'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt', 'serial_20230219_164928.txt',
@@ -990,7 +991,7 @@ if __name__ == '__main__':
         mon_ver_100, sim_ver_100, sim_s_ver_100, mon_r, sim_r =\
             replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=False, t_max=t_max_in, sres0=sres0_in,
                       sresct=sresct_in, stauct_mon=stauct_in, stauct_sim=stauct_in, use_vb_sim=False,
-                      s_hys_sim=s_hys_in, s_hys_mon=s_hys_in, scale_hys_cap_mon=s_hys_cap_in,
+                      s_hys_sim=s_hys_in, s_hys_mon=s_hys_in,
                       scale_hys_cap_sim=s_hys_cap_in, s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in,
                       s_hys_chg=s_hys_chg_in, s_hys_dis=s_hys_dis_in, scale_in=scale_in, use_mon_soc=use_mon_soc_in,
                       dvoc_mon=dvoc_mon_in, dvoc_sim=dvoc_sim_in)
