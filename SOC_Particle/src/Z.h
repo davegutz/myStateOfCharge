@@ -91,7 +91,15 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL ) set(*val_); // retained
+        if ( ram==NULL )
+        {
+            set(*val_);
+            prefix_ = "  ";
+        }
+        else  // EERAM
+        {
+            prefix_ = "* ";
+        }
     }
 
     ~BooleanZ(){}
@@ -128,9 +136,9 @@ public:
     void print_str()
     {
         if ( !check_off_ )
-            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (* %-2s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
-            sprintf(pr.buff, " %-33s %9d, %10s (* %-2s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -147,7 +155,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(pr.buff, "* %-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", prefix_.c_str(), code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -192,6 +200,7 @@ protected:
     boolean max_;
     boolean default_;
     boolean check_off_;
+    String prefix_;
 };
 
 
@@ -330,7 +339,15 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL ) set(*val_); // retained
+        if ( ram==NULL )
+        {
+            set(*val_);
+            prefix_ = "  ";
+        }
+        else  // EERAM
+        {
+            prefix_ = "* ";
+        }
     }
 
     ~FloatZ(){}
@@ -370,9 +387,9 @@ public:
     void print_str()
     {
         if ( !check_off_ )
-            sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (* %-2s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
-            sprintf(pr.buff, " %-33s %9.3f, %10s (* %-2s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-33s %9.3f, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -389,7 +406,7 @@ public:
     
     void print_help_str()
     {
-        sprintf(pr.buff, "* %-2s= %6.3f: (%-6.3g-%6.3g) [%6.3f] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(pr.buff, "%s%-2s= %6.3f: (%-6.3g-%6.3g) [%6.3f] %s, %s", prefix_.c_str(), code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -434,6 +451,7 @@ protected:
     float min_;
     float max_;
     boolean check_off_;
+    String prefix_;
 };
 
 
@@ -997,7 +1015,15 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL ) set(*val_); // retained
+        if ( ram==NULL )
+        {
+            set(*val_);
+            prefix_ = "  ";
+        }
+        else  // EERAM
+        {
+            prefix_ = "* ";
+        }
     }
 
     ~ULongZ(){}
@@ -1037,9 +1063,9 @@ public:
     void print_str()
     {
         if ( !check_off_ )
-            sprintf(pr.buff, " %-18s %10d -> %10d, %10s (* %-2s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-18s %10d -> %10d, %10s (%s%-2s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
-            sprintf(pr.buff, " %-32s %10d, %10s (* %-2s)", description_.c_str(), (int)*val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-32s %10d, %10s (%s%-2s)", description_.c_str(), (int)*val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
     
     void print()
@@ -1056,7 +1082,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(pr.buff, "* %-2s= %6ld: (%-6ld-%6ld) [%6ld] %s, %s", code_.c_str(), min_, max_, default_, *val_, description_.c_str(), units_.c_str());
+        sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", prefix_.c_str(), code_.c_str(), (int)*val_, (int)min_, (int)max_, (int)default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -1101,6 +1127,7 @@ protected:
     unsigned long max_;
     unsigned long default_;
     boolean check_off_;
+    String prefix_;
 };
 
 // class FloatVariable : public Z <float>

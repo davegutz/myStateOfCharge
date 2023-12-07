@@ -46,6 +46,55 @@ struct PublishPars
 };
 
 
+// A limited class of variables needed to tweak behavior.  Perhaps could be combined with CommandPars if can
+// convince myself that CommandPars is needed to be treated special and separate for backup RAM use?
+class AdjustPars
+{
+public:
+  ~AdjustPars();
+
+  // Small static value area for 'retained'
+  boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
+  unsigned long int tail_inj; // Tail after end injection, ms
+  float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale chec, (1)
+  unsigned long int wait_inj; // Wait before start injection, ms
+
+  // Adjustment handling structure
+  BooleanZ *fail_tb_p;
+  FloatZ *tb_stale_time_sclr_p;
+  ULongZ *tail_inj_p;
+  ULongZ *wait_inj_p;
+
+  AdjustPars()
+  {
+    nominalize();
+    fail_tb_p             = new BooleanZ("Xu", NULL, "Ignore Tb & fail", "1=Fail",  false, true, &fail_tb, 0, true);
+    tb_stale_time_sclr_p  = new FloatZ("Xv", NULL, "scl Tb 1-wire stale pers", "slr",  0, 100, &tb_stale_time_sclr, 1, true);
+    tail_inj_p            = new ULongZ("XT", NULL, "tail end inj", "ms", 0UL, 120000UL, &tail_inj, 0UL, true);
+    wait_inj_p            = new ULongZ("XW", NULL, "wait start inj", "ms", 0UL, 120000UL, &wait_inj, 0UL, true);
+  }
+
+  void large_reset(void)
+  {
+    nominalize();
+  }
+
+  void nominalize(void)
+  {
+    tb_stale_time_sclr = 1;
+  }
+
+  void pretty_print(void)
+  {
+    Serial.printf("adjust parameters(ap):\n");
+    Serial.printf(" fail_tb %d\n", fail_tb);
+    Serial.printf(" tb_stale_time_sclr %7.3f\n", tb_stale_time_sclr);
+  }
+
+};            
+
+
+
 class CommandPars
 {
 public:

@@ -108,7 +108,8 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
 
 // Globals
 extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
-extern CommandPars cp;            // Various parameters to be common at system level
+extern CommandPars cp;            // Various parameters shared at system level
+extern AdjustPars ap;             // Various adjustments
 extern PrinterPars pr;            // Print buffer structure
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
@@ -124,6 +125,7 @@ extern PublishPars pp;            // For publishing
 Flt_st mySum[NSUM];                   // Summaries
 PrinterPars pr = PrinterPars();       // Print buffer
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level
+AdjustPars ap = AdjustPars();         // Various parameters for adjustment
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
 unsigned long millis_flip = millis(); // Timekeeping
 unsigned long last_sync = millis();   // Timekeeping

@@ -30,6 +30,7 @@
 #include "mySummary.h"
 
 extern CommandPars cp;  // Various parameters shared at system level
+extern AdjustPars ap;   // Various adjustments
 extern PrinterPars pr;  // Print buffer
 extern PublishPars pp;  // For publishing
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
@@ -89,7 +90,7 @@ float TempSensor::sample(Sensors *Sen)
   #elif defined(CONFIG_DS2482_1WIRE)
     // Check success
 
-    if ( cp.tb_info.ready && TEMP_RANGE_CHECK<cp.tb_info.t_c && cp.tb_info.t_c<TEMP_RANGE_CHECK_MAX && !Sen->Flt->fail_tb() )
+    if ( cp.tb_info.ready && TEMP_RANGE_CHECK<cp.tb_info.t_c && cp.tb_info.t_c<TEMP_RANGE_CHECK_MAX && !ap.fail_tb )
     {
       Tb_hdwe = SdTb->update(cp.tb_info.t_c);
       tb_stale_flt_ = false;
@@ -240,9 +241,9 @@ void Shunt::sample(const boolean reset_loc, const float T)
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving):
   cc_diff_(0.), cc_diff_sclr_(1), cc_diff_empty_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false),
-  ewhi_sclr_(1), ewlo_sclr_(1), ewmin_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0), fail_tb_(false),
+  ewhi_sclr_(1), ewlo_sclr_(1), ewmin_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0),
   ib_diff_sclr_(1), ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
-  latched_fail_fake_(false), tb_sel_stat_(1), tb_stale_time_sclr_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
+  latched_fail_fake_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   tb_sel_stat_last_(1), vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL), sp_preserving_(preserving)
 {
   IbErrFilt = new LagTustin(T, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
@@ -702,7 +703,7 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
 {
   boolean reset_loc = reset | reset_all_faults_;
 
-  if ( disab_tb_fa_ || (sp.mod_tb() && !fail_tb_) )
+  if ( disab_tb_fa_ || (sp.mod_tb() && !ap.fail_tb) )
   {
     faultAssign( false, TB_FLT );
     failAssign( false, TB_FA );
@@ -710,7 +711,7 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
   else
   {
     faultAssign( Sen->SensorTb->tb_stale_flt(), TB_FLT );
-    failAssign( TbStaleFail->calculate(tb_flt(), TB_STALE_SET*tb_stale_time_sclr_, TB_STALE_RESET*tb_stale_time_sclr_,
+    failAssign( TbStaleFail->calculate(tb_flt(), TB_STALE_SET*ap.tb_stale_time_sclr, TB_STALE_RESET*ap.tb_stale_time_sclr,
       Sen->T_temp, reset_loc), TB_FA );
   }
 }

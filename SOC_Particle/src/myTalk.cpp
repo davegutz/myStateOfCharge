@@ -31,6 +31,7 @@
 #include "debug.h"
 
 extern CommandPars cp;            // Various parameters shared at system level
+extern AdjustPars ap;             // Various adjustments
 extern PrinterPars pr;            // Print buffer
 extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
@@ -128,8 +129,8 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   Sen->Sim->ds_voc_soc(0);  // Ds
   cp.Tb_bias_model = 0;  // D^
   Sen->Sim->Dv(0);  // Dy
-  Sen->Flt->tb_stale_time_sclr(1);  // Xv 1
-  Sen->Flt->fail_tb(0);  // Xu 0
+  ap.tb_stale_time_sclr = 1;  // Xv 1
+  ap.fail_tb = false;  // Xu 0
 
   // Noise
   Sen->Tb_noise_amp(0);  // DT 0
@@ -1123,8 +1124,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     {
                       chit("Xf.02;", QUEUE);  // Frequency 0.02 Hz
                       chit("Xa-2000;", QUEUE);// Amplitude -2000 A
-                      chit("XW5;", QUEUE);    // Wait time before starting to cycle
-                      chit("XT5;", QUEUE);    // Wait time after cycle to print
+                      chit("XW5000;", QUEUE);    // Wait time before starting to cycle
+                      chit("XT5000;", QUEUE);    // Wait time after cycle to print
                       chit("XC3;", QUEUE);    // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
                       chit("v4;", QUEUE);     // Data collection
@@ -1133,8 +1134,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     {
                       chit("Xf.002;", QUEUE); // Frequency 0.002 Hz
                       chit("Xa-60;", QUEUE);  // Amplitude -60 A
-                      chit("XW60;", QUEUE);   // Wait time before starting to cycle
-                      chit("XT60;", QUEUE);  // Wait time after cycle to print
+                      chit("XW60000;", QUEUE);   // Wait time before starting to cycle
+                      chit("XT60000;", QUEUE);  // Wait time after cycle to print
                       chit("XC1;", QUEUE);    // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
                       chit("v2;", QUEUE);     // Data collection
@@ -1143,8 +1144,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     {
                       chit("Xf.0002;", QUEUE);  // Frequency 0.002 Hz
                       chit("Xa-6;", QUEUE);     // Amplitude -60 A
-                      chit("XW60;", QUEUE);     // Wait time before starting to cycle
-                      chit("XT2400;", QUEUE);   // Wait time after cycle to print
+                      chit("XW60000;", QUEUE);     // Wait time before starting to cycle
+                      chit("XT240000;", QUEUE);   // Wait time after cycle to print
                       chit("XC.5;", QUEUE);     // Number of injection cycles
                       chit("W2;", QUEUE);       // Wait
                       chit("v2;", QUEUE);       // Data collection
@@ -1154,8 +1155,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       chit("Xtt;", QUEUE);      // Start up a triangle wave
                       chit("Xf.02;", QUEUE);  // Frequency 0.02 Hz
                       chit("Xa-29500;", QUEUE);// Amplitude -2000 A
-                      chit("XW5;", QUEUE);    // Wait time before starting to cycle
-                      chit("XT5;", QUEUE);    // Wait time after cycle to print
+                      chit("XW5000;", QUEUE);    // Wait time before starting to cycle
+                      chit("XT5000;", QUEUE);    // Wait time after cycle to print
                       chit("XC3;", QUEUE);    // Number of injection cycles
                       chit("W2;", QUEUE);     // Wait
                       chit("v2;", QUEUE);     // Data collection
@@ -1194,11 +1195,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'R' ): // XR:  Start injection now
                 if ( Sen->now>TEMP_INIT_DELAY )
                 {
-                  Sen->start_inj = Sen->wait_inj + Sen->now;
-                  Sen->stop_inj = Sen->wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(sp.Freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
-                  Sen->end_inj = Sen->stop_inj + Sen->tail_inj;
+                  Sen->start_inj = ap.wait_inj + Sen->now;
+                  Sen->stop_inj = ap.wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(sp.Freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
+                  Sen->end_inj = Sen->stop_inj + ap.tail_inj;
                   Serial.printf("**\n*** RUN: at %ld, %7.3f cycles %ld to %ld with %ld wait and %ld tail\n\n",
-                    Sen->now, Sen->cycles_inj, Sen->start_inj, Sen->stop_inj, Sen->wait_inj, Sen->tail_inj);
+                    Sen->now, Sen->cycles_inj, Sen->start_inj, Sen->stop_inj, ap.wait_inj, ap.tail_inj);
                 }
                 else Serial.printf("Wait%5.1fs for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
                 break;
@@ -1223,29 +1224,19 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'W' ):  // XW<>:  Wait beginning of programmed transient
-                FP_in = cp.input_str.substring(2).toFloat();
-                Sen->wait_inj = (unsigned long int)(max(FP_in, 0.))*1000;
-                Serial.printf("Wait%7.1f s to inj\n", FP_in);
+                ap.wait_inj_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
-              case ( 'T' ):  // XT<>:  Tail
-                FP_in = cp.input_str.substring(2).toFloat();
-                Sen->tail_inj = (unsigned long int)(max(FP_in, 0.))*1000;
-                Serial.printf("Wait%7.1f s tail after\n", FP_in);
+              case ( 'T' ):  // XT<>:  Tail end of programmed transient
+                ap.tail_inj_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'u' ):  // Xu<>:  Tb, fail it
-                INT_in = cp.input_str.substring(2).toInt();
-                Serial.printf("Fail tb %d to ", Sen->Flt->fail_tb());
-                Sen->Flt->fail_tb(INT_in);
-                Serial.printf("%d\n", Sen->Flt->fail_tb());
+                ap.fail_tb_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'v' ):  // Xv<>:  Tb stale time scalar
-                FP_in = cp.input_str.substring(2).toFloat();
-                Serial.printf("Stale tb time sclr%9.4f to", Sen->Flt->tb_stale_time_sclr());
-                Sen->Flt->tb_stale_time_sclr(FP_in);
-                Serial.printf("%9.4f\n", Sen->Flt->tb_stale_time_sclr());
+                ap.tb_stale_time_sclr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               default:
@@ -1484,10 +1475,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf(" XR  "); Serial.printf("RUN inj\n");
   Serial.printf(" XS  "); Serial.printf("STOP inj\n");
   Serial.printf(" Xs= "); Serial.printf("%4.2f scalar on T_SAT\n", cp.s_t_sat);
-  Serial.printf(" XW= "); Serial.printf("%7.2f s wait start inj\n", float(Sen->wait_inj)/1000.);
-  Serial.printf(" XT= "); Serial.printf("%7.2f s tail end inj\n", float(Sen->tail_inj)/1000.);
-  Serial.printf(" Xu= "); Serial.printf("%d T=ignore Tb read\n", Sen->Flt->fail_tb());
-  Serial.printf(" Xv= "); Serial.printf("%4.2f scale Tb 1-wire stale persist\n", Sen->Flt->tb_stale_time_sclr());
+  ap.tail_inj_p->print_help();  // XT
+  ap.wait_inj_p->print_help();  // XW
+  ap.fail_tb_p->print_help();  // Xu
+  ap.tb_stale_time_sclr_p->print_help();  // Xv
   Serial.printf("\nurgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE, <=LAST\n");
   #endif
 }

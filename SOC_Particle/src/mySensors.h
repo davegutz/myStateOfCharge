@@ -191,8 +191,6 @@ public:
   float ewlo_thr() { return ewlo_thr_; };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
-  void fail_tb(const boolean fail) { fail_tb_ = fail; };
-  boolean fail_tb() { return fail_tb_; };
   uint16_t fltw() { return fltw_; };
   uint16_t falw() { return falw_; };
   boolean ib_amp_bare() { return faultRead(IB_AMP_BARE);  };
@@ -247,8 +245,6 @@ public:
   boolean tb_flt() { return faultRead(TB_FLT); };
   int8_t tb_sel_status() { return tb_sel_stat_; };
   void tb_stale(const boolean reset, Sensors *Sen);
-  void tb_stale_time_sclr(const float sclr) { tb_stale_time_sclr_ = sclr; };
-  float tb_stale_time_sclr() { return tb_stale_time_sclr_; };
   void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, const float _vb_max, const boolean reset);  // Range check Vb
   boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
@@ -286,7 +282,6 @@ protected:
   float ewsat_sclr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
-  boolean fail_tb_;         // Make hardware bus read ignore Tb and fail it
   float ib_diff_sclr_;      // Scale ib_diff detection thresh, scalar
   float ib_quiet_sclr_;     // Scale ib_quiet detection thresh, scalar
   float ib_diff_;           // Current sensor difference error, A
@@ -296,7 +291,6 @@ protected:
   boolean latched_fail_;    // There is a latched fail, T=latched fail
   boolean latched_fail_fake_;  // There would be a latched fail if not faking, T=latched fail
   int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
-  float tb_stale_time_sclr_; // Scalar on persistences of Tb hardware stale chec, (1)
   int8_t vb_sel_stat_;      // Memory of Vb signal selection, 0=none, 1=sensor
   int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noa, 0=none, 1=a
   boolean reset_all_faults_;// Reset all fault logic
@@ -358,9 +352,7 @@ public:
   unsigned long int elapsed_inj;  // Injection elapsed time, ms
   unsigned long int start_inj;// Start of calculated injection, ms
   unsigned long int stop_inj; // Stop of calculated injection, ms
-  unsigned long int wait_inj; // Wait before start injection, ms
   unsigned long int end_inj;  // End of print injection, ms
-  unsigned long int tail_inj; // Tail after end injection, ms
   unsigned long int until_q;  // Time until set v0, ms
   float cycles_inj;           // Number of injection cycles
   double control_time;        // Decimal time, seconds since 1/1/2021
