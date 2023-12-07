@@ -25,12 +25,15 @@
 #define _COMMAND_H
 
 #include "myCloud.h"
+#include "constants.h"
+#include "Z.h"
 
 // DS2482 data union
 typedef union {
 	float t_c;
 	boolean ready;
 } Tb_union;
+
 
 // Definition of structure for external control coordination
 struct PublishPars
@@ -43,9 +46,12 @@ struct PublishPars
 };
 
 
-struct CommandPars
+class CommandPars
 {
-  char buffer[280];         // Auxiliary print buffer
+public:
+  ~CommandPars();
+
+  // Small static value area for 'retained'
   String input_str;         // Hold incoming data
   String end_str;           // Hold chit_chat end data - after everything else, 1 per Control pass
   String queue_str;         // Hold chit_chat queue data - queue with Control pass, 1 per Control pass
@@ -67,7 +73,11 @@ struct CommandPars
   Tb_union tb_info;         // Use cp to pass DS2482 I2C information
   boolean write_summary;    // Use talk to issue a write command to summary
 
-  CommandPars(void)
+  // Adjustment handling structure
+  Uint8tZ *eframe_mult_p;
+  Uint8tZ *print_mult_p;
+
+  CommandPars()
   {
     token = false;
     dc_dc_on = false;
@@ -85,27 +95,17 @@ struct CommandPars
     write_summary = false;
     tb_info.t_c = 0.;
     tb_info.ready = false;
+    eframe_mult_p = new Uint8tZ("DE", NULL, "EKF Multiframe rate x Dr",  "uint",  0, UINT8_MAX, &eframe_mult, EKF_EFRAME_MULT, true);
+    print_mult_p  = new Uint8tZ("DP", NULL, "Print multiplier x Dr", "uint",  0, UINT8_MAX, &print_mult, DP_MULT, true);
   }
 
-  void assign_eframe_mult(const uint8_t count)
-  {
-    eframe_mult = count;
-  }
+  void assign_eframe_mult(const uint8_t count) { eframe_mult = count; }
 
-  void assign_print_mult(const uint8_t count)
-  {
-    print_mult = count;
-  }
+  void assign_print_mult(const uint8_t count)  { print_mult = count;  }
 
-  void cmd_reset(void)
-  {
-    soft_reset = true;
-  }
+  void cmd_reset(void) { soft_reset = true; }
 
-  void cmd_summarize(void)
-  {
-    write_summary = true;
-  }
+  void cmd_summarize(void) { write_summary = true; }
 
   void large_reset(void)
   {

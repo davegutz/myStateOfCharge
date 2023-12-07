@@ -30,6 +30,7 @@
 #include "mySubs.h"
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 extern CommandPars cp;  // Various parameters to be static at system level
+extern PrinterPars pr;  // Print buffer
 extern PublishPars pp;  // For publishing
 
 // class Battery
@@ -801,9 +802,9 @@ float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Battery
         double cTime;
         if ( sp.tweak_test() ) cTime = float(Sen->now)/1000.;
         else cTime = Sen->control_time;
-        sprintf(cp.buffer, "unit_sim, %13.3f, %d, %7.0f, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
+        sprintf(pr.buff, "unit_sim, %13.3f, %d, %7.0f, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
             cTime, sp.Sim_chm_z, q_cap_rated_scaled_, bms_off_, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ib_charge_, ioc_, model_saturated_, *sp_delta_q_, soc_, reset_temp,'\0');
-        Serial.printf("%s\n", cp.buffer);
+        Serial.printf("%s\n", pr.buff);
     }
 
     // Save and return

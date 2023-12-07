@@ -230,8 +230,8 @@ void SavedPars::pretty_print(const boolean all)
 
 void SavedPars::pretty_print_modeling()
 {
-  bitMapPrint(cp.buffer, sp.Modeling(), 8);
-  Serial.printf(" 0x%s\n", cp.buffer);
+  bitMapPrint(pr.buff, sp.Modeling(), 8);
+  Serial.printf(" 0x%s\n", pr.buff);
   Serial.printf(" 0x128 ib_noa_dscn %d\n", mod_ib_noa_dscn());
   Serial.printf(" 0x64  ib_amp_dscn %d\n", mod_ib_amp_dscn());
   Serial.printf(" 0x32  vb_dscn %d\n", mod_vb_dscn());

@@ -31,6 +31,7 @@
 #include "debug.h"
 
 extern CommandPars cp;            // Various parameters shared at system level
+extern PrinterPars pr;            // Print buffer
 extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 
@@ -428,9 +429,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'E' ):  //   DE<>:  EKF execution frame multiplier
-                Serial.printf("Eframe mult %d to ", cp.eframe_mult);
-                cp.assign_eframe_mult(max(min(cp.input_str.substring(2).toInt(), UINT8_MAX), 0));
-                Serial.printf("%d\n", cp.eframe_mult);
+                cp.eframe_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'i' ):  //*  Di<>:  Bias all current sensors (same way as Da and Db)
@@ -455,9 +454,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'P' ):  //   DP<>:  PRINT multiplier
-                Serial.printf("Print int %d to ", cp.print_mult);
-                cp.assign_print_mult(max(min(cp.input_str.substring(2).toInt(), UINT8_MAX), 0));
-                Serial.printf("%d\n", cp.print_mult);
+                cp.print_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'r' ):  //   Dr<>:  READ sample time input
@@ -1320,8 +1317,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Vb_bias_hdwe_p->print1_help();  //* Dc
 
   #ifndef HELPLESS
-  Serial.printf("  DE= "); Serial.printf("%d", cp.eframe_mult); Serial.printf(": eframe mult Dr [20]\n");
-  Serial.printf("  DP=  "); Serial.print(cp.print_mult); Serial.printf(": print mult Dr [4]\n"); 
+  cp.eframe_mult_p->print_help();  //  DE
+  cp.print_mult_p->print_help();  //  DP
   Serial.printf("  Dr=  "); Serial.print(Sen->ReadSensors->delay()); Serial.printf(": minor frame, ms [100]\n"); 
   Serial.printf("  Ds=  "); Serial.print(Sen->Sim->ds_voc_soc()); Serial.printf(": d_soc to Sim.voc-soc, fraction [0]\n");
   #endif

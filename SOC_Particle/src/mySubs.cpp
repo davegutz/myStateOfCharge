@@ -29,6 +29,7 @@
 #include "mySummary.h"
 
 extern CommandPars cp;  // Various parameters shared at system level
+extern PrinterPars pr;  // Print buffer
 extern PublishPars pp;  // For publishing
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
@@ -119,7 +120,7 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
   if ( sp.tweak_test() ) cTime = double(Sen->now)/1000.;
   else cTime = Sen->control_time;
 
-  sprintf(cp.buffer, "%s, %s,%13.3f,%6.3f, %d,%7.0f,%d, %d, %d, %d, %6.3f,%6.3f,%9.3f,%9.3f,%7.5f,  %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%5.3f,", \
+  sprintf(pr.buff, "%s, %s,%13.3f,%6.3f, %d,%7.0f,%d, %d, %d, %d, %6.3f,%6.3f,%9.3f,%9.3f,%7.5f,  %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%5.3f,", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
     sp.Mon_chm(), Mon->q_cap_rated_scaled(), pubList->sat, sp.Ib_select(), sp.Modeling(), Mon->bms_off(),
     Mon->Tb(), Mon->vb(), Mon->ib(), Mon->ib_charge(), Mon->voc_soc(), 
@@ -390,22 +391,22 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
 
   // ---------- Top Line of Display -------------------------------------------
   // Tb
-  sprintf(cp.buffer, "%3.0f", pp.pubList.Tb);
-  disp_0 = cp.buffer;
+  sprintf(pr.buff, "%3.0f", pp.pubList.Tb);
+  disp_0 = pr.buff;
   if ( Sen->Flt->tb_fa() && (blink==0 || blink==1) )
     disp_0 = "***";
 
   // Voc
-  sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
-  disp_1 = cp.buffer;
+  sprintf(pr.buff, "%5.2f", pp.pubList.Voc);
+  disp_1 = pr.buff;
   if ( Sen->Flt->vb_sel_stat()==0 && (blink==1 || blink==2) )
     disp_1 = "*fail";
   else if ( Sen->bms_off )
     disp_1 = " off ";
 
   // Ib
-  sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);
-  disp_2 = cp.buffer;
+  sprintf(pr.buff, "%6.1f", pp.pubList.Ib);
+  disp_2 = pr.buff;
   if ( blink==2 )
   {
     if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
@@ -431,8 +432,8 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
 
   // --------------------- Bottom line of Display ------------------------------
   // Hrs EHK
-  sprintf(cp.buffer, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
-  disp_0 = cp.buffer;
+  sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
+  disp_0 = pr.buff;
   if ( blink==0 || blink==1 || blink==2 )
   {
     if ( Sen->Flt->cc_diff_fa() )
@@ -443,21 +444,21 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   // t charge
   if ( abs(pp.pubList.tcharge) < 24. )
   {
-    sprintf(cp.buffer, "%5.1f", pp.pubList.tcharge);
+    sprintf(pr.buff, "%5.1f", pp.pubList.tcharge);
   }
   else
   {
-    sprintf(cp.buffer, " --- ");
+    sprintf(pr.buff, " --- ");
   }  
-  disp_1 = cp.buffer;
+  disp_1 = pr.buff;
   display->print(disp_1.c_str());
 
   // Hrs large
   display->setTextSize(2);             // Draw 2X-scale text
   if ( blink==1 || blink==3 || !Sen->saturated )
   {
-    sprintf(cp.buffer, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
-    disp_2 = cp.buffer;
+    sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
+    disp_2 = pr.buff;
   }
   else if (Sen->saturated)
     disp_2 = "SAT";
@@ -488,22 +489,22 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
 
   // ---------- Top Line of Display -------------------------------------------
   // Tb
-  sprintf(cp.buffer, "%3.0f", pp.pubList.Tb);
-  disp_0 = cp.buffer;
+  sprintf(pr.buff, "%3.0f", pp.pubList.Tb);
+  disp_0 = pr.buff;
   if ( Sen->Flt->tb_fa() && (blink==0 || blink==1) )
     disp_0 = "***";
 
   // Voc
-  sprintf(cp.buffer, "%5.2f", pp.pubList.Voc);
-  disp_1 = cp.buffer;
+  sprintf(pr.buff, "%5.2f", pp.pubList.Voc);
+  disp_1 = pr.buff;
   if ( Sen->Flt->vb_sel_stat()==0 && (blink==1 || blink==2) )
     disp_1 = "*fail";
   else if ( Sen->bms_off )
     disp_1 = " off ";
 
   // Ib
-  sprintf(cp.buffer, "%6.1f", pp.pubList.Ib);
-  disp_2 = cp.buffer;
+  sprintf(pr.buff, "%6.1f", pp.pubList.Ib);
+  disp_2 = pr.buff;
   if ( blink==2 )
   {
     if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
@@ -526,8 +527,8 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
 
   // --------------------- Bottom line of Display ------------------------------
   // Hrs EHK
-  sprintf(cp.buffer, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
-  disp_0 = cp.buffer;
+  sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
+  disp_0 = pr.buff;
   if ( blink==0 || blink==1 || blink==2 )
   {
     if ( Sen->Flt->cc_diff_fa() )
@@ -537,19 +538,19 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
   // t charge
   if ( abs(pp.pubList.tcharge) < 24. )
   {
-    sprintf(cp.buffer, "%5.1f", pp.pubList.tcharge);
+    sprintf(pr.buff, "%5.1f", pp.pubList.tcharge);
   }
   else
   {
-    sprintf(cp.buffer, " --- ");
+    sprintf(pr.buff, " --- ");
   }  
-  disp_1 = cp.buffer;
+  disp_1 = pr.buff;
 
   // Hrs large
   if ( blink==1 || blink==3 || !Sen->saturated )
   {
-    sprintf(cp.buffer, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
-    disp_2 = cp.buffer;
+    sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
+    disp_2 = pr.buff;
   }
   else if (Sen->saturated)
     disp_2 = "SAT";
@@ -808,9 +809,9 @@ void serialEvent1()
 void rapid_print(Sensors *Sen, BatteryMonitor *Mon)
 {
   create_rapid_string(&pp.pubList, Sen, Mon);
-  Serial.printf("%s\n", cp.buffer);
+  Serial.printf("%s\n", pr.buff);
   #ifndef CONFIG_PHOTON
-    Serial1.printf("%s\n", cp.buffer);
+    Serial1.printf("%s\n", pr.buff);
   #endif
 }
 

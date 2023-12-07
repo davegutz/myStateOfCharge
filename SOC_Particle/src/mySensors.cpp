@@ -30,6 +30,7 @@
 #include "mySummary.h"
 
 extern CommandPars cp;  // Various parameters shared at system level
+extern PrinterPars pr;  // Print buffer
 extern PublishPars pp;  // For publishing
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
@@ -398,11 +399,11 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" ib m    %d  %d 'Fi 1'\n", ib_amp_flt(), ib_amp_fa());
   Serial.printf(" vb      %d  %d 'Fv 1  *SV, *Dc/*Dv'\n", vb_flt(), vb_fa());
   Serial.printf(" tb      %d  %d 'Ft 1'\n  ", tb_flt(), tb_fa());
-  bitMapPrint(cp.buffer, fltw_, NUM_FLT);
-  Serial.print(cp.buffer);
+  bitMapPrint(pr.buff, fltw_, NUM_FLT);
+  Serial.print(pr.buff);
   Serial.printf("   ");
-  bitMapPrint(cp.buffer, falw_, NUM_FA);
-  Serial.printf("%s\n", cp.buffer);
+  bitMapPrint(pr.buff, falw_, NUM_FA);
+  Serial.printf("%s\n", pr.buff);
   Serial.printf("  CBA98765x3210 xxA9876543210\n");
   Serial.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
   if ( cp.fake_faults )
@@ -442,11 +443,11 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" ib m    %d  %d 'Fi 1'\n", ib_amp_flt(), ib_amp_fa());
   Serial1.printf(" vb      %d  %d 'Fv 1, *SV, *Dc/*Dv'\n", vb_flt(), vb_fa());
   Serial1.printf(" tb      %d  %d 'Ft 1'\n  ", tb_flt(), tb_fa());
-  bitMapPrint(cp.buffer, fltw_, NUM_FLT);
-  Serial1.print(cp.buffer);
+  bitMapPrint(pr.buff, fltw_, NUM_FLT);
+  Serial1.print(pr.buff);
   Serial1.printf("   ");
-  bitMapPrint(cp.buffer, falw_, NUM_FA);
-  Serial1.printf("%s\n", cp.buffer);
+  bitMapPrint(pr.buff, falw_, NUM_FA);
+  Serial1.printf("%s\n", pr.buff);
   Serial1.printf("  CBA98765x3210 xxA9876543210\n");
   Serial1.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
   if ( cp.fake_faults )
@@ -892,22 +893,22 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
       double cTime;
       if ( sp.tweak_test() ) cTime = double(now)/1000.;
       else cTime = control_time;
-      sprintf(cp.buffer, "unit_sel,%13.3f, %d, %d,  %10.7f,  %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,  %7.5f,%7.5f, ",
+      sprintf(pr.buff, "unit_sel,%13.3f, %d, %d,  %10.7f,  %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,  %7.5f,%7.5f, ",
           cTime, reset, sp.Ib_select(),
           Flt->cc_diff(),
           ib_amp_hdwe(), ib_noa_hdwe(), ib_amp_model(), ib_noa_model(), ib_model(), 
           Flt->ib_diff(), Flt->ib_diff_f());
-      Serial.printf("%s", cp.buffer);
-      sprintf(cp.buffer, "  %7.5f,%7.5f,%7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
+      Serial.printf("%s", pr.buff);
+      sprintf(pr.buff, "  %7.5f,%7.5f,%7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
           Mon->voc_soc(), Flt->e_wrap(), Flt->e_wrap_filt(),
           Flt->ib_sel_stat(), ib_hdwe(), ib_hdwe_model(), sp.mod_ib(), ib(),
           Flt->vb_sel_stat(), vb_hdwe(), vb_model(), sp.mod_vb(), vb(),
           Tb_hdwe, Tb, sp.mod_tb(), Tb_filt);
-      Serial.printf("%s", cp.buffer);
-      sprintf(cp.buffer, "%d, %d, %7.3f, %7.3f, %d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,",
+      Serial.printf("%s", pr.buff);
+      sprintf(pr.buff, "%d, %d, %7.3f, %7.3f, %d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,",
           Flt->fltw(), Flt->falw(), Flt->ib_rate(), Flt->ib_quiet(), Flt->tb_sel_status(),
           Flt->cc_diff_thr(), Flt->ewhi_thr(), Flt->ewlo_thr(), Flt->ib_diff_thr(), Flt->ib_quiet_thr(), Flt->preserving());
-      Serial.printf("%s\n", cp.buffer);
+      Serial.printf("%s\n", pr.buff);
   }
 }
 
