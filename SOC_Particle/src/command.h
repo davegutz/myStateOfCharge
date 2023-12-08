@@ -70,10 +70,10 @@ public:
   AdjustPars()
   {
     nominalize();
-    fail_tb_p             = new BooleanZ("Xu", NULL, "Ignore Tb & fail", "1=Fail",  false, true, &fail_tb, 0, true);
-    tb_stale_time_sclr_p  = new FloatZ("Xv", NULL, "scl Tb 1-wire stale pers", "slr",  0, 100, &tb_stale_time_sclr, 1, true);
-    tail_inj_p            = new ULongZ("XT", NULL, "tail end inj", "ms", 0UL, 120000UL, &tail_inj, 0UL, true);
-    wait_inj_p            = new ULongZ("XW", NULL, "wait start inj", "ms", 0UL, 120000UL, &wait_inj, 0UL, true);
+    fail_tb_p           = new BooleanZ("Xu", NULL, "Ignore Tb & fail",          "1=Fail", false,  true,     &fail_tb, 0, true);
+    tb_stale_time_sclr_p  = new FloatZ("Xv", NULL, "scl Tb 1-wire stale pers",  "slr",    0,      100,      &tb_stale_time_sclr, 1, true);
+    tail_inj_p            = new ULongZ("XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj, 0UL, true);
+    wait_inj_p            = new ULongZ("XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj, 0UL, true);
     Z_[size_++] = fail_tb_p;
     Z_[size_++] = tb_stale_time_sclr_p;
     Z_[size_++] = tail_inj_p;
@@ -125,23 +125,26 @@ public:
   float s_t_sat;            // Scalar on saturation test time set and reset
   float Tb_bias_model;      // Bias on Tb for model, C
   Tb_union tb_info;         // Use cp to pass DS2482 I2C information
+  unsigned long int until_q;  // Time until set v0, ms
   boolean write_summary;    // Use talk to issue a write command to summary
 
   // Adjustment handling structure
   FloatZ *cycles_inj_p;
+  BooleanZ *dc_dc_on_p;
   Uint8tZ *eframe_mult_p;
   BooleanZ *fake_faults_p;
   Uint8tZ *print_mult_p;
   FloatZ *s_t_sat_p;
   FloatZ *Tb_bias_model_p;
+  ULongZ *until_q_p;
+  Z *Z_[8];
   uint8_t size_;
-  Z *Z_[6];
 
 
   CommandPars()
   {
     token = false;
-    dc_dc_on = false;
+    dc_dc_on = false;  // Xd
     eframe_mult = EKF_EFRAME_MULT; // DE
     fake_faults = FAKE_FAULTS; // Ff
     inf_reset = false;
@@ -156,19 +159,24 @@ public:
     write_summary = false;
     tb_info.t_c = 0.;
     tb_info.ready = false;
+    until_q = 0UL;  // XQ
     size_ = 0;
-    cycles_inj_p  = new FloatZ("XC", NULL, "Number prog cycle", "float",  0, 1000, &cycles_inj, 0, true);
-    eframe_mult_p = new Uint8tZ("DE", NULL, "EKF Multiframe rate x Dr",  "uint",  0, UINT8_MAX, &eframe_mult, EKF_EFRAME_MULT, true);
-    fake_faults_p = new BooleanZ("Ff", NULL, "Faults ignored",  "0=False, 1=True",  0, 1, &fake_faults, FAKE_FAULTS, true);
-    print_mult_p  = new Uint8tZ("DP", NULL, "Print multiplier x Dr", "uint",  0, UINT8_MAX, &print_mult, DP_MULT, true);
-    s_t_sat_p     = new FloatZ("Xs", NULL, "scalar on T_SAT", "slr",  0, 100, &s_t_sat, 1, true);
-    Tb_bias_model_p  = new FloatZ("D^", NULL, "Del model", "deg C",  -50, 50, &Tb_bias_model, TEMP_BIAS, true);
+    cycles_inj_p     = new FloatZ("XC", NULL, "Number prog cycle",          "float",      0,    1000,       &cycles_inj, 0, true);
+    dc_dc_on_p     = new BooleanZ("Xd", NULL, "DC-DC charger on",           "0=F, 1=T",   0,    1,          &dc_dc_on, false, true);
+    eframe_mult_p   = new Uint8tZ("DE", NULL, "EKF Multiframe rate x Dr",   "uint",       0,    UINT8_MAX,  &eframe_mult, EKF_EFRAME_MULT, true);
+    fake_faults_p  = new BooleanZ("Ff", NULL, "Faults ignored",             "0=F, 1=T",   0,    1,          &fake_faults, FAKE_FAULTS, true);
+    print_mult_p    = new Uint8tZ("DP", NULL, "Print multiplier x Dr",      "uint",       0,    UINT8_MAX,  &print_mult, DP_MULT, true);
+    s_t_sat_p        = new FloatZ("Xs", NULL, "scalar on T_SAT",            "slr",        0,    100,        &s_t_sat, 1, true);
+    Tb_bias_model_p  = new FloatZ("D^", NULL, "Del model",                  "deg C",      -50,  50,         &Tb_bias_model, TEMP_BIAS, true);
+    until_q_p        = new ULongZ("XQ", NULL, "Time until v0",              "ms",         0UL,  500000UL,   &until_q, 0UL, true);
     Z_[size_++] = cycles_inj_p;
+    Z_[size_++] = dc_dc_on_p;
     Z_[size_++] = eframe_mult_p;
     Z_[size_++] = fake_faults_p;
     Z_[size_++] = print_mult_p;
     Z_[size_++] = s_t_sat_p;
     Z_[size_++] = Tb_bias_model_p;
+    Z_[size_++] = until_q_p;
   }
 
   void assign_eframe_mult(const uint8_t count) { eframe_mult = count; }
@@ -190,7 +198,6 @@ public:
   void pretty_print(void)
   {
     Serial.printf("command parameters(cp):\n");
-    Serial.printf(" dc_dc_on %d\n", dc_dc_on);
     Serial.printf(" inf_reset %d\n", inf_reset);
     Serial.printf(" model_cutback %d\n", model_cutback);
     Serial.printf(" model_saturated %d\n", model_saturated);

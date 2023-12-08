@@ -691,14 +691,14 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 
   // Quiet logic.   Reset to ready state at soc=0.5; do not change Modeling.  Passes at least once before running chit.
   static unsigned long int millis_past = millis();
-  static unsigned long int until_q_past = Sen->until_q;
-  if ( Sen->until_q>0UL && until_q_past==0UL ) until_q_past = Sen->until_q;
-  Sen->until_q = (unsigned long) max(0, (long) Sen->until_q  - (long)(millis() - millis_past));
-  if ( Sen->until_q==0UL && until_q_past>0UL )
+  static unsigned long int until_q_past = cp.until_q;
+  if ( cp.until_q>0UL && until_q_past==0UL ) until_q_past = cp.until_q;
+  cp.until_q = (unsigned long) max(0, (long) cp.until_q  - (long)(millis() - millis_past));
+  if ( cp.until_q==0UL && until_q_past>0UL )
   {
     chit("v0;Hd;Pf;BZ;Rf;", QUEUE);
   }
-  until_q_past = Sen->until_q;
+  until_q_past = cp.until_q;
   millis_past = millis();
 
 }

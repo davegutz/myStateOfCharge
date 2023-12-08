@@ -967,11 +967,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'd' ):  // Xd<>:  on/off dc-dc charger manual setting
-                if ( cp.input_str.substring(2).toInt()>0 )
-                  cp.dc_dc_on = true;
-                else
-                  cp.dc_dc_on = false;
-                Serial.printf("dc_dc_on to %d\n", cp.dc_dc_on);
+                cp.dc_dc_on_p->print_adj_print(cp.input_str.substring(2).toInt()>0);
                 break;
 
               case ( 'm' ):  // Xm<>:  code for modeling level
@@ -1001,8 +997,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'Q' ): //  XQ<>: time to quiet
-                Sen->until_q = (unsigned long int) cp.input_str.substring(2).toInt();
-                Serial.printf("Going black in %7.1f seconds\n", float(Sen->until_q) / 1000.);
+                cp.until_q_p->print_adj_print((unsigned long int) cp.input_str.substring(2).toInt());
+                Serial.printf("Going black in %7.1f seconds\n", float(cp.until_q) / 1000.);
                 break;
 
               case ( 't' ): //*  Xt<>:  injection type
@@ -1440,9 +1436,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   #endif
 
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
-  Serial.printf(" Xd=  "); Serial.printf("%d,   dc-dc charger on [0]\n", cp.dc_dc_on);
-  Serial.printf(" XQ=  "); Serial.printf("%ld,  Time until silent, s [0]\n", Sen->until_q);
-
+  cp.dc_dc_on_p->print_help();  // Xd
+  cp.until_q_p->print_help();  // XQ
   sp.Modeling_p->print_help();  //* Xm
   sp.pretty_print_modeling();
 

@@ -764,7 +764,6 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
   this->display = true;
   this->Ib_hdwe_model = 0.;
   Prbn_Tb_ = new PRBS_7(TB_NOISE_SEED);
-  this->until_q = 0UL;
   Prbn_Vb_ = new PRBS_7(VB_NOISE_SEED);
   Prbn_Ib_amp_ = new PRBS_7(IB_AMP_NOISE_SEED);
   Prbn_Ib_noa_ = new PRBS_7(IB_NOA_NOISE_SEED);
