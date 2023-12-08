@@ -75,7 +75,7 @@ float TempSensor::sample(Sensors *Sen)
     }
 
     // Check success
-    if ( count<MAX_TEMP_READS && TEMP_RANGE_CHECK<temp && temp<TEMP_RANGE_CHECK_MAX && !Sen->Flt->fail_tb() )
+    if ( count<MAX_TEMP_READS && TEMP_RANGE_CHECK<temp && temp<TEMP_RANGE_CHECK_MAX && !ap.fail_tb )
     {
       Tb_hdwe = SdTb->update(temp);
       tb_stale_flt_ = false;
