@@ -91,7 +91,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL )
+        if ( ram==NULL && check_off )
         {
             set(*val_);
             prefix_ = "  ";
@@ -218,7 +218,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL )
+        if ( ram==NULL && check_off )
         {
             set(*val_);
             prefix_ = "  ";
@@ -285,7 +285,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(pr.buff, "%s%-2s= %6.1f: (%-6.1f-%6.1f) [%6.1f] %s, %s", code_.c_str(), prefix_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(pr.buff, "%s%-2s= %6.1f: (%-6.1f-%6.1f) [%6.1f] %s, %s", prefix_.c_str(), code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
     
     void print_help()
@@ -348,7 +348,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL )
+        if ( ram==NULL && check_off )
         {
             set(*val_);
             prefix_ = "  ";
@@ -476,14 +476,7 @@ public:
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
-        if ( ram==NULL )
-        {
-            prefix_ = "  ";
-        }
-        else  // EERAM
-        {
-            prefix_ = "* ";
-        }
+        prefix_ = "  ";
     }
 
     ~FloatNoZ(){}
@@ -557,7 +550,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL )
+        if ( ram==NULL && check_off )
         {
             set(*val_);
             prefix_ = "  ";
@@ -623,7 +616,7 @@ public:
 
     void print_help_str()
     {
-      sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), prefix_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+      sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", prefix_.c_str(), code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -686,7 +679,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL )
+        if ( ram==NULL && check_off )
         {
             set(*val_);
             prefix_ = "  ";
@@ -753,7 +746,7 @@ public:
 
     void print_help_str()
     {
-      sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), prefix_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+      sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", prefix_.c_str(), code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -816,7 +809,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-       if ( ram==NULL )
+       if ( ram==NULL && check_off )
         {
             set(*val_);
             prefix_ = "  ";
@@ -880,7 +873,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), prefix_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", prefix_.c_str(), code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -942,7 +935,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL )
+        if ( ram==NULL && check_off )
         {
             set(*val_);
             prefix_ = "  ";
@@ -1006,7 +999,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), prefix_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", prefix_.c_str(), code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -1069,7 +1062,7 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL )
+        if ( ram==NULL && check_off )
         {
             set(*val_);
             prefix_ = "  ";

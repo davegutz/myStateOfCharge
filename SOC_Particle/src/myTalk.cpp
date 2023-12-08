@@ -1279,10 +1279,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   #ifndef HELPLESS
   Serial.printf("\nB<?> Battery e.g.:\n");
-  Serial.printf(" *Bm=  %d.  Mon chem 0='BB', 1='CH' [%d]\n", sp.Mon_chm(), MON_CHEM); 
-  Serial.printf(" *Bs=  %d.  Sim chem 0='BB', 1='CH' [%d]\n", sp.Sim_chm(), SIM_CHEM); 
-  Serial.printf(" *BP=  %4.2f.  parallel in bank [%4.2f]'\n", sp.nP(), NP);
-  Serial.printf(" *BS=  %4.2f.  series in bank [%4.2f]'\n", sp.nS(), NS);
+  sp.Mon_chm_p->print_help();  //* Bm
+  sp.Sim_chm_p->print_help();  //* Bs
+  sp.nP_p->print_help();  //* BP
+  sp.nS_p->print_help();  //* BS
 
   Serial.printf("\nBZ Benignly zero test settings\n");
   
