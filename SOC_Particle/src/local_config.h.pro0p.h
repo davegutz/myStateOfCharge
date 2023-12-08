@@ -11,8 +11,9 @@ const String unit = version + "_pro0p";
 #define CONFIG_SSD1306_OLED
 #define CONFIG_ADS1013_OPAMP
 #define CONFIG_DS18B20_SWIRE
-// #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
 // #define DEPLOY_PHOTON
+
+// don't use on Photon.  Use Argon or Photon 2 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

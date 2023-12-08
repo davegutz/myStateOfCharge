@@ -95,8 +95,10 @@ public:
 
   void pretty_print(void)
   {
-    Serial.printf("adjust parameters(ap):\n");
-    for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
+    #ifndef DEPLOY_PHOTON
+      Serial.printf("adjust parameters(ap):\n");
+      for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
+    #endif
     Serial.printf("\nOff-nominal:\n");
     for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
   }
@@ -207,16 +209,18 @@ public:
 
   void pretty_print(void)
   {
-    Serial.printf("command parameters(cp):\n");
-    Serial.printf(" inf_reset %d\n", inf_reset);
-    Serial.printf(" model_cutback %d\n", model_cutback);
-    Serial.printf(" model_saturated %d\n", model_saturated);
-    Serial.printf(" publishS %d\n", publishS);
-    Serial.printf(" soft_reset %d\n", soft_reset);
-    Serial.printf(" tb_info.t_c %7.3f\n", tb_info.t_c);
-    Serial.printf(" tb_info.ready %d\n", tb_info.ready);
-    Serial.printf(" write_summary %d\n\n", write_summary);
-    for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
+    #ifndef DEPLOY_PHOTON
+      Serial.printf("command parameters(cp):\n");
+      Serial.printf(" inf_reset %d\n", inf_reset);
+      Serial.printf(" model_cutback %d\n", model_cutback);
+      Serial.printf(" model_saturated %d\n", model_saturated);
+      Serial.printf(" publishS %d\n", publishS);
+      Serial.printf(" soft_reset %d\n", soft_reset);
+      Serial.printf(" tb_info.t_c %7.3f\n", tb_info.t_c);
+      Serial.printf(" tb_info.ready %d\n", tb_info.ready);
+      Serial.printf(" write_summary %d\n\n", write_summary);
+      for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
+    #endif
     Serial.printf("\nOff-nominal:\n");
     for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
   }

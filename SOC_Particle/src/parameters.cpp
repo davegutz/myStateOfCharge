@@ -221,8 +221,10 @@ void SavedPars::pretty_print(const boolean all)
     Serial.printf("             defaults    current EERAM values\n");
     for (int i=0; i<n_; i++ ) if ( all || Z_[i]->is_off() )  Z_[i]->print();
 
-    Serial.printf("Xm:\n");
-    pretty_print_modeling();
+    #ifndef DEPLOY_PHOTON
+        Serial.printf("Xm:\n");
+        pretty_print_modeling();
+    #endif
 
     #ifdef CONFIG_47L16_EERAM
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);

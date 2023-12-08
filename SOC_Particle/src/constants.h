@@ -80,18 +80,18 @@
 // For all, there are 40 bytes for each unit of NSUM
 #ifdef CONFIG_PHOTON  // dec ~133500  units: pro0p
     #ifdef DEPLOY_PHOTON
-        #define NSUM 251 // Number of saved SRAM summaries (251)
+        #define NSUM 200 // Number of saved SRAM summaries (200)
     #else
         #ifdef DEBUG_INIT
-            #define NSUM  40 // Number of saved SRAM summaries (40)
+            #define NSUM 0 // Number of saved SRAM summaries (40)
         #else
-            #define NSUM  97 // Number of saved SRAM summaries (97)
+            #define NSUM  26 // Number of saved SRAM summaries (26)
         #endif
     #endif
 #endif
 
 #ifdef CONFIG_ARGON  // dec ~222350  units: pro1a, soc1a
-    #define NSUM 2224   // Number of saved SRAM summaries (2224)
+    #define NSUM 2222   // Number of saved SRAM summaries (2224)
 #endif
 
 #ifdef CONFIG_PHOTON2  // dec ~ 276770  units: pro2p2, pro2p3
