@@ -218,7 +218,15 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL ) set(*val_); // retained
+        if ( ram==NULL )
+        {
+            set(*val_);
+            prefix_ = "  ";
+        }
+        else  // EERAM
+        {
+            prefix_ = "* ";
+        }
     }
 
     ~DoubleZ(){}
@@ -258,9 +266,9 @@ public:
     void print_str()
     {
         if ( !check_off_ )
-            sprintf(pr.buff, " %-20s %9.1f -> %9.1f, %10s (* %-2s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-20s %9.1f -> %9.1f, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
-            sprintf(pr.buff, " %-33s %9.1f, %10s (* %-2s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-33s %9.1f, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
     
     void print()
@@ -277,7 +285,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(pr.buff, "* %-2s= %6.1f: (%-6.1f-%6.1f) [%6.1f] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(pr.buff, "%s%-2s= %6.1f: (%-6.1f-%6.1f) [%6.1f] %s, %s", code_.c_str(), prefix_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
     
     void print_help()
@@ -322,6 +330,7 @@ protected:
     double min_;
     double max_;
     boolean check_off_;
+    String prefix_;
 };
 
 
@@ -467,6 +476,14 @@ public:
         min_ = min;
         max_ = max;
         default_ = max(min(_default, max_), min_);
+        if ( ram==NULL )
+        {
+            prefix_ = "  ";
+        }
+        else  // EERAM
+        {
+            prefix_ = "* ";
+        }
     }
 
     ~FloatNoZ(){}
@@ -484,7 +501,7 @@ public:
     
     void print_str()
     {
-        sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (* %-2s)", description_.c_str(), default_, NAN, units_.c_str(), code_.c_str());
+        sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (%s%-2s)", description_.c_str(), default_, NAN, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -501,7 +518,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(pr.buff, "* %-2s= %6.3f: (%-6.3g-%6.3g) [%6.3f] %s, %s", code_.c_str(), NAN, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(pr.buff, "%s%-2s= %6.3f: (%-6.3g-%6.3g) [%6.3f] %s, %s", prefix_.c_str(), code_.c_str(), NAN, min_, max_, default_, description_.c_str(), units_.c_str());
     }
     
     void print_help()
@@ -522,6 +539,7 @@ protected:
     float default_;
     float min_;
     float max_;
+    String prefix_;
 };
 
 
@@ -539,7 +557,15 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL ) set(*val_); // retained
+        if ( ram==NULL )
+        {
+            set(*val_);
+            prefix_ = "  ";
+        }
+        else  // EERAM
+        {
+            prefix_ = "* ";
+        }
     }
 
     ~IntZ(){}
@@ -579,9 +605,9 @@ public:
     void print_str()
     {
         if ( !check_off_ )
-            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (* %-2s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
-            sprintf(pr.buff, " %-33s %9d, %10s (* %-2s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
     void print()
     {
@@ -597,7 +623,7 @@ public:
 
     void print_help_str()
     {
-      sprintf(pr.buff, "* %-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+      sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), prefix_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -642,6 +668,7 @@ protected:
     int max_;
     int default_;
     boolean check_off_;
+    String prefix_;
 };
 
 
@@ -659,7 +686,15 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL ) set(*val_); // retained
+        if ( ram==NULL )
+        {
+            set(*val_);
+            prefix_ = "  ";
+        }
+        else  // EERAM
+        {
+            prefix_ = "* ";
+        }
     }
 
     ~Int8tZ(){}
@@ -699,9 +734,9 @@ public:
     void print_str()
     {
         if ( !check_off_ )
-            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (* %-2s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
-            sprintf(pr.buff, " %-33s %9d, %10s (* %-2s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -718,7 +753,7 @@ public:
 
     void print_help_str()
     {
-      sprintf(pr.buff, "* %-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+      sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), prefix_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -763,6 +798,7 @@ protected:
     int8_t max_;
     int8_t default_;
     boolean check_off_;
+    String prefix_;
 };
 
 
@@ -780,8 +816,16 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL ) set(*val_); // retained
-    }
+       if ( ram==NULL )
+        {
+            set(*val_);
+            prefix_ = "  ";
+        }
+        else  // EERAM
+        {
+            prefix_ = "* ";
+        }
+     }
 
     ~Uint16tZ(){}
 
@@ -817,9 +861,9 @@ public:
     void print_str()
     {
         if ( !check_off_ )
-            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (* %-2s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
-            sprintf(pr.buff, " %-33s %9d, %10s (* %-2s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -836,7 +880,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(pr.buff, "* %-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), prefix_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -881,6 +925,7 @@ protected:
     uint16_t max_;
     uint16_t default_;
     boolean check_off_;
+    String prefix_;
 };
 
 class Uint8tZ: public Z
@@ -897,7 +942,15 @@ public:
         val_ = store;
         default_ = max(min(_default, max_), min_);
         check_off_ = check_off;
-        if ( ram==NULL ) set(*val_); // retained
+        if ( ram==NULL )
+        {
+            set(*val_);
+            prefix_ = "  ";
+        }
+        else  // EERAM
+        {
+            prefix_ = "* ";
+        }
     }
 
     ~Uint8tZ(){}
@@ -934,9 +987,9 @@ public:
     void print_str()
     {
         if ( !check_off_ )
-            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (* %-2s)", description_.c_str(), default_, *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
-            sprintf(pr.buff, " %-33s %9d, %10s (* %-2s)", description_.c_str(), *val_, units_.c_str(), code_.c_str());
+            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -953,7 +1006,7 @@ public:
 
     void print_help_str()
     {
-        sprintf(pr.buff, "* %-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
+        sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", code_.c_str(), prefix_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     void print_help()
@@ -998,6 +1051,7 @@ protected:
     uint8_t max_;
     uint8_t default_;
     boolean check_off_;
+    String prefix_;
 };
 
 

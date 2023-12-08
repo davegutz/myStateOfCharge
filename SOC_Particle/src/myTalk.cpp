@@ -762,6 +762,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 chit("Q;", SOON);
                 break;
 
+              case ( 'b' ):  // Pb:  Print Vb measure
+                Serial.printf("\nVolt:");   Serial.printf("Vb_bias_hdwe,Vb_m,mod,Vb=,%7.3f,%7.3f,%d,%7.3f,\n", 
+                  sp.Vb_bias_hdwe(), Sen->Vb_model, sp.Modeling(), Sen->Vb);
+                break;
+
               case ( 'e' ):  // Pe:  Print EKF
                 Serial.printf ("\nMon::"); Mon->EKF_1x1::pretty_print();
                 Serial1.printf("\nMon::"); Mon->EKF_1x1::pretty_print();
@@ -795,7 +800,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'r' ):  // Pr:  Print retained
                 Serial.printf("\n"); sp.pretty_print( true );
-                Serial.printf("\n"); cp.pretty_print();
                 break;
 
               case ( 's' ):  // Ps:  Print sim
@@ -804,17 +808,17 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("S::"); Sen->Sim->Coulombs::pretty_print();
                 break;
 
+              case ( 'v' ):  // Pv:  Print volatile
+                Serial.printf("\n"); ap.pretty_print();
+                Serial.printf("\n"); cp.pretty_print();
+                break;
+
               case ( 'x' ):  // Px:  Print shunt measure
                 Serial.printf("\nAmp: "); Serial.printf("Vshunt_int,Vshunt,Vc,Vo,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
                   Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->Vc(), Sen->ShuntAmp->Vo(), Sen->ShuntAmp->Ishunt_cal());
                 Serial.printf("Noa:"); Serial.printf("Vshunt_int,Vshunt,Vc,Vo,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
                   Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->Vc(), Sen->ShuntNoAmp->Vo(), Sen->ShuntNoAmp->Ishunt_cal());
                 Serial.printf("Sel:Noa,Ib=,%d,%7.3f\n", sp.Ib_select(), Sen->Ib);
-                break;
-
-              case ( 'v' ):  // Pv:  Print Vb measure
-                Serial.printf("\nVolt:");   Serial.printf("Vb_bias_hdwe,Vb_m,mod,Vb=,%7.3f,%7.3f,%d,%7.3f,\n", 
-                  sp.Vb_bias_hdwe(), Sen->Vb_model, sp.Modeling(), Sen->Vb);
                 break;
 
               default:
@@ -1188,18 +1192,17 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'C' ): // XC:  injection number of cycles
-                Sen->cycles_inj = max(min(cp.input_str.substring(2).toFloat(), 10000.), 0);
-                Serial.printf("#inj cycles to%7.3f\n", Sen->cycles_inj);
+                cp.cycles_inj_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'R' ): // XR:  Start injection now
                 if ( Sen->now>TEMP_INIT_DELAY )
                 {
                   Sen->start_inj = ap.wait_inj + Sen->now;
-                  Sen->stop_inj = ap.wait_inj + (Sen->now + min((unsigned long int)(Sen->cycles_inj / max(sp.Freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
+                  Sen->stop_inj = ap.wait_inj + (Sen->now + min((unsigned long int)(cp.cycles_inj / max(sp.Freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
                   Sen->end_inj = Sen->stop_inj + ap.tail_inj;
                   Serial.printf("**\n*** RUN: at %ld, %7.3f cycles %ld to %ld with %ld wait and %ld tail\n\n",
-                    Sen->now, Sen->cycles_inj, Sen->start_inj, Sen->stop_inj, ap.wait_inj, ap.tail_inj);
+                    Sen->now, cp.cycles_inj, Sen->start_inj, Sen->stop_inj, ap.wait_inj, ap.tail_inj);
                 }
                 else Serial.printf("Wait%5.1fs for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
                 break;
@@ -1217,10 +1220,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 's' ): // Xs:  scale T_SAT
-                FP_in = cp.input_str.substring(2).toFloat();
-                Serial.printf("s_t_sat%7.1f s to ", cp.s_t_sat);
-                cp.s_t_sat = max(FP_in, 0.);
-                Serial.printf("%7.1f\n", cp.s_t_sat);
+                cp.s_t_sat_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'W' ):  // XW<>:  Wait beginning of programmed transient
@@ -1369,15 +1369,16 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nP<?>   Print values\n");
   Serial.printf("  Pa= "); Serial.printf("all\n");
+  Serial.printf("  Pb= "); Serial.printf("vb details\n");
   Serial.printf("  Pe= "); Serial.printf("ekf\n");
   Serial.printf("  Pf= "); Serial.printf("faults\n");
   Serial.printf("  Pm= "); Serial.printf("Mon\n");
   Serial.printf("  PM= "); Serial.printf("amp shunt\n");
   Serial.printf("  PN= "); Serial.printf("noa shunt\n");
-  Serial.printf("  Pr= "); Serial.printf("retained and command\n");
+  Serial.printf("  Pr= "); Serial.printf("retained adj\n");
   Serial.printf("  Ps= "); Serial.printf("Sim\n");
+  Serial.printf("  Pv= "); Serial.printf("volatile adj\n");
   Serial.printf("  Px= "); Serial.printf("ib select\n");
-  Serial.printf("  Pv= "); Serial.printf("vb details\n");
 
   Serial.printf("\nQ      vital stats\n");
 
@@ -1471,10 +1472,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Xp13:tweak tri\n");
   Serial.printf("  Xp20:collect fast\n");
   Serial.printf("  Xp21:collect slow\n");
-  Serial.printf(" XC= "); Serial.printf("%6.3f cycles inj\n", Sen->cycles_inj);
+  cp.cycles_inj_p->print_help();  // XC
   Serial.printf(" XR  "); Serial.printf("RUN inj\n");
   Serial.printf(" XS  "); Serial.printf("STOP inj\n");
-  Serial.printf(" Xs= "); Serial.printf("%4.2f scalar on T_SAT\n", cp.s_t_sat);
+  cp.s_t_sat_p->print_help();  // Xs
   ap.tail_inj_p->print_help();  // XT
   ap.wait_inj_p->print_help();  // XW
   ap.fail_tb_p->print_help();  // Xu

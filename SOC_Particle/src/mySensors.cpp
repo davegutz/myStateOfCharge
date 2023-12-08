@@ -760,7 +760,6 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
   this->start_inj = 0UL;
   this->stop_inj = 0UL;
   this->end_inj = 0UL;
-  this->cycles_inj = 0.;
   this->ReadSensors = ReadSensors;
   this->display = true;
   this->Ib_hdwe_model = 0.;

@@ -354,7 +354,6 @@ public:
   unsigned long int stop_inj; // Stop of calculated injection, ms
   unsigned long int end_inj;  // End of print injection, ms
   unsigned long int until_q;  // Time until set v0, ms
-  float cycles_inj;           // Number of injection cycles
   double control_time;        // Decimal time, seconds since 1/1/2021
   boolean display;            // Use display
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?

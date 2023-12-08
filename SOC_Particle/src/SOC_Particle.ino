@@ -124,7 +124,7 @@ extern PublishPars pp;            // For publishing
 
 Flt_st mySum[NSUM];                   // Summaries
 PrinterPars pr = PrinterPars();       // Print buffer
-CommandPars cp = CommandPars();       // Various control parameters commanding at system level
+CommandPars cp = CommandPars();       // Various control parameters commanding at system level.  Initialized on start up.  Not retained.
 AdjustPars ap = AdjustPars();         // Various parameters for adjustment
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
 unsigned long millis_flip = millis(); // Timekeeping
