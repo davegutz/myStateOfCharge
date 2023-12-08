@@ -144,7 +144,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   Sen->ReadSensors->delay(READ_DELAY);
 
   // Fault logic
-  Sen->Flt->cc_diff_sclr(1);  // Fc 1
+  ap.cc_diff_sclr = 1;  // Fc 1
   Sen->Flt->ib_diff_sclr(1);  // Fd 1
   cp.fake_faults = 0;  // Ff 0
   sp.put_Ib_select(0);  // Ff 0
@@ -618,10 +618,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
 
               case ( 'c' ):  //   Fc<>: scale cc_diff threshold
-                scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("cc_diff scl%7.3f to", Sen->Flt->cc_diff_sclr());
-                Sen->Flt->cc_diff_sclr(scale);
-                Serial.printf("%7.3f\n", Sen->Flt->cc_diff_sclr());
+                ap.cc_diff_sclr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'd' ):  //   Fd<>: scale ib_diff threshold
@@ -1347,7 +1344,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nF<?>   Faults\n");
   #ifndef HELPLESS
-  Serial.printf("  Fc= "); Serial.printf("%6.3f", Sen->Flt->cc_diff_sclr()); Serial.printf(": sclr cc_diff thr ^ [1]\n"); 
+  ap.cc_diff_sclr_p->print_help();  // Fc
   Serial.printf("  Fd= "); Serial.printf("%6.3f", Sen->Flt->ib_diff_sclr()); Serial.printf(": sclr ib_diff thr ^ [1]\n"); 
   cp.fake_faults_p->print_help();  // Ff
   cp.fake_faults_p->print1_help();  // Ff

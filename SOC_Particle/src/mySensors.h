@@ -168,8 +168,6 @@ public:
   ~Fault();
   float cc_diff() { return cc_diff_; };
   void cc_diff(Sensors *Sen, BatteryMonitor *Mon);
-  void cc_diff_sclr(const float sclr) { cc_diff_sclr_ = sclr; };
-  float cc_diff_sclr() { return cc_diff_sclr_; };
   boolean cc_diff_fa() { return failRead(CC_DIFF_FA); };
   float cc_diff_thr_;     // Threshold Coulomb Counters difference faults, soc fraction
   float cc_diff_thr() { return cc_diff_thr_; };
@@ -271,7 +269,6 @@ protected:
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
-  float cc_diff_sclr_;      // Scale cc_diff detection thresh, scalar
   float cc_diff_empty_sclr_;  // Scale cc_diff when soc low, scalasr
   boolean disab_ib_fa_;     // Disable hard fault range failures for ib
   boolean disab_tb_fa_;     // Disable hard fault range failures for tb

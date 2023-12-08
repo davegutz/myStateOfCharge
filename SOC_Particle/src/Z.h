@@ -41,8 +41,9 @@ class Z
 public:
     Z(){}
 
-    Z(const String &code, SerialRAM *ram, const String &description, const String &units, boolean _uint8=false)
+    Z(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, boolean _uint8=false)
     {
+        *n = *n + 1;
         code_ = code;
         description_ = description.substring(0, 20);
         units_ = units.substring(0, 10);
@@ -82,9 +83,9 @@ class BooleanZ: public Z
 public:
     BooleanZ(){}
 
-    BooleanZ(const String &code, SerialRAM *ram, const String &description, const String &units, const boolean min, const boolean max,
+    BooleanZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean min, const boolean max,
     boolean *store, const boolean _default=false, const boolean check_off=false):
-        Z(code, ram, description, units, true)
+        Z(n, code, ram, description, units, true)
     {
         min_ = min;
         max_ = max;
@@ -209,9 +210,9 @@ class DoubleZ: public Z
 public:
     DoubleZ(){}
 
-    DoubleZ(const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, double *store,
+    DoubleZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, double *store,
         const double _default=0, const boolean check_off=false):
-        Z(code, ram, description, units, false)
+        Z(n, code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -339,9 +340,9 @@ class FloatZ: public Z
 public:
     FloatZ(){}
 
-    FloatZ(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+    FloatZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
     float *store, const float _default=0, const boolean check_off=false):
-        Z(code, ram, description, units, false)
+        Z(n, code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -469,9 +470,9 @@ class FloatNoZ: public Z
 public:
     FloatNoZ(){}
 
-    FloatNoZ(const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+    FloatNoZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
     const float _default=0):
-        Z(code, ram, description, units, false)
+        Z(n, code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -541,9 +542,9 @@ class IntZ: public Z
 public:
     IntZ(){}
 
-    IntZ(const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
+    IntZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
     const int _default=0, const boolean check_off=false):
-        Z(code, ram, description, units, false)
+        Z(n, code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -670,9 +671,9 @@ class Int8tZ: public Z
 public:
     Int8tZ(){}
 
-    Int8tZ(const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
+    Int8tZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
     int8_t *store, const int8_t _default=0, const boolean check_off=false):
-        Z(code, ram, description, units, false)
+        Z(n, code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -800,9 +801,9 @@ class Uint16tZ: public Z
 public:
     Uint16tZ(){}
 
-    Uint16tZ(const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
+    Uint16tZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
     uint16_t *store, const uint16_t _default=0, const boolean check_off=false):
-        Z(code, ram, description, units, true)
+        Z(n, code, ram, description, units, true)
     {
         min_ = min;
         max_ = max;
@@ -926,9 +927,9 @@ class Uint8tZ: public Z
 public:
     Uint8tZ(){}
 
-    Uint8tZ(const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
+    Uint8tZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
     uint8_t *store, const uint8_t _default=0, const boolean check_off=false):
-        Z(code, ram, description, units, true)
+        Z(n, code, ram, description, units, true)
     {
         min_ = min;
         max_ = max;
@@ -1053,9 +1054,9 @@ class ULongZ: public Z
 public:
     ULongZ(){}
 
-    ULongZ(const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
+    ULongZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
     unsigned long *store, const unsigned long _default=0, const boolean check_off=true):
-        Z(code, ram, description, units, true)
+        Z(n, code, ram, description, units, true)
     {
         min_ = min;
         max_ = max;

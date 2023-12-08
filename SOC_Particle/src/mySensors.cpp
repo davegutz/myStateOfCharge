@@ -240,7 +240,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
 
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving):
-  cc_diff_(0.), cc_diff_sclr_(1), cc_diff_empty_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false),
+  cc_diff_(0.), cc_diff_empty_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false),
   ewhi_sclr_(1), ewlo_sclr_(1), ewmin_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0),
   ib_diff_sclr_(1), ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
   latched_fail_fake_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
@@ -275,7 +275,7 @@ void Fault::cc_diff(Sensors *Sen, BatteryMonitor *Mon)
     cc_diff_empty_sclr_ = 1.;
   }
   // ewsat_sclr_ used here because voc_soc map inaccurate on cold days
-  cc_diff_thr_ = CC_DIFF_SOC_DIS_THRESH*cc_diff_sclr_*cc_diff_empty_sclr_*ewsat_sclr_;
+  cc_diff_thr_ = CC_DIFF_SOC_DIS_THRESH*ap.cc_diff_sclr*cc_diff_empty_sclr_*ewsat_sclr_;
   failAssign( abs(cc_diff_)>=cc_diff_thr_ , CC_DIFF_FA );  // Not latched
 }
 

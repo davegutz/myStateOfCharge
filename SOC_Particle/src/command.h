@@ -54,30 +54,37 @@ public:
   ~AdjustPars();
 
   // Small static value area for 'retained'
+  float cc_diff_sclr;         // Scale cc_diff detection thresh, scalar
   boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
   unsigned long int tail_inj; // Tail after end injection, ms
   float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale chec, (1)
   unsigned long int wait_inj; // Wait before start injection, ms
 
   // Adjustment handling structure
+  FloatZ *cc_diff_sclr_p;
   BooleanZ *fail_tb_p;
   FloatZ *tb_stale_time_sclr_p;
   ULongZ *tail_inj_p;
   ULongZ *wait_inj_p;
-  uint8_t size_;
-  Z *Z_[4];
+  uint8_t n_;
+  Z *Z_[5];  // TODO **Z_ and new below
 
   AdjustPars()
   {
+    n_ = 0;
     nominalize();
-    fail_tb_p           = new BooleanZ("Xu", NULL, "Ignore Tb & fail",          "1=Fail", false,  true,     &fail_tb, 0, true);
-    tb_stale_time_sclr_p  = new FloatZ("Xv", NULL, "scl Tb 1-wire stale pers",  "slr",    0,      100,      &tb_stale_time_sclr, 1, true);
-    tail_inj_p            = new ULongZ("XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj, 0UL, true);
-    wait_inj_p            = new ULongZ("XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj, 0UL, true);
-    Z_[size_++] = fail_tb_p;
-    Z_[size_++] = tb_stale_time_sclr_p;
-    Z_[size_++] = tail_inj_p;
-    Z_[size_++] = wait_inj_p;
+    cc_diff_sclr_p        = new FloatZ(&n_, "Fc", NULL, "Slr cc_diff thr ",          "slr",    0,      1000,     &cc_diff_sclr,      1,    true);
+    fail_tb_p           = new BooleanZ(&n_, "Xu", NULL, "Ignore Tb & fail",          "1=Fail", false,  true,     &fail_tb,           0,    true);
+    tb_stale_time_sclr_p  = new FloatZ(&n_, "Xv", NULL, "scl Tb 1-wire stale pers",  "slr",    0,      100,      &tb_stale_time_sclr,1,    true);
+    tail_inj_p            = new ULongZ(&n_, "XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj,          0UL,  true);
+    wait_inj_p            = new ULongZ(&n_, "XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj,          0UL,  true);
+    uint8_t i = 0;
+    Z_[i++] = cc_diff_sclr_p;
+    Z_[i++] = fail_tb_p;
+    Z_[i++] = tb_stale_time_sclr_p;
+    Z_[i++] = tail_inj_p;
+    Z_[i++] = wait_inj_p;
+    if ( i != n_ ) Serial.printf("WARN(command.h, AdjustPars):  size error i%d != n_%d\n", i, n_);
   }
 
   void large_reset(void)
@@ -87,13 +94,15 @@ public:
 
   void nominalize(void)
   {
+    // cc_diff_sclr = 1;
+    // fail_tb = false;
     tb_stale_time_sclr = 1;
   }
 
   void pretty_print(void)
   {
     Serial.printf("adjust parameters(ap):\n");
-    for ( uint8_t i=0; i<size_; i++ ) Z_[i] -> print();
+    for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
   }
 
 };            
@@ -138,7 +147,7 @@ public:
   FloatZ *Tb_bias_model_p;
   ULongZ *until_q_p;
   Z *Z_[8];
-  uint8_t size_;
+  uint8_t n_;
 
 
   CommandPars()
@@ -160,23 +169,25 @@ public:
     tb_info.t_c = 0.;
     tb_info.ready = false;
     until_q = 0UL;  // XQ
-    size_ = 0;
-    cycles_inj_p     = new FloatZ("XC", NULL, "Number prog cycle",          "float",      0,    1000,       &cycles_inj, 0, true);
-    dc_dc_on_p     = new BooleanZ("Xd", NULL, "DC-DC charger on",           "0=F, 1=T",   0,    1,          &dc_dc_on, false, true);
-    eframe_mult_p   = new Uint8tZ("DE", NULL, "EKF Multiframe rate x Dr",   "uint",       0,    UINT8_MAX,  &eframe_mult, EKF_EFRAME_MULT, true);
-    fake_faults_p  = new BooleanZ("Ff", NULL, "Faults ignored",             "0=F, 1=T",   0,    1,          &fake_faults, FAKE_FAULTS, true);
-    print_mult_p    = new Uint8tZ("DP", NULL, "Print multiplier x Dr",      "uint",       0,    UINT8_MAX,  &print_mult, DP_MULT, true);
-    s_t_sat_p        = new FloatZ("Xs", NULL, "scalar on T_SAT",            "slr",        0,    100,        &s_t_sat, 1, true);
-    Tb_bias_model_p  = new FloatZ("D^", NULL, "Del model",                  "deg C",      -50,  50,         &Tb_bias_model, TEMP_BIAS, true);
-    until_q_p        = new ULongZ("XQ", NULL, "Time until v0",              "ms",         0UL,  500000UL,   &until_q, 0UL, true);
-    Z_[size_++] = cycles_inj_p;
-    Z_[size_++] = dc_dc_on_p;
-    Z_[size_++] = eframe_mult_p;
-    Z_[size_++] = fake_faults_p;
-    Z_[size_++] = print_mult_p;
-    Z_[size_++] = s_t_sat_p;
-    Z_[size_++] = Tb_bias_model_p;
-    Z_[size_++] = until_q_p;
+    n_ = 0;
+    cycles_inj_p     = new FloatZ(&n_, "XC", NULL, "Number prog cycle",          "float",      0,    1000,       &cycles_inj, 0, true);
+    dc_dc_on_p     = new BooleanZ(&n_, "Xd", NULL, "DC-DC charger on",           "0=F, 1=T",   0,    1,          &dc_dc_on, false, true);
+    eframe_mult_p   = new Uint8tZ(&n_, "DE", NULL, "EKF Multiframe rate x Dr",   "uint",       0,    UINT8_MAX,  &eframe_mult, EKF_EFRAME_MULT, true);
+    fake_faults_p  = new BooleanZ(&n_, "Ff", NULL, "Faults ignored",             "0=F, 1=T",   0,    1,          &fake_faults, FAKE_FAULTS, true);
+    print_mult_p    = new Uint8tZ(&n_, "DP", NULL, "Print multiplier x Dr",      "uint",       0,    UINT8_MAX,  &print_mult, DP_MULT, true);
+    s_t_sat_p        = new FloatZ(&n_, "Xs", NULL, "scalar on T_SAT",            "slr",        0,    100,        &s_t_sat, 1, true);
+    Tb_bias_model_p  = new FloatZ(&n_, "D^", NULL, "Del model",                  "deg C",      -50,  50,         &Tb_bias_model, TEMP_BIAS, true);
+    until_q_p        = new ULongZ(&n_, "XQ", NULL, "Time until v0",              "ms",         0UL,  500000UL,   &until_q, 0UL, true);
+    uint8_t i = 0;
+    Z_[i++] = cycles_inj_p;
+    Z_[i++] = dc_dc_on_p;
+    Z_[i++] = eframe_mult_p;
+    Z_[i++] = fake_faults_p;
+    Z_[i++] = print_mult_p;
+    Z_[i++] = s_t_sat_p;
+    Z_[i++] = Tb_bias_model_p;
+    Z_[i++] = until_q_p;
+    if ( i != n_ ) Serial.printf("WARN(command.h, CommandPars):  size error i%d != n_%d\n", i, n_);
   }
 
   void assign_eframe_mult(const uint8_t count) { eframe_mult = count; }
@@ -206,7 +217,7 @@ public:
     Serial.printf(" tb_info.t_c %7.3f\n", tb_info.t_c);
     Serial.printf(" tb_info.ready %d\n", tb_info.ready);
     Serial.printf(" write_summary %d\n\n", write_summary);
-    for ( uint8_t i=0; i<size_; i++ ) Z_[i] -> print();
+    for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
   }
 
 };            

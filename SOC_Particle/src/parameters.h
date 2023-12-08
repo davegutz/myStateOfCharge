@@ -244,6 +244,7 @@ public:
     float Vb_scale_z;
 
 protected:
+    uint8_t n_;
     SerialRAM *rP_;
     #ifndef CONFIG_47L16_EERAM
         Flt_st *fault_;
