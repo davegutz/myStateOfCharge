@@ -67,17 +67,17 @@ public:
   ULongZ *tail_inj_p;
   ULongZ *wait_inj_p;
   uint8_t n_;
-  Z *Z_[5];  // TODO **Z_ and new below
+  Z **Z_;
 
   AdjustPars()
   {
     n_ = 0;
-    nominalize();
     cc_diff_sclr_p        = new FloatZ(&n_, "Fc", NULL, "Slr cc_diff thr ",          "slr",    0,      1000,     &cc_diff_sclr,      1,    true);
     fail_tb_p           = new BooleanZ(&n_, "Xu", NULL, "Ignore Tb & fail",          "1=Fail", false,  true,     &fail_tb,           0,    true);
     tb_stale_time_sclr_p  = new FloatZ(&n_, "Xv", NULL, "scl Tb 1-wire stale pers",  "slr",    0,      100,      &tb_stale_time_sclr,1,    true);
     tail_inj_p            = new ULongZ(&n_, "XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj,          0UL,  true);
     wait_inj_p            = new ULongZ(&n_, "XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj,          0UL,  true);
+    Z_ = new Z*[n_];
     uint8_t i = 0;
     Z_[i++] = cc_diff_sclr_p;
     Z_[i++] = fail_tb_p;
@@ -85,26 +85,26 @@ public:
     Z_[i++] = tail_inj_p;
     Z_[i++] = wait_inj_p;
     if ( i != n_ ) Serial.printf("WARN(command.h, AdjustPars):  size error i%d != n_%d\n", i, n_);
+    set_nominal();
   }
 
   void large_reset(void)
   {
-    nominalize();
-  }
-
-  void nominalize(void)
-  {
-    // cc_diff_sclr = 1;
-    // fail_tb = false;
-    tb_stale_time_sclr = 1;
+    set_nominal();
   }
 
   void pretty_print(void)
   {
     Serial.printf("adjust parameters(ap):\n");
     for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
+    Serial.printf("\nOff-nominal:\n");
+    for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
   }
 
+  void set_nominal()
+  {
+      for ( uint16_t i=0; i<n_; i++ ) Z_[i]->set_nominal();
+  }
 };            
 
 
@@ -146,7 +146,7 @@ public:
   FloatZ *s_t_sat_p;
   FloatZ *Tb_bias_model_p;
   ULongZ *until_q_p;
-  Z *Z_[8];
+  Z **Z_;
   uint8_t n_;
 
 
@@ -178,6 +178,7 @@ public:
     s_t_sat_p        = new FloatZ(&n_, "Xs", NULL, "scalar on T_SAT",            "slr",        0,    100,        &s_t_sat, 1, true);
     Tb_bias_model_p  = new FloatZ(&n_, "D^", NULL, "Del model",                  "deg C",      -50,  50,         &Tb_bias_model, TEMP_BIAS, true);
     until_q_p        = new ULongZ(&n_, "XQ", NULL, "Time until v0",              "ms",         0UL,  500000UL,   &until_q, 0UL, true);
+    Z_ = new Z*[n_];
     uint8_t i = 0;
     Z_[i++] = cycles_inj_p;
     Z_[i++] = dc_dc_on_p;
@@ -188,11 +189,8 @@ public:
     Z_[i++] = Tb_bias_model_p;
     Z_[i++] = until_q_p;
     if ( i != n_ ) Serial.printf("WARN(command.h, CommandPars):  size error i%d != n_%d\n", i, n_);
+    set_nominal();
   }
-
-  void assign_eframe_mult(const uint8_t count) { eframe_mult = count; }
-
-  void assign_print_mult(const uint8_t count)  { print_mult = count;  }
 
   void cmd_reset(void) { soft_reset = true; }
 
@@ -204,6 +202,7 @@ public:
     model_saturated = true;
     soft_reset = true;
     num_v_print = 0UL;
+    set_nominal();
   }
 
   void pretty_print(void)
@@ -218,8 +217,14 @@ public:
     Serial.printf(" tb_info.ready %d\n", tb_info.ready);
     Serial.printf(" write_summary %d\n\n", write_summary);
     for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
+    Serial.printf("\nOff-nominal:\n");
+    for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
   }
 
+  void set_nominal()
+  {
+      for ( uint16_t i=0; i<n_; i++ ) Z_[i]->set_nominal();
+  }
 };            
 
 

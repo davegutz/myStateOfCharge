@@ -139,8 +139,8 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   Sen->Ib_noa_noise_amp(0);  // DN 0
 
   // Intervals
-  cp.assign_eframe_mult(max(min(EKF_EFRAME_MULT, UINT8_MAX), 0)); // DE
-  cp.assign_print_mult(max(min(DP_MULT, UINT8_MAX), 0));  // DP
+  cp.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
+  cp.print_mult = max(min(DP_MULT, UINT8_MAX), 0);  // DP
   Sen->ReadSensors->delay(READ_DELAY);
 
   // Fault logic
@@ -860,6 +860,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 cp.cmd_reset();
                 Sen->ReadSensors->delay(READ_DELAY);
                 sp.large_reset();
+                ap.large_reset();
                 cp.large_reset();
                 cp.cmd_reset();
                 chit("HR;", SOON);
@@ -874,10 +875,18 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 cp.cmd_reset();
                 break;
 
-              case ( 'S' ):  // RS: reset saved pars
-                sp.reset_pars();
+              case ( 'S' ):  // RS: renominalize saved pars
+                sp.set_nominal();
                 sp.pretty_print(true);
                 break;
+
+              case ( 'V' ):  // RV: renominalize volatile pars
+                ap.set_nominal();
+                ap.pretty_print();
+                cp.set_nominal();
+                cp.pretty_print();
+                break;
+
 
               default:
                 Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
@@ -1382,7 +1391,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Rr= "); Serial.printf("saturate Mon and equalize Sim & Mon\n");
   Serial.printf("  RR= "); Serial.printf("DEPLOY\n");
   Serial.printf("  Rs= "); Serial.printf("small.  Reinitialize filters\n");
-  Serial.printf("  RS= "); Serial.printf("SavedPars: Reinitialize saved\n");
+  Serial.printf("  RS= "); Serial.printf("SavedPars: Renominalize saved\n");
+  Serial.printf("  RV= "); Serial.printf("AdjustPars:CommandPars: Renominalize volatile\n");
   #endif
 
   sp.Ib_select_p->print_help();  //* si

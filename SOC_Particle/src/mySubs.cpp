@@ -939,7 +939,7 @@ void wait_on_user_input(Adafruit_SSD1306 *display)
   if ( answer=='Y' )
   {
     Serial.printf("  Y\n\n"); Serial1.printf("  Y\n\n");
-    sp.reset_pars();
+    sp.set_nominal();
     sp.pretty_print( true );
     #ifdef CONFIG_PHOTON2
       System.backupRamSync();
@@ -1001,7 +1001,7 @@ void wait_on_user_input()
   if ( answer=='Y' )
   {
     Serial.printf("  Y\n\n"); Serial1.printf("  Y\n\n");
-    sp.reset_pars();
+    sp.set_nominal();
     sp.pretty_print( true );
     #ifdef CONFIG_PHOTON2
       System.backupRamSync();

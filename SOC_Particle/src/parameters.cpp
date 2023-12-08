@@ -122,6 +122,7 @@ void SavedPars::init_z()
     T_state_model_p     = new FloatZ(&n_, "na", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_z, RATED_TEMP, true);
     Vb_bias_hdwe_p      = new FloatZ(&n_, "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_z, VOLT_BIAS);
     Vb_scale_p          = new FloatZ(&n_, "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
+    Z_ = new Z*[n_];
     uint8_t i = 0;
     Z_[i++] = Amp_p;                
     Z_[i++] = Cutback_gain_sclr_p;
@@ -341,9 +342,9 @@ void SavedPars::reset_his()
         history_[i].put_nominal();
     }
  }
-void SavedPars::reset_pars()
+void SavedPars::set_nominal()
 {
-    for ( uint16_t i=0; i<n_; i++ ) Z_[i]->set_default();
+    for ( uint16_t i=0; i<n_; i++ ) Z_[i]->set_nominal();
 
     put_Inj_bias(float(0.));
 

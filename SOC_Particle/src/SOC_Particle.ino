@@ -252,7 +252,7 @@ void setup()
     Serial.printf("\n\n");
     sp.pretty_print( false );
     Serial.printf("\n\n");
-    sp.reset_pars();
+    sp.set_nominal();
     Serial.printf("Fixed corruption\n");
     sp.pretty_print(true);
   }
@@ -399,7 +399,7 @@ void loop()
     Sen->reset = reset;
     
     // Check for really slow data capture and run EKF each read frame
-    cp.assign_eframe_mult(max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1));
+    cp.eframe_mult = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1);
 
     // Set print frame
     static uint8_t print_count = 0;

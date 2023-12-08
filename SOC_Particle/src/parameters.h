@@ -83,10 +83,10 @@ public:
     // functions
     void init_z();
     boolean is_corrupt();
-    void large_reset() { reset_pars(); reset_flt(); reset_his(); }
+    void large_reset() { set_nominal(); reset_flt(); reset_his(); }
     void reset_flt();
     void reset_his();
-    void reset_pars();
+    void set_nominal();
     boolean mod_all_dscn() { return ( 111<Modeling() ); }                // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
     boolean mod_any_dscn() { return ( 15<Modeling() ); }                 // Bare any
@@ -258,7 +258,7 @@ protected:
     uint16_t nhis_;         // Length of Flt_ram array for fault history
     uint16_t nsum_;         // Length of Sum array for history
     uint16_t size_;
-    Z *Z_[40];
+    Z **Z_;
 };
 
 #endif

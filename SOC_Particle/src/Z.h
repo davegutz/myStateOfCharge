@@ -64,8 +64,9 @@ public:
     virtual void get(){};
     virtual boolean is_corrupt(){return false;};
     virtual boolean is_off(){return false;};
+    virtual boolean off_nominal(){return false;};
     virtual void print(){};
-    virtual void set_default(){};
+    virtual void set_nominal(){};
 
 protected:
     String code_;
@@ -101,6 +102,7 @@ public:
         {
             prefix_ = "* ";
         }
+        set_nominal();
     }
 
     ~BooleanZ(){}
@@ -125,7 +127,12 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_ && !check_off_;
+        return off_nominal() && !check_off_;
+    }
+
+    virtual boolean off_nominal()
+    {
+        return *val_ != default_;
     }
 
     boolean max_of() { return max_; }
@@ -133,7 +140,7 @@ public:
     boolean min_of() { return min_; }
 
     boolean nominal() { return default_; }
-    
+
     void print_str()
     {
         if ( !check_off_ )
@@ -182,7 +189,7 @@ public:
    
     void set(boolean val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %d (%-d, %d)\n", code_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -190,9 +197,10 @@ public:
         }
     }
 
-    virtual void set_default()
+    virtual void set_nominal()
     {
-        if ( !check_off_ ) set(default_);
+        *val_ = default_;
+        if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
     }
 
 protected:
@@ -228,6 +236,7 @@ public:
         {
             prefix_ = "* ";
         }
+        set_nominal();
     }
 
     ~DoubleZ(){}
@@ -255,8 +264,14 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_ && !check_off_;
+        return off_nominal() && !check_off_;
     }
+
+    virtual boolean off_nominal()
+    {
+        return *val_ != default_;
+    }
+
 
     double max_of() { return max_; }
 
@@ -312,7 +327,7 @@ public:
 
     void set(double val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -320,9 +335,10 @@ public:
         }
     }
 
-    virtual void set_default()
+    virtual void set_nominal()
     {
-        if ( !check_off_ ) set(default_);
+        *val_ = default_;
+        if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
     }
 
 protected:
@@ -358,6 +374,7 @@ public:
         {
             prefix_ = "* ";
         }
+        set_nominal();
     }
 
     ~FloatZ(){}
@@ -385,7 +402,12 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_ && !check_off_;
+        return off_nominal() && !check_off_;
+    }
+
+    virtual boolean off_nominal()
+    {
+        return *val_ != default_;
     }
 
     float max_of() { return max_; }
@@ -442,7 +464,7 @@ public:
 
     void set(float val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -450,9 +472,10 @@ public:
         }
     }
 
-    virtual void set_default()
+    virtual void set_nominal()
     {
-        if ( !check_off_ ) set(default_);
+        *val_ = default_;
+        if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
     }
 
 protected:
@@ -527,7 +550,7 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
-    virtual void set_default(){}
+    virtual void set_nominal(){}
 
 protected:
     float default_;
@@ -560,6 +583,7 @@ public:
         {
             prefix_ = "* ";
         }
+        set_nominal();
     }
 
     ~IntZ(){}
@@ -587,7 +611,12 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_ && !check_off_;
+        return off_nominal() && !check_off_;
+    }
+
+    virtual boolean off_nominal()
+    {
+        return *val_ != default_;
     }
 
     int max_of() { return max_; }
@@ -643,7 +672,7 @@ public:
 
     void set(int val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %d (%-d, %d)\n", code_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -651,9 +680,10 @@ public:
         }
     }
 
-    virtual void set_default()
+    virtual void set_nominal()
     {
-        if ( !check_off_ ) set(default_);
+        *val_ = default_;
+        if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
     }
 
 protected:
@@ -689,6 +719,7 @@ public:
         {
             prefix_ = "* ";
         }
+        set_nominal();
     }
 
     ~Int8tZ(){}
@@ -716,7 +747,12 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_ && !check_off_;
+        return off_nominal() && !check_off_;
+    }
+
+    virtual boolean off_nominal()
+    {
+        return *val_ != default_;
     }
 
     int8_t max_of() { return max_; }
@@ -773,7 +809,7 @@ public:
 
     void set(int8_t val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %d (%-d, %d)\n", code_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -781,9 +817,10 @@ public:
         }
     }
 
-    virtual void set_default()
+    virtual void set_nominal()
     {
-        if ( !check_off_ ) set(default_);
+        *val_ = default_;
+        if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
     }
 
 protected:
@@ -819,6 +856,7 @@ public:
         {
             prefix_ = "* ";
         }
+        set_nominal();
      }
 
     ~Uint16tZ(){}
@@ -843,7 +881,12 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_ && !check_off_;
+        return off_nominal() && !check_off_;
+    }
+
+    virtual boolean off_nominal()
+    {
+        return *val_ != default_;
     }
 
     uint16_t max_of() { return max_; }
@@ -900,7 +943,7 @@ public:
    
     void set(uint16_t val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %d (%-d, %d)\n", code_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -908,9 +951,10 @@ public:
         }
     }
 
-    virtual void set_default()
+    virtual void set_nominal()
     {
-        if ( !check_off_ ) set(default_);
+        *val_ = default_;
+        if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
     }
 
 protected:
@@ -945,6 +989,7 @@ public:
         {
             prefix_ = "* ";
         }
+        set_nominal();
     }
 
     ~Uint8tZ(){}
@@ -969,7 +1014,12 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_ && !check_off_;
+        return off_nominal() && !check_off_;
+    }
+
+    virtual boolean off_nominal()
+    {
+        return *val_ != default_;
     }
 
     uint8_t max_of() { return max_; }
@@ -1026,7 +1076,7 @@ public:
    
     void set(uint8_t val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %d (%-d, %d)\n", code_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -1034,9 +1084,10 @@ public:
         }
     }
 
-    virtual void set_default()
+    virtual void set_nominal()
     {
-        if ( !check_off_ ) set(default_);
+        *val_ = default_;
+        if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
     }
 
 protected:
@@ -1072,6 +1123,7 @@ public:
         {
             prefix_ = "* ";
         }
+        set_nominal();
     }
 
     ~ULongZ(){}
@@ -1099,7 +1151,12 @@ public:
 
     virtual boolean is_off()
     {
-        return *val_ != default_ && !check_off_;
+        return off_nominal() && !check_off_;
+    }
+
+    virtual boolean off_nominal()
+    {
+        return *val_ != default_;
     }
 
     unsigned long max_of() { return max_; }
@@ -1156,7 +1213,7 @@ public:
    
     void set(unsigned long val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s set:: out range %ld (%-ld, %ld)\n", code_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %ld (%-ld, %ld)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
         {
             *val_ = val;
@@ -1164,9 +1221,10 @@ public:
         }
     }
 
-    virtual void set_default()
+    virtual void set_nominal()
     {
-        if ( !check_off_ ) set(default_);
+        *val_ = default_;
+        if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
     }
 
 protected:
