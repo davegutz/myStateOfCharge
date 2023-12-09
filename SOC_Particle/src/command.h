@@ -28,6 +28,7 @@
 #include "constants.h"
 #include "Z.h"
 #include "Adjust.h"
+#include <list>
 
 // DS2482 data union
 typedef union {
@@ -74,20 +75,20 @@ public:
   AjBoolean *testB_p;
   AjDouble *testD_p;
   Z **Z_;
-  // X **X_;
+  std::list< Adjust<boolean>* > Xb_; 
+  std::list< Adjust<double>* > Xd_;
 
   AdjustPars()
   {
     n_ = 0;
-    m_ = 0;
     cc_diff_sclr_p        = new FloatZ(&n_, "Fc", NULL, "Slr cc_diff thr ",          "slr",    0,      1000,     &cc_diff_sclr,      1,    true);
     fail_tb_p           = new BooleanZ(&n_, "Xu", NULL, "Ignore Tb & fail",          "1=Fail", false,  true,     &fail_tb,           0,    true);
     tb_stale_time_sclr_p  = new FloatZ(&n_, "Xv", NULL, "scl Tb 1-wire stale pers",  "slr",    0,      100,      &tb_stale_time_sclr,1,    true);
     tail_inj_p            = new ULongZ(&n_, "XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj,          0UL,  true);
     wait_inj_p            = new ULongZ(&n_, "XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj,          0UL,  true);
 
-    testB_p            = new AjBoolean(&m_, "XB", NULL, "testB boolean",       "B-",     false,    true, &testB,          false,  true);
-    testD_p             = new AjDouble(&m_, "XD", NULL, "testD double",        "D-",     0,        1,    &testD,          0.5,    true);
+    Xb_.push_back(testB_p  = new AjBoolean("XB", NULL, "testB boolean",       "B-",     false,    true, &testB,          false,  true));
+    Xd_.push_back(testD_p   = new AjDouble("XD", NULL, "testD double",        "D-",     0,        1,    &testD,          0.5,    true));
 
     Z_ = new Z*[n_];
     uint8_t i = 0;
@@ -97,10 +98,6 @@ public:
     Z_[i++] = tail_inj_p;
     Z_[i++] = wait_inj_p;
     if ( i != n_ ) Serial.printf("WARN(command.h, AdjustPars):  size error i%d != n_%d\n", i, n_);
-    // X_ = new X*[m_];
-    // uint8_t j = 0;
-    // X_[j++] = testB_p;
-    // if ( j != m_ ) Serial.printf("WARN(command.h, AdjustPars):  size error j%d != m_%d\n", j, m_);
     set_nominal();
   }
 
@@ -114,17 +111,14 @@ public:
     #ifndef DEPLOY_PHOTON
       Serial.printf("adjust parameters(ap):\n");
       for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
-      // for ( uint8_t j=0; j<m_; ++ ) X_[j] -> print();
-      testB_p->print();
-      testD_p->print();
+      std::for_each(  Xb_.begin(), Xb_.end(), std::mem_fun(&Adjust<boolean>::print) );
+      std::for_each(  Xd_.begin(), Xd_.end(), std::mem_fun(&Adjust<double>::print) );
     #endif
+    
     Serial.printf("\nOff-nominal:\n");
-    // for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
-    // for ( uint8_t j=0; j<m_; j++ ) if ( X_[j]->off_nominal() ) X_[j] -> print();
-    // testB_p->off_nominal();
-    // testD_p->off_nominal();
-    if ( testB_p->off_nominal() )  testB_p->print();
-    if ( testD_p->off_nominal() )  testD_p->print();
+    for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
+    std::for_each(  Xb_.begin(), Xb_.end(), std::mem_fun(&Adjust<boolean>::print_off) );
+    std::for_each(  Xd_.begin(), Xd_.end(), std::mem_fun(&Adjust<double>::print_off) );
   }
 
   void set_nominal()

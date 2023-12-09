@@ -43,10 +43,9 @@ class Adjust
 public:
     Adjust(){}
 
-    Adjust(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units,
+    Adjust(const String &code, SerialRAM *ram, const String &description, const String &units,
      const T _min, const T _max, T *store, const T _default, const boolean check_off=false)
     {
-        *n = *n + 1;
         code_ = code;
         description_ = description.substring(0, 20);
         units_ = units.substring(0, 10);
@@ -99,6 +98,15 @@ public:
     {
         print_str();
         Serial.printf("%s\n", pr.buff);
+    }
+    
+    void print_off()
+    {
+        if ( *val_ptr_ != default_ )
+        {
+            print_str();
+            Serial.printf("%s\n", pr.buff);
+        }
     }
     
     void print1()
@@ -158,9 +166,9 @@ class AjBoolean: public Adjust <boolean>
 public:
     AjBoolean(){}
 
-    AjBoolean(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean _min, const boolean _max,
+    AjBoolean(const String &code, SerialRAM *ram, const String &description, const String &units, const boolean _min, const boolean _max,
     boolean *store, const boolean _default=false, const boolean check_off_=false):
-        Adjust(n, code, ram, description, units, _min, _max, store, _default, check_off_)
+        Adjust(code, ram, description, units, _min, _max, store, _default, check_off_)
     {
         pull_set_nominal();
     }
@@ -223,9 +231,9 @@ class AjDouble: public Adjust <double>
 public:
     AjDouble(){}
 
-    AjDouble(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const double _min, const double _max,
+    AjDouble(const String &code, SerialRAM *ram, const String &description, const String &units, const double _min, const double _max,
     double *store, const double _default=false, const boolean check_off_=false):
-        Adjust(n, code, ram, description, units, _min, _max, store, max(min(_default, _max), _min), check_off_)
+        Adjust(code, ram, description, units, _min, _max, store, max(min(_default, _max), _min), check_off_)
     {
         pull_set_nominal();
     }
