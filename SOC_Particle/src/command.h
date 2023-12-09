@@ -116,14 +116,16 @@ public:
       // for ( uint8_t j=0; j<m_; ++ ) X_[j] -> print();
       Serial.printf("AdjustPars:  &testB 0x%X testB %d\n", &testB, testB);
     testB_p            = new BooleanX(&m_, "XW", NULL, "testB",            "B-",     false,    true, &testB,          false,  true);
+    testB_p->off_nominal();
     testD_p            = new DoubleX(&m_, "XZ", NULL, "testD",            "D-",     0,    1, &testD,          0.5,  true);
+    testD_p->off_nominal();
       // testB_p->print();
     #endif
     Serial.printf("\nOff-nominal:\n");
     for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
     // for ( uint8_t j=0; j<m_; j++ ) if ( X_[j]->off_nominal() ) X_[j] -> print();
-    testB_p->off_nominal();
-    testD_p->off_nominal();
+    // testB_p->off_nominal();
+    // testD_p->off_nominal();
     // if ( testB_p->off_nominal() )  testB_p->print();
   }
 

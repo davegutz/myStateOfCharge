@@ -67,8 +67,8 @@ public:
             prefix_ = "* ";
         }
         check_off_ = check_off;
-        Serial.printf("X::X cpt store 0x%X\n", store);
-        Serial.printf("X::X cpt val_ptr_ 0x%X\n", val_ptr_);
+        Serial.printf("X::X cpt store 0x%X ", store);
+        Serial.printf("val_ptr_ 0x%X\n", val_ptr_);
     }
 
     ~X(){}
@@ -76,11 +76,6 @@ public:
     String code() { return code_; }
     const char* description() { return description_.c_str(); }
     const char* units() { return units_.c_str(); }
-
-    // Placeholders
-    virtual uint16_t assign_addr(uint16_t next){return next;}
-    virtual void get(){};
-    virtual boolean is_corrupt(){return false;};
 
     boolean is_off()
     {
@@ -93,26 +88,22 @@ public:
 
     T nominal() { return default_; }
 
-    virtual boolean off_nominal()
+    boolean off_nominal()
     {
-        // Serial.printf("val_ptr_ 0x%X *val_ptr %d\n", val_ptr_, *val_ptr_);
-        Serial.printf("val_ptr_ 0x%X ", val_ptr_);
-        Serial.printf("X default_ %7.3f\n", default_);
+        Serial.printf("val_ptr_ 0x%X\n", val_ptr_);
         // return *val_ptr_ != default_;
         return false;
     }
 
-    virtual void print()
+    void print()
     {
-        // print_str();
-        sprintf(pr.buff, "testB");
+        print_str();
         Serial.printf("%s\n", pr.buff);
     }
     
-    virtual void print1()
+    void print1()
     {
-        // print_str();
-        sprintf(pr.buff, "testB");
+        print_str();
         Serial1.printf("%s\n", pr.buff);
     }
 
@@ -137,7 +128,10 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
-    // virtual uint16_t assign_addr(uint16_t next){return 0;};
+    // Placeholders
+    virtual uint16_t assign_addr(uint16_t next){return 0;};
+    virtual void get(){};
+    virtual boolean is_corrupt(){return false;};
     virtual void print_help_str(){};
     virtual void print_str(){};
     virtual void pull_set_nominal(){};
