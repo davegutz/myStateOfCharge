@@ -107,7 +107,7 @@ public:
 
     ~BooleanZ(){}
 
-    boolean assign_addr(boolean next)
+    uint16_t assign_addr(boolean next)
     {
         addr_.a16 = next;
         return next + sizeof(boolean);
