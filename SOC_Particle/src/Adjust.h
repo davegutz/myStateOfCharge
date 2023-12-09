@@ -21,8 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef X_H_
-#define X_H_
+#ifndef ADJUST_H_
+#define ADJUST_H_
 
 #include "hardware/SerialRAM.h"
 #include "PrinterPars.h"
@@ -38,12 +38,12 @@ extern PrinterPars pr;  // Print buffer
 */
 
 template <typename T>
-class X
+class Adjust
 {
 public:
-    X(){}
+    Adjust(){}
 
-    X(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units,
+    Adjust(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units,
      const T _min, const T _max, T *store, const T _default, const boolean check_off=false)
     {
         *n = *n + 1;
@@ -67,11 +67,11 @@ public:
             prefix_ = "* ";
         }
         check_off_ = check_off;
-        // Serial.printf("X::X cpt store 0x%X ", store);
-        // Serial.printf("val_ptr_ 0x%X\n", val_ptr_);
+        // Serial.printf("Adjust::Adjust cpt store 0x%Adjust ", store);
+        // Serial.printf("val_ptr_ 0x%Adjust\n", val_ptr_);
     }
 
-    ~X(){}
+    ~Adjust(){}
 
     String code() { return code_; }
     const char* description() { return description_.c_str(); }
@@ -90,7 +90,7 @@ public:
 
     boolean off_nominal()
     {
-        // Serial.printf("val_ptr_ 0x%X\n", val_ptr_);
+        // Serial.printf("val_ptr_ 0x%Adjust\n", val_ptr_);
         return *val_ptr_ != default_;
         // return false;
     }
@@ -153,19 +153,19 @@ protected:
 };
 
 
-class BooleanX: public X <boolean>
+class AjBoolean: public Adjust <boolean>
 {
 public:
-    BooleanX(){}
+    AjBoolean(){}
 
-    BooleanX(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean _min, const boolean _max,
+    AjBoolean(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean _min, const boolean _max,
     boolean *store, const boolean _default=false, const boolean check_off_=false):
-        X(n, code, ram, description, units, _min, _max, store, _default, check_off_)
+        Adjust(n, code, ram, description, units, _min, _max, store, _default, check_off_)
     {
         pull_set_nominal();
     }
 
-    ~BooleanX(){}
+    ~AjBoolean(){}
 
     virtual uint16_t assign_addr(uint16_t next)
     {
@@ -218,19 +218,19 @@ protected:
 };
 
 
-class DoubleX: public X <double>
+class AjDouble: public Adjust <double>
 {
 public:
-    DoubleX(){}
+    AjDouble(){}
 
-    DoubleX(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const double _min, const double _max,
+    AjDouble(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const double _min, const double _max,
     double *store, const double _default=false, const boolean check_off_=false):
-        X(n, code, ram, description, units, _min, _max, store, max(min(_default, _max), _min), check_off_)
+        Adjust(n, code, ram, description, units, _min, _max, store, max(min(_default, _max), _min), check_off_)
     {
         pull_set_nominal();
     }
 
-    ~DoubleX(){}
+    ~AjDouble(){}
 
     virtual uint16_t assign_addr(uint16_t next)
     {
@@ -281,143 +281,6 @@ public:
 
 protected:
 };
-
-// class DoubleZ: public Z
-// {
-// public:
-//     DoubleZ(){}
-
-//     DoubleZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, double *store,
-//         const double _default=0, const boolean check_off=false):
-//         Z(n, code, ram, description, units, false)
-//     {
-//         min_ = min;
-//         max_ = max;
-//         val_ = store;
-//         default_ = max(min(_default, max_), min_);
-//         check_off_ = check_off;
-//         if ( ram==NULL && check_off )
-//         {
-//             set_push(*val_);
-//             prefix_ = "  ";
-//         }
-//         else  // EERAM
-//         {
-//             prefix_ = "* ";
-//         }
-//         pull_set_nominal();
-//     }
-
-//     ~DoubleZ(){}
-
-//     uint16_t assign_addr(uint16_t next)
-//     {
-//         addr_.a16 = next;
-//         return next + sizeof(double);
-//     }
-
-//     virtual void get()
-//     {
-//         if ( is_eeram_ )
-//         {
-//             rP_->get(addr_.a16, *val_);
-//         }
-//     }
-
-//     virtual boolean is_corrupt()
-//     {
-//         boolean corrupt = *val_ > max_ || *val_ < min_;
-//         if ( corrupt ) Serial.printf("\n%s %s corrupt", code_.c_str(), description_.c_str());
-//         return corrupt;
-//     }
-
-//     virtual boolean is_off()
-//     {
-//         return off_nominal() && !check_off_;
-//     }
-
-//     virtual boolean off_nominal()
-//     {
-//         return *val_ != default_;
-//     }
-
-
-//     double max_of() { return max_; }
-
-//     double min_of() { return min_; }
-
-//     double nominal() { return default_; }
-
-//     void print_str()
-//     {
-//         if ( !check_off_ )
-//             sprintf(pr.buff, " %-20s %9.1f -> %9.1f, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
-//         else
-//             sprintf(pr.buff, " %-33s %9.1f, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
-//     }
-    
-//     void print()
-//     {
-//         print_str();
-//         Serial.printf("%s\n", pr.buff);
-//     }
-
-//     void print1()
-//     {
-//         print_str();
-//         Serial1.printf("%s\n", pr.buff);
-//     }
-
-//     void print_help_str()
-//     {
-//         sprintf(pr.buff, "%s%-2s= %6.1f: (%-6.1f-%6.1f) [%6.1f] %s, %s", prefix_.c_str(), code_.c_str(), *val_, min_, max_, default_, description_.c_str(), units_.c_str());
-//     }
-    
-//     void print_help()
-//     {
-//         print_help_str();
-//         Serial.printf("%s\n", pr.buff);
-//     }
-
-//     void print1_help()
-//     {
-//         print_help_str();
-//         Serial1.printf("%s\n", pr.buff);
-//     }
-
-//     void print_adj_print(const double input)
-//     {
-//         print();
-//         print1();
-//         set_push(input);
-//         print();
-//         print1();
-//     }
-
-//     void set_push(double val)
-//     {
-//         if ( val>max_ || val<min_ ) Serial.printf("%s %s set_push:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
-//         else
-//         {
-//             *val_ = val;
-//             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
-//         }
-//     }
-
-//     virtual void pull_set_nominal()
-//     {
-//         *val_ = default_;
-//         if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
-//     }
-
-// protected:
-//     double *val_;
-//     double default_;
-//     double min_;
-//     double max_;
-//     boolean check_off_;
-//     String prefix_;
-// };
 
 
 // class FloatZ: public Z

@@ -27,7 +27,7 @@
 #include "myCloud.h"
 #include "constants.h"
 #include "Z.h"
-#include "X.h"
+#include "Adjust.h"
 
 // DS2482 data union
 typedef union {
@@ -71,8 +71,8 @@ public:
   ULongZ *wait_inj_p;
   uint8_t n_;
   uint8_t m_;
-  BooleanX *testB_p;
-  DoubleX *testD_p;
+  AjBoolean *testB_p;
+  AjDouble *testD_p;
   Z **Z_;
   // X **X_;
 
@@ -86,8 +86,8 @@ public:
     tail_inj_p            = new ULongZ(&n_, "XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj,          0UL,  true);
     wait_inj_p            = new ULongZ(&n_, "XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj,          0UL,  true);
 
-    testB_p            = new BooleanX(&m_, "XB", NULL, "testB boolean",       "B-",     false,    true, &testB,          false,  true);
-    testD_p             = new DoubleX(&m_, "XD", NULL, "testD double",        "D-",     0,        1,    &testD,          0.5,    true);
+    testB_p            = new AjBoolean(&m_, "XB", NULL, "testB boolean",       "B-",     false,    true, &testB,          false,  true);
+    testD_p             = new AjDouble(&m_, "XD", NULL, "testD double",        "D-",     0,        1,    &testD,          0.5,    true);
 
     Z_ = new Z*[n_];
     uint8_t i = 0;
