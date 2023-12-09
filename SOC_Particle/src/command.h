@@ -27,8 +27,7 @@
 #include "myCloud.h"
 #include "constants.h"
 #include "Z.h"
-#include "Adjust.h"
-#include <list>
+// #include "Adjust.h"
 
 // DS2482 data union
 typedef union {
@@ -61,8 +60,6 @@ public:
   unsigned long int tail_inj; // Tail after end injection, ms
   float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale chec, (1)
   unsigned long int wait_inj; // Wait before start injection, ms
-  boolean testB;
-  double testD;
 
   // Adjustment handling structure
   FloatZ *cc_diff_sclr_p;
@@ -72,11 +69,13 @@ public:
   ULongZ *wait_inj_p;
   uint8_t n_;
   uint8_t m_;
-  AjBoolean *testB_p;
-  AjDouble *testD_p;
   Z **Z_;
-  std::list< Adjust<boolean>* > Xb_; 
-  std::list< Adjust<double>* > Xd_;
+  // boolean testB;
+  // double testD;
+  // AjBoolean *testB_p;
+  // AjDouble *testD_p;
+  // std::list< Adjust<boolean>* > Xb_; 
+  // std::list< Adjust<double>* > Xd_;
 
   AdjustPars()
   {
@@ -87,8 +86,8 @@ public:
     tail_inj_p            = new ULongZ(&n_, "XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj,          0UL,  true);
     wait_inj_p            = new ULongZ(&n_, "XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj,          0UL,  true);
 
-    Xb_.push_back(testB_p  = new AjBoolean("XB", NULL, "testB boolean",       "B-",     false,    true, &testB,          false,  true));
-    Xd_.push_back(testD_p   = new AjDouble("XD", NULL, "testD double",        "D-",     0,        1,    &testD,          0.5,    true));
+    // Xb_.push_back(testB_p  = new AjBoolean("XB", NULL, "testB boolean",       "B-",     false,    true, &testB,          false,  true));
+    // Xd_.push_back(testD_p   = new AjDouble("XD", NULL, "testD double",        "D-",     0,        1,    &testD,          0.5,    true));
 
     Z_ = new Z*[n_];
     uint8_t i = 0;
@@ -111,22 +110,21 @@ public:
     #ifndef DEPLOY_PHOTON
       Serial.printf("adjust parameters(ap):\n");
       for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
-      std::for_each(  Xb_.begin(), Xb_.end(), std::mem_fun(&Adjust<boolean>::print) );
-      std::for_each(  Xd_.begin(), Xd_.end(), std::mem_fun(&Adjust<double>::print) );
+      // std::for_each(  Xb_.begin(), Xb_.end(), std::mem_fun(&Adjust<boolean>::print) );
+      // std::for_each(  Xd_.begin(), Xd_.end(), std::mem_fun(&Adjust<double>::print) );
     #endif
-    
+
     Serial.printf("\nOff-nominal:\n");
     for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
-    std::for_each(  Xb_.begin(), Xb_.end(), std::mem_fun(&Adjust<boolean>::print_off) );
-    std::for_each(  Xd_.begin(), Xd_.end(), std::mem_fun(&Adjust<double>::print_off) );
+    // std::for_each(  Xb_.begin(), Xb_.end(), std::mem_fun(&Adjust<boolean>::print_off) );
+    // std::for_each(  Xd_.begin(), Xd_.end(), std::mem_fun(&Adjust<double>::print_off) );
   }
 
   void set_nominal()
   {
       for ( uint16_t i=0; i<n_; i++ ) Z_[i]->set_nominal();
-      // for ( uint16_t j=0; j<m_; i++ ) X_[j]->pull_set_nominal();
-      testB_p->pull_set_nominal();
-      testD_p->pull_set_nominal();
+    // std::for_each(  Xb_.begin(), Xb_.end(), std::mem_fun(&Adjust<boolean>::pull_set_nominal) );
+    // std::for_each(  Xd_.begin(), Xd_.end(), std::mem_fun(&Adjust<double>::pull_set_nominal) );
   }
 };            
 

@@ -26,6 +26,7 @@
 
 #include "hardware/SerialRAM.h"
 #include "PrinterPars.h"
+#include <list>
 extern PrinterPars pr;  // Print buffer
 
 #undef max
@@ -135,6 +136,8 @@ public:
         print_help_str();
         Serial1.printf("%s\n", pr.buff);
     }
+
+    T value() { return *val_ptr_; }
 
     // Placeholders
     virtual uint16_t assign_addr(uint16_t next){return 0;};
@@ -1177,5 +1180,36 @@ protected:
 // };
 
 
+// This is a dumb attempt to reinvent the Z wheel.  I didn't see that ptr_ = new AjBoolean would not work for Z* ptr_
+// class Adjustment
+// {
+// public:
+//     Adjustment(){}
+
+//     Adjustment(const String &code, SerialRAM *ram, const String &description, const String &units,
+//      const boolean _min, const boolean _max, boolean *store, const boolean _default, const boolean check_off=false)
+//     {
+//         ptr_ = new AjBoolean(code, ram, description, units, _min, _max, store, _default, check_off);
+//     }
+
+//     ~Adjustment(){}
+//     void print() { ptr_->print() }
+//     void print_off(){ ptr_->print_off(); }
+//     void print1(){ ptr_->print1(); }
+//     void print_adj_print(const boolean input) { ptr_->print_adj_print(input); }
+//     void print_adj_print(const double input) { ptr_->print_adj_print(input); }
+//     void print_help() { ptr_->print_help(); }
+//     void print1_help() { ptr_->print1_help(); }
+//     uint16_t assign_addr(uint16_t next) { return ptr_->assign_addr(next); }
+//     void get() { return ptr_->get(); }
+//     boolean is_corrupt() { return ptr_->is_corrupt(); }
+//     void print_help_str() { ptr_->print_help_str(); }
+//     void print_str() { ptr_->print_str(); }
+//     void pull_set_nominal() { ptr_->pull_set_nominal(); }
+//     void set_push(const boolean input) { ptr_->set_push(input); }
+
+// protected:
+//     Z* ptr_;
+// };
 
 #endif
