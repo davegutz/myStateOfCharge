@@ -44,7 +44,7 @@ public:
     X(){}
 
     X(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units,
-     const T min, const T max, T *store, const T _default, const boolean check_off=false)
+     const T _min, const T _max, T *store, const T _default, const boolean check_off=false)
     {
         *n = *n + 1;
         code_ = code;
@@ -53,13 +53,13 @@ public:
         if ( ram==NULL ) is_eeram_ = false;
         else is_eeram_ = true;
         rP_ = ram;
-        min_ = min;
-        max_ = max;
+        min_ = _min;
+        max_ = _max;
         val_ptr_ = store;
         default_ = _default;
         if ( ram==NULL && check_off )
         {
-            // set_push(*val_ptr_);
+            set_push(*val_ptr_);
             prefix_ = "  ";
         }
         else  // EERAM
@@ -67,8 +67,8 @@ public:
             prefix_ = "* ";
         }
         check_off_ = check_off;
-        Serial.printf("X::X cpt store 0x%X ", store);
-        Serial.printf("val_ptr_ 0x%X\n", val_ptr_);
+        // Serial.printf("X::X cpt store 0x%X ", store);
+        // Serial.printf("val_ptr_ 0x%X\n", val_ptr_);
     }
 
     ~X(){}
@@ -90,9 +90,9 @@ public:
 
     boolean off_nominal()
     {
-        Serial.printf("val_ptr_ 0x%X\n", val_ptr_);
-        // return *val_ptr_ != default_;
-        return false;
+        // Serial.printf("val_ptr_ 0x%X\n", val_ptr_);
+        return *val_ptr_ != default_;
+        // return false;
     }
 
     void print()
@@ -158,14 +158,11 @@ class BooleanX: public X <boolean>
 public:
     BooleanX(){}
 
-    BooleanX(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean min, const boolean max,
+    BooleanX(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean _min, const boolean _max,
     boolean *store, const boolean _default=false, const boolean check_off_=false):
-        X(n, code, ram, description, units, min, max, store, _default, check_off_)
+        X(n, code, ram, description, units, _min, _max, store, _default, check_off_)
     {
-        boolean local_def = max(min(_default, max_), min_);
-        Serial.printf("BouleanX::BouleanX store 0x%X *store %d default %d\n", store, *store, _default);
-        // X(n, code, ram, description, units, min, max, store, local_def, check_off_);
-        // pull_set_nominal();
+        pull_set_nominal();
     }
 
     ~BooleanX(){}
@@ -190,17 +187,15 @@ public:
 
     virtual void print_str()
     {
-        // if ( !check_off_ )
-        //     sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        // else
-        //     sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        sprintf(pr.buff, "testB");
+        if ( !check_off_ )
+            sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
+        else
+            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     virtual void print_help_str()
     {
-        // sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", prefix_.c_str(), code_.c_str(), *val_ptr_, min_, max_, default_, description_.c_str(), units_.c_str());
-        sprintf(pr.buff, "testB");
+        sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", prefix_.c_str(), code_.c_str(), *val_ptr_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     virtual void pull_set_nominal()
@@ -228,14 +223,11 @@ class DoubleX: public X <double>
 public:
     DoubleX(){}
 
-    DoubleX(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max,
+    DoubleX(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const double _min, const double _max,
     double *store, const double _default=false, const boolean check_off_=false):
-        X(n, code, ram, description, units, min, max, store, _default, check_off_)
+        X(n, code, ram, description, units, _min, _max, store, max(min(_default, _max), _min), check_off_)
     {
-        double local_def = max(min(_default, max_), min_);
-        Serial.printf("DoubleX::DoubleX store 0x%X *store %7.3f default %7.3f\n", store, *store, _default);
-        // X(n, code, ram, description, units, min, max, store, local_def, check_off_);
-        // pull_set_nominal();
+        pull_set_nominal();
     }
 
     ~DoubleX(){}
@@ -260,17 +252,15 @@ public:
 
     virtual void print_str()
     {
-        // if ( !check_off_ )
-        //     sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        // else
-        //     sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        sprintf(pr.buff, "testD");
+        if ( !check_off_ )
+            sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (%s%-2s)", description_.c_str(), default_, *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
+        else
+            sprintf(pr.buff, " %-33s %9.3f, %10s (%s%-2s)", description_.c_str(), *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     virtual void print_help_str()
     {
-        // sprintf(pr.buff, "%s%-2s= %6d: (%-6d-%6d) [%6d] %s, %s", prefix_.c_str(), code_.c_str(), *val_ptr_, min_, max_, default_, description_.c_str(), units_.c_str());
-        sprintf(pr.buff, "testD");
+        sprintf(pr.buff, "%s%-2s= %6.3f: (%-6.3f-%6.3f) [%6.3f] %s, %s", prefix_.c_str(), code_.c_str(), *val_ptr_, min_, max_, default_, description_.c_str(), units_.c_str());
     }
 
     virtual void pull_set_nominal()

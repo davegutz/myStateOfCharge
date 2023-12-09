@@ -86,7 +86,8 @@ public:
     tail_inj_p            = new ULongZ(&n_, "XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj,          0UL,  true);
     wait_inj_p            = new ULongZ(&n_, "XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj,          0UL,  true);
 
-    // testB_p            = new BooleanX(&m_, "XW", NULL, "wait start inj",            "ms",     false,    true, &testB,          false,  true);
+    testB_p            = new BooleanX(&m_, "XB", NULL, "testB boolean",       "B-",     false,    true, &testB,          false,  true);
+    testD_p             = new DoubleX(&m_, "XD", NULL, "testD double",        "D-",     0,        1,    &testD,          0.5,    true);
 
     Z_ = new Z*[n_];
     uint8_t i = 0;
@@ -114,26 +115,24 @@ public:
       Serial.printf("adjust parameters(ap):\n");
       for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
       // for ( uint8_t j=0; j<m_; ++ ) X_[j] -> print();
-      Serial.printf("AdjustPars:  &testB 0x%X testB %d\n", &testB, testB);
-    testB_p            = new BooleanX(&m_, "XW", NULL, "testB",            "B-",     false,    true, &testB,          false,  true);
-    testB_p->off_nominal();
-    testD_p            = new DoubleX(&m_, "XZ", NULL, "testD",            "D-",     0,    1, &testD,          0.5,  true);
-    testD_p->off_nominal();
-      // testB_p->print();
+      testB_p->print();
+      testD_p->print();
     #endif
     Serial.printf("\nOff-nominal:\n");
-    for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
+    // for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
     // for ( uint8_t j=0; j<m_; j++ ) if ( X_[j]->off_nominal() ) X_[j] -> print();
     // testB_p->off_nominal();
     // testD_p->off_nominal();
-    // if ( testB_p->off_nominal() )  testB_p->print();
+    if ( testB_p->off_nominal() )  testB_p->print();
+    if ( testD_p->off_nominal() )  testD_p->print();
   }
 
   void set_nominal()
   {
       for ( uint16_t i=0; i<n_; i++ ) Z_[i]->set_nominal();
       // for ( uint16_t j=0; j<m_; i++ ) X_[j]->pull_set_nominal();
-      // testB_p->pull_set_nominal();
+      testB_p->pull_set_nominal();
+      testD_p->pull_set_nominal();
   }
 };            
 
