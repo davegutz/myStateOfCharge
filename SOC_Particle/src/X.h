@@ -159,11 +159,12 @@ public:
     BooleanX(){}
 
     BooleanX(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean min, const boolean max,
-    boolean *store, const boolean _default=false, const boolean check_off_=false)   
+    boolean *store, const boolean _default=false, const boolean check_off_=false):
+        X(n, code, ram, description, units, min, max, store, _default, check_off_)
     {
         boolean local_def = max(min(_default, max_), min_);
         Serial.printf("BouleanX::BouleanX store 0x%X *store %d default %d\n", store, *store, _default);
-        X(n, code, ram, description, units, min, max, store, local_def, check_off_);
+        // X(n, code, ram, description, units, min, max, store, local_def, check_off_);
         // pull_set_nominal();
     }
 
@@ -228,11 +229,12 @@ public:
     DoubleX(){}
 
     DoubleX(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max,
-    double *store, const double _default=false, const boolean check_off_=false)   
+    double *store, const double _default=false, const boolean check_off_=false):
+        X(n, code, ram, description, units, min, max, store, _default, check_off_)
     {
         double local_def = max(min(_default, max_), min_);
         Serial.printf("DoubleX::DoubleX store 0x%X *store %7.3f default %7.3f\n", store, *store, _default);
-        X(n, code, ram, description, units, min, max, store, local_def, check_off_);
+        // X(n, code, ram, description, units, min, max, store, local_def, check_off_);
         // pull_set_nominal();
     }
 
