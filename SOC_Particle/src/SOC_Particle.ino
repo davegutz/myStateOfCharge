@@ -164,7 +164,7 @@ void setup()
     delay(1000);
     sp.load_all();
   #endif
-  sp.Time_now_p->set(max(sp.Time_now_z, (unsigned long)Time.now()));  // Synch with web when possible
+  sp.put_Time_now(max(sp.Time_now_z, (unsigned long)Time.now()));  // Synch with web when possible
   Time.setTime(sp.Time_now_z);
 
   // Peripherals (non-Photon2)
