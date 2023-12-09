@@ -1241,6 +1241,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 ap.tb_stale_time_sclr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
+              case ( 'B' ):  // XB<>:  test
+                ap.testB_p->print_adj_print((boolean) cp.input_str.substring(2).toInt());
+                break;
+
               default:
                 Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
             }
@@ -1482,6 +1486,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   ap.wait_inj_p->print_help();  // XW
   ap.fail_tb_p->print_help();  // Xu
   ap.tb_stale_time_sclr_p->print_help();  // Xv
+  // ap.testB_p->print_help();  // XB
   Serial.printf("\nurgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE, <=LAST\n");
   #endif
 }

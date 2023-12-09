@@ -27,6 +27,7 @@
 #include "myCloud.h"
 #include "constants.h"
 #include "Z.h"
+#include "X.h"
 
 // DS2482 data union
 typedef union {
@@ -59,6 +60,8 @@ public:
   unsigned long int tail_inj; // Tail after end injection, ms
   float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale chec, (1)
   unsigned long int wait_inj; // Wait before start injection, ms
+  boolean testB;
+  double testD;
 
   // Adjustment handling structure
   FloatZ *cc_diff_sclr_p;
@@ -67,16 +70,24 @@ public:
   ULongZ *tail_inj_p;
   ULongZ *wait_inj_p;
   uint8_t n_;
+  uint8_t m_;
+  BooleanX *testB_p;
+  DoubleX *testD_p;
   Z **Z_;
+  // X **X_;
 
   AdjustPars()
   {
     n_ = 0;
+    m_ = 0;
     cc_diff_sclr_p        = new FloatZ(&n_, "Fc", NULL, "Slr cc_diff thr ",          "slr",    0,      1000,     &cc_diff_sclr,      1,    true);
     fail_tb_p           = new BooleanZ(&n_, "Xu", NULL, "Ignore Tb & fail",          "1=Fail", false,  true,     &fail_tb,           0,    true);
     tb_stale_time_sclr_p  = new FloatZ(&n_, "Xv", NULL, "scl Tb 1-wire stale pers",  "slr",    0,      100,      &tb_stale_time_sclr,1,    true);
     tail_inj_p            = new ULongZ(&n_, "XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj,          0UL,  true);
     wait_inj_p            = new ULongZ(&n_, "XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj,          0UL,  true);
+
+    // testB_p            = new BooleanX(&m_, "XW", NULL, "wait start inj",            "ms",     false,    true, &testB,          false,  true);
+
     Z_ = new Z*[n_];
     uint8_t i = 0;
     Z_[i++] = cc_diff_sclr_p;
@@ -85,6 +96,10 @@ public:
     Z_[i++] = tail_inj_p;
     Z_[i++] = wait_inj_p;
     if ( i != n_ ) Serial.printf("WARN(command.h, AdjustPars):  size error i%d != n_%d\n", i, n_);
+    // X_ = new X*[m_];
+    // uint8_t j = 0;
+    // X_[j++] = testB_p;
+    // if ( j != m_ ) Serial.printf("WARN(command.h, AdjustPars):  size error j%d != m_%d\n", j, m_);
     set_nominal();
   }
 
@@ -98,14 +113,25 @@ public:
     #ifndef DEPLOY_PHOTON
       Serial.printf("adjust parameters(ap):\n");
       for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
+      // for ( uint8_t j=0; j<m_; ++ ) X_[j] -> print();
+      Serial.printf("AdjustPars:  &testB 0x%X testB %d\n", &testB, testB);
+    testB_p            = new BooleanX(&m_, "XW", NULL, "testB",            "B-",     false,    true, &testB,          false,  true);
+    testD_p            = new DoubleX(&m_, "XZ", NULL, "testD",            "D-",     0,    1, &testD,          0.5,  true);
+      // testB_p->print();
     #endif
     Serial.printf("\nOff-nominal:\n");
     for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
+    // for ( uint8_t j=0; j<m_; j++ ) if ( X_[j]->off_nominal() ) X_[j] -> print();
+    testB_p->off_nominal();
+    testD_p->off_nominal();
+    // if ( testB_p->off_nominal() )  testB_p->print();
   }
 
   void set_nominal()
   {
       for ( uint16_t i=0; i<n_; i++ ) Z_[i]->set_nominal();
+      // for ( uint16_t j=0; j<m_; i++ ) X_[j]->pull_set_nominal();
+      // testB_p->pull_set_nominal();
   }
 };            
 
