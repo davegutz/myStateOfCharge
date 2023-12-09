@@ -178,7 +178,7 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
-    void print_adj_print(const uint8_t input)
+    void print_adj_print(const boolean input)
     {
         print();
         print1();
