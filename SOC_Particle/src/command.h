@@ -61,11 +61,12 @@ public:
   uint8_t eframe_mult;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
   boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
   boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
+  float ib_amp_add;           // Amp signal add
   uint8_t print_mult;         // Print multiplier for objects
   float s_t_sat;              // Scalar on saturation test time set and reset
   unsigned long int tail_inj; // Tail after end injection, ms
-  float Tb_bias_model;        // Bias on Tb for model, C
-  float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale chec, (1)
+  float Tb_bias_model;        // Bias on Tb for model
+  float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale check
   unsigned long int until_q;  // Time until set v0, ms
   unsigned long int wait_inj; // Wait before start injection, ms
   FloatZ *cc_diff_sclr_p;
@@ -74,6 +75,7 @@ public:
   Uint8tZ *eframe_mult_p;
   BooleanZ *fail_tb_p;
   BooleanZ *fake_faults_p;
+  FloatZ *ib_amp_add_p;
   Uint8tZ *print_mult_p;
   FloatZ *s_t_sat_p;
   FloatZ *Tb_bias_model_p;
@@ -96,19 +98,20 @@ public:
   AdjustPars()
   {
     n_ = 0;
-    cc_diff_sclr_p   = new FloatZ(&n_, "Fc", NULL, "Slr cc_diff thr ",          "slr",    0,      1000,     &cc_diff_sclr,      1,    true);
-    cycles_inj_p     = new FloatZ(&n_, "XC", NULL, "Number prog cycle",          "float",      0,    1000,       &cycles_inj, 0, true);
-    dc_dc_on_p     = new BooleanZ(&n_, "Xd", NULL, "DC-DC charger on",           "0=F, 1=T",   0,    1,          &dc_dc_on, false, true);
-    eframe_mult_p   = new Uint8tZ(&n_, "DE", NULL, "EKF Multiframe rate x Dr",   "uint",       0,    UINT8_MAX,  &eframe_mult, EKF_EFRAME_MULT, true);
-    fail_tb_p      = new BooleanZ(&n_, "Xu", NULL, "Ignore Tb & fail",          "1=Fail", false,  true,     &fail_tb,           0,    true);
-    fake_faults_p  = new BooleanZ(&n_, "Ff", NULL, "Faults ignored",             "0=F, 1=T",   0,    1,          &fake_faults, FAKE_FAULTS, true);
-    print_mult_p    = new Uint8tZ(&n_, "DP", NULL, "Print multiplier x Dr",      "uint",       0,    UINT8_MAX,  &print_mult, DP_MULT, true);
-    s_t_sat_p        = new FloatZ(&n_, "Xs", NULL, "scalar on T_SAT",            "slr",        0,    100,        &s_t_sat, 1, true);
-    Tb_bias_model_p  = new FloatZ(&n_, "D^", NULL, "Del model",                  "deg C",      -50,  50,         &Tb_bias_model, TEMP_BIAS, true);
-    tb_stale_time_sclr_p = new FloatZ(&n_, "Xv", NULL, "scl Tb 1-wire stale pers",  "slr",    0,      100,      &tb_stale_time_sclr,1,    true);
-    tail_inj_p       = new ULongZ(&n_, "XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj,          0UL,  true);
-    until_q_p        = new ULongZ(&n_, "XQ", NULL, "Time until v0",              "ms",         0UL, 1000000UL,   &until_q, 0UL, true);
-    wait_inj_p       = new ULongZ(&n_, "XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj,          0UL,  true);
+    cc_diff_sclr_p   = new FloatZ(&n_, "Fc", NULL, "Slr cc_diff thr ",          "slr",        0,      1000,     &cc_diff_sclr,      1,                true);
+    cycles_inj_p     = new FloatZ(&n_, "XC", NULL, "Number prog cycle",          "float",     0,    1000,       &cycles_inj,        0,                true);
+    dc_dc_on_p     = new BooleanZ(&n_, "Xd", NULL, "DC-DC charger on",           "0=F, 1=T",  0,    1,          &dc_dc_on,          false,            true);
+    eframe_mult_p   = new Uint8tZ(&n_, "DE", NULL, "EKF Multiframe rate x Dr",   "uint",      0,    UINT8_MAX,  &eframe_mult,       EKF_EFRAME_MULT,  true);
+    fail_tb_p      = new BooleanZ(&n_, "Xu", NULL, "Ignore Tb & fail",          "1=Fail",     false,  true,     &fail_tb,           0,                true);
+    fake_faults_p  = new BooleanZ(&n_, "Ff", NULL, "Faults ignored",             "0=F, 1=T",  0,    1,          &fake_faults,       FAKE_FAULTS,      true);
+    ib_amp_add_p     = new FloatZ(&n_, "Dm", NULL, "Amp signal add ",            "A",        -1000,   1000,     &ib_amp_add,        0,                true);
+    print_mult_p    = new Uint8tZ(&n_, "DP", NULL, "Print multiplier x Dr",      "uint",      0,    UINT8_MAX,  &print_mult,        DP_MULT,          true);
+    s_t_sat_p        = new FloatZ(&n_, "Xs", NULL, "scalar on T_SAT",            "slr",       0,    100,        &s_t_sat,           1,                true);
+    Tb_bias_model_p  = new FloatZ(&n_, "D^", NULL, "Del model",                  "deg C",     -50,  50,         &Tb_bias_model,     TEMP_BIAS,        true);
+    tb_stale_time_sclr_p = new FloatZ(&n_, "Xv", NULL, "scl Tb 1-wire stale pers",  "slr",    0,    100,        &tb_stale_time_sclr,1,                true);
+    tail_inj_p       = new ULongZ(&n_, "XT", NULL, "tail end inj",               "ms",        0UL,  120000UL,   &tail_inj,          0UL,              true);
+    until_q_p        = new ULongZ(&n_, "XQ", NULL, "Time until v0",              "ms",        0UL,  1000000UL,  &until_q,           0UL,              true);
+    wait_inj_p       = new ULongZ(&n_, "XW", NULL, "wait start inj",             "ms",        0UL,  120000UL,   &wait_inj,          0UL,              true);
 
     // Xb_.push_back(testB_p  = new AjBoolean("XB", NULL, "testB boolean",       "B-",     false,    true, &testB,          false,  true));
     // Xd_.push_back(testD_p   = new AjDouble("XD", NULL, "testD double",        "D-",     0,        1,    &testD,          0.5,    true));
@@ -121,6 +124,7 @@ public:
     Z_[i++] = eframe_mult_p;
     Z_[i++] = fail_tb_p;
     Z_[i++] = fake_faults_p;
+    Z_[i++] = ib_amp_add_p;
     Z_[i++] = print_mult_p;
     Z_[i++] = s_t_sat_p;
     Z_[i++] = Tb_bias_model_p;

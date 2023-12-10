@@ -357,8 +357,6 @@ public:
   unsigned long int dt_ib(void) { return dt_ib_; };
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
   float ib() { return Ib / sp.nP(); };                            // Battery unit current, A
-  float ib_amp_add() { return ib_amp_add_; };
-  void ib_amp_add(const float add) { ib_amp_add_ = add; };
   float ib_amp_hdwe() { return Ib_amp_hdwe / sp.nP(); };          // Battery amp unit current, A
   float ib_amp_model() { return Ib_amp_model / sp.nP(); };        // Battery amp model unit current, A
   float ib_amp_sclr() { return ib_amp_sclr_; };
@@ -415,7 +413,6 @@ protected:
   PRBS_7 *Prbn_Ib_noa_; // Ib non-amplified sensor noise generator model only
   float Tb_noise_amp_;  // Tb noise amplitude model only, deg C pk-pk
   float Vb_noise_amp_;  // Vb bank noise amplitude model only, V pk-pk
-  float ib_amp_add_;    // Fault injection bias on amp, A
   float ib_amp_sclr_;   // Fault injection sclr on amp
   float ib_noa_add_;    // Fault injection bias on non amp, A
   float ib_noa_sclr_;   // Fault injection sclr on non amp

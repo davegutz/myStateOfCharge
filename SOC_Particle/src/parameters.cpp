@@ -89,11 +89,11 @@ void SavedPars::init_z()
 {
     // Memory map
     // Input definitions
-    Amp_p               = new FloatZ(&n_, "Xf", rP_, "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_z, 0.);
+    Amp_p               = new FloatZ(&n_, "Xa", rP_, "Inj amp",             "Amps pk",  -1e6, 1e6, &Amp_z, 0.);
     Cutback_gain_sclr_p = new FloatZ(&n_, "Sk", rP_, "Cutback gain scalar", "slr",      -1e6, 1e6, &Cutback_gain_sclr_z, 1.);
     Debug_p               = new IntZ(&n_, "v",  rP_, "Verbosity",           "int",      -128, 128, &Debug_z, 0);
-    Delta_q_p          = new DoubleZ(&n_, "na", rP_, "Charge chg",          "C",        -1e8, 1e5, &Delta_q_z, 0., true);
-    Delta_q_model_p    = new DoubleZ(&n_, "na", rP_, "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_z, 0., true);
+    Delta_q_p          = new DoubleZ(&n_, "qm", rP_, "Charge chg",          "C",        -1e8, 1e5, &Delta_q_z, 0., true);
+    Delta_q_model_p    = new DoubleZ(&n_, "qs", rP_, "Charge chg Sim",      "C",        -1e8, 1e5, &Delta_q_model_z, 0., true);
     Dw_p                = new FloatZ(&n_, "Dw", rP_, "Tab mon adj",         "v",        -1e2, 1e2, &Dw_z, VTAB_BIAS);
     Freq_p              = new FloatZ(&n_, "Xf", rP_, "Inj freq",            "Hz",        0.,  2.,  &Freq_z, 0.);
     Ib_bias_all_p       = new FloatZ(&n_, "DI", rP_, "Del all",             "A",        -1e5, 1e5, &Ib_bias_all_z, CURR_BIAS_ALL);
@@ -103,10 +103,10 @@ void SavedPars::init_z()
     Ib_scale_amp_p      = new FloatZ(&n_, "SA", rP_, "Slr amp",             "A",        -1e5, 1e5, &Ib_scale_amp_z, CURR_SCALE_AMP);
     Ib_scale_noa_p      = new FloatZ(&n_, "SB", rP_, "Slr noa",             "A",        -1e5, 1e5, &Ib_scale_noa_z, CURR_SCALE_NOA);
     Ib_select_p         = new Int8tZ(&n_, "si", rP_, "curr sel mode",       "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS));
-    Iflt_p            = new Uint16tZ(&n_, "na", rP_, "Fault buffer indx",   "uint",      0, nflt_+1, &Iflt_z, nflt_+1, true);
-    Ihis_p            = new Uint16tZ(&n_, "na", rP_, "Hist buffer indx",    "uint",      0, nhis_+1, &Ihis_z, nhis_+1, true);
+    Iflt_p            = new Uint16tZ(&n_, "if", rP_, "Fault buffer indx",   "uint",      0, nflt_+1, &Iflt_z, nflt_+1, true);
+    Ihis_p            = new Uint16tZ(&n_, "ih", rP_, "Hist buffer indx",    "uint",      0, nhis_+1, &Ihis_z, nhis_+1, true);
     Inj_bias_p          = new FloatZ(&n_, "Xb", rP_, "Injection bias",      "A",        -1e5, 1e5, &Inj_bias_z, 0.);
-    Isum_p            = new Uint16tZ(&n_, "na", rP_, "Summ buffer indx",    "uint",      0, NSUM+1,  &Isum_z, NSUM+1, true);
+    Isum_p            = new Uint16tZ(&n_, "is", rP_, "Summ buffer indx",    "uint",      0, NSUM+1,  &Isum_z, NSUM+1, true);
     Modeling_p         = new Uint8tZ(&n_, "Xm", rP_, "Modeling bitmap",     "[0x00000000]", 0, 255, &Modeling_z, MODELING);
     Mon_chm_p          = new Uint8tZ(&n_, "Bm", rP_, "Monitor battery",     "0=BB, 1=CH", 0, 1, &Mon_chm_z, MON_CHEM);
     nP_p                = new FloatZ(&n_, "BP", rP_, "Number parallel",     "units",     1e-6, 100, &nP_z, NP);
@@ -118,8 +118,8 @@ void SavedPars::init_z()
     Tb_bias_hdwe_p      = new FloatZ(&n_, "Dt", rP_, "Bias Tb sensor",      "dg C",     -500, 500, &Tb_bias_hdwe_z, TEMP_BIAS);
     Time_now_p          = new ULongZ(&n_, "UT", rP_, "UNIX tim since epoch","sec",       0UL, 2100000000UL, &Time_now_z, 1669801880UL, true);
     Type_p             = new Uint8tZ(&n_, "Xt", rP_, "Inj type",            "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",      0,   10,  &Type_z, 0);
-    T_state_p           = new FloatZ(&n_, "na", rP_, "Tb rate lim mem",     "dg C",    -10,  70,  &T_state_z, RATED_TEMP, true);
-    T_state_model_p     = new FloatZ(&n_, "na", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_z, RATED_TEMP, true);
+    T_state_p           = new FloatZ(&n_, "tm", rP_, "Tb rate lim mem",     "dg C",    -10,  70,  &T_state_z, RATED_TEMP, true);
+    T_state_model_p     = new FloatZ(&n_, "ts", rP_, "Tb Sim rate lim mem", "dg C",    -10,  70,  &T_state_model_z, RATED_TEMP, true);
     Vb_bias_hdwe_p      = new FloatZ(&n_, "Dc", rP_, "Bias Vb sensor",      "v",        -10,  70,  &Vb_bias_hdwe_z, VOLT_BIAS);
     Vb_scale_p          = new FloatZ(&n_, "SV", rP_, "Scale Vb sensor",     "v",        -1e5, 1e5, &Vb_scale_z, VB_SCALE);
     Z_ = new Z*[n_];

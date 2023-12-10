@@ -122,7 +122,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   Sen->Flt->wrap_err_filt_state(0);  // SH 0
 
   // Injection
-  Sen->ib_amp_add(0);  // Dm 0
+  ap.ib_amp_add = 0;  // Dm 0
   Sen->ib_noa_add(0);  // Dn 0
   Sen->vb_add(0);  // Dv 0
   Sen->Sim->ds_voc_soc(0);  // Ds
@@ -442,9 +442,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'm' ):  //   Dm<>:  Amp signal adder for faults
-                Serial.printf("ib_amp_add%7.3f to", Sen->ib_amp_add());
-                Sen->ib_amp_add(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->ib_amp_add());
+                ap.ib_amp_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'n' ):  //   Dn<>:  No Amp signal adder for faults
