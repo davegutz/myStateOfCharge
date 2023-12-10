@@ -683,7 +683,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     Sen->elapsed_inj = 0UL;
     Serial.printf("running -v0;-Pa;*Xm247,*Xp0\n");
     chit("v0;", ASAP);     // Turn off echo
-    chit("Pa;", ASAP);     // Print all for record.  Last so Pf last and visible
+    chit("Pa;", ASAP);     // Print all for record
     chit("Xm247;", SOON);  // Turn off tweak_test
     chit("Xp0;", SOON);    // Reset
   }

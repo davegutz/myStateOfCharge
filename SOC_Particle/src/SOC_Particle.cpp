@@ -94,15 +94,18 @@ void loop();
 #include "myCloud.h"
 #include "debug.h"
 #include "parameters.h"
-#include "Variable.h"
 
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
 
-SerialLogHandler logHandler;
+// Turn on Log
+#ifdef LOGHANDLE
+  SerialLogHandler logHandler;
+#endif
 
 #ifdef CONFIG_DS2482_1WIRE
-  #include "DS2482-RK.h"
+  #include "myDS2482.h"
+  MyDs2482_Class Ds2482(0);
   DS2482 ds(Wire, 0);
   DS2482DeviceListStatic<10> deviceList;
 #endif
@@ -114,20 +117,24 @@ SerialLogHandler logHandler;
 
 // Globals
 extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
-extern CommandPars cp;            // Various parameters to be common at system level
+extern CommandPars cp;            // Various parameters shared at system level
+extern AdjustPars ap;             // Various adjustments
+extern PrinterPars pr;            // Print buffer structure
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
 
 #ifdef CONFIG_47L16_EERAM
-  SavedPars sp = SavedPars(&ram);     // Various parameters to be common at system level
+  retained SavedPars sp = SavedPars(&ram);  // Various parameters to be common at system level
 #else
   retained Flt_st saved_hist[NHIS];    // For displaying faults
   retained Flt_st saved_faults[NFLT];  // For displaying faults
-  retained SavedPars sp = SavedPars(saved_hist, NHIS, saved_faults, NFLT);  // Various parameters to be common at system level
+  retained SavedPars sp = SavedPars(saved_hist, uint16_t(NHIS), saved_faults, uint16_t(NFLT));  // Various parameters to be common at system level
 #endif
 
 Flt_st mySum[NSUM];                   // Summaries
-CommandPars cp = CommandPars();       // Various control parameters commanding at system level
+PrinterPars pr = PrinterPars();       // Print buffer
+CommandPars cp = CommandPars();       // Various control parameters commanding at system level.  Initialized on start up.  Not retained.
+AdjustPars ap = AdjustPars();         // Various parameters for adjustment
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
 unsigned long millis_flip = millis(); // Timekeeping
 unsigned long last_sync = millis();   // Timekeeping
@@ -142,12 +149,12 @@ Pins *myPins;                   // Photon hardware pin mapping used
 // Setup
 void setup()
 {
+  //Log.info("begin setup");
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
-  Serial.begin(230400);
+  Serial.begin(CONFIG_SBAUD);
   Serial.flush();
   delay(1000);          // Ensures a clean display
-delay(4000);
   Serial.printf("Hi!\n");
 
   // EERAM and Bluetooth Serial1.  Use BT-AT project in this GitHub repository to change.
@@ -155,17 +162,18 @@ delay(4000);
   // Compile and flash onto the SOC_Photon target temporarily to set baud rate.  Directions
   // for HC-06 inside SOC_Photon.ino of ../../BT-AT/src.   AT+BAUD8; to set 115200.
   // Serial1.blockOnOverrun(false); doesn't work:  it's a mess; partial lines galore
-  Serial1.begin(S1BAUD);
+  Serial1.begin(CONFIG_S1BAUD);
   Serial1.flush();
 
   // EERAM chip card for I2C
   #ifdef CONFIG_47L16_EERAM
+    //Log.info("setup EERAM");
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
     sp.load_all();
   #endif
-  sp.Time_now_p->set(max(sp.Time_now_z, (unsigned long)Time.now()));  // Synch with web when possible
+  sp.put_Time_now(max(sp.Time_now_z, (unsigned long)Time.now()));  // Synch with web when possible
   Time.setTime(sp.Time_now_z);
 
   // Peripherals (non-Photon2)
@@ -185,6 +193,7 @@ delay(4000);
   // A4 - not available
   // A5-->D14 - spare
   
+  //Log.info("setup Pins");
   #ifdef CONFIG_PHOTON2
     myPins = new Pins(D3, D7, D12, D11, D13);
     // pinMode(D3, INPUT_PULLUP);
@@ -195,20 +204,22 @@ delay(4000);
   digitalWrite(myPins->status_led, LOW);
 
   // I2C for OLED, ADS, backup EERAM, DS2482
+  // Photon2 only accepts 100 and 400 khz
   #ifndef CONFIG_BARE
-    Wire.begin();
+    Log.info("setup I2C Wire");
     #ifdef CONFIG_ADS1013_OPAMP
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
-      Serial.printf("High speed Wire setup for ADS1013\n");
-    #endif
-    #if defined(CONFIG_ADS1013_OPAMP) || defined(CONFIG_SSD1306_OLED) || defined(CONFIG_DS2482_1WIRE)
+      Serial.printf("Nominal Wire setup for ADS1013\n");
+    #else
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
       Serial.printf("Wire started\n");
     #endif
+    Wire.begin();
   #endif
 
   // Display (after start Wire)
   #ifdef CONFIG_SSD1306_OLED
+    //Log.info("setup display");
     display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
     Serial.printf("Init DISP\n");
     if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
@@ -225,35 +236,16 @@ delay(4000);
 
   // 1-Wire chip card for I2C (after start Wire)
   #ifdef CONFIG_DS2482_1WIRE
+    Log.info("setup DS2482 special 1-wire");
     ds.setup();
-    #if !defined(CONFIG_ADS1013_OPAMP) && !defined(CONFIG_SSD1306_OLED)
-      // Single drop
-      DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status)
-      {
-        Serial.printlnf("deviceReset=%d", status);
-      });
-      Serial.printf("DS2482 single-drop setup complete\n");
-    #else
-      // Multidrop
-      DS2482DeviceReset::run(ds, [](DS2482DeviceReset&, int status) {
-        Serial.printlnf("deviceReset=%d", status);
-        DS2482SearchBusCommand::run(ds, deviceList, [](DS2482SearchBusCommand &obj, int status) {
-
-          if (status != DS2482Command::RESULT_DONE) {
-            Serial.printlnf("DS2482SearchBusCommand status=%d", status);
-            return;
-          }
-
-          Serial.printlnf("Found %u devices", deviceList.getDeviceCount());
-        });
-      });
-      Serial.printf("DS2482 multi-drop setup complete\n");
-    #endif
+    Ds2482.setup();
+    Serial.printf("DS2482 multi-drop setup complete\n");
   #endif
 
   // Synchronize clock
   // Device needs to be configured for wifi (hold setup 3 sec run Particle app) and in range of wifi
   // Phone hotspot is very convenient
+  //Log.info("setup WiFi or lack of");
   WiFi.disconnect();
   delay(2000);
   WiFi.off();
@@ -269,7 +261,7 @@ delay(4000);
     Serial.printf("\n\n");
     sp.pretty_print( false );
     Serial.printf("\n\n");
-    sp.reset_pars();
+    sp.set_nominal();
     Serial.printf("Fixed corruption\n");
     sp.pretty_print(true);
   }
@@ -297,6 +289,7 @@ delay(4000);
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
   {
+    //Log.info("setup renominalize");
     if ( sp.num_diffs() )
     {
       #ifdef CONFIG_SSD1306_OLED
@@ -312,6 +305,7 @@ delay(4000);
     }
   }
 
+  //Log.info("setup end");
   Serial.printf("End setup()\n\n");
 } // setup
 
@@ -320,12 +314,11 @@ delay(4000);
 void loop()
 {
   // Synchronization
-  #ifdef CONFIG_DS2482_1WIRE
-    ds.loop();
-  #endif
-  boolean read;
+  boolean chitchat = false;
+  static Sync *Talk = new Sync(TALK_DELAY);
+  boolean read = false;
   static Sync *ReadSensors = new Sync(READ_DELAY);
-  boolean read_temp;
+  boolean read_temp = false;
   static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
   boolean display_and_remember;
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
@@ -352,12 +345,17 @@ void loop()
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);
 
-  // Variables storage  TODO:  combine with Z
-  static Vars *V = new Vars(&sp);
-
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
   // Synchronize
+  #ifdef CONFIG_DS2482_1WIRE
+    Ds2482.loop();
+    // if ( read || read_temp || reset || reset_temp )
+    // if ( read_temp || reset_temp )  // never ready=1
+    // {
+    //   Ds2482.loop();
+    // }
+  #endif
   now = millis();
   time_now = Time.now();
   if ( now - last_sync > ONE_DAY_MILLIS || reset )  sync_time(now, &last_sync, &millis_flip); 
@@ -366,6 +364,7 @@ void loop()
   hm_string = String(tempStr);
   read_temp = ReadTemp->update(millis(), reset);
   read = ReadSensors->update(millis(), reset);
+  chitchat = Talk->update(millis(), reset);
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);
   display_and_remember = DisplayUserSync->update(millis(), reset);
@@ -378,56 +377,21 @@ void loop()
   // Outputs:   Sen->Tb,  Sen->Tb_filt
   if ( read_temp )
   {
+    Log.info("read_temp");
+    #ifdef CONFIG_DS2482_1WIRE
+        Ds2482.check();
+        cp.tb_info.t_c = Ds2482.tempC(0);
+        cp.tb_info.ready = Ds2482.ready();
+    #endif
     Sen->T_temp = ReadTemp->updateTime();
     Sen->temp_load_and_filter(Sen, reset_temp);
-
-    #ifdef CONFIG_DS2482_1WIRE
-      #if !defined(CONFIG_ADS1013_OPAMP) && !defined(CONFIG_SSD1306_OLED)
-        // Singledrop Wire I2C
-        // For single-drop you can pass an empty address to get the temperature of the only
-        // sensor on the 1-wire bus
-        DS24821WireAddress addr;
-        DS2482GetTemperatureCommand::run(ds, addr, [](DS2482GetTemperatureCommand&, int status, float tempC)
-        {
-          if (status == DS2482Command::RESULT_DONE) {
-            Serial.printf("%.4f\n", tempC);
-          }
-          else {
-            Serial.printf("DS2482GetTemperatureCommand failed status=%d\n", status);
-          }
-        });
-      #else
-        // Multidrop Wire I2C
-        if (deviceList.getDeviceCount() > 0)
-        {
-          DS2482GetTemperatureForListCommand::run(ds, deviceList, [](DS2482GetTemperatureForListCommand&, int status, DS2482DeviceList &deviceList)
-          {
-            if (status != DS2482Command::RESULT_DONE)
-            {
-              Serial.printlnf("DS2482GetTemperatureForListCommand status=%d", status);
-              return;
-            }
-            for(size_t ii = 0; ii < deviceList.getDeviceCount(); ii++) {
-              Serial.printlnf("%s valid=%d C=%f",
-                  deviceList.getAddressByIndex(ii).toString().c_str(),
-                  deviceList.getDeviceByIndex(ii).getValid(),
-                  deviceList.getDeviceByIndex(ii).getTemperatureC());
-            }
-
-          });
-        }
-        else
-        {
-          Serial.printlnf("no devices found");
-        }
-      #endif
-    #endif
   }
 
   // Sample Ib
   #ifndef CONFIG_ADS1013_OPAMP
     if ( read )
     {
+      Log.info("Read shunt");
       static unsigned int t_us_last = micros();
       unsigned int t_us_now = micros();
       float T = float(t_us_now - t_us_last) / 1e6;
@@ -440,14 +404,15 @@ void loop()
   // Input all other sensors and do high rate calculations
   if ( read )
   {
+    Log.info("read");
     Sen->reset = reset;
     
     // Check for really slow data capture and run EKF each read frame
-    cp.assign_eframe_mult(max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1));
+    ap.eframe_mult = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1);
 
     // Set print frame
     static uint8_t print_count = 0;
-    if ( print_count>=cp.print_mult-1 || print_count==UINT8_MAX )  // > avoids lockup on change by user
+    if ( print_count>=ap.print_mult-1 || print_count==UINT8_MAX )  // > avoids lockup on change by user
     {
       print_count = 0;
       cp.publishS = true;
@@ -496,11 +461,13 @@ void loop()
     // Print
     print_rapid_data(reset, Sen, Mon);
 
+    Log.info("end read");
   }  // end read (high speed frame)
 
   // OLED and Bluetooth display drivers.   Also convenient update time for saving parameters (remember)
   if ( display_and_remember )
   {
+    Log.info("display and remember");
     #ifdef CONFIG_SSD1306_OLED
       oled_display(display, Sen, Mon);
     #else
@@ -520,13 +487,15 @@ void loop()
   // String definitions are below.
   // Control
   if ( control ){} // placeholder
+
+
   // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   asap();
-  if ( read )
+  if ( chitchat )
   {
     chat();         // Work on internal chit-chat
+    talk(Mon, Sen);   // Collect user inputs
   }
-  talk(Mon, Sen, V);   // Collect user inputs
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
@@ -550,7 +519,7 @@ void loop()
   if ( read ) reset = false;
   if ( read_temp && elapsed>TEMP_INIT_DELAY && reset_temp )
   {
-    Serial.printf("temp init complete\n");
+    Serial.printf("\ntemp init complete\n");
     reset_temp = false;
   }
   if ( cp.publishS ) reset_publish = false;

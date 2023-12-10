@@ -112,7 +112,6 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   cp.cmd_summarize();  // Hs
   cp.cmd_summarize();  // Hs
   cp.cmd_summarize();  // Hs
-  chit("Pf", ASAP);  // Pf
 
   // Model
   Sen->Sim->hys_scale(1);  // Sh 1
@@ -141,7 +140,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   // Intervals
   ap.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
   ap.print_mult = max(min(DP_MULT, UINT8_MAX), 0);  // DP
-  Sen->ReadSensors->delay(READ_DELAY);
+  Sen->ReadSensors->delay(READ_DELAY);  // Dr
 
   // Fault logic
   ap.cc_diff_sclr = 1;  // Fc 1
@@ -865,7 +864,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 cp.cmd_reset();
                 chit("HR;", SOON);
                 chit("Rf;", SOON);
-                // chit("W3;", SOON);
                 chit("Hs;", SOON);
                 chit("Pf;", SOON);
                 break;
@@ -883,8 +881,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'V' ):  // RV: renominalize volatile pars
                 ap.set_nominal();
                 ap.pretty_print();
-                ap.set_nominal();
-                cp.pretty_print();
                 break;
 
 
@@ -1216,7 +1212,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Sen->end_inj = 0UL;
                 Sen->elapsed_inj = 0UL;
                 chit("v0;", ASAP);     // Turn off echo
-                chit("Pa;", ASAP);     // Print all for record.  Last so Pf last and visible
                 chit("Xm247;", SOON);  // Turn off tweak_test
                 chit("Xp0;", SOON);    // Reset
                 break;
