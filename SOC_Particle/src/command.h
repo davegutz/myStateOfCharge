@@ -54,22 +54,20 @@ class AdjustPars
 public:
   ~AdjustPars();
 
-  // Small static value area for 'retained'
+  // Adjustment handling structure
   float cc_diff_sclr;         // Scale cc_diff detection thresh, scalar
   boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
   unsigned long int tail_inj; // Tail after end injection, ms
   float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale chec, (1)
   unsigned long int wait_inj; // Wait before start injection, ms
-
-  // Adjustment handling structure
   FloatZ *cc_diff_sclr_p;
   BooleanZ *fail_tb_p;
   FloatZ *tb_stale_time_sclr_p;
   ULongZ *tail_inj_p;
   ULongZ *wait_inj_p;
   uint8_t n_;
-  uint8_t m_;
   Z **Z_;
+  // uint8_t m_;
   // boolean testB;
   // double testD;
   // AjBoolean *testB_p;
@@ -141,24 +139,24 @@ public:
   String soon_str;          // Hold chit_chat soon data - priority with next Control pass, 1 per Control pass
   String asap_str;          // Hold chit_chat asap data - no waiting, ASAP all of now_str processed before Control pass
   boolean token;            // Whether input_str is complete
-  float cycles_inj;         // Number of injection cycles
-  boolean dc_dc_on;         // DC-DC charger is on
-  uint8_t eframe_mult;      // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
-  boolean fake_faults;      // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
   boolean inf_reset;        // Use talk to reset infinite counter
   boolean model_cutback;    // On model cutback
   boolean model_saturated;  // Sim on cutback and saturated
   unsigned long num_v_print;// Number of print echos made, for checking on BLE
-  uint8_t print_mult;       // Print multiplier for objects
   boolean publishS;         // Print serial monitor data
   boolean soft_reset;       // Use talk to reset main
-  float s_t_sat;            // Scalar on saturation test time set and reset
-  float Tb_bias_model;      // Bias on Tb for model, C
   Tb_union tb_info;         // Use cp to pass DS2482 I2C information
-  unsigned long int until_q;  // Time until set v0, ms
   boolean write_summary;    // Use talk to issue a write command to summary
 
   // Adjustment handling structure
+  float cycles_inj;         // Number of injection cycles
+  boolean dc_dc_on;         // DC-DC charger is on
+  uint8_t eframe_mult;      // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
+  boolean fake_faults;      // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
+  uint8_t print_mult;       // Print multiplier for objects
+  float s_t_sat;            // Scalar on saturation test time set and reset
+  float Tb_bias_model;      // Bias on Tb for model, C
+  unsigned long int until_q;  // Time until set v0, ms
   FloatZ *cycles_inj_p;
   BooleanZ *dc_dc_on_p;
   Uint8tZ *eframe_mult_p;

@@ -135,12 +135,6 @@ public:
         return *val_ != default_;
     }
 
-    boolean max_of() { return max_; }
-
-    boolean min_of() { return min_; }
-
-    boolean nominal() { return default_; }
-
     void print_str()
     {
         if ( !check_off_ )
@@ -271,13 +265,6 @@ public:
     {
         return *val_ != default_;
     }
-
-
-    double max_of() { return max_; }
-
-    double min_of() { return min_; }
-
-    double nominal() { return default_; }
 
     void print_str()
     {
@@ -410,12 +397,6 @@ public:
         return *val_ != default_;
     }
 
-    float max_of() { return max_; }
-
-    float min_of() { return min_; }
-
-    float nominal() { return default_; }
-    
     void print_str()
     {
         if ( !check_off_ )
@@ -510,12 +491,6 @@ public:
         return next;
     }
 
-    float max_of() { return max_; }
-
-    float min_of() { return min_; }
-
-    float nominal() { return default_; }
-    
     void print_str()
     {
         sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (%s%-2s)", description_.c_str(), default_, NAN, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -619,12 +594,6 @@ public:
         return *val_ != default_;
     }
 
-    int max_of() { return max_; }
-
-    int min_of() { return min_; }
-
-    int nominal() { return default_; }
-    
     void print_str()
     {
         if ( !check_off_ )
@@ -755,12 +724,6 @@ public:
         return *val_ != default_;
     }
 
-    int8_t max_of() { return max_; }
-
-    int8_t min_of() { return min_; }
-
-    int8_t nominal() { return default_; }
-    
     void print_str()
     {
         if ( !check_off_ )
@@ -889,12 +852,6 @@ public:
         return *val_ != default_;
     }
 
-    uint16_t max_of() { return max_; }
-
-    uint16_t min_of() { return min_; }
-
-    uint16_t nominal() { return default_; }
-    
     void print_str()
     {
         if ( !check_off_ )
@@ -1022,12 +979,6 @@ public:
         return *val_ != default_;
     }
 
-    uint8_t max_of() { return max_; }
-
-    uint8_t min_of() { return min_; }
-
-    uint8_t nominal() { return default_; }
-    
     void print_str()
     {
         if ( !check_off_ )
@@ -1158,12 +1109,6 @@ public:
     {
         return *val_ != default_;
     }
-
-    unsigned long max_of() { return max_; }
-
-    unsigned long min_of() { return min_; }
-
-    unsigned long nominal() { return default_; }
 
     void print_str()
     {
