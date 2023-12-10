@@ -42,7 +42,6 @@
 
 extern PublishPars pp;  // For publishing
 extern CommandPars cp;  // Various parameters to be static at system level
-extern AdjustPars ap;   // Various adjustments
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 struct Pins;
 
@@ -232,7 +231,7 @@ public:
   boolean preserving() { return *sp_preserving_; };
   void pretty_print(Sensors *Sen, BatteryMonitor *Mon);
   void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);
-  boolean record() { if ( ap.fake_faults ) return no_fails_fake(); else return no_fails(); };
+  boolean record() { if ( sp.fake_faults ) return no_fails_fake(); else return no_fails(); };
   boolean red_loss() { return faultRead(RED_LOSS); };
   boolean red_loss_calc();
   void reset_all_faults(const boolean cmd) { reset_all_faults_ = cmd; };

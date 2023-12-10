@@ -84,9 +84,23 @@ public:
     void init_z();
     boolean is_corrupt();
     void large_reset() { set_nominal(); reset_flt(); reset_his(); }
+    void mem_print();
+    uint16_t nflt() { return nflt_; }
+    uint16_t nhis() { return nhis_; }
+    uint16_t nsum() { return nsum_; }
+    void nominalize_fault_array();
+    void nominalize_history_array();
+    int num_diffs();
+    void pretty_print(const boolean all);
+    void pretty_print_modeling();
+    void pretty_print_volatile(const boolean all);
+    void print_fault_array();
+    void print_fault_header();
+    void print_history_array();
     void reset_flt();
     void reset_his();
     void set_nominal();
+
     boolean mod_all_dscn() { return ( 111<Modeling() ); }                // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
     boolean mod_any_dscn() { return ( 15<Modeling() ); }                 // Bare any
@@ -109,66 +123,53 @@ public:
         void load_all();
     #endif
 
-    void mem_print();
-    uint16_t nflt() { return nflt_; }
-    uint16_t nhis() { return nhis_; }
-    uint16_t nsum() { return nsum_; }
-    void nominalize_fault_array();
-    void nominalize_history_array();
-    int num_diffs();
-    void pretty_print(const boolean all);
-    void pretty_print_modeling();
-    void print_fault_array();
-    void print_fault_header();
-    void print_history_array();
-
     // put
     void put_all_dynamic();
-    void put_Amp(const float input) { Amp_p->set(input); }
-    void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_p->set(input); }
-    void put_Debug(const int input) { Debug_p->set(input); }
-    void put_Delta_q(const double input) { Delta_q_p->set(input); }
+    void put_Amp(const float input) { Amp_p->check_set_put(input); }
+    void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_p->check_set_put(input); }
+    void put_Debug(const int input) { Debug_p->check_set_put(input); }
+    void put_Delta_q(const double input) { Delta_q_p->check_set_put(input); }
     void put_Delta_q() {}
-    void put_Delta_q_model(const double input) { Delta_q_model_p->set(input); }
+    void put_Delta_q_model(const double input) { Delta_q_model_p->check_set_put(input); }
     void put_Delta_q_model() {}
-    void put_Dw(const float input) { Dw_p->set(input); }
-    void put_Freq(const float input) { Freq_p->set(input); }
-    void put_Ib_bias_all(const float input) { Ib_bias_all_p->set(input); }
-    void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->set(input); }
-    void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->set(input); }
-    void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->set(input); }
-    void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->set(input); }
-    void put_Ib_select(const int8_t input) { Ib_select_p->set(input); }
-    void put_Iflt(const int input) { Iflt_p->set(input); }
-    void put_Ihis(const int input) { Ihis_p->set(input); }
-    void put_Isum(const int input) { Isum_p->set(input); }
-    void put_Inj_bias(const float input) { Inj_bias_p->set(input); }
-    void put_Mon_chm(const uint8_t input) { Mon_chm_p->set(input); }
+    void put_Dw(const float input) { Dw_p->check_set_put(input); }
+    void put_Freq(const float input) { Freq_p->check_set_put(input); }
+    void put_Ib_bias_all(const float input) { Ib_bias_all_p->check_set_put(input); }
+    void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->check_set_put(input); }
+    void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->check_set_put(input); }
+    void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->check_set_put(input); }
+    void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->check_set_put(input); }
+    void put_Ib_select(const int8_t input) { Ib_select_p->check_set_put(input); }
+    void put_Iflt(const int input) { Iflt_p->check_set_put(input); }
+    void put_Ihis(const int input) { Ihis_p->check_set_put(input); }
+    void put_Isum(const int input) { Isum_p->check_set_put(input); }
+    void put_Inj_bias(const float input) { Inj_bias_p->check_set_put(input); }
+    void put_Mon_chm(const uint8_t input) { Mon_chm_p->check_set_put(input); }
     void put_Mon_chm() {}
-    void put_nP(const float input) { nP_p->set(input); }
-    void put_nS(const float input) { nS_p->set(input); }
-    void put_Preserving(const uint8_t input) { Preserving_p->set(input); }
-    void put_Sim_chm(const uint8_t input) { Sim_chm_p->set(input); }
+    void put_nP(const float input) { nP_p->check_set_put(input); }
+    void put_nS(const float input) { nS_p->check_set_put(input); }
+    void put_Preserving(const uint8_t input) { Preserving_p->check_set_put(input); }
+    void put_Sim_chm(const uint8_t input) { Sim_chm_p->check_set_put(input); }
     void put_Sim_chm() {}
-    void put_S_cap_mon(const float input) { S_cap_mon_p->set(input); }
-    void put_S_cap_sim(const float input) { S_cap_sim_p->set(input); }
-    void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->set(input); }
-    void put_Time_now(const float input) { Time_now_p->set(input); }
-    void put_Type(const uint8_t input) { Type_p->set(input); }
-    void put_T_state(const float input) { T_state_p->set(input); }
-    void put_T_state_model(const float input) { T_state_model_p->set(input); }
-    void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->set(input); }
-    void put_Vb_scale(const float input) { Vb_scale_p->set(input); }
+    void put_S_cap_mon(const float input) { S_cap_mon_p->check_set_put(input); }
+    void put_S_cap_sim(const float input) { S_cap_sim_p->check_set_put(input); }
+    void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->check_set_put(input); }
+    void put_Time_now(const float input) { Time_now_p->check_set_put(input); }
+    void put_Type(const uint8_t input) { Type_p->check_set_put(input); }
+    void put_T_state(const float input) { T_state_p->check_set_put(input); }
+    void put_T_state_model(const float input) { T_state_model_p->check_set_put(input); }
+    void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->check_set_put(input); }
+    void put_Vb_scale(const float input) { Vb_scale_p->check_set_put(input); }
     #ifndef CONFIG_47L16_EERAM
-        void put_Modeling(const uint8_t input) { Modeling_p->set(input); Modeling_z = Modeling();}
+        void put_Modeling(const uint8_t input) { Modeling_p->check_set_put(input); Modeling_z = Modeling();}
         void put_T_state() {}
         void put_T_state_model() {}
 
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #else
-        void put_Modeling(const uint8_t input) { Modeling_p->set(input); }
-        void put_T_state() { T_state_p->set(T_state_z); }
-        void put_T_state_model() { T_state_p->set(T_state_model_z); }
+        void put_Modeling(const uint8_t input) { Modeling_p->check_set_put(input); }
+        void put_T_state() { T_state_p->check_set_put(T_state_z); }
+        void put_T_state_model() { T_state_p->check_set_put(T_state_model_z); }
 
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].put(input); }
     #endif
@@ -208,6 +209,34 @@ public:
     Uint8tZ *Type_p;
     FloatZ *Vb_bias_hdwe_p;
     FloatZ *Vb_scale_p;
+    float cc_diff_sclr;         // Scale cc_diff detection thresh, scalar
+    float cycles_inj;           // Number of injection cycles
+    boolean dc_dc_on;           // DC-DC charger is on
+    uint8_t eframe_mult;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
+    boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
+    boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
+    float ib_amp_add;           // Amp signal add
+    uint8_t print_mult;         // Print multiplier for objects
+    float s_t_sat;              // Scalar on saturation test time set and reset
+    unsigned long int tail_inj; // Tail after end injection, ms
+    float Tb_bias_model;        // Bias on Tb for model
+    float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale check
+    unsigned long int until_q;  // Time until set v0, ms
+    unsigned long int wait_inj; // Wait before start injection, ms
+    FloatZ *cc_diff_sclr_p;
+    FloatZ *cycles_inj_p;
+    BooleanZ *dc_dc_on_p;
+    Uint8tZ *eframe_mult_p;
+    BooleanZ *fail_tb_p;
+    BooleanZ *fake_faults_p;
+    FloatZ *ib_amp_add_p;
+    Uint8tZ *print_mult_p;
+    FloatZ *s_t_sat_p;
+    FloatZ *Tb_bias_model_p;
+    FloatZ *tb_stale_time_sclr_p;
+    ULongZ *tail_inj_p;
+    ULongZ *until_q_p;
+    ULongZ *wait_inj_p;
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
     float Amp_z;

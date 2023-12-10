@@ -41,16 +41,16 @@ class Z
 public:
     Z(){}
 
-    Z(int8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, boolean _uint8=false)
+    Z(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units,
+        const boolean check_for_off_on_init=true)
     {
         *n = *n + 1;
         code_ = code;
         description_ = description.substring(0, 20);
         units_ = units.substring(0, 10);
-        if ( ram==NULL ) is_eeram_ = false;
-        else is_eeram_ = true;
+        check_for_off_on_init_ = check_for_off_on_init;
+        is_eeram_ = !(ram==NULL);
         rP_ = ram;
-        is_uint8_t_ = _uint8;
     }
 
     ~Z(){}
@@ -63,6 +63,7 @@ public:
     virtual uint16_t assign_addr(uint16_t next){return next;}
     virtual void get(){};
     virtual boolean is_corrupt(){return false;};
+    virtual boolean is_eeram(){return is_eeram_;};
     virtual boolean is_off(){return false;};
     virtual boolean off_nominal(){return false;};
     virtual void print(){};
@@ -74,8 +75,9 @@ protected:
     address16b addr_;
     String units_;
     String description_;
-    boolean is_eeram_;
-    boolean is_uint8_t_;
+    boolean is_eeram_;      // eeram
+    boolean check_for_off_on_init_;  // check for off-nominal on initialization
+    String prefix_;         // either "* " saved or "  " not saved
 };
 
 
@@ -84,25 +86,15 @@ class BooleanZ: public Z
 public:
     BooleanZ(){}
 
-    BooleanZ(int8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean min, const boolean max,
-    boolean *store, const boolean _default=false, const boolean check_off=false):
-        Z(n, code, ram, description, units, true)
+    BooleanZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean min, const boolean max,
+    boolean *store, const boolean _default=false, const boolean check_for_off_on_init=true):
+        Z(n, prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
-        check_off_ = check_off;
-        if ( ram==NULL && check_off )
-        {
-            set(*val_);
-            prefix_ = "  ";
-        }
-        else  // EERAM
-        {
-            prefix_ = "* ";
-        }
-        set_nominal();
+        if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
     ~BooleanZ(){}
@@ -127,7 +119,7 @@ public:
 
     virtual boolean is_off()
     {
-        return off_nominal() && !check_off_;
+        return off_nominal() && check_for_off_on_init_;
     }
 
     virtual boolean off_nominal()
@@ -137,7 +129,7 @@ public:
 
     void print_str()
     {
-        if ( !check_off_ )
+        if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
             sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -176,12 +168,12 @@ public:
     {
         print();
         print1();
-        set(input);
+        check_set_put(input);
         print();
         print1();
     }
    
-    void set(boolean val)
+    void check_set_put(boolean val)
     {
         if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
@@ -202,8 +194,6 @@ protected:
     boolean min_;
     boolean max_;
     boolean default_;
-    boolean check_off_;
-    String prefix_;
 };
 
 
@@ -212,25 +202,15 @@ class DoubleZ: public Z
 public:
     DoubleZ(){}
 
-    DoubleZ(int8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, double *store,
-        const double _default=0, const boolean check_off=false):
-        Z(n, code, ram, description, units, false)
+    DoubleZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, double *store,
+        const double _default=0, const boolean check_for_off_on_init=true):
+        Z(n, prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
-        check_off_ = check_off;
-        if ( ram==NULL && check_off )
-        {
-            set(*val_);
-            prefix_ = "  ";
-        }
-        else  // EERAM
-        {
-            prefix_ = "* ";
-        }
-        set_nominal();
+        if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
     ~DoubleZ(){}
@@ -258,7 +238,7 @@ public:
 
     virtual boolean is_off()
     {
-        return off_nominal() && !check_off_;
+        return off_nominal() && check_for_off_on_init_;
     }
 
     virtual boolean off_nominal()
@@ -268,7 +248,7 @@ public:
 
     void print_str()
     {
-        if ( !check_off_ )
+        if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9.1f -> %9.1f, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
             sprintf(pr.buff, " %-33s %9.1f, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -307,12 +287,12 @@ public:
     {
         print();
         print1();
-        set(input);
+        check_set_put(input);
         print();
         print1();
     }
 
-    void set(double val)
+    void check_set_put(double val)
     {
         if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
@@ -333,8 +313,6 @@ protected:
     double default_;
     double min_;
     double max_;
-    boolean check_off_;
-    String prefix_;
 };
 
 
@@ -343,25 +321,15 @@ class FloatZ: public Z
 public:
     FloatZ(){}
 
-    FloatZ(int8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
-    float *store, const float _default=0, const boolean check_off=false):
-        Z(n, code, ram, description, units, false)
+    FloatZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+    float *store, const float _default=0, const boolean check_for_off_on_init=true):
+        Z(n, prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
-        check_off_ = check_off;
-        if ( ram==NULL && check_off )
-        {
-            set(*val_);
-            prefix_ = "  ";
-        }
-        else  // EERAM
-        {
-            prefix_ = "* ";
-        }
-        set_nominal();
+        if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
     ~FloatZ(){}
@@ -389,7 +357,7 @@ public:
 
     virtual boolean is_off()
     {
-        return off_nominal() && !check_off_;
+        return off_nominal() && check_for_off_on_init_;
     }
 
     virtual boolean off_nominal()
@@ -399,7 +367,7 @@ public:
 
     void print_str()
     {
-        if ( !check_off_ )
+        if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
             sprintf(pr.buff, " %-33s %9.3f, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -438,12 +406,12 @@ public:
     {
         print();
         print1();
-        set(input);
+        check_set_put(input);
         print();
         print1();
     }
 
-    void set(float val)
+    void check_set_put(float val)
     {
         if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
@@ -464,8 +432,6 @@ protected:
     float default_;
     float min_;
     float max_;
-    boolean check_off_;
-    String prefix_;
 };
 
 
@@ -474,9 +440,9 @@ class FloatNoZ: public Z
 public:
     FloatNoZ(){}
 
-    FloatNoZ(int8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+    FloatNoZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
     const float _default=0):
-        Z(n, code, ram, description, units, false)
+        Z(n, prefix, code, ram, description, units, false)
     {
         min_ = min;
         max_ = max;
@@ -540,25 +506,15 @@ class IntZ: public Z
 public:
     IntZ(){}
 
-    IntZ(int8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
-    const int _default=0, const boolean check_off=false):
-        Z(n, code, ram, description, units, false)
+    IntZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
+    const int _default=0, const boolean check_for_off_on_init=true):
+        Z(n, prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
-        check_off_ = check_off;
-        if ( ram==NULL && check_off )
-        {
-            set(*val_);
-            prefix_ = "  ";
-        }
-        else  // EERAM
-        {
-            prefix_ = "* ";
-        }
-        set_nominal();
+        if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
     ~IntZ(){}
@@ -586,7 +542,7 @@ public:
 
     virtual boolean is_off()
     {
-        return off_nominal() && !check_off_;
+        return off_nominal() && check_for_off_on_init_;
     }
 
     virtual boolean off_nominal()
@@ -596,7 +552,7 @@ public:
 
     void print_str()
     {
-        if ( !check_off_ )
+        if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
             sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -634,12 +590,12 @@ public:
     {
         print();
         print1();
-        set(input);
+        check_set_put(input);
         print();
         print1();
     }
 
-    void set(int val)
+    void check_set_put(int val)
     {
         if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
@@ -660,8 +616,6 @@ protected:
     int min_;
     int max_;
     int default_;
-    boolean check_off_;
-    String prefix_;
 };
 
 
@@ -670,25 +624,15 @@ class Int8tZ: public Z
 public:
     Int8tZ(){}
 
-    Int8tZ(int8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
-    int8_t *store, const int8_t _default=0, const boolean check_off=false):
-        Z(n, code, ram, description, units, false)
+    Int8tZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
+    int8_t *store, const int8_t _default=0, const boolean check_for_off_on_init=true):
+        Z(n, prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
-        check_off_ = check_off;
-        if ( ram==NULL && check_off )
-        {
-            set(*val_);
-            prefix_ = "  ";
-        }
-        else  // EERAM
-        {
-            prefix_ = "* ";
-        }
-        set_nominal();
+        if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
     ~Int8tZ(){}
@@ -716,7 +660,7 @@ public:
 
     virtual boolean is_off()
     {
-        return off_nominal() && !check_off_;
+        return off_nominal() && check_for_off_on_init_;
     }
 
     virtual boolean off_nominal()
@@ -726,7 +670,7 @@ public:
 
     void print_str()
     {
-        if ( !check_off_ )
+        if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
             sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -765,12 +709,12 @@ public:
     {
         print();
         print1();
-        set(input);
+        check_set_put(input);
         print();
         print1();
     }
 
-    void set(int8_t val)
+    void check_set_put(int8_t val)
     {
         if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
@@ -791,8 +735,6 @@ protected:
     int8_t min_;
     int8_t max_;
     int8_t default_;
-    boolean check_off_;
-    String prefix_;
 };
 
 
@@ -801,25 +743,15 @@ class Uint16tZ: public Z
 public:
     Uint16tZ(){}
 
-    Uint16tZ(int8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
-    uint16_t *store, const uint16_t _default=0, const boolean check_off=false):
-        Z(n, code, ram, description, units, true)
+    Uint16tZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
+    uint16_t *store, const uint16_t _default=0, const boolean check_for_off_on_init=true):
+        Z(n, prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
-        check_off_ = check_off;
-       if ( ram==NULL && check_off )
-        {
-            set(*val_);
-            prefix_ = "  ";
-        }
-        else  // EERAM
-        {
-            prefix_ = "* ";
-        }
-        set_nominal();
+        if ( check_for_off_on_init_ ) check_set_put(*val_);
      }
 
     ~Uint16tZ(){}
@@ -844,7 +776,7 @@ public:
 
     virtual boolean is_off()
     {
-        return off_nominal() && !check_off_;
+        return off_nominal() && check_for_off_on_init_;
     }
 
     virtual boolean off_nominal()
@@ -854,7 +786,7 @@ public:
 
     void print_str()
     {
-        if ( !check_off_ )
+        if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
             sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -893,12 +825,12 @@ public:
     {
         print();
         print1();
-        set(input);
+        check_set_put(input);
         print();
         print1();
     }
    
-    void set(uint16_t val)
+    void check_set_put(uint16_t val)
     {
         if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
@@ -919,8 +851,6 @@ protected:
     uint16_t min_;
     uint16_t max_;
     uint16_t default_;
-    boolean check_off_;
-    String prefix_;
 };
 
 class Uint8tZ: public Z
@@ -928,25 +858,15 @@ class Uint8tZ: public Z
 public:
     Uint8tZ(){}
 
-    Uint8tZ(int8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
-    uint8_t *store, const uint8_t _default=0, const boolean check_off=false):
-        Z(n, code, ram, description, units, true)
+    Uint8tZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
+    uint8_t *store, const uint8_t _default=0, const boolean check_for_off_on_init=true):
+        Z(n, prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
-        check_off_ = check_off;
-        if ( ram==NULL && check_off )
-        {
-            set(*val_);
-            prefix_ = "  ";
-        }
-        else  // EERAM
-        {
-            prefix_ = "* ";
-        }
-        set_nominal();
+        if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
     ~Uint8tZ(){}
@@ -971,7 +891,7 @@ public:
 
     virtual boolean is_off()
     {
-        return off_nominal() && !check_off_;
+        return off_nominal() && check_for_off_on_init_;
     }
 
     virtual boolean off_nominal()
@@ -981,7 +901,7 @@ public:
 
     void print_str()
     {
-        if ( !check_off_ )
+        if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
             sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -1020,12 +940,12 @@ public:
     {
         print();
         print1();
-        set(input);
+        check_set_put(input);
         print();
         print1();
     }
    
-    void set(uint8_t val)
+    void check_set_put(uint8_t val)
     {
         if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
@@ -1046,8 +966,6 @@ protected:
     uint8_t min_;
     uint8_t max_;
     uint8_t default_;
-    boolean check_off_;
-    String prefix_;
 };
 
 
@@ -1056,25 +974,15 @@ class ULongZ: public Z
 public:
     ULongZ(){}
 
-    ULongZ(int8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
-    unsigned long *store, const unsigned long _default=0, const boolean check_off=true):
-        Z(n, code, ram, description, units, true)
+    ULongZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
+    unsigned long *store, const unsigned long _default=0, const boolean check_for_off_on_init=true):
+        Z(n, prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
         val_ = store;
         default_ = max(min(_default, max_), min_);
-        check_off_ = check_off;
-        if ( ram==NULL && check_off )
-        {
-            set(*val_);
-            prefix_ = "  ";
-        }
-        else  // EERAM
-        {
-            prefix_ = "* ";
-        }
-        set_nominal();
+        if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
     ~ULongZ(){}
@@ -1102,7 +1010,7 @@ public:
 
     virtual boolean is_off()
     {
-        return off_nominal() && !check_off_;
+        return off_nominal() && check_for_off_on_init_;
     }
 
     virtual boolean off_nominal()
@@ -1112,7 +1020,7 @@ public:
 
     void print_str()
     {
-        if ( !check_off_ )
+        if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-18s %10d -> %10d, %10s (%s%-2s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
             sprintf(pr.buff, " %-32s %10d, %10s (%s%-2s)", description_.c_str(), (int)*val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -1151,12 +1059,12 @@ public:
     {
         print();
         print1();
-        set(input);
+        check_set_put(input);
         print();
         print1();
     }
    
-    void set(unsigned long val)
+    void check_set_put(unsigned long val)
     {
         if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %ld (%-ld, %ld)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
@@ -1177,8 +1085,6 @@ protected:
     unsigned long min_;
     unsigned long max_;
     unsigned long default_;
-    boolean check_off_;
-    String prefix_;
 };
 
 // class FloatVariable : public Z <float>

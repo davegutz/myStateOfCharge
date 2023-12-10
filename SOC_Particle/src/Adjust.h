@@ -45,7 +45,7 @@ public:
     Adjust(){}
 
     Adjust(const String &code, SerialRAM *ram, const String &description, const String &units,
-     const T _min, const T _max, T *store, const T _default, const boolean check_off=false)
+     const T _min, const T _max, T *store, const T _default, const boolean no_check=false)
     {
         code_ = code;
         description_ = description.substring(0, 20);
@@ -57,7 +57,7 @@ public:
         max_ = _max;
         val_ptr_ = store;
         default_ = _default;
-        if ( ram==NULL && check_off )
+        if ( ram==NULL && no_check )
         {
             set_push(*val_ptr_);
             prefix_ = "  ";
@@ -66,7 +66,7 @@ public:
         {
             prefix_ = "* ";
         }
-        check_off_ = check_off;
+        no_check_ = no_check;
         // Serial.printf("Adjust::Adjust cpt store 0x%Adjust ", store);
         // Serial.printf("val_ptr_ 0x%Adjust\n", val_ptr_);
     }
@@ -79,7 +79,7 @@ public:
 
     boolean is_off()
     {
-        return off_nominal() && !check_off_;
+        return off_nominal() && !no_check_;
     }
 
     boolean off_nominal()
@@ -153,7 +153,7 @@ protected:
     T min_;
     T max_;
     T default_;
-    boolean check_off_;
+    boolean no_check_;
     String prefix_;
 };
 
@@ -164,8 +164,8 @@ public:
     AjBoolean(){}
 
     AjBoolean(const String &code, SerialRAM *ram, const String &description, const String &units, const boolean _min, const boolean _max,
-    boolean *store, const boolean _default=false, const boolean check_off_=false):
-        Adjust(code, ram, description, units, _min, _max, store, _default, check_off_)
+    boolean *store, const boolean _default=false, const boolean no_check_=false):
+        Adjust(code, ram, description, units, _min, _max, store, _default, no_check_)
     {
         pull_set_nominal();
     }
@@ -192,7 +192,7 @@ public:
 
     virtual void print_str()
     {
-        if ( !check_off_ )
+        if ( !no_check_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
             sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -229,8 +229,8 @@ public:
     AjDouble(){}
 
     AjDouble(const String &code, SerialRAM *ram, const String &description, const String &units, const double _min, const double _max,
-    double *store, const double _default=false, const boolean check_off_=false):
-        Adjust(code, ram, description, units, _min, _max, store, max(min(_default, _max), _min), check_off_)
+    double *store, const double _default=false, const boolean no_check_=false):
+        Adjust(code, ram, description, units, _min, _max, store, max(min(_default, _max), _min), no_check_)
     {
         pull_set_nominal();
     }
@@ -257,7 +257,7 @@ public:
 
     virtual void print_str()
     {
-        if ( !check_off_ )
+        if ( !no_check_ )
             sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (%s%-2s)", description_.c_str(), default_, *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
         else
             sprintf(pr.buff, " %-33s %9.3f, %10s (%s%-2s)", description_.c_str(), *val_ptr_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -294,15 +294,15 @@ protected:
 //     FloatZ(){}
 
 //     FloatZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
-//     float *store, const float _default=0, const boolean check_off=false):
+//     float *store, const float _default=0, const boolean no_check=false):
 //         Z(n, code, ram, description, units, false)
 //     {
 //         min_ = min;
 //         max_ = max;
 //         val_ = store;
 //         default_ = max(min(_default, max_), min_);
-//         check_off_ = check_off;
-//         if ( ram==NULL && check_off )
+//         no_check_ = no_check;
+//         if ( ram==NULL && no_check )
 //         {
 //             set_push(*val_);
 //             prefix_ = "  ";
@@ -339,7 +339,7 @@ protected:
 
 //     virtual boolean is_off()
 //     {
-//         return off_nominal() && !check_off_;
+//         return off_nominal() && !no_check_;
 //     }
 
 //     virtual boolean off_nominal()
@@ -349,7 +349,7 @@ protected:
 
 //     void print_str()
 //     {
-//         if ( !check_off_ )
+//         if ( !no_check_ )
 //             sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
 //         else
 //             sprintf(pr.buff, " %-33s %9.3f, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -414,7 +414,7 @@ protected:
 //     float default_;
 //     float min_;
 //     float max_;
-//     boolean check_off_;
+//     boolean no_check_;
 //     String prefix_;
 // };
 
@@ -491,15 +491,15 @@ protected:
 //     IntZ(){}
 
 //     IntZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
-//     const int _default=0, const boolean check_off=false):
+//     const int _default=0, const boolean no_check=false):
 //         Z(n, code, ram, description, units, false)
 //     {
 //         min_ = min;
 //         max_ = max;
 //         val_ = store;
 //         default_ = max(min(_default, max_), min_);
-//         check_off_ = check_off;
-//         if ( ram==NULL && check_off )
+//         no_check_ = no_check;
+//         if ( ram==NULL && no_check )
 //         {
 //             set_push(*val_);
 //             prefix_ = "  ";
@@ -536,7 +536,7 @@ protected:
 
 //     virtual boolean is_off()
 //     {
-//         return off_nominal() && !check_off_;
+//         return off_nominal() && !no_check_;
 //     }
 
 //     virtual boolean off_nominal()
@@ -546,7 +546,7 @@ protected:
 
 //     void print_str()
 //     {
-//         if ( !check_off_ )
+//         if ( !no_check_ )
 //             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
 //         else
 //             sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -610,7 +610,7 @@ protected:
 //     int min_;
 //     int max_;
 //     int default_;
-//     boolean check_off_;
+//     boolean no_check_;
 //     String prefix_;
 // };
 
@@ -621,15 +621,15 @@ protected:
 //     Int8tZ(){}
 
 //     Int8tZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
-//     int8_t *store, const int8_t _default=0, const boolean check_off=false):
+//     int8_t *store, const int8_t _default=0, const boolean no_check=false):
 //         Z(n, code, ram, description, units, false)
 //     {
 //         min_ = min;
 //         max_ = max;
 //         val_ = store;
 //         default_ = max(min(_default, max_), min_);
-//         check_off_ = check_off;
-//         if ( ram==NULL && check_off )
+//         no_check_ = no_check;
+//         if ( ram==NULL && no_check )
 //         {
 //             set_push(*val_);
 //             prefix_ = "  ";
@@ -666,7 +666,7 @@ protected:
 
 //     virtual boolean is_off()
 //     {
-//         return off_nominal() && !check_off_;
+//         return off_nominal() && !no_check_;
 //     }
 
 //     virtual boolean off_nominal()
@@ -676,7 +676,7 @@ protected:
 
 //     void print_str()
 //     {
-//         if ( !check_off_ )
+//         if ( !no_check_ )
 //             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
 //         else
 //             sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -741,7 +741,7 @@ protected:
 //     int8_t min_;
 //     int8_t max_;
 //     int8_t default_;
-//     boolean check_off_;
+//     boolean no_check_;
 //     String prefix_;
 // };
 
@@ -752,15 +752,15 @@ protected:
 //     Uint16tZ(){}
 
 //     Uint16tZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
-//     uint16_t *store, const uint16_t _default=0, const boolean check_off=false):
+//     uint16_t *store, const uint16_t _default=0, const boolean no_check=false):
 //         Z(n, code, ram, description, units, true)
 //     {
 //         min_ = min;
 //         max_ = max;
 //         val_ = store;
 //         default_ = max(min(_default, max_), min_);
-//         check_off_ = check_off;
-//        if ( ram==NULL && check_off )
+//         no_check_ = no_check;
+//        if ( ram==NULL && no_check )
 //         {
 //             set_push(*val_);
 //             prefix_ = "  ";
@@ -794,7 +794,7 @@ protected:
 
 //     virtual boolean is_off()
 //     {
-//         return off_nominal() && !check_off_;
+//         return off_nominal() && !no_check_;
 //     }
 
 //     virtual boolean off_nominal()
@@ -804,7 +804,7 @@ protected:
     
 //     void print_str()
 //     {
-//         if ( !check_off_ )
+//         if ( !no_check_ )
 //             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
 //         else
 //             sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -869,7 +869,7 @@ protected:
 //     uint16_t min_;
 //     uint16_t max_;
 //     uint16_t default_;
-//     boolean check_off_;
+//     boolean no_check_;
 //     String prefix_;
 // };
 
@@ -879,15 +879,15 @@ protected:
 //     Uint8tZ(){}
 
 //     Uint8tZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
-//     uint8_t *store, const uint8_t _default=0, const boolean check_off=false):
+//     uint8_t *store, const uint8_t _default=0, const boolean no_check=false):
 //         Z(n, code, ram, description, units, true)
 //     {
 //         min_ = min;
 //         max_ = max;
 //         val_ = store;
 //         default_ = max(min(_default, max_), min_);
-//         check_off_ = check_off;
-//         if ( ram==NULL && check_off )
+//         no_check_ = no_check;
+//         if ( ram==NULL && no_check )
 //         {
 //             set_push(*val_);
 //             prefix_ = "  ";
@@ -921,7 +921,7 @@ protected:
 
 //     virtual boolean is_off()
 //     {
-//         return off_nominal() && !check_off_;
+//         return off_nominal() && !no_check_;
 //     }
 
 //     virtual boolean off_nominal()
@@ -931,7 +931,7 @@ protected:
    
 //     void print_str()
 //     {
-//         if ( !check_off_ )
+//         if ( !no_check_ )
 //             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
 //         else
 //             sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -996,7 +996,7 @@ protected:
 //     uint8_t min_;
 //     uint8_t max_;
 //     uint8_t default_;
-//     boolean check_off_;
+//     boolean no_check_;
 //     String prefix_;
 // };
 
@@ -1007,15 +1007,15 @@ protected:
 //     ULongZ(){}
 
 //     ULongZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
-//     unsigned long *store, const unsigned long _default=0, const boolean check_off=true):
+//     unsigned long *store, const unsigned long _default=0, const boolean no_check=true):
 //         Z(n, code, ram, description, units, true)
 //     {
 //         min_ = min;
 //         max_ = max;
 //         val_ = store;
 //         default_ = max(min(_default, max_), min_);
-//         check_off_ = check_off;
-//         if ( ram==NULL && check_off )
+//         no_check_ = no_check;
+//         if ( ram==NULL && no_check )
 //         {
 //             set_push(*val_);
 //             prefix_ = "  ";
@@ -1052,7 +1052,7 @@ protected:
 
 //     virtual boolean is_off()
 //     {
-//         return off_nominal() && !check_off_;
+//         return off_nominal() && !no_check_;
 //     }
 
 //     virtual boolean off_nominal()
@@ -1062,7 +1062,7 @@ protected:
 
 //     void print_str()
 //     {
-//         if ( !check_off_ )
+//         if ( !no_check_ )
 //             sprintf(pr.buff, " %-18s %10d -> %10d, %10s (%s%-2s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), prefix_.c_str(), code_.c_str());
 //         else
 //             sprintf(pr.buff, " %-32s %10d, %10s (%s%-2s)", description_.c_str(), (int)*val_, units_.c_str(), prefix_.c_str(), code_.c_str());
@@ -1127,7 +1127,7 @@ protected:
 //     unsigned long min_;
 //     unsigned long max_;
 //     unsigned long default_;
-//     boolean check_off_;
+//     boolean no_check_;
 //     String prefix_;
 // };
 
@@ -1139,9 +1139,9 @@ protected:
 //     Adjustment(){}
 
 //     Adjustment(const String &code, SerialRAM *ram, const String &description, const String &units,
-//      const boolean _min, const boolean _max, boolean *store, const boolean _default, const boolean check_off=false)
+//      const boolean _min, const boolean _max, boolean *store, const boolean _default, const boolean no_check=false)
 //     {
-//         ptr_ = new AjBoolean(code, ram, description, units, _min, _max, store, _default, check_off);
+//         ptr_ = new AjBoolean(code, ram, description, units, _min, _max, store, _default, no_check);
 //     }
 
 //     ~Adjustment(){}
