@@ -127,7 +127,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   Sen->ib_noa_add(0);  // Dn 0
   Sen->vb_add(0);  // Dv 0
   Sen->Sim->ds_voc_soc(0);  // Ds
-  cp.Tb_bias_model = 0;  // D^
+  ap.Tb_bias_model = 0;  // D^
   Sen->Sim->Dv(0);  // Dy
   ap.tb_stale_time_sclr = 1;  // Xv 1
   ap.fail_tb = false;  // Xu 0
@@ -139,14 +139,14 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   Sen->Ib_noa_noise_amp(0);  // DN 0
 
   // Intervals
-  cp.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
-  cp.print_mult = max(min(DP_MULT, UINT8_MAX), 0);  // DP
+  ap.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
+  ap.print_mult = max(min(DP_MULT, UINT8_MAX), 0);  // DP
   Sen->ReadSensors->delay(READ_DELAY);
 
   // Fault logic
   ap.cc_diff_sclr = 1;  // Fc 1
   Sen->Flt->ib_diff_sclr(1);  // Fd 1
-  cp.fake_faults = 0;  // Ff 0
+  ap.fake_faults = 0;  // Ff 0
   sp.put_Ib_select(0);  // Ff 0
   Sen->Flt->ewhi_sclr(1);  // Fi 1
   Sen->Flt->ewlo_sclr(1);  // Fo 1
@@ -430,7 +430,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'E' ):  //   DE<>:  EKF execution frame multiplier
-                cp.eframe_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
+                ap.eframe_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'i' ):  //*  Di<>:  Bias all current sensors (same way as Da and Db)
@@ -455,7 +455,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'P' ):  //   DP<>:  PRINT multiplier
-                cp.print_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
+                ap.print_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'r' ):  //   Dr<>:  READ sample time input
@@ -476,7 +476,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( '^' ):  //   D^<>:  Temp bias change model for faults
-                cp.Tb_bias_model_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                ap.Tb_bias_model_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'v' ):  //     Dv<>:  voltage signal adder for faults
@@ -630,7 +630,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'f' ):  //* si, Ff<>:  fake faults
                 INT_in = cp.input_str.substring(2).toInt();
-                cp.fake_faults_p->print_adj_print(INT_in);
+                ap.fake_faults_p->print_adj_print(INT_in);
                 Serial.printf("sp.ib_select %d to ", sp.Ib_select());
                 sp.put_Ib_select(INT_in);
                 Serial.printf("%d\n", sp.Ib_select());
@@ -883,7 +883,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'V' ):  // RV: renominalize volatile pars
                 ap.set_nominal();
                 ap.pretty_print();
-                cp.set_nominal();
+                ap.set_nominal();
                 cp.pretty_print();
                 break;
 
@@ -973,7 +973,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'd' ):  // Xd<>:  on/off dc-dc charger manual setting
-                cp.dc_dc_on_p->print_adj_print(cp.input_str.substring(2).toInt()>0);
+                ap.dc_dc_on_p->print_adj_print(cp.input_str.substring(2).toInt()>0);
                 break;
 
               case ( 'm' ):  // Xm<>:  code for modeling level
@@ -1003,8 +1003,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'Q' ): //  XQ<>: time to quiet
-                cp.until_q_p->print_adj_print((unsigned long int) cp.input_str.substring(2).toInt());
-                Serial.printf("Going black in %7.1f seconds\n", float(cp.until_q) / 1000.);
+                ap.until_q_p->print_adj_print((unsigned long int) cp.input_str.substring(2).toInt());
+                Serial.printf("Going black in %7.1f seconds\n", float(ap.until_q) / 1000.);
                 break;
 
               case ( 't' ): //*  Xt<>:  injection type
@@ -1194,17 +1194,17 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'C' ): // XC:  injection number of cycles
-                cp.cycles_inj_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                ap.cycles_inj_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'R' ): // XR:  Start injection now
                 if ( Sen->now>TEMP_INIT_DELAY )
                 {
                   Sen->start_inj = ap.wait_inj + Sen->now;
-                  Sen->stop_inj = ap.wait_inj + (Sen->now + min((unsigned long int)(cp.cycles_inj / max(sp.Freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
+                  Sen->stop_inj = ap.wait_inj + (Sen->now + min((unsigned long int)(ap.cycles_inj / max(sp.Freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
                   Sen->end_inj = Sen->stop_inj + ap.tail_inj;
                   Serial.printf("**\n*** RUN: at %ld, %7.3f cycles %ld to %ld with %ld wait and %ld tail\n\n",
-                    Sen->now, cp.cycles_inj, Sen->start_inj, Sen->stop_inj, ap.wait_inj, ap.tail_inj);
+                    Sen->now, ap.cycles_inj, Sen->start_inj, Sen->stop_inj, ap.wait_inj, ap.tail_inj);
                 }
                 else Serial.printf("Wait%5.1fs for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
                 break;
@@ -1222,7 +1222,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 's' ): // Xs:  scale T_SAT
-                cp.s_t_sat_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                ap.s_t_sat_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'W' ):  // XW<>:  Wait beginning of programmed transient
@@ -1316,8 +1316,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Vb_bias_hdwe_p->print1_help();  //* Dc
 
   #ifndef HELPLESS
-  cp.eframe_mult_p->print_help();  //  DE
-  cp.print_mult_p->print_help();  //  DP
+  ap.eframe_mult_p->print_help();  //  DE
+  ap.print_mult_p->print_help();  //  DP
   Serial.printf("  Dr=  "); Serial.print(Sen->ReadSensors->delay()); Serial.printf(": minor frame, ms [100]\n"); 
   Serial.printf("  Ds=  "); Serial.print(Sen->Sim->ds_voc_soc()); Serial.printf(": d_soc to Sim.voc-soc, fraction [0]\n");
   #endif
@@ -1326,7 +1326,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Tb_bias_hdwe_p->print1_help();  //* Dt
   
   #ifndef HELPLESS
-  cp.Tb_bias_model_p->print_help();  // D^
+  ap.Tb_bias_model_p->print_help();  // D^
   Serial.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.printf(": volt fault inj, V [0]\n"); 
   #endif
 
@@ -1363,8 +1363,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   #ifndef HELPLESS
   ap.cc_diff_sclr_p->print_help();  // Fc
   Serial.printf("  Fd= "); Serial.printf("%6.3f", Sen->Flt->ib_diff_sclr()); Serial.printf(": sclr ib_diff thr ^ [1]\n"); 
-  cp.fake_faults_p->print_help();  // Ff
-  cp.fake_faults_p->print1_help();  // Ff
+  ap.fake_faults_p->print_help();  // Ff
+  ap.fake_faults_p->print1_help();  // Ff
   Serial.printf("  Fi= "); Serial.printf("%6.3f", Sen->Flt->ewhi_sclr()); Serial.printf(": sclr e_wrap_hi thr ^ [1]\n"); 
   Serial.printf("  Fo= "); Serial.printf("%6.3f", Sen->Flt->ewlo_sclr()); Serial.printf(": sclr e_wrap_lo thr ^ [1]\n"); 
   Serial.printf("  Fq= "); Serial.printf("%6.3f", Sen->Flt->ib_quiet_sclr()); Serial.printf(": sclr ib_quiet thr v [1]\n"); 
@@ -1451,8 +1451,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   #endif
 
   Serial.printf("\nX<?> - Test Mode.   For example:\n");
-  cp.dc_dc_on_p->print_help();  // Xd
-  cp.until_q_p->print_help();  // XQ
+  ap.dc_dc_on_p->print_help();  // Xd
+  ap.until_q_p->print_help();  // XQ
   sp.Modeling_p->print_help();  //* Xm
   sp.pretty_print_modeling();
 
@@ -1482,10 +1482,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Xp13:tweak tri\n");
   Serial.printf("  Xp20:collect fast\n");
   Serial.printf("  Xp21:collect slow\n");
-  cp.cycles_inj_p->print_help();  // XC
+  ap.cycles_inj_p->print_help();  // XC
   Serial.printf(" XR  "); Serial.printf("RUN inj\n");
   Serial.printf(" XS  "); Serial.printf("STOP inj\n");
-  cp.s_t_sat_p->print_help();  // Xs
+  ap.s_t_sat_p->print_help();  // Xs
   ap.tail_inj_p->print_help();  // XT
   ap.wait_inj_p->print_help();  // XW
   ap.fail_tb_p->print_help();  // Xu

@@ -399,11 +399,11 @@ void loop()
     Sen->reset = reset;
     
     // Check for really slow data capture and run EKF each read frame
-    cp.eframe_mult = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1);
+    ap.eframe_mult = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1);
 
     // Set print frame
     static uint8_t print_count = 0;
-    if ( print_count>=cp.print_mult-1 || print_count==UINT8_MAX )  // > avoids lockup on change by user
+    if ( print_count>=ap.print_mult-1 || print_count==UINT8_MAX )  // > avoids lockup on change by user
     {
       print_count = 0;
       cp.publishS = true;

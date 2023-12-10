@@ -252,7 +252,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     if (sp.mod_vb()) ib_dyn = ib_past_;
     else ib_dyn = ib_;
     voc_ = vb_ - (ChargeTransfer_->calculate(ib_dyn, reset_temp, chem_.tau_ct, dt_)*chem_.r_ct*sr_ + ib_dyn*chem_.r_0*sr_);
-    if ( !cp.fake_faults )
+    if ( !ap.fake_faults )
     {
         if ( (bms_off_ && voltage_low_) ||  Sen->Flt->vb_fa())
         {
@@ -274,7 +274,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     if ( eframe_ == 0 )
     {
         float ddq_dt = ib_;
-        dt_eframe_ = dt_ * float(cp.eframe_mult);  // TODO:  this is noisy error if dt_ varies
+        dt_eframe_ = dt_ * float(ap.eframe_mult);  // TODO:  this is noisy error if dt_ varies
         if ( ddq_dt>0. && !sp.tweak_test() ) ddq_dt *= coul_eff_;
         ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
         predict_ekf(ddq_dt);       // u = d(dq)/dt
@@ -289,7 +289,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
         EKF_converged->calculate(conv, EKF_T_CONV, EKF_T_RESET, min(dt_eframe_, EKF_T_RESET), cp.soft_reset);
     }
     eframe_++;
-    if ( reset_temp || cp.soft_reset || eframe_ >= cp.eframe_mult ) eframe_ = 0;  // '>=' allows changing cp.eframe_mult on the fly
+    if ( reset_temp || cp.soft_reset || eframe_ >= ap.eframe_mult ) eframe_ = 0;  // '>=' allows changing ap.eframe_mult on the fly
     if ( (sp.Debug()==3 || sp.Debug()==4) && cp.publishS ) EKF_1x1::serial_print(Sen->control_time, Sen->now, dt_eframe_);  // print EKF in Read frame
 
     // Filter

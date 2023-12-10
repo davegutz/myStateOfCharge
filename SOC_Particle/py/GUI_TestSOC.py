@@ -708,6 +708,31 @@ def save_data_as():
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
+def save_progress():
+    if size_of(putty_test_csv_path.get()) > 64:  # bytes
+        # For custom option, redefine Test.file_path if requested
+        new_file_txt = None
+        if option.get() == 'custom':
+            new_file_txt = tk.simpledialog.askstring(title=__file__, prompt="custom file name string:")
+            if new_file_txt is not None:
+                Test.create_file_path_and_key(name_override=new_file_txt)
+                Test.label.config(text=Test.file_txt)
+                print('Test.file_path', Test.file_path)
+        if os.path.isfile(Test.file_path) and os.path.getsize(Test.file_path) > 0:  # bytes
+            confirmation = tk.messagebox.askyesno('query overwrite', 'File exists:  overwrite?')
+            if confirmation is False:
+                print('skipped overwrite')
+                tkinter.messagebox.showwarning(message='retained ' + Test.file_path)
+                return
+        copy_clean(putty_test_csv_path.get(), Test.file_path)
+        print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
+        print('updating Test file label')
+        Test.create_file_path_and_key(name_override=new_file_txt)
+    else:
+        print('putty test file non-existent or too small (<64 bytes) probably already done')
+        tkinter.messagebox.showwarning(message="Nothing to save")
+
+
 def save_putty():
     m_str = datetime.datetime.fromtimestamp(os.path.getmtime(putty_test_csv_path.get())).strftime("%Y-%m-%dT%H-%M-%S").replace(' ', 'T')
     putty_test_sav_path = tk.StringVar(master, os.path.join(Test.dataReduction_folder, 'putty_' + m_str + '.csv'))
@@ -951,6 +976,14 @@ if __name__ == '__main__':
     save_data_button = myButton(sav_panel, text='save data', command=save_data, fg="red", bg=bg_color,
                                 wraplength=wrap_length, justify=tk.LEFT, font=butt_font_large)
     save_data_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+    save_progress_label = tk.Label(sav_panel, text='          ', font=label_font_gentle)
+    save_progress_label.pack(side=tk.LEFT, padx=5, pady=5)
+    save_progress_button = myButton(sav_panel, text='save progress', command=save_progress, fg="black", bg=bg_color,
+                                    wraplength=wrap_length, justify=tk.LEFT)
+    save_progress_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+
     clear_data_button = myButton(sav_panel, text='clear', command=clear_data_verbose, fg="red", bg=bg_color,
                                  wraplength=wrap_length, justify=tk.RIGHT)
     clear_data_button.pack(side=tk.RIGHT, padx=5, pady=5)

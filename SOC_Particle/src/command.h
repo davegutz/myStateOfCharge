@@ -56,17 +56,35 @@ public:
 
   // Adjustment handling structure
   float cc_diff_sclr;         // Scale cc_diff detection thresh, scalar
+  float cycles_inj;           // Number of injection cycles
+  boolean dc_dc_on;           // DC-DC charger is on
+  uint8_t eframe_mult;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
   boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
+  boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
+  uint8_t print_mult;         // Print multiplier for objects
+  float s_t_sat;              // Scalar on saturation test time set and reset
   unsigned long int tail_inj; // Tail after end injection, ms
+  float Tb_bias_model;        // Bias on Tb for model, C
   float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale chec, (1)
+  unsigned long int until_q;  // Time until set v0, ms
   unsigned long int wait_inj; // Wait before start injection, ms
   FloatZ *cc_diff_sclr_p;
+  FloatZ *cycles_inj_p;
+  BooleanZ *dc_dc_on_p;
+  Uint8tZ *eframe_mult_p;
   BooleanZ *fail_tb_p;
+  BooleanZ *fake_faults_p;
+  Uint8tZ *print_mult_p;
+  FloatZ *s_t_sat_p;
+  FloatZ *Tb_bias_model_p;
   FloatZ *tb_stale_time_sclr_p;
   ULongZ *tail_inj_p;
+  ULongZ *until_q_p;
   ULongZ *wait_inj_p;
+
   uint8_t n_;
   Z **Z_;
+  // Adjustment handling structure
   // uint8_t m_;
   // boolean testB;
   // double testD;
@@ -78,11 +96,19 @@ public:
   AdjustPars()
   {
     n_ = 0;
-    cc_diff_sclr_p        = new FloatZ(&n_, "Fc", NULL, "Slr cc_diff thr ",          "slr",    0,      1000,     &cc_diff_sclr,      1,    true);
-    fail_tb_p           = new BooleanZ(&n_, "Xu", NULL, "Ignore Tb & fail",          "1=Fail", false,  true,     &fail_tb,           0,    true);
-    tb_stale_time_sclr_p  = new FloatZ(&n_, "Xv", NULL, "scl Tb 1-wire stale pers",  "slr",    0,      100,      &tb_stale_time_sclr,1,    true);
-    tail_inj_p            = new ULongZ(&n_, "XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj,          0UL,  true);
-    wait_inj_p            = new ULongZ(&n_, "XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj,          0UL,  true);
+    cc_diff_sclr_p   = new FloatZ(&n_, "Fc", NULL, "Slr cc_diff thr ",          "slr",    0,      1000,     &cc_diff_sclr,      1,    true);
+    cycles_inj_p     = new FloatZ(&n_, "XC", NULL, "Number prog cycle",          "float",      0,    1000,       &cycles_inj, 0, true);
+    dc_dc_on_p     = new BooleanZ(&n_, "Xd", NULL, "DC-DC charger on",           "0=F, 1=T",   0,    1,          &dc_dc_on, false, true);
+    eframe_mult_p   = new Uint8tZ(&n_, "DE", NULL, "EKF Multiframe rate x Dr",   "uint",       0,    UINT8_MAX,  &eframe_mult, EKF_EFRAME_MULT, true);
+    fail_tb_p      = new BooleanZ(&n_, "Xu", NULL, "Ignore Tb & fail",          "1=Fail", false,  true,     &fail_tb,           0,    true);
+    fake_faults_p  = new BooleanZ(&n_, "Ff", NULL, "Faults ignored",             "0=F, 1=T",   0,    1,          &fake_faults, FAKE_FAULTS, true);
+    print_mult_p    = new Uint8tZ(&n_, "DP", NULL, "Print multiplier x Dr",      "uint",       0,    UINT8_MAX,  &print_mult, DP_MULT, true);
+    s_t_sat_p        = new FloatZ(&n_, "Xs", NULL, "scalar on T_SAT",            "slr",        0,    100,        &s_t_sat, 1, true);
+    Tb_bias_model_p  = new FloatZ(&n_, "D^", NULL, "Del model",                  "deg C",      -50,  50,         &Tb_bias_model, TEMP_BIAS, true);
+    tb_stale_time_sclr_p = new FloatZ(&n_, "Xv", NULL, "scl Tb 1-wire stale pers",  "slr",    0,      100,      &tb_stale_time_sclr,1,    true);
+    tail_inj_p       = new ULongZ(&n_, "XT", NULL, "tail end inj",              "ms",     0UL,    120000UL, &tail_inj,          0UL,  true);
+    until_q_p        = new ULongZ(&n_, "XQ", NULL, "Time until v0",              "ms",         0UL,  500000UL,   &until_q, 0UL, true);
+    wait_inj_p       = new ULongZ(&n_, "XW", NULL, "wait start inj",            "ms",     0UL,    120000UL, &wait_inj,          0UL,  true);
 
     // Xb_.push_back(testB_p  = new AjBoolean("XB", NULL, "testB boolean",       "B-",     false,    true, &testB,          false,  true));
     // Xd_.push_back(testD_p   = new AjDouble("XD", NULL, "testD double",        "D-",     0,        1,    &testD,          0.5,    true));
@@ -90,11 +116,20 @@ public:
     Z_ = new Z*[n_];
     uint8_t i = 0;
     Z_[i++] = cc_diff_sclr_p;
+    Z_[i++] = cycles_inj_p;
+    Z_[i++] = dc_dc_on_p;
+    Z_[i++] = eframe_mult_p;
     Z_[i++] = fail_tb_p;
+    Z_[i++] = fake_faults_p;
+    Z_[i++] = print_mult_p;
+    Z_[i++] = s_t_sat_p;
+    Z_[i++] = Tb_bias_model_p;
     Z_[i++] = tb_stale_time_sclr_p;
     Z_[i++] = tail_inj_p;
+    Z_[i++] = until_q_p;
     Z_[i++] = wait_inj_p;
-    if ( i != n_ ) Serial.printf("WARN(command.h, AdjustPars):  size error i%d != n_%d\n", i, n_);
+    if ( i != n_ ) Serial.printf("WARN(command.h, CommandPars):  size error i%d != n_%d\n", i, n_);
+
     set_nominal();
   }
 
@@ -148,67 +183,18 @@ public:
   Tb_union tb_info;         // Use cp to pass DS2482 I2C information
   boolean write_summary;    // Use talk to issue a write command to summary
 
-  // Adjustment handling structure
-  float cycles_inj;         // Number of injection cycles
-  boolean dc_dc_on;         // DC-DC charger is on
-  uint8_t eframe_mult;      // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
-  boolean fake_faults;      // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
-  uint8_t print_mult;       // Print multiplier for objects
-  float s_t_sat;            // Scalar on saturation test time set and reset
-  float Tb_bias_model;      // Bias on Tb for model, C
-  unsigned long int until_q;  // Time until set v0, ms
-  FloatZ *cycles_inj_p;
-  BooleanZ *dc_dc_on_p;
-  Uint8tZ *eframe_mult_p;
-  BooleanZ *fake_faults_p;
-  Uint8tZ *print_mult_p;
-  FloatZ *s_t_sat_p;
-  FloatZ *Tb_bias_model_p;
-  ULongZ *until_q_p;
-  Z **Z_;
-  uint8_t n_;
-
-
   CommandPars()
   {
     token = false;
-    dc_dc_on = false;  // Xd
-    eframe_mult = EKF_EFRAME_MULT; // DE
-    fake_faults = FAKE_FAULTS; // Ff
     inf_reset = false;
     model_cutback = false;
     model_saturated = false;
     num_v_print = 0UL;
-    print_mult = DP_MULT;  // DP
     publishS = false;
     soft_reset = false;
-    s_t_sat = 1.;
-    Tb_bias_model = 0.;  // D^
     write_summary = false;
     tb_info.t_c = 0.;
     tb_info.ready = false;
-    until_q = 0UL;  // XQ
-    n_ = 0;
-    cycles_inj_p     = new FloatZ(&n_, "XC", NULL, "Number prog cycle",          "float",      0,    1000,       &cycles_inj, 0, true);
-    dc_dc_on_p     = new BooleanZ(&n_, "Xd", NULL, "DC-DC charger on",           "0=F, 1=T",   0,    1,          &dc_dc_on, false, true);
-    eframe_mult_p   = new Uint8tZ(&n_, "DE", NULL, "EKF Multiframe rate x Dr",   "uint",       0,    UINT8_MAX,  &eframe_mult, EKF_EFRAME_MULT, true);
-    fake_faults_p  = new BooleanZ(&n_, "Ff", NULL, "Faults ignored",             "0=F, 1=T",   0,    1,          &fake_faults, FAKE_FAULTS, true);
-    print_mult_p    = new Uint8tZ(&n_, "DP", NULL, "Print multiplier x Dr",      "uint",       0,    UINT8_MAX,  &print_mult, DP_MULT, true);
-    s_t_sat_p        = new FloatZ(&n_, "Xs", NULL, "scalar on T_SAT",            "slr",        0,    100,        &s_t_sat, 1, true);
-    Tb_bias_model_p  = new FloatZ(&n_, "D^", NULL, "Del model",                  "deg C",      -50,  50,         &Tb_bias_model, TEMP_BIAS, true);
-    until_q_p        = new ULongZ(&n_, "XQ", NULL, "Time until v0",              "ms",         0UL,  500000UL,   &until_q, 0UL, true);
-    Z_ = new Z*[n_];
-    uint8_t i = 0;
-    Z_[i++] = cycles_inj_p;
-    Z_[i++] = dc_dc_on_p;
-    Z_[i++] = eframe_mult_p;
-    Z_[i++] = fake_faults_p;
-    Z_[i++] = print_mult_p;
-    Z_[i++] = s_t_sat_p;
-    Z_[i++] = Tb_bias_model_p;
-    Z_[i++] = until_q_p;
-    if ( i != n_ ) Serial.printf("WARN(command.h, CommandPars):  size error i%d != n_%d\n", i, n_);
-    set_nominal();
   }
 
   void cmd_reset(void) { soft_reset = true; }
@@ -221,7 +207,6 @@ public:
     model_saturated = true;
     soft_reset = true;
     num_v_print = 0UL;
-    set_nominal();
   }
 
   void pretty_print(void)
@@ -236,16 +221,9 @@ public:
       Serial.printf(" tb_info.t_c %7.3f\n", tb_info.t_c);
       Serial.printf(" tb_info.ready %d\n", tb_info.ready);
       Serial.printf(" write_summary %d\n\n", write_summary);
-      for ( uint8_t i=0; i<n_; i++ ) Z_[i] -> print();
     #endif
-    Serial.printf("\nOff-nominal:\n");
-    for ( uint8_t i=0; i<n_; i++ ) if ( Z_[i]->off_nominal() ) Z_[i] -> print();
   }
 
-  void set_nominal()
-  {
-      for ( uint16_t i=0; i<n_; i++ ) Z_[i]->set_nominal();
-  }
 };            
 
 
