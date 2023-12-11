@@ -784,9 +784,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'R' ):  // PR:  Print retained
                 Serial.printf("\n"); sp.pretty_print( true );
+                Serial.printf("\n"); sp.pretty_print( false );
                 break;
 
-              case ( 'r' ):  // Pr:  Print retained
+              case ( 'r' ):  // Pr:  Print only off-nominal retained
                 Serial.printf("\n"); sp.pretty_print( false );
                 break;
 
@@ -799,11 +800,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'V' ):  // PV:  Print all volatile
                 Serial.printf("\n"); ap.pretty_print(true);
                 Serial.printf("\n"); cp.pretty_print();
+                Serial.printf("\n"); ap.pretty_print(false);
                 break;
 
-              case ( 'v' ):  // Pv:  Print only off volatile
+              case ( 'v' ):  // Pv:  Print only off-nominal volatile
                 Serial.printf("\n"); ap.pretty_print(false);
-                Serial.printf("\n"); cp.pretty_print();
                 break;
 
               case ( 'x' ):  // Px:  Print shunt measure

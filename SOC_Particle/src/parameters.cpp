@@ -90,13 +90,11 @@ void  VolatilePars::initialize()
 // Print only the volatile paramters (non-eeram)
 void VolatilePars::pretty_print(const boolean all)
 {
-    Serial.printf("volatile all:\n");
-    Serial.printf("             defaults    current Volatile values\n");
-    Serial.printf("adjust parameters(ap):\n");
     #ifndef DEPLOY_PHOTON
         if ( all )
         {
-            for (int i=0; i<n_; i++ )
+            Serial.printf("volatile all:\n");
+            for (uint8_t i=0; i<n_; i++ )
             {
                 if ( !(Z_[i]->is_eeram()) )
                 {
@@ -105,17 +103,22 @@ void VolatilePars::pretty_print(const boolean all)
             }
         }
     #endif
-    Serial.printf("volatile off:\n");
-    Serial.printf("             defaults    current Volatile values\n");
-    for (int i=0; i<n_; i++ )
+    if ( !all )
     {
-        if ( !(Z_[i]->is_eeram()) )
+        Serial.printf("volatile off:\n");
+        uint8_t count = 0;
+        for (uint8_t i=0; i<n_; i++ )
         {
-            if ( all || Z_[i]->is_off() )
+            if ( !(Z_[i]->is_eeram()) )
             {
-                Z_[i]->print();
+                if ( all || Z_[i]->is_off() )
+                {
+                    count++;
+                    Z_[i]->print();
+                }
             }
         }
+        if ( count==0 ) Serial.printf("**none**\n");
     }
 }
 
@@ -187,7 +190,7 @@ void SavedPars::initialize()
     Z_[n_] = (Delta_q_model_p = new DoubleZ(&n_, "* ", "qs", rP_, "Charge chg Sim",       "C",      -1e8, 1e5,  &Delta_q_model_z, 0,                false));
     Z_[n_] = (Delta_q_p       = new DoubleZ(&n_, "* ", "qm", rP_, "Charge chg",           "C",      -1e8, 1e5,  &Delta_q_z,       0,                false ));
     Z_[n_] = (Dw_p             = new FloatZ(&n_, "* ", "Dw", rP_, "Tab mon adj",          "v",      -1e2, 1e2,  &Dw_z,            VTAB_BIAS));
-    Z_[n_] = (Freq_p           = new FloatZ(&n_, "* ", "Xf", rP_, "Inj freq",             "Hz",     0.,   2.,   &Freq_z,          0));
+    Z_[n_] = (Freq_p           = new FloatZ(&n_, "* ", "Xf", rP_, "Inj freq",             "Hz",     0,    2,    &Freq_z,          0));
     Z_[n_] = (Ib_bias_all_nan_p=new FloatNoZ(&n_,"* ", "Di", rP_, "DI + reset",           "A",      -1e5, 1e5,  CURR_BIAS_ALL));
     Z_[n_] = (Ib_bias_all_p    = new FloatZ(&n_, "* ", "DI", rP_, "Del all",              "A",      -1e5, 1e5,  &Ib_bias_all_z, CURR_BIAS_ALL));
     Z_[n_] = (Ib_bias_amp_p    = new FloatZ(&n_, "* ", "DA", rP_, "Add amp",              "A",      -1e5, 1e5,  &Ib_bias_amp_z, CURR_BIAS_AMP));
@@ -195,8 +198,8 @@ void SavedPars::initialize()
     Z_[n_] = (Ib_scale_amp_p   = new FloatZ(&n_, "* ", "SA", rP_, "Slr amp",              "A",      -1e5, 1e5,  &Ib_scale_amp_z,CURR_SCALE_AMP));
     Z_[n_] = (Ib_scale_noa_p   = new FloatZ(&n_, "* ", "SB", rP_, "Slr noa",              "A",      -1e5, 1e5,  &Ib_scale_noa_z,CURR_SCALE_NOA));
     Z_[n_] = (Ib_select_p      = new Int8tZ(&n_, "* ", "si", rP_, "curr sel mode",        "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS)));
-    Z_[n_] = (Iflt_p         = new Uint16tZ(&n_, "* ", "if", rP_, "Fault buffer indx",    "uint",   0,    nflt_+1, &Iflt_z,     nflt_+1,            false));
-    Z_[n_] = (Ihis_p         = new Uint16tZ(&n_, "* ", "ih", rP_, "Hist buffer indx",     "uint",   0,    nhis_+1, &Ihis_z,     nhis_+1,            false));
+    Z_[n_] = (Iflt_p         = new Uint16tZ(&n_, "* ", "if", rP_, "Fault buffer indx",    "uint",   0,    nflt_+1, &Iflt_z,     nflt_,              false));
+    Z_[n_] = (Ihis_p         = new Uint16tZ(&n_, "* ", "ih", rP_, "Hist buffer indx",     "uint",   0,    nhis_+1, &Ihis_z,     nhis_,              false));
     Z_[n_] = (Inj_bias_p       = new FloatZ(&n_, "* ", "Xb", rP_, "Injection bias",       "A",      -1e5, 1e5,  &Inj_bias_z,    0.));
     Z_[n_] = (Isum_p         = new Uint16tZ(&n_, "* ", "is", rP_, "Summ buffer indx",     "uint",   0,    NSUM+1,&Isum_z,       NSUM+1,             false));
     Z_[n_] = (Modeling_p      = new Uint8tZ(&n_, "* ", "Xm", rP_, "Modeling bitmap",      "[0x]",   0, 255,  &Modeling_z,    MODELING));
@@ -207,7 +210,7 @@ void SavedPars::initialize()
     Z_[n_] = (Sim_chm_p       = new Uint8tZ(&n_, "* ", "Bs", rP_, "Sim battery",          "0=BB, 1=CH",0,   1,    &Sim_chm_z,     SIM_CHEM));
     Z_[n_] = (S_cap_mon_p      = new FloatZ(&n_, "* ", "SQ", rP_, "Scalar cap Mon",       "slr",    0,    1000, &S_cap_mon_z,   1.));
     Z_[n_] = (S_cap_sim_p      = new FloatZ(&n_, "* ", "Sq", rP_, "Scalar cap Sim",       "slr",    0,    1000, &S_cap_sim_z,   1.));
-    Z_[n_] = (Tb_bias_hdwe_p   = new FloatZ(&n_, "* ", "Dt", rP_, "Bias Tb sensor",       "dg C",   500,  500,  &Tb_bias_hdwe_z,TEMP_BIAS));
+    Z_[n_] = (Tb_bias_hdwe_p   = new FloatZ(&n_, "* ", "Dt", rP_, "Bias Tb sensor",       "dg C",   -500, 500,  &Tb_bias_hdwe_z,TEMP_BIAS));
     Z_[n_] = (Time_now_p       = new ULongZ(&n_, "* ", "UT", rP_, "UNIX time epoch",      "sec",    0UL,  2100000000UL, &Time_now_z, 1669801880UL,  false));
     Z_[n_] = (Type_p          = new Uint8tZ(&n_, "* ", "Xt", rP_, "Inj type",             "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",  0,   10,  &Type_z, 0));
     Z_[n_] = (T_state_model_p  = new FloatZ(&n_, "* ", "ts", rP_, "Tb Sim rate lim mem",  "dg C",   -10,  70,   &T_state_model_z, RATED_TEMP,       false));
@@ -252,21 +255,36 @@ void SavedPars::pretty_print(const boolean all)
 {
     if ( all )
     {
+        Serial.printf("saved (sp) all\n");
+        for (int i=0; i<n_; i++ )
+        {
+            Z_[i]->print();
+        }
         // Serial.printf("history array (%d):\n", nhis_);
         // print_history_array();
         // print_fault_header();
         // Serial.printf("fault array (%d):\n", nflt_);
         // print_fault_array();
         // print_fault_header();
+        #ifndef DEPLOY_PHOTON
+            Serial.printf("Xm:\n");
+            pretty_print_modeling();
+        #endif
     }
-    Serial.printf("saved (sp): all=%d\n", all);
-    Serial.printf("             defaults    current EERAM values\n");
-    for (int i=0; i<n_; i++ ) if ( all || Z_[i]->is_off() )  Z_[i]->print();
-
-    #ifndef DEPLOY_PHOTON
-        Serial.printf("Xm:\n");
-        pretty_print_modeling();
-    #endif
+    else
+    {
+        Serial.printf("saved (sp) diffs\n");
+        uint8_t count = 0;
+        for (int i=0; i<n_; i++ )
+        {
+            if ( Z_[i]->is_off() )
+            {
+                count++;
+                Z_[i]->print();
+            }
+        }
+        if ( count==0 ) Serial.printf("**none**\n");
+    }
 
     #ifdef CONFIG_47L16_EERAM
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);

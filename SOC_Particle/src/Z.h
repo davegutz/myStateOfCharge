@@ -130,10 +130,10 @@ public:
 
     void print_str()
     {
-        if ( !check_for_off_on_init_ )
+        // if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        else
-            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
+        // else
+        //     sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -249,10 +249,10 @@ public:
 
     void print_str()
     {
-        if ( !check_for_off_on_init_ )
+        // if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9.1f -> %9.1f, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        else
-            sprintf(pr.buff, " %-33s %9.1f, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
+        // else
+        //     sprintf(pr.buff, " %-33s %9.1f, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
     
     void print()
@@ -368,10 +368,10 @@ public:
 
     void print_str()
     {
-        if ( !check_for_off_on_init_ )
+        // if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        else
-            sprintf(pr.buff, " %-33s %9.3f, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
+        // else
+        //     sprintf(pr.buff, " %-33s %9.3f, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -553,10 +553,10 @@ public:
 
     void print_str()
     {
-        if ( !check_for_off_on_init_ )
+        // if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        else
-            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
+        // else
+        //     sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
     void print()
     {
@@ -671,10 +671,10 @@ public:
 
     void print_str()
     {
-        if ( !check_for_off_on_init_ )
+        // if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        else
-            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
+        // else
+        //     sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -787,10 +787,10 @@ public:
 
     void print_str()
     {
-        if ( !check_for_off_on_init_ )
+        // if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        else
-            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
+        // else
+        //     sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -902,10 +902,10 @@ public:
 
     void print_str()
     {
-        if ( !check_for_off_on_init_ )
+        // if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-20s %9d -> %9d, %10s (%s%-2s)", description_.c_str(), default_, *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        else
-            sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
+        // else
+        //     sprintf(pr.buff, " %-33s %9d, %10s (%s%-2s)", description_.c_str(), *val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
 
     void print()
@@ -1021,10 +1021,10 @@ public:
 
     void print_str()
     {
-        if ( !check_for_off_on_init_ )
+        // if ( !check_for_off_on_init_ )
             sprintf(pr.buff, " %-18s %10d -> %10d, %10s (%s%-2s)", description_.c_str(), (int)default_, (int)*val_, units_.c_str(), prefix_.c_str(), code_.c_str());
-        else
-            sprintf(pr.buff, " %-32s %10d, %10s (%s%-2s)", description_.c_str(), (int)*val_, units_.c_str(), prefix_.c_str(), code_.c_str());
+        // else
+        //     sprintf(pr.buff, " %-32s %10d, %10s (%s%-2s)", description_.c_str(), (int)*val_, units_.c_str(), prefix_.c_str(), code_.c_str());
     }
     
     void print()

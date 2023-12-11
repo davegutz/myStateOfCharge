@@ -295,6 +295,7 @@ void setup()
       Serial.printf(" No diffs in retained...\n\n"); Serial1.printf(" No diffs in retained...\n\n");
     }
   }
+  Serial.printf("sp %d bytes <3068?\n", sizeof(sp));
 
   //Log.info("setup end");
   Serial.printf("End setup()\n\n");

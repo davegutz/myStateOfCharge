@@ -60,14 +60,15 @@ def_dict = {'test': {"version": "g20230530",
 # Transient string
 unit_list = ['pro0p', 'pro1a', 'pro3p2', 'pro2p2', 'soc0p', 'soc1a']
 batt_list = ['bb', 'ch']
-sel_list = ['custom', 'init1', 'ampHiFail', 'rapidTweakRegression', 'rapidTweakRegressionH0', 'offSitHysBmsBB',
+sel_list = ['custom', 'init1', 'Saved adjusts', 'ampHiFail', 'rapidTweakRegression', 'rapidTweakRegressionH0', 'offSitHysBmsBB',
             'offSitHysBmsCH', 'triTweakDisch', 'coldStart', 'ampHiFailFf', 'ampLoFail', 'ampHiFailNoise',
             'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
             'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf',
             'pulseEKF', 'pulseSS', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim']
-lookup = {'init': ('Y;c;*W;*v0;*XS;*Ca0.5;<Rf;<Pf;', '', ('',), 0),
-          'custom': ('', '', ("For general purpose data collection", "'save data' will present a choice of file name", ""), 60),
-          'ampHiFail': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;Dm50;Dn0.0001;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 30, 12),
+lookup = {'init': ('Y;c;*W;*v0;*XS;*Ca0.5;<Rf;<Pf;', ('',), 10, 12),
+          'Saved adjusts': ('PR;PV;Bm1;Pr;Bm0;Pr;BP2;Pr;BP1;Pr;BS2;Pr;BS1;Pr;Bs1;Pr;Bs0;Pr;DA5;Pr;DB-5;Pr;RS;Pr;Dc0.2;Pr;Dc0;DI10;Pr;DI0;Pr;Di-10;Pr;Di0;Pr;Dt5;Pr;Dt0;Pr;SA2;Pr;SA1;Pr;SB2;Pr;SB1;Pr;si-1;Pr;RS;Pr;Sk2;Pr;Sk1;Pr;SQ2;Pr;SQ1;Pr;Sq3;Pr;Sq1;Pr;SV1.1;Pr;SV1;Pr;Xb10;Pr;Xb0;Pr;Xa1000;Pr;Xa0;Pr;Xf1;Pr;RS;Pr;Xm10;Pr;RS;Pr;XQ3;PR;PV;', ("For testing out the adjustments and memory", "Read through output and witness set and reset of all", "The DS2482 moderate headroom should not exceed limit printed.  EG 11 of 12 is ok."), 60, 0),
+          'custom': ('', '', ("For general purpose data collection", "'save data' will present a choice of file name", ""), 60, 12),
+          'ampHiFail': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;v2;Dm50;Dn0.0001;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"),20, 12),
           'rapidTweakRegression': ('Ff0;HR;Xp10;', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 180, 12),
           'rapidTweakRegressionH0': ('Sh0;SH0;Ff0;HR;Xp10;', ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!'), 180, 12),
           'offSitHysBmsBB': ('Ff0;Xp0;Xm247;Ca0.05;Rb;Rf;Dr100;DP1;Xts;Xa-162;Xf0.004;XW10000;XT10;XC2;W1;Ph;HR;Pf;v2;W1;XR;', ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',), 568, 12),
