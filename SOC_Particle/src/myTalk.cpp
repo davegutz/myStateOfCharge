@@ -125,9 +125,9 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   ap.ib_amp_add = 0;  // Dm 0
   ap.ib_noa_add = 0;  // Dn 0
   Sen->vb_add(0);  // Dv 0
-  Sen->Sim->ds_voc_soc(0);  // Ds
+  ap.ds_voc_soc = 0;  // Ds
   ap.Tb_bias_model = 0;  // D^
-  Sen->Sim->Dv(0);  // Dy
+  ap.dv_voc_soc = 0;  // Dy
   ap.tb_stale_time_sclr = 1;  // Xv 1
   ap.fail_tb = false;  // Xu 0
 
@@ -460,9 +460,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 's' ):  //   Ds<>:  d_soc to Sim.voc_soc
-                Serial.printf("Sim d_soc %7.3f to ", Sen->Sim->ds_voc_soc());
-                Sen->Sim->ds_voc_soc(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Sim->ds_voc_soc());
+                ap.ds_voc_soc_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 't' ):  //*  Dt<>:  Temp bias change hardware
@@ -486,10 +484,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 sp.Dw_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
-              case ( 'y' ):  //   Dy<>:
-                Serial.printf("Sim.Dv%7.3f to", Sen->Sim->Dv());
-                Sen->Sim->Dv(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Sim->Dv());
+              case ( 'y' ):  //   Dy<>:  delta Sim curve soc in
+                ap.dv_voc_soc_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'T' ):  //   DT<>:  Tb noise
@@ -918,27 +914,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             sp.Debug_p->print_adj_print(cp.input_str.substring(1).toInt());
             break;
 
-          case ( 'V' ):
-            switch ( cp.input_str.charAt(1) )
-            {
-
-              case ( 'm' ):  //   Vm<>:  delta Mon curve soc in
-                Serial.printf("Mon ds_voc_soc%7.3f to", Mon->ds_voc_soc());
-                Mon->ds_voc_soc(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Mon->ds_voc_soc());
-                break;
-
-              case ( 's' ):  //   Vs<>:  delta Sim curve soc in
-                Serial.printf("Sim ds_voc_soc%7.3f to", Sen->Sim->ds_voc_soc());
-                Sen->Sim->ds_voc_soc(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Sim->ds_voc_soc());
-                break;
-
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
-            }
-            break;
-
           case ( 'W' ):  // W<>:  wait.  Skip
             if ( cp.input_str.substring(1).length() )
             {
@@ -1314,7 +1289,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   ap.eframe_mult_p->print_help();  //  DE
   ap.print_mult_p->print_help();  //  DP
   Serial.printf("  Dr=  "); Serial.print(Sen->ReadSensors->delay()); Serial.printf(": minor frame, ms [100]\n"); 
-  Serial.printf("  Ds=  "); Serial.print(Sen->Sim->ds_voc_soc()); Serial.printf(": d_soc to Sim.voc-soc, fraction [0]\n");
+  ap.ds_voc_soc_p->print_help();  //  Ds
+  ap.dv_voc_soc_p->print_help();  //  Dy
 
   sp.Tb_bias_hdwe_p->print_help();  //* Dt
   sp.Tb_bias_hdwe_p->print1_help();  //* Dt
@@ -1325,9 +1301,10 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Dw_p->print_help();  //* Dw
   sp.Dw_p->print1_help();  //* Dw
 
-  Serial.printf("  Dy=  "); Serial.print(Sen->Sim->Dv()); Serial.printf(": Tab sim adj, V [0]\n"); 
+  ap.ds_voc_soc_p->print_help();
   Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise, deg C pk-pk [%6.3f]\n", TB_NOISE); 
   Serial.printf("  DV= "); Serial.printf("%6.3f", Sen->Vb_noise_amp()); Serial.printf(": noise, V pk-pk [%6.3f]\n", VB_NOISE); 
+  ap.dv_voc_soc_p->print_help();
   ap.Ib_amp_noise_amp_p->print_help();
   ap.Ib_noa_noise_amp_p->print_help();
 
@@ -1426,10 +1403,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
     Serial.printf("  v79: sat_ib model\n");
   #endif
   Serial.printf("  v99: calibration\n");
-
-  Serial.printf("\nV<?> - VOC(SOC) curve deltas\n");
-  Serial.printf(" Vm= "); Serial.printf("%6.3f", Mon->ds_voc_soc()); Serial.printf(": Mon soc in [0]\n"); 
-  Serial.printf(" Vs= "); Serial.printf("%6.3f", Sen->Sim->ds_voc_soc()); Serial.printf(": Sim soc in[0]\n"); 
 
   Serial.printf("\nW<?> - iters to wait\n");
 

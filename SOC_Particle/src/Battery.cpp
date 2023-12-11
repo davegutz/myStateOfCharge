@@ -39,9 +39,8 @@ extern PublishPars pp;  // For publishing
 Battery::Battery() {}
 Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, const float d_voc_soc)
     : Coulombs(sp_delta_q, sp_t_last, (NOM_UNIT_CAP*3600), T_RLIM, sp_mod_code, COULOMBIC_EFF_SCALE), bms_charging_(false),
-	bms_off_(false), ds_voc_soc_(0), dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.),
-    ib_(0.), ibs_(0.), ioc_(0.), print_now_(false), sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB),
-    voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), voltage_low_(false), vsat_(NOMINAL_VB)
+	bms_off_(false), dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.), ib_(0.), ibs_(0.), ioc_(0.), print_now_(false),
+    sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB), voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), voltage_low_(false), vsat_(NOMINAL_VB)
 {
     nom_vsat_   = chem_.v_sat - HDB_VB;   // Center in hysteresis
     ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_.tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);  // Update time and time constant changed on the fly
@@ -54,22 +53,6 @@ Battery::~Battery() {}
 float Battery::calculate(const float temp_C, const float soc_frac, float curr_in, const double dt, const boolean dc_dc_on)
 {
     return 0.;
-}
-
-/* calc_soc_voc:  VOC-OCV model
-    INPUTS:
-        soc         Fraction of saturation charge (q_capacity_) available (0-1) 
-        temp_c      Battery temperature, deg C
-    OUTPUTS:
-        dv_dsoc     Derivative scaled, V/fraction
-        voc         Static model open circuit voltage from table (reference), V
-*/
-float Battery::calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc)
-{
-    float voc;  // return value
-    *dv_dsoc = calc_soc_voc_slope(soc + ds_voc_soc_, temp_c);
-    voc = chem_.voc_T_->interp(soc + ds_voc_soc_, temp_c);
-    return voc;
 }
 
 /* calc_soc_voc_slope:  Derivative model read from tables
@@ -111,9 +94,7 @@ void Battery::pretty_print(void)
     Serial.printf("  bms_charging %d\n", bms_charging_);
     Serial.printf("  bms_off %d\n", bms_off_);
     Serial.printf("  c_sd%9.3g, farad\n", chem_.c_sd);
-    Serial.printf("  ds_voc_soc%10.6f, frac\n", ds_voc_soc_);
     Serial.printf("  dt%7.3f, s\n", dt_);
-    Serial.printf("  dv_dsoc%10.6f, V/frac\n", dv_dsoc_);
     Serial.printf("  dv_dyn%7.3f, V\n", dv_dyn_);
     Serial.printf("  dvoc_dt%10.6f, V/dg C\n", chem_.dvoc_dt);
     Serial.printf("  ib%7.3f, A\n", ib_);
@@ -360,6 +341,22 @@ float BatteryMonitor::calc_charge_time(const double q, const float q_capacity, c
     return( tcharge_ );
 }
 
+/* calc_soc_voc:  VOC-OCV model
+    INPUTS:
+        soc         Fraction of saturation charge (q_capacity_) available (0-1) 
+        temp_c      Battery temperature, deg C
+    OUTPUTS:
+        dv_dsoc     Derivative scaled, V/fraction
+        voc         Static model open circuit voltage from table (reference), V
+*/
+float BatteryMonitor::calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc)
+{
+    float voc;  // return value
+    *dv_dsoc = calc_soc_voc_slope(soc, temp_c);
+    voc = chem_.voc_T_->interp(soc, temp_c);
+    return voc;
+}
+
 // EKF model for predict
 void BatteryMonitor::ekf_predict(double *Fx, double *Bu)
 {
@@ -539,7 +536,6 @@ BatterySim::BatterySim() :
     Sq_inj_ = new SqInj();
     Tri_inj_ = new TriInj();
     Cos_inj_ = new CosInj();
-    dv_voc_soc_ = 0.;           // Talk table bias, Dy, V
     sat_ib_null_ = 0.;          // Current cutback value for soc=1, A
     sat_cutback_gain_ = 1000.;  // Gain to retard ib when soc approaches 1, dimensionless
     model_saturated_ = false;
@@ -608,7 +604,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     float soc_lim = max(min(soc_, 1.0), -0.2);  // slightly beyond
 
     // VOC-OCV model
-    voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_) + dv_voc_soc_;
+    voc_stat_ = calc_soc_voc(soc_, temp_c_, &dv_dsoc_) + ap.dv_voc_soc;
     voc_stat_ = min(voc_stat_ + (soc_ - soc_lim) * dv_dsoc_, vsat_*1.2);  // slightly beyond sat but don't windup
 
 
@@ -651,7 +647,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     dv_dyn_ = vb_ - voc_;
 
     // Saturation logic, both full and empty
-    sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ds_voc_soc_) ) * sat_cutback_gain_ * sp.Cutback_gain_sclr();
+    sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ap.ds_voc_soc) ) * sat_cutback_gain_ * sp.Cutback_gain_sclr();
     if ( sp.tweak_test() || !sp.mod_ib() ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
     ib_fut_ = min(ib_charge_fut, sat_ib_max_);      // the feedback of ib_
     // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past value.  (This prevents sat logic from working)
@@ -678,6 +674,22 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     #endif
 
     return ( vb_ );
+}
+
+/* calc_soc_voc:  VOC-OCV model
+    INPUTS:
+        soc         Fraction of saturation charge (q_capacity_) available (0-1) 
+        temp_c      Battery temperature, deg C
+    OUTPUTS:
+        dv_dsoc     Derivative scaled, V/fraction
+        voc         Static model open circuit voltage from table (reference), V
+*/
+float BatterySim::calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc)
+{
+    float voc;  // return value
+    *dv_dsoc = calc_soc_voc_slope(soc + ap.ds_voc_soc, temp_c);
+    voc = chem_.voc_T_->interp(soc + ap.ds_voc_soc, temp_c);
+    return voc;
 }
 
 // Injection model, calculate inj bias based on time since boot

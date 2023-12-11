@@ -85,15 +85,13 @@ public:
   // operators
   // functions
   boolean bms_off() { return bms_off_; };
-  float calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc);
+  virtual float calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc) { return 0.; };
   float calc_soc_voc_slope(float soc, float temp_c);
   float calc_vsat(void);
   virtual float calculate(const float temp_C, const float soc_frac, float curr_in, const double dt, const boolean dc_dc_on);
   float C_rate() { return ib_ / NOM_UNIT_CAP; }
   String decode(const uint8_t mod);
   float dqdt() { return chem_.dqdt; };
-  void ds_voc_soc(const float _ds) { ds_voc_soc_ = _ds; };
-  float ds_voc_soc() { return ds_voc_soc_; };
   float dv_dsoc() { return dv_dsoc_; };
   float dv_dyn() { return dv_dyn_; };
   uint8_t encode(const String mod_str);
@@ -114,7 +112,6 @@ public:
 protected:
   boolean bms_charging_; // Indicator that battery is charging, T = charging, changing soc and voltage
   boolean bms_off_; // Indicator that battery management system is off, T = off preventing current flow
-  float ds_voc_soc_;    // VOC(SOC) delta soc on input
   float dt_;       // Update time, s
   float dv_dsoc_;  // Derivative scaled, V/fraction
   float dv_dyn_;   // ib-induced back emf, V
@@ -152,6 +149,7 @@ public:
   float amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_; };
   float amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_; };
   float calc_charge_time(const double q, const float q_capacity, const float charge_curr, const float soc);
+  virtual float calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc);
   float calculate(Sensors *Sen, const boolean reset);
   boolean converged_ekf() { return EKF_converged->state(); };
   double delta_q_ekf() { return delta_q_ekf_; };
@@ -210,10 +208,9 @@ public:
   // functions
   float calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset);
   float calc_inj(const unsigned long now, const uint8_t type, const float amp, const double freq);
+  virtual float calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc);
   float count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon, const boolean initializing_all);
   boolean cutback() { return model_cutback_; };
-  void Dv(const float _dv) { dv_voc_soc_ = _dv; };
-  float Dv() { return dv_voc_soc_; };
   double delta_q() { return *sp_delta_q_; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
   void hys_pretty_print () { hys_->pretty_print(); };
@@ -237,7 +234,6 @@ protected:
   TriInj *Tri_inj_;         // Class to create triangle waves
   CosInj *Cos_inj_;         // Class to create cosine waves
   uint32_t duty_;           // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
-  float dv_voc_soc_;        // Adjustment on voc_soc table, Dy, V
   float hys_scale_;         // Hysteresis scalar
   float ib_charge_;         // Current input avaiable for charging, A
   float ib_fut_;            // Future value of limited current, A

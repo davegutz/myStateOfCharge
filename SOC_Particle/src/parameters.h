@@ -58,6 +58,8 @@ public:
     float cc_diff_sclr;         // Scale cc_diff detection thresh, scalar
     float cycles_inj;           // Number of injection cycles
     boolean dc_dc_on;           // DC-DC charger is on
+    float ds_voc_soc;           // VOC(SOC) delta soc on input, frac
+    float dv_voc_soc;           // VOC(SOC) del v, V
     uint8_t eframe_mult;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
     boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
     boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
@@ -75,6 +77,8 @@ public:
     FloatZ *cc_diff_sclr_p;
     FloatZ *cycles_inj_p;
     BooleanZ *dc_dc_on_p;
+    FloatZ *ds_voc_soc_p;
+    FloatZ *dv_voc_soc_p;
     Uint8tZ *eframe_mult_p;
     BooleanZ *fail_tb_p;
     BooleanZ *fake_faults_p;
