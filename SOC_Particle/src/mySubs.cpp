@@ -28,10 +28,11 @@
 #include "debug.h"
 #include "mySummary.h"
 
+extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
+extern VolatilePars ap; // Various adjustment parameters shared at system level
 extern CommandPars cp;  // Various parameters shared at system level
 extern PrinterPars pr;  // Print buffer
 extern PublishPars pp;  // For publishing
-extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
 // Print consolidation
 void print_all_header(void)
@@ -261,8 +262,8 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   }
   // Call calculate twice because sat_ is a used-before-calculated (UBC)
   // Simple 'call twice' method because sat_ is discrete no analog which would require iteration
-  Sen->Vb_model = Sen->Sim->calculate(Sen, sp.dc_dc_on, true) * sp.nS();
-  Sen->Vb_model = Sen->Sim->calculate(Sen, sp.dc_dc_on, true) * sp.nS();  // Call again because sat is a UBC
+  Sen->Vb_model = Sen->Sim->calculate(Sen, ap.dc_dc_on, true) * sp.nS();
+  Sen->Vb_model = Sen->Sim->calculate(Sen, ap.dc_dc_on, true) * sp.nS();  // Call again because sat is a UBC
   Sen->Ib_model = Sen->Sim->ib_fut() * sp.nP();
 
   // Call to count_coulombs not strictly needed for init.  Calculates some things not otherwise calculated for 'all'
@@ -358,7 +359,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
 
   // Debounce saturation calculation done in ekf using voc model
   boolean sat = Mon->is_sat(reset);
-  Sen->saturated = Is_sat_delay->calculate(sat, T_SAT*sp.s_t_sat, T_DESAT*sp.s_t_sat, min(Sen->T, T_SAT/2.), reset);
+  Sen->saturated = Is_sat_delay->calculate(sat, T_SAT*ap.s_t_sat, T_DESAT*ap.s_t_sat, min(Sen->T, T_SAT/2.), reset);
 
   // Memory store
   // Initialize to ekf when not saturated
@@ -597,7 +598,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Sim initialize as needed from memory
   if ( reset_temp )
   {
-    Sen->Tb_model = Sen->Tb_model_filt = RATED_TEMP + sp.Tb_bias_model;
+    Sen->Tb_model = Sen->Tb_model_filt = RATED_TEMP + ap.Tb_bias_model;
     initialize_all(Mon, Sen, 0., false);
   }
   Sen->Sim->apply_delta_q_t(reset);
@@ -608,7 +609,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  States: Sim->soc(past)
   //  Outputs:  Tb_hdwe, Ib_model, Vb_model, sp.inj_bias, Sim.model_saturated
   Sen->Tb_model = Sen->Tb_model_filt = Sen->Sim->temp_c();
-  Sen->Vb_model = Sen->Sim->calculate(Sen, sp.dc_dc_on, reset) * sp.nS() + Sen->Vb_add();
+  Sen->Vb_model = Sen->Sim->calculate(Sen, ap.dc_dc_on, reset) * sp.nS() + Sen->Vb_add();
   Sen->Ib_model = Sen->Sim->ib_fut() * sp.nP();
   cp.model_cutback = Sen->Sim->cutback();
   cp.model_saturated = Sen->Sim->saturated();
@@ -691,14 +692,14 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 
   // Quiet logic.   Reset to ready state at soc=0.5; do not change Modeling.  Passes at least once before running chit.
   static unsigned long int millis_past = millis();
-  static unsigned long int until_q_past = sp.until_q;
-  if ( sp.until_q>0UL && until_q_past==0UL ) until_q_past = sp.until_q;
-  sp.until_q = (unsigned long) max(0, (long) sp.until_q  - (long)(millis() - millis_past));
-  if ( sp.until_q==0UL && until_q_past>0UL )
+  static unsigned long int until_q_past = ap.until_q;
+  if ( ap.until_q>0UL && until_q_past==0UL ) until_q_past = ap.until_q;
+  ap.until_q = (unsigned long) max(0, (long) ap.until_q  - (long)(millis() - millis_past));
+  if ( ap.until_q==0UL && until_q_past>0UL )
   {
     chit("v0;Hd;Pf;BZ;Rf;", QUEUE);
   }
-  until_q_past = sp.until_q;
+  until_q_past = ap.until_q;
   millis_past = millis();
 
 }

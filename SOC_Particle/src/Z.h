@@ -45,6 +45,7 @@ public:
         const boolean check_for_off_on_init=true)
     {
         *n = *n + 1;
+        prefix_ = prefix;
         code_ = code;
         description_ = description.substring(0, 20);
         units_ = units.substring(0, 10);

@@ -24,7 +24,9 @@
 #include "application.h"
 #include "fault.h"
 #include "mySensors.h"
+
 extern SavedPars sp;       // Various parameters to be static at system level and saved through power cycle
+extern VolatilePars ap; // Various adjustment parameters shared at system level
 
 // struct Flt_st.  This file needed to avoid circular reference to sp in header files
 void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)

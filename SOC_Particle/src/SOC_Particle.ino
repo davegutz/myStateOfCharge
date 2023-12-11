@@ -108,10 +108,11 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
 
 // Globals
 extern SavedPars sp;              // Various parameters to be static at system level and saved through power cycle
+extern VolatilePars ap;           // Various adjustment parameters shared at system level
 extern CommandPars cp;            // Various parameters shared at system level
 extern PrinterPars pr;            // Print buffer structure
-extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 extern PublishPars pp;            // For publishing
+extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 
 #ifdef CONFIG_47L16_EERAM
   retained SavedPars sp = SavedPars(&ram);  // Various parameters to be common at system level
@@ -123,6 +124,7 @@ extern PublishPars pp;            // For publishing
 
 Flt_st mySum[NSUM];                   // Summaries
 PrinterPars pr = PrinterPars();       // Print buffer
+VolatilePars ap = VolatilePars();     // Various adjustment parameters commanding at system level.  Initialized on start up.  Not retained.
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level.  Initialized on start up.  Not retained.
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
 unsigned long millis_flip = millis(); // Timekeeping
@@ -397,11 +399,11 @@ void loop()
     Sen->reset = reset;
     
     // Check for really slow data capture and run EKF each read frame
-    sp.eframe_mult = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1);
+    ap.eframe_mult = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1);
 
     // Set print frame
     static uint8_t print_count = 0;
-    if ( print_count>=sp.print_mult-1 || print_count==UINT8_MAX )  // > avoids lockup on change by user
+    if ( print_count>=ap.print_mult-1 || print_count==UINT8_MAX )  // > avoids lockup on change by user
     {
       print_count = 0;
       cp.publishS = true;

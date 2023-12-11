@@ -26,8 +26,10 @@
 #include "Battery.h"
 #include "Coulombs.h"
 #include "parameters.h"
-extern SavedPars sp;      // Various parameters to be static at system level and saved through power cycle
 #include "command.h"
+
+extern SavedPars sp;      // Various parameters to be static at system level and saved through power cycle
+extern VolatilePars ap; // Various adjustment parameters shared at system level
 extern CommandPars cp;    // Various parameters to be static at system level
 extern PublishPars pp;    // For publishing
 
@@ -187,7 +189,7 @@ float Coulombs::count_coulombs(const double dt, const boolean reset_temp, const 
           *sp_delta_q_ = 0.;
         }
     }
-    // else if ( reset_temp && !sp.fake_faults ) *sp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
+    // else if ( reset_temp && !ap.fake_faults ) *sp_delta_q_ = delta_q_ekf;  // Solution to booting up unsaturated
     resetting_ = false;     // one pass flag
 
     // Integration.   Can go to negative

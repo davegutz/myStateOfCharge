@@ -30,13 +30,71 @@
 #include "PrinterPars.h"
 #include "Z.h"
 
-// Definition of structure to be saved in EERAM.  Many are needed to calibrate.  Others are
+class Parameters
+{
+public:
+    Parameters();
+    ~Parameters();
+    virtual void initialize() {};
+    boolean is_corrupt();
+    virtual void pretty_print(const boolean all){};
+    void set_nominal();
+protected:
+    int8_t n_;
+    Z **Z_;
+};
+
+
+// Volatile memory
+class VolatilePars : public Parameters
+{
+public:
+    VolatilePars();
+    ~VolatilePars();
+    virtual void initialize();
+    virtual void pretty_print(const boolean all);
+
+    // Declare
+    float cc_diff_sclr;         // Scale cc_diff detection thresh, scalar
+    float cycles_inj;           // Number of injection cycles
+    boolean dc_dc_on;           // DC-DC charger is on
+    uint8_t eframe_mult;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
+    boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
+    boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
+    float ib_amp_add;           // Amp signal add
+    uint8_t print_mult;         // Print multiplier for objects
+    float s_t_sat;              // Scalar on saturation test time set and reset
+    unsigned long int tail_inj; // Tail after end injection, ms
+    float Tb_bias_model;        // Bias on Tb for model
+    float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale check
+    unsigned long int until_q;  // Time until set v0, ms
+    unsigned long int wait_inj; // Wait before start injection, ms
+    FloatZ *cc_diff_sclr_p;
+    FloatZ *cycles_inj_p;
+    BooleanZ *dc_dc_on_p;
+    Uint8tZ *eframe_mult_p;
+    BooleanZ *fail_tb_p;
+    BooleanZ *fake_faults_p;
+    FloatZ *ib_amp_add_p;
+    Uint8tZ *print_mult_p;
+    FloatZ *s_t_sat_p;
+    FloatZ *Tb_bias_model_p;
+    FloatZ *tb_stale_time_sclr_p;
+    ULongZ *tail_inj_p;
+    ULongZ *until_q_p;
+    ULongZ *wait_inj_p;
+
+protected:
+};
+
+
+// Definition of structure to be saved, either EERAM or retained backup SRAM.  Many are needed to calibrate.  Others are
 // needed to allow testing with resets.  Others allow application to remember dynamic
 // tweaks.  Default values below are important:  they prevent junk
 // behavior on initial build. Don't put anything in here that you can't live with normal running
 // because could get set by testing and forgotten.  Not reset by hard reset
 // SavedPars Class
-class SavedPars
+class SavedPars : public Parameters
 {
 public:
     SavedPars();
@@ -44,8 +102,6 @@ public:
     SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const uint16_t nflt);
     ~SavedPars();
  
-    // operators
-
     // parameter list
     float Amp() { return Amp_z; }
     float Cutback_gain_sclr() { return Cutback_gain_sclr_z; }
@@ -81,8 +137,7 @@ public:
     float Vb_scale() { return Vb_scale_z; }
 
     // functions
-    void init_z();
-    boolean is_corrupt();
+    virtual void initialize();
     void large_reset() { set_nominal(); reset_flt(); reset_his(); }
     void mem_print();
     uint16_t nflt() { return nflt_; }
@@ -91,15 +146,14 @@ public:
     void nominalize_fault_array();
     void nominalize_history_array();
     int num_diffs();
-    void pretty_print(const boolean all);
+    virtual void pretty_print(const boolean all);
     void pretty_print_modeling();
-    void pretty_print_volatile(const boolean all);
     void print_fault_array();
     void print_fault_header();
     void print_history_array();
     void reset_flt();
     void reset_his();
-    void set_nominal();
+    virtual void set_nominal();
 
     boolean mod_all_dscn() { return ( 111<Modeling() ); }                // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
@@ -164,7 +218,6 @@ public:
         void put_Modeling(const uint8_t input) { Modeling_p->check_set_put(input); Modeling_z = Modeling();}
         void put_T_state() {}
         void put_T_state_model() {}
-
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #else
         void put_Modeling(const uint8_t input) { Modeling_p->check_set_put(input); }
@@ -209,34 +262,6 @@ public:
     Uint8tZ *Type_p;
     FloatZ *Vb_bias_hdwe_p;
     FloatZ *Vb_scale_p;
-    float cc_diff_sclr;         // Scale cc_diff detection thresh, scalar
-    float cycles_inj;           // Number of injection cycles
-    boolean dc_dc_on;           // DC-DC charger is on
-    uint8_t eframe_mult;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
-    boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
-    boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
-    float ib_amp_add;           // Amp signal add
-    uint8_t print_mult;         // Print multiplier for objects
-    float s_t_sat;              // Scalar on saturation test time set and reset
-    unsigned long int tail_inj; // Tail after end injection, ms
-    float Tb_bias_model;        // Bias on Tb for model
-    float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale check
-    unsigned long int until_q;  // Time until set v0, ms
-    unsigned long int wait_inj; // Wait before start injection, ms
-    FloatZ *cc_diff_sclr_p;
-    FloatZ *cycles_inj_p;
-    BooleanZ *dc_dc_on_p;
-    Uint8tZ *eframe_mult_p;
-    BooleanZ *fail_tb_p;
-    BooleanZ *fake_faults_p;
-    FloatZ *ib_amp_add_p;
-    Uint8tZ *print_mult_p;
-    FloatZ *s_t_sat_p;
-    FloatZ *Tb_bias_model_p;
-    FloatZ *tb_stale_time_sclr_p;
-    ULongZ *tail_inj_p;
-    ULongZ *until_q_p;
-    ULongZ *wait_inj_p;
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
     float Amp_z;
@@ -273,7 +298,6 @@ public:
     float Vb_scale_z;
 
 protected:
-    int8_t n_;
     SerialRAM *rP_;
     #ifndef CONFIG_47L16_EERAM
         Flt_st *fault_;
@@ -286,8 +310,6 @@ protected:
     uint16_t nflt_;         // Length of Flt_ram array for fault snapshot
     uint16_t nhis_;         // Length of Flt_ram array for fault history
     uint16_t nsum_;         // Length of Sum array for history
-    uint16_t size_;
-    Z **Z_;
 };
 
 #endif
