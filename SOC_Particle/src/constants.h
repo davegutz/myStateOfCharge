@@ -85,7 +85,7 @@
         #ifdef DEBUG_INIT
             #define NSUM 0 // Number of saved SRAM summaries (40)
         #else
-            #define NSUM  5 // Number of saved SRAM summaries (26)
+            #define NSUM  20 // Number of saved SRAM summaries (26)
         #endif
     #endif
 #endif

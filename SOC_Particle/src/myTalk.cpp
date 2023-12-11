@@ -1277,13 +1277,13 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("No help photon for test. Look at code.\n");
   Serial.printf("\n\nHelp menu.  Omit '=' and end entry with ';'\n");
 
+  #ifndef HELPLESS
   Serial.printf("\nb<?>   Manage fault buffer\n");
   Serial.printf("  bd= "); Serial.printf("dump fault buffer\n");
   Serial.printf("  bh= "); Serial.printf("reset history buffer\n");
   Serial.printf("  br= "); Serial.printf("reset fault buffer\n");
   Serial.printf("  bR= "); Serial.printf("reset all buffers\n");
 
-  #ifndef HELPLESS
   Serial.printf("\nB<?> Battery e.g.:\n");
   sp.Mon_chm_p->print_help();  //* Bm
   sp.Sim_chm_p->print_help();  //* Bs
@@ -1297,7 +1297,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\nC<?> Chg SOC e.g.:\n");
   Serial.printf("  Ca=  all - '(0-1.1)'\n"); 
   Serial.printf("  Cm=  model (& ekf if mod)- '(0-1.1)'\n"); 
-  #endif
 
   Serial.printf("\nD/S<?> Adj e.g.:\n");
   sp.Ib_bias_amp_p->print_help();  //* DA
@@ -1312,42 +1311,33 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Vb_bias_hdwe_p->print1_help();  //* Dc
   sp.Ib_bias_amp_p->print_help();  //  Dm
   sp.Ib_bias_noa_p->print_help();  //  Dn
-
-  #ifndef HELPLESS
   ap.eframe_mult_p->print_help();  //  DE
   ap.print_mult_p->print_help();  //  DP
   Serial.printf("  Dr=  "); Serial.print(Sen->ReadSensors->delay()); Serial.printf(": minor frame, ms [100]\n"); 
   Serial.printf("  Ds=  "); Serial.print(Sen->Sim->ds_voc_soc()); Serial.printf(": d_soc to Sim.voc-soc, fraction [0]\n");
-  #endif
 
   sp.Tb_bias_hdwe_p->print_help();  //* Dt
   sp.Tb_bias_hdwe_p->print1_help();  //* Dt
-  
-  #ifndef HELPLESS
+
   ap.Tb_bias_model_p->print_help();  // D^
   Serial.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.printf(": volt fault inj, V [0]\n"); 
-  #endif
 
   sp.Dw_p->print_help();  //* Dw
   sp.Dw_p->print1_help();  //* Dw
 
-  #ifndef HELPLESS
   Serial.printf("  Dy=  "); Serial.print(Sen->Sim->Dv()); Serial.printf(": Tab sim adj, V [0]\n"); 
   Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise, deg C pk-pk [%6.3f]\n", TB_NOISE); 
   Serial.printf("  DV= "); Serial.printf("%6.3f", Sen->Vb_noise_amp()); Serial.printf(": noise, V pk-pk [%6.3f]\n", VB_NOISE); 
   ap.Ib_amp_noise_amp_p->print_help();
   ap.Ib_noa_noise_amp_p->print_help();
-  #endif
 
   sp.Ib_scale_amp_p->print_help();  //* SA
   sp.Ib_scale_amp_p->print1_help();  //* SA
   sp.Ib_scale_noa_p->print_help();  //* SB
   sp.Ib_scale_noa_p->print1_help();  //* SB
-  
-  #ifndef HELPLESS
+
   Serial.printf("  Sh= "); Serial.printf("%6.3f", Sen->Sim->hys_scale()); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
   Serial.printf("  SH= "); Serial.printf("%6.3f", Sen->Sim->hys_state()); Serial.printf(": hys states [0]\n");
-  #endif
 
   sp.S_cap_mon_p->print_help();  //* SQ
   sp.S_cap_mon_p->print1_help();  //* SQ
@@ -1358,7 +1348,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Vb_scale_p->print1_help();  //* SV
 
   Serial.printf("\nF<?>   Faults\n");
-  #ifndef HELPLESS
   ap.cc_diff_sclr_p->print_help();  // Fc
   Serial.printf("  Fd= "); Serial.printf("%6.3f", Sen->Flt->ib_diff_sclr()); Serial.printf(": sclr ib_diff thr ^ [1]\n"); 
   ap.fake_faults_p->print_help();  // Ff
@@ -1401,7 +1390,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Rs= "); Serial.printf("small.  Reinitialize filters\n");
   Serial.printf("  RS= "); Serial.printf("SavedPars: Renominalize saved\n");
   Serial.printf("  RV= "); Serial.printf("Renominalize volatile\n");
-  #endif
 
   sp.Ib_select_p->print_help();  //* si
   sp.Time_now_p->print_help();  //* UT
@@ -1409,7 +1397,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Debug_p->print_help();  // v
   sp.Debug_p->print1_help();  // v
 
-  #ifndef HELPLESS
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
   Serial.printf("  v-2: ADS counts for throughput meas\n");
   #ifdef DEBUG_INIT
@@ -1460,9 +1447,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   sp.Amp_p->print_help();  //* Xa
   sp.Freq_p->print_help();  //* Xf
-
   sp.Type_p->print_help();  //* Xt
-  // Serial.printf(" *Xt=  "); Serial.printf("%d", sp.type()); Serial.printf(": Inj 'n'=none(0) 's'=sin(1) 'q'=square(2) 't'=tri(3) biases(4,5,6) 'o'=cos(8))\n");
+
   #ifndef HELPLESS
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
   Serial.printf("  Xp-1: Off, modeling false\n");
