@@ -370,15 +370,11 @@ public:
   float ib_noa_hdwe() { return Ib_noa_hdwe / sp.nP(); };          // Battery no amp unit current, A
   float ib_noa_model() { return Ib_noa_model / sp.nP(); };        // Battery no amp model unit current, A
   float ib_noa_sclr() { return ib_noa_sclr_; };
-  void ib_noa_sclr(const float sclr) { ib_noa_sclr_ = sclr; };
   float Ib_amp_add();
-  float Ib_amp_noise();
-  float Ib_amp_noise_amp() { return ( Ib_amp_noise_amp_ ); };
-  void Ib_amp_noise_amp(const float noise) { Ib_amp_noise_amp_ = noise; };
   float Ib_noa_add();
+  float Ib_amp_noise();
   float Ib_noa_noise();
-  float Ib_noa_noise_amp() { return ( Ib_noa_noise_amp_ ); };
-  void Ib_noa_noise_amp(const float noise) { Ib_noa_noise_amp_ = noise; };
+  void ib_noa_sclr(const float sclr) { ib_noa_sclr_ = sclr; };
   float Ib_noise();
   void reset_temp(const boolean reset) { reset_temp_ = reset; };
   boolean reset_temp() { return ( reset_temp_ ); };
@@ -416,8 +412,6 @@ protected:
   float ib_amp_sclr_;   // Fault injection sclr on amp
   float ib_noa_add_;    // Fault injection bias on non amp, A
   float ib_noa_sclr_;   // Fault injection sclr on non amp
-  float Ib_amp_noise_amp_;  // Ib bank noise on amplified sensor, amplitude model only, A pk-pk
-  float Ib_noa_noise_amp_;  // Ib bank noise on non-amplified sensor, amplitude model only, A pk-pk
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
   unsigned long int sample_time_ib_;          // Exact moment of selected Ib sample, ms
   unsigned long int sample_time_vb_;          // Exact moment of selected Vb sample, ms

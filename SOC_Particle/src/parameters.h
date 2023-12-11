@@ -62,6 +62,8 @@ public:
     boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
     boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
     float ib_amp_add;           // Amp signal add
+    float Ib_amp_noise_amp;     // Ib bank noise on amplified sensor, amplitude model only, A pk-pk
+    float Ib_noa_noise_amp;     // Ib bank noise on non-amplified sensor, amplitude model only, A pk-pk
     uint8_t print_mult;         // Print multiplier for objects
     float s_t_sat;              // Scalar on saturation test time set and reset
     unsigned long int tail_inj; // Tail after end injection, ms
@@ -76,6 +78,8 @@ public:
     BooleanZ *fail_tb_p;
     BooleanZ *fake_faults_p;
     FloatZ *ib_amp_add_p;
+    FloatZ *Ib_amp_noise_amp_p;
+    FloatZ *Ib_noa_noise_amp_p;
     Uint8tZ *print_mult_p;
     FloatZ *s_t_sat_p;
     FloatZ *Tb_bias_model_p;

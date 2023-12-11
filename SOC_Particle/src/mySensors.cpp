@@ -739,8 +739,8 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
   Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE), ib_amp_sclr_(1.), ib_noa_add_(0.), ib_noa_sclr_(1.),
-  Ib_amp_noise_amp_(IB_AMP_NOISE), Ib_noa_noise_amp_(IB_NOA_NOISE), reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),
-  sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL), vb_add_(0.)
+  reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),sample_time_ib_hdwe_(0UL),
+  sample_time_vb_hdwe_(0UL), vb_add_(0.)
 {
   this->T = T;
   this->T_filt = T;
@@ -936,16 +936,16 @@ float Sensors::Vb_noise()
 // Ib noise
 float Sensors::Ib_amp_noise()
 {
-  if ( Ib_amp_noise_amp_==0. ) return ( 0. );
+  if ( ap.Ib_amp_noise_amp==0. ) return ( 0. );
   uint8_t raw = Prbn_Ib_amp_->calculate();
-  float noise = (float(raw)/125. - 0.5) * Ib_amp_noise_amp_;
+  float noise = (float(raw)/125. - 0.5) * ap.Ib_amp_noise_amp;
   return ( noise );
 }
 float Sensors::Ib_noa_noise()
 {
-  if ( Ib_noa_noise_amp_==0. ) return ( 0. );
+  if ( ap.Ib_noa_noise_amp==0. ) return ( 0. );
   uint8_t raw = Prbn_Ib_noa_->calculate();
-  float noise = (float(raw)/125. - 0.5) * Ib_noa_noise_amp_;
+  float noise = (float(raw)/125. - 0.5) * ap.Ib_noa_noise_amp;
   return ( noise );
 }
 

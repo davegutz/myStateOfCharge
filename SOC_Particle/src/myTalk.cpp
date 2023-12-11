@@ -134,8 +134,8 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   // Noise
   Sen->Tb_noise_amp(0);  // DT 0
   Sen->Vb_noise_amp(0);  // DV 0
-  Sen->Ib_amp_noise_amp(0);  // DM 0
-  Sen->Ib_noa_noise_amp(0);  // DN 0
+  ap.Ib_amp_noise_amp = 0;  // DM 0
+  ap.Ib_noa_noise_amp = 0;  // DN 0
 
   // Intervals
   ap.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
@@ -507,15 +507,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'M' ):  //   DM<>:  Ib amp noise
-                Serial.printf("Sen.Ib_amp_noise_amp_%7.3f to ", Sen->Ib_amp_noise_amp());
-                Sen->Ib_amp_noise_amp(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Ib_amp_noise_amp());
+                ap.Ib_amp_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'N' ):  //   DN<>:  Ib noa noise
-                Serial.printf("Sen.Ib_noa_noise_amp_%7.3f to ", Sen->Ib_noa_noise_amp());
-                Sen->Ib_noa_noise_amp(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Ib_noa_noise_amp());
+                ap.Ib_noa_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               default:
@@ -1339,8 +1335,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  Dy=  "); Serial.print(Sen->Sim->Dv()); Serial.printf(": Tab sim adj, V [0]\n"); 
   Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise, deg C pk-pk [%6.3f]\n", TB_NOISE); 
   Serial.printf("  DV= "); Serial.printf("%6.3f", Sen->Vb_noise_amp()); Serial.printf(": noise, V pk-pk [%6.3f]\n", VB_NOISE); 
-  Serial.printf("  DM= "); Serial.printf("%6.3f", Sen->Ib_amp_noise_amp()); Serial.printf(": amp noise, A pk-pk [%6.3f]\n", IB_AMP_NOISE); 
-  Serial.printf("  DN= "); Serial.printf("%6.3f", Sen->Ib_noa_noise_amp()); Serial.printf(": noa noise, A pk-pk [%6.3f]\n", IB_NOA_NOISE); 
+  ap.Ib_amp_noise_amp_p->print_help();
+  ap.Ib_noa_noise_amp_p->print_help();
   #endif
 
   sp.Ib_scale_amp_p->print_help();  //* SA

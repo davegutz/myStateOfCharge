@@ -72,7 +72,9 @@ void  VolatilePars::initialize()
     Z_[n_] = (eframe_mult_p   = new Uint8tZ(&n_, "  ", "DE", NULL,"EKF frame rate x Dr",  "uint",   0,    UINT8_MAX, &eframe_mult,  EKF_EFRAME_MULT));
     Z_[n_] = (fail_tb_p      = new BooleanZ(&n_, "  ", "Xu", NULL,"Ignore Tb & fail",     "T=Fail", false,true, &fail_tb,           false));
     Z_[n_] = (fake_faults_p  = new BooleanZ(&n_, "  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,   &fake_faults,        FAKE_FAULTS));
-    Z_[n_] = (ib_amp_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"Amp signal add ",      "A",      -1000,1000, &ib_amp_add,        0));
+    Z_[n_] = (ib_amp_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
+    Z_[n_] = (Ib_amp_noise_amp_p= new FloatZ(&n_,"  ", "DM", NULL,"Amp amp noise",        "A",      0,    1000, &Ib_amp_noise_amp,  IB_AMP_NOISE));
+    Z_[n_] = (Ib_noa_noise_amp_p= new FloatZ(&n_, "  ","DN", NULL,"Amp noa noise",        "A",      0,    1000, &Ib_noa_noise_amp,  IB_NOA_NOISE));
     Z_[n_] = (print_mult_p    = new Uint8tZ(&n_, "  ", "DP", NULL,"Print mult x Dr",      "uint",   0,    UINT8_MAX, &print_mult,   DP_MULT));
     Z_[n_] = (s_t_sat_p        = new FloatZ(&n_, "  ", "Xs", NULL,"Scalar on T_SAT",      "slr",    0,    100,  &s_t_sat,           1));
     Z_[n_] = (tail_inj_p       = new ULongZ(&n_, "  ", "XT", NULL,"Tail end inj",         "ms",     0UL,  120000UL,&tail_inj,       0UL));
