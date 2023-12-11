@@ -365,8 +365,6 @@ public:
   float ib_hdwe_model() { return Ib_hdwe_model / sp.nP(); };      // Battery select hardware model unit current, A
   float ib_model() { return Ib_model / sp.nP(); };                // Battery select model unit current, A
   float ib_model_in() { return Ib_model_in / sp.nP(); };          // Battery select model input unit current, A
-  float ib_noa_add() { return ib_noa_add_; };
-  void ib_noa_add(const float add) { ib_noa_add_ = add; };
   float ib_noa_hdwe() { return Ib_noa_hdwe / sp.nP(); };          // Battery no amp unit current, A
   float ib_noa_model() { return Ib_noa_model / sp.nP(); };        // Battery no amp model unit current, A
   float ib_noa_sclr() { return ib_noa_sclr_; };
@@ -410,7 +408,6 @@ protected:
   float Tb_noise_amp_;  // Tb noise amplitude model only, deg C pk-pk
   float Vb_noise_amp_;  // Vb bank noise amplitude model only, V pk-pk
   float ib_amp_sclr_;   // Fault injection sclr on amp
-  float ib_noa_add_;    // Fault injection bias on non amp, A
   float ib_noa_sclr_;   // Fault injection sclr on non amp
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
   unsigned long int sample_time_ib_;          // Exact moment of selected Ib sample, ms

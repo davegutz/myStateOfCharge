@@ -65,7 +65,7 @@ void  VolatilePars::initialize()
     // Memory map
     // Input definitions
     n_ = -1;
-    Z_ = new Z*[15];
+    Z_ = new Z*[16];
     Z_[n_] = (cc_diff_sclr_p   = new FloatZ(&n_, "  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_sclr,      1));
     Z_[n_] = (cycles_inj_p     = new FloatZ(&n_, "  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
     Z_[n_] = (dc_dc_on_p     = new BooleanZ(&n_, "  ", "Xd", NULL,"DC-DC charger on",     "T=on",   0,    1,    &dc_dc_on,          false));
@@ -73,6 +73,7 @@ void  VolatilePars::initialize()
     Z_[n_] = (fail_tb_p      = new BooleanZ(&n_, "  ", "Xu", NULL,"Ignore Tb & fail",     "T=Fail", false,true, &fail_tb,           false));
     Z_[n_] = (fake_faults_p  = new BooleanZ(&n_, "  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,   &fake_faults,        FAKE_FAULTS));
     Z_[n_] = (ib_amp_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
+    Z_[n_] = (ib_noa_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"No amp signal add",    "A",      -1000,1000, &ib_noa_add,        0));
     Z_[n_] = (Ib_amp_noise_amp_p= new FloatZ(&n_,"  ", "DM", NULL,"Amp amp noise",        "A",      0,    1000, &Ib_amp_noise_amp,  IB_AMP_NOISE));
     Z_[n_] = (Ib_noa_noise_amp_p= new FloatZ(&n_, "  ","DN", NULL,"Amp noa noise",        "A",      0,    1000, &Ib_noa_noise_amp,  IB_NOA_NOISE));
     Z_[n_] = (print_mult_p    = new Uint8tZ(&n_, "  ", "DP", NULL,"Print mult x Dr",      "uint",   0,    UINT8_MAX, &print_mult,   DP_MULT));

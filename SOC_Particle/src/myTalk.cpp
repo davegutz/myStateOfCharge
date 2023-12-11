@@ -123,7 +123,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
 
   // Injection
   ap.ib_amp_add = 0;  // Dm 0
-  Sen->ib_noa_add(0);  // Dn 0
+  ap.ib_noa_add = 0;  // Dn 0
   Sen->vb_add(0);  // Dv 0
   Sen->Sim->ds_voc_soc(0);  // Ds
   ap.Tb_bias_model = 0;  // D^
@@ -446,9 +446,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'n' ):  //   Dn<>:  No Amp signal adder for faults
-                Serial.printf("ib_noa_add%7.3f to", Sen->ib_noa_add());
-                Sen->ib_noa_add(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->ib_noa_add());
+                ap.ib_noa_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'P' ):  //   DP<>:  PRINT multiplier
@@ -882,7 +880,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'V' ):  // RV: renominalize volatile pars
-                sp.set_nominal();
+                ap.set_nominal();
                 ap.pretty_print(true);
                 break;
 
@@ -1312,6 +1310,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Ib_bias_all_nan_p->print1_help();  //* DI
   sp.Vb_bias_hdwe_p->print_help();  //* Dc
   sp.Vb_bias_hdwe_p->print1_help();  //* Dc
+  sp.Ib_bias_amp_p->print_help();  //  Dm
+  sp.Ib_bias_noa_p->print_help();  //  Dn
 
   #ifndef HELPLESS
   ap.eframe_mult_p->print_help();  //  DE
