@@ -740,7 +740,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
   Tb_noise_amp_(TB_NOISE), Vb_noise_amp_(VB_NOISE), ib_amp_sclr_(1.), ib_noa_sclr_(1.),
   reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),sample_time_ib_hdwe_(0UL),
-  sample_time_vb_hdwe_(0UL), vb_add_(0.)
+  sample_time_vb_hdwe_(0UL)
 {
   this->T = T;
   this->T_filt = T;
@@ -922,7 +922,7 @@ float Sensors::Tb_noise()
 // Conversion.   Here to avoid circular reference to sp in headers.
 float Sensors::Ib_amp_add() { return ( ap.ib_amp_add * sp.nP() ); };
 float Sensors::Ib_noa_add() { return ( ap.ib_noa_add * sp.nP() ); };
-float Sensors::Vb_add() { return ( vb_add_ * sp.nS() ); };
+float Sensors::Vb_add() { return ( ap.vb_add * sp.nS() ); };
 
 // Vb noise
 float Sensors::Vb_noise()

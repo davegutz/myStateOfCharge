@@ -65,7 +65,7 @@ void  VolatilePars::initialize()
     // Memory map
     // Input definitions
     n_ = -1;
-    Z_ = new Z*[18];
+    Z_ = new Z*[19];
     Z_[n_] = (cc_diff_sclr_p   = new FloatZ(&n_, "  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_sclr,      1));
     Z_[n_] = (cycles_inj_p     = new FloatZ(&n_, "  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
     Z_[n_] = (dc_dc_on_p     = new BooleanZ(&n_, "  ", "Xd", NULL,"DC-DC charger on",     "T=on",   0,    1,    &dc_dc_on,          false));
@@ -84,6 +84,7 @@ void  VolatilePars::initialize()
     Z_[n_] = (Tb_bias_model_p  = new FloatZ(&n_, "  ", "D^", NULL,"Del model",            "dg C",   -50,  50,   &Tb_bias_model,     TEMP_BIAS));
     Z_[n_] = (tb_stale_time_sclr_p=new FloatZ(&n_,"  ","Xv", NULL,"Scale Tb 1-wire pers", "slr",    0,    100,  &tb_stale_time_sclr,1));
     Z_[n_] = (until_q_p        = new ULongZ(&n_, "  ", "XQ", NULL,"Time until v0",        "ms",     0UL,  1000000UL,  &until_q,     0UL));
+    Z_[n_] = (vb_add_p         = new FloatZ(&n_, "  ", "Dv", NULL,"Bias on vb",           "v",      -15,  15,   &vb_add,            0));
     Z_[n_] = (wait_inj_p       = new ULongZ(&n_, "  ", "XW", NULL,"Wait start inj",       "ms",     0UL,  120000UL, &wait_inj,      0UL));
 }
 
@@ -118,7 +119,7 @@ void VolatilePars::pretty_print(const boolean all)
                 }
             }
         }
-        if ( count==0 ) Serial.printf("**none**\n");
+        if ( count==0 ) Serial.printf("**none**\n\n");
     }
 }
 
@@ -283,7 +284,7 @@ void SavedPars::pretty_print(const boolean all)
                 Z_[i]->print();
             }
         }
-        if ( count==0 ) Serial.printf("**none**\n");
+        if ( count==0 ) Serial.printf("**none**\n\n");
     }
 
     #ifdef CONFIG_47L16_EERAM

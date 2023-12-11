@@ -124,7 +124,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   // Injection
   ap.ib_amp_add = 0;  // Dm 0
   ap.ib_noa_add = 0;  // Dn 0
-  Sen->vb_add(0);  // Dv 0
+  ap.vb_add = 0;  // Dv 0
   ap.ds_voc_soc = 0;  // Ds
   ap.Tb_bias_model = 0;  // D^
   ap.dv_voc_soc = 0;  // Dy
@@ -473,11 +473,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'v' ):  //     Dv<>:  voltage signal adder for faults
-                Serial.printf("*Sen->vb_add%7.3f to", Sen->vb_add());
-                Serial1.printf("*Sen->vb_add%7.3f to", Sen->vb_add());
-                Sen->vb_add(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->vb_add());
-                Serial1.printf("%7.3f\n", Sen->vb_add());
+                ap.vb_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                ap.vb_add_p->print1();
                 break;
 
               case ( 'w' ):  //   * Dw<>:
@@ -1279,49 +1276,40 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Ib_bias_amp_p->print1_help();  //* DA
   sp.Ib_bias_noa_p->print_help();  //* DB
   sp.Ib_bias_noa_p->print1_help();  //* DB
-  sp.Ib_bias_all_p->print_help();  //* Di
-  sp.Ib_bias_all_p->print1_help();  //* Di
-  sp.Ib_bias_all_nan_p->print_help();  //* DI
-  sp.Ib_bias_all_nan_p->print1_help();  //* DI
   sp.Vb_bias_hdwe_p->print_help();  //* Dc
   sp.Vb_bias_hdwe_p->print1_help();  //* Dc
-  sp.Ib_bias_amp_p->print_help();  //  Dm
-  sp.Ib_bias_noa_p->print_help();  //  Dn
   ap.eframe_mult_p->print_help();  //  DE
+  sp.Ib_bias_all_nan_p->print_help();  //* DI
+  sp.Ib_bias_all_nan_p->print1_help();  //* DI
+  sp.Ib_bias_all_p->print_help();  //* Di
+  sp.Ib_bias_all_p->print1_help();  //* Di
+  sp.Ib_bias_amp_p->print_help();  //  Dm
+  ap.Ib_amp_noise_amp_p->print_help();  // DM
+  sp.Ib_bias_noa_p->print_help();  //  Dn
+  ap.Ib_noa_noise_amp_p->print_help();  // DN
   ap.print_mult_p->print_help();  //  DP
   Serial.printf("  Dr=  "); Serial.print(Sen->ReadSensors->delay()); Serial.printf(": minor frame, ms [100]\n"); 
   ap.ds_voc_soc_p->print_help();  //  Ds
-  ap.dv_voc_soc_p->print_help();  //  Dy
-
   sp.Tb_bias_hdwe_p->print_help();  //* Dt
   sp.Tb_bias_hdwe_p->print1_help();  //* Dt
-
-  ap.Tb_bias_model_p->print_help();  // D^
-  Serial.printf("  Dv=  "); Serial.print(Sen->vb_add()); Serial.printf(": volt fault inj, V [0]\n"); 
-
+  Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise, deg C pk-pk [%6.3f]\n", TB_NOISE); 
+  ap.vb_add_p->print_help();  // Dv
+  Serial.printf("  DV= "); Serial.printf("%6.3f", Sen->Vb_noise_amp()); Serial.printf(": noise, V pk-pk [%6.3f]\n", VB_NOISE); 
   sp.Dw_p->print_help();  //* Dw
   sp.Dw_p->print1_help();  //* Dw
-
-  ap.ds_voc_soc_p->print_help();
-  Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise, deg C pk-pk [%6.3f]\n", TB_NOISE); 
-  Serial.printf("  DV= "); Serial.printf("%6.3f", Sen->Vb_noise_amp()); Serial.printf(": noise, V pk-pk [%6.3f]\n", VB_NOISE); 
-  ap.dv_voc_soc_p->print_help();
-  ap.Ib_amp_noise_amp_p->print_help();
-  ap.Ib_noa_noise_amp_p->print_help();
-
+  ap.dv_voc_soc_p->print_help();  //  Dy
+  ap.Tb_bias_model_p->print_help();  // D^
   sp.Ib_scale_amp_p->print_help();  //* SA
   sp.Ib_scale_amp_p->print1_help();  //* SA
   sp.Ib_scale_noa_p->print_help();  //* SB
   sp.Ib_scale_noa_p->print1_help();  //* SB
-
   Serial.printf("  Sh= "); Serial.printf("%6.3f", Sen->Sim->hys_scale()); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
   Serial.printf("  SH= "); Serial.printf("%6.3f", Sen->Sim->hys_state()); Serial.printf(": hys states [0]\n");
-
+  sp.Cutback_gain_sclr_p->print_help();  //* Sk
   sp.S_cap_mon_p->print_help();  //* SQ
   sp.S_cap_mon_p->print1_help();  //* SQ
   sp.S_cap_sim_p->print_help();  //* Sq
   sp.S_cap_sim_p->print1_help();  //* Sq
-  sp.Cutback_gain_sclr_p->print_help();  //* Sk
   sp.Vb_scale_p->print_help();  //* SV
   sp.Vb_scale_p->print1_help();  //* SV
 

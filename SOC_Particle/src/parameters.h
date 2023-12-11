@@ -73,6 +73,7 @@ public:
     float Tb_bias_model;        // Bias on Tb for model
     float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale check
     unsigned long int until_q;  // Time until set v0, ms
+    float vb_add;               // Fault injection bias, V
     unsigned long int wait_inj; // Wait before start injection, ms
     FloatZ *cc_diff_sclr_p;
     FloatZ *cycles_inj_p;
@@ -92,6 +93,7 @@ public:
     FloatZ *tb_stale_time_sclr_p;
     ULongZ *tail_inj_p;
     ULongZ *until_q_p;
+    FloatZ *vb_add_p;
     ULongZ *wait_inj_p;
 
 protected:

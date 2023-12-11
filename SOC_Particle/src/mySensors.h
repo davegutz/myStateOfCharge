@@ -385,8 +385,6 @@ public:
   float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
   void Tb_noise_amp(const float noise) { Tb_noise_amp_ = noise; };
   float vb() { return Vb / sp.nS(); };                            // Battery select unit voltage, V
-  float vb_add() { return ( vb_add_ ); };
-  void vb_add(const float add) { vb_add_ = add; };
   float vb_hdwe() { return Vb_hdwe / sp.nS(); };                  // Battery select hardware unit voltage, V
   void vb_load(const uint16_t vb_pin, const boolean reset);       // Analog read of Vb
   float vb_model() { return (Vb_model / sp.nS()); };              // Battery select model unit voltage, V
@@ -414,7 +412,6 @@ protected:
   unsigned long int sample_time_vb_;          // Exact moment of selected Vb sample, ms
   unsigned long int sample_time_ib_hdwe_;     // Exact moment of Ib sample, ms
   unsigned long int sample_time_vb_hdwe_;     // Exact moment of Vb sample, ms
-  float vb_add_;        // Fault injection bias, V
   unsigned long int dt_ib_hdwe_;          // Delta update of Ib sample, ms
   unsigned long int dt_ib_;               // Delta update of selected Ib sample, ms
 };
