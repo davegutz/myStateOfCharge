@@ -132,10 +132,10 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   ap.fail_tb = false;  // Xu 0
 
   // Noise
-  Sen->Tb_noise_amp(0);  // DT 0
-  Sen->Vb_noise_amp(0);  // DV 0
-  ap.Ib_amp_noise_amp = 0;  // DM 0
-  ap.Ib_noa_noise_amp = 0;  // DN 0
+  ap.Tb_noise_amp = TB_NOISE;  // DT 0
+  ap.Vb_noise_amp = VB_NOISE;  // DV 0
+  ap.Ib_amp_noise_amp = IB_AMP_NOISE;  // DM 0
+  ap.Ib_noa_noise_amp = IB_NOA_NOISE;  // DN 0
 
   // Intervals
   ap.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
@@ -273,8 +273,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( 'B' ):
             switch ( cp.input_str.charAt(1) )
             {
-              case ( 'm' ):  //* Bm:  Monitor chemistry change
+              case ( 'm' ):  //* Bm
                 INT_in = cp.input_str.substring(2).toInt();
+                // sp.Mon_chm_p->print_adj_print(cp.input_str.substring(2).toInt());  // Bm
+                // break;
                 switch ( INT_in )
                 {
                   case ( 0 ):  // Bm0: Mon Battleborn
@@ -486,15 +488,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'T' ):  //   DT<>:  Tb noise
-                Serial.printf("Sen.Tb_noise_amp_%7.3f to ", Sen->Tb_noise_amp());
-                Sen->Tb_noise_amp(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Tb_noise_amp());
+                ap.Tb_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'V' ):  //   DV<>:  Vb noise
-                Serial.printf("Sen.Vb_noise_amp_%7.3f to ", Sen->Vb_noise_amp());
-                Sen->Vb_noise_amp(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->Vb_noise_amp());
+                ap.Vb_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'M' ):  //   DM<>:  Ib amp noise
@@ -584,7 +582,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("%7.3f\n", Mon->Sr());
                 break;
             
-              case ( 'k' ):  //*  Sk<>:  scale cutback gain for sim rep of BMS
+              case ( 'k' ):  //*  Sk<>:  scale cutback gain for sim rep of >print_adj_print(S
                 sp.Cutback_gain_sclr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
             
@@ -1258,7 +1256,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  bR= "); Serial.printf("reset all buffers\n");
 
   Serial.printf("\nB<?> Battery e.g.:\n");
-  sp.Mon_chm_p->print_help();  //* Bm
+  sp.Mon_chm_p->print_help();  //* Bm 
   sp.Sim_chm_p->print_help();  //* Bs
   sp.nP_p->print_help();  //* BP
   sp.nS_p->print_help();  //* BS
@@ -1292,9 +1290,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   ap.ds_voc_soc_p->print_help();  //  Ds
   sp.Tb_bias_hdwe_p->print_help();  //* Dt
   sp.Tb_bias_hdwe_p->print1_help();  //* Dt
-  Serial.printf("  DT= "); Serial.printf("%6.3f", Sen->Tb_noise_amp()); Serial.printf(": noise, deg C pk-pk [%6.3f]\n", TB_NOISE); 
+  ap.Tb_noise_amp_p->print_help();  // DT
   ap.vb_add_p->print_help();  // Dv
-  Serial.printf("  DV= "); Serial.printf("%6.3f", Sen->Vb_noise_amp()); Serial.printf(": noise, V pk-pk [%6.3f]\n", VB_NOISE); 
+  ap.Vb_noise_amp_p->print_help();  // DV
   sp.Dw_p->print_help();  //* Dw
   sp.Dw_p->print1_help();  //* Dw
   ap.dv_voc_soc_p->print_help();  //  Dy

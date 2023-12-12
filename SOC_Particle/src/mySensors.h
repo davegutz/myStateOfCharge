@@ -382,16 +382,12 @@ public:
   void shunt_select_initial(const boolean reset);   // Choose between shunts for model
   void temp_load_and_filter(Sensors *Sen, const boolean reset_temp);
   float Tb_noise();
-  float Tb_noise_amp() { return ( Tb_noise_amp_ ); };
-  void Tb_noise_amp(const float noise) { Tb_noise_amp_ = noise; };
   float vb() { return Vb / sp.nS(); };                            // Battery select unit voltage, V
   float vb_hdwe() { return Vb_hdwe / sp.nS(); };                  // Battery select hardware unit voltage, V
   void vb_load(const uint16_t vb_pin, const boolean reset);       // Analog read of Vb
   float vb_model() { return (Vb_model / sp.nS()); };              // Battery select model unit voltage, V
   float Vb_add();
   float Vb_noise();
-  float Vb_noise_amp() { return ( Vb_noise_amp_ ); };
-  void Vb_noise_amp(const float noise) { Vb_noise_amp_ = noise; };
   void vb_print(void);                  // Print Vb result
   Fault *Flt;
 protected:
@@ -403,8 +399,6 @@ protected:
   PRBS_7 *Prbn_Vb_;     // Vb noise generator model only
   PRBS_7 *Prbn_Ib_amp_; // Ib amplified sensor noise generator model only
   PRBS_7 *Prbn_Ib_noa_; // Ib non-amplified sensor noise generator model only
-  float Tb_noise_amp_;  // Tb noise amplitude model only, deg C pk-pk
-  float Vb_noise_amp_;  // Vb bank noise amplitude model only, V pk-pk
   float ib_amp_sclr_;   // Fault injection sclr on amp
   float ib_noa_sclr_;   // Fault injection sclr on non amp
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset

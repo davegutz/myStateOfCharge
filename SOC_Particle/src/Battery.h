@@ -33,8 +33,8 @@
 #include "constants.h"
 #include "myLibrary/iterate.h"
 #include "Hysteresis.h"
+#include "Z.h"
 class Sensors;
-// #define t_float float
 
 #define RATED_TEMP      25.       // Temperature at NOM_UNIT_CAP, deg C (25)
 #define TCHARGE_DISPLAY_DEADBAND  0.1 // Inside this +/- deadband, charge time is displayed '---', A
@@ -135,6 +135,7 @@ protected:
   double *rand_B_;  // ChargeTransfer model B
   double *rand_C_;  // ChargeTransfer model C
   double *rand_D_;  // ChargeTransfer model D
+  fptr app_chem_p_;
 };
 
 
@@ -148,6 +149,7 @@ public:
   // functions
   float amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_; };
   float amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_; };
+  void app_chem();
   float calc_charge_time(const double q, const float q_capacity, const float charge_curr, const float soc);
   virtual float calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc);
   float calculate(Sensors *Sen, const boolean reset);

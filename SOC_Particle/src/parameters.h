@@ -30,6 +30,9 @@
 #include "PrinterPars.h"
 #include "Z.h"
 
+void app_no();
+void app_mon_chem();
+
 class Parameters
 {
 public:
@@ -42,6 +45,7 @@ public:
 protected:
     int8_t n_;
     Z **Z_;
+    // fptr fptr_;
 };
 
 
@@ -71,9 +75,11 @@ public:
     float s_t_sat;              // Scalar on saturation test time set and reset
     unsigned long int tail_inj; // Tail after end injection, ms
     float Tb_bias_model;        // Bias on Tb for model
+    float Tb_noise_amp;         // Tb noise amplitude model only, deg C pk-pk
     float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale check
     unsigned long int until_q;  // Time until set v0, ms
     float vb_add;               // Fault injection bias, V
+    float Vb_noise_amp;         // Vb bank noise amplitude model only, V pk-pk
     unsigned long int wait_inj; // Wait before start injection, ms
     FloatZ *cc_diff_sclr_p;
     FloatZ *cycles_inj_p;
@@ -90,10 +96,12 @@ public:
     Uint8tZ *print_mult_p;
     FloatZ *s_t_sat_p;
     FloatZ *Tb_bias_model_p;
+    FloatZ *Tb_noise_amp_p;
     FloatZ *tb_stale_time_sclr_p;
     ULongZ *tail_inj_p;
     ULongZ *until_q_p;
     FloatZ *vb_add_p;
+    FloatZ *Vb_noise_amp_p;
     ULongZ *wait_inj_p;
 
 protected:

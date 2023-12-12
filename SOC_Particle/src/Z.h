@@ -33,6 +33,8 @@ extern PrinterPars pr;  // Print buffer
 #undef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
+typedef void (*fptr)();
+
 /* Using pointers in building class so all that stuff does not get saved by 'retained' keyword in SOC_Particle.ino.
     Only the *_z parameters at the bottom of Parameters.h are stored in SRAM.  Class initialized by *init in arg list.
 */
@@ -52,10 +54,14 @@ public:
         check_for_off_on_init_ = check_for_off_on_init;
         is_eeram_ = !(ram==NULL);
         rP_ = ram;
+        // app_ = app;
     }
 
     ~Z(){}
 
+    fptr app_;
+    fptr app() { return app_; }
+    // void app(fptr ptr) { app_ = ptr; }
     String code() { return code_; }
     const char* description() { return description_.c_str(); }
     const char* units() { return units_.c_str(); }
@@ -508,7 +514,7 @@ public:
     IntZ(){}
 
     IntZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
-    const int _default=0, const boolean check_for_off_on_init=true):
+        const int _default=0, const boolean check_for_off_on_init=true):
         Z(n, prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
@@ -626,7 +632,7 @@ public:
     Int8tZ(){}
 
     Int8tZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
-    int8_t *store, const int8_t _default=0, const boolean check_for_off_on_init=true):
+        int8_t *store, const int8_t _default=0, const boolean check_for_off_on_init=true):
         Z(n, prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
@@ -1087,25 +1093,5 @@ protected:
     unsigned long max_;
     unsigned long default_;
 };
-
-// class FloatVariable : public Z <float>
-// {
-// public:
-//     FloatVariable(){}
-
-//     FloatVariable(const String &description, const String &units, const float _default)
-//     {
-//         Z <float>(description, units, _default, false);
-//     }
-
-//     FloatVariable(SerialRAM *ram, const String &description, const String &units, const float _default)
-//     {
-//         Z <float>(ram, description, units, _default, false);
-//     }
-
-//     ~FloatVariable(){}
-// protected:
-// };
-
 
 #endif

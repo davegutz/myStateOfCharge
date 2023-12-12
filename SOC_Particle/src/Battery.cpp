@@ -28,6 +28,7 @@
 #include "constants.h"
 #include "command.h"
 #include "mySubs.h"
+#include "Z.h"
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 extern VolatilePars ap; // Various adjustment parameters shared at system level
 extern CommandPars cp;  // Various parameters to be static at system level
@@ -36,7 +37,6 @@ extern PublishPars pp;  // For publishing
 
 // class Battery
 // constructors
-Battery::Battery() {}
 Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, const float d_voc_soc)
     : Coulombs(sp_delta_q, sp_t_last, (NOM_UNIT_CAP*3600), T_RLIM, sp_mod_code, COULOMBIC_EFF_SCALE), bms_charging_(false),
 	bms_off_(false), dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.), ib_(0.), ibs_(0.), ioc_(0.), print_now_(false),
@@ -142,12 +142,23 @@ BatteryMonitor::BatteryMonitor():
     SdVb_ = new SlidingDeadband(HDB_VB);  // Noise filter
     EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT); // Convergence test debounce.  Initializes false
     ice_ = new Iterator("EKF solver");
+    // sp.Mon_chm_p->app_ = &app_chem;
 }
 BatteryMonitor::~BatteryMonitor() {}
 
 // operators
 
 // functions
+// Call back apply chemistry change
+void BatteryMonitor::app_chem(void)
+{
+    if ( *(chem_.sp_mod_code) == 0 )
+        assign_all_mod("Battleborn");
+    else
+        assign_all_mod("CHINS");
+    chem_pretty_print();
+    cp.cmd_reset();
+}
 
 /* BatteryMonitor::calculate:  SOC-OCV curve fit solved by ekf.   Works in 12 V
    battery units.  Scales up/down to number of series/parallel batteries on output/input.
