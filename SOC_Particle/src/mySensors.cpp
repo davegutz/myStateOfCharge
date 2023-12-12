@@ -824,8 +824,11 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
     else
     {
       Tb = RATED_TEMP + Tb_noise() + ap.Tb_bias_model;
-      Tb_filt = RATED_TEMP + ap.Tb_bias_model;
+      Tb_filt = RATED_TEMP + ap.Tb_bias_model;  // Simplifying assumption that Tb_filt perfectly quiet - so don't have to make model of filter
     }
+    #indef CONFIG_PHOTON
+      if ( sp.Debug()==16) Serial.printf("Tb_noise %7.3f Tb%7.3f Tb_filt%7.3f tb_fa %d\n", Tb_noise(), Tb, Tb_filt, Flt->tb_fa());
+    #endif
   }
   else
   {
