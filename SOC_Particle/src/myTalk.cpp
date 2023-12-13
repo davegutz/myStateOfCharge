@@ -147,8 +147,8 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   ap.ib_diff_slr = 1;  // Fd 1
   ap.fake_faults = 0;  // Ff 0
   sp.put_Ib_select(0);  // Ff 0
-  Sen->Flt->ewhi_slr(1);  // Fi 1
-  Sen->Flt->ewlo_slr(1);  // Fo 1
+  ap.ewhi_slr = 1;  // Fi
+  ap.ewlo_slr = 1;  // Fo
   Sen->Flt->ib_quiet_slr(1);  // Fq 1
   Sen->Flt->disab_ib_fa(0);  // FI 0
   Sen->Flt->disab_tb_fa(0);  // FT 0
@@ -620,17 +620,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'i' ):  //   Fi<>: scale e_wrap_hi threshold
-                scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("e_wrap_hi scl%7.3f to", Sen->Flt->ewhi_slr());
-                Sen->Flt->ewhi_slr(scale);
-                Serial.printf("%7.3f\n", Sen->Flt->ewhi_slr());
+                ap.ewhi_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'o' ):  //   Fo<>: scale e_wrap_lo threshold
-                scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("e_wrap_lo scl%7.3f to", Sen->Flt->ewlo_slr());
-                Sen->Flt->ewlo_slr(scale);
-                Serial.printf("%7.3f\n", Sen->Flt->ewlo_slr());
+                ap.ewlo_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'q' ):  //   Fq<>: scale ib_quiet threshold
@@ -1302,8 +1296,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   ap.ib_diff_slr_p->print1_help();  // Fd
   ap.fake_faults_p->print_help();  // Ff
   ap.fake_faults_p->print1_help();  // Ff
-  Serial.printf("  Fi= "); Serial.printf("%6.3f", Sen->Flt->ewhi_slr()); Serial.printf(": slr e_wrap_hi thr ^ [1]\n"); 
-  Serial.printf("  Fo= "); Serial.printf("%6.3f", Sen->Flt->ewlo_slr()); Serial.printf(": slr e_wrap_lo thr ^ [1]\n"); 
+  ap.ewhi_slr_p->print_help();  // Fi
+  ap.ewlo_slr_p->print_help();  // Fo
   Serial.printf("  Fq= "); Serial.printf("%6.3f", Sen->Flt->ib_quiet_slr()); Serial.printf(": slr ib_quiet thr v [1]\n"); 
   Serial.printf("  FI=  "); Serial.print(Sen->Flt->disab_ib_fa()); Serial.printf(": disab Ib rng\n");
   Serial.printf("  FT=  "); Serial.print(Sen->Flt->disab_tb_fa()); Serial.printf(": disab Tb rng\n");

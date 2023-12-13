@@ -180,10 +180,6 @@ public:
   boolean disab_vb_fa() { return disab_vb_fa_; };
   boolean dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
-  void ewhi_slr(const float slr) { ewhi_slr_ = slr; };
-  float ewhi_slr() { return ewhi_slr_; };
-  void ewlo_slr(const float slr) { ewlo_slr_ = slr; };
-  float ewlo_slr() { return ewlo_slr_; };
   float ewhi_thr_;      // Threshold e_wrap failed high, V
   float ewhi_thr() { return ewhi_thr_; };
   float ewlo_thr_;      // Threshold e_wrap failed low, V
@@ -272,8 +268,6 @@ protected:
   boolean disab_ib_fa_;     // Disable hard fault range failures for ib
   boolean disab_tb_fa_;     // Disable hard fault range failures for tb
   boolean disab_vb_fa_;     // Disable hard fault range failures for vb
-  float ewhi_slr_;         // Scale wrap hi detection thresh, scalar
-  float ewlo_slr_;         // Scale wrap lo detection thresh, scalar
   float ewmin_slr_;        // Scale wrap detection thresh when voc(soc) less than min, scalar
   float ewsat_slr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V

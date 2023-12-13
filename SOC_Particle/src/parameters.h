@@ -65,6 +65,8 @@ public:
     float ds_voc_soc;           // VOC(SOC) delta soc on input, frac
     float dv_voc_soc;           // VOC(SOC) del v, V
     uint8_t eframe_mult;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
+    float ewhi_slr;             // Scale wrap hi detection thresh, scalar
+    float ewlo_slr;             // Scale wrap lo detection thresh, scalar
     boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
     boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
     float hys_scale;            // Sim hysteresis scalar
@@ -89,6 +91,8 @@ public:
     FloatZ *ds_voc_soc_p;
     FloatZ *dv_voc_soc_p;
     Uint8tZ *eframe_mult_p;
+    FloatZ *ewhi_slr_p;
+    FloatZ *ewlo_slr_p;
     BooleanZ *fail_tb_p;
     BooleanZ *fake_faults_p;
     FloatZ *hys_scale_p;
