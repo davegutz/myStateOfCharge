@@ -159,7 +159,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 {
   float FP_in = -99.;
   int INT_in = -1;
-  float scale = 1.;
   boolean reset = false;
   urgency request;
 
@@ -454,9 +453,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'r' ):  //   Dr<>:  READ sample time input
-                Serial.printf("ReadSensors %ld to ", Sen->ReadSensors->delay());
-                Sen->ReadSensors->delay(cp.input_str.substring(2).toInt());
-                Serial.printf("%ld\n", Sen->ReadSensors->delay());
+                ap.read_delay_p->print_adj_print(cp.input_str.substring(2).toInt());
+                Sen->ReadSensors->delay(ap.read_delay);  // validated
                 break;
 
               case ( 's' ):  //   Ds<>:  d_soc to Sim.voc_soc
@@ -541,28 +539,14 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'q' ):  //*  Sq<>: scale capacity sim
-                scale = cp.input_str.substring(2).toFloat();
-                sp.S_cap_sim_p->print_adj_print(scale);
-            
-                Serial.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_rated_scaled());
-                Serial1.printf("Sim.q_cap_rated%7.3f %7.3f to ", scale, Sen->Sim->q_cap_rated_scaled());
-            
+                sp.S_cap_sim_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 Sen->Sim->apply_cap_scale(sp.S_cap_sim());
                 if ( sp.Modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
-            
-                Serial.printf("%7.3f\n", Sen->Sim->q_cap_rated_scaled());
-                Serial.printf("Sim:"); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
-                Serial1.printf("%7.3f\n", Sen->Sim->q_cap_rated_scaled());
-                Serial1.printf("Sim:"); Sen->Sim->pretty_print(); Sen->Sim->Coulombs::pretty_print();
                 break;
             
               case ( 'Q' ):  //*  SQ<>: scale capacity mon
-                scale = cp.input_str.substring(2).toFloat();
-                sp.S_cap_mon_p->print_adj_print(scale);
-            
+                sp.S_cap_mon_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 Mon->apply_cap_scale(sp.S_cap_mon());
-                Serial.printf("%7.3f\n", Mon->q_cap_rated_scaled());
-                Serial.printf("Mon:"); Mon->pretty_print(Sen); Mon->Coulombs::pretty_print();
                 break;
             
               case ( 'r' ):  //   Sr<>:  scalar resistor
@@ -595,11 +579,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'f' ):  //* si, Ff<>:  fake faults
-                INT_in = cp.input_str.substring(2).toInt();
-                ap.fake_faults_p->print_adj_print(INT_in);
-                Serial.printf("sp.ib_select %d to ", sp.Ib_select());
-                sp.put_Ib_select(INT_in);
-                Serial.printf("%d\n", sp.Ib_select());
+                ap.fake_faults_p->print_adj_print(cp.input_str.substring(2).toInt());
+                sp.put_Ib_select(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'I' ):  //   FI<>:  Fault disable ib hard
@@ -1244,7 +1225,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Ib_bias_noa_p->print_help();  //  Dn
   ap.Ib_noa_noise_amp_p->print_help();  // DN
   ap.print_mult_p->print_help();  //  DP
-  Serial.printf("  Dr=  "); Serial.print(Sen->ReadSensors->delay()); Serial.printf(": minor frame, ms [100]\n"); 
+  ap.read_delay_p->print_help();  //  Dr
   ap.ds_voc_soc_p->print_help();  //  Ds
   sp.Tb_bias_hdwe_p->print_help();  //* Dt
   sp.Tb_bias_hdwe_p->print1_help();  //* Dt
@@ -1260,7 +1241,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Ib_scale_noa_p->print_help();  //* SB
   sp.Ib_scale_noa_p->print1_help();  //* SB
   ap.hys_scale_p->print_help();  //  Sh
-  Serial.printf("  SH= "); Serial.printf("%6.3f", Sen->Sim->hys_state()); Serial.printf(": hys states [0]\n");
+  ap.hys_state_p->print_help();  //  SH
   sp.Cutback_gain_slr_p->print_help();  //* Sk
   sp.S_cap_mon_p->print_help();  //* SQ
   sp.S_cap_mon_p->print1_help();  //* SQ
