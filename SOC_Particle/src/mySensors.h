@@ -196,8 +196,6 @@ public:
   boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
   void ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
-  void ib_diff_sclr(const float sclr) { ib_diff_sclr_ = sclr; };
-  float ib_diff_sclr() { return ib_diff_sclr_; };
   float ib_diff_thr_;     // Threshold current difference faults, A
   float ib_diff_thr() { return ib_diff_thr_; };
   boolean ib_dscn_fa() { return failRead(IB_DSCN_FA); };
@@ -280,7 +278,6 @@ protected:
   float ewsat_sclr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
-  float ib_diff_sclr_;      // Scale ib_diff detection thresh, scalar
   float ib_quiet_sclr_;     // Scale ib_quiet detection thresh, scalar
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A

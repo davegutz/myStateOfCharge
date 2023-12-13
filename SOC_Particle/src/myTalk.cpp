@@ -114,7 +114,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   cp.cmd_summarize();  // Hs
 
   // Model
-  Sen->Sim->hys_scale(1);  // Sh 1
+  ap.hys_scale = HYS_SCALE;  // Sh 1
   Sen->Sim->Sr(1);  // Sr
   Mon->Sr(1);  // Sr 1
   sp.Cutback_gain_sclr_p->print_adj_print(1); // Sk 1
@@ -144,7 +144,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
 
   // Fault logic
   ap.cc_diff_sclr = 1;  // Fc 1
-  Sen->Flt->ib_diff_sclr(1);  // Fd 1
+  ap.ib_diff_sclr = 1;  // Fd 1
   ap.fake_faults = 0;  // Ff 0
   sp.put_Ib_select(0);  // Ff 0
   Sen->Flt->ewhi_sclr(1);  // Fi 1
@@ -521,10 +521,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'h' ):  //   Sh<>: scale hysteresis
-                Serial.printf("Sen->Sim->hys_sale%7.3f to ", Sen->Sim->hys_scale());
-                scale = cp.input_str.substring(2).toFloat();
-                Sen->Sim->hys_scale(scale);
-                Serial.printf("%7.3f\n", Sen->Sim->hys_scale());
+                ap.hys_scale_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'H' ):  //   SH<>: state of all hysteresis
@@ -604,10 +601,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'd' ):  //   Fd<>: scale ib_diff threshold
-                scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("ib_diff scl%7.3f to", Sen->Flt->ib_diff_sclr());
-                Sen->Flt->ib_diff_sclr(scale);
-                Serial.printf("%7.3f\n", Sen->Flt->ib_diff_sclr());
+                ap.ib_diff_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'f' ):  //* si, Ff<>:  fake faults
@@ -1205,16 +1199,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'v' ):  // Xv<>:  Tb stale time scalar
-                ap.tb_stale_time_sclr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                ap.tb_stale_time_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
-
-              // case ( 'B' ):  // XB<>:  test
-              //   sp.testB_p->print_adj_print((boolean) cp.input_str.substring(2).toInt());
-              //   break;
-
-              // case ( 'D' ):  // XD<>:  test
-              //   sp.testD_p->print_adj_print((double) cp.input_str.substring(2).toFloat());
-              //   break;
 
               default:
                 Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
@@ -1301,7 +1287,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Ib_scale_amp_p->print1_help();  //* SA
   sp.Ib_scale_noa_p->print_help();  //* SB
   sp.Ib_scale_noa_p->print1_help();  //* SB
-  Serial.printf("  Sh= "); Serial.printf("%6.3f", Sen->Sim->hys_scale()); Serial.printf(": hys sclr [%5.2f]\n", HYS_SCALE);
+  ap.hys_scale_p->print_help();  //  Sh
   Serial.printf("  SH= "); Serial.printf("%6.3f", Sen->Sim->hys_state()); Serial.printf(": hys states [0]\n");
   sp.Cutback_gain_sclr_p->print_help();  //* Sk
   sp.S_cap_mon_p->print_help();  //* SQ
@@ -1313,7 +1299,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nF<?>   Faults\n");
   ap.cc_diff_sclr_p->print_help();  // Fc
-  Serial.printf("  Fd= "); Serial.printf("%6.3f", Sen->Flt->ib_diff_sclr()); Serial.printf(": sclr ib_diff thr ^ [1]\n"); 
+  ap.ib_diff_slr_p->print1_help();  // Fd
   ap.fake_faults_p->print_help();  // Ff
   ap.fake_faults_p->print1_help();  // Ff
   Serial.printf("  Fi= "); Serial.printf("%6.3f", Sen->Flt->ewhi_sclr()); Serial.printf(": sclr e_wrap_hi thr ^ [1]\n"); 
@@ -1435,7 +1421,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   ap.tail_inj_p->print_help();  // XT
   ap.wait_inj_p->print_help();  // XW
   ap.fail_tb_p->print_help();  // Xu
-  ap.tb_stale_time_sclr_p->print_help();  // Xv
+  ap.tb_stale_time_slr_p->print_help();  // Xv
   // sp.testB_p->print_help();  // XB
   // sp.testD_p->print_help();  // XD
   Serial.printf("\nurgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE, <=LAST\n");

@@ -66,7 +66,7 @@ void  VolatilePars::initialize()
     // Memory map
     // Input definitions
     n_ = -1;
-    Z_ = new Z*[21];
+    Z_ = new Z*[23];
     Z_[n_] = (cc_diff_sclr_p   = new FloatZ(&n_, "  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_sclr,      1));
     Z_[n_] = (cycles_inj_p     = new FloatZ(&n_, "  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
     Z_[n_] = (dc_dc_on_p     = new BooleanZ(&n_, "  ", "Xd", NULL,"DC-DC charger on",     "T=on",   0,    1,    &dc_dc_on,          false));
@@ -74,8 +74,10 @@ void  VolatilePars::initialize()
     Z_[n_] = (dv_voc_soc_p     = new FloatZ(&n_, "  ", "Dy", NULL,"VOC(SOC) del v",       "v",      -50,  50,   &dv_voc_soc,        0));
     Z_[n_] = (eframe_mult_p   = new Uint8tZ(&n_, "  ", "DE", NULL,"EKF frame rate x Dr",  "uint",   0,    UINT8_MAX, &eframe_mult,  EKF_EFRAME_MULT));
     Z_[n_] = (fail_tb_p      = new BooleanZ(&n_, "  ", "Xu", NULL,"Ignore Tb & fail",     "T=Fail", false,true, &fail_tb,           false));
-    Z_[n_] = (fake_faults_p  = new BooleanZ(&n_, "  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,   &fake_faults,        FAKE_FAULTS));
+    Z_[n_] = (fake_faults_p  = new BooleanZ(&n_, "  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,    &fake_faults,       FAKE_FAULTS));
+    Z_[n_] = (hys_scale_p      = new FloatZ(&n_, "  ", "Sh", NULL,"Sim hyst scale",       "slr",    0,    100,  &hys_scale,         HYS_SCALE));
     Z_[n_] = (ib_amp_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
+    Z_[n_] = (ib_diff_slr_p    = new FloatZ(&n_, "  ", "Fd", NULL,"Slr ib_diff thr",      "A",      0,    1000, &ib_diff_sclr,      1));
     Z_[n_] = (ib_noa_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"No amp signal add",    "A",      -1000,1000, &ib_noa_add,        0));
     Z_[n_] = (Ib_amp_noise_amp_p= new FloatZ(&n_,"  ", "DM", NULL,"Amp amp noise",        "A",      0,    1000, &Ib_amp_noise_amp,  IB_AMP_NOISE));
     Z_[n_] = (Ib_noa_noise_amp_p= new FloatZ(&n_, "  ","DN", NULL,"Amp noa noise",        "A",      0,    1000, &Ib_noa_noise_amp,  IB_NOA_NOISE));
@@ -84,7 +86,7 @@ void  VolatilePars::initialize()
     Z_[n_] = (tail_inj_p       = new ULongZ(&n_, "  ", "XT", NULL,"Tail end inj",         "ms",     0UL,  120000UL,&tail_inj,       0UL));
     Z_[n_] = (Tb_bias_model_p  = new FloatZ(&n_, "  ", "D^", NULL,"Del model",            "dg C",   -50,  50,   &Tb_bias_model,     TEMP_BIAS));
     Z_[n_] = (Tb_noise_amp_p   = new FloatZ(&n_, "  ", "DT", NULL,"Tb noise",             "dg C pk-pk", 0,50,   &Tb_noise_amp,      TB_NOISE));
-    Z_[n_] = (tb_stale_time_sclr_p=new FloatZ(&n_,"  ","Xv", NULL,"Scale Tb 1-wire pers", "slr",    0,    100,  &tb_stale_time_sclr,1));
+    Z_[n_] = (tb_stale_time_slr_p=new FloatZ(&n_,"  ", "Xv", NULL,"Scale Tb 1-wire pers", "slr",    0,    100,  &tb_stale_time_sclr,1));
     Z_[n_] = (until_q_p        = new ULongZ(&n_, "  ", "XQ", NULL,"Time until v0",        "ms",     0UL,  1000000UL,  &until_q,     0UL));
     Z_[n_] = (vb_add_p         = new FloatZ(&n_, "  ", "Dv", NULL,"Bias on vb",           "v",      -15,  15,   &vb_add,            0));
     Z_[n_] = (Vb_noise_amp_p   = new FloatZ(&n_, "  ", "DV", NULL,"Vb noise",             "v pk-pk",0,    10,   &Vb_noise_amp,      VB_NOISE));

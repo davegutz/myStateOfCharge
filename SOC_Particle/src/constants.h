@@ -91,11 +91,11 @@
 #endif
 
 #ifdef CONFIG_ARGON  // dec ~222350  units: pro1a, soc1a
-    #define NSUM 2222   // Number of saved SRAM summaries (2224)
+    #define NSUM 2218   // Number of saved SRAM summaries (2218)
 #endif
 
 #ifdef CONFIG_PHOTON2  // dec ~ 276770  units: pro2p2, pro2p3
-    #define NSUM 3000   // Number of saved SRAM summaries (3205)
+    #define NSUM 3000   // Number of saved SRAM summaries (3000)
 #endif
 
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)

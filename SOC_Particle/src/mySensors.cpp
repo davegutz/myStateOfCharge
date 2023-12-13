@@ -241,7 +241,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
 Fault::Fault(const double T, uint8_t *preserving):
   cc_diff_(0.), cc_diff_empty_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false),
   ewhi_sclr_(1), ewlo_sclr_(1), ewmin_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0),
-  ib_diff_sclr_(1), ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
+  ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
   latched_fail_fake_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   tb_sel_stat_last_(1), vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL), sp_preserving_(preserving)
 {
@@ -293,7 +293,7 @@ void Fault::ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     ib_diff_ = Sen->ib_amp_hdwe() - Sen->ib_noa_hdwe();
   }
   ib_diff_f_ = IbErrFilt->calculate(ib_diff_, reset_loc, min(Sen->T, MAX_ERR_T));
-  ib_diff_thr_ = IBATT_DISAGREE_THRESH*ib_diff_sclr_;
+  ib_diff_thr_ = IBATT_DISAGREE_THRESH*ap.ib_diff_sclr;
   faultAssign( ib_diff_f_>=ib_diff_thr_, IB_DIFF_HI_FLT );
   faultAssign( ib_diff_f_<=-ib_diff_thr_, IB_DIFF_LO_FLT );
   failAssign( IbdHiPer->calculate(ib_diff_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIFF_HI_FA ); // IB_DIFF_FA not latched
@@ -826,7 +826,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
       Tb = RATED_TEMP + Tb_noise() + ap.Tb_bias_model;
       Tb_filt = RATED_TEMP + ap.Tb_bias_model;  // Simplifying assumption that Tb_filt perfectly quiet - so don't have to make model of filter
     }
-    #indef CONFIG_PHOTON
+    #ifndef CONFIG_PHOTON
       if ( sp.Debug()==16) Serial.printf("Tb_noise %7.3f Tb%7.3f Tb_filt%7.3f tb_fa %d\n", Tb_noise(), Tb, Tb_filt, Flt->tb_fa());
     #endif
   }

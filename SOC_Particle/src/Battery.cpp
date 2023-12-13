@@ -538,7 +538,7 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Battery model class for reference use mainly in regression testing
 BatterySim::BatterySim() :
-    Battery(&sp.Delta_q_model_z, &sp.T_state_model_z, &sp.Sim_chm_z, VS), duty_(0UL), hys_scale_(HYS_SCALE), ib_fut_(0.),
+    Battery(&sp.Delta_q_model_z, &sp.T_state_model_z, &sp.Sim_chm_z, VS), duty_(0UL), ib_fut_(0.),
     ib_in_(0.), model_cutback_(true), q_(NOM_UNIT_CAP*3600.), sample_time_(0UL), sample_time_z_(0UL), sat_ib_max_(0.)
 {
     // ChargeTransfer dynamic model for EKF
@@ -620,9 +620,9 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
 
 
     // Hysteresis model
-    hys_->calculate(ib_in_, soc_, hys_scale_);
+    hys_->calculate(ib_in_, soc_, ap.hys_scale);
     boolean init_low = bms_off_ || ( soc_<(soc_min_+HYS_SOC_MIN_MARG) && ib_>HYS_IB_THR );
-    dv_hys_ = hys_->update(dt_, sat_, init_low, 0.0, hys_scale_, reset);
+    dv_hys_ = hys_->update(dt_, sat_, init_low, 0.0, ap.hys_scale, reset);
     voc_ = voc_stat_ + dv_hys_;
     ioc_ = hys_->ioc();
 
@@ -867,7 +867,7 @@ void BatterySim::pretty_print(void)
     this->Battery::pretty_print();
     Serial.printf(" BS::BS:\n");
     Serial.printf("  dv_hys%7.3f, V\n", hys_->dv_hys());
-    Serial.printf("  hys_scale%7.3f,\n", hys_scale_);
+    Serial.printf("  hys_scale%7.3f,\n", ap.hys_scale);
     Serial.printf("  ib%7.3f, A\n", ib_);
     Serial.printf("  ib_fut%7.3f, A\n", ib_fut_);
     Serial.printf("  ib_in%7.3f, A\n", ib_in_);

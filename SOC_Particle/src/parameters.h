@@ -67,7 +67,9 @@ public:
     uint8_t eframe_mult;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
     boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
     boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
+    float hys_scale;            // Sim hysteresis scalar
     float ib_amp_add;           // Fault injection bias on amp, A
+    float ib_diff_sclr;         // Scale ib_diff detection thresh, scalar
     float ib_noa_add;           // Fault injection bias on non amp, A
     float Ib_amp_noise_amp;     // Ib bank noise on amplified sensor, amplitude model only, A pk-pk
     float Ib_noa_noise_amp;     // Ib bank noise on non-amplified sensor, amplitude model only, A pk-pk
@@ -89,7 +91,9 @@ public:
     Uint8tZ *eframe_mult_p;
     BooleanZ *fail_tb_p;
     BooleanZ *fake_faults_p;
+    FloatZ *hys_scale_p;
     FloatZ *ib_amp_add_p;
+    FloatZ *ib_diff_slr_p;
     FloatZ *ib_noa_add_p;
     FloatZ *Ib_amp_noise_amp_p;
     FloatZ *Ib_noa_noise_amp_p;
@@ -97,7 +101,7 @@ public:
     FloatZ *s_t_sat_p;
     FloatZ *Tb_bias_model_p;
     FloatZ *Tb_noise_amp_p;
-    FloatZ *tb_stale_time_sclr_p;
+    FloatZ *tb_stale_time_slr_p;
     ULongZ *tail_inj_p;
     ULongZ *until_q_p;
     FloatZ *vb_add_p;

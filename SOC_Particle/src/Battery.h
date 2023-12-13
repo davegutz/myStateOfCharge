@@ -216,8 +216,6 @@ public:
   double delta_q() { return *sp_delta_q_; };
   unsigned long int dt(void) { return sample_time_ - sample_time_z_; };
   void hys_pretty_print () { hys_->pretty_print(); };
-  float hys_scale() { return hys_scale_; };
-  void hys_scale(const float sclr) { hys_scale_ = sclr; };
   float hys_state() { return hys_->dv_hys(); };
   void hys_state(const float st) { hys_->dv_hys(st); };
   void init_hys(const float hys) { hys_->init(hys); };
@@ -236,7 +234,6 @@ protected:
   TriInj *Tri_inj_;         // Class to create triangle waves
   CosInj *Cos_inj_;         // Class to create cosine waves
   uint32_t duty_;           // Used in Test Mode to inject Fake shunt current (0 - uint32_t(255))
-  float hys_scale_;         // Hysteresis scalar
   float ib_charge_;         // Current input avaiable for charging, A
   float ib_fut_;            // Future value of limited current, A
   float ib_in_;             // Saved value of current input, A

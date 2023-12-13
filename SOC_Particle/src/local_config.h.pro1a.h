@@ -8,10 +8,14 @@ const String unit = version + "_pro1a";
 #define CONFIG_SBAUD               230400      // Default Serial baud
 #define CONFIG_S1BAUD              230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define CONFIG_ARGON
-#define CONFIG_SSD1306_OLED
+// #define CONFIG_SSD1306_OLED
 #define CONFIG_47L16_EERAM
 #define CONFIG_DISP_SKIP 5
 #define CONFIG_DS18B20_SWIRE
+
+// #define DEBUG_QUEUE
+// #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
+// #define LOGHANDLE
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
