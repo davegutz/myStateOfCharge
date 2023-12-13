@@ -112,13 +112,19 @@ public:
         return next + sizeof(boolean);
     }
 
-    void check_set_put(boolean val)
+    boolean check_set_put(boolean val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ )
+        {
+            Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            return false;
+        }
         else
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
+            pr.buff[0] = 0;  // prevent misuse
+            return true;
         }
     }
 
@@ -178,13 +184,14 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
-    void print_adj_print(const boolean input)
+    boolean print_adj_print(const boolean input)
     {
         print();
         print1();
-        check_set_put(input);
+        boolean success = check_set_put(input);
         print();
         print1();
+        return success;
     }
    
     virtual void set_nominal()
@@ -225,13 +232,19 @@ public:
         return next + sizeof(double);
     }
 
-    void check_set_put(double val)
+    boolean check_set_put(double val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ )
+        {
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            return false;
+        }
         else
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
+            pr.buff[0] = 0;  // prevent misuse
+            return true;
         }
     }
 
@@ -294,13 +307,14 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
-    void print_adj_print(const double input)
+    boolean print_adj_print(const double input)
     {
         print();
         print1();
-        check_set_put(input);
+        boolean success = check_set_put(input);
         print();
         print1();
+        return success;
     }
 
     virtual void set_nominal()
@@ -341,13 +355,19 @@ public:
         return next + sizeof(float);
     }
 
-    void check_set_put(float val)
+    boolean check_set_put(float val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ )
+        {
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            return false;
+        }
         else
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
+            pr.buff[0] = 0;  // prevent misuse
+            return true;
         }
     }
 
@@ -410,13 +430,14 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
-    void print_adj_print(const float input)
+    boolean print_adj_print(const float input)
     {
         print();
         print1();
-        check_set_put(input);
+        boolean success = check_set_put(input);
         print();
         print1();
+        return success;
     }
 
     virtual void set_nominal()
@@ -523,13 +544,19 @@ public:
         return next + sizeof(int);
     }
 
-    void check_set_put(int val)
+    boolean check_set_put(int val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ )
+        {
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            return false;
+        }
         else
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
+            pr.buff[0] = 0;  // prevent misuse
+            return true;
         }
     }
 
@@ -591,13 +618,14 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
     
-    void print_adj_print(const int input)
+    boolean print_adj_print(const int input)
     {
         print();
         print1();
-        check_set_put(input);
+        boolean success = check_set_put(input);
         print();
         print1();
+        return success;
     }
 
     virtual void set_nominal()
@@ -638,13 +666,19 @@ public:
         return next + sizeof(int8_t);
     }
 
-    void check_set_put(int8_t val)
+    boolean check_set_put(int8_t val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ )
+        {
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            return false;
+        }
         else
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
+            pr.buff[0] = 0;  // prevent misuse
+            return true;
         }
     }
 
@@ -707,13 +741,14 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
     
-    void print_adj_print(const int8_t input)
+    boolean print_adj_print(const int8_t input)
     {
         print();
         print1();
-        check_set_put(input);
+        boolean success = check_set_put(input);
         print();
         print1();
+        return success;
     }
 
     virtual void set_nominal()
@@ -754,13 +789,19 @@ public:
         return next + sizeof(uint16_t);
     }
 
-    void check_set_put(uint16_t val)
+    boolean check_set_put(uint16_t val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ )
+        {
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            return false;
+        }
         else
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
+            pr.buff[0] = 0;  // prevent misuse
+            return true;
         }
     }
 
@@ -820,13 +861,14 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
-    void print_adj_print(const uint16_t input)
+    boolean print_adj_print(const uint16_t input)
     {
         print();
         print1();
-        check_set_put(input);
+        boolean success = check_set_put(input);
         print();
         print1();
+        return success;
     }
    
     virtual void set_nominal()
@@ -866,13 +908,19 @@ public:
         return next + sizeof(uint8_t);
     }
 
-    void check_set_put(uint8_t val)
+    boolean check_set_put(uint8_t val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ )
+        {
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            return false;
+        }
         else
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
+            pr.buff[0] = 0;  // prevent misuse
+            return true;
         }
     }
 
@@ -932,13 +980,14 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
-    void print_adj_print(const uint8_t input)
+    boolean print_adj_print(const uint8_t input)
     {
         print();
         print1();
-        check_set_put(input);
+        boolean success = check_set_put(input);
         print();
         print1();
+        return success;
     }
    
     virtual void set_nominal()
@@ -979,13 +1028,19 @@ public:
         return next + sizeof(unsigned long);
     }
 
-    void check_set_put(unsigned long val)
+    boolean check_set_put(unsigned long val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %ld (%-ld, %ld)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ )
+        {
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %ld (%-ld, %ld)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            return false;
+        }
         else
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
+            pr.buff[0] = 0;  // prevent misuse
+            return true;
         }
     }
 
@@ -1048,13 +1103,14 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
-    void print_adj_print(const unsigned long input)
+    boolean print_adj_print(const unsigned long input)
     {
         print();
         print1();
-        check_set_put(input);
+        boolean success = check_set_put(input);
         print();
         print1();
+        return success;
     }
    
     virtual void set_nominal()

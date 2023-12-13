@@ -356,10 +356,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'a' ):  // Ca<>:  assign charge state in fraction to all versions including model
-                FP_in = cp.input_str.substring(2).toFloat();
-                if ( FP_in<1.1 )  // Apply crude limit to prevent user error
+                if ( ap.init_all_soc_p->print_adj_print(cp.input_str.substring(2).toFloat()) )  // Apply crude limit to prevent user error
                 {
-                  initialize_all(Mon, Sen, FP_in, true);
+                  initialize_all(Mon, Sen, ap.init_all_soc, true);
                   #ifdef DEBUG_INIT
                     if ( sp.Debug()==-1 ){ Serial.printf("after initialize_all:"); debug_m1(Mon, Sen);}
                   #endif
@@ -375,7 +374,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   }
                 }
                 else
-                  Serial.printf("soc%8.4f; err 0-1.1\n", FP_in);
+                  Serial.printf("skipping %s\n", cp.input_str.c_str());
                 break;
 
               case ( 'm' ):  // Cm<>:  assign curve charge state in fraction to model only (ekf if modeling)
@@ -1177,7 +1176,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\nc  clear talk, esp '-c;'\n");
 
   Serial.printf("\nC<?> Chg SOC e.g.:\n");
-  Serial.printf("  Ca=  all - '(0-1.1)'\n"); 
+  ap.init_all_soc_p->print_help();  // Ca
   Serial.printf("  Cm=  model (& ekf if mod)- '(0-1.1)'\n"); 
 
   Serial.printf("\nD/S<?> Adj e.g.:\n");

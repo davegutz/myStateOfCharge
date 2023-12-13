@@ -66,7 +66,7 @@ void  VolatilePars::initialize()
     // Memory map
     // Input definitions
     n_ = -1;
-    Z_ = new Z*[32];
+    Z_ = new Z*[33];
     Z_[n_] = (cc_diff_slr_p    = new FloatZ(&n_, "  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_slr,       1));
     Z_[n_] = (cycles_inj_p     = new FloatZ(&n_, "  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
     Z_[n_] = (dc_dc_on_p     = new BooleanZ(&n_, "  ", "Xd", NULL,"DC-DC charger on",     "T=on",   0,    1,    &dc_dc_on,          false));
@@ -88,6 +88,7 @@ void  VolatilePars::initialize()
     Z_[n_] = (Ib_amp_noise_amp_p= new FloatZ(&n_,"  ", "DM", NULL,"Amp amp noise",        "A",      0,    1000, &Ib_amp_noise_amp,  IB_AMP_NOISE));
     Z_[n_] = (Ib_noa_noise_amp_p= new FloatZ(&n_,"  ", "DN", NULL,"Amp noa noise",        "A",      0,    1000, &Ib_noa_noise_amp,  IB_NOA_NOISE));
     Z_[n_] = (ib_quiet_slr_p   = new FloatZ(&n_, "  ", "Fq", NULL,"Ib quiet det slr",     "slr",    0,    1000, &ib_quiet_slr,      1));
+    Z_[n_] = (init_all_soc_p   = new FloatZ(&n_, "  ", "Ca", NULL,"Init all to this",     "soc",    -0.5, 1.1,  &init_all_soc,      1));
     Z_[n_] = (print_mult_p    = new Uint8tZ(&n_, "  ", "DP", NULL,"Print mult x Dr",      "uint",   0,    UINT8_MAX, &print_mult,   DP_MULT));
     Z_[n_] = (read_delay_p     = new ULongZ(&n_, "  ", "Dr", NULL,"Minor frame",          "ms",     0UL,  1000000UL,  &read_delay,  READ_DELAY));
     Z_[n_] = (slr_res_p        = new FloatZ(&n_, "  ", "Sr", NULL,"Scalar Randles R0",    "slr",    0,    100,  &slr_res,           1));
