@@ -330,27 +330,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'P' ):  //* BP<>:  Number of parallel batteries in bank, e.g. '2P1S'
-                FP_in = cp.input_str.substring(2).toFloat();
-                if ( FP_in>0 )  // Apply crude limit to prevent user error
-                {
-                  Serial.printf("nP%5.2f to", sp.nP());
-                  sp.put_nP(FP_in);
-                  Serial.printf("%5.2f\n", sp.nP());
-                }
-                else
-                  Serial.printf("err%5.2f; <=0\n", FP_in);
+                sp.nP_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'S' ):  //* BS<>:  Number of series batteries in bank, e.g. '2P1S'
-                FP_in = cp.input_str.substring(2).toFloat();
-                if ( FP_in>0 )  // Apply crude limit to prevent user error
-                {
-                  Serial.printf("nS%5.2f to", sp.nS());
-                  sp.put_nS(FP_in);
-                  Serial.printf("%5.2f\n", sp.nS());
-                }
-                else
-                  Serial.printf("err%5.2f; <=0\n", FP_in);
+                sp.nS_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'Z' ):  // BZ :  Benign zeroing of settings to make clearing test easier
