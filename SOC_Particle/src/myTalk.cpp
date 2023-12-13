@@ -115,8 +115,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
 
   // Model
   ap.hys_scale = HYS_SCALE;  // Sh 1
-  Sen->Sim->Sr(1);  // Sr
-  Mon->Sr(1);  // Sr 1
+  ap.slr_res = 1;  // Sr 1
   sp.Cutback_gain_slr_p->print_adj_print(1); // Sk 1
   ap.hys_state = 0;  // SH 0
 
@@ -567,13 +566,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
             
               case ( 'r' ):  //   Sr<>:  scalar resistor
-                scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("\nSim resistance scale Sr%7.3f to", Sen->Sim->Sr());
-                Sen->Sim->Sr(scale);
-                Serial.printf("%7.3f\n", Sen->Sim->Sr());
-                Serial.printf("\nMon resistance scale Sr%7.3f to", Mon->Sr());
-                Mon->Sr(scale);
-                Serial.printf("%7.3f\n", Mon->Sr());
+                ap.slr_res_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
             
               case ( 'k' ):  //*  Sk<>:  scale cutback gain for sim rep of >print_adj_print(S

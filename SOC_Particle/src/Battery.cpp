@@ -40,7 +40,7 @@ extern PublishPars pp;  // For publishing
 Battery::Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, const float d_voc_soc)
     : Coulombs(sp_delta_q, sp_t_last, (NOM_UNIT_CAP*3600), T_RLIM, sp_mod_code, COULOMBIC_EFF_SCALE), bms_charging_(false),
 	bms_off_(false), dt_(0.1), dv_dsoc_(0.3), dv_dyn_(0.), dv_hys_(0.), ib_(0.), ibs_(0.), ioc_(0.), print_now_(false),
-    sr_(1.), temp_c_(NOMINAL_TB), vb_(NOMINAL_VB), voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), voltage_low_(false), vsat_(NOMINAL_VB)
+    temp_c_(NOMINAL_TB), vb_(NOMINAL_VB), voc_(NOMINAL_VB), voc_stat_(NOMINAL_VB), voltage_low_(false), vsat_(NOMINAL_VB)
 {
     nom_vsat_   = chem_.v_sat - HDB_VB;   // Center in hysteresis
     ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_.tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);  // Update time and time constant changed on the fly
@@ -104,7 +104,7 @@ void Battery::pretty_print(void)
     Serial.printf("  soc%8.4f\n", soc_);
     Serial.printf(" *sp_delt_q%10.1f, C\n", *sp_delta_q_);
     Serial.printf(" *sp_t_last%10.1f, dg C\n", *sp_t_last_);
-    Serial.printf("  sr%7.3f, slr\n", sr_);
+    Serial.printf("  sr%7.3f, slr\n", ap.slr_res);
     Serial.printf("  tau_ct%10.6f, s (=1/R/C)\n", chem_.tau_ct);
     Serial.printf("  tau_sd%9.3g, s\n", chem_.tau_sd);
     Serial.printf("  temp_c%7.3f, dg C\n", temp_c_);
@@ -244,7 +244,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     float ib_dyn;
     if (sp.mod_vb()) ib_dyn = ib_past_;
     else ib_dyn = ib_;
-    voc_ = vb_ - (ChargeTransfer_->calculate(ib_dyn, reset_temp, chem_.tau_ct, dt_)*chem_.r_ct*sr_ + ib_dyn*chem_.r_0*sr_);
+    voc_ = vb_ - (ChargeTransfer_->calculate(ib_dyn, reset_temp, chem_.tau_ct, dt_)*chem_.r_ct*ap.slr_res + ib_dyn*chem_.r_0*ap.slr_res);
     if ( !ap.fake_faults )
     {
         if ( (bms_off_ && voltage_low_) ||  Sen->Flt->vb_fa())
@@ -401,7 +401,7 @@ void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
     if ( isnan(vb_) ) vb_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
-    dv_dyn_ = ib_*chem_.r_ss*sr_;
+    dv_dyn_ = ib_*chem_.r_ss*ap.slr_res;
     voc_ = vb_ - dv_dyn_;
     #ifdef DEBUG_INIT
         if ( sp.Debug()==-1 )
@@ -474,6 +474,10 @@ void BatteryMonitor::regauge(const float temp_c)
         Serial.printf("conf %7.3f\n", soc_);
     }
 }
+
+// Scale resistance
+float BatteryMonitor::r_sd () { return chem_.r_sd * ap.slr_res; };
+float BatteryMonitor::r_ss () { return chem_.r_ss * ap.slr_res; };
 
 /* Steady state voc(soc) solver for initialization of ekf state.  Expects Sen->Tb_filt to be in reset mode
     INPUTS:
@@ -644,7 +648,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
         ib_ = 0.;
 
     // ChargeTransfer dynamic model for model, reverse version to generate sensor inputs
-    vb_ = voc_ + (ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_)*chem_.r_ct*sr_ + ib_*chem_.r_0*sr_);
+    vb_ = voc_ + (ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_)*chem_.r_ct*ap.slr_res + ib_*chem_.r_0*ap.slr_res);
 
     // Special cases override
     if ( bms_off_ )
@@ -844,7 +848,7 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
     ib_ = Sen->ib_model_in();
     ib_ = max(min(ib_, IMAX_NUM), -IMAX_NUM);  // Overflow protection when ib_ past value used
     vb_ = Sen->vb();
-    voc_ = vb_ - ib_*chem_.r_ss*sr_;
+    voc_ = vb_ - ib_*chem_.r_ss*ap.slr_res;
     if ( isnan(voc_) ) voc_ = 13.;    // reset overflow
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
     dv_dyn_ = vb_ - voc_;

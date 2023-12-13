@@ -34,6 +34,7 @@
 #include "myLibrary/iterate.h"
 #include "Hysteresis.h"
 #include "Z.h"
+
 class Sensors;
 
 #define RATED_TEMP      25.       // Temperature at NOM_UNIT_CAP, deg C (25)
@@ -100,8 +101,6 @@ public:
   float ioc() { return ioc_; };          // Hysteresis output current, A
   virtual void pretty_print();
   void print_signal(const boolean print) { print_now_ = print; };
-  void Sr(const float sr) { sr_ = sr; };
-  float Sr() { return sr_; };
   float temp_c() { return temp_c_; };    // Battery temperature, deg C
   float Tb() { return temp_c_; };        // Battery bank temperature, deg C
   float vb() { return vb_; };            // Battery terminal voltage, V
@@ -121,7 +120,6 @@ protected:
   float ioc_;      // Hysteresis output current, A
   float nom_vsat_; // Nominal saturation threshold at 25C, V
   boolean print_now_; // Print command
-  float sr_;       // Resistance scalar
   float temp_c_;    // Battery temperature, deg C
   float vb_;       // Battery terminal voltage, V
   float voc_;      // Static model open circuit voltage, V
@@ -135,7 +133,6 @@ protected:
   double *rand_B_;  // ChargeTransfer model B
   double *rand_C_;  // ChargeTransfer model C
   double *rand_D_;  // ChargeTransfer model D
-  fptr app_chem_p_;
 };
 
 
@@ -163,8 +160,8 @@ public:
   float K_ekf() { return K_; };
   void pretty_print(Sensors *Sen);
   void regauge(const float temp_c);
-  float r_sd () { return chem_.r_sd*sr_; };
-  float r_ss () { return chem_.r_ss*sr_; };
+  float r_sd ();
+  float r_ss ();
   float soc_ekf() { return soc_ekf_; };
   boolean solve_ekf(const boolean reset, const boolean reset_temp, Sensors *Sen);
   float tcharge() { return tcharge_; };
