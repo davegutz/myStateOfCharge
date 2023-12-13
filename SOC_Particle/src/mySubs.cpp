@@ -615,8 +615,8 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   cp.model_saturated = Sen->Sim->saturated();
 
   // Inputs:  Sim->Ib
-  Sen->Ib_amp_model = Sen->Ib_model*Sen->ib_amp_sclr() + Sen->Ib_amp_add() + Sen->Ib_amp_noise();  // Sm/Dm
-  Sen->Ib_noa_model = Sen->Ib_model*Sen->ib_noa_sclr() + Sen->Ib_noa_add() + Sen->Ib_noa_noise();  // Sn/Dn
+  Sen->Ib_amp_model = Sen->Ib_model*Sen->ib_amp_slr() + Sen->Ib_amp_add() + Sen->Ib_amp_noise();  // Sm/Dm
+  Sen->Ib_noa_model = Sen->Ib_model*Sen->ib_noa_slr() + Sen->Ib_noa_add() + Sen->Ib_noa_noise();  // Sn/Dn
 
   // Select
   //  Inputs:                                       --->   Outputs:

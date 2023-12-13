@@ -104,7 +104,7 @@ void Battery::pretty_print(void)
     Serial.printf("  soc%8.4f\n", soc_);
     Serial.printf(" *sp_delt_q%10.1f, C\n", *sp_delta_q_);
     Serial.printf(" *sp_t_last%10.1f, dg C\n", *sp_t_last_);
-    Serial.printf("  sr%7.3f, sclr\n", sr_);
+    Serial.printf("  sr%7.3f, slr\n", sr_);
     Serial.printf("  tau_ct%10.6f, s (=1/R/C)\n", chem_.tau_ct);
     Serial.printf("  tau_sd%9.3g, s\n", chem_.tau_sd);
     Serial.printf("  temp_c%7.3f, dg C\n", temp_c_);
@@ -658,7 +658,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     dv_dyn_ = vb_ - voc_;
 
     // Saturation logic, both full and empty
-    sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ap.ds_voc_soc) ) * sat_cutback_gain_ * sp.Cutback_gain_sclr();
+    sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ap.ds_voc_soc) ) * sat_cutback_gain_ * sp.Cutback_gain_slr();
     if ( sp.tweak_test() || !sp.mod_ib() ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
     ib_fut_ = min(ib_charge_fut, sat_ib_max_);      // the feedback of ib_
     // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past value.  (This prevents sat logic from working)

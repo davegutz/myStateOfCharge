@@ -239,9 +239,9 @@ void Shunt::sample(const boolean reset_loc, const float T)
 
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving):
-  cc_diff_(0.), cc_diff_empty_sclr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false),
-  ewhi_sclr_(1), ewlo_sclr_(1), ewmin_sclr_(1), ewsat_sclr_(1), e_wrap_(0), e_wrap_filt_(0),
-  ib_quiet_sclr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
+  cc_diff_(0.), cc_diff_empty_slr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false),
+  ewhi_slr_(1), ewlo_slr_(1), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0),
+  ib_quiet_slr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
   latched_fail_fake_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   tb_sel_stat_last_(1), vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL), sp_preserving_(preserving)
 {
@@ -267,14 +267,14 @@ void Fault::cc_diff(Sensors *Sen, BatteryMonitor *Mon)
                                           // Coulomb counter is wrapa big integrator)
   if ( Mon->soc() <= max(Mon->soc_min()+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS) )
   {
-    cc_diff_empty_sclr_ = CC_DIFF_LO_SOC_SCLR;
+    cc_diff_empty_slr_ = CC_DIFF_LO_SOC_SLR;
   }
   else
   {
-    cc_diff_empty_sclr_ = 1.;
+    cc_diff_empty_slr_ = 1.;
   }
-  // ewsat_sclr_ used here because voc_soc map inaccurate on cold days
-  cc_diff_thr_ = CC_DIFF_SOC_DIS_THRESH*ap.cc_diff_sclr*cc_diff_empty_sclr_*ewsat_sclr_;
+  // ewsat_slr_ used here because voc_soc map inaccurate on cold days
+  cc_diff_thr_ = CC_DIFF_SOC_DIS_THRESH*ap.cc_diff_slr*cc_diff_empty_slr_*ewsat_slr_;
   failAssign( abs(cc_diff_)>=cc_diff_thr_ , CC_DIFF_FA );  // Not latched
 }
 
@@ -293,7 +293,7 @@ void Fault::ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     ib_diff_ = Sen->ib_amp_hdwe() - Sen->ib_noa_hdwe();
   }
   ib_diff_f_ = IbErrFilt->calculate(ib_diff_, reset_loc, min(Sen->T, MAX_ERR_T));
-  ib_diff_thr_ = IBATT_DISAGREE_THRESH*ap.ib_diff_sclr;
+  ib_diff_thr_ = IBATT_DISAGREE_THRESH*ap.ib_diff_slr;
   faultAssign( ib_diff_f_>=ib_diff_thr_, IB_DIFF_HI_FLT );
   faultAssign( ib_diff_f_<=-ib_diff_thr_, IB_DIFF_LO_FLT );
   failAssign( IbdHiPer->calculate(ib_diff_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIFF_HI_FA ); // IB_DIFF_FA not latched
@@ -314,7 +314,7 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   ib_quiet_ = QuietFilt->calculate(ib_rate_, reset_loc, min(Sen->T, MAX_T_Q_FILT));
 
   // Fault
-  ib_quiet_thr_ = QUIET_A*ib_quiet_sclr_;
+  ib_quiet_thr_ = QUIET_A*ib_quiet_slr_;
   faultAssign( !sp.mod_ib() && abs(ib_quiet_)<=ib_quiet_thr_ && !reset_loc, IB_DSCN_FLT );   // initializes false
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
   #ifndef CONFIG_PHOTON
@@ -332,32 +332,32 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
   if ( Mon->soc()>=WRAP_SOC_HI_OFF )
   {
-    ewsat_sclr_ = WRAP_SOC_HI_SCLR;
-    ewmin_sclr_ = 1.;
+    ewsat_slr_ = WRAP_SOC_HI_SLR;
+    ewmin_slr_ = 1.;
   }
   else if ( Mon->soc() <= max(Mon->soc_min()+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS)  )
   {
-    ewsat_sclr_ = 1.;
-    ewmin_sclr_ = WRAP_SOC_LO_SCLR;
+    ewsat_slr_ = 1.;
+    ewmin_slr_ = WRAP_SOC_LO_SLR;
   }
   else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SAT_MARG) ||
           ( Mon->voc_stat()>(Mon->vsat()-WRAP_HI_SAT_MARG) && Mon->C_rate()>WRAP_MOD_C_RATE && Mon->soc()>WRAP_SOC_MOD_OFF) ) // Use voc_stat to get some anticipation
   {
-    ewsat_sclr_ = WRAP_HI_SAT_SCLR;
-    ewmin_sclr_ = 1.;
+    ewsat_slr_ = WRAP_HI_SAT_SLR;
+    ewmin_slr_ = 1.;
   }
   else
   {
-    ewsat_sclr_ = 1.;
-    ewmin_sclr_ = 1.;
+    ewsat_slr_ = 1.;
+    ewmin_slr_ = 1.;
   }
   e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
   // sat logic screens out voc jumps when ib>0 when saturated
   // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
   // wrap_vb latches because vb is single sensor
-  ewhi_thr_ = Mon->r_ss()*WRAP_HI_A*ewhi_sclr_*ewsat_sclr_*ewmin_sclr_;
+  ewhi_thr_ = Mon->r_ss()*WRAP_HI_A*ewhi_slr_*ewsat_slr_*ewmin_slr_;
   faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
-  ewlo_thr_ = Mon->r_ss()*WRAP_LO_A*ewlo_sclr_*ewsat_sclr_*ewmin_sclr_;
+  ewlo_thr_ = Mon->r_ss()*WRAP_LO_A*ewlo_slr_*ewsat_slr_*ewmin_slr_;
   faultAssign( (e_wrap_filt_ <= ewlo_thr_), WRAP_LO_FLT);
   failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // non-latching
   failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // non-latching
@@ -710,7 +710,7 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
   else
   {
     faultAssign( Sen->SensorTb->tb_stale_flt(), TB_FLT );
-    failAssign( TbStaleFail->calculate(tb_flt(), TB_STALE_SET*ap.tb_stale_time_sclr, TB_STALE_RESET*ap.tb_stale_time_sclr,
+    failAssign( TbStaleFail->calculate(tb_flt(), TB_STALE_SET*ap.tb_stale_time_slr, TB_STALE_RESET*ap.tb_stale_time_slr,
       Sen->T_temp, reset_loc), TB_FA );
   }
 }
@@ -738,7 +738,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
-  ib_amp_sclr_(1.), ib_noa_sclr_(1.), reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),
+  ib_amp_slr_(1.), ib_noa_slr_(1.), reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),
   sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL)
 {
   this->T = T;
@@ -987,8 +987,8 @@ void Sensors::shunt_select_initial(const boolean reset)
       else
         hdwe_add = 0.;
     }
-    Ib_amp_model = Ib_model*ib_amp_sclr() + Ib_amp_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sm / Dm
-    Ib_noa_model = Ib_model*ib_noa_sclr() + Ib_noa_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sn / Dn
+    Ib_amp_model = Ib_model*ib_amp_slr() + Ib_amp_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sm / Dm
+    Ib_noa_model = Ib_model*ib_noa_slr() + Ib_noa_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sn / Dn
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
     Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);
     Ib_noa_hdwe = ShuntNoAmp->Ishunt_cal() + hdwe_add;  // Sense fault injection feeds logic, not model

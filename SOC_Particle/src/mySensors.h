@@ -180,10 +180,10 @@ public:
   boolean disab_vb_fa() { return disab_vb_fa_; };
   boolean dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
-  void ewhi_sclr(const float sclr) { ewhi_sclr_ = sclr; };
-  float ewhi_sclr() { return ewhi_sclr_; };
-  void ewlo_sclr(const float sclr) { ewlo_sclr_ = sclr; };
-  float ewlo_sclr() { return ewlo_sclr_; };
+  void ewhi_slr(const float slr) { ewhi_slr_ = slr; };
+  float ewhi_slr() { return ewhi_slr_; };
+  void ewlo_slr(const float slr) { ewlo_slr_ = slr; };
+  float ewlo_slr() { return ewlo_slr_; };
   float ewhi_thr_;      // Threshold e_wrap failed high, V
   float ewhi_thr() { return ewhi_thr_; };
   float ewlo_thr_;      // Threshold e_wrap failed low, V
@@ -203,8 +203,8 @@ public:
   boolean ib_noa_bare() { return faultRead(IB_NOA_BARE); };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
-  void ib_quiet_sclr(const float sclr) { ib_quiet_sclr_ = sclr; };
-  float ib_quiet_sclr() { return ib_quiet_sclr_; };
+  void ib_quiet_slr(const float slr) { ib_quiet_slr_ = slr; };
+  float ib_quiet_slr() { return ib_quiet_slr_; };
   float ib_quiet_thr_;     // Threshold below which ib is quiet, A pk
   float ib_quiet_thr() { return ib_quiet_thr_; };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
@@ -268,17 +268,17 @@ protected:
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
-  float cc_diff_empty_sclr_;  // Scale cc_diff when soc low, scalasr
+  float cc_diff_empty_slr_;  // Scale cc_diff when soc low, scalasr
   boolean disab_ib_fa_;     // Disable hard fault range failures for ib
   boolean disab_tb_fa_;     // Disable hard fault range failures for tb
   boolean disab_vb_fa_;     // Disable hard fault range failures for vb
-  float ewhi_sclr_;         // Scale wrap hi detection thresh, scalar
-  float ewlo_sclr_;         // Scale wrap lo detection thresh, scalar
-  float ewmin_sclr_;        // Scale wrap detection thresh when voc(soc) less than min, scalar
-  float ewsat_sclr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
+  float ewhi_slr_;         // Scale wrap hi detection thresh, scalar
+  float ewlo_slr_;         // Scale wrap lo detection thresh, scalar
+  float ewmin_slr_;        // Scale wrap detection thresh when voc(soc) less than min, scalar
+  float ewsat_slr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
-  float ib_quiet_sclr_;     // Scale ib_quiet detection thresh, scalar
+  float ib_quiet_slr_;     // Scale ib_quiet detection thresh, scalar
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
   float ib_quiet_;          // ib hardware noise, A/s
@@ -356,20 +356,20 @@ public:
   float ib() { return Ib / sp.nP(); };                            // Battery unit current, A
   float ib_amp_hdwe() { return Ib_amp_hdwe / sp.nP(); };          // Battery amp unit current, A
   float ib_amp_model() { return Ib_amp_model / sp.nP(); };        // Battery amp model unit current, A
-  float ib_amp_sclr() { return ib_amp_sclr_; };
-  void ib_amp_sclr(const float sclr) { ib_amp_sclr_ = sclr; };
+  float ib_amp_slr() { return ib_amp_slr_; };
+  void ib_amp_slr(const float slr) { ib_amp_slr_ = slr; };
   float ib_hdwe() { return Ib_hdwe / sp.nP(); };                  // Battery select hardware unit current, A
   float ib_hdwe_model() { return Ib_hdwe_model / sp.nP(); };      // Battery select hardware model unit current, A
   float ib_model() { return Ib_model / sp.nP(); };                // Battery select model unit current, A
   float ib_model_in() { return Ib_model_in / sp.nP(); };          // Battery select model input unit current, A
   float ib_noa_hdwe() { return Ib_noa_hdwe / sp.nP(); };          // Battery no amp unit current, A
   float ib_noa_model() { return Ib_noa_model / sp.nP(); };        // Battery no amp model unit current, A
-  float ib_noa_sclr() { return ib_noa_sclr_; };
+  float ib_noa_slr() { return ib_noa_slr_; };
   float Ib_amp_add();
   float Ib_noa_add();
   float Ib_amp_noise();
   float Ib_noa_noise();
-  void ib_noa_sclr(const float sclr) { ib_noa_sclr_ = sclr; };
+  void ib_noa_slr(const float slr) { ib_noa_slr_ = slr; };
   float Ib_noise();
   void reset_temp(const boolean reset) { reset_temp_ = reset; };
   boolean reset_temp() { return ( reset_temp_ ); };
@@ -396,8 +396,8 @@ protected:
   PRBS_7 *Prbn_Vb_;     // Vb noise generator model only
   PRBS_7 *Prbn_Ib_amp_; // Ib amplified sensor noise generator model only
   PRBS_7 *Prbn_Ib_noa_; // Ib non-amplified sensor noise generator model only
-  float ib_amp_sclr_;   // Fault injection sclr on amp
-  float ib_noa_sclr_;   // Fault injection sclr on non amp
+  float ib_amp_slr_;   // Fault injection slr on amp
+  float ib_noa_slr_;   // Fault injection slr on non amp
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
   unsigned long int sample_time_ib_;          // Exact moment of selected Ib sample, ms
   unsigned long int sample_time_vb_;          // Exact moment of selected Vb sample, ms

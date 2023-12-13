@@ -107,7 +107,7 @@ const float T_DESAT =         20;       // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
 #define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)
 #define TEMP_INIT_DELAY       10000     // It takes 10 seconds first read of DS18 (10000)
-#define CC_DIFF_LO_SOC_SCLR   4.        // Large to disable cc_diff
+#define CC_DIFF_LO_SOC_SLR    4.        // Large to disable cc_diff
 #define TAU_ERR_FILT          5.        // Current sensor difference filter time constant, s (5.)
 #define MAX_ERR_FILT          10.       // Current sensor difference Filter maximum windup, A (10.)
 #define MAX_ERR_T             10.       // Maximum update time allowed to avoid instability, s (10.)
@@ -136,7 +136,7 @@ const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('u
 #define WRAP_HI_A       32.             // Wrap high voltage threshold, A (32 after testing; 16=0.2v)
 #define WRAP_LO_A       -40.            // Wrap high voltage threshold, A (-40, -20 too small on truck -16=-0.2v, -32 marginal)
 #define WRAP_HI_SAT_MARG  0.2           // Wrap voltage margin to saturation, V (0.2)
-#define WRAP_HI_SAT_SCLR  2.0           // Wrap voltage margin scalar when saturated (2.0)
+#define WRAP_HI_SAT_SLR   2.0           // Wrap voltage margin scalar when saturated (2.0)
 #define IBATT_DISAGREE_THRESH 10.       // Signal selection threshold for current disagree test, A (10.)
 const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
 #define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
@@ -156,10 +156,10 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define NOMINAL_VSAT    13.85           // Nominal saturation voltage, V (13.85)
 #define IMAX_NUM        100000.         // Simulation limit to prevent NaN, A (1e5)
 #define WRAP_SOC_HI_OFF     0.97        // Disable e_wrap_hi when saturated (0.97)
-#define WRAP_SOC_HI_SCLR    1000.       // Huge to disable e_wrap (1000)
+#define WRAP_SOC_HI_SLR     1000.       // Huge to disable e_wrap (1000)
 #define WRAP_SOC_LO_OFF_ABS 0.35        // Disable e_wrap when near empty (soc lo any Tb, 0.35)
 #define WRAP_SOC_LO_OFF_REL 0.2         // Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback, 0.2)
-#define WRAP_SOC_LO_SCLR    60.         // Large to disable e_wrap (60. for startup)
+#define WRAP_SOC_LO_SLR     60.         // Large to disable e_wrap (60. for startup)
 #define WRAP_MOD_C_RATE     .02         // Moderate charge rate threshold to engage wrap threshold (0.02 to prevent trip near saturation .05 too large)
 #define WRAP_SOC_MOD_OFF    0.85        // Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
 #define VC_S                1.0         // Vc sense scalar (1.0)

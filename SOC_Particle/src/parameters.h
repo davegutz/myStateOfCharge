@@ -59,7 +59,7 @@ public:
     virtual void pretty_print(const boolean all);
 
     // Declare
-    float cc_diff_sclr;         // Scale cc_diff detection thresh, scalar
+    float cc_diff_slr;          // Scale cc_diff detection thresh, scalar
     float cycles_inj;           // Number of injection cycles
     boolean dc_dc_on;           // DC-DC charger is on
     float ds_voc_soc;           // VOC(SOC) delta soc on input, frac
@@ -69,7 +69,7 @@ public:
     boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
     float hys_scale;            // Sim hysteresis scalar
     float ib_amp_add;           // Fault injection bias on amp, A
-    float ib_diff_sclr;         // Scale ib_diff detection thresh, scalar
+    float ib_diff_slr;          // Scale ib_diff detection thresh, scalar
     float ib_noa_add;           // Fault injection bias on non amp, A
     float Ib_amp_noise_amp;     // Ib bank noise on amplified sensor, amplitude model only, A pk-pk
     float Ib_noa_noise_amp;     // Ib bank noise on non-amplified sensor, amplitude model only, A pk-pk
@@ -78,12 +78,12 @@ public:
     unsigned long int tail_inj; // Tail after end injection, ms
     float Tb_bias_model;        // Bias on Tb for model
     float Tb_noise_amp;         // Tb noise amplitude model only, deg C pk-pk
-    float tb_stale_time_sclr;   // Scalar on persistences of Tb hardware stale check
+    float tb_stale_time_slr;    // Scalar on persistences of Tb hardware stale check
     unsigned long int until_q;  // Time until set v0, ms
     float vb_add;               // Fault injection bias, V
     float Vb_noise_amp;         // Vb bank noise amplitude model only, V pk-pk
     unsigned long int wait_inj; // Wait before start injection, ms
-    FloatZ *cc_diff_sclr_p;
+    FloatZ *cc_diff_slr_p;
     FloatZ *cycles_inj_p;
     BooleanZ *dc_dc_on_p;
     FloatZ *ds_voc_soc_p;
@@ -128,7 +128,7 @@ public:
  
     // parameter list
     float Amp() { return Amp_z; }
-    float Cutback_gain_sclr() { return Cutback_gain_sclr_z; }
+    float Cutback_gain_slr() { return Cutback_gain_slr_z; }
     int Debug() { return Debug_z;}
     double Delta_q() { return Delta_q_z;}
     double Delta_q_model() { return Delta_q_model_z;}
@@ -204,7 +204,7 @@ public:
     // put
     void put_all_dynamic();
     void put_Amp(const float input) { Amp_p->check_set_put(input); }
-    void put_Cutback_gain_sclr(const float input) { Cutback_gain_sclr_p->check_set_put(input); }
+    void put_Cutback_gain_slr(const float input) { Cutback_gain_slr_p->check_set_put(input); }
     void put_Debug(const int input) { Debug_p->check_set_put(input); }
     void put_Delta_q(const double input) { Delta_q_p->check_set_put(input); }
     void put_Delta_q() {}
@@ -254,7 +254,7 @@ public:
     Flt_st put_history(const Flt_st input, const uint8_t i);
     boolean tweak_test() { return ( 1<<3 & Modeling() ); } // Driving signal injection completely using software inj_bias 
     FloatZ *Amp_p;
-    FloatZ *Cutback_gain_sclr_p;
+    FloatZ *Cutback_gain_slr_p;
     IntZ *Debug_p;
     DoubleZ *Delta_q_p;
     DoubleZ *Delta_q_model_p;
@@ -289,7 +289,7 @@ public:
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
     float Amp_z;
-    float Cutback_gain_sclr_z;
+    float Cutback_gain_slr_z;
     int Debug_z;
     double Delta_q_z;
     double Delta_q_model_z;

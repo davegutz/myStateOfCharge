@@ -117,7 +117,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   ap.hys_scale = HYS_SCALE;  // Sh 1
   Sen->Sim->Sr(1);  // Sr
   Mon->Sr(1);  // Sr 1
-  sp.Cutback_gain_sclr_p->print_adj_print(1); // Sk 1
+  sp.Cutback_gain_slr_p->print_adj_print(1); // Sk 1
   Sen->Sim->hys_state(0);  // SH 0
   Sen->Flt->wrap_err_filt_state(0);  // SH 0
 
@@ -128,7 +128,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   ap.ds_voc_soc = 0;  // Ds
   ap.Tb_bias_model = 0;  // D^
   ap.dv_voc_soc = 0;  // Dy
-  ap.tb_stale_time_sclr = 1;  // Xv 1
+  ap.tb_stale_time_slr = 1;  // Xv 1
   ap.fail_tb = false;  // Xu 0
 
   // Noise
@@ -143,13 +143,13 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   Sen->ReadSensors->delay(READ_DELAY);  // Dr
 
   // Fault logic
-  ap.cc_diff_sclr = 1;  // Fc 1
-  ap.ib_diff_sclr = 1;  // Fd 1
+  ap.cc_diff_slr = 1;  // Fc 1
+  ap.ib_diff_slr = 1;  // Fd 1
   ap.fake_faults = 0;  // Ff 0
   sp.put_Ib_select(0);  // Ff 0
-  Sen->Flt->ewhi_sclr(1);  // Fi 1
-  Sen->Flt->ewlo_sclr(1);  // Fo 1
-  Sen->Flt->ib_quiet_sclr(1);  // Fq 1
+  Sen->Flt->ewhi_slr(1);  // Fi 1
+  Sen->Flt->ewlo_slr(1);  // Fo 1
+  Sen->Flt->ib_quiet_slr(1);  // Fq 1
   Sen->Flt->disab_ib_fa(0);  // FI 0
   Sen->Flt->disab_tb_fa(0);  // FT 0
   Sen->Flt->disab_vb_fa(0);  // FV 0
@@ -533,15 +533,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'm' ):  //   Sm<>:  Amp signal scalar for faults
-                Serial.printf("ShuntAmp.sclr%7.3f to", Sen->ib_amp_sclr());
-                Sen->ib_amp_sclr(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->ib_amp_sclr());
+                Serial.printf("ShuntAmp.slr%7.3f to", Sen->ib_amp_slr());
+                Sen->ib_amp_slr(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Sen->ib_amp_slr());
                 break;
 
               case ( 'n' ):  //   Sn<>:  No Amp signal scalar for faults
-                Serial.printf("ShuntNoAmp.sclr%7.3f to", Sen->ib_noa_sclr());
-                Sen->ib_noa_sclr(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->ib_noa_sclr());
+                Serial.printf("ShuntNoAmp.slr%7.3f to", Sen->ib_noa_slr());
+                Sen->ib_noa_slr(cp.input_str.substring(2).toFloat());
+                Serial.printf("%7.3f\n", Sen->ib_noa_slr());
                 break;
 
               case ( 'q' ):  //*  Sq<>: scale capacity sim
@@ -580,7 +580,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
             
               case ( 'k' ):  //*  Sk<>:  scale cutback gain for sim rep of >print_adj_print(S
-                sp.Cutback_gain_sclr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                sp.Cutback_gain_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
             
               case ( 'V' ):  //*  SV<>:  Vb sensor scalar
@@ -597,7 +597,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
 
               case ( 'c' ):  //   Fc<>: scale cc_diff threshold
-                ap.cc_diff_sclr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                ap.cc_diff_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'd' ):  //   Fd<>: scale ib_diff threshold
@@ -621,23 +621,23 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               case ( 'i' ):  //   Fi<>: scale e_wrap_hi threshold
                 scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("e_wrap_hi scl%7.3f to", Sen->Flt->ewhi_sclr());
-                Sen->Flt->ewhi_sclr(scale);
-                Serial.printf("%7.3f\n", Sen->Flt->ewhi_sclr());
+                Serial.printf("e_wrap_hi scl%7.3f to", Sen->Flt->ewhi_slr());
+                Sen->Flt->ewhi_slr(scale);
+                Serial.printf("%7.3f\n", Sen->Flt->ewhi_slr());
                 break;
 
               case ( 'o' ):  //   Fo<>: scale e_wrap_lo threshold
                 scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("e_wrap_lo scl%7.3f to", Sen->Flt->ewlo_sclr());
-                Sen->Flt->ewlo_sclr(scale);
-                Serial.printf("%7.3f\n", Sen->Flt->ewlo_sclr());
+                Serial.printf("e_wrap_lo scl%7.3f to", Sen->Flt->ewlo_slr());
+                Sen->Flt->ewlo_slr(scale);
+                Serial.printf("%7.3f\n", Sen->Flt->ewlo_slr());
                 break;
 
               case ( 'q' ):  //   Fq<>: scale ib_quiet threshold
                 scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("ib_quiet scl%7.3f to", Sen->Flt->ib_quiet_sclr());
-                Sen->Flt->ib_quiet_sclr(scale);
-                Serial.printf("%7.3f\n", Sen->Flt->ib_quiet_sclr());
+                Serial.printf("ib_quiet scl%7.3f to", Sen->Flt->ib_quiet_slr());
+                Sen->Flt->ib_quiet_slr(scale);
+                Serial.printf("%7.3f\n", Sen->Flt->ib_quiet_slr());
                 break;
 
               case ( 'T' ):  //   FT<>:  Fault disable tb stale
@@ -1289,7 +1289,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Ib_scale_noa_p->print1_help();  //* SB
   ap.hys_scale_p->print_help();  //  Sh
   Serial.printf("  SH= "); Serial.printf("%6.3f", Sen->Sim->hys_state()); Serial.printf(": hys states [0]\n");
-  sp.Cutback_gain_sclr_p->print_help();  //* Sk
+  sp.Cutback_gain_slr_p->print_help();  //* Sk
   sp.S_cap_mon_p->print_help();  //* SQ
   sp.S_cap_mon_p->print1_help();  //* SQ
   sp.S_cap_sim_p->print_help();  //* Sq
@@ -1298,13 +1298,13 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Vb_scale_p->print1_help();  //* SV
 
   Serial.printf("\nF<?>   Faults\n");
-  ap.cc_diff_sclr_p->print_help();  // Fc
+  ap.cc_diff_slr_p->print_help();  // Fc
   ap.ib_diff_slr_p->print1_help();  // Fd
   ap.fake_faults_p->print_help();  // Ff
   ap.fake_faults_p->print1_help();  // Ff
-  Serial.printf("  Fi= "); Serial.printf("%6.3f", Sen->Flt->ewhi_sclr()); Serial.printf(": sclr e_wrap_hi thr ^ [1]\n"); 
-  Serial.printf("  Fo= "); Serial.printf("%6.3f", Sen->Flt->ewlo_sclr()); Serial.printf(": sclr e_wrap_lo thr ^ [1]\n"); 
-  Serial.printf("  Fq= "); Serial.printf("%6.3f", Sen->Flt->ib_quiet_sclr()); Serial.printf(": sclr ib_quiet thr v [1]\n"); 
+  Serial.printf("  Fi= "); Serial.printf("%6.3f", Sen->Flt->ewhi_slr()); Serial.printf(": slr e_wrap_hi thr ^ [1]\n"); 
+  Serial.printf("  Fo= "); Serial.printf("%6.3f", Sen->Flt->ewlo_slr()); Serial.printf(": slr e_wrap_lo thr ^ [1]\n"); 
+  Serial.printf("  Fq= "); Serial.printf("%6.3f", Sen->Flt->ib_quiet_slr()); Serial.printf(": slr ib_quiet thr v [1]\n"); 
   Serial.printf("  FI=  "); Serial.print(Sen->Flt->disab_ib_fa()); Serial.printf(": disab Ib rng\n");
   Serial.printf("  FT=  "); Serial.print(Sen->Flt->disab_tb_fa()); Serial.printf(": disab Tb rng\n");
   Serial.printf("  FV=  "); Serial.print(Sen->Flt->disab_vb_fa()); Serial.printf(": disab Vb rng\n");
