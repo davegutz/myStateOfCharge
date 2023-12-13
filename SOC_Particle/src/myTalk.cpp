@@ -150,9 +150,9 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   ap.ewhi_slr = 1;  // Fi
   ap.ewlo_slr = 1;  // Fo
   Sen->Flt->ib_quiet_slr(1);  // Fq 1
-  Sen->Flt->disab_ib_fa(0);  // FI 0
-  Sen->Flt->disab_tb_fa(0);  // FT 0
-  Sen->Flt->disab_vb_fa(0);  // FV 0
+  ap.disab_ib_fa = 0;  // FI 0
+  ap.disab_tb_fa = 0;  // FT 0
+  ap.disab_vb_fa = 0;  // FV 0
 
 }
 
@@ -613,10 +613,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'I' ):  //   FI<>:  Fault disable ib hard
-                INT_in = cp.input_str.substring(2).toInt();
-                Serial.printf("Sen->Flt->disab_ib_fa %d to ", Sen->Flt->disab_ib_fa());
-                Sen->Flt->disab_ib_fa(INT_in);
-                Serial.printf("%d\n", Sen->Flt->disab_ib_fa());
+                ap.disab_ib_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'i' ):  //   Fi<>: scale e_wrap_hi threshold
@@ -635,17 +632,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'T' ):  //   FT<>:  Fault disable tb stale
-                INT_in = cp.input_str.substring(2).toInt();
-                Serial.printf("Sen->Flt->disab_tb_fa %d to ", Sen->Flt->disab_tb_fa());
-                Sen->Flt->disab_tb_fa(INT_in);
-                Serial.printf("%d\n", Sen->Flt->disab_tb_fa());
+                ap.disab_tb_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'V' ):  //   FV<>:  Fault disable vb hard
-                INT_in = cp.input_str.substring(2).toInt();
-                Serial.printf("Sen->Flt->disab_vb_fa %d to ", Sen->Flt->disab_vb_fa());
-                Sen->Flt->disab_vb_fa(INT_in);
-                Serial.printf("%d\n", Sen->Flt->disab_vb_fa());
+                ap.disab_vb_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               default:
@@ -1299,9 +1290,9 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   ap.ewhi_slr_p->print_help();  // Fi
   ap.ewlo_slr_p->print_help();  // Fo
   Serial.printf("  Fq= "); Serial.printf("%6.3f", Sen->Flt->ib_quiet_slr()); Serial.printf(": slr ib_quiet thr v [1]\n"); 
-  Serial.printf("  FI=  "); Serial.print(Sen->Flt->disab_ib_fa()); Serial.printf(": disab Ib rng\n");
-  Serial.printf("  FT=  "); Serial.print(Sen->Flt->disab_tb_fa()); Serial.printf(": disab Tb rng\n");
-  Serial.printf("  FV=  "); Serial.print(Sen->Flt->disab_vb_fa()); Serial.printf(": disab Vb rng\n");
+  ap.disab_ib_fa_p->print_help();  // FI
+  ap.disab_tb_fa_p->print_help();  // FT
+  ap.disab_vb_fa_p->print_help();  // FV
 
   Serial.printf("\nH<?>   Manage history\n");
   Serial.printf("  Hd= "); Serial.printf("dump summ log\n");

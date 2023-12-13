@@ -66,10 +66,13 @@ void  VolatilePars::initialize()
     // Memory map
     // Input definitions
     n_ = -1;
-    Z_ = new Z*[25];
+    Z_ = new Z*[28];
     Z_[n_] = (cc_diff_slr_p    = new FloatZ(&n_, "  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_slr,       1));
     Z_[n_] = (cycles_inj_p     = new FloatZ(&n_, "  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
     Z_[n_] = (dc_dc_on_p     = new BooleanZ(&n_, "  ", "Xd", NULL,"DC-DC charger on",     "T=on",   0,    1,    &dc_dc_on,          false));
+    Z_[n_] = (disab_ib_fa_p  = new BooleanZ(&n_, "  ", "FI", NULL,"Disab hard range ib",  "T=disab",0,    1,    &disab_ib_fa,       false));
+    Z_[n_] = (disab_tb_fa_p  = new BooleanZ(&n_, "  ", "FT", NULL,"Disab hard range tb",  "T=disab",0,    1,    &disab_tb_fa,       false));
+    Z_[n_] = (disab_vb_fa_p  = new BooleanZ(&n_, "  ", "FV", NULL,"Disab hard range vb",  "T=disab",0,    1,    &disab_vb_fa,       false));
     Z_[n_] = (ds_voc_soc_p     = new FloatZ(&n_, "  ", "Ds", NULL,"VOC(SOC) del soc",     "slr",    -0.5, 0.5,  &ds_voc_soc,        0));
     Z_[n_] = (dv_voc_soc_p     = new FloatZ(&n_, "  ", "Dy", NULL,"VOC(SOC) del v",       "v",      -50,  50,   &dv_voc_soc,        0));
     Z_[n_] = (eframe_mult_p   = new Uint8tZ(&n_, "  ", "DE", NULL,"EKF frame rate x Dr",  "uint",   0,    UINT8_MAX, &eframe_mult,  EKF_EFRAME_MULT));

@@ -172,12 +172,6 @@ public:
   boolean cc_diff_fa() { return failRead(CC_DIFF_FA); };
   float cc_diff_thr_;     // Threshold Coulomb Counters difference faults, soc fraction
   float cc_diff_thr() { return cc_diff_thr_; };
-  void disab_ib_fa(const boolean dis) { disab_ib_fa_ = dis; };
-  boolean disab_ib_fa() { return disab_ib_fa_; };
-  void disab_tb_fa(const boolean dis) { disab_tb_fa_ = dis; };
-  boolean disab_tb_fa() { return disab_tb_fa_; };
-  void disab_vb_fa(const boolean dis) { disab_vb_fa_ = dis; };
-  boolean disab_vb_fa() { return disab_vb_fa_; };
   boolean dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
   float ewhi_thr_;      // Threshold e_wrap failed high, V
@@ -264,10 +258,7 @@ protected:
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
-  float cc_diff_empty_slr_;  // Scale cc_diff when soc low, scalasr
-  boolean disab_ib_fa_;     // Disable hard fault range failures for ib
-  boolean disab_tb_fa_;     // Disable hard fault range failures for tb
-  boolean disab_vb_fa_;     // Disable hard fault range failures for vb
+  float cc_diff_empty_slr_;  // Scale cc_diff when soc low, scalar
   float ewmin_slr_;        // Scale wrap detection thresh when voc(soc) less than min, scalar
   float ewsat_slr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V

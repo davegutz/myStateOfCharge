@@ -239,8 +239,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
 
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving):
-  cc_diff_(0.), cc_diff_empty_slr_(1), disab_ib_fa_(false), disab_tb_fa_(false), disab_vb_fa_(false),
-  ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0),
+  cc_diff_(0.), cc_diff_empty_slr_(1), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0),
   ib_quiet_slr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
   latched_fail_fake_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   tb_sel_stat_last_(1), vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL), sp_preserving_(preserving)
@@ -373,7 +372,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" ib_quiet %7.3f  thr=%7.3f Fq v\n\n", ib_quiet_, ib_quiet_thr_);
 
   Serial.printf(" soc  %7.3f  soc_inf %7.3f voc %7.3f  voc_soc %7.3f\n", Mon->soc(), Mon->soc_inf(), Mon->voc(), Mon->voc_soc());
-  Serial.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n", disab_tb_fa_, disab_vb_fa_, disab_ib_fa_);
+  Serial.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n", ap.disab_tb_fa, ap.disab_vb_fa, ap.disab_ib_fa);
   Serial.printf(" bms_off   %d\n\n", Mon->bms_off());
 
   Serial.printf(" Tbh=%7.3f  Tbm=%7.3f sel %7.3f\n", Sen->Tb_hdwe, Sen->Tb_model, Sen->Tb);
@@ -418,7 +417,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" ib_quiet %7.3f  thr=%7.3f Fq v\n\n", ib_quiet_, ib_quiet_thr_);
 
   Serial1.printf(" soc  %7.3f  soc_inf %7.3f voc %7.3f  voc_soc %7.3f\n", Mon->soc(), Mon->soc_inf(), Mon->voc(), Mon->voc_soc());
-  Serial1.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n", disab_tb_fa_, disab_vb_fa_, disab_ib_fa_);
+  Serial1.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n", ap.disab_tb_fa, ap.disab_vb_fa, ap.disab_ib_fa);
   Serial1.printf(" bms_off   %d\n\n", Mon->bms_off());
 
   Serial1.printf(" Tbh=%7.3f  Tbm=%7.3f\n", Sen->Tb_hdwe, Sen->Tb_model);
@@ -679,13 +678,13 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     faultAssign( Sen->ShuntAmp->bare_detected(), IB_AMP_BARE);
     faultAssign( Sen->ShuntNoAmp->bare_detected(), IB_NOA_BARE);
     #ifndef CONFIG_BARE
-      faultAssign( ( ib_amp_bare() || Sen->ShuntAmp->Ishunt_cal() >= current_max ) && !disab_ib_fa_, IB_AMP_FLT );
-      faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max ) && !disab_ib_fa_, IB_NOA_FLT );
+      faultAssign( ( ib_amp_bare() || Sen->ShuntAmp->Ishunt_cal() >= current_max ) && !ap.disab_ib_fa, IB_AMP_FLT );
+      faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max ) && !ap.disab_ib_fa, IB_NOA_FLT );
     #else
-      faultAssign( Sen->ShuntAmp->Ishunt_cal() >= current_max && !disab_ib_fa_, IB_AMP_FLT );
-      faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !disab_ib_fa_, IB_NOA_FLT );
+      faultAssign( Sen->ShuntAmp->Ishunt_cal() >= current_max && !ap.disab_ib_fa, IB_AMP_FLT );
+      faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_NOA_FLT );
     #endif
-    if ( disab_ib_fa_ )
+    if ( ap.disab_ib_fa )
     {
       failAssign( false, IB_AMP_FA );
       failAssign( false, IB_NOA_FA);
@@ -702,7 +701,7 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
 {
   boolean reset_loc = reset | reset_all_faults_;
 
-  if ( disab_tb_fa_ || (sp.mod_tb() && !ap.fail_tb) )
+  if ( ap.disab_tb_fa || (sp.mod_tb() && !ap.fail_tb) )
   {
     faultAssign( false, TB_FLT );
     failAssign( false, TB_FA );
@@ -723,7 +722,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
   {
     failAssign(false, VB_FA);
   }
-  if ( disab_vb_fa_ || sp.mod_vb() )
+  if ( ap.disab_vb_fa || sp.mod_vb() )
   {
     faultAssign(false, VB_FLT);
     failAssign( false, VB_FA);

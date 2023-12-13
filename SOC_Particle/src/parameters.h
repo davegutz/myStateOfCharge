@@ -62,6 +62,9 @@ public:
     float cc_diff_slr;          // Scale cc_diff detection thresh, scalar
     float cycles_inj;           // Number of injection cycles
     boolean dc_dc_on;           // DC-DC charger is on
+    boolean disab_ib_fa;        // Disable hard fault range failures for ib
+    boolean disab_tb_fa;        // Disable hard fault range failures for tb
+    boolean disab_vb_fa;        // Disable hard fault range failures for vb
     float ds_voc_soc;           // VOC(SOC) delta soc on input, frac
     float dv_voc_soc;           // VOC(SOC) del v, V
     uint8_t eframe_mult;        // Frame multiplier for EKF execution.  Number of READ executes for each EKF execution
@@ -88,6 +91,9 @@ public:
     FloatZ *cc_diff_slr_p;
     FloatZ *cycles_inj_p;
     BooleanZ *dc_dc_on_p;
+    BooleanZ *disab_ib_fa_p;
+    BooleanZ *disab_tb_fa_p;
+    BooleanZ *disab_vb_fa_p;
     FloatZ *ds_voc_soc_p;
     FloatZ *dv_voc_soc_p;
     Uint8tZ *eframe_mult_p;
