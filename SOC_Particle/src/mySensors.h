@@ -338,20 +338,16 @@ public:
   float ib() { return Ib / sp.nP(); };                            // Battery unit current, A
   float ib_amp_hdwe() { return Ib_amp_hdwe / sp.nP(); };          // Battery amp unit current, A
   float ib_amp_model() { return Ib_amp_model / sp.nP(); };        // Battery amp model unit current, A
-  float ib_amp_slr() { return ib_amp_slr_; };
-  void ib_amp_slr(const float slr) { ib_amp_slr_ = slr; };
   float ib_hdwe() { return Ib_hdwe / sp.nP(); };                  // Battery select hardware unit current, A
   float ib_hdwe_model() { return Ib_hdwe_model / sp.nP(); };      // Battery select hardware model unit current, A
   float ib_model() { return Ib_model / sp.nP(); };                // Battery select model unit current, A
   float ib_model_in() { return Ib_model_in / sp.nP(); };          // Battery select model input unit current, A
   float ib_noa_hdwe() { return Ib_noa_hdwe / sp.nP(); };          // Battery no amp unit current, A
   float ib_noa_model() { return Ib_noa_model / sp.nP(); };        // Battery no amp model unit current, A
-  float ib_noa_slr() { return ib_noa_slr_; };
   float Ib_amp_add();
   float Ib_noa_add();
   float Ib_amp_noise();
   float Ib_noa_noise();
-  void ib_noa_slr(const float slr) { ib_noa_slr_ = slr; };
   float Ib_noise();
   void reset_temp(const boolean reset) { reset_temp_ = reset; };
   boolean reset_temp() { return ( reset_temp_ ); };
@@ -378,8 +374,6 @@ protected:
   PRBS_7 *Prbn_Vb_;     // Vb noise generator model only
   PRBS_7 *Prbn_Ib_amp_; // Ib amplified sensor noise generator model only
   PRBS_7 *Prbn_Ib_noa_; // Ib non-amplified sensor noise generator model only
-  float ib_amp_slr_;   // Fault injection slr on amp
-  float ib_noa_slr_;   // Fault injection slr on non amp
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
   unsigned long int sample_time_ib_;          // Exact moment of selected Ib sample, ms
   unsigned long int sample_time_vb_;          // Exact moment of selected Vb sample, ms

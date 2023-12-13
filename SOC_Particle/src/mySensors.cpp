@@ -737,8 +737,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
-  ib_amp_slr_(1.), ib_noa_slr_(1.), reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),
-  sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL)
+  reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL), sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL)
 {
   this->T = T;
   this->T_filt = T;
@@ -986,8 +985,8 @@ void Sensors::shunt_select_initial(const boolean reset)
       else
         hdwe_add = 0.;
     }
-    Ib_amp_model = Ib_model*ib_amp_slr() + Ib_amp_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sm / Dm
-    Ib_noa_model = Ib_model*ib_noa_slr() + Ib_noa_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Sn / Dn
+    Ib_amp_model = Ib_model + Ib_amp_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm
+    Ib_noa_model = Ib_model + Ib_noa_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
     Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);
     Ib_noa_hdwe = ShuntNoAmp->Ishunt_cal() + hdwe_add;  // Sense fault injection feeds logic, not model

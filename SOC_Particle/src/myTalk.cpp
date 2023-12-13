@@ -526,18 +526,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Sen->Flt->wrap_err_filt_state(-ap.hys_state);
                 break;
 
-              case ( 'm' ):  //   Sm<>:  Amp signal scalar for faults
-                Serial.printf("ShuntAmp.slr%7.3f to", Sen->ib_amp_slr());
-                Sen->ib_amp_slr(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->ib_amp_slr());
-                break;
-
-              case ( 'n' ):  //   Sn<>:  No Amp signal scalar for faults
-                Serial.printf("ShuntNoAmp.slr%7.3f to", Sen->ib_noa_slr());
-                Sen->ib_noa_slr(cp.input_str.substring(2).toFloat());
-                Serial.printf("%7.3f\n", Sen->ib_noa_slr());
-                break;
-
               case ( 'q' ):  //*  Sq<>: scale capacity sim
                 sp.S_cap_sim_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 Sen->Sim->apply_cap_scale(sp.S_cap_sim());
