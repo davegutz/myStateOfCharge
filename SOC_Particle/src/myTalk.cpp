@@ -47,27 +47,35 @@ void asap()
 void chat()
 {
   #ifdef DEBUG_QUEUE
-    Serial.printf("shebang [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+    if ( cp.input_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() )
+      Serial.printf("cp.input_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
+        cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
   #endif
   if ( cp.soon_str.length() )  // Do SOON first
   {
     get_string(&cp.soon_str);
   #ifdef DEBUG_QUEUE
-    if ( cp.token ) Serial.printf("chat (SOON):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+    if ( cp.token && (cp.input_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() ))
+      Serial.printf("chat (SOON):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n",
+        cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
   #endif
   }
   else if ( cp.queue_str.length() ) // Do QUEUE only after SOON empty
   {
     get_string(&cp.queue_str);
     #ifdef DEBUG_QUEUE
-      if ( cp.token ) Serial.printf("chat (QUEUE):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+      if ( cp.token && (cp.input_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() ))
+          Serial.printf("chat (QUEUE):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n",
+           cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
     #endif
   }
   else if ( cp.end_str.length() ) // Do QUEUE only after SOON empty
   {
     get_string(&cp.end_str);
     #ifdef DEBUG_QUEUE
-      if ( cp.token ) Serial.printf("chat (QUEUE):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n", cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+    if ( cp.token && (cp.input_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() ))
+      Serial.printf("chat (QUEUE):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n",
+        cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
     #endif
   }
 }
@@ -237,37 +245,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         break;
 
       case ( INCOMING ):
-
         switch ( cp.input_str.charAt(0) )
         {
-          case ( 'W' ):  // W<>:  wait.  Skip
-            if ( cp.input_str.substring(1).length() )
-            {
-              INT_in = cp.input_str.substring(1).toInt();
-              if ( INT_in > 0 )
-              {
-                for ( int i=0; i<INT_in; i++ )
-                {
-                  chit("W;", SOON);
-                }
-              }
-            }
-            else
-            {
-              Serial.printf("..Wait.\n");
-            }
-            break;
 
-          default:
-            // First process what we can from structures
-            ap.find_adjust(cp.input_str);
-            sp.find_adjust(cp.input_str);
-
-        }
-
-        // There may be followup to structures or new commands
-        switch ( cp.input_str.charAt(0) )
-        {
           case ( 'b' ):  // Fault buffer
             switch ( cp.input_str.charAt(1) )
             {
@@ -300,74 +280,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( 'B' ):
             switch ( cp.input_str.charAt(1) )
             {
-              case ( 'm' ):  //* Bm
-                // INT_in = cp.input_str.substring(2).toInt();
-                switch ( sp.Mon_chm_z )
-                {
-                  case ( 0 ):  // Bm0: Mon Battleborn
-                    // sp.Mon_chm_p->print_adj_print(INT_in);
-                    Mon->assign_all_mod("Battleborn");
-                    Mon->chem_pretty_print();
-                    cp.cmd_reset();
-                    break;
-
-                  case ( 1 ):  // Bm1: Mon CHINS
-                    // sp.Mon_chm_p->print_adj_print(INT_in);
-                    Mon->assign_all_mod("CHINS");
-                    Mon->chem_pretty_print();
-                    cp.cmd_reset();
-                    break;
-
-                  case ( 2 ):  // Bm2: Mon Spare
-                    // sp.Mon_chm_p->print_adj_print(INT_in);
-                    Mon->assign_all_mod("Spare");
-                    Mon->chem_pretty_print();
-                    cp.cmd_reset();
-                    break;
-
-                  default:
-                    Serial.printf("%d ? 'h'", INT_in);
-                }
-                break;
-
-              case ( 's' ):  //* Bs:  Simulation chemistry change
-                // INT_in = cp.input_str.substring(2).toInt();
-                switch ( sp.Sim_chm_z )
-                {
-                  case ( 0 ):  // Bs0: Sim Battleborn
-                    // sp.Sim_chm_p->print_adj_print(INT_in);
-                    Sen->Sim->assign_all_mod("Battleborn");
-                    cp.cmd_reset();
-                    break;
-
-                  case ( 1 ):  // Bs1: Sim CHINS
-                    // sp.Sim_chm_p->print_adj_print(INT_in);
-                    Sen->Sim->assign_all_mod("CHINS");
-                    cp.cmd_reset();
-                    break;
-
-                  case ( 2 ):  // Bs2: Sim Spare
-                    // sp.Sim_chm_p->print_adj_print(INT_in);
-                    Sen->Sim->assign_all_mod("Spare");
-                    cp.cmd_reset();
-                    break;
-
-                  default:
-                    Serial.printf("%d ? 'h'", INT_in);
-                }
-                break;
-
-              case ( 'P' ):  //* BP<>:  Number of parallel batteries in bank, e.g. '2P1S'
-                // sp.nP_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'S' ):  //* BS<>:  Number of series batteries in bank, e.g. '2P1S'
-                // sp.nS_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
               case ( 'Z' ):  // BZ :  Benign zeroing of settings to make clearing test easier
-                  benign_zero(Mon, Sen);
-                  Serial.printf("Benign Zero\n");
+                benign_zero(Mon, Sen);
+                Serial.printf("Benign Zero\n");
                 break;
 
               default:
@@ -378,231 +293,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
           case ( 'c' ):  // c:  clear queues
             Serial.printf("***CLEAR QUEUES\n");
             clear_queues();
-            break;
-
-          case ( 'C' ):  // C:
-            switch ( cp.input_str.charAt(1) )
-            {
-              case ( 'a' ):  // Ca<>:  assign charge state in fraction to all versions including model
-                if ( ap.init_all_soc_p->success() )
-                {
-                  initialize_all(Mon, Sen, ap.init_all_soc, true);
-                  #ifdef DEBUG_INIT
-                    if ( sp.Debug()==-1 ){ Serial.printf("after initialize_all:"); debug_m1(Mon, Sen);}
-                  #endif
-                  if ( sp.Modeling() )
-                  {
-                    cp.cmd_reset();
-                    chit("W3;", SOON);  // Wait 10 passes of Control
-                  }
-                  else
-                  {
-                    cp.cmd_reset();
-                    chit("W3;", SOON);  // Wait 10 passes of Control
-                  }
-                }
-                else
-                  Serial.printf("skipping %s\n", cp.input_str.c_str());
-                break;
-
-              case ( 'm' ):  // Cm<>:  assign curve charge state in fraction to model only (ekf if modeling)
-                if ( ap.init_sim_soc_p->success() )  // Apply crude limit to prevent user error
-                {
-                  Sen->Sim->apply_soc(ap.init_sim_soc, Sen->Tb_filt);
-                  Serial.printf("soc%8.4f, dq%7.3f, soc_mod%8.4f, dq mod%7.3f,\n",
-                      Mon->soc(), Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q());
-                  if ( sp.Modeling() ) cp.cmd_reset_sim(); // Does not block.  Commands a reset
-                }
-                else
-                  Serial.printf("soc%8.4f; must be 0-1.1\n", FP_in);
-                break;
-
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
-            }
-            break;
-
-          case ( 'D' ):
-            switch ( cp.input_str.charAt(1) )
-            {
-              case ( 'A' ):  //*  DA<>:  Amp sensor bias
-                // sp.Ib_bias_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'B' ):  //*  DB<>:  No Amp sensor bias
-                // sp.Ib_bias_noa_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'c' ):  //*  Dc<>:  Vb bias
-                // sp.Vb_bias_hdwe_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'E' ):  //   DE<>:  EKF execution frame multiplier
-                // ap.eframe_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
-                break;
-
-              case ( 'I' ):  //*  DI<>:  Bias all current sensors without reset (same way as Da and Db)
-                // sp.Ib_bias_all_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'm' ):  //   Dm<>:  Amp signal adder for faults
-                // ap.ib_amp_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'n' ):  //   Dn<>:  No Amp signal adder for faults
-                // ap.ib_noa_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'P' ):  //   DP<>:  PRINT multiplier
-                // ap.print_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
-                break;
-
-              case ( 'r' ):  //   Dr<>:  READ sample time input
-                // ap.read_delay_p->print_adj_print(cp.input_str.substring(2).toInt());
-                Sen->ReadSensors->delay(ap.read_delay);  // validated
-                break;
-
-              case ( 's' ):  //   Ds<>:  d_soc to Sim.voc_soc
-                // ap.ds_voc_soc_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 't' ):  //*  Dt<>:  Temp bias change hardware
-                // sp.Tb_bias_hdwe_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                cp.cmd_reset();
-                break;
-
-              case ( '^' ):  //   D^<>:  Temp bias change model for faults
-                // ap.Tb_bias_model_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'v' ):  //     Dv<>:  voltage signal adder for faults
-                // ap.vb_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                ap.vb_add_p->print1();
-                break;
-
-              case ( 'w' ):  //   * Dw<>:
-                // sp.Dw_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'y' ):  //   Dy<>:  delta Sim curve soc in
-                // ap.dv_voc_soc_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'T' ):  //   DT<>:  Tb noise
-                // ap.Tb_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'V' ):  //   DV<>:  Vb noise
-                // ap.Vb_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'M' ):  //   DM<>:  Ib amp noise
-                // ap.Ib_amp_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'N' ):  //   DN<>:  Ib noa noise
-                // ap.Ib_noa_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
-            }
-            break;
-
-          case ( 'S' ):
-            switch ( cp.input_str.charAt(1) )
-            {
-
-              case ( 'A' ):  //*  SA<>:  Amp sensor scalar
-                // sp.Ib_scale_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'B' ):  //*  SB<>:  No Amp sensor scalar
-                // sp.Ib_scale_noa_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'h' ):  //   Sh<>: scale hysteresis
-                // ap.hys_scale_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'H' ):  //   SH<>: state of all hysteresis
-                // ap.hys_state_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                Sen->Sim->hys_state(ap.hys_state);
-                Sen->Flt->wrap_err_filt_state(-ap.hys_state);
-                break;
-
-              case ( 'q' ):  //*  Sq<>: scale capacity sim
-                // sp.S_cap_sim_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                Sen->Sim->apply_cap_scale(sp.S_cap_sim());
-                if ( sp.Modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
-                break;
-            
-              case ( 'Q' ):  //*  SQ<>: scale capacity mon
-                // sp.S_cap_mon_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                Mon->apply_cap_scale(sp.S_cap_mon());
-                break;
-            
-              case ( 'r' ):  //   Sr<>:  scalar resistor
-                // ap.slr_res_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-            
-              case ( 'k' ):  //*  Sk<>:  scale cutback gain for sim rep of >print_adj_print(S
-                // sp.Cutback_gain_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-            
-              case ( 'V' ):  //*  SV<>:  Vb sensor scalar
-                // sp.Vb_scale_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
-            }
-            break;
-
-          case ( 'F' ):  // Fault stuff
-            switch ( cp.input_str.charAt(1) )
-            {
-
-              case ( 'c' ):  //   Fc<>: scale cc_diff threshold
-                // ap.cc_diff_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'd' ):  //   Fd<>: scale ib_diff threshold
-                // ap.ib_diff_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'f' ):  //* si, Ff<>:  fake faults
-                // ap.fake_faults_p->print_adj_print(cp.input_str.substring(2).toInt());
-                sp.put_Ib_select(cp.input_str.substring(2).toInt());
-                break;
-
-              case ( 'I' ):  //   FI<>:  Fault disable ib hard
-                // ap.disab_ib_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
-                break;
-
-              case ( 'i' ):  //   Fi<>: scale e_wrap_hi threshold
-                // ap.ewhi_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'o' ):  //   Fo<>: scale e_wrap_lo threshold
-                // ap.ewlo_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'q' ):  //   Fq<>: scale ib_quiet threshold
-                // ap.ib_quiet_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
-              case ( 'T' ):  //   FT<>:  Fault disable tb stale
-                // ap.disab_tb_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
-                break;
-
-              case ( 'V' ):  //   FV<>:  Fault disable vb hard
-                // ap.disab_vb_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
-                break;
-
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
-            }
             break;
 
           case ( 'H' ):  // History
@@ -639,30 +329,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
               default:
                 Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
-            }
-            break;
-
-          case ( 'l' ):
-            switch ( sp.Debug() )
-            {
-              case ( -1 ):  // l-1:
-                // Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noa  ,Vb_fo*10-110  ,voc_s*10-110  ,dv_dyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
-                break;
-              case ( 1 ):  // l1:
-                print_serial_header();
-                break;
-              case ( 2 ):  // l2:
-                print_signal_sel_header();
-                print_serial_sim_header();
-                print_serial_header();
-                break;
-              case ( 3 ):  // l3:
-                print_serial_ekf_header();
-                print_serial_sim_header();
-                print_serial_header();
-                break;
-              default:
-                print_serial_header();
             }
             break;
 
@@ -816,135 +482,41 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 ap.pretty_print(true);
                 break;
 
-
               default:
                 Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
             }
-            break;
-
-          case ( 's' ):
-            switch ( cp.input_str.charAt(1) )
-            {
-              case ( 'i' ):  //* si:  selection battery  mode
-                // sp.Ib_select_p->print_adj_print(cp.input_str.substring(1).toInt());
-                break;
-
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
-            }
-            break;
-
-          case ( 'U' ):
-            switch ( cp.input_str.charAt(1) )
-            {
-              case ( 'T' ):  //*  UT<>:  Unix time since epoch
-              // sp.Time_now_p->print_adj_print((unsigned long)cp.input_str.substring(2).toInt());
-              Time.setTime(sp.Time_now_z);
-              break;
-
-            default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
-            }
-            break;
-
-          case ( 'v' ):  //*  v<>:  verbose level
-            // sp.Debug_p->print_adj_print(cp.input_str.substring(1).toInt());
             break;
 
           // Photon 2 O/S waits 10 seconds between backup SRAM saves.  To save time, you can get in the habit of pressing 'w;'
           // This was not done for all passes just to save only when an adjustment change verified by user (* parameters), to avoid SRAM life impact.
           #ifdef CONFIG_PHOTON2
-            case ( 'w' ):  // w:  confirm write * adjustments to to SRAM
-              System.backupRamSync();
-              Serial.printf("SAVED *\n"); Serial1.printf("SAVED *\n");
-              break;
+          case ( 'w' ):  // w:  confirm write * adjustments to to SRAM
+            System.backupRamSync();
+            Serial.printf("SAVED *\n"); Serial1.printf("SAVED *\n");
+            break;
           #endif
 
-          case ( 'W' ):  // W
-            // already handled
+          case ( 'W' ):  // W<>:  wait.  Skip
+            if ( cp.input_str.substring(1).length() )
+            {
+              INT_in = cp.input_str.substring(1).toInt();
+              if ( INT_in > 0 )
+              {
+                for ( int i=0; i<INT_in; i++ )
+                {
+                  chit("W;", SOON);
+                }
+              }
+            }
+            else
+            {
+              Serial.printf("..Wait.\n");
+            }
             break;
 
-          case ( 'X' ):  // X
+          case ( 'X' ):
             switch ( cp.input_str.charAt(1) )
             {
-              case ( 'd' ):  // Xd<>:  on/off dc-dc charger manual setting
-                // ap.dc_dc_on_p->print_adj_print(cp.input_str.substring(2).toInt()>0);
-                break;
-
-              case ( 'm' ):  // Xm<>:  code for modeling level
-                INT_in =  cp.input_str.substring(2).toInt();
-                reset = sp.Modeling() != modeling_past;
-                Serial.printf("past M %d new M %d reset %d\n", modeling_past, sp.Modeling(), reset);
-                // sp.Modeling_p->print_adj_print(INT_in);
-                if ( reset )
-                {
-                  Serial.printf("Chg...reset\n");
-                  cp.cmd_reset();
-                }
-                break;
-
-              case ( 'a' ): // Xa<>:  injection amplitude
-                sp.put_Amp(cp.input_str.substring(2).toFloat()*sp.nP());
-                Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
-                break;
-
-              case ( 'f' ): //*  Xf<>:  injection frequency
-                // sp.Freq_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                if ( sp.Freq_p->success() ) sp.Freq_z = sp.Freq_z*(2. * PI);
-                break;
-
-              case ( 'b' ): //*  Xb<>:  injection bias
-                // sp.Inj_bias_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
-                break;
-
-              case ( 'Q' ): //  XQ<>: time to quiet
-                // ap.until_q_p->print_adj_print((unsigned long int) cp.input_str.substring(2).toInt());
-                Serial.printf("Going black in %7.1f seconds\n", float(ap.until_q) / 1000.);
-                break;
-
-              case ( 't' ): //*  Xt<>:  injection type
-                switch ( cp.input_str.charAt(2) )
-                {
-                  case ( 'n' ):  // Xtn:  none
-                    sp.put_Type(0);
-                    Serial.printf("Set none. sp.type() %d\n", sp.type());
-                    break;
-
-                  case ( 's' ):  // Xts:  sine
-                    sp.put_Type(1);
-                    Serial.printf("Set sin. sp.type() %d\n", sp.type());
-                    break;
-
-                  case ( 'q' ):  // Xtq:  square
-                    sp.put_Type(2);
-                    Serial.printf("Set square. sp.type() %d\n", sp.type());
-                    break;
-
-                  case ( 't' ):  // Xtt:  triangle
-                    sp.put_Type(3);
-                    Serial.printf("Set tri. sp.type() %d\n", sp.type());
-                    break;
-
-                  case ( 'c' ):  // Xtc:  charge rate
-                    sp.put_Type(4);
-                    Serial.printf("Set 1C charge. sp.type() %d\n", sp.type());
-                    break;
-
-                  case ( 'd' ):  // Xtd:  discharge rate
-                    sp.put_Type(5);
-                    Serial.printf("Set 1C disch. sp.type() %d\n", sp.type());
-                    break;
-
-                  case ( 'o' ):  // Xto:  cosine
-                    sp.put_Type(8);
-                    Serial.printf("Set cos. sp.type() %d\n", sp.type());
-                    break;
-
-                  default:
-                    Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
-                }
-                break;
 
               case ( 'p' ): // Xp<>:  injection program
                 INT_in = cp.input_str.substring(2).toInt();
@@ -1093,10 +665,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 }
                 break;
 
-              case ( 'C' ): // XC:  injection number of cycles
-                // ap.cycles_inj_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                break;
-
               case ( 'R' ): // XR:  Start injection now
                 if ( Sen->now>TEMP_INIT_DELAY )
                 {
@@ -1120,24 +688,235 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 chit("Xp0;", SOON);    // Reset
                 break;
 
-              case ( 's' ): // Xs:  scale T_SAT
-                // ap.s_t_sat_p->print_adj_print(cp.input_str.substring(2).toFloat());
+              case ( 't' ): //*  Xt<>:  injection type
+                switch ( cp.input_str.charAt(2) )
+                {
+                  case ( 'n' ):  // Xtn:  none
+                    sp.put_Type(0);
+                    Serial.printf("Set none. sp.type() %d\n", sp.type());
+                    break;
+
+                  case ( 's' ):  // Xts:  sine
+                    sp.put_Type(1);
+                    Serial.printf("Set sin. sp.type() %d\n", sp.type());
+                    break;
+
+                  case ( 'q' ):  // Xtq:  square
+                    sp.put_Type(2);
+                    Serial.printf("Set square. sp.type() %d\n", sp.type());
+                    break;
+
+                  case ( 't' ):  // Xtt:  triangle
+                    sp.put_Type(3);
+                    Serial.printf("Set tri. sp.type() %d\n", sp.type());
+                    break;
+
+                  case ( 'c' ):  // Xtc:  charge rate
+                    sp.put_Type(4);
+                    Serial.printf("Set 1C charge. sp.type() %d\n", sp.type());
+                    break;
+
+                  case ( 'd' ):  // Xtd:  discharge rate
+                    sp.put_Type(5);
+                    Serial.printf("Set 1C disch. sp.type() %d\n", sp.type());
+                    break;
+
+                  case ( 'o' ):  // Xto:  cosine
+                    sp.put_Type(8);
+                    Serial.printf("Set cos. sp.type() %d\n", sp.type());
+                    break;
+
+                  default:
+                    Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
+                }
                 break;
 
-              case ( 'W' ):  // XW<>:  Wait beginning of programmed transient
-                // ap.wait_inj_p->print_adj_print(cp.input_str.substring(2).toInt());
+              default:
+                Serial.printf("Xp=%d unk.  see 'h'\n", INT_in);
+            }
+            break;
+
+          case ( 'h' ):  // h: help
+            talkH(Mon, Sen);
+            break;
+
+          default:
+            // First process what we can from structures
+            ap.find_adjust(cp.input_str);
+            sp.find_adjust(cp.input_str);
+
+        }
+
+        // There may be followup to structures or new commands
+        switch ( cp.input_str.charAt(0) )
+        {
+
+          case ( 'B' ):
+            switch ( cp.input_str.charAt(1) )
+            {
+
+              case ( 'm' ):  //* Bm
+                if ( sp.Mon_chm_p->success() )
+                switch ( sp.Mon_chm_z )
+                {
+                  case ( 0 ):  // Bm0: Mon Battleborn
+                      Mon->assign_all_mod("Battleborn");
+                      Mon->chem_pretty_print();
+                      cp.cmd_reset();
+                      break;
+
+                    case ( 1 ):  // Bm1: Mon CHINS
+                      Mon->assign_all_mod("CHINS");
+                      Mon->chem_pretty_print();
+                      cp.cmd_reset();
+                      break;
+
+                    case ( 2 ):  // Bm2: Mon Spare
+                      Mon->assign_all_mod("Spare");
+                      Mon->chem_pretty_print();
+                      cp.cmd_reset();
+                      break;
+
+                    default:
+                      Serial.printf("%d ? 'h'", INT_in);
+                  }
+                  break;
+
+              case ( 's' ):  //* Bs:  Simulation chemistry change
+                if ( sp.Sim_chm_p->success() )
+                switch ( sp.Sim_chm_z )
+                {
+                  case ( 0 ):  // Bs0: Sim Battleborn
+                    Sen->Sim->assign_all_mod("Battleborn");
+                    cp.cmd_reset();
+                    break;
+
+                  case ( 1 ):  // Bs1: Sim CHINS
+                    Sen->Sim->assign_all_mod("CHINS");
+                    cp.cmd_reset();
+                    break;
+
+                  case ( 2 ):  // Bs2: Sim Spare
+                    Sen->Sim->assign_all_mod("Spare");
+                    cp.cmd_reset();
+                    break;
+
+                  default:
+                    Serial.printf("%d ? 'h'", INT_in);
+                }
                 break;
 
-              case ( 'T' ):  // XT<>:  Tail end of programmed transient
-                // ap.tail_inj_p->print_adj_print(cp.input_str.substring(2).toInt());
+              default:
+                Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
+            }
+            break;
+
+          case ( 'C' ):  // C:
+            switch ( cp.input_str.charAt(1) )
+            {
+
+              case ( 'a' ):  // Ca<>:  assign charge state in fraction to all versions including model
+                if ( ap.init_all_soc_p->success() )
+                {
+                  initialize_all(Mon, Sen, ap.init_all_soc, true);
+                  #ifdef DEBUG_INIT
+                    if ( sp.Debug()==-1 ){ Serial.printf("after initialize_all:"); debug_m1(Mon, Sen);}
+                  #endif
+                  if ( sp.Modeling() )
+                  {
+                    cp.cmd_reset();
+                    chit("W3;", SOON);  // Wait 10 passes of Control
+                  }
+                  else
+                  {
+                    cp.cmd_reset();
+                    chit("W3;", SOON);  // Wait 10 passes of Control
+                  }
+                }
+                else
+                  Serial.printf("skipping %s\n", cp.input_str.c_str());
                 break;
 
-              case ( 'u' ):  // Xu<>:  Tb, fail it
-                // ap.fail_tb_p->print_adj_print(cp.input_str.substring(2).toInt());
+              case ( 'm' ):  // Cm<>:  assign curve charge state in fraction to model only (ekf if modeling)
+                if ( ap.init_sim_soc_p->success() )  // Apply crude limit to prevent user error
+                {
+                  Sen->Sim->apply_soc(ap.init_sim_soc, Sen->Tb_filt);
+                  Serial.printf("soc%8.4f, dq%7.3f, soc_mod%8.4f, dq mod%7.3f,\n",
+                      Mon->soc(), Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q());
+                  if ( sp.Modeling() ) cp.cmd_reset_sim(); // Does not block.  Commands a reset
+                }
+                else
+                  Serial.printf("soc%8.4f; must be 0-1.1\n", FP_in);
                 break;
 
-              case ( 'v' ):  // Xv<>:  Tb stale time scalar
-                // ap.tb_stale_time_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+              default:
+                Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
+            }
+            break;
+
+          case ( 'D' ):
+            switch ( cp.input_str.charAt(1) )
+            {
+
+              case ( 'r' ):  //   Dr<>:  READ sample time input
+                if ( ap.read_delay_p->success() )
+                  Sen->ReadSensors->delay(ap.read_delay);  // validated
+                break;
+
+              case ( 't' ):  //*  Dt<>:  Temp bias change hardware
+                if ( sp.Tb_bias_hdwe_p->success() )
+                  cp.cmd_reset();
+                break;
+
+              case ( 'v' ):  //     Dv<>:  voltage signal adder for faults
+                if ( ap.vb_add_p->success() )
+                  ap.vb_add_p->print1();
+                break;
+  
+              default:
+                Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
+            }
+            break;
+
+          case ( 'S' ):
+            switch ( cp.input_str.charAt(1) )
+            {
+
+              case ( 'H' ):  //   SH<>: state of all hysteresis
+                if ( ap.hys_state_p->success() )
+                {
+                  Sen->Sim->hys_state(ap.hys_state);
+                  Sen->Flt->wrap_err_filt_state(-ap.hys_state);
+                }
+                break;
+
+              case ( 'q' ):  //*  Sq<>: scale capacity sim
+                if ( sp.S_cap_sim_p->success() )
+                {
+                  Sen->Sim->apply_cap_scale(sp.S_cap_sim());
+                  if ( sp.Modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
+                }
+                break;
+            
+              case ( 'Q' ):  //*  SQ<>: scale capacity mon
+                if ( sp.S_cap_mon_p->success() )
+                {
+                  Mon->apply_cap_scale(sp.S_cap_mon());
+                }
+                break;
+            
+              default:
+                Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
+            }
+            break;
+
+          case ( 'F' ):  // Fault stuff
+            switch ( cp.input_str.charAt(1) )
+            {
+
+              case ( 'f' ):  //* si, Ff<>:  fake faults
+                if ( ap.fake_faults_p->success() )
+                  sp.put_Ib_select(cp.input_str.substring(2).toInt());
                 break;
 
               default:
@@ -1145,8 +924,97 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             }
             break;
 
-          case ( 'h' ):  // h: help
-            talkH(Mon, Sen);
+
+          case ( 'l' ):
+            if ( sp.Debug_p->success() )
+            switch ( sp.Debug() )
+            {
+              case ( -1 ):  // l-1:
+                // Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noa  ,Vb_fo*10-110  ,voc_s*10-110  ,dv_dyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
+                break;
+              case ( 1 ):  // l1:
+                print_serial_header();
+                break;
+              case ( 2 ):  // l2:
+                print_signal_sel_header();
+                print_serial_sim_header();
+                print_serial_header();
+                break;
+              case ( 3 ):  // l3:
+                print_serial_ekf_header();
+                print_serial_sim_header();
+                print_serial_header();
+                break;
+              default:
+                print_serial_header();
+            }
+            break;
+
+          case ( 's' ):
+            if ( sp.Ib_select_p->success() )
+            switch ( cp.input_str.charAt(1) )
+            {
+              case ( 'i' ):  //* si:  selection battery  mode
+                // sp.Ib_select_p->print_adj_print(cp.input_str.substring(1).toInt());
+                break;
+
+              default:
+                Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
+            }
+            break;
+
+          case ( 'U' ):
+            if ( sp.Time_now_p->success() )
+            switch ( cp.input_str.charAt(1) )
+            {
+              case ( 'T' ):  //*  UT<>:  Unix time since epoch
+              Time.setTime(sp.Time_now_z);
+              break;
+
+            default:
+                Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
+            }
+            break;
+
+          case ( 'X' ):  // X
+            switch ( cp.input_str.charAt(1) )
+            {
+
+              case ( 'm' ):  // Xm<>:  code for modeling level
+                if ( sp.Modeling_p->success() )
+                {
+                  reset = sp.Modeling() != modeling_past;
+                  if ( reset )
+                  {
+                    Serial.printf("Chg...reset\n");
+                    cp.cmd_reset();
+                  }
+                }
+                break;
+
+              case ( 'a' ): // Xa<>:  injection amplitude
+                if ( sp.Amp_p->success() )
+                {
+                  sp.Amp_z *= sp.nP();
+                  Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
+                }
+                break;
+
+              case ( 'f' ): //*  Xf<>:  injection frequency
+                if ( sp.Freq_p->success() ) sp.Freq_z = sp.Freq_z*(2. * PI);
+                break;
+
+              case ( 'b' ): //*  Xb<>:  injection bias
+                Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
+                break;
+
+              case ( 'Q' ): //  XQ<>: time to quiet
+                Serial.printf("Going black in %7.1f seconds\n", float(ap.until_q) / 1000.);
+                break;
+
+              default:
+                Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
+            }
             break;
 
           default:
