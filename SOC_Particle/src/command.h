@@ -63,7 +63,9 @@ public:
   boolean model_saturated;  // Sim on cutback and saturated
   unsigned long num_v_print;// Number of print echos made, for checking on BLE
   boolean publishS;         // Print serial monitor data
-  boolean soft_reset;       // Use talk to reset main
+  boolean soft_reset;       // Use talk to reset all
+  boolean soft_reset_sim;   // Use talk to reset sim only
+  boolean soft_sim_hold;    // Use talk to reset sim only
   Tb_union tb_info;         // Use cp to pass DS2482 I2C information
   boolean write_summary;    // Use talk to issue a write command to summary
 
@@ -76,12 +78,18 @@ public:
     num_v_print = 0UL;
     publishS = false;
     soft_reset = false;
+    soft_reset_sim = false;
+    soft_sim_hold = false;
     write_summary = false;
     tb_info.t_c = 0.;
     tb_info.ready = false;
   }
 
   void cmd_reset(void) { soft_reset = true; }
+
+  void cmd_reset_sim(void) { soft_reset_sim = true; }
+
+  void cmd_soft_sim_hold(void) { soft_sim_hold = true; }
 
   void cmd_summarize(void) { write_summary = true; }
 
@@ -102,6 +110,7 @@ public:
       Serial.printf(" model_saturated %d\n", model_saturated);
       Serial.printf(" publishS %d\n", publishS);
       Serial.printf(" soft_reset %d\n", soft_reset);
+      Serial.printf(" soft_reset_sim %d\n", soft_reset_sim);
       Serial.printf(" tb_info.t_c %7.3f\n", tb_info.t_c);
       Serial.printf(" tb_info.ready %d\n", tb_info.ready);
       Serial.printf(" write_summary %d\n\n", write_summary);

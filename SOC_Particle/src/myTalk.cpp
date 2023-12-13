@@ -378,13 +378,12 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'm' ):  // Cm<>:  assign curve charge state in fraction to model only (ekf if modeling)
-                FP_in = cp.input_str.substring(2).toFloat();
-                if ( FP_in<1.1 )   // Apply crude limit to prevent user error
+                if ( ap.init_sim_soc_p->print_adj_print(cp.input_str.substring(2).toFloat()) )  // Apply crude limit to prevent user error
                 {
-                  Sen->Sim->apply_soc(FP_in, Sen->Tb_filt);
+                  Sen->Sim->apply_soc(ap.init_sim_soc, Sen->Tb_filt);
                   Serial.printf("soc%8.4f, dq%7.3f, soc_mod%8.4f, dq mod%7.3f,\n",
                       Mon->soc(), Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q());
-                  if ( sp.Modeling() ) cp.cmd_reset();
+                  if ( sp.Modeling() ) cp.cmd_reset_sim(); // Does not block.  Commands a reset
                 }
                 else
                   Serial.printf("soc%8.4f; must be 0-1.1\n", FP_in);

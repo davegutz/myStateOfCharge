@@ -342,11 +342,6 @@ void loop()
   // Synchronize
   #ifdef CONFIG_DS2482_1WIRE
     Ds2482.loop();
-    // if ( read || read_temp || reset || reset_temp )
-    // if ( read_temp || reset_temp )  // never ready=1
-    // {
-    //   Ds2482.loop();
-    // }
   #endif
   now = millis();
   time_now = Time.now();
@@ -517,10 +512,13 @@ void loop()
   if ( cp.publishS ) reset_publish = false;
 
   // Soft reset
-  if ( cp.soft_reset )
+  if ( read ) cp.soft_sim_hold = false;
+  if ( cp.soft_reset || cp.soft_reset_sim )
   {
     reset = reset_temp = reset_publish = true;
-    Serial.printf("soft reset...\n");
+    if ( cp.soft_reset_sim ) cp.cmd_soft_sim_hold();
   }
   cp.soft_reset = false;
+  cp.soft_reset_sim = false;
+
 } // loop

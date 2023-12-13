@@ -81,6 +81,7 @@ public:
     float Ib_noa_noise_amp;     // Ib bank noise on non-amplified sensor, amplitude model only, A pk-pk
     float ib_quiet_slr;         // Scale ib_quiet detection thresh, scalar
     float init_all_soc;         // Reinitialize all models to this soc
+    float init_sim_soc;         // Reinitialize sim model only to this soc
     uint8_t print_mult;         // Print multiplier for objects
     unsigned long int read_delay; // Minor frame, ms
     float slr_res;              // Scalar Randles R0, slr
@@ -115,6 +116,7 @@ public:
     FloatZ *Ib_noa_noise_amp_p;
     FloatZ *ib_quiet_slr_p;
     FloatZ *init_all_soc_p;
+    FloatZ *init_sim_soc_p;
     Uint8tZ *print_mult_p;
     ULongZ *read_delay_p;
     FloatZ *slr_res_p;

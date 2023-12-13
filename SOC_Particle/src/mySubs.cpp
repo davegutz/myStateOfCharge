@@ -241,12 +241,16 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
     }
   #endif
   if ( !Sen->Flt->tb_fa() ) harvest_temp_change(Sen->Tb_filt, Mon, Sen->Sim);
+  
   #ifdef DEBUG_INIT
     if ( sp.Debug()==-1 ){ Serial.printf("after harvest_temp:"); debug_m1(Mon, Sen);}
   #endif
-  // if ( use_soc_in )
-  //   Mon->apply_soc(soc_in, Sen->Tb_filt);  // saves sp.delta_q and sp.T_state
-  Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies sp.delta_q and sp.T_state
+
+  if ( cp.soft_sim_hold )  
+    Sen->Sim->apply_delta_q_t(Sen->Sim->delta_q(), Sen->Sim->t_last());  // applies sp.delta_q and sp.T_state
+  else
+    Sen->Sim->apply_delta_q_t(Mon->delta_q(), Mon->t_last());  // applies sp.delta_q and sp.T_state
+
   #ifdef DEBUG_INIT
     if ( sp.Debug()==-1 ){ Serial.printf("S.a_d_q_t:"); debug_m1(Mon, Sen);}
   #endif
@@ -289,7 +293,7 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   #ifdef DEBUG_INIT
     if ( sp.Debug()==-1 ){ Serial.printf("SENIB:"); debug_m1(Mon, Sen);}
   #endif
-  if ( sp.mod_vb() )
+  if ( sp.mod_vb() && !cp.soft_sim_hold )
   {
     Mon->apply_soc(Sen->Sim->soc(), Sen->Tb_filt);
   }
