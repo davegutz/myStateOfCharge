@@ -732,7 +732,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               default:
-                Serial.printf("Xp=%d unk.  see 'h'\n", INT_in);
+                Serial.printf("X%c unk.  see 'h'\n", cp.input_str.charAt(1));
             }
             break;
 
@@ -747,7 +747,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
         }
 
-        // There may be followup to structures or new commands
+        ///////////PART 2/////// There may be followup to structures or new commands
         switch ( cp.input_str.charAt(0) )
         {
 
@@ -777,8 +777,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                       cp.cmd_reset();
                       break;
 
-                    default:
-                      Serial.printf("%d ? 'h'", INT_in);
                   }
                   break;
 
@@ -801,13 +799,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     cp.cmd_reset();
                     break;
 
-                  default:
-                    Serial.printf("%d ? 'h'", INT_in);
                 }
                 break;
-
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
             }
             break;
 
@@ -849,8 +842,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   Serial.printf("soc%8.4f; must be 0-1.1\n", FP_in);
                 break;
 
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
             }
             break;
 
@@ -873,8 +864,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   ap.vb_add_p->print1();
                 break;
   
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
             }
             break;
 
@@ -905,8 +894,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 }
                 break;
             
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
             }
             break;
 
@@ -919,8 +906,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   sp.put_Ib_select(cp.input_str.substring(2).toInt());
                 break;
 
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
             }
             break;
 
@@ -950,29 +935,15 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             }
             break;
 
-          case ( 's' ):
-            if ( sp.Ib_select_p->success() )
-            switch ( cp.input_str.charAt(1) )
-            {
-              case ( 'i' ):  //* si:  selection battery  mode
-                // sp.Ib_select_p->print_adj_print(cp.input_str.substring(1).toInt());
-                break;
-
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
-            }
-            break;
-
           case ( 'U' ):
             if ( sp.Time_now_p->success() )
             switch ( cp.input_str.charAt(1) )
             {
+
               case ( 'T' ):  //*  UT<>:  Unix time since epoch
               Time.setTime(sp.Time_now_z);
               break;
 
-            default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
             }
             break;
 
@@ -1011,14 +982,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               case ( 'Q' ): //  XQ<>: time to quiet
                 Serial.printf("Going black in %7.1f seconds\n", float(ap.until_q) / 1000.);
                 break;
-
-              default:
-                Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
             }
             break;
 
           default:
-            Serial.print(cp.input_str.charAt(0)); Serial.print(" ? 'h'\n");
+            // Serial.print(cp.input_str.charAt(0)); Serial.print(" ? 'h'\n");
             break;
         }
     }
