@@ -29,7 +29,7 @@ const String unit = version + "_pro0p";
 #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (-1333 is -100A/0.075V)
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
 #define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
-#define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'Di'), A
+#define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
 #define VOLT_BIAS             1.8   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)

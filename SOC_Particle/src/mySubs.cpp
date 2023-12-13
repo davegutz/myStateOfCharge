@@ -687,7 +687,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     Serial.printf("STOP echo\n");
     Sen->elapsed_inj = 0UL;
     Serial.printf("running -v0;-Pa;*Xm247,*Xp0\n");
-    chit("v0;", ASAP);     // Turn off echo
+    chit("vv0;", ASAP);     // Turn off echo
     chit("Pa;", ASAP);     // Print all for record
     chit("Xm247;", SOON);  // Turn off tweak_test
     chit("Xp0;", SOON);    // Reset
@@ -701,7 +701,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   ap.until_q = (unsigned long) max(0, (long) ap.until_q  - (long)(millis() - millis_past));
   if ( ap.until_q==0UL && until_q_past>0UL )
   {
-    chit("v0;Hd;Pf;BZ;Rf;", QUEUE);
+    chit("vv0;Hd;Pf;BZ;Rf;", QUEUE);
   }
   until_q_past = ap.until_q;
   millis_past = millis();
@@ -733,7 +733,7 @@ void finish_request(void)
   cp.input_str.trim();
   cp.input_str.replace("\n","");
   cp.input_str.replace("\0","");
-  cp.input_str.replace(";","");
+  cp.input_str.replace("","");
   cp.input_str.replace(",","");
   cp.input_str.replace(" ","");
   cp.input_str.replace("=","");

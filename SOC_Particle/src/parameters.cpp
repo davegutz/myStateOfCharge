@@ -25,6 +25,9 @@
 #include "Battery.h"
 #include "parameters.h"
 #include "mySensors.h"
+#include "command.h"
+
+extern CommandPars cp;
 
 
 // class Parameters
@@ -33,6 +36,42 @@
 Parameters::Parameters():n_(0) {};
 
 Parameters::~Parameters(){};
+
+boolean Parameters::find_adjust(const String &str)
+{
+    uint8_t count = 0;
+    boolean success = false;
+    String substr = str.substring(0, 2);
+    String value_str = str.substring(2);
+    if ( substr.length()<2 )
+    {
+        Serial.printf("%s substr of %s is too short\n", substr.c_str(), str.c_str());
+        return false;
+    }
+    for ( uint8_t i=0; i<n_; i++ )
+    {
+        if ( substr==Z_[i]->code() )
+        {
+            if ( !count ) success = Z_[i]->print_adjust(value_str);
+            count++;
+        }
+    }
+    if ( count==1 && success )
+    {
+        return success;
+    }
+    else if ( count > 1 )
+    {
+        Serial.printf("REPEAT: %s was decoded into code %s and value %s\n", str.c_str(), substr.c_str(), value_str.c_str());
+        return false;
+    }
+    else
+    {
+        // Serial.printf("Problem: %s was decoded into code %s and value %s\n", str.c_str(), substr.c_str(), value_str.c_str());
+        return false;
+    }
+
+}
 
 boolean Parameters::is_corrupt()
 {
@@ -200,15 +239,14 @@ void SavedPars::initialize()
     // Memory map
     // Input definitions
     n_ = -1;
-    Z_ = new Z*[33];
+    Z_ = new Z*[32];
     Z_[n_] = (Amp_p            = new FloatZ(&n_, "* ", "Xa", rP_, "Inj amp",              "Amps pk",-1e6, 1e6,  &Amp_z,         0));
     Z_[n_] = (Cutback_gain_slr_p=new FloatZ(&n_, "* ", "Sk", rP_, "Cutback gain scalar",  "slr",    -1e6, 1e6,  &Cutback_gain_slr_z,1));
-    Z_[n_] = (Debug_p            = new IntZ(&n_, "* ", "v",  rP_, "Verbosity",            "int",    -128, 128,  &Debug_z,       0));
+    Z_[n_] = (Debug_p            = new IntZ(&n_, "* ", "vv", rP_, "Verbosity",            "int",    -128, 128,  &Debug_z,       0));
     Z_[n_] = (Delta_q_model_p = new DoubleZ(&n_, "* ", "qs", rP_, "Charge chg Sim",       "C",      -1e8, 1e5,  &Delta_q_model_z, 0,                false));
     Z_[n_] = (Delta_q_p       = new DoubleZ(&n_, "* ", "qm", rP_, "Charge chg",           "C",      -1e8, 1e5,  &Delta_q_z,     0,                  false ));
     Z_[n_] = (Dw_p             = new FloatZ(&n_, "* ", "Dw", rP_, "Tab mon adj",          "v",      -1e2, 1e2,  &Dw_z,          VTAB_BIAS));
     Z_[n_] = (Freq_p           = new FloatZ(&n_, "* ", "Xf", rP_, "Inj freq",             "Hz",     0,    2,    &Freq_z,        0));
-    Z_[n_] = (Ib_bias_all_nan_p=new FloatNoZ(&n_,"* ", "Di", rP_, "DI + reset",           "A",      -1e5, 1e5,                  CURR_BIAS_ALL));
     Z_[n_] = (Ib_bias_all_p    = new FloatZ(&n_, "* ", "DI", rP_, "Del all",              "A",      -1e5, 1e5,  &Ib_bias_all_z, CURR_BIAS_ALL));
     Z_[n_] = (Ib_bias_amp_p    = new FloatZ(&n_, "* ", "DA", rP_, "Add amp",              "A",      -1e5, 1e5,  &Ib_bias_amp_z, CURR_BIAS_AMP));
     Z_[n_] = (Ib_bias_noa_p    = new FloatZ(&n_, "* ", "DB", rP_, "Add noa",              "A",      -1e5, 1e5,  &Ib_bias_noa_z, CURR_BIAS_NOA));

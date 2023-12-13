@@ -26,6 +26,7 @@
 
 #include "hardware/SerialRAM.h"
 #include "PrinterPars.h"
+
 extern PrinterPars pr;  // Print buffer
 
 #undef max
@@ -64,6 +65,7 @@ public:
     // void app(fptr ptr) { app_ = ptr; }
     String code() { return code_; }
     const char* description() { return description_.c_str(); }
+    boolean success() { return success_; }
     const char* units() { return units_.c_str(); }
 
     // Placeholders
@@ -74,6 +76,7 @@ public:
     virtual boolean is_off(){return false;};
     virtual boolean off_nominal(){return false;};
     virtual void print(){};
+    virtual boolean print_adjust(const String &str){return false;};
     virtual void set_nominal(){};
 
 protected:
@@ -85,6 +88,7 @@ protected:
     boolean is_eeram_;      // eeram
     boolean check_for_off_on_init_;  // check for off-nominal on initialization
     String prefix_;         // either "* " saved or "  " not saved
+    boolean success_;       // result of print_adjust
 };
 
 
@@ -123,7 +127,6 @@ public:
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
-            pr.buff[0] = 0;  // prevent misuse
             return true;
         }
     }
@@ -184,14 +187,24 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
+    virtual boolean print_adjust(const String &str)
+    {
+        print();
+        print1();
+        success_ = check_set_put(str.toInt());
+        print();
+        print1();
+        return success_;
+    }
+
     boolean print_adj_print(const boolean input)
     {
         print();
         print1();
-        boolean success = check_set_put(input);
+        success_ = check_set_put(input);
         print();
         print1();
-        return success;
+        return success_;
     }
    
     virtual void set_nominal()
@@ -243,7 +256,6 @@ public:
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
-            pr.buff[0] = 0;  // prevent misuse
             return true;
         }
     }
@@ -307,14 +319,24 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
+    virtual boolean print_adjust(const String &str)
+    {
+        print();
+        print1();
+        success_ = check_set_put(str.toFloat());
+        print();
+        print1();
+        return success_;
+    }
+
     boolean print_adj_print(const double input)
     {
         print();
         print1();
-        boolean success = check_set_put(input);
+        success_ = check_set_put(input);
         print();
         print1();
-        return success;
+        return success_;
     }
 
     virtual void set_nominal()
@@ -366,7 +388,6 @@ public:
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
-            pr.buff[0] = 0;  // prevent misuse
             return true;
         }
     }
@@ -430,14 +451,24 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
+    virtual boolean print_adjust(const String &str)
+    {
+        print();
+        print1();
+        success_ = check_set_put(str.toFloat());
+        print();
+        print1();
+        return success_;
+    }
+
     boolean print_adj_print(const float input)
     {
         print();
         print1();
-        boolean success = check_set_put(input);
+        success_ = check_set_put(input);
         print();
         print1();
-        return success;
+        return success_;
     }
 
     virtual void set_nominal()
@@ -451,72 +482,6 @@ protected:
     float default_;
     float min_;
     float max_;
-};
-
-
-class FloatNoZ: public Z
-{
-public:
-    FloatNoZ(){}
-
-    FloatNoZ(int8_t *n, const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
-    const float _default=0):
-        Z(n, prefix, code, ram, description, units, false)
-    {
-        min_ = min;
-        max_ = max;
-        default_ = max(min(_default, max_), min_);
-        prefix_ = "  ";
-    }
-
-    ~FloatNoZ(){}
-
-    uint16_t assign_addr(uint16_t next)
-    {
-        return next;
-    }
-
-    void print_str()
-    {
-        sprintf(pr.buff, " %-20s %9.3f -> %9.3f, %10s (%s%-2s)", description_.c_str(), default_, NAN, units_.c_str(), prefix_.c_str(), code_.c_str());
-    }
-
-    void print()
-    {
-        print_str();
-        Serial.printf("%s\n", pr.buff);
-    }
-
-    void print1()
-    {
-        print_str();
-        Serial1.printf("%s\n", pr.buff);
-    }
-
-    void print_help_str()
-    {
-        sprintf(pr.buff, "%s%-2s= %6.3f: (%-6.3g-%6.3g) [%6.3f] %s, %s", prefix_.c_str(), code_.c_str(), NAN, min_, max_, default_, description_.c_str(), units_.c_str());
-    }
-    
-    void print_help()
-    {
-        print_help_str();
-        Serial.printf("%s\n", pr.buff);
-    }
-
-    void print1_help()
-    {
-        print_help_str();
-        Serial1.printf("%s\n", pr.buff);
-    }
-
-    virtual void set_nominal(){}
-
-protected:
-    float default_;
-    float min_;
-    float max_;
-    String prefix_;
 };
 
 
@@ -555,7 +520,6 @@ public:
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
-            pr.buff[0] = 0;  // prevent misuse
             return true;
         }
     }
@@ -618,14 +582,24 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
     
+    virtual boolean print_adjust(const String &str)
+    {
+        print();
+        print1();
+        success_ = check_set_put(str.toInt());
+        print();
+        print1();
+        return success_;
+    }
+
     boolean print_adj_print(const int input)
     {
         print();
         print1();
-        boolean success = check_set_put(input);
+        success_ = check_set_put(input);
         print();
         print1();
-        return success;
+        return success_;
     }
 
     virtual void set_nominal()
@@ -677,7 +651,6 @@ public:
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
-            pr.buff[0] = 0;  // prevent misuse
             return true;
         }
     }
@@ -741,14 +714,24 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
     
+    virtual boolean print_adjust(const String &str)
+    {
+        print();
+        print1();
+        success_ = check_set_put(str.toInt());
+        print();
+        print1();
+        return success_;
+    }
+
     boolean print_adj_print(const int8_t input)
     {
         print();
         print1();
-        boolean success = check_set_put(input);
+        success_ = check_set_put(input);
         print();
         print1();
-        return success;
+        return success_;
     }
 
     virtual void set_nominal()
@@ -800,7 +783,6 @@ public:
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
-            pr.buff[0] = 0;  // prevent misuse
             return true;
         }
     }
@@ -861,14 +843,24 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
+    virtual boolean print_adjust(const String &str)
+    {
+        print();
+        print1();
+        success_ = check_set_put(str.toInt());
+        print();
+        print1();
+        return success_;
+    }
+
     boolean print_adj_print(const uint16_t input)
     {
         print();
         print1();
-        boolean success = check_set_put(input);
+        success_ = check_set_put(input);
         print();
         print1();
-        return success;
+        return success_;
     }
    
     virtual void set_nominal()
@@ -919,7 +911,6 @@ public:
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->write(addr_.a16, *val_);
-            pr.buff[0] = 0;  // prevent misuse
             return true;
         }
     }
@@ -980,14 +971,24 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
+    virtual boolean print_adjust(const String &str)
+    {
+        print();
+        print1();
+        success_ = check_set_put(str.toInt());
+        print();
+        print1();
+        return success_;
+    }
+
     boolean print_adj_print(const uint8_t input)
     {
         print();
         print1();
-        boolean success = check_set_put(input);
+        success_ = check_set_put(input);
         print();
         print1();
-        return success;
+        return success_;
     }
    
     virtual void set_nominal()
@@ -1039,7 +1040,6 @@ public:
         {
             *val_ = val;
             if ( is_eeram_ ) rP_->put(addr_.a16, *val_);
-            pr.buff[0] = 0;  // prevent misuse
             return true;
         }
     }
@@ -1103,14 +1103,24 @@ public:
         Serial1.printf("%s\n", pr.buff);
     }
 
+    virtual boolean print_adjust(const String &str)
+    {
+        print();
+        print1();
+        success_ = check_set_put((unsigned long) str.toInt());
+        print();
+        print1();
+        return success_;
+    }
+
     boolean print_adj_print(const unsigned long input)
     {
         print();
         print1();
-        boolean success = check_set_put(input);
+        success_ = check_set_put(input);
         print();
         print1();
-        return success;
+        return success_;
     }
    
     virtual void set_nominal()

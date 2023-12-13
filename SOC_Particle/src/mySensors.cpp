@@ -451,7 +451,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("  fltw=%d     falw=%d\n", fltw_, falw_);
   if ( ap.fake_faults )
     Serial1.printf("fake_faults=>redl\n");
-  Serial1.printf("v0; to return\n");
+  Serial1.printf("vv0; to return\n");
 }
 
 // Redundancy loss.   Here in cpp because sp circular reference in .h files due to sp.Ib_select()

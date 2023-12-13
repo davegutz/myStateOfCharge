@@ -38,6 +38,8 @@ class Parameters
 public:
     Parameters();
     ~Parameters();
+    // Do everything
+    boolean find_adjust(const String &str);
     virtual void initialize() {};
     boolean is_corrupt();
     virtual void pretty_print(const boolean all){};
@@ -45,7 +47,6 @@ public:
 protected:
     int8_t n_;
     Z **Z_;
-    // fptr fptr_;
 };
 
 
@@ -283,7 +284,6 @@ public:
     FloatZ *Dw_p;
     FloatZ *Freq_p;
     FloatZ *Ib_bias_all_p;
-    FloatNoZ *Ib_bias_all_nan_p;
     FloatZ *Ib_bias_amp_p;
     FloatZ *Ib_bias_noa_p;
     FloatZ *Ib_scale_amp_p;
@@ -357,5 +357,6 @@ protected:
     uint16_t nhis_;         // Length of Flt_ram array for fault history
     uint16_t nsum_;         // Length of Sum array for history
 };
+
 
 #endif

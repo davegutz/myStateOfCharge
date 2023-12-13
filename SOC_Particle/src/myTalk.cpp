@@ -160,6 +160,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
   float FP_in = -99.;
   int INT_in = -1;
   boolean reset = false;
+  uint16_t modeling_past = sp.Modeling();
   urgency request;
 
   // Serial event
@@ -236,6 +237,35 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         break;
 
       case ( INCOMING ):
+
+        switch ( cp.input_str.charAt(0) )
+        {
+          case ( 'W' ):  // W<>:  wait.  Skip
+            if ( cp.input_str.substring(1).length() )
+            {
+              INT_in = cp.input_str.substring(1).toInt();
+              if ( INT_in > 0 )
+              {
+                for ( int i=0; i<INT_in; i++ )
+                {
+                  chit("W;", SOON);
+                }
+              }
+            }
+            else
+            {
+              Serial.printf("..Wait.\n");
+            }
+            break;
+
+          default:
+            // First process what we can from structures
+            ap.find_adjust(cp.input_str);
+            sp.find_adjust(cp.input_str);
+
+        }
+
+        // There may be followup to structures or new commands
         switch ( cp.input_str.charAt(0) )
         {
           case ( 'b' ):  // Fault buffer
@@ -271,27 +301,25 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'm' ):  //* Bm
-                INT_in = cp.input_str.substring(2).toInt();
-                // sp.Mon_chm_p->print_adj_print(cp.input_str.substring(2).toInt());  // Bm
-                // break;
-                switch ( INT_in )
+                // INT_in = cp.input_str.substring(2).toInt();
+                switch ( sp.Mon_chm_z )
                 {
                   case ( 0 ):  // Bm0: Mon Battleborn
-                    sp.Mon_chm_p->print_adj_print(INT_in);
+                    // sp.Mon_chm_p->print_adj_print(INT_in);
                     Mon->assign_all_mod("Battleborn");
                     Mon->chem_pretty_print();
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bm1: Mon CHINS
-                    sp.Mon_chm_p->print_adj_print(INT_in);
+                    // sp.Mon_chm_p->print_adj_print(INT_in);
                     Mon->assign_all_mod("CHINS");
                     Mon->chem_pretty_print();
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bm2: Mon Spare
-                    sp.Mon_chm_p->print_adj_print(INT_in);
+                    // sp.Mon_chm_p->print_adj_print(INT_in);
                     Mon->assign_all_mod("Spare");
                     Mon->chem_pretty_print();
                     cp.cmd_reset();
@@ -303,23 +331,23 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 's' ):  //* Bs:  Simulation chemistry change
-                INT_in = cp.input_str.substring(2).toInt();
-                switch ( INT_in )
+                // INT_in = cp.input_str.substring(2).toInt();
+                switch ( sp.Sim_chm_z )
                 {
                   case ( 0 ):  // Bs0: Sim Battleborn
-                    sp.Sim_chm_p->print_adj_print(INT_in);
+                    // sp.Sim_chm_p->print_adj_print(INT_in);
                     Sen->Sim->assign_all_mod("Battleborn");
                     cp.cmd_reset();
                     break;
 
                   case ( 1 ):  // Bs1: Sim CHINS
-                    sp.Sim_chm_p->print_adj_print(INT_in);
+                    // sp.Sim_chm_p->print_adj_print(INT_in);
                     Sen->Sim->assign_all_mod("CHINS");
                     cp.cmd_reset();
                     break;
 
                   case ( 2 ):  // Bs2: Sim Spare
-                    sp.Sim_chm_p->print_adj_print(INT_in);
+                    // sp.Sim_chm_p->print_adj_print(INT_in);
                     Sen->Sim->assign_all_mod("Spare");
                     cp.cmd_reset();
                     break;
@@ -330,11 +358,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'P' ):  //* BP<>:  Number of parallel batteries in bank, e.g. '2P1S'
-                sp.nP_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.nP_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'S' ):  //* BS<>:  Number of series batteries in bank, e.g. '2P1S'
-                sp.nS_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.nS_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'Z' ):  // BZ :  Benign zeroing of settings to make clearing test easier
@@ -356,7 +384,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'a' ):  // Ca<>:  assign charge state in fraction to all versions including model
-                if ( ap.init_all_soc_p->print_adj_print(cp.input_str.substring(2).toFloat()) )  // Apply crude limit to prevent user error
+                if ( ap.init_all_soc_p->success() )
                 {
                   initialize_all(Mon, Sen, ap.init_all_soc, true);
                   #ifdef DEBUG_INIT
@@ -378,7 +406,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'm' ):  // Cm<>:  assign curve charge state in fraction to model only (ekf if modeling)
-                if ( ap.init_sim_soc_p->print_adj_print(cp.input_str.substring(2).toFloat()) )  // Apply crude limit to prevent user error
+                if ( ap.init_sim_soc_p->success() )  // Apply crude limit to prevent user error
                 {
                   Sen->Sim->apply_soc(ap.init_sim_soc, Sen->Tb_filt);
                   Serial.printf("soc%8.4f, dq%7.3f, soc_mod%8.4f, dq mod%7.3f,\n",
@@ -398,87 +426,82 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'A' ):  //*  DA<>:  Amp sensor bias
-                sp.Ib_bias_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Ib_bias_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'B' ):  //*  DB<>:  No Amp sensor bias
-                sp.Ib_bias_noa_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Ib_bias_noa_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'c' ):  //*  Dc<>:  Vb bias
-                sp.Vb_bias_hdwe_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Vb_bias_hdwe_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'E' ):  //   DE<>:  EKF execution frame multiplier
-                ap.eframe_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
-                break;
-
-              case ( 'i' ):  //*  Di<>:  Bias all current sensors (same way as Da and Db)
-                chit("DI;", ASAP);  // Occur before reset
-                cp.cmd_reset();
+                // ap.eframe_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'I' ):  //*  DI<>:  Bias all current sensors without reset (same way as Da and Db)
-                sp.Ib_bias_all_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Ib_bias_all_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'm' ):  //   Dm<>:  Amp signal adder for faults
-                ap.ib_amp_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.ib_amp_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'n' ):  //   Dn<>:  No Amp signal adder for faults
-                ap.ib_noa_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.ib_noa_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'P' ):  //   DP<>:  PRINT multiplier
-                ap.print_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
+                // ap.print_mult_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'r' ):  //   Dr<>:  READ sample time input
-                ap.read_delay_p->print_adj_print(cp.input_str.substring(2).toInt());
+                // ap.read_delay_p->print_adj_print(cp.input_str.substring(2).toInt());
                 Sen->ReadSensors->delay(ap.read_delay);  // validated
                 break;
 
               case ( 's' ):  //   Ds<>:  d_soc to Sim.voc_soc
-                ap.ds_voc_soc_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.ds_voc_soc_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 't' ):  //*  Dt<>:  Temp bias change hardware
-                sp.Tb_bias_hdwe_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Tb_bias_hdwe_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 cp.cmd_reset();
                 break;
 
               case ( '^' ):  //   D^<>:  Temp bias change model for faults
-                ap.Tb_bias_model_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.Tb_bias_model_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'v' ):  //     Dv<>:  voltage signal adder for faults
-                ap.vb_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.vb_add_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 ap.vb_add_p->print1();
                 break;
 
               case ( 'w' ):  //   * Dw<>:
-                sp.Dw_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Dw_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'y' ):  //   Dy<>:  delta Sim curve soc in
-                ap.dv_voc_soc_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.dv_voc_soc_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'T' ):  //   DT<>:  Tb noise
-                ap.Tb_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.Tb_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'V' ):  //   DV<>:  Vb noise
-                ap.Vb_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.Vb_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'M' ):  //   DM<>:  Ib amp noise
-                ap.Ib_amp_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.Ib_amp_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'N' ):  //   DN<>:  Ib noa noise
-                ap.Ib_noa_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.Ib_noa_noise_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               default:
@@ -491,44 +514,44 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
 
               case ( 'A' ):  //*  SA<>:  Amp sensor scalar
-                sp.Ib_scale_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Ib_scale_amp_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'B' ):  //*  SB<>:  No Amp sensor scalar
-                sp.Ib_scale_noa_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Ib_scale_noa_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'h' ):  //   Sh<>: scale hysteresis
-                ap.hys_scale_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.hys_scale_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'H' ):  //   SH<>: state of all hysteresis
-                ap.hys_state_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.hys_state_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 Sen->Sim->hys_state(ap.hys_state);
                 Sen->Flt->wrap_err_filt_state(-ap.hys_state);
                 break;
 
               case ( 'q' ):  //*  Sq<>: scale capacity sim
-                sp.S_cap_sim_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.S_cap_sim_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 Sen->Sim->apply_cap_scale(sp.S_cap_sim());
                 if ( sp.Modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
                 break;
             
               case ( 'Q' ):  //*  SQ<>: scale capacity mon
-                sp.S_cap_mon_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.S_cap_mon_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 Mon->apply_cap_scale(sp.S_cap_mon());
                 break;
             
               case ( 'r' ):  //   Sr<>:  scalar resistor
-                ap.slr_res_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.slr_res_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
             
               case ( 'k' ):  //*  Sk<>:  scale cutback gain for sim rep of >print_adj_print(S
-                sp.Cutback_gain_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Cutback_gain_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
             
               case ( 'V' ):  //*  SV<>:  Vb sensor scalar
-                sp.Vb_scale_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Vb_scale_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               default:
@@ -541,40 +564,40 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             {
 
               case ( 'c' ):  //   Fc<>: scale cc_diff threshold
-                ap.cc_diff_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.cc_diff_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'd' ):  //   Fd<>: scale ib_diff threshold
-                ap.ib_diff_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.ib_diff_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'f' ):  //* si, Ff<>:  fake faults
-                ap.fake_faults_p->print_adj_print(cp.input_str.substring(2).toInt());
+                // ap.fake_faults_p->print_adj_print(cp.input_str.substring(2).toInt());
                 sp.put_Ib_select(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'I' ):  //   FI<>:  Fault disable ib hard
-                ap.disab_ib_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
+                // ap.disab_ib_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'i' ):  //   Fi<>: scale e_wrap_hi threshold
-                ap.ewhi_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.ewhi_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'o' ):  //   Fo<>: scale e_wrap_lo threshold
-                ap.ewlo_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.ewlo_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'q' ):  //   Fq<>: scale ib_quiet threshold
-                ap.ib_quiet_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.ib_quiet_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'T' ):  //   FT<>:  Fault disable tb stale
-                ap.disab_tb_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
+                // ap.disab_tb_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'V' ):  //   FV<>:  Fault disable vb hard
-                ap.disab_vb_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
+                // ap.disab_vb_fa_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               default:
@@ -803,7 +826,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'i' ):  //* si:  selection battery  mode
-                sp.Ib_select_p->print_adj_print(cp.input_str.substring(1).toInt());
+                // sp.Ib_select_p->print_adj_print(cp.input_str.substring(1).toInt());
                 break;
 
               default:
@@ -815,7 +838,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'T' ):  //*  UT<>:  Unix time since epoch
-              sp.Time_now_p->print_adj_print((unsigned long)cp.input_str.substring(2).toInt());
+              // sp.Time_now_p->print_adj_print((unsigned long)cp.input_str.substring(2).toInt());
+              Time.setTime(sp.Time_now_z);
               break;
 
             default:
@@ -824,25 +848,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'v' ):  //*  v<>:  verbose level
-            sp.Debug_p->print_adj_print(cp.input_str.substring(1).toInt());
-            break;
-
-          case ( 'W' ):  // W<>:  wait.  Skip
-            if ( cp.input_str.substring(1).length() )
-            {
-              INT_in = cp.input_str.substring(1).toInt();
-              if ( INT_in > 0 )
-              {
-                for ( int i=0; i<INT_in; i++ )
-                {
-                  chit("W;", SOON);
-                }
-              }
-            }
-            else
-            {
-              Serial.printf("..Wait.\n");
-            }
+            // sp.Debug_p->print_adj_print(cp.input_str.substring(1).toInt());
             break;
 
           // Photon 2 O/S waits 10 seconds between backup SRAM saves.  To save time, you can get in the habit of pressing 'w;'
@@ -854,17 +860,22 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
               break;
           #endif
 
+          case ( 'W' ):  // W
+            // already handled
+            break;
+
           case ( 'X' ):  // X
             switch ( cp.input_str.charAt(1) )
             {
               case ( 'd' ):  // Xd<>:  on/off dc-dc charger manual setting
-                ap.dc_dc_on_p->print_adj_print(cp.input_str.substring(2).toInt()>0);
+                // ap.dc_dc_on_p->print_adj_print(cp.input_str.substring(2).toInt()>0);
                 break;
 
               case ( 'm' ):  // Xm<>:  code for modeling level
                 INT_in =  cp.input_str.substring(2).toInt();
-                reset = sp.Modeling() != INT_in;
-                sp.Modeling_p->print_adj_print(INT_in);
+                reset = sp.Modeling() != modeling_past;
+                Serial.printf("past M %d new M %d reset %d\n", modeling_past, sp.Modeling(), reset);
+                // sp.Modeling_p->print_adj_print(INT_in);
                 if ( reset )
                 {
                   Serial.printf("Chg...reset\n");
@@ -878,17 +889,17 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'f' ): //*  Xf<>:  injection frequency
-                sp.Freq_p->print_adj_print(cp.input_str.substring(2).toFloat());
-                sp.Freq_p->print_adj_print(sp.Freq()*(2. * PI));
+                // sp.Freq_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                if ( sp.Freq_p->success() ) sp.Freq_z = sp.Freq_z*(2. * PI);
                 break;
 
               case ( 'b' ): //*  Xb<>:  injection bias
-                sp.Inj_bias_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // sp.Inj_bias_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
                 break;
 
               case ( 'Q' ): //  XQ<>: time to quiet
-                ap.until_q_p->print_adj_print((unsigned long int) cp.input_str.substring(2).toInt());
+                // ap.until_q_p->print_adj_print((unsigned long int) cp.input_str.substring(2).toInt());
                 Serial.printf("Going black in %7.1f seconds\n", float(ap.until_q) / 1000.);
                 break;
 
@@ -959,51 +970,55 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     case ( 2 ):  // Xp2:  
                       chit("Xp0;", QUEUE);
                       chit("Xtc;", QUEUE);
-                      chit("Di-40;", QUEUE);
+                      chit("DI-40;", QUEUE);
+                      chit("Rs", QUEUE);
                       break;
 
                     case ( 3 ):  // Xp3:  
                       chit("Xp0;", QUEUE);
                       chit("Xtc;", QUEUE);
-                      chit("Di40;", QUEUE);
+                      chit("DI40;", QUEUE);
+                      chit("Rs", QUEUE);
                       break;
 
                     case ( 4 ):  // Xp4:  
                       chit("Xp0;", QUEUE);
                       chit("Xtc;", QUEUE);
-                      chit("Di-100;", QUEUE);
+                      chit("DI-100;", QUEUE);
+                      chit("Rs", QUEUE);
                       break;
 
                     case ( 5 ):  // Xp5:  
                       chit("Xp0;", QUEUE);
                       chit("Xtc;", QUEUE);
-                      chit("Di100;", QUEUE);
+                      chit("DI100;", QUEUE);
+                      chit("Rs", QUEUE);
                       break;
 
                   #endif
 
                   case ( 6 ):  // Xp6:  Program a pulse for EKF test
-                    chit("XS;Dm0;Dn0;v0;Xm255;Ca.5;Pm;Dr100;DP20;v4;", QUEUE);  // setup
+                    chit("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;Dr100;DP20;vv4;", QUEUE);  // setup
                     chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
-                    chit("W10;Pm;v0;", QUEUE);  // finish
+                    chit("W10;Pm;vv0;", QUEUE);  // finish
                     break;
 
                   case ( 7 ):  // Xp7:  Program a sensor pulse for State Space test
-                    chit("XS;Dm0;Dn0;v0;Xm255;Ca.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
+                    chit("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;Dr100;DP1;vv2;", QUEUE);  // setup
                     chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
-                    chit("W10;Pm;v0;", QUEUE);  // finish
+                    chit("W10;Pm;vv0;", QUEUE);  // finish
                     break;
 
                   case ( 8 ):  // Xp8:  Program a hardware pulse for State Space test
-                    chit("XS;Di0;v0;Xm255;Ca.5;Pm;Dr100;DP1;v2;", QUEUE);  // setup
+                    chit("XS;Di0;vv0;Xm255;Ca.5;Pm;Dr100;DP1;vv2;", QUEUE);  // setup
                     chit("DI500;DI-500;DI0;", QUEUE);  // run
-                    chit("W10;Pm;v0;", QUEUE);  // finish
+                    chit("W10;Pm;vv0;", QUEUE);  // finish
                     break;
 
                   case ( 9 ): case( 10 ): case ( 11 ): case( 12 ): case( 13 ): // Xp9: Xp10: Xp11: Xp12: Xp13:  Program regression
                     // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
                     chit("Xp0;", QUEUE);      // Reset nominal
-                    chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
+                    chit("vv0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
                     chit("Xm255;", QUEUE);    // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
                     chit("Xts;", QUEUE);      // Start up a sine wave
                     chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
@@ -1057,7 +1072,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20= 0.5 s sample/2.0s print, 21= 2 s sample/8 s print
-                    chit("v0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
+                    chit("vv0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
                     chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 20 )
                     {
@@ -1079,7 +1094,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'C' ): // XC:  injection number of cycles
-                ap.cycles_inj_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.cycles_inj_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'R' ): // XR:  Start injection now
@@ -1100,29 +1115,29 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Sen->stop_inj = 0UL;
                 Sen->end_inj = 0UL;
                 Sen->elapsed_inj = 0UL;
-                chit("v0;", ASAP);     // Turn off echo
+                chit("vv0;", ASAP);     // Turn off echo
                 chit("Xm247;", SOON);  // Turn off tweak_test
                 chit("Xp0;", SOON);    // Reset
                 break;
 
               case ( 's' ): // Xs:  scale T_SAT
-                ap.s_t_sat_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.s_t_sat_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'W' ):  // XW<>:  Wait beginning of programmed transient
-                ap.wait_inj_p->print_adj_print(cp.input_str.substring(2).toInt());
+                // ap.wait_inj_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'T' ):  // XT<>:  Tail end of programmed transient
-                ap.tail_inj_p->print_adj_print(cp.input_str.substring(2).toInt());
+                // ap.tail_inj_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'u' ):  // Xu<>:  Tb, fail it
-                ap.fail_tb_p->print_adj_print(cp.input_str.substring(2).toInt());
+                // ap.fail_tb_p->print_adj_print(cp.input_str.substring(2).toInt());
                 break;
 
               case ( 'v' ):  // Xv<>:  Tb stale time scalar
-                ap.tb_stale_time_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                // ap.tb_stale_time_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               default:
@@ -1186,10 +1201,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Vb_bias_hdwe_p->print_help();  //* Dc
   sp.Vb_bias_hdwe_p->print1_help();  //* Dc
   ap.eframe_mult_p->print_help();  //  DE
-  sp.Ib_bias_all_nan_p->print_help();  //* DI
-  sp.Ib_bias_all_nan_p->print1_help();  //* DI
-  sp.Ib_bias_all_p->print_help();  //* Di
-  sp.Ib_bias_all_p->print1_help();  //* Di
+  sp.Ib_bias_all_p->print_help();  //* DI
+  sp.Ib_bias_all_p->print1_help();  //* DI
   sp.Ib_bias_amp_p->print_help();  //  Dm
   ap.Ib_amp_noise_amp_p->print_help();  // DM
   sp.Ib_bias_noa_p->print_help();  //  Dn
@@ -1271,34 +1284,34 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Debug_p->print1_help();  // v
 
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
-  Serial.printf("  v-2: ADS counts for throughput meas\n");
+  Serial.printf(" vv-2: ADS counts for throughput meas\n");
   #ifdef DEBUG_INIT
     Serial.printf("  v-1: Debug\n");
   #endif
-  Serial.printf("   v1: GP\n");
-  Serial.printf("   v2: GP, Sim & Sel\n");
-  Serial.printf("   v3: EKF\n");
-  Serial.printf("   v4: GP, Sim, Sel, & EKF\n");
-  Serial.printf("   v5: OLED display\n");
+  Serial.printf("  vv1: GP\n");
+  Serial.printf("  vv2: GP, Sim & Sel\n");
+  Serial.printf("  vv3: EKF\n");
+  Serial.printf("  vv4: GP, Sim, Sel, & EKF\n");
+  Serial.printf("  vv5: OLED display\n");
   #ifndef CONFIG_PHOTON
-    Serial.printf("  v12: EKF\n");
-    Serial.printf(" v-13: ib_dscn\n");
+    Serial.printf(" vv12: EKF\n");
+    Serial.printf("vv-13: ib_dscn\n");
   #endif
-  Serial.printf("  v14: vshunt and Ib raw\n");
-  Serial.printf("  v15: vb raw\n");
-  Serial.printf("  v16: Tb\n");
+  Serial.printf(" vv14: vshunt and Ib raw\n");
+  Serial.printf(" vv15: vb raw\n");
+  Serial.printf(" vv16: Tb\n");
   #ifndef CONFIG_PHOTON
-    Serial.printf(" v-23: Vb_hdwe_ac\n");
-    Serial.printf(" v-24: Vb_hdwe_ac, Ib_hdwe\n");
-    Serial.printf("  v34: EKF detail\n");
-    Serial.printf("  v35: ChargeTransfer balance\n");
-    Serial.printf("  v37: EKF short\n");
-    Serial.printf("  v75: voc_low check mod\n");
-    Serial.printf("  v76: vb model\n");
-    Serial.printf("  v78: Batt model sat\n");
-    Serial.printf("  v79: sat_ib model\n");
+    Serial.printf("vv-23: Vb_hdwe_ac\n");
+    Serial.printf("vv-24: Vb_hdwe_ac, Ib_hdwe\n");
+    Serial.printf(" vv34: EKF detail\n");
+    Serial.printf(" vv35: ChargeTransfer balance\n");
+    Serial.printf(" vv37: EKF short\n");
+    Serial.printf(" vv75: voc_low check mod\n");
+    Serial.printf(" vv76: vb model\n");
+    Serial.printf(" vv78: Batt model sat\n");
+    Serial.printf(" vv79: sat_ib model\n");
   #endif
-  Serial.printf("  v99: calibration\n");
+  Serial.printf(" vv99: calibration\n");
 
   Serial.printf("\nW<?> - iters to wait\n");
 

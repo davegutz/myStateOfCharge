@@ -41,7 +41,7 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
   }
 
   // sp.Debug()==-13 ib_dscn for Arduino.
-  // Start Arduino serial plotter.  Toggle v like 'v0;v-13;' to produce legend
+  // Start Arduino serial plotter.  Toggle v like 'vv0;vv-13;' to produce legend
   void debug_m13(Sensors *Sen)
   {
 
@@ -63,7 +63,7 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
   }
 
   // sp.Debug()==-23 vb for Arduino.
-  // Start Arduino serial plotter.  Toggle v like 'v0;v-23;' to produce legend
+  // Start Arduino serial plotter.  Toggle v like 'vv0;vv-23;' to produce legend
   void debug_m23(Sensors *Sen)
   {
 
@@ -81,7 +81,7 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
   }
 
   // sp.Debug()==-24 Vb, Ib for Arduino.
-  // Start Arduino serial plotter.  Toggle v like 'v0;v-23;' to produce legend
+  // Start Arduino serial plotter.  Toggle v like 'vv0;vv-23;' to produce legend
   void debug_m24(Sensors *Sen)
   {
 
