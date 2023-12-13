@@ -149,7 +149,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   sp.put_Ib_select(0);  // Ff 0
   ap.ewhi_slr = 1;  // Fi
   ap.ewlo_slr = 1;  // Fo
-  Sen->Flt->ib_quiet_slr(1);  // Fq 1
+  ap.ib_quiet_slr = 1;  // Fq 1
   ap.disab_ib_fa = 0;  // FI 0
   ap.disab_tb_fa = 0;  // FT 0
   ap.disab_vb_fa = 0;  // FV 0
@@ -625,10 +625,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'q' ):  //   Fq<>: scale ib_quiet threshold
-                scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("ib_quiet scl%7.3f to", Sen->Flt->ib_quiet_slr());
-                Sen->Flt->ib_quiet_slr(scale);
-                Serial.printf("%7.3f\n", Sen->Flt->ib_quiet_slr());
+                ap.ib_quiet_slr_p->print_adj_print(cp.input_str.substring(2).toFloat());
                 break;
 
               case ( 'T' ):  //   FT<>:  Fault disable tb stale
@@ -1289,7 +1286,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   ap.fake_faults_p->print1_help();  // Ff
   ap.ewhi_slr_p->print_help();  // Fi
   ap.ewlo_slr_p->print_help();  // Fo
-  Serial.printf("  Fq= "); Serial.printf("%6.3f", Sen->Flt->ib_quiet_slr()); Serial.printf(": slr ib_quiet thr v [1]\n"); 
+  ap.ib_quiet_slr_p->print_help();  // Fq
   ap.disab_ib_fa_p->print_help();  // FI
   ap.disab_tb_fa_p->print_help();  // FT
   ap.disab_vb_fa_p->print_help();  // FV

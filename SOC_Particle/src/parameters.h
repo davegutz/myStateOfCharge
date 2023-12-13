@@ -78,6 +78,7 @@ public:
     float ib_noa_add;           // Fault injection bias on non amp, A
     float Ib_amp_noise_amp;     // Ib bank noise on amplified sensor, amplitude model only, A pk-pk
     float Ib_noa_noise_amp;     // Ib bank noise on non-amplified sensor, amplitude model only, A pk-pk
+    float ib_quiet_slr;         // Scale ib_quiet detection thresh, scalar
     uint8_t print_mult;         // Print multiplier for objects
     float s_t_sat;              // Scalar on saturation test time set and reset
     unsigned long int tail_inj; // Tail after end injection, ms
@@ -107,6 +108,7 @@ public:
     FloatZ *ib_noa_add_p;
     FloatZ *Ib_amp_noise_amp_p;
     FloatZ *Ib_noa_noise_amp_p;
+    FloatZ *ib_quiet_slr_p;
     Uint8tZ *print_mult_p;
     FloatZ *s_t_sat_p;
     FloatZ *Tb_bias_model_p;

@@ -193,8 +193,6 @@ public:
   boolean ib_noa_bare() { return faultRead(IB_NOA_BARE); };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
-  void ib_quiet_slr(const float slr) { ib_quiet_slr_ = slr; };
-  float ib_quiet_slr() { return ib_quiet_slr_; };
   float ib_quiet_thr_;     // Threshold below which ib is quiet, A pk
   float ib_quiet_thr() { return ib_quiet_thr_; };
   int8_t ib_sel_stat() { return ib_sel_stat_; };
@@ -263,7 +261,6 @@ protected:
   float ewsat_slr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
-  float ib_quiet_slr_;     // Scale ib_quiet detection thresh, scalar
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
   float ib_quiet_;          // ib hardware noise, A/s

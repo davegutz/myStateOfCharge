@@ -240,7 +240,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving):
   cc_diff_(0.), cc_diff_empty_slr_(1), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0),
-  ib_quiet_slr_(1), ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
+  ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
   latched_fail_fake_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   tb_sel_stat_last_(1), vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL), sp_preserving_(preserving)
 {
@@ -313,7 +313,7 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   ib_quiet_ = QuietFilt->calculate(ib_rate_, reset_loc, min(Sen->T, MAX_T_Q_FILT));
 
   // Fault
-  ib_quiet_thr_ = QUIET_A*ib_quiet_slr_;
+  ib_quiet_thr_ = QUIET_A * ap.ib_quiet_slr;
   faultAssign( !sp.mod_ib() && abs(ib_quiet_)<=ib_quiet_thr_ && !reset_loc, IB_DSCN_FLT );   // initializes false
   failAssign( QuietPer->calculate(dscn_flt(), QUIET_S, QUIET_R, Sen->T, reset_loc), IB_DSCN_FA);
   #ifndef CONFIG_PHOTON
