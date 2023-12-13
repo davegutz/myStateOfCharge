@@ -118,8 +118,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   Sen->Sim->Sr(1);  // Sr
   Mon->Sr(1);  // Sr 1
   sp.Cutback_gain_slr_p->print_adj_print(1); // Sk 1
-  Sen->Sim->hys_state(0);  // SH 0
-  Sen->Flt->wrap_err_filt_state(0);  // SH 0
+  ap.hys_state = 0;  // SH 0
 
   // Injection
   ap.ib_amp_add = 0;  // Dm 0
@@ -525,11 +524,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               case ( 'H' ):  //   SH<>: state of all hysteresis
-                scale = cp.input_str.substring(2).toFloat();
-                Serial.printf("\nSim::Hys::dv_hys%7.3f\n", Sen->Sim->hys_state());
-                Sen->Sim->hys_state(scale);
-                Sen->Flt->wrap_err_filt_state(-scale);
-                Serial.printf("to%7.3f\n", Sen->Sim->hys_state());
+                ap.hys_state_p->print_adj_print(cp.input_str.substring(2).toFloat());
+                Sen->Sim->hys_state(ap.hys_state);
+                Sen->Flt->wrap_err_filt_state(-ap.hys_state);
                 break;
 
               case ( 'm' ):  //   Sm<>:  Amp signal scalar for faults

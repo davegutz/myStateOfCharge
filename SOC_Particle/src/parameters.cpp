@@ -66,7 +66,7 @@ void  VolatilePars::initialize()
     // Memory map
     // Input definitions
     n_ = -1;
-    Z_ = new Z*[29];
+    Z_ = new Z*[30];
     Z_[n_] = (cc_diff_slr_p    = new FloatZ(&n_, "  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_slr,       1));
     Z_[n_] = (cycles_inj_p     = new FloatZ(&n_, "  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
     Z_[n_] = (dc_dc_on_p     = new BooleanZ(&n_, "  ", "Xd", NULL,"DC-DC charger on",     "T=on",   0,    1,    &dc_dc_on,          false));
@@ -80,9 +80,10 @@ void  VolatilePars::initialize()
     Z_[n_] = (ewlo_slr_p       = new FloatZ(&n_, "  ", "Fo", NULL,"Slr wrap lo thr",      "slr",    0,    1000, &ewlo_slr,          1));
     Z_[n_] = (fail_tb_p      = new BooleanZ(&n_, "  ", "Xu", NULL,"Ignore Tb & fail",     "T=Fail", false,true, &fail_tb,           false));
     Z_[n_] = (fake_faults_p  = new BooleanZ(&n_, "  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,    &fake_faults,       FAKE_FAULTS));
-    Z_[n_] = (hys_scale_p      = new FloatZ(&n_, "  ", "Sh", NULL,"Sim hyst scale",       "slr",    0,    100,  &hys_scale,         HYS_SCALE));
+    Z_[n_] = (hys_scale_p      = new FloatZ(&n_, "  ", "Sh", NULL,"Sim hys scale",        "slr",    0,    100,  &hys_scale,         HYS_SCALE));
+    Z_[n_] = (hys_state_p      = new FloatZ(&n_, "  ", "SH", NULL,"Sim hys state",        "v",      -10,  10,   &hys_state,         0));
     Z_[n_] = (ib_amp_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
-    Z_[n_] = (ib_diff_slr_p    = new FloatZ(&n_, "  ", "Fd", NULL,"Slr ib_diff thr",      "A",      0,    1000, &ib_diff_slr,      1));
+    Z_[n_] = (ib_diff_slr_p    = new FloatZ(&n_, "  ", "Fd", NULL,"Slr ib_diff thr",      "A",      0,    1000, &ib_diff_slr,       1));
     Z_[n_] = (ib_noa_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"No amp signal add",    "A",      -1000,1000, &ib_noa_add,        0));
     Z_[n_] = (Ib_amp_noise_amp_p= new FloatZ(&n_,"  ", "DM", NULL,"Amp amp noise",        "A",      0,    1000, &Ib_amp_noise_amp,  IB_AMP_NOISE));
     Z_[n_] = (Ib_noa_noise_amp_p= new FloatZ(&n_,"  ", "DN", NULL,"Amp noa noise",        "A",      0,    1000, &Ib_noa_noise_amp,  IB_NOA_NOISE));

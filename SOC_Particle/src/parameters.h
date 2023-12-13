@@ -73,6 +73,7 @@ public:
     boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
     boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
     float hys_scale;            // Sim hysteresis scalar
+    float hys_state;            // Sim hysteresis state
     float ib_amp_add;           // Fault injection bias on amp, A
     float ib_diff_slr;          // Scale ib_diff detection thresh, scalar
     float ib_noa_add;           // Fault injection bias on non amp, A
@@ -103,6 +104,7 @@ public:
     BooleanZ *fail_tb_p;
     BooleanZ *fake_faults_p;
     FloatZ *hys_scale_p;
+    FloatZ *hys_state_p;
     FloatZ *ib_amp_add_p;
     FloatZ *ib_diff_slr_p;
     FloatZ *ib_noa_add_p;
