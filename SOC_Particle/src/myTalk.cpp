@@ -275,7 +275,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
+                found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
+                if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
             }
             break;
 
@@ -288,7 +289,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" ? 'h'\n");
+                found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
+                if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
             }
             break;
 
@@ -330,7 +332,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               default:
-                Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
+                found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
+                if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
             }
             break;
 
@@ -419,7 +422,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               default:
-                Serial.printf("\n");Serial.print(cp.input_str.charAt(1)); Serial.printf("? 'h'\n");
+                found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
+                if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
             }
             break;
 
@@ -486,7 +490,8 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               default:
-                Serial.print(cp.input_str.charAt(1)); Serial.printf(" unk. 'h'\n");
+                found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
+                if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
             }
             break;
 
@@ -537,7 +542,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     if ( !sp.tweak_test() ) chit("Xm247;", ASAP);  // Prevent upset of time in Xp9, Xp10, Xp11, etc
                     chit("Xf0;Xa0;Xtn;", ASAP);
                     if ( !sp.tweak_test() ) chit("Xb0;", ASAP);
-                    chit("Mk1;Nk1;", ASAP);  // Stop any injection
                     chit("BZ;", SOON);
                     break;
 
@@ -731,12 +735,13 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   default:
-                    Serial.print(cp.input_str.charAt(1)); Serial.print(" ? 'h'\n");
+                    if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
                 }
                 break;
 
               default:
-                Serial.printf("X%c unk.  see 'h'\n", cp.input_str.charAt(1));
+                found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
+                if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
             }
             break;
 
@@ -745,8 +750,6 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           default:
-            // First process what we can from structures
-            found = false;  // we know this
             found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
             if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
 
