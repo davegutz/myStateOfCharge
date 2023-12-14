@@ -736,7 +736,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 
 // Class Sensors
-Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
+Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk):
   reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL), sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL)
 {
   this->T = T;
@@ -757,6 +757,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors):
   this->stop_inj = 0UL;
   this->end_inj = 0UL;
   this->ReadSensors = ReadSensors;
+  this->Talk = Talk;
   this->display = true;
   this->Ib_hdwe_model = 0.;
   Prbn_Tb_ = new PRBS_7(TB_NOISE_SEED);

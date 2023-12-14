@@ -287,7 +287,7 @@ class Sensors
 {
 public:
   Sensors();
-  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors);
+  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
@@ -323,6 +323,7 @@ public:
   Shunt *ShuntAmp;            // Ib sense amplified
   Shunt *ShuntNoAmp;          // Ib sense non-amplified
   TempSensor* SensorTb;       // Tb sense
+  Sync *Talk;                 // Handle to debug talk time
   General2_Pole* TbSenseFilt; // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
   SlidingDeadband *SdTb;      // Non-linear filter for Tb
   BatterySim *Sim;            // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off

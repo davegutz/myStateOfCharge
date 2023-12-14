@@ -338,7 +338,7 @@ void loop()
   static boolean reset_publish = true;
 
   // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors);
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk);
 
    // Monitor to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor();

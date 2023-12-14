@@ -88,6 +88,7 @@ public:
     float slr_res;              // Scalar Randles R0, slr
     float s_t_sat;              // Scalar on saturation test time set and reset
     unsigned long int tail_inj; // Tail after end injection, ms
+    unsigned long int talk_delay; // Talk frame, ms
     float Tb_bias_model;        // Bias on Tb for model
     float Tb_noise_amp;         // Tb noise amplitude model only, deg C pk-pk
     float tb_stale_time_slr;    // Scalar on persistences of Tb hardware stale check
@@ -122,10 +123,11 @@ public:
     ULongZ *read_delay_p;
     FloatZ *slr_res_p;
     FloatZ *s_t_sat_p;
+    ULongZ *tail_inj_p;
+    ULongZ *talk_delay_p;
     FloatZ *Tb_bias_model_p;
     FloatZ *Tb_noise_amp_p;
     FloatZ *tb_stale_time_slr_p;
-    ULongZ *tail_inj_p;
     ULongZ *until_q_p;
     FloatZ *vb_add_p;
     FloatZ *Vb_noise_amp_p;

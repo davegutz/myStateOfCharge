@@ -105,7 +105,7 @@ void  VolatilePars::initialize()
     // Memory map
     // Input definitions
     n_ = -1;
-    Z_ = new Z*[34];
+    Z_ = new Z*[35];
     Z_[n_] = (cc_diff_slr_p    = new FloatZ(&n_, "  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_slr,       1));
     Z_[n_] = (cycles_inj_p     = new FloatZ(&n_, "  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
     Z_[n_] = (dc_dc_on_p     = new BooleanZ(&n_, "  ", "Xd", NULL,"DC-DC charger on",     "T=on",   0,    1,    &dc_dc_on,          false));
@@ -134,6 +134,7 @@ void  VolatilePars::initialize()
     Z_[n_] = (slr_res_p        = new FloatZ(&n_, "  ", "Sr", NULL,"Scalar Randles R0",    "slr",    0,    100,  &slr_res,           1));
     Z_[n_] = (s_t_sat_p        = new FloatZ(&n_, "  ", "Xs", NULL,"Scalar on T_SAT",      "slr",    0,    100,  &s_t_sat,           1));
     Z_[n_] = (tail_inj_p       = new ULongZ(&n_, "  ", "XT", NULL,"Tail end inj",         "ms",     0UL,  120000UL,&tail_inj,       0UL));
+    Z_[n_] = (talk_delay_p     = new ULongZ(&n_, "  ", "D>", NULL,"Talk frame",           "ms",     0UL,  120000UL,&talk_delay,     TALK_DELAY));
     Z_[n_] = (Tb_bias_model_p  = new FloatZ(&n_, "  ", "D^", NULL,"Del model",            "dg C",   -50,  50,   &Tb_bias_model,     TEMP_BIAS));
     Z_[n_] = (Tb_noise_amp_p   = new FloatZ(&n_, "  ", "DT", NULL,"Tb noise",             "dg C pk-pk", 0,50,   &Tb_noise_amp,      TB_NOISE));
     Z_[n_] = (tb_stale_time_slr_p=new FloatZ(&n_,"  ", "Xv", NULL,"Scale Tb 1-wire pers", "slr",    0,    100,  &tb_stale_time_slr,1));

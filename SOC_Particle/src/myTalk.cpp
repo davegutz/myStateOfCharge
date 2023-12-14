@@ -170,6 +170,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
   boolean reset = false;
   uint16_t modeling_past = sp.Modeling();
   urgency request;
+  String murmur;
 
   // Serial event
   request = NEW;
@@ -457,6 +458,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                 Mon->apply_soc(1.0, Sen->Tb_filt);
                 cp.cmd_reset();
                 Sen->ReadSensors->delay(READ_DELAY);
+                Sen->Talk->delay(TALK_DELAY);
                 sp.large_reset();
                 sp.large_reset();
                 cp.large_reset();
@@ -576,9 +578,10 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                   case ( 7 ):  // Xp7:  Program a sensor pulse for State Space test
-                    chit("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;Dr100;DP1;vv2;", QUEUE);  // setup
+                    chit("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;", QUEUE);  // setup
                     chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
-                    chit("W10;Pm;vv0;", QUEUE);  // finish
+                    murmur = "D>" + String(TALK_DELAY) + ";W10;Pm;vv0;Dr" + String(READ_DELAY) + ";";
+                    chit(murmur, QUEUE);  // finish
                     break;
 
                   case ( 8 ):  // Xp8:  Program a hardware pulse for State Space test
@@ -864,6 +867,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
                   ap.vb_add_p->print1();
                 break;
   
+              case ( '>' ):  //   D><>:  TALK sample time input
+                if ( ap.talk_delay_p->success() )
+                  Sen->Talk->delay(ap.talk_delay);  // validated
+                break;
+
             }
             break;
 
@@ -1055,6 +1063,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Dw_p->print1_help();  //* Dw
   ap.dv_voc_soc_p->print_help();  //  Dy
   ap.Tb_bias_model_p->print_help();  // D^
+  ap.talk_delay_p->print_help();  //  D>
   sp.Ib_scale_amp_p->print_help();  //* SA
   sp.Ib_scale_amp_p->print1_help();  //* SA
   sp.Ib_scale_noa_p->print_help();  //* SB
