@@ -279,6 +279,7 @@ void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const
 {
     int i;
 
+
     // Delete old if exists, before assigning anything
     if (n_h)
         delete x_dv;

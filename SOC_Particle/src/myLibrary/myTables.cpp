@@ -179,7 +179,10 @@ TableInterp::TableInterp(const unsigned int n, const float x[])
   }
 }
 
-TableInterp::~TableInterp() {}
+TableInterp::~TableInterp()
+{
+  delete x_;
+}
 // operators
 // functions
 float TableInterp::interp(void)
@@ -219,7 +222,10 @@ TableInterp1D::TableInterp1D(const unsigned int n, const float x[], const float 
     v_[i] = v[i];
   }
 }
-TableInterp1D::~TableInterp1D() {}
+TableInterp1D::~TableInterp1D()
+{
+  delete v_;
+}
 // operators
 // functions
 float TableInterp1D::interp(const float x)
@@ -239,7 +245,10 @@ TableInterp1Dclip::TableInterp1Dclip(const unsigned int n, const float x[], cons
     v_[i] = v[i];
   }
 }
-TableInterp1Dclip::~TableInterp1Dclip() {}
+TableInterp1Dclip::~TableInterp1Dclip()
+{
+  delete v_;
+}
 // operators
 // functions
 float TableInterp1Dclip::interp(const float x)
@@ -276,7 +285,11 @@ TableInterp2D::TableInterp2D(const unsigned int n, const unsigned int m, const f
       v_[i + j * n1_] = v[i + j * n1_];
     }
 }
-TableInterp2D::~TableInterp2D() {}
+TableInterp2D::~TableInterp2D()
+{
+  delete y_;
+  delete v_;
+}
 // operators
 // functions
 float TableInterp2D::interp(float x, float y)
