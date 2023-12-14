@@ -41,63 +41,63 @@ boolean recall_R(const char letter, BatteryMonitor *Mon, Sensors *Sen)
     switch ( letter )
     {
         case ( 'b' ):  // Rb:  Reset battery states (also hys)
-        Sen->Sim->init_battery_sim(true, Sen);  // Reset sim battery state
-        Mon->init_battery_mon(true, Sen);       // Reset mon battery state
-        break;
+            Sen->Sim->init_battery_sim(true, Sen);  // Reset sim battery state
+            Mon->init_battery_mon(true, Sen);       // Reset mon battery state
+            break;
 
         case ( 'f' ):  // Rf:  Reset fault Rf
-        Serial.printf("Reset latches\n");
-        Sen->Flt->reset_all_faults(true);
-        break;
+            Serial.printf("Reset latches\n");
+            Sen->Flt->reset_all_faults(true);
+            break;
 
         case ( 'i' ):  // Ri:  Reset infinite counter
-        Serial.printf("Reset infinite counter\n");
-        cp.inf_reset = true;
-        break;
+            Serial.printf("Reset infinite counter\n");
+            cp.inf_reset = true;
+            break;
 
         case ( 'r' ):  // Rr:  small reset counters
-        Serial.printf("CC reset\n");
-        Sen->Sim->apply_soc(1.0, Sen->Tb_filt);
-        Mon->apply_soc(1.0, Sen->Tb_filt);
-        cp.cmd_reset();
-        break;
+            Serial.printf("CC reset\n");
+            Sen->Sim->apply_soc(1.0, Sen->Tb_filt);
+            Mon->apply_soc(1.0, Sen->Tb_filt);
+            cp.cmd_reset();
+            break;
 
         case ( 'R' ):  // RR:  large reset
-        Serial.printf("RESET\n");
-        Serial1.printf("RESET\n");
-        Sen->Sim->apply_soc(1.0, Sen->Tb_filt);
-        Mon->apply_soc(1.0, Sen->Tb_filt);
-        cp.cmd_reset();
-        Sen->ReadSensors->delay(READ_DELAY);
-        Sen->Talk->delay(TALK_DELAY);
-        sp.large_reset();
-        sp.large_reset();
-        cp.large_reset();
-        cp.cmd_reset();
-        chit("HR;", SOON);
-        chit("Rf;", SOON);
-        chit("Hs;", SOON);
-        chit("Pf;", SOON);
-        break;
+            Serial.printf("RESET\n");
+            Serial1.printf("RESET\n");
+            Sen->Sim->apply_soc(1.0, Sen->Tb_filt);
+            Mon->apply_soc(1.0, Sen->Tb_filt);
+            cp.cmd_reset();
+            Sen->ReadSensors->delay(READ_DELAY);
+            Sen->Talk->delay(TALK_DELAY);
+            sp.large_reset();
+            sp.large_reset();
+            cp.large_reset();
+            cp.cmd_reset();
+            chit("HR;", SOON);
+            chit("Rf;", SOON);
+            chit("Hs;", SOON);
+            chit("Pf;", SOON);
+            break;
 
         case ( 's' ):  // Rs:  small reset filters
-        Serial.printf("reset\n");
-        cp.cmd_reset();
-        break;
+            Serial.printf("reset\n");
+            cp.cmd_reset();
+            break;
 
         case ( 'S' ):  // RS: renominalize saved pars
-        sp.set_nominal();
-        sp.pretty_print(true);
-        break;
+            sp.set_nominal();
+            sp.pretty_print(true);
+            break;
 
         case ( 'V' ):  // RV: renominalize volatile pars
-        ap.set_nominal();
-        ap.pretty_print(true);
-        break;
+            ap.set_nominal();
+            ap.pretty_print(true);
+            break;
 
         default:
-        found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
-        if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
+            found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
+            if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
     }
     return found;
 }
