@@ -91,7 +91,7 @@
 #endif
 
 #ifdef CONFIG_ARGON  // dec ~222350  units: pro1a, soc1a
-    #define NSUM 2216   // Number of saved SRAM summaries (2216)
+    #define NSUM 2215   // Number of saved SRAM summaries (2216)
 #endif
 
 #ifdef CONFIG_PHOTON2  // dec ~ 276770  units: pro2p2, pro2p3
