@@ -53,6 +53,7 @@ boolean Parameters::find_adjust(const String &str)
         if ( substr==Z_[i]->code() )
         {
             if ( !count ) success = Z_[i]->print_adjust(value_str);
+            else Serial.printf("REPEAT at i %d %s\n", i, Z_[i]->code().c_str());
             count++;
         }
     }
@@ -123,7 +124,7 @@ void  VolatilePars::initialize()
     Z_[n_] = (hys_state_p      = new FloatZ(&n_, "  ", "SH", NULL,"Sim hys state",        "v",      -10,  10,   &hys_state,         0));
     Z_[n_] = (ib_amp_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
     Z_[n_] = (ib_diff_slr_p    = new FloatZ(&n_, "  ", "Fd", NULL,"Slr ib_diff thr",      "A",      0,    1000, &ib_diff_slr,       1));
-    Z_[n_] = (ib_noa_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"No amp signal add",    "A",      -1000,1000, &ib_noa_add,        0));
+    Z_[n_] = (ib_noa_add_p     = new FloatZ(&n_, "  ", "Dn", NULL,"No amp signal add",    "A",      -1000,1000, &ib_noa_add,        0));
     Z_[n_] = (Ib_amp_noise_amp_p= new FloatZ(&n_,"  ", "DM", NULL,"Amp amp noise",        "A",      0,    1000, &Ib_amp_noise_amp,  IB_AMP_NOISE));
     Z_[n_] = (Ib_noa_noise_amp_p= new FloatZ(&n_,"  ", "DN", NULL,"Amp noa noise",        "A",      0,    1000, &Ib_noa_noise_amp,  IB_NOA_NOISE));
     Z_[n_] = (ib_quiet_slr_p   = new FloatZ(&n_, "  ", "Fq", NULL,"Ib quiet det slr",     "slr",    0,    1000, &ib_quiet_slr,      1));

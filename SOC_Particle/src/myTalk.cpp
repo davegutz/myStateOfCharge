@@ -168,6 +168,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
   float FP_in = -99.;
   int INT_in = -1;
   boolean reset = false;
+  boolean found = false;
   uint16_t modeling_past = sp.Modeling();
   urgency request;
   String murmur;
@@ -745,8 +746,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
 
           default:
             // First process what we can from structures
-            ap.find_adjust(cp.input_str);
-            sp.find_adjust(cp.input_str);
+            found = false;  // we know this
+            found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
+            if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
 
         }
 
