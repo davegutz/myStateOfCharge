@@ -21,30 +21,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "application.h"
-#include "recall_X.h"
 #include "../mySubs.h"
 #include "../command.h"
-#include "../local_config.h"
-#include "../mySummary.h"
 #include "../parameters.h"
-#include <math.h>
-#include "../debug.h"
 
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 extern VolatilePars ap; // Various adjustment parameters shared at system level
 extern CommandPars cp;  // Various parameters shared at system level
 extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 
-boolean followup(const char letter, BatteryMonitor *Mon, Sensors *Sen, uint16_t modeling_past)
+boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, Sensors *Sen, uint16_t modeling_past)
 {
-    float FP_in = -99.;
     boolean reset = false;
     boolean found = true;
-    switch ( letter )
+    switch ( letter_0 )
     {
 
         case ( 'B' ):
-            switch ( cp.input_str.charAt(1) )
+            switch ( letter_1 )
+ 
             {
 
                 case ( 'm' ):  //* Bm
@@ -97,7 +92,7 @@ boolean followup(const char letter, BatteryMonitor *Mon, Sensors *Sen, uint16_t 
             break;
 
         case ( 'C' ):  // C:
-            switch ( cp.input_str.charAt(1) )
+            switch ( letter_1 )
             {
 
                 case ( 'a' ):  // Ca<>:  assign charge state in fraction to all versions including model
@@ -131,14 +126,14 @@ boolean followup(const char letter, BatteryMonitor *Mon, Sensors *Sen, uint16_t 
                         if ( sp.Modeling() ) cp.cmd_reset_sim(); // Does not block.  Commands a reset
                     }
                     else
-                        Serial.printf("soc%8.4f; must be 0-1.1\n", FP_in);
+                        Serial.printf("soc%8.4f; must be 0-1.1\n", ap.init_sim_soc);
                     break;
 
             }
             break;
 
         case ( 'D' ):
-            switch ( cp.input_str.charAt(1) )
+            switch ( letter_1 )
             {
 
                 case ( 'r' ):  //   Dr<>:  READ sample time input
@@ -165,7 +160,7 @@ boolean followup(const char letter, BatteryMonitor *Mon, Sensors *Sen, uint16_t 
             break;
 
         case ( 'S' ):
-            switch ( cp.input_str.charAt(1) )
+            switch ( letter_1 )
             {
 
                 case ( 'H' ):  //   SH<>: state of all hysteresis
@@ -195,7 +190,7 @@ boolean followup(const char letter, BatteryMonitor *Mon, Sensors *Sen, uint16_t 
             break;
 
         case ( 'F' ):  // Fault stuff
-            switch ( cp.input_str.charAt(1) )
+            switch ( letter_1 )
             {
 
                 case ( 'f' ):  //* si, Ff<>:  fake faults
@@ -234,7 +229,7 @@ boolean followup(const char letter, BatteryMonitor *Mon, Sensors *Sen, uint16_t 
 
         case ( 'U' ):
             if ( sp.Time_now_p->success() )
-            switch ( cp.input_str.charAt(1) )
+            switch ( letter_1 )
             {
 
                 case ( 'T' ):  //*  UT<>:  Unix time since epoch
@@ -245,7 +240,7 @@ boolean followup(const char letter, BatteryMonitor *Mon, Sensors *Sen, uint16_t 
             break;
 
         case ( 'X' ):  // X
-            switch ( cp.input_str.charAt(1) )
+            switch ( letter_1 )
             {
 
                 case ( 'm' ):  // Xm<>:  code for modeling level
@@ -283,7 +278,7 @@ boolean followup(const char letter, BatteryMonitor *Mon, Sensors *Sen, uint16_t 
             break;
 
             default:
-                // Serial.print(cp.input_str.charAt(0)); Serial.print(" ? 'h'\n");
+                // Serial.print( letter_0 ); Serial.print(" ? 'h'\n");
                 break;
     }
     return found;

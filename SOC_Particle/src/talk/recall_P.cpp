@@ -35,10 +35,10 @@ extern VolatilePars ap; // Various adjustment parameters shared at system level
 extern CommandPars cp;  // Various parameters shared at system level
 extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 
-boolean recall_P(const char letter, BatteryMonitor *Mon, Sensors *Sen)
+boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
 {
     boolean found = true;
-    switch ( letter )
+    switch ( letter_1 )
     {
         case ( 'a' ):  // Pa:  Print all
             chit("Pm;", SOON);

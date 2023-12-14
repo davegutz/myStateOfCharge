@@ -25,6 +25,6 @@
 #define _FOLLOW_UP
 #include "../Battery.h"
 
-void followup(const char letter, BatteryMonitor *Mon, Sensors *Sen, const uint16_t modeling_past);
+boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, Sensors *Sen, uint16_t modeling_past);
 
 #endif

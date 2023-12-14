@@ -35,12 +35,12 @@ extern VolatilePars ap; // Various adjustment parameters shared at system level
 extern CommandPars cp;  // Various parameters shared at system level
 extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 
-boolean recall_X(const char letter, BatteryMonitor *Mon, Sensors *Sen)
+boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
 {
     boolean found = true;
     int INT_in;
     String murmur;
-    switch ( letter )
+    switch ( letter_1 )
     {
 
         case ( 'p' ): // Xp<>:  injection program
