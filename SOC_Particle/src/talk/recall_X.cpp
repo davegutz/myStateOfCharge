@@ -131,7 +131,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT5000;", QUEUE);    // Wait time after cycle to print
                         chit("XC3;", QUEUE);    // Number of injection cycles
                         chit("W2;", QUEUE);     // Wait
-                        chit("v4;", QUEUE);     // Data collection
+                        chit("vv4;", QUEUE);     // Data collection
                     }
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
@@ -141,7 +141,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT60000;", QUEUE);  // Wait time after cycle to print
                         chit("XC1;", QUEUE);    // Number of injection cycles
                         chit("W2;", QUEUE);     // Wait
-                        chit("v2;", QUEUE);     // Data collection
+                        chit("vv2;", QUEUE);     // Data collection
                     }
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
@@ -151,7 +151,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT240000;", QUEUE);   // Wait time after cycle to print
                         chit("XC.5;", QUEUE);     // Number of injection cycles
                         chit("W2;", QUEUE);       // Wait
-                        chit("v2;", QUEUE);       // Data collection
+                        chit("vv2;", QUEUE);       // Data collection
                     }
                     else if ( INT_in == 13 )  // Xp13:  tri tweak
                     {
@@ -162,7 +162,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT5000;", QUEUE);    // Wait time after cycle to print
                         chit("XC3;", QUEUE);    // Number of injection cycles
                         chit("W2;", QUEUE);     // Wait
-                        chit("v2;", QUEUE);     // Data collection
+                        chit("vv2;", QUEUE);     // Data collection
                     }
                     chit("W2;", QUEUE);       // Wait
                     chit("XR;", QUEUE);       // Run cycle
@@ -175,12 +175,12 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     {
                         chit("Dr500;", QUEUE);  // 5x sample time, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Photon
                         chit("DP4;", QUEUE);    // 4x data collection, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Python
-                        chit("v2;", QUEUE);     // Large data set
+                        chit("vv2;", QUEUE);     // Large data set
                     }
                     else if ( INT_in == 21 )
                     {
                         chit("DP20;", QUEUE);   // 20x data collection
-                        chit("v2;", QUEUE);     // Slow data collection
+                        chit("vv2;", QUEUE);     // Slow data collection
                     }
                     chit("Rb;", QUEUE);       // Large data set
                     break;

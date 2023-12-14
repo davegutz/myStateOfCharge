@@ -21,8 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef _MOUTH_H
-#define _MOUTH_H
+#ifndef _TRANSCRIBE_H
+#define _TRANSCRIBE_H
 #include "../Battery.h"
 
 enum urgency {INCOMING, ASAP, SOON, QUEUE, NEW, LAST};
@@ -33,7 +33,7 @@ void asap();
 void chat();
 void chit(const String cmd, const enum urgency when);
 void clear_queues();
-void talk(BatteryMonitor *Mon, Sensors *Sen);
+void transcribe(BatteryMonitor *Mon, Sensors *Sen);
 void talkH(BatteryMonitor *batt, Sensors *Sen); // Help
 
 #endif

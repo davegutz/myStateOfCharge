@@ -738,7 +738,7 @@ void finish_request(void)
   cp.input_str.replace(" ","");
   cp.input_str.replace("=","");
   cp.input_str.replace(";","");
-  cp.token = true;  // token:  temporarily inhibits while loop until talk() call resets token
+  cp.token = true;  // token:  temporarily inhibits while loop until transcribe() call resets token
 }
 
 /*

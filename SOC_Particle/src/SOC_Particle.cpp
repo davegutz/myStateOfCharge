@@ -490,7 +490,7 @@ void loop()
   if ( chitchat )
   {
     chat();         // Work on internal chit-chat
-    talk(Mon, Sen);   // Collect user inputs
+    transcribe(Mon, Sen);   // Collect user inputs
   }
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer

@@ -44,12 +44,13 @@ extern PrinterPars pr;  // Print buffer
 extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 
 // Talk Executive
-void talk(BatteryMonitor *Mon, Sensors *Sen)
+void transcribe(BatteryMonitor *Mon, Sensors *Sen)
 {
   int INT_in = -1;
   boolean found = false;
   urgency request;
   uint16_t modeling_past = sp.Modeling();
+  char letter_0, letter_1;
 
   // Serial event
   request = NEW;
@@ -83,6 +84,9 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
     {
       request = NEW;
     }
+    // Now we know the letters
+    letter_0 = cp.input_str.charAt(0);
+    letter_1 = cp.input_str.charAt(1);
 
     // Limited echoing of Serial1 commands available
     if ( request==0 )
@@ -120,11 +124,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         break;
 
       case ( INCOMING ):
-        switch ( cp.input_str.charAt(0) )
+        switch ( letter_0 )
         {
 
           case ( 'b' ):  // Fault buffer
-            switch ( cp.input_str.charAt(1) )
+            switch ( letter_1 )
             {
               case ( 'd' ):  // bd: fault buffer dump
                 Serial.printf("\n");
@@ -154,7 +158,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'B' ):
-            switch ( cp.input_str.charAt(1) )
+            switch ( letter_1 )
             {
               case ( 'Z' ):  // BZ :  Benign zeroing of settings to make clearing test easier
                 benign_zero(Mon, Sen);
@@ -173,11 +177,11 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'H' ):  // History
-            found = recall_H(cp.input_str.charAt(1), Mon, Sen);
+            found = recall_H(letter_1, Mon, Sen);
             break;
 
           case ( 'P' ):
-            found = recall_P(cp.input_str.charAt(1), Mon, Sen);
+            found = recall_P(letter_1, Mon, Sen);
             break;
 
           case ( 'Q' ):  // Q:  quick critical
@@ -185,7 +189,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'R' ):
-            found = recall_R(cp.input_str.charAt(1), Mon, Sen);
+            found = recall_R(letter_1, Mon, Sen);
             break;
 
           // Photon 2 O/S waits 10 seconds between backup SRAM saves.  To save time, you can get in the habit of pressing 'w;'
@@ -216,7 +220,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           case ( 'X' ):
-            found = recall_X(cp.input_str.charAt(1), Mon, Sen);
+            found = recall_X(letter_1, Mon, Sen);
             break;
 
           case ( 'h' ):  // h: help
@@ -230,7 +234,7 @@ void talk(BatteryMonitor *Mon, Sensors *Sen)
         }
 
         ///////////PART 2/////// There may be followup to structures or new commands
-        followup(cp.input_str.charAt(0), cp.input_str.charAt(1), Mon, Sen, modeling_past);
+        followup(letter_0, letter_1, Mon, Sen, modeling_past);
     }
 
     cp.input_str = "";

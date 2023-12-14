@@ -27,7 +27,7 @@
 // #include "../local_config.h"
 // #include "../mySummary.h"
 #include "../parameters.h"
-#include "mouth.h"
+#include "transcribe.h"
 // #include <math.h>
 // #include "../debug.h"
 
@@ -40,7 +40,7 @@ extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 void asap()
 {
   get_string(&cp.asap_str);
-  // if ( cp.token ) Serial.printf("asap:  talk('%s;')\n", cp.input_str.c_str());
+  // if ( cp.token ) Serial.printf("asap:  transcribe('%s;')\n", cp.input_str.c_str());
 }
 
 // Process chat strings
@@ -80,7 +80,7 @@ void chat()
   }
 }
 
-// Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
+// Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for transcribe()
 void chit(const String cmd, const urgency when)
 {
   #ifdef DEBUG_QUEUE
@@ -102,7 +102,7 @@ void chit(const String cmd, const urgency when)
     cp.asap_str += cmd;
 }
 
-// Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for talk()
+// Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for transcribe()
 void clear_queues()
 {
   cp.end_str = "";
