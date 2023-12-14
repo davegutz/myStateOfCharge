@@ -21,19 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef _MY_TALK_H
-#define _MY_TALK_H
-#include "Battery.h"
+#ifndef _RECALL_P
+#define _RECALL_P
+#include "../Battery.h"
 
-enum urgency {INCOMING, ASAP, SOON, QUEUE, NEW, LAST};
-typedef enum urgency urgency;
-
-void benign_zero(BatteryMonitor *Mon, Sensors *Sen);
-void asap();
-void chat();
-void chit(const String cmd, const enum urgency when);
-void clear_queues();
-void talk(BatteryMonitor *Mon, Sensors *Sen);
-void talkH(BatteryMonitor *batt, Sensors *Sen); // Help
+boolean recall_P(const char letter, BatteryMonitor *Mon, Sensors *Sen);
 
 #endif

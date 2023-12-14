@@ -28,7 +28,7 @@
 #include "Battery.h"
 #include "constants.h"
 #include "myCloud.h"
-#include "myTalk.h"
+#include "talk/mouth.h"
 #include "command.h"
 #include "mySync.h"
 #include "parameters.h"
