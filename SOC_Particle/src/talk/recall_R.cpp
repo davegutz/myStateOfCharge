@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "application.h"
-#include "recall_P.h"
+#include "recall_R.h"
 #include "../mySubs.h"
 #include "../command.h"
 #include "../local_config.h"
@@ -38,7 +38,7 @@ extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 boolean recall_R(const char letter, BatteryMonitor *Mon, Sensors *Sen)
 {
     boolean found = true;
-    switch ( cp.input_str.charAt(1) )
+    switch ( letter )
     {
         case ( 'b' ):  // Rb:  Reset battery states (also hys)
         Sen->Sim->init_battery_sim(true, Sen);  // Reset sim battery state
