@@ -76,6 +76,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Vb_bias_hdwe_p->print_help();  //* Dc
   sp.Vb_bias_hdwe_p->print1_help();  //* Dc
   ap.eframe_mult_p->print_help();  //  DE
+  ap.his_delay_div_p->print_help();  //  Dh
   sp.Ib_bias_all_p->print_help();  //* DI
   sp.Ib_bias_all_p->print1_help();  //* DI
   sp.Ib_bias_amp_p->print_help();  //  Dm

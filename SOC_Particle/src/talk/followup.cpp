@@ -136,6 +136,11 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
             switch ( letter_1 )
             {
 
+                case ( 'h' ):  //   Dh<>:  READ sample time input
+                    if ( ap.his_delay_div_p->success() )
+                        Sen->Summarize->delay(HISTORY_DELAY / ap.his_delay_div);  // validated
+                    break;
+
                 case ( 'r' ):  //   Dr<>:  READ sample time input
                     if ( ap.read_delay_p->success() )
                         Sen->ReadSensors->delay(ap.read_delay);  // validated
