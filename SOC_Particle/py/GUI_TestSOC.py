@@ -25,6 +25,8 @@ import re
 from tkinter import ttk, filedialog
 import tkinter.simpledialog
 import tkinter.messagebox
+from CompareHistSim import compare_hist_sim
+# from CompareHistRun import compare_hist_run
 from CompareRunSim import compare_run_sim
 from CompareRunRun import compare_run_run
 from CountdownTimer import CountdownTimer
@@ -54,6 +56,7 @@ def_dict = {'test': {"version": "g20230530",
                     "battery": "bb",
                     'dataReduction_folder': '<enter data dataReduction_folder>'},
             'others': {"option": "custom",
+                       'mod_in_app': "247",
                        'modeling': True}
             }
 
@@ -96,7 +99,7 @@ lookup = {'init': ('Y;c;Dh1;*W;*vv0;*XS;*Ca0.5;<Rf;<Pf;', ('',), 10, 12),
           'tbFailHdwe': ('Ff0;Ca.5;Xp0;Xm246;DP1;Dr100;W2;HR;Pf;vv2;Xv.002;W10;Xu1;W20;Xu0;Xv1;W20;vv0;Pf;', ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.", "'Xp0' in reset puts Xm back to 247."), 60, 12),
           'DvMon': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;vv2;W30;Dm0.001;Dw-0.8;Dn0.0001;', ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa"), 120, 12),
           'DvSim': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;vv2;W30;Dm0.001;Dy-0.8;Dn0.0001;', ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa"), 120, 12),
-          'faultParade': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;Dh100;vv2;Dm50;Dn0.0001;W20;Dm0;Dn0;W20;Rf;', ("Check fault, history, and summary logging", "Should flag faults but take no action", "", "", ""), 120, 12),
+          'faultParade': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;Dh100;vv2;Dm50;Dn0.0001;W200;Dm0;Dn0;W20;Rf;', ("Check fault, history, and summary logging", "Should flag faults but take no action", "", "", ""), 240, 80),
           }
 putty_connection = {'': 'test',
                     'pro0p': 'testpro0p',
@@ -359,6 +362,41 @@ def clear_data(silent=False, nowait=False):
             tkinter.messagebox.showwarning(message="Nothing to clear")
 
 
+def compare_hist():
+    if not Test.key_exists_in_file:
+        tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
+        return
+    if modeling.get():
+        print('compare_hist_sim')
+        # master.withdraw()
+        chm = None
+        if Test.battery == 'bb':
+            chm = 0
+        elif Test.battery == 'ch':
+            chm = 1
+        compare_hist_sim(data_file_path=Test.file_path, save_pdf_path=os.path.join(Test.version_path, './figures'),
+                         path_to_temp=os.path.join(Test.version_path, './temp'), chm_in=chm, mod_in=mod_in_app.get())
+        # master.deiconify()
+    else:
+        if not Ref.key_exists_in_file:
+            tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in " + Ref.file_txt)
+            return
+        print('GUI_TestSOC compare_hist:  Ref', Ref.file_path, Ref.key)
+        print('GUI_TestSOC compare_hist:  Test', Test.file_path, Test.key)
+        keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
+        # master.withdraw()
+        chm = None
+        if Test.battery == 'bb':
+            chm = 0
+        elif Test.battery == 'ch':
+            chm = 1
+        print(f"make compare_hist_run.py")
+        # compare_hist_run(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
+        #                 save_pdf_path=os.path.join(Test.version_path, './figures'),
+        #                 path_to_temp=os.path.join(Test.version_path, './temp'))
+        # master.deiconify()
+
+
 def compare_run():
     if not Test.key_exists_in_file:
         tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
@@ -469,6 +507,13 @@ def empty_file(target):
         os.remove(empty_csv_path.get())
     except OSError:
         pass
+
+
+def enter_mod_in_app():
+    mod_in_app.set(tk.simpledialog.askinteger(title=__file__, prompt="enter the value of Modeling in app to assume", initialvalue=mod_in_app.get()))
+    cf['others']['mod_in_app'] = str(mod_in_app.get())
+    cf.save_to_file()
+    mod_in_app_button.config(text=mod_in_app.get())
 
 
 def end_early():
@@ -633,12 +678,14 @@ def putty_size():
 def ref_remove():
     top_panel_right.pack_forget()
     run_button.config(text='Compare Run Sim')
+    comp_button.config(text='Compare Hist Sim')
     Ref.label.forget()
 
 
 def ref_restore():
     top_panel_right.pack(expand=True, fill='both')
     run_button.config(text='Compare Run Run')
+    comp_button.config(text='Compare Hist Run')
     Ref.label.pack(padx=5, pady=5)
 
 
@@ -994,6 +1041,7 @@ if __name__ == '__main__':
     save_data_as_button.pack(side=tk.RIGHT, padx=5, pady=5)
 
     # Run panel
+    mod_in_app = tk.IntVar(master, int(cf['others']['mod_in_app']))
     run_sep_panel = tk.Frame(master)
     run_sep_panel.pack(expand=True, fill='x')
     tk.Label(run_sep_panel, text=' ', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
@@ -1003,10 +1051,17 @@ if __name__ == '__main__':
     if platform.system() == 'Darwin':
         run_button = myButton(run_panel, text=' Compare ', command=compare_run, fg="green", bg=bg_color,
                               justify=tk.LEFT, font=butt_font_large)
+        comp_button = myButton(run_panel, text=' Compare ', command=compare_hist, fg="green", bg=bg_color,
+                              justify=tk.LEFT, font=butt_font_large)
     else:
         run_button = myButton(run_panel, text=' Compare ', command=compare_run, fg="green", bg=bg_color,
                               wraplength=wrap_length, justify=tk.LEFT, font=butt_font_large)
+        comp_button = myButton(run_panel, text=' Compare ', command=compare_hist, fg="green", bg=bg_color,
+                               justify=tk.LEFT, font=butt_font_large)
+    mod_in_app_button = myButton(run_panel, text=mod_in_app.get(), command=enter_mod_in_app, fg="green", bg=bg_color)
     run_button.pack(side=tk.LEFT, padx=5, pady=5)
+    mod_in_app_button.pack(side=tk.RIGHT, padx=5, pady=5)
+    comp_button.pack(side=tk.RIGHT, padx=5, pady=5)
 
     # Compare panel
     compare_sep_panel = tk.Frame(master)

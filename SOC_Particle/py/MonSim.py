@@ -130,10 +130,10 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         sat_s_init = mon_old.voc_stat[0] > mon_old.vsat[0]
     t_len = len(t)
     rp = Retained()
-    try:
-        rp.modeling = mon_old.mod()
-    except IOError:
+    if mon_old.dtype.names.count('mod_data') > 0:
         rp.modeling = mon_old.mod_data[0]
+    else:
+        rp.modeling = mon_old.mod()
     print("rp.modeling is ", rp.modeling)
     print('use_ib_mon is', use_ib_mon)
     tweak_test = rp.tweak_test()
