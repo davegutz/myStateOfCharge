@@ -24,6 +24,7 @@
 #include "../mySubs.h"
 #include "../command.h"
 #include "../parameters.h"
+#include "../debug.h"
 
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 extern VolatilePars ap; // Various adjustment parameters shared at system level
@@ -138,7 +139,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
 
                 case ( 'h' ):  //   Dh<>:  READ sample time input
                     if ( ap.his_delay_div_p->success() )
-                        Sen->Summarize->delay(HISTORY_DELAY / ap.his_delay_div);  // validated
+                        Sen->Summarize->delay(SUMMARY_DELAY / ap.his_delay_div);  // validated
                     break;
 
                 case ( 'r' ):  //   Dr<>:  READ sample time input

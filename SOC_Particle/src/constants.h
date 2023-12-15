@@ -50,8 +50,8 @@
 #define TALK_DELAY            313UL      // Talk wait, ms (313UL = 0.313 sec)
 #define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec) Dr
 #define READ_TEMP_DELAY       6011UL    // Sensor read wait, ms (6011UL = 6.011 sec)
-#define HISTORY_DELAY         1800000UL // Battery state tracking and reporting, ms (1800000UL = 30 min) Dh
-#define HISTORY_WAIT          60000UL   // Summarize alive time before first save, ms (60000UL = 1 min) Dh
+#define SUMMARY_DELAY         1800000UL // Battery state tracking and reporting, ms (1800000UL = 30 min) Dh
+#define SUMMARY_WAIT          60000UL   // Summarize alive time before first save, ms (60000UL = 1 min) Dh
 #define PUBLISH_SERIAL_DELAY  400UL     // Serial print interval (400UL = 0.4 sec)
 #define DISPLAY_USER_DELAY    1200UL    // User display update (1200UL = 1.2 sec)
 #define CONTROL_DELAY         100UL     // Control read wait, ms (100UL = 0.1 sec)
@@ -80,22 +80,22 @@
 // For all, there are 40 bytes for each unit of NSUM
 #ifdef CONFIG_PHOTON  // dec ~133500  units: pro0p
     #ifdef DEPLOY_PHOTON
-        #define NSUM 200 // Number of saved SRAM summaries (200)
+        #define NSUM 226 // Number of saved SRAM summaries (226)
     #else
         #ifdef DEBUG_INIT
-            #define NSUM 0 // Number of saved SRAM summaries (40)
+            #define NSUM -4 // Number of saved SRAM summaries (-4)
         #else
-            #define NSUM  20 // Number of saved SRAM summaries (26)
+            #define NSUM  54 // Number of saved SRAM summaries (54)
         #endif
     #endif
 #endif
 
 #ifdef CONFIG_ARGON  // dec ~222350  units: pro1a, soc1a
-    #define NSUM 2211   // Number of saved SRAM summaries (2211)
+    #define NSUM 2212   // Number of saved SRAM summaries (2212)
 #endif
 
-#ifdef CONFIG_PHOTON2  // dec ~ 276770  units: pro2p2, pro2p3
-    #define NSUM 3000   // Number of saved SRAM summaries (3000)
+#ifdef CONFIG_PHOTON2  // dec ~ 276770  units: pro2p2, pro3p2
+    #define NSUM 3185   // Number of saved SRAM summaries (3185)
 #endif
 
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)

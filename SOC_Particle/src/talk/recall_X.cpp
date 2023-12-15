@@ -102,7 +102,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                 case ( 7 ):  // Xp7:  Program a sensor pulse for State Space test
                     chit("XS;Dm0;Dn0;vv0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;", QUEUE);  // setup
                     chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
-                    murmur = "D>" + String(TALK_DELAY) + ";W10;Pm;vv0;Dr" + String(READ_DELAY) + ";Dh" + String(HISTORY_DELAY) + ";";
+                    murmur = "D>" + String(TALK_DELAY) + ";W10;Pm;vv0;Dr" + String(READ_DELAY) + ";Dh" + String(SUMMARY_DELAY) + ";";
                     chit(murmur, QUEUE);  // finish
                     break;
 

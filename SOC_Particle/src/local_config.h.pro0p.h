@@ -13,7 +13,9 @@ const String unit = version + "_pro0p";
 #define CONFIG_DS18B20_SWIRE
 // #define DEPLOY_PHOTON
 
-// don't use on Photon.  Use Argon or Photon 2 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
+// #define DEBUG_QUEUE
+// #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
+// #define LOGHANDLE
 
 // * = SRAM EEPROM adjustments, retained on power reset
 

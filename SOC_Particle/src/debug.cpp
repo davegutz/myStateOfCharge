@@ -40,7 +40,7 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
     Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc());
   }
 
-  // sp.Debug()==-13 ib_dscn for Arduino.
+// sp.Debug()==-13 ib_dscn for Arduino.
   // Start Arduino serial plotter.  Toggle v like 'vv0;vv-13;' to produce legend
   void debug_m13(Sensors *Sen)
   {

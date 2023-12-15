@@ -325,7 +325,7 @@ void loop()
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
   boolean summarizing;
   static boolean boot_wait = true;  // waiting for a while before summarizing
-  static Sync *Summarize = new Sync(HISTORY_DELAY);
+  static Sync *Summarize = new Sync(SUMMARY_DELAY);
   boolean control;
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
   unsigned long current_time;
@@ -364,8 +364,8 @@ void loop()
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);
   display_and_remember = DisplayUserSync->update(millis(), reset);
-  boolean boot_summ = boot_wait && ( elapsed >= HISTORY_WAIT / ap.his_delay_div ) && !sp.Modeling_z;
-  if ( elapsed >= HISTORY_WAIT / ap.his_delay_div ) boot_wait = false;
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / ap.his_delay_div ) && !sp.Modeling_z;
+  if ( elapsed >= SUMMARY_WAIT / ap.his_delay_div ) boot_wait = false;
   summarizing = Summarize->update(millis(), false);
   summarizing = summarizing || boot_summ;
 
