@@ -46,7 +46,6 @@ boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             chit("Pr;", SOON);
             chit("PM;", SOON);
             chit("PN;", SOON);
-            chit("Ph;", SOON);
             chit("Hd;", SOON);
             chit("Pf;", SOON);
             chit("Q;", SOON);
