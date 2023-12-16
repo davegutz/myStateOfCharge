@@ -648,7 +648,10 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
       sp.put_Iflt(sp.Iflt() + 1);
       if ( sp.Iflt()>sp.nflt() - 1 ) sp.put_Iflt(0);  // wrap buffer
       Flt_st fault_snap;
-      fault_snap.assign(Time.now(), Mon, Sen);
+      if ( sp.Modeling_z > 1)
+        fault_snap.assign_proto(Time.now(), Mon, Sen);
+      else
+        fault_snap.assign(Time.now(), Mon, Sen);
       sp.put_fault(fault_snap, sp.Iflt());
     }
     else if ( fails_repeated < 4 )
@@ -686,7 +689,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   {
     Serial.printf("STOP echo\n");
     Sen->elapsed_inj = 0UL;
-    Serial.printf("running -v0;-Pa;*Xm247,*Xp0\n");
+    Serial.printf("running -vv0;-Pa;*Xm247,*Xp0\n");
     chit("vv0;", ASAP);     // Turn off echo
     chit("Pa;", ASAP);     // Print all for record
     chit("Xm247;", SOON);  // Turn off tweak_test

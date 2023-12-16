@@ -138,13 +138,16 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
             {
 
                 case ( 'h' ):  //   Dh<>:  READ sample time input
-                    if ( ap.his_delay_div_p->success() )
-                        Sen->Summarize->delay(SUMMARY_DELAY / ap.his_delay_div);  // validated
+                    if ( ap.his_delay_p->success() )
+                        Sen->Summarize->delay(max(ap.read_delay, ap.his_delay));  // validated
                     break;
 
                 case ( 'r' ):  //   Dr<>:  READ sample time input
                     if ( ap.read_delay_p->success() )
+                    {
                         Sen->ReadSensors->delay(ap.read_delay);  // validated
+                        Sen->Summarize->delay(max(ap.read_delay, ap.his_delay));  // validated
+                    }
                     break;
 
                 case ( 't' ):  //*  Dt<>:  Temp bias change hardware

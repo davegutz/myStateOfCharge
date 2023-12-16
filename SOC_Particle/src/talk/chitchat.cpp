@@ -147,7 +147,6 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   ap.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
   ap.print_mult = max(min(DP_MULT, UINT8_MAX), 0);  // DP
   Sen->ReadSensors->delay(READ_DELAY);  // Dr
-  Sen->Summarize->delay(SUMMARY_DELAY);  // Dh
 
   // Fault logic
   ap.cc_diff_slr = 1;  // Fc 1

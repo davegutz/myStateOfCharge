@@ -41,6 +41,7 @@ public:
   void delay(unsigned long new_delay) { delay_ = new_delay; updateTimeInput_ = float(delay_)/1000.; };
   unsigned long last() { return(last_); };
   boolean stat() { return(stat_); };
+  unsigned long updateDiff() { return(updateDiff_); };
   double updateTime() { return(updateTime_); };
   double updateTimeInput() { return(updateTimeInput_); };
   unsigned long now() { return(now_); };

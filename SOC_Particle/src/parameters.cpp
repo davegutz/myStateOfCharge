@@ -120,7 +120,7 @@ void  VolatilePars::initialize()
     Z_[n_] = (ewlo_slr_p       = new FloatZ(&n_, "  ", "Fo", NULL,"Slr wrap lo thr",      "slr",    0,    1000, &ewlo_slr,          1));
     Z_[n_] = (fail_tb_p      = new BooleanZ(&n_, "  ", "Xu", NULL,"Ignore Tb & fail",     "T=Fail", false,true, &fail_tb,           false));
     Z_[n_] = (fake_faults_p  = new BooleanZ(&n_, "  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,    &fake_faults,       FAKE_FAULTS));
-    Z_[n_] = (his_delay_div_p  = new ULongZ(&n_, "  ", "Dh", NULL,"History frame div",    "div",    1UL,  100UL,&his_delay_div,     1));
+    Z_[n_] = (his_delay_p      = new ULongZ(&n_, "  ", "Dh", NULL,"History frame",        "ms",     10UL, SUMMARY_DELAY,&his_delay, SUMMARY_DELAY));
     Z_[n_] = (hys_scale_p      = new FloatZ(&n_, "  ", "Sh", NULL,"Sim hys scale",        "slr",    0,    100,  &hys_scale,         HYS_SCALE));
     Z_[n_] = (hys_state_p      = new FloatZ(&n_, "  ", "SH", NULL,"Sim hys state",        "v",      -10,  10,   &hys_state,         0));
     Z_[n_] = (ib_amp_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
@@ -256,10 +256,10 @@ void SavedPars::initialize()
     Z_[n_] = (Ib_scale_amp_p   = new FloatZ(&n_, "* ", "SA", rP_, "Slr amp",              "A",      -1e5, 1e5,  &Ib_scale_amp_z,CURR_SCALE_AMP));
     Z_[n_] = (Ib_scale_noa_p   = new FloatZ(&n_, "* ", "SB", rP_, "Slr noa",              "A",      -1e5, 1e5,  &Ib_scale_noa_z,CURR_SCALE_NOA));
     Z_[n_] = (Ib_select_p      = new Int8tZ(&n_, "* ", "si", rP_, "curr sel mode",        "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS)));
-    Z_[n_] = (Iflt_p         = new Uint16tZ(&n_, "* ", "if", rP_, "Fault buffer indx",    "uint",   0,  nflt_+1,&Iflt_z,        nflt_,              false));
-    Z_[n_] = (Ihis_p         = new Uint16tZ(&n_, "* ", "ih", rP_, "Hist buffer indx",     "uint",   0,  nhis_+1,&Ihis_z,        nhis_,              false));
+    Z_[n_] = (Iflt_p         = new Uint16tZ(&n_, "* ", "if", rP_, "Fault buffer indx",    "uint",   0,  nflt_,  &Iflt_z,        nflt_,              false));
+    Z_[n_] = (Ihis_p         = new Uint16tZ(&n_, "* ", "ih", rP_, "Hist buffer indx",     "uint",   0,  nhis_,  &Ihis_z,        nhis_,              false));
     Z_[n_] = (Inj_bias_p       = new FloatZ(&n_, "* ", "Xb", rP_, "Injection bias",       "A",      -1e5, 1e5,  &Inj_bias_z,    0.));
-    Z_[n_] = (Isum_p         = new Uint16tZ(&n_, "* ", "is", rP_, "Summ buffer indx",     "uint",   0,  NSUM+1, &Isum_z,        NSUM+1,             false));
+    Z_[n_] = (Isum_p         = new Uint16tZ(&n_, "* ", "is", rP_, "Summ buffer indx",     "uint",   0,   NSUM,  &Isum_z,        NSUM+1,             false));
     Z_[n_] = (Modeling_p      = new Uint8tZ(&n_, "* ", "Xm", rP_, "Modeling bitmap",      "[0x]",   0,    255,  &Modeling_z,    MODELING));
     Z_[n_] = (Mon_chm_p       = new Uint8tZ(&n_, "* ", "Bm", rP_, "Monitor battery",      "0=BB, 1=CH",0,   1,  &Mon_chm_z,     MON_CHEM));
     Z_[n_] = (nP_p             = new FloatZ(&n_, "* ", "BP", rP_, "Number parallel",      "units",  1e-6, 100,  &nP_z,          NP));
@@ -373,7 +373,10 @@ void SavedPars::print_fault_array()
   while ( ++n < nflt_+1 )
   {
     if ( ++i > (nflt_-1) ) i = 0; // circular buffer
-    fault_[i].print("unit_f");
+    if ( sp.Modeling_z > 0 )
+        fault_[i].print_proto("unit_f");
+    else
+        fault_[i].print("unit_f");
   }
 }
 
@@ -387,12 +390,15 @@ void SavedPars::print_fault_header()
 // Print history
 void SavedPars::print_history_array()
 {
-  int i = Ihis_z;  // Last one written was ihis
+  int i = Ihis_z;  // Last one written was Ihis_z
   int n = -1;
   while ( ++n < nhis_ )
   {
     if ( ++i > (nhis_-1) ) i = 0; // circular buffer
-    history_[i].print("unit_h");
+    if ( sp.Modeling_z > 0 )
+        history_[i].print_proto("unit_h");
+    else
+        history_[i].print("unit_h");
   }
 }
 

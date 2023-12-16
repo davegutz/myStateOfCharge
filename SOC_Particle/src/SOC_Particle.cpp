@@ -364,10 +364,9 @@ void loop()
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);
   display_and_remember = DisplayUserSync->update(millis(), reset);
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / ap.his_delay_div ) && !sp.Modeling_z;
-  if ( elapsed >= SUMMARY_WAIT / ap.his_delay_div ) boot_wait = false;
-  summarizing = Summarize->update(millis(), false);
-  summarizing = summarizing || boot_summ;
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) && !sp.Modeling_z;
+  if ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) boot_wait = false;
+  summarizing = Summarize->update(millis(), false) || boot_summ;
 
   // Sample temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt
@@ -500,11 +499,14 @@ void loop()
     sp.put_Ihis(sp.Ihis_z + 1);
     if ( sp.Ihis_z > (sp.nhis() - 1) ) sp.put_Ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
-    hist_snap.assign(time_now, Mon, Sen);
+    if ( sp.Modeling_z > 1)
+      hist_snap.assign_proto(time_now, Mon, Sen);
+    else
+      hist_snap.assign(time_now, Mon, Sen);
     hist_bounced = sp.put_history(hist_snap, sp.Ihis_z);
 
     sp.put_Isum(sp.Isum_z+1);
-    if ( sp.Isum_z > NSUM-1 ) sp.put_Isum(0);
+    if ( sp.Isum_z > NSUM-1 ) sp.put_Isum(0);  // wrap buffer
     mySum[sp.Isum_z].copy_to_Flt_ram_from(hist_bounced);
 
     Serial.printf("Summ...\n");

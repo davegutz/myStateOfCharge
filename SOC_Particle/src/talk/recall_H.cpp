@@ -55,7 +55,8 @@ boolean recall_H(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
         break;
 
     case ( 'R' ):  // HR: History reset
-        Serial.printf("Reset his & flt...");
+        Serial.printf("Reset sum, his, flt...");
+        reset_all_fault_buffer("unit_h", mySum, sp.Isum(), sp.nsum());
         sp.reset_his();
         sp.reset_flt();
         Serial.printf("done\n");

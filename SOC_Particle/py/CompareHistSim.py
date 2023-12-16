@@ -894,8 +894,8 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
     dvoc_sim_in = 0.
 
     # User inputs (multiple input_files allowed
-    data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\g20231111b/faultParade_pro0p_ch.csv'
-    data_file_txt = 'faultParade_pro0p_ch.csv'  # unit_key='g20231111b_pro0p_ch'
+    # data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\g20231111b/faultParade_pro0p_ch.csv'
+    # data_file_txt = 'faultParade_pro0p_ch.csv'  # unit_key='g20231111b_pro0p_ch'
     # input_files = ['g20231111b/faultParade_pro0p_ch.csv']; unit_key='g20231111b_pro0p_ch'
     # temp_hist_file = 'hist_CompareFault.txt'
     # temp_flt_file = 'flt_CompareFault.txt'
@@ -974,8 +974,7 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
     mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100, chm_in=chm_in)
     mon_ver_100, sim_ver_100, sim_s_ver_100, mon_r, sim_r =\
         replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=False, t_max=time_end_in, use_vb_sim=False,
-                    scale_in=scale_in, use_mon_soc=use_mon_soc_in,
-                  dvoc_mon=dvoc_mon_in, dvoc_sim=dvoc_sim_in)
+                  scale_in=scale_in, use_mon_soc=use_mon_soc_in, dvoc_mon=dvoc_mon_in, dvoc_sim=dvoc_sim_in)
 
     # Plots
     fig_list = []

@@ -24,7 +24,7 @@
 #include "mySummary.h"
 #include "parameters.h"
 
-// print helpler
+// print helper
 void print_all_fault_buffer(const String code, struct Flt_st *flt, const int iflt, const int nflt)
 {
   int i = iflt;  // Last one written was iflt
@@ -32,6 +32,20 @@ void print_all_fault_buffer(const String code, struct Flt_st *flt, const int ifl
   while ( ++n < nflt )
   {
     if ( ++i > (nflt-1) ) i = 0; // circular buffer
-    flt[i].print(code);
+    if ( sp.Modeling_z > 0 )
+      flt[i].print_proto(code);
+    else
+      flt[i].print(code);
+  }
+}
+
+void reset_all_fault_buffer(const String code, struct Flt_st *flt, const int iflt, const int nflt)
+{
+  int i = iflt;  // Last one written was iflt
+  int n = -1;
+  while ( ++n < nflt )
+  {
+    if ( ++i > (nflt-1) ) i = 0; // circular buffer
+    flt[i].put_nominal();
   }
 }

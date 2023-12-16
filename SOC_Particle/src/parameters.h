@@ -73,7 +73,7 @@ public:
     float ewlo_slr;             // Scale wrap lo detection thresh, scalar
     boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
     boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
-    unsigned long int his_delay_div; // Minor frame divisor, div
+    unsigned long int his_delay; // Minor frame divisor, div
     float hys_scale;            // Sim hysteresis scalar
     float hys_state;            // Sim hysteresis state
     float ib_amp_add;           // Fault injection bias on amp, A
@@ -110,7 +110,7 @@ public:
     FloatZ *ewlo_slr_p;
     BooleanZ *fail_tb_p;
     BooleanZ *fake_faults_p;
-    ULongZ *his_delay_div_p;
+    ULongZ *his_delay_p;
     FloatZ *hys_scale_p;
     FloatZ *hys_state_p;
     FloatZ *ib_amp_add_p;

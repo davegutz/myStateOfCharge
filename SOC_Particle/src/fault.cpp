@@ -51,6 +51,28 @@ void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
   this->falw = Sen->Flt->falw();
 }
 
+void Flt_st::assign_proto(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
+{
+  char buffer[32];
+  time_long_2_str(now, buffer);
+  this->t = now;
+  this->Tb_hdwe = int16_t(Sen->Tb_hdwe*600.);
+  this->vb_hdwe = int16_t(Sen->Vb/sp.nS()*1200.);
+  this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/sp.nP()*15.);
+  this->ib_noa_hdwe = int16_t(Sen->Ib_noa_hdwe/sp.nP()*15.);
+  this->Tb = int16_t(Sen->Tb*600.);
+  this->vb = int16_t(Sen->Vb/sp.nS()*1200.);
+  this->ib = int16_t(Sen->Ib/sp.nP()*15.);
+  this->soc = int16_t(Mon->soc()*16000.);
+  this->soc_min = int16_t(Mon->soc_min()*16000.);
+  this->soc_ekf = int16_t(Mon->soc_ekf()*16000.);
+  this->voc = int16_t(Mon->voc()*1200.);
+  this->voc_stat = int16_t(Mon->voc_stat()*1200.);
+  this->e_wrap_filt = int16_t(Sen->Flt->e_wrap_filt()*1200.);
+  this->fltw = Sen->Flt->fltw();
+  this->falw = Sen->Flt->falw();
+}
+
 // Copy function
 void Flt_st::copy_to_Flt_ram_from(Flt_st input)
 {
@@ -106,11 +128,28 @@ void Flt_st::pretty_print(const String code)
     Serial.printf("t %ld\n", this->t);
     Serial.printf("Tb_hdwe %7.3f\n", float(this->Tb_hdwe)/600.);
     Serial.printf("vb_hdwe %7.3f\n", float(this->vb_hdwe)/1200.);
+    if ( sp.Modeling_z > 0 )
+    {
+      Serial.printf("ib_amp_hdwe %7.3f\n", float(this->ib_amp_hdwe)/15.);
+      Serial.printf("ib_noa_hdwe %7.3f\n", float(this->ib_noa_hdwe)/15.);
+    }
+    else
+    {
+      Serial.printf("ib_amp_hdwe %7.3f\n", float(this->ib_amp_hdwe)/600.);
+      Serial.printf("ib_noa_hdwe %7.3f\n", float(this->ib_noa_hdwe)/600.);
+    }
     Serial.printf("ib_amp_hdwe %7.3f\n", float(this->ib_amp_hdwe)/600.);
     Serial.printf("ib_noa_hdwe %7.3f\n", float(this->ib_noa_hdwe)/600.);
     Serial.printf("Tb %7.3f\n", float(this->Tb)/600.);
     Serial.printf("vb %7.3f\n", float(this->vb)/1200.);
-    Serial.printf("ib %7.3f\n", float(this->ib)/600.);
+    if ( sp.Modeling_z > 0 )
+    {
+      Serial.printf("ib %7.3f\n", float(this->ib)/15.);
+    }
+    else
+    {
+      Serial.printf("ib %7.3f\n", float(this->ib)/600.);
+    }
     Serial.printf("soc %7.4f\n", float(this->soc)/16000.);
     Serial.printf("soc_min %7.4f\n", float(this->soc_min)/16000.);
     Serial.printf("soc_ekf %7.4f\n", float(this->soc_ekf)/16000.);
@@ -120,6 +159,7 @@ void Flt_st::pretty_print(const String code)
     Serial.printf("fltw %d falw %d\n", this->fltw, this->falw);
   }
 }
+
 
 void Flt_st::print(const String code)
 {
@@ -153,6 +193,48 @@ void Flt_st::print(const String code)
       float(this->Tb)/600.,
       float(this->vb)/1200.,
       float(this->ib)/600.,
+      float(this->soc)/16000.,
+      float(this->soc_min)/16000.,
+      float(this->soc_ekf)/16000.,
+      float(this->voc)/1200.,
+      float(this->voc_stat)/1200.,
+      float(this->e_wrap_filt)/1200.,
+      this->fltw,
+      this->falw);
+  }
+}
+void Flt_st::print_proto(const String code)
+{
+  char buffer[32] = "---";
+  if ( this->t>1 )
+  {
+    time_long_2_str(this->t, buffer);
+    Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
+      code.c_str(), buffer, this->t,
+      float(this->Tb_hdwe)/600.,
+      float(this->vb_hdwe)/1200.,
+      float(this->ib_amp_hdwe)/15.,
+      float(this->ib_noa_hdwe)/15.,
+      float(this->Tb)/600.,
+      float(this->vb)/1200.,
+      float(this->ib)/15.,
+      float(this->soc)/16000.,
+      float(this->soc_min)/16000.,
+      float(this->soc_ekf)/16000.,
+      float(this->voc)/1200.,
+      float(this->voc_stat)/1200.,
+      float(this->e_wrap_filt)/1200.,
+      this->fltw,
+      this->falw);
+    Serial1.printf("unit_f, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
+      buffer, this->t,
+      float(this->Tb_hdwe)/600.,
+      float(this->vb_hdwe)/1200.,
+      float(this->ib_amp_hdwe)/15.,
+      float(this->ib_noa_hdwe)/15.,
+      float(this->Tb)/600.,
+      float(this->vb)/1200.,
+      float(this->ib)/15.,
       float(this->soc)/16000.,
       float(this->soc_min)/16000.,
       float(this->soc_ekf)/16000.,
