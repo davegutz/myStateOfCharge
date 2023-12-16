@@ -32,10 +32,7 @@ void print_all_fault_buffer(const String code, struct Flt_st *flt, const int ifl
   while ( ++n < nflt )
   {
     if ( ++i > (nflt-1) ) i = 0; // circular buffer
-    if ( sp.Modeling_z > 0 )
-      flt[i].print_proto(code);
-    else
-      flt[i].print(code);
+    flt[i].print(code);
   }
 }
 

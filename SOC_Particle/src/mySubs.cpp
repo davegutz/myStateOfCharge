@@ -648,10 +648,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
       sp.put_Iflt(sp.Iflt() + 1);
       if ( sp.Iflt()>sp.nflt() - 1 ) sp.put_Iflt(0);  // wrap buffer
       Flt_st fault_snap;
-      if ( sp.Modeling_z > 1)
-        fault_snap.assign_proto(Time.now(), Mon, Sen);
-      else
-        fault_snap.assign(Time.now(), Mon, Sen);
+      fault_snap.assign(Time.now(), Mon, Sen);
       sp.put_fault(fault_snap, sp.Iflt());
     }
     else if ( fails_repeated < 4 )

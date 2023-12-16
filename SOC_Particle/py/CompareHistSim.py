@@ -544,9 +544,9 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fi
     ref_str = ''
     test_str = '_ver'
 
-    fig_list.append(plt.figure())  # GP 3 Tune
+    fig_list.append(plt.figure())  # GP 2 Hist
     plt.subplot(331)
-    plt.title(plot_title + ' GP 3 Tune')
+    plt.title(plot_title + ' GP 2 Hist')
     mo.dv_dyn = mo.vb - mo.voc
     plt.plot(mo.time, mo.dv_dyn, color='blue', linestyle='-', label='dv_dyn'+ref_str)
     plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle='--', label='dv_dyn'+test_str)

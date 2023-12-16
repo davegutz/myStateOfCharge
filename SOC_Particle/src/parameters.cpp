@@ -373,10 +373,7 @@ void SavedPars::print_fault_array()
   while ( ++n < nflt_+1 )
   {
     if ( ++i > (nflt_-1) ) i = 0; // circular buffer
-    if ( sp.Modeling_z > 0 )
-        fault_[i].print_proto("unit_f");
-    else
-        fault_[i].print("unit_f");
+    fault_[i].print("unit_f");
   }
 }
 
@@ -395,10 +392,7 @@ void SavedPars::print_history_array()
   while ( ++n < nhis_ )
   {
     if ( ++i > (nhis_-1) ) i = 0; // circular buffer
-    if ( sp.Modeling_z > 0 )
-        history_[i].print_proto("unit_h");
-    else
-        history_[i].print("unit_h");
+    history_[i].print("unit_h");
   }
 }
 

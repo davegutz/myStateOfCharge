@@ -50,13 +50,11 @@ struct Flt_st
   uint16_t falw = 0;    // Fail word
   unsigned long dummy = 0;  // padding to absorb Wire.write corruption
   void assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen);
-  void assign_proto(const time32_t now, BatteryMonitor *Mon, Sensors *Sen);
   void copy_to_Flt_ram_from(Flt_st input);
   void get() {};
   void nominal();
   void pretty_print(const String code);
   void print(const String code);
-  void print_proto(const String code);
   void put(Flt_st source);
   void put_nominal();
 };

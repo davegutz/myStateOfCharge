@@ -499,10 +499,7 @@ void loop()
     sp.put_Ihis(sp.Ihis_z + 1);
     if ( sp.Ihis_z > (sp.nhis() - 1) ) sp.put_Ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
-    if ( sp.Modeling_z > 1)
-      hist_snap.assign_proto(time_now, Mon, Sen);
-    else
-      hist_snap.assign(time_now, Mon, Sen);
+    hist_snap.assign(time_now, Mon, Sen);
     hist_bounced = sp.put_history(hist_snap, sp.Ihis_z);
 
     sp.put_Isum(sp.Isum_z+1);
