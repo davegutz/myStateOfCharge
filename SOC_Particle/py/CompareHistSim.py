@@ -894,8 +894,8 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
     dvoc_sim_in = 0.
 
     # User inputs (multiple input_files allowed
-    # data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\g20231111b/faultParade_pro0p_ch.csv'
-    # data_file_txt = 'faultParade_pro0p_ch.csv'  # unit_key='g20231111b_pro0p_ch'
+    data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro1a_bb.csv'
+    data_file_txt = 'rapidTweakRegression_pro1a_bb.csv'  # unit_key='g20231111b_pro0p_ch'
     # input_files = ['g20231111b/faultParade_pro0p_ch.csv']; unit_key='g20231111b_pro0p_ch'
     # temp_hist_file = 'hist_CompareFault.txt'
     # temp_flt_file = 'flt_CompareFault.txt'
