@@ -609,7 +609,7 @@ if __name__ == '__main__':
         import os
         if not os.path.isdir(path_to_temp):
             os.mkdir(path_to_temp)
-        cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
+        cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
                   'e_w_f', 'fltw', 'falw')
         # cat files
         cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)

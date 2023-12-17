@@ -135,7 +135,7 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
         soc = d_ra.soc[i]
         voc_stat = d_ra.voc_stat[i]
         Tb = d_ra.Tb[i]
-        ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
+        ib_diff_ = d_ra.ibmh[i] - d_ra.ibnh[i]
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         ib_diff.append(ib_diff_)
         C_rate = d_ra.ib[i] / rated_batt_cap
@@ -929,7 +929,7 @@ if __name__ == '__main__':
         import os
         if not os.path.isdir(path_to_temp):
             os.mkdir(path_to_temp)
-        cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
+        cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
                   'e_w_f', 'fltw', 'falw')
 
         # Load configuration

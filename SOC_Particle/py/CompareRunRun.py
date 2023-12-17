@@ -102,7 +102,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     # Load fault
     temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', title_key='fltb',
                                            unit_key='unit_f', skip=skip, comment_str='---')
-    cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
+    cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
               'e_w_f', 'fltw', 'falw')
     if temp_flt_file_clean and not v1_only:
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,

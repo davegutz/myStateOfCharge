@@ -625,7 +625,7 @@ def add_stuff_f(d_ra, voc_soc_tbl=None, soc_min_tbl=None, ib_band=0.5):
         soc = d_ra.soc[i]
         voc_stat = d_ra.voc_stat[i]
         Tb = d_ra.Tb[i]
-        ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
+        ib_diff_ = d_ra.ibmh[i] - d_ra.ibnh[i]
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         ib_diff.append(ib_diff_)
         cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ =\
@@ -928,7 +928,7 @@ if __name__ == '__main__':
             os.mkdir(path_to_temp)
         cols_h = ('time', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc_dyn', 'voc_stat', 'tweak_sclr_amp',
                   'tweak_sclr_noa', 'falw')
-        cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
+        cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
                   'e_wrap_filt', 'fltw', 'falw')
 
         # cat files

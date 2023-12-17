@@ -484,11 +484,17 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       ib_sel_stat_ = 1;
     }
     ib_sel_stat_last_ =  ib_sel_stat_;
+
     Serial.printf("reset ib flt\n");
   }
 
   // Ib truth table
-  if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() )  // these separate inputs don't latch
+  if ( ap.fake_faults )
+  {
+    ib_sel_stat_ = 1;
+    latched_fail_ = false;
+  }
+  else if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() )  // these separate inputs don't latch
   {
     ib_sel_stat_ = 0;    // takes two non-latching inputs to set and latch
     latched_fail_ = true;

@@ -22,15 +22,21 @@ from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
 from Battery import Battery, BatteryMonitor, is_sat, Retained
 from MonSim import replicate
-from Battery import overall_batt
-from Util import cat
+# from Util import cat
 from resample import resample
 from PlotKiller import show_killer
 from DataOverModel import dom_plot
 from PlotGP import tune_r, gp_plot
 from PlotOffOn import off_on_plot
-from Chemistry_BMS import ib_lag, Chemistry
+from Chemistry_BMS import ib_lag
 from myFilters import LagExp
+import sys
+from DataOverModel import write_clean_file
+from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
+from datetime import datetime
+import os
+
+plt.rcParams['axes.grid'] = True
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 IB_BAND = 1.  # Threshold to declare charging or discharging
@@ -921,14 +927,6 @@ def look_it(x, tab, temp):
     return voc
 
 
-import sys
-from DataOverModel import write_clean_file
-from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
-plt.rcParams['axes.grid'] = True
-from datetime import datetime
-import os
-
-
 def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./figures', path_to_temp='./temp', chm_in=0,
                      mod_in=0):
     
@@ -946,6 +944,10 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
 
     # User inputs (multiple input_files allowed
     data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+    (path, basename) = os.path.split(data_file_path)
+    if data_file_path is not None:
+        save_pdf_path = path + './figures'
+
     data_file_txt = 'rapidTweakRegression_pro3p2_bb.csv'
 
     if data_file_path is None:
@@ -976,7 +978,6 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
         h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                               encoding=None).view(np.recarray)
     else:
-        h_raw = None
         print("data from", temp_hist_file, "empty after loading")
         exit(1)
 
@@ -987,7 +988,6 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                               encoding=None).view(np.recarray)
     else:
-        f_raw = None
         print("data from", temp_flt_file, "empty after loading")
         exit(1)
 
@@ -1028,7 +1028,7 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
     plot_title = filename + '   ' + date_time
     if len(f.time) > 1:
         fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                      fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
+                                         fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
     if len(h_20C.time) > 1:
         sim_old = None
         plot_init_in = False
@@ -1041,13 +1041,10 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
         fig_list, fig_files = off_on_plot(mon_old_100, mon_ver_100, sim_old, sim_ver_100, sim_s_ver_100, filename,
                                           fig_files, plot_title=plot_title, fig_list=fig_list,
                                           plot_init_in=plot_init_in, ref_str='', test_str='_ver')
-        # fig_list, fig_files = overall_batt(mon_ver_100, sim_ver_100, suffix='_100',
-        #                                 filename=filename, fig_files=fig_files,
-        #                                 plot_title=plot_title, fig_list=fig_list)
         fig_list, fig_files = overall_fault(mon_old_100, mon_ver_100, sim_ver_100, sim_s_ver_100, filename,
-                                         fig_files, plot_title=plot_title, fig_list=fig_list)
+                                            fig_files, plot_title=plot_title, fig_list=fig_list)
         fig_list, fig_files = tune_r(mon_old_100, mon_ver_100, sim_s_ver_100, filename,
-                                  fig_files, plot_title=plot_title, fig_list=fig_list)
+                                     fig_files, plot_title=plot_title, fig_list=fig_list)
 
     precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
     unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)

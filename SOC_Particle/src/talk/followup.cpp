@@ -204,7 +204,10 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
 
                 case ( 'f' ):  //* si, Ff<>:  fake faults
                 if ( ap.fake_faults_p->success() )
+                {
+                    Sen->Flt->reset_all_faults();
                     sp.put_Ib_select(cp.input_str.substring(2).toInt());
+                }
                 break;
 
             }

@@ -326,6 +326,9 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
   #ifdef DEBUG_INIT
     if ( sp.Debug()==-1 ){ Serial.printf("end:"); debug_m1(Mon, Sen);}
   #endif
+
+  // Finally....clear all faults
+  Sen->Flt->reset_all_faults();
 }
 
 // Load high fidelity signals; filtered in hardware the same bandwidth, sampled the same

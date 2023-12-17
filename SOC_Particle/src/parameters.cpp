@@ -256,10 +256,10 @@ void SavedPars::initialize()
     Z_[n_] = (Ib_scale_amp_p   = new FloatZ(&n_, "* ", "SA", rP_, "Slr amp",              "A",      -1e5, 1e5,  &Ib_scale_amp_z,CURR_SCALE_AMP));
     Z_[n_] = (Ib_scale_noa_p   = new FloatZ(&n_, "* ", "SB", rP_, "Slr noa",              "A",      -1e5, 1e5,  &Ib_scale_noa_z,CURR_SCALE_NOA));
     Z_[n_] = (Ib_select_p      = new Int8tZ(&n_, "* ", "si", rP_, "curr sel mode",        "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS)));
-    Z_[n_] = (Iflt_p         = new Uint16tZ(&n_, "* ", "if", rP_, "Fault buffer indx",    "uint",   0,  nflt_,  &Iflt_z,        nflt_,              false));
-    Z_[n_] = (Ihis_p         = new Uint16tZ(&n_, "* ", "ih", rP_, "Hist buffer indx",     "uint",   0,  nhis_,  &Ihis_z,        nhis_,              false));
+    Z_[n_] = (Iflt_p         = new Uint16tZ(&n_, "* ", "if", rP_, "Fault buffer indx",    "uint",   0,nflt_+1,  &Iflt_z,        nflt_,              false));
+    Z_[n_] = (Ihis_p         = new Uint16tZ(&n_, "* ", "ih", rP_, "Hist buffer indx",     "uint",   0,nhis_+1,  &Ihis_z,        nhis_,              false));
     Z_[n_] = (Inj_bias_p       = new FloatZ(&n_, "* ", "Xb", rP_, "Injection bias",       "A",      -1e5, 1e5,  &Inj_bias_z,    0.));
-    Z_[n_] = (Isum_p         = new Uint16tZ(&n_, "* ", "is", rP_, "Summ buffer indx",     "uint",   0,   NSUM,  &Isum_z,        NSUM+1,             false));
+    Z_[n_] = (Isum_p         = new Uint16tZ(&n_, "* ", "is", rP_, "Summ buffer indx",     "uint",   0, NSUM+1,  &Isum_z,        NSUM,               false));
     Z_[n_] = (Modeling_p      = new Uint8tZ(&n_, "* ", "Xm", rP_, "Modeling bitmap",      "[0x]",   0,    255,  &Modeling_z,    MODELING));
     Z_[n_] = (Mon_chm_p       = new Uint8tZ(&n_, "* ", "Bm", rP_, "Monitor battery",      "0=BB, 1=CH",0,   1,  &Mon_chm_z,     MON_CHEM));
     Z_[n_] = (nP_p             = new FloatZ(&n_, "* ", "BP", rP_, "Number parallel",      "units",  1e-6, 100,  &nP_z,          NP));
