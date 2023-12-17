@@ -74,7 +74,7 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
 
         return fig_list, fig_files
 
-    if mo.ibmh is not None:
+    if mo.ibmh is not None and hasattr(mo, 'ib_diff_f'):
         fig_list.append(plt.figure())  # 1a
         plt.subplot(321)
         plt.title(plot_title + ' 1a')

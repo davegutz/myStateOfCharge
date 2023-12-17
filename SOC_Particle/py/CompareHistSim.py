@@ -20,13 +20,17 @@ import numpy.lib.recfunctions as rf
 import matplotlib.pyplot as plt
 from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
-from Battery import Battery, BatteryMonitor, is_sat
+from Battery import Battery, BatteryMonitor, is_sat, Retained
 from MonSim import replicate
 from Battery import overall_batt
 from Util import cat
 from resample import resample
-from PlotGP import tune_r
 from PlotKiller import show_killer
+from DataOverModel import dom_plot
+from PlotGP import tune_r, gp_plot
+from PlotOffOn import off_on_plot
+from Chemistry_BMS import ib_lag, Chemistry
+from myFilters import LagExp
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 IB_BAND = 1.  # Threshold to declare charging or discharging
@@ -117,6 +121,22 @@ def add_stuff(d_ra, mon, ib_band=0.5):
     return d_mod
 
 
+# Add ib_lag = ib lagged by time constant
+def add_ib_lag(data, mon):
+    lag_tau = ib_lag(mon.chemistry.mod_code)
+    IbLag = LagExp(1., lag_tau, -100., 100.)
+    n = len(data.time)
+    if hasattr(data, 'ib_lag') is False:
+        data = rf.rec_append_fields(data, 'ib_lag', np.array(data.time, dtype=float))
+        data.ib_lag = np.zeros(n)
+    dt = data.time[1] - data.time[0]
+    for i in range(n):
+        if i > 0:
+            dt = data.time[i] - data.time[i-1]
+        data.ib_lag[i] = IbLag.calculate_tau(float(data.ib[i]), i == 0, dt, lag_tau)
+    return data
+
+
 # Add schedule lookups and do some rack and stack
 def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., modeling=247):
     voc_soc = []
@@ -131,11 +151,16 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., modeling=247
     ib_quiet_thr = []
     ib_diff = []
     dt = []
+    ib_charge = []
+    dv_dyn = []
+    bms_off_init = False
+    bms_off = False
+    rp = Retained()
     for i in range(len(d_ra.time)):
         soc = d_ra.soc[i]
         voc_stat = d_ra.voc_stat[i]
         Tb = d_ra.Tb[i]
-        ib_diff_ = d_ra.ibah[i] - d_ra.ibnh[i]
+        ib_diff_ = d_ra.ibmh[i] - d_ra.ibnh[i]
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         ib_diff.append(ib_diff_)
         C_rate = d_ra.ib[i] / rated_batt_cap
@@ -143,6 +168,24 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., modeling=247
         BB = BatteryMonitor(0)
         cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = \
             fault_thr_bb(Tb, soc, voc_soc[i], voc_stat, C_rate, BB)
+        ib_ = d_ra.ib[i]
+        temp_c = d_ra.Tb[i]
+        vb_ = d_ra.vb[i]
+        voc_ = d_ra.voc[i]
+        reset = i == 0
+        # Battery management system model (uses past value bms_off and voc_stat)
+        if not bms_off:
+            voltage_low = voc_stat < mon.chemistry.vb_down
+        else:
+            voltage_low = voc_stat < mon.chemistry.vb_rising
+        bms_charging = ib_ > Battery.IB_MIN_UP
+        if reset and bms_off_init is not None:
+            bms_off = bms_off_init
+        else:
+            bms_off = (temp_c <= mon.chemistry.low_t) or (voltage_low and not rp.tweak_test())  # KISS
+        ib_charge_ = ib_
+        if bms_off and not bms_charging:
+            ib_charge_ = 0.
         cc_dif.append(cc_dif_)
         cc_diff_thr.append(cc_diff_thr_)
         ewhi_thr.append(ewhi_thr_)
@@ -158,6 +201,9 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., modeling=247
             dt.append(float(d_ra.time[1] - d_ra.time[0]))
         else:
             pass
+        dv_dyn_ = vb_ - voc_
+        ib_charge.append(ib_charge_)
+        dv_dyn.append(dv_dyn_)
     time_min = (d_ra.time-d_ra.time[0])/60.
     time_day = (d_ra.time-d_ra.time[0])/3600./24.
     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
@@ -174,6 +220,9 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., modeling=247
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff_thr', np.array(ib_diff_thr, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_quiet_thr', np.array(ib_quiet_thr, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'ib_charge', np.array(ib_charge, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'dv_dyn', np.array(dv_dyn, dtype=float))
+    d_mod = add_ib_lag(d_mod, mon)
     d_mod = calc_fault(d_ra, d_mod)
     voc_stat_chg = np.copy(d_mod.voc_stat)
     voc_stat_dis = np.copy(d_mod.voc_stat)
@@ -910,7 +959,7 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
     if not os.path.isdir(path_to_temp):
         os.mkdir(path_to_temp)
 
-    cols_f = ('time', 'Tb_h', 'vb_h', 'ibah', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
+    cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
               'e_w_f', 'fltw', 'falw')
 
     # Load configuration
@@ -986,6 +1035,17 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
         fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                       fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
     if len(h_20C.time) > 1:
+        sim_old = None
+        plot_init_in = False
+        fig_list, fig_files = dom_plot(mon_old_100, mon_ver_100, sim_old, sim_ver_100, sim_s_ver_100, filename,
+                                       fig_files, plot_title=plot_title, fig_list=fig_list,
+                                       plot_init_in=plot_init_in, ref_str='', test_str='_ver')
+        fig_list, fig_files = gp_plot(mon_old_100, mon_ver_100, sim_old, sim_ver_100, sim_s_ver_100, filename,
+                                      fig_files, plot_title=plot_title, fig_list=fig_list,
+                                      plot_init_in=plot_init_in, ref_str='', test_str='_ver')
+        fig_list, fig_files = off_on_plot(mon_old_100, mon_ver_100, sim_old, sim_ver_100, sim_s_ver_100, filename,
+                                          fig_files, plot_title=plot_title, fig_list=fig_list,
+                                          plot_init_in=plot_init_in, ref_str='', test_str='_ver')
         # fig_list, fig_files = overall_batt(mon_ver_100, sim_ver_100, suffix='_100',
         #                                 filename=filename, fig_files=fig_files,
         #                                 plot_title=plot_title, fig_list=fig_list)
