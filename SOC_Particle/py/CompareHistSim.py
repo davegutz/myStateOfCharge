@@ -126,6 +126,8 @@ def add_ib_lag(data, mon):
     lag_tau = ib_lag(mon.chemistry.mod_code)
     IbLag = LagExp(1., lag_tau, -100., 100.)
     n = len(data.time)
+    if n < 2:
+        return data
     if hasattr(data, 'ib_lag') is False:
         data = rf.rec_append_fields(data, 'ib_lag', np.array(data.time, dtype=float))
         data.ib_lag = np.zeros(n)
@@ -943,12 +945,8 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
     dvoc_sim_in = 0.
 
     # User inputs (multiple input_files allowed
-    data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro1a_bb.csv'
-    data_file_txt = 'rapidTweakRegression_pro1a_bb.csv'  # unit_key='g20231111b_pro0p_ch'
-    # input_files = ['g20231111b/faultParade_pro0p_ch.csv']; unit_key='g20231111b_pro0p_ch'
-    # temp_hist_file = 'hist_CompareFault.txt'
-    # temp_flt_file = 'flt_CompareFault.txt'
-    path_to_data = '../dataReduction'
+    data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+    data_file_txt = 'rapidTweakRegression_pro3p2_bb.csv'
 
     if data_file_path is None:
         if data_file_txt is not None:
@@ -972,7 +970,7 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
     temp_flt_file = data_file_path
 
     # Load history
-    temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_h',
+    temp_hist_file_clean = write_clean_file(temp_hist_file, type_='_hist', title_key='fltb', unit_key='unit_h',
                                             skip=skip, comment_str='---')
     if temp_hist_file_clean:
         h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
@@ -983,7 +981,7 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
         exit(1)
 
     # Load fault
-    temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
+    temp_flt_file_clean = write_clean_file(temp_flt_file, type_='_flt', title_key='fltb', unit_key='unit_f',
                                            skip=skip, comment_str='---')
     if temp_flt_file_clean:
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
@@ -1007,10 +1005,7 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
     # Shift time and add data
     time0 = h_20C.time[0]
     h_20C.time -= time0
-    # T_100 = 0.1
-    T_100 = 0.3
-    T_100 = 5
-    T_100 = 60
+    T_100 = 0.1
     h_20C_resamp_100 = resample(data=h_20C, dt_resamp=T_100, time_var='time',
                                 specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                           ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),

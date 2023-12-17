@@ -374,8 +374,10 @@ def compare_hist():
             chm = 0
         elif Test.battery == 'ch':
             chm = 1
-        compare_hist_sim(data_file_path=Test.file_path, save_pdf_path=os.path.join(Test.version_path, './figures'),
-                         path_to_temp=os.path.join(Test.version_path, './temp'), chm_in=chm, mod_in=mod_in_app.get())
+        compare_hist_sim(data_file_path=Test.file_path,
+                         save_pdf_path=os.path.join(Test.version_path, './figures'),
+                         path_to_temp=os.path.join(Test.version_path, './temp'),
+                         chm_in=chm, mod_in=mod_in_app.get())
         # master.deiconify()
     else:
         if not Ref.key_exists_in_file:

@@ -386,7 +386,7 @@ def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, sk
     path_to_temp = path + '/temp'
     if not os.path.isdir(path_to_temp):
         os.mkdir(path_to_temp)
-    csv_file = path_to_temp+'/'+basename.replace('.txt', type_ + '.csv', 1)
+    csv_file = path_to_temp+'/'+basename.replace('.csv', type_ + '.csv', 1)
     # Header
     have_header_str = None
     with open(path_to_data, "r", encoding='cp437') as input_file:
