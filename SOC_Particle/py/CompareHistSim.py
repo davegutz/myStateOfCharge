@@ -927,12 +927,13 @@ def look_it(x, tab, temp):
     return voc
 
 
-def compare_hist_sim(data_file=None, time_end_in=None, save_pdf_path='./figures', path_to_temp='./temp', chm_in=0,
+def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp', chm_in=0,
                      mod_in=0):
-    
+
+    print(f"{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{chm_in=}\n{mod_in=}\n")
+
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     # date_ = datetime.now().strftime("%y%m%d")
-    skip = 1
 
     # Save these
     scale_in = 1
@@ -942,17 +943,12 @@ def compare_hist_sim(data_file=None, time_end_in=None, save_pdf_path='./figures'
     dvoc_mon_in = 0.
     dvoc_sim_in = 0.
 
-    # User inputs (multiple input_files allowed
-    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
-    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/ampHiFail_pro3p2_bb.csv'
-    # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
-
     # File path operations
     (data_file_folder, data_file_txt) = os.path.split(data_file)
-    save_pdf_path =  os.path.join(data_file_folder, './figures')
+    save_pdf_path = os.path.join(data_file_folder, rel_path_to_save_pdf)
     if not os.path.isdir(save_pdf_path):
         os.mkdir(save_pdf_path)
-    path_to_temp = os.path.join(data_file_folder, './temp')
+    path_to_temp = os.path.join(data_file_folder, rel_path_to_temp)
     if not os.path.isdir(path_to_temp):
         os.mkdir(path_to_temp)
 
@@ -964,7 +960,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, save_pdf_path='./figures'
 
     # Load history
     temp_hist_file_clean = write_clean_file(data_file, type_='_hist', title_key='fltb', unit_key='unit_h',
-                                            skip=skip, comment_str='---')
+                                            skip=1, comment_str='---')
     if temp_hist_file_clean:
         h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                               encoding=None).view(np.recarray)
@@ -974,7 +970,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, save_pdf_path='./figures'
 
     # Load fault
     temp_flt_file_clean = write_clean_file(data_file, type_='_flt', title_key='fltb', unit_key='unit_f',
-                                           skip=skip, comment_str='---')
+                                           skip=1, comment_str='---')
     if temp_flt_file_clean:
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                               encoding=None).view(np.recarray)
@@ -999,9 +995,9 @@ def compare_hist_sim(data_file=None, time_end_in=None, save_pdf_path='./figures'
     h_20C.time -= time0
     T_100 = 0.1
     h_20C_resamp = resample(data=h_20C, dt_resamp=T_100, time_var='time',
-                                specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
-                                          ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
-                                          ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
+                            specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
+                                      ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
+                                      ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
     for i in range(len(h_20C_resamp.time)):
         if i == 0:
             h_20C_resamp.dt[i] = h_20C_resamp.time[1] - h_20C_resamp.time[0]
@@ -1052,4 +1048,9 @@ def compare_hist_sim(data_file=None, time_end_in=None, save_pdf_path='./figures'
 
 
 if __name__ == '__main__':
-    compare_hist_sim()
+    # User inputs (multiple input_files allowed
+    data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+
+    # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
+
+    compare_hist_sim(data_file=data_file_full)

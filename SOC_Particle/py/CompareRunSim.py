@@ -35,53 +35,128 @@ from PlotKiller import show_killer
 plt.rcParams['axes.grid'] = True
 
 
-def compare_run_sim(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_path='./figures', path_to_temp='./temp'):
+def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to_save_pdf='./figures',
+                    rel_path_to_temp='./temp'):
+
+    print(f"{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n")
+
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
-    if not os.path.isdir(save_pdf_path):
-        os.mkdir(save_pdf_path)
+    
+    # Transient  inputs
+    zero_zero_in = False
+    init_time_in = None
+    use_vb_sim_in = False
+    use_ib_mon_in = False
+    tune_in = False
+    cc_dif_tol_in = 0.2
+    legacy_in = False
+    ds_voc_soc_in = 0.
+    temp_file = None
+    use_vb_raw = False
+    dvoc_sim_in = 0.
+    dvoc_mon_in = 0.
+
+    # detect running interactively
+    # this is written to run in pwd of call
+    if data_file is None and temp_file is None:
+        path_to_data = easygui.fileopenbox(msg="choose your data file to plot")
+        data_file = easygui.filesavebox(msg="pick new file name, cancel to keep", title="get new file name")
+        if data_file is None:
+            data_file = path_to_data
+        else:
+            os.rename(path_to_data, data_file)
+        unit_key = easygui.enterbox(msg="enter pro0p, pro1a, soc0p, soc1a", title="get unit_key", default="pro1a")
+        # Put configurations unique to this build of logic here
+        if unit_key == 'pro02p2':
+            pass
+        elif unit_key == 'pro3p2':
+            pass
+        elif unit_key == 'pro1a':
+            pass
+        elif unit_key == 'pro0p':
+            pass
+        elif unit_key == 'soc0p':
+            pass
+        elif unit_key == 'soc1a':
+            pass
+    elif temp_file is not None:
+        rel_path_to_temp = os.path.join(rel_path_to_temp, temp_file)
+        data_file = rel_path_to_temp
+
+    # Folder operations
+    (data_file_folder, data_file_txt) = os.path.split(data_file)
+    save_pdf_path = os.path.join(data_file_folder, rel_path_to_save_pdf)
+    if not os.path.isdir(rel_path_to_save_pdf):
+        os.mkdir(rel_path_to_save_pdf)
+    path_to_temp = os.path.join(data_file_folder, rel_path_to_temp)
     if not os.path.isdir(path_to_temp):
         os.mkdir(path_to_temp)
 
-    # Transient  inputs
-    t_ib_fail = None
-    init_time_in = None
-    use_ib_mon_in = False
-    scale_in = None
-    use_vb_raw = False
-    scale_r_ss_in = 1.
-    s_hys_in = 1.
-    dvoc_sim_in = 0.
-    dvoc_mon_in = 0.
-    Bmon_in = None
-    Bsim_in = None
-    skip = 1
-    zero_zero_in = False
-    drive_ekf_in = False
-    time_end_in = None
-    dTb = None
-    plot_init_in = False
-    long_term_in = False
-    plot_overall_in = True
-    use_vb_sim_in = False
-    sres0_in = 1.
-    sresct_in = 1.
-    stauct_in = 1
-    s_hys_cap_in = 1.
-    s_coul_eff_in = 1.
-    s_cap_chg_in = 1.
-    s_cap_dis_in = 1.
-    s_hys_chg_in = 1.
-    s_hys_dis_in = 1.
-    tune_in = False
-    cc_dif_tol_in = 0.2
-    verbose_in = False
-    legacy_in = False
-    cutback_gain_sclr_in = 1.
-    ds_voc_soc_in = 0.
-    data_file_txt = None
-    temp_file = None
+    # # Load mon v4 (old)
+    mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
+        load_data(data_file, 1, unit_key, zero_zero_in, time_end_in, legacy=legacy_in)
 
+    # How to initialize
+    if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
+        init_time = 1.
+    else:
+        if init_time_in:
+            init_time = init_time_in
+        else:
+            init_time = -4.
+    # Get dv_hys from data
+    # dv_hys = mon_old.dv_hys[0]
+
+    # New run
+    mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
+    mon_ver, sim_ver, sim_s_ver, mon, sim = \
+        replicate(mon_old, sim_old=sim_old, init_time=init_time, use_ib_mon=use_ib_mon_in,
+                  use_vb_raw=use_vb_raw, dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in, use_vb_sim=use_vb_sim_in,
+                  ds_voc_soc=ds_voc_soc_in)
+    save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
+
+    # Plots
+    fig_list = []
+    fig_files = []
+    data_root_test = data_file_clean.split('/')[-1].replace('.csv', '')
+    dir_root_test = data_file_clean.split('/')[-3].split('\\')[-1]
+    filename = data_root_test
+    plot_title = dir_root_test + '/' + data_root_test + '   ' + date_time
+    if temp_flt_file_clean and len(f.time) > 1:
+        fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+                                         fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
+    fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                   plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                   test_str='_ver')
+    fig_list, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                   plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                   test_str='_ver')
+    fig_list, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                     plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                     test_str='_ver')
+    fig_list, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                  plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                  test_str='_ver')
+    fig_list, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                      plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                      test_str='_ver')
+    if tune_in:
+        fig_list, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
+                                     plot_title=plot_title, fig_list=fig_list, ref_str='', test_str='_ver')
+
+    # Copies
+    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
+    unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
+    cleanup_fig_files(fig_files)
+    plt.show(block=False)
+    string = 'plots ' + str(fig_list[0].number) + ' - ' + str(fig_list[-1].number)
+    show_killer(string, 'CompareRunSim', fig_list=fig_list)
+
+    return True
+
+
+if __name__ == '__main__':
     # Save these examples
     # data_file_txt = '../dataReduction/slowTweakRegression_pro0p_ch.csv'; unit_key = 'g20231111_pro0p_ch'; #use_ib_mon_in=True; scale_in=1.12
     # data_file_txt = '../dataReduction/ampHiFail_pro0p_ch.csv'; unit_key = 'g20230530d_pro0p_ch'; #use_ib_mon_in=True; scale_in=1.12
@@ -103,115 +178,15 @@ def compare_run_sim(data_file_path=None, unit_key=None, time_end_in=None, save_p
 
     # Repeat of CHINS steps but for BB in truck
     # data_file_txt = 'steps vA20230305 20230324 BB.txt'; unit_key = 'soc1a'  ; tune_in = True; dvoc_mon_in = 0.16; dvoc_sim_in = 0.16;
-    # temp_file = 'steps vA20230326 20230328.txt'; cat(temp_file, ('puttyLog20230328_113851.csv', 'puttyLog20230328_131552.csv'), in_path=path_to_data, out_path=path_to_temp); unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in; sres0_in = 2.5; sresct_in = 0.13; stauct_in = 1.;
-    # temp_file = 'steps vA20230326 20230328.txt'; cat(temp_file, ('puttyLog20230328_113851.csv', 'puttyLog20230328_131552.csv'), in_path=path_to_data, out_path=path_to_temp); unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in;
+    # temp_file = 'steps vA20230326 20230328.txt'; cat(temp_file, ('puttyLog20230328_113851.csv', 'puttyLog20230328_131552.csv'), in_path=path_to_data, out_path=rel_path_to_temp); unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in; sres0_in = 2.5; sresct_in = 0.13; stauct_in = 1.;
+    # temp_file = 'steps vA20230326 20230328.txt'; cat(temp_file, ('puttyLog20230328_113851.csv', 'puttyLog20230328_131552.csv'), in_path=path_to_data, out_path=rel_path_to_temp); unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in;
     # data_file_txt = 'puttyLog20230328_131552_short.txt'; unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in; sres0_in = 2.5; sresct_in = 0.13; stauct_in = 1;
     # data_file_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; s_hys_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
     # data_file_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; s_hys_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
     # data_file_txt = 'real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110
     # data_file_txt = 'real world Xp20 v20220917a.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -69900
 
-    if data_file_path is None:
-        if data_file_txt is not None:
-            path_to_data = os.path.join(os.getcwd(), data_file_txt)
-            data_file_path = path_to_data
-        else:
-            path_to_data = None
-
-    # detect running interactively
-    # this is written to run in pwd of call
-    if data_file_path is None and temp_file is None:
-        path_to_data = easygui.fileopenbox(msg="choose your data file to plot")
-        data_file = easygui.filesavebox(msg="pick new file name, return to keep", title="get new file name")
-        if data_file is None:
-            data_file = path_to_data
-        else:
-            os.rename(path_to_data, data_file)
-        unit_key = easygui.enterbox(msg="enter pro0p, pro1a, soc0p, soc1a", title="get unit_key", default="pro1a")
-        # Put configurations unique to this build of logic here
-        if unit_key == 'pro0p':
-            pass
-        elif unit_key == 'pro1a':
-            pass
-        elif unit_key == 'soc0p':
-            pass
-        elif unit_key == 'soc1a':
-            pass
-    else:
-        if temp_file is None:
-            data_file = data_file_path
-        else:
-            path_to_temp = os.path.join(path_to_temp, temp_file)
-            data_file = path_to_temp
-
-    # # Load mon v4 (old)
-    mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
-        load_data(data_file, skip, unit_key, zero_zero_in, time_end_in, legacy=legacy_in)
-
-    # How to initialize
-    if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
-        init_time = 1.
-    else:
-        if init_time_in:
-            init_time = init_time_in
-        else:
-            init_time = -4.
-    # Get dv_hys from data
-    # dv_hys = mon_old.dv_hys[0]
-
-    # New run
-    mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-    mon_ver, sim_ver, sim_s_ver, mon, sim = \
-        replicate(mon_old, sim_old=sim_old, init_time=init_time, sres0=sres0_in, sresct=sresct_in,
-                  t_ib_fail=t_ib_fail, use_ib_mon=use_ib_mon_in, scale_in=scale_in, use_vb_raw=use_vb_raw,
-                  scale_r_ss=scale_r_ss_in, s_hys_sim=s_hys_in, s_hys_mon=s_hys_in, dvoc_sim=dvoc_sim_in,
-                  dvoc_mon=dvoc_mon_in, Bmon=Bmon_in, Bsim=Bsim_in, drive_ekf=drive_ekf_in,
-                  dTb_in=dTb, verbose=verbose_in, use_vb_sim=use_vb_sim_in, scale_hys_cap_sim=s_hys_cap_in,
-                  stauct_mon=stauct_in, stauct_sim=stauct_in,
-                  s_coul_eff=s_coul_eff_in, s_cap_chg=s_cap_chg_in, s_cap_dis=s_cap_dis_in, s_hys_chg=s_hys_chg_in,
-                  s_hys_dis=s_hys_dis_in, cutback_gain_sclr=cutback_gain_sclr_in, ds_voc_soc=ds_voc_soc_in)
-    save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
-
-    # Plots
-    fig_list = []
-    fig_files = []
-    data_root_test = data_file_clean.split('/')[-1].replace('.csv', '')
-    dir_root_test = data_file_clean.split('/')[-3].split('\\')[-1]
-    filename = data_root_test
-    plot_title = dir_root_test + '/' + data_root_test + '   ' + date_time
-    if temp_flt_file_clean and len(f.time) > 1:
-        fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                         fig_list=fig_list, long_term=long_term_in, cc_dif_tol=cc_dif_tol_in)
-    if plot_overall_in:
-        fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                       plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
-                                       test_str='_ver')
-        fig_list, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                       plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
-                                       test_str='_ver')
-        fig_list, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                         plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
-                                         test_str='_ver')
-        fig_list, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                      plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
-                                      test_str='_ver')
-        fig_list, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                          plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
-                                          test_str='_ver')
-    if tune_in:
-        fig_list, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
-                                     plot_title=plot_title, fig_list=fig_list, ref_str='', test_str='_ver')
-
-    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
-    print('filename', filename, 'path', save_pdf_path)
-    unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
-    cleanup_fig_files(fig_files)
-
-    plt.show(block=False)
-    string = 'plots ' + str(fig_list[0].number) + ' - ' + str(fig_list[-1].number)
-    show_killer(string,'CompareRunSim', fig_list=fig_list)
-    return True
-
-
-if __name__ == '__main__':
-    compare_run_sim()
+    data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+    unit_key_full = 'pro3p2_bb'
+    compare_run_sim(data_file=data_file_full, unit_key=unit_key_full)
+    # compare_run_sim()

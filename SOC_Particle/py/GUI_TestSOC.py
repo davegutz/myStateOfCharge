@@ -419,9 +419,9 @@ def compare_run():
         print('GUI_TestSOC compare_run:  Test', Test.file_path, Test.key)
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
         # master.withdraw()
-        compare_run_run(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
-                        save_pdf_path=os.path.join(Test.version_path, './figures'),
-                        path_to_temp=os.path.join(Test.version_path, './temp'))
+        compare_run_run(keys=keys, data_file_folder_ref=Ref.version_path, data_file_folder_test=Test.version_path,
+                        rel_path_to_save_pdf=os.path.join(Test.version_path, './figures'),
+                        rel_path_to_temp=os.path.join(Test.version_path, './temp'))
         # master.deiconify()
 
 
