@@ -23,7 +23,7 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanu
 from CompareFault import over_fault
 import matplotlib.pyplot as plt
 from datetime import datetime
-from CompareRunRun import load_data
+from load_data import load_data
 from DataOverModel import dom_plot
 from PlotSimS import sim_s_plot
 from PlotEKF import ekf_plot
@@ -36,7 +36,7 @@ plt.rcParams['axes.grid'] = True
 
 
 def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to_save_pdf='./figures',
-                    rel_path_to_temp='./temp'):
+                    rel_path_to_temp='./temp', data_only=False):
 
     print(f"{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n")
 
@@ -117,43 +117,44 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
     save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
     # Plots
-    fig_list = []
-    fig_files = []
-    data_root_test = data_file_clean.split('/')[-1].replace('.csv', '')
-    dir_root_test = data_file_clean.split('/')[-3].split('\\')[-1]
-    filename = data_root_test
-    plot_title = dir_root_test + '/' + data_root_test + '   ' + date_time
-    if temp_flt_file_clean and len(f.time) > 1:
-        fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                         fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
-    fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                   plot_title=plot_title, fig_list=fig_list, ref_str='',
-                                   test_str='_ver')
-    fig_list, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                   plot_title=plot_title, fig_list=fig_list, ref_str='',
-                                   test_str='_ver')
-    fig_list, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                     plot_title=plot_title, fig_list=fig_list, ref_str='',
-                                     test_str='_ver')
-    fig_list, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                  plot_title=plot_title, fig_list=fig_list, ref_str='',
-                                  test_str='_ver')
-    fig_list, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+    if data_only is False:
+        fig_list = []
+        fig_files = []
+        data_root_test = data_file_clean.split('/')[-1].replace('.csv', '')
+        dir_root_test = data_file_clean.split('/')[-3].split('\\')[-1]
+        filename = data_root_test
+        plot_title = dir_root_test + '/' + data_root_test + '   ' + date_time
+        if temp_flt_file_clean and len(f.time) > 1:
+            fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+                                             fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
+        fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                       plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                       test_str='_ver')
+        fig_list, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                       plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                       test_str='_ver')
+        fig_list, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                         plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                         test_str='_ver')
+        fig_list, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
                                       plot_title=plot_title, fig_list=fig_list, ref_str='',
                                       test_str='_ver')
-    if tune_in:
-        fig_list, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
-                                     plot_title=plot_title, fig_list=fig_list, ref_str='', test_str='_ver')
+        fig_list, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                          plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                          test_str='_ver')
+        if tune_in:
+            fig_list, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
+                                         plot_title=plot_title, fig_list=fig_list, ref_str='', test_str='_ver')
 
-    # Copies
-    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
-    unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
-    cleanup_fig_files(fig_files)
-    plt.show(block=False)
-    string = 'plots ' + str(fig_list[0].number) + ' - ' + str(fig_list[-1].number)
-    show_killer(string, 'CompareRunSim', fig_list=fig_list)
+        # Copies
+        precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
+        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
+        cleanup_fig_files(fig_files)
+        plt.show(block=False)
+        string = 'plots ' + str(fig_list[0].number) + ' - ' + str(fig_list[-1].number)
+        show_killer(string, 'CompareRunSim', fig_list=fig_list)
 
-    return True
+    return mon_old, sim_old, mon_ver, sim_ver, sim_s_ver
 
 
 if __name__ == '__main__':

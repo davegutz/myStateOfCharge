@@ -376,8 +376,8 @@ def compare_hist():
         elif Test.battery == 'ch':
             chm = 1
         compare_hist_sim(data_file=Test.file_path,
-                         save_pdf_path=os.path.join(Test.version_path, './figures'),
-                         path_to_temp=os.path.join(Test.version_path, './temp'),
+                         rel_path_to_save_pdf=os.path.join(Test.version_path, './figures'),
+                         rel_path_to_temp=os.path.join(Test.version_path, './temp'),
                          chm_in=chm, mod_in=mod_in_app.get())
         # master.deiconify()
     else:
@@ -407,9 +407,9 @@ def compare_run():
     if modeling.get():
         print('compare_run_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
         # master.withdraw()
-        compare_run_sim(data_file_path=Test.file_path, unit_key=Test.key,
-                        save_pdf_path=os.path.join(Test.version_path, './figures'),
-                        path_to_temp=os.path.join(Test.version_path, './temp'))
+        compare_run_sim(data_file=Test.file_path, unit_key=Test.key,
+                        rel_path_to_save_pdf=os.path.join(Test.version_path, './figures'),
+                        rel_path_to_temp=os.path.join(Test.version_path, './temp'))
         # master.deiconify()
     else:
         if not Ref.key_exists_in_file:
