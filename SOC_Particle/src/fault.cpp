@@ -41,6 +41,7 @@ void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
   this->Tb = int16_t(Sen->Tb*600.);
   this->vb = int16_t(Sen->Vb/sp.nS()*1200.);
   this->ib = int16_t(Sen->Ib/sp.nP()*600./sp.Ib_hist_slr());
+  if ( sp.Debug()==-1) Serial.printf("Ib %7.3f nP %7.3f ib %d\n", Sen->Ib, sp.nP(), this->ib);
   this->soc = int16_t(Mon->soc()*16000.);
   this->soc_min = int16_t(Mon->soc_min()*16000.);
   this->soc_ekf = int16_t(Mon->soc_ekf()*16000.);

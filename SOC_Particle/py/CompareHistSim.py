@@ -944,11 +944,11 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
 
     # User inputs (multiple input_files allowed
     data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
-    (path, basename) = os.path.split(data_file_path)
+    # data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/ampHiFail_pro3p2_bb.csv'
+    (path, data_file_txt) = os.path.split(data_file_path)
     if data_file_path is not None:
         save_pdf_path = path + './figures'
 
-    data_file_txt = 'rapidTweakRegression_pro3p2_bb.csv'
 
     if data_file_path is None:
         if data_file_txt is not None:

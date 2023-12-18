@@ -119,7 +119,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xm255;", QUEUE);    // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
                     chit("Xts;", QUEUE);      // Start up a sine wave
                     chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
-                    chit("Dm1;Dn1;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.
+                    chit("Dm.01;Dn.01;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.
                     chit("DP1;", QUEUE);      // Fast data collection (may cause trouble in CoolTerm.  if so, try Dr200)
                     chit("Rb;", QUEUE);       // Reset battery states
                     // chit("Pa;", QUEUE);       // Print all for record
@@ -131,7 +131,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT5000;", QUEUE);    // Wait time after cycle to print
                         chit("XC3;", QUEUE);    // Number of injection cycles
                         chit("W2;", QUEUE);     // Wait
-                        chit("vv4;", QUEUE);     // Data collection
+                        chit("vv4;Dh1000;", QUEUE);     // Data collection
                     }
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
@@ -141,7 +141,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT60000;", QUEUE);  // Wait time after cycle to print
                         chit("XC1;", QUEUE);    // Number of injection cycles
                         chit("W2;", QUEUE);     // Wait
-                        chit("vv2;", QUEUE);     // Data collection
+                        chit("vv2;Dh1000;", QUEUE);     // Data collection
                     }
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
@@ -151,7 +151,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT240000;", QUEUE);   // Wait time after cycle to print
                         chit("XC.5;", QUEUE);     // Number of injection cycles
                         chit("W2;", QUEUE);       // Wait
-                        chit("vv2;", QUEUE);       // Data collection
+                        chit("vv2;Dh1000;", QUEUE);       // Data collection
                     }
                     else if ( INT_in == 13 )  // Xp13:  tri tweak
                     {
@@ -162,7 +162,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT5000;", QUEUE);    // Wait time after cycle to print
                         chit("XC3;", QUEUE);    // Number of injection cycles
                         chit("W2;", QUEUE);     // Wait
-                        chit("vv2;", QUEUE);     // Data collection
+                        chit("vv2;DH1000;", QUEUE);     // Data collection
                     }
                     chit("W2;", QUEUE);       // Wait
                     chit("XR;", QUEUE);       // Run cycle

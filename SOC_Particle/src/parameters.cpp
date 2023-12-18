@@ -120,7 +120,7 @@ void  VolatilePars::initialize()
     Z_[n_] = (ewlo_slr_p       = new FloatZ(&n_, "  ", "Fo", NULL,"Slr wrap lo thr",      "slr",    0,    1000, &ewlo_slr,          1));
     Z_[n_] = (fail_tb_p      = new BooleanZ(&n_, "  ", "Xu", NULL,"Ignore Tb & fail",     "T=Fail", false,true, &fail_tb,           false));
     Z_[n_] = (fake_faults_p  = new BooleanZ(&n_, "  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,    &fake_faults,       FAKE_FAULTS));
-    Z_[n_] = (his_delay_p      = new ULongZ(&n_, "  ", "Dh", NULL,"History frame",        "ms",     10UL, SUMMARY_DELAY,&his_delay, SUMMARY_DELAY));
+    Z_[n_] = (his_delay_p      = new ULongZ(&n_, "  ", "Dh", NULL,"History frame",        "ms",    1000UL,SUMMARY_DELAY,&his_delay, SUMMARY_DELAY));
     Z_[n_] = (hys_scale_p      = new FloatZ(&n_, "  ", "Sh", NULL,"Sim hys scale",        "slr",    0,    100,  &hys_scale,         HYS_SCALE));
     Z_[n_] = (hys_state_p      = new FloatZ(&n_, "  ", "SH", NULL,"Sim hys state",        "v",      -10,  10,   &hys_state,         0));
     Z_[n_] = (ib_amp_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
