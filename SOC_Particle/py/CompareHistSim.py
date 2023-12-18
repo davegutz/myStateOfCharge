@@ -927,7 +927,7 @@ def look_it(x, tab, temp):
     return voc
 
 
-def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./figures', path_to_temp='./temp', chm_in=0,
+def compare_hist_sim(data_file=None, time_end_in=None, save_pdf_path='./figures', path_to_temp='./temp', chm_in=0,
                      mod_in=0):
     
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -943,81 +943,77 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
     dvoc_sim_in = 0.
 
     # User inputs (multiple input_files allowed
-    data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
-    # data_file_path = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/ampHiFail_pro3p2_bb.csv'
-    (path, data_file_txt) = os.path.split(data_file_path)
-    if data_file_path is not None:
-        save_pdf_path = path + './figures'
+    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/ampHiFail_pro3p2_bb.csv'
+    # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
-
-    if data_file_path is None:
-        if data_file_txt is not None:
-            path_to_data = os.path.join(os.getcwd(), data_file_txt)
-            data_file_path = path_to_data
-        else:
-            path_to_data = None
+    # File path operations
+    (data_file_folder, data_file_txt) = os.path.split(data_file)
+    save_pdf_path =  os.path.join(data_file_folder, './figures')
+    if not os.path.isdir(save_pdf_path):
+        os.mkdir(save_pdf_path)
+    path_to_temp = os.path.join(data_file_folder, './temp')
     if not os.path.isdir(path_to_temp):
         os.mkdir(path_to_temp)
 
-    cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
-              'e_w_f', 'fltw', 'falw')
+    # Data work
+    cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat', 'e_w_f', 'fltw', 'falw')
 
     # Load configuration
     batt = BatteryMonitor(mod_code=chm_in)
 
-    # cat files
-    # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
-    # temp_hist_file = os.path.join(path_to_temp, temp_hist_file)
-    temp_hist_file = data_file_path
-    temp_flt_file = data_file_path
-
     # Load history
-    temp_hist_file_clean = write_clean_file(temp_hist_file, type_='_hist', title_key='fltb', unit_key='unit_h',
+    temp_hist_file_clean = write_clean_file(data_file, type_='_hist', title_key='fltb', unit_key='unit_h',
                                             skip=skip, comment_str='---')
     if temp_hist_file_clean:
         h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                               encoding=None).view(np.recarray)
     else:
-        print("data from", temp_hist_file, "empty after loading")
+        print("data from", temp_hist_file_clean, "empty after loading")
         exit(1)
 
     # Load fault
-    temp_flt_file_clean = write_clean_file(temp_flt_file, type_='_flt', title_key='fltb', unit_key='unit_f',
+    temp_flt_file_clean = write_clean_file(data_file, type_='_flt', title_key='fltb', unit_key='unit_f',
                                            skip=skip, comment_str='---')
     if temp_flt_file_clean:
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
                               encoding=None).view(np.recarray)
     else:
-        print("data from", temp_flt_file, "empty after loading")
+        print("data from", temp_flt_file_clean, "empty after loading")
         exit(1)
 
+    # Sort and augment data
     f_raw = np.unique(f_raw)
     f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, modeling=mod_in)
     print("\nf:\n", f, "\n")
     f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)
-
-    # Sort unique
     h_raw = np.unique(h_raw)
     h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
-    # h = add_stuff(h_raw, batt, ib_band=IB_BAND)
     print("\nh:\n", h, "\n")
+    
+    # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
     h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
-    # Shift time and add data
+
+    # Correct time by shifting and covert to fast update rate
     time0 = h_20C.time[0]
     h_20C.time -= time0
     T_100 = 0.1
-    h_20C_resamp_100 = resample(data=h_20C, dt_resamp=T_100, time_var='time',
+    h_20C_resamp = resample(data=h_20C, dt_resamp=T_100, time_var='time',
                                 specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                           ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
                                           ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
-    for i in range(len(h_20C_resamp_100.time)):
+    for i in range(len(h_20C_resamp.time)):
         if i == 0:
-            h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[1] - h_20C_resamp_100.time[0]
+            h_20C_resamp.dt[i] = h_20C_resamp.time[1] - h_20C_resamp.time[0]
         else:
-            h_20C_resamp_100.dt[i] = h_20C_resamp_100.time[i] - h_20C_resamp_100.time[i-1]
-    mon_old_100, sim_old_100 = bandaid(h_20C_resamp_100, chm_in=chm_in)
+            h_20C_resamp.dt[i] = h_20C_resamp.time[i] - h_20C_resamp.time[i-1]
+            
+    # Hand fix oddities
+    mon_old, sim_old = bandaid(h_20C_resamp, chm_in=chm_in)
+
+    # Replicate
     mon_ver_100, sim_ver_100, sim_s_ver_100, mon_r, sim_r =\
-        replicate(mon_old_100, sim_old=sim_old_100, init_time=1., verbose=False, t_max=time_end_in, use_vb_sim=False,
+        replicate(mon_old, sim_old=sim_old, init_time=1., verbose=False, t_max=time_end_in, use_vb_sim=False,
                   scale_in=scale_in, use_mon_soc=use_mon_soc_in, dvoc_mon=dvoc_mon_in, dvoc_sim=dvoc_sim_in)
 
     # Plots
@@ -1032,18 +1028,18 @@ def compare_hist_sim(data_file_path=None, time_end_in=None, save_pdf_path='./fig
     if len(h_20C.time) > 1:
         sim_old = None
         plot_init_in = False
-        fig_list, fig_files = dom_plot(mon_old_100, mon_ver_100, sim_old, sim_ver_100, sim_s_ver_100, filename,
+        fig_list, fig_files = dom_plot(mon_old, mon_ver_100, sim_old, sim_ver_100, sim_s_ver_100, filename,
                                        fig_files, plot_title=plot_title, fig_list=fig_list,
                                        plot_init_in=plot_init_in, ref_str='', test_str='_ver')
-        fig_list, fig_files = gp_plot(mon_old_100, mon_ver_100, sim_old, sim_ver_100, sim_s_ver_100, filename,
+        fig_list, fig_files = gp_plot(mon_old, mon_ver_100, sim_old, sim_ver_100, sim_s_ver_100, filename,
                                       fig_files, plot_title=plot_title, fig_list=fig_list,
                                       plot_init_in=plot_init_in, ref_str='', test_str='_ver')
-        fig_list, fig_files = off_on_plot(mon_old_100, mon_ver_100, sim_old, sim_ver_100, sim_s_ver_100, filename,
+        fig_list, fig_files = off_on_plot(mon_old, mon_ver_100, sim_old, sim_ver_100, sim_s_ver_100, filename,
                                           fig_files, plot_title=plot_title, fig_list=fig_list,
                                           plot_init_in=plot_init_in, ref_str='', test_str='_ver')
-        fig_list, fig_files = overall_fault(mon_old_100, mon_ver_100, sim_ver_100, sim_s_ver_100, filename,
+        fig_list, fig_files = overall_fault(mon_old, mon_ver_100, sim_ver_100, sim_s_ver_100, filename,
                                             fig_files, plot_title=plot_title, fig_list=fig_list)
-        fig_list, fig_files = tune_r(mon_old_100, mon_ver_100, sim_s_ver_100, filename,
+        fig_list, fig_files = tune_r(mon_old, mon_ver_100, sim_s_ver_100, filename,
                                      fig_files, plot_title=plot_title, fig_list=fig_list)
 
     precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
