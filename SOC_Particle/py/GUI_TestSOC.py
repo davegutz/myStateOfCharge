@@ -28,6 +28,7 @@ import tkinter.messagebox
 from CompareHistSim import compare_hist_sim
 from CompareRunSim import compare_run_sim
 from CompareRunRun import compare_run_run
+from CompareRunHist import compare_run_hist
 from CountdownTimer import CountdownTimer
 import shutil
 import pyperclip
@@ -71,7 +72,7 @@ lookup = {'init': ('Y;c;Dh1800000;*W;*vv0;*XS;*Ca1;<HR;<Pf;', ('',), 10, 12),
           'initMid': ('Y;c;Dh1800000;*W;*vv0;*XS;*Ca.5;<HR;<Pf;', ('',), 10, 12),
           'saveAdjusts': ('Dr100;DP1;vv4;PR;PV;Bm1;Pr;Bm0;Pr;BP2;Pr;BP1;Pr;BS2;Pr;BS1;Pr;Bs1;Pr;Bs0;Pr;DA5;Pr;DB-5;Pr;RS;Pr;Dc0.2;Pr;Dc0;DI-10;Pr;DI0;Pr;Dt5;Pr;Dt0;Pr;SA2;Pr;SA1;Pr;SB2;Pr;SB1;Pr;si-1;Pr;RS;Pr;Sk2;Pr;Sk1;Pr;SQ2;Pr;SQ1;Pr;Sq3;Pr;Sq1;Pr;SV1.1;Pr;SV1;Pr;Xb10;Pr;Xb0;Pr;Xa1000;Pr;Xa0;Pr;Xf1;Pr;RS;Pr;Xm10;Pr;RS;Pr;W3;vv0;XQ3;PR;PV;', ("For testing out the adjustments and memory", "Read through output and witness set and reset of all", "The DS2482 moderate headroom should not exceed limit printed.  EG 11 of 12 is ok."), 60, 0),
           'custom': ('', ("For general purpose data collection", "'save data' will present a choice of file name", ""), 60, 12),
-          'ampHiFail': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;vv2;Dh1000;W20;Dm50;Dn0.0001;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"),20, 12),
+          'ampHiFail': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;vv2;Dh1000;W20;Dm50;Dn0.0001;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change"), 20, 12),
           'rapidTweakRegression': ('Ff0;HR;Xp10;Dh1000;', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips'), 180, 12),
           'pulseSS': ("Xp7;", ("Should generate a very short <10 sec data burst with a sw pulse.  Look at plots for good overlay. e_wrap will have a delay.", "This is the shortest of all tests.  Useful for quick checks."), 15, 1),
           'rapidTweakRegressionH0': ('Sh0;SH0;Ff0;HR;Xp10;', ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!'), 180, 12),
@@ -408,6 +409,27 @@ def compare_run():
         # master.deiconify()
 
 
+def compare_run_to_hist():
+    if not Test.key_exists_in_file:
+        tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
+        return
+    if modeling.get():
+        print('compare_hist_to_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
+        # master.withdraw()
+        chm = None
+        if Test.battery == 'bb':
+            chm = 0
+        elif Test.battery == 'ch':
+            chm = 1
+        compare_run_hist(data_file_=Test.file_path, unit_key_=Test.key,
+                         rel_path_to_save_pdf_=os.path.join(Test.version_path, './figures'),
+                         rel_path_to_temp_=os.path.join(Test.version_path, './temp'),
+                         chm_in_=chm, mod_in_=mod_in_app.get())
+        # master.deiconify()
+    else:
+        print('not possible')
+
+
 # Choose file to perform compare_run_run on
 def compare_run_run_choose():
     # Select file
@@ -423,10 +445,10 @@ def compare_run_run_choose():
                 ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(ref_path)
                 keys = [ref_key, test_key]
                 # master.withdraw()
-                compare_run_run(keys=keys, dir_data_ref_path=ref_folder_path,
-                                dir_data_test_path=test_folder_path,
-                                save_pdf_path=test_folder_path + './figures',
-                                path_to_temp=test_folder_path + './temp')
+                compare_run_run(keys=keys, data_file_folder_ref=ref_folder_path,
+                                data_file_folder_test=test_folder_path,
+                                rel_path_to_save_pdf=test_folder_path + './figures',
+                                rel_path_to_temp=test_folder_path + './temp')
                 # master.deiconify()
             else:
                 tk.messagebox.showerror(message='key not found in' + testpath)
@@ -443,9 +465,9 @@ def compare_run_sim_choose():
         for testpath in testpaths:
             test_folder_path, test_parent, basename, test_txt, key = contain_all(testpath)
             if key != '':
-                compare_run_sim(data_file_path=testpath, unit_key=key,
-                                save_pdf_path=os.path.join(test_folder_path, './figures'),
-                                path_to_temp=os.path.join(test_folder_path, './temp'))
+                compare_run_sim(data_file=testpath, unit_key=key,
+                                rel_path_to_save_pdf=os.path.join(test_folder_path, './figures'),
+                                rel_path_to_temp=os.path.join(test_folder_path, './temp'))
             else:
                 tk.messagebox.showerror(message='key not found in' + testpath)
 
@@ -664,6 +686,7 @@ def putty_size():
 def ref_remove():
     top_panel_right.pack_forget()
     run_button.config(text='Compare Run Sim')
+    run_hist_button.config(text='Compare Run Hist')
     hist_sim_button.config(text='Compare Hist Sim')
     Ref.label.forget()
 
@@ -671,6 +694,7 @@ def ref_remove():
 def ref_restore():
     top_panel_right.pack(expand=True, fill='both')
     run_button.config(text='Compare Run Run')
+    run_hist_button.config(text='Compare Run Hist')
     hist_sim_button.config(text='Compare Hist Run')
     Ref.label.pack(padx=5, pady=5)
 
@@ -1018,7 +1042,6 @@ if __name__ == '__main__':
                                     wraplength=wrap_length, justify=tk.LEFT)
     save_progress_button.pack(side=tk.LEFT, padx=5, pady=5)
 
-
     clear_data_button = myButton(sav_panel, text='clear', command=clear_data_verbose, fg="red", bg=bg_color,
                                  wraplength=wrap_length, justify=tk.RIGHT)
     clear_data_button.pack(side=tk.RIGHT, padx=5, pady=5)
@@ -1038,16 +1061,16 @@ if __name__ == '__main__':
         run_button = myButton(run_panel, text=' Compare ', command=compare_run, fg="green", bg=bg_color,
                               justify=tk.LEFT, font=butt_font_large)
         hist_sim_button = myButton(run_panel, text=' Compare ', command=compare_hist_to_sim, fg="green", bg=bg_color,
-                              justify=tk.LEFT, font=butt_font_large)
-        run_hist_button = myButton(run_panel, text=' Compare ', command=compare_run_hist, fg="green", bg=bg_color,
-                               justify=tk.LEFT, font=butt_font_large)
+                                   justify=tk.LEFT, font=butt_font_large)
+        run_hist_button = myButton(run_panel, text=' Compare ', command=compare_run_to_hist, fg="green", bg=bg_color,
+                                   justify=tk.LEFT, font=butt_font_large)
     else:
         run_button = myButton(run_panel, text=' Compare ', command=compare_run, fg="green", bg=bg_color,
                               wraplength=wrap_length, justify=tk.LEFT, font=butt_font_large)
         hist_sim_button = myButton(run_panel, text=' Compare ', command=compare_hist_to_sim, fg="green", bg=bg_color,
-                               justify=tk.LEFT, font=butt_font_large)
-        run_hist_button = myButton(run_panel, text=' Compare ', command=compare_run_hist, fg="green", bg=bg_color,
-                           justify=tk.LEFT, font=butt_font_large)
+                                   justify=tk.LEFT, font=butt_font_large)
+        run_hist_button = myButton(run_panel, text=' Compare ', command=compare_run_to_hist, fg="green", bg=bg_color,
+                                   justify=tk.LEFT, font=butt_font_large)
     mod_in_app_button = myButton(run_panel, text=mod_in_app.get(), command=enter_mod_in_app, fg="green", bg=bg_color)
     run_button.pack(side=tk.LEFT, padx=5, pady=5)
     mod_in_app_button.pack(side=tk.RIGHT, padx=5, pady=5)
@@ -1069,7 +1092,6 @@ if __name__ == '__main__':
     run_run_choose_button = myButton(compare_panel, text='Compare Run Run Choose', command=compare_run_run_choose,
                                      fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT, font=butt_font)
     run_run_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
-
 
     # Begin
     handle_test_unit()
