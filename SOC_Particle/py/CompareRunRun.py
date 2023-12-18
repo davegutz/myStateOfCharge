@@ -29,6 +29,7 @@ from load_data import load_data
 
 plt.rcParams['axes.grid'] = True
 
+
 def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=None,
                     rel_path_to_save_pdf='../dataReduction/figures', rel_path_to_temp='../dataReduction/temp'):
 

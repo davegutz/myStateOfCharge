@@ -26,7 +26,6 @@ from tkinter import ttk, filedialog
 import tkinter.simpledialog
 import tkinter.messagebox
 from CompareHistSim import compare_hist_sim
-# from CompareHistRun import compare_hist_run
 from CompareRunSim import compare_run_sim
 from CompareRunRun import compare_run_run
 from CountdownTimer import CountdownTimer
@@ -363,12 +362,12 @@ def clear_data(silent=False, nowait=False):
             tkinter.messagebox.showwarning(message="Nothing to clear")
 
 
-def compare_hist():
+def compare_hist_to_sim():
     if not Test.key_exists_in_file:
         tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
         return
     if modeling.get():
-        print('compare_hist.  save_pdf_path', os.path.join(Test.version_path, './figures'))
+        print('compare_hist_to_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
         # master.withdraw()
         chm = None
         if Test.battery == 'bb':
@@ -381,23 +380,7 @@ def compare_hist():
                          chm_in=chm, mod_in=mod_in_app.get())
         # master.deiconify()
     else:
-        if not Ref.key_exists_in_file:
-            tkinter.messagebox.showwarning(message="Ref Key '" + Ref.key + "' does not exist in " + Ref.file_txt)
-            return
-        print('GUI_TestSOC compare_hist:  Ref', Ref.file_path, Ref.key)
-        print('GUI_TestSOC compare_hist:  Test', Test.file_path, Test.key)
-        keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
-        # master.withdraw()
-        chm = None
-        if Test.battery == 'bb':
-            chm = 0
-        elif Test.battery == 'ch':
-            chm = 1
-        print(f"make compare_hist_run.py")
-        # compare_hist_run(keys=keys, dir_data_ref_path=Ref.version_path, dir_data_test_path=Test.version_path,
-        #                 save_pdf_path=os.path.join(Test.version_path, './figures'),
-        #                 path_to_temp=os.path.join(Test.version_path, './temp'))
-        # master.deiconify()
+        print('not possible')
 
 
 def compare_run():
@@ -681,14 +664,14 @@ def putty_size():
 def ref_remove():
     top_panel_right.pack_forget()
     run_button.config(text='Compare Run Sim')
-    comp_button.config(text='Compare Hist Sim')
+    hist_sim_button.config(text='Compare Hist Sim')
     Ref.label.forget()
 
 
 def ref_restore():
     top_panel_right.pack(expand=True, fill='both')
     run_button.config(text='Compare Run Run')
-    comp_button.config(text='Compare Hist Run')
+    hist_sim_button.config(text='Compare Hist Run')
     Ref.label.pack(padx=5, pady=5)
 
 
@@ -1054,17 +1037,22 @@ if __name__ == '__main__':
     if platform.system() == 'Darwin':
         run_button = myButton(run_panel, text=' Compare ', command=compare_run, fg="green", bg=bg_color,
                               justify=tk.LEFT, font=butt_font_large)
-        comp_button = myButton(run_panel, text=' Compare ', command=compare_hist, fg="green", bg=bg_color,
+        hist_sim_button = myButton(run_panel, text=' Compare ', command=compare_hist_to_sim, fg="green", bg=bg_color,
                               justify=tk.LEFT, font=butt_font_large)
+        run_hist_button = myButton(run_panel, text=' Compare ', command=compare_run_hist, fg="green", bg=bg_color,
+                               justify=tk.LEFT, font=butt_font_large)
     else:
         run_button = myButton(run_panel, text=' Compare ', command=compare_run, fg="green", bg=bg_color,
                               wraplength=wrap_length, justify=tk.LEFT, font=butt_font_large)
-        comp_button = myButton(run_panel, text=' Compare ', command=compare_hist, fg="green", bg=bg_color,
+        hist_sim_button = myButton(run_panel, text=' Compare ', command=compare_hist_to_sim, fg="green", bg=bg_color,
                                justify=tk.LEFT, font=butt_font_large)
+        run_hist_button = myButton(run_panel, text=' Compare ', command=compare_run_hist, fg="green", bg=bg_color,
+                           justify=tk.LEFT, font=butt_font_large)
     mod_in_app_button = myButton(run_panel, text=mod_in_app.get(), command=enter_mod_in_app, fg="green", bg=bg_color)
     run_button.pack(side=tk.LEFT, padx=5, pady=5)
     mod_in_app_button.pack(side=tk.RIGHT, padx=5, pady=5)
-    comp_button.pack(side=tk.RIGHT, padx=5, pady=5)
+    hist_sim_button.pack(side=tk.RIGHT, padx=5, pady=5)
+    run_hist_button.pack(side=tk.RIGHT, padx=5, pady=5)
 
     # Compare panel
     compare_sep_panel = tk.Frame(master)

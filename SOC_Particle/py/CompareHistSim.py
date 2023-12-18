@@ -1047,7 +1047,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         string = 'plots ' + str(fig_list[0].number) + ' - ' + str(fig_list[-1].number)
         show_killer(string, 'CompareFault', fig_list=fig_list)
 
-        return mon_old, sim_old, mon_ver, sim_ver, sim_s_ver
+    return mon_old, sim_old, mon_ver, sim_ver, sim_s_ver
 
 if __name__ == '__main__':
     # User inputs (multiple input_files allowed

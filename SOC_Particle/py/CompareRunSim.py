@@ -154,7 +154,7 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
         string = 'plots ' + str(fig_list[0].number) + ' - ' + str(fig_list[-1].number)
         show_killer(string, 'CompareRunSim', fig_list=fig_list)
 
-    return mon_old, sim_old, mon_ver, sim_ver, sim_s_ver
+    return data_file_clean, mon_old, sim_old, mon_ver, sim_ver, sim_s_ver
 
 
 if __name__ == '__main__':

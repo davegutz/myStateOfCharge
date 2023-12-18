@@ -162,7 +162,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.plot(mo.time, mo.e_wrap, color='magenta', linestyle='-', label='e_wrap'+ref_str)
         plt.plot(mv.time, mv.e_wrap, color='cyan', linestyle='--', label='e_wrap'+test_str)
         plt.plot(mo.time, mo.e_wrap_filt, color='black', linestyle='-.', label='e_wrap_filt'+ref_str)
-        plt.plot(mv.time, mv.e_wrap_filt, color='red', linestyle=':', label='e_wrap_filt'+test_str)
+        if hasattr(mv, 'e_wrap_filt'):
+            plt.plot(mv.time, mv.e_wrap_filt, color='red', linestyle=':', label='e_wrap_filt'+test_str)
         plt.plot(mo.time, mo.ewh_thr, color='red', linestyle='-.', label='ewh_thr'+ref_str)
         plt.plot(mo.time, mo.ewl_thr, color='red', linestyle='-.', label='ewl_thr'+ref_str)
         plt.ylim(-1, 1)
@@ -234,7 +235,7 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plt.subplot(325)
     plt.plot(mo.time, mo.dv_hys, color='green', linestyle='-', label='dv_hys'+ref_str)
     plt.plot(mv.time, mv.dv_hys, color='cyan', linestyle='--', label='dv_hys'+test_str)
-    if sv:
+    if hasattr(sv, 'time'):
         from pyDAGx import myTables
         lut_vb = myTables.TableInterp1D(np.array(mo.time), np.array(mo.vb))
         n = len(sv.time)
@@ -358,7 +359,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.plot(mo.time, mo.e_wrap, color='green', linestyle='-', label='e_wrap' + ref_str)
         plt.plot(mv.time, mv.e_wrap, color='red', linestyle='--', label='e_wrap' + test_str)
         plt.plot(mo.time, mo.e_wrap_filt, color='magenta', linestyle='-.', label='e_wrap_filt' + ref_str)
-        plt.plot(mv.time, mv.e_wrap_filt, color='cyan', linestyle=':', label='e_wrap_filt' + test_str)
+        if hasattr(mv, 'e_wrap_filt'):
+            plt.plot(mv.time, mv.e_wrap_filt, color='cyan', linestyle=':', label='e_wrap_filt' + test_str)
         plt.plot(mo.time, mo.ewh_thr, color='black', linestyle='-.', label='ewh_thr' + ref_str)
         plt.plot(mo.time, mo.ewl_thr, color='black', linestyle='-.', label='ewl_thr' + ref_str)
         plt.plot(mo.time, mo.cc_dif, color='green', linestyle='-', label='cc_diff'+ref_str)
@@ -367,7 +369,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.legend(loc=1)
         plt.subplot(224)
         plt.plot(mo.time, mo.ib_sel_stat - 2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')
-        plt.plot(mv.time, mv.ib_sel_stat - 2, color='blue', linestyle='--', label='ib_sel_stat' + test_str + '-2')
+        if hasattr(mv, 'ib_sel_stat'):
+            plt.plot(mv.time, mv.ib_sel_stat - 2, color='blue', linestyle='--', label='ib_sel_stat' + test_str + '-2')
         plt.plot(mo.time, mo.vb_sel + 2, color='magenta', linestyle='-', label='vb_sel_stat' + ref_str + '+2')
         plt.plot(mv.time, mv.vb_sel + 2, color='cyan', linestyle='--', label='vb_sel_stat' + test_str + '+2')
         plt.plot(mo.time, mo.tb_sel + 6, color='green', linestyle='-', label='tb_sel_stat' + ref_str + '+6')
