@@ -375,10 +375,10 @@ def compare_hist_to_sim():
             chm = 0
         elif Test.battery == 'ch':
             chm = 1
-        compare_hist_sim(data_file=Test.file_path,
+        compare_hist_sim(data_file=Test.file_path, unit_key=key,
                          rel_path_to_save_pdf=os.path.join(Test.version_path, './figures'),
                          rel_path_to_temp=os.path.join(Test.version_path, './temp'),
-                         chm_in=chm, mod_in=mod_in_app.get())
+                         chm_in=chm, mod_in=mod_in_app.get(), mon_t=True)
         # master.deiconify()
     else:
         print('not possible')

@@ -131,7 +131,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     t_len = len(t)
     rp = Retained()
     if hasattr(mon_old, 'mod'):
-        rp.modeling = mon_old.mod()
+        rp.modeling = int(mon_old.mod())
     elif mon_old.dtype.names.count('mod_data') > 0:
         rp.modeling = mon_old.mod_data[0]
     else:

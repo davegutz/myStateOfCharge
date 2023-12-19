@@ -42,7 +42,7 @@ def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_pat
                         rel_path_to_save_pdf=rel_path_to_save_pdf_, rel_path_to_temp=rel_path_to_temp_,
                         data_only=data_only_)
     mo_h, so_h, mv_h, sv_h, ssv_h =\
-        compare_hist_sim(data_file=data_file_, time_end_in=time_end_in_,
+        compare_hist_sim(data_file=data_file_, unit_key=unit_key_, time_end_in=time_end_in_,
                          rel_path_to_save_pdf=rel_path_to_save_pdf_, rel_path_to_temp=rel_path_to_temp_,
                          chm_in=chm_in_, mod_in=mod_in_, data_only=data_only_)
 

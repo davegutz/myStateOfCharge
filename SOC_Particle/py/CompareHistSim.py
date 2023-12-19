@@ -35,6 +35,7 @@ from DataOverModel import write_clean_file
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 from datetime import datetime
 import os
+from load_data import load_data
 
 plt.rcParams['axes.grid'] = True
 
@@ -940,8 +941,20 @@ def shift_time(mo, extra_shift=0.):
     return mo
 
 
+def add_mod(hist, mon_t=False, mon=None):
+    if mon_t is False or mon is None:
+        print("add_mod:  not executing")
+        return
+    else:
+        mod = []
+        for i in range(len(hist.time)):
+            t_sec = float(hist.time[i]) - float(hist.time[0]) + mon.time[0]
+            mod.append(np.interp(t_sec, mon.time, mon.mod))
+        return rf.rec_append_fields(hist, 'mod', np.array(mod, dtype=int))
+
+
 def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
-                     chm_in=0, mod_in=0, data_only=False):
+                     chm_in=0, mod_in=0, data_only=False, mon_t=False, unit_key=None):
 
     print(f"{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{chm_in=}\n{mod_in=}\n")
 
@@ -970,6 +983,14 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
     # Load configuration
     batt = BatteryMonitor(mod_code=chm_in)
+
+    # Load mon
+    # # Load mon v4 (old)
+    mon_old = None
+    sim_old = None
+    if mon_t is True:
+        mon_old, sim_old, f, mon_t_file_clean, temp_mont_t_file_clean = \
+            load_data(data_file, 1, unit_key=unit_key, time_end_in=time_end_in, zero_zero_in=False)
 
     # Load history
     temp_hist_file_clean = write_clean_file(data_file, type_='_hist', title_key='fltb', unit_key='unit_h',
@@ -1000,7 +1021,9 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     print("\nh raw:\n", h_raw.dtype.names, "\n", h_raw, "\n", h_raw.dtype.names, "\n")
     h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, modeling=mod_in)
     print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n")
-    
+    if mon_t is True:
+        h = add_mod(h, mon_t, mon_old)
+
     # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
     h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
 
@@ -1070,7 +1093,8 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 if __name__ == '__main__':
     # User inputs (multiple input_files allowed
     data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+    key = 'pro3p2_bb'
 
     # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
-    compare_hist_sim(data_file=data_file_full, mod_in=255)
+    compare_hist_sim(data_file=data_file_full, mod_in=255, mon_t=True, unit_key=key)
