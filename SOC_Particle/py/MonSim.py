@@ -132,11 +132,12 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     rp = Retained()
     if hasattr(mon_old, 'mod'):
         rp.modeling = int(mon_old.mod())
-    elif mon_old.dtype.names.count('mod_data') > 0:
+    elif hasattr(mon_old, 'mod_data'):
         rp.modeling = mon_old.mod_data[0]
     else:
-        print("what do we do now?")
-        exit(1)
+        rp.modeling = 255
+        print(f"what do we do now?  {rp.modeling=}")
+        # exit(1)
     print("rp.modeling is ", rp.modeling)
     print('use_ib_mon is', use_ib_mon)
     tweak_test = rp.tweak_test()

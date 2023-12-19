@@ -370,15 +370,9 @@ def compare_hist_to_sim():
     if modeling.get():
         print('compare_hist_to_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
         # master.withdraw()
-        chm = None
-        if Test.battery == 'bb':
-            chm = 0
-        elif Test.battery == 'ch':
-            chm = 1
-        compare_hist_sim(data_file=Test.file_path, unit_key=key,
+        compare_hist_sim(data_file=Test.file_path, unit_key=Test.key,
                          rel_path_to_save_pdf=os.path.join(Test.version_path, './figures'),
-                         rel_path_to_temp=os.path.join(Test.version_path, './temp'),
-                         chm_in=chm, mod_in=mod_in_app.get(), mon_t=True)
+                         rel_path_to_temp=os.path.join(Test.version_path, './temp'), mon_t=True)
         # master.deiconify()
     else:
         print('not possible')
@@ -421,10 +415,10 @@ def compare_run_to_hist():
             chm = 0
         elif Test.battery == 'ch':
             chm = 1
+
         compare_run_hist(data_file_=Test.file_path, unit_key_=Test.key,
                          rel_path_to_save_pdf_=os.path.join(Test.version_path, './figures'),
-                         rel_path_to_temp_=os.path.join(Test.version_path, './temp'),
-                         chm_in_=chm, mod_in_=mod_in_app.get())
+                         rel_path_to_temp_=os.path.join(Test.version_path, './temp'))
         # master.deiconify()
     else:
         print('not possible')

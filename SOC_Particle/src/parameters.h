@@ -207,6 +207,7 @@ public:
     virtual void set_nominal();
 
     float Ib_hist_slr() { if ( Modeling() == 255 ) return 40.; else return 1.; }
+    float Vb_hist_slr() { if ( Modeling() == 255 ) return 2.; else return 1.; }
     boolean mod_all_dscn() { return ( 111<Modeling() ); }                // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
     boolean mod_any_dscn() { return ( 15<Modeling() ); }                 // Bare any

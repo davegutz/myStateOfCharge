@@ -722,7 +722,7 @@ def calc_fault(d_ra, d_mod):
 
 
 # Fake stuff to get replicate to accept inputs and run
-def bandaid(h, chm_in=0):
+def bandaid(h):
     res = np.zeros(len(h.time))
     res[0:10] = 1
     ib_sel = h['ib'].copy()
@@ -733,10 +733,9 @@ def bandaid(h, chm_in=0):
     soc_s = h['soc'].copy()
     bms_off_s = h['bms_off'].copy()
     sat_s = h['sat'].copy()
-    chm = np.ones(len(h.time))*chm_in
+    chm_s = h['chm_s'].copy()
     sel = np.zeros(len(h.time))
     preserving = np.ones(len(h.time))
-    chm_s = np.ones(len(h.time))*chm_in
     mon_old = rf.rec_append_fields(h, 'res', res)
     mon_old = rf.rec_append_fields(mon_old, 'ib_past', ib_in_s)
     if not hasattr(mon_old, 'ib_sel'):
@@ -747,7 +746,6 @@ def bandaid(h, chm_in=0):
     mon_old = rf.rec_append_fields(mon_old, 'preserving', preserving)
     mon_old = rf.rec_append_fields(mon_old, 'vb_sel', vb_sel)
     mon_old = rf.rec_append_fields(mon_old, 'soc_s', soc_s)
-    mon_old = rf.rec_append_fields(mon_old, 'chm', chm)
     mon_old = rf.rec_append_fields(mon_old, 'sel', sel)
     mon_old = rf.rec_append_fields(mon_old, 'ewh_thr', sel)
     mon_old = rf.rec_append_fields(mon_old, 'ewl_thr', sel)
@@ -939,6 +937,25 @@ def shift_time(mo, extra_shift=0.):
     return mo
 
 
+def add_chm(hist, mon_t=False, mon=None, chm=None):
+    if mon_t is False or mon is None:
+        print("add_chm:  not executing")
+        if chm is not None:
+            chm_s = []
+            for i in range(len(hist.time)):
+                chm_s.append(chm)
+            hist = rf.rec_append_fields(hist, 'chm_s', np.array(chm_s, dtype=int))
+        return
+    else:
+        chm = []
+        for i in range(len(hist.time)):
+            t_sec = float(hist.time[i]) - float(hist.time[0]) + mon.time[0]
+            chm.append(np.interp(t_sec, mon.time, mon.chm))
+        hist = rf.rec_append_fields(hist, 'chm_s', np.array(chm, dtype=int))
+        hist = rf.rec_append_fields(hist, 'chm', np.array(chm, dtype=int))
+    return hist
+
+
 def add_mod(hist, mon_t=False, mon=None):
     if mon_t is False or mon is None:
         print("add_mod:  not executing")
@@ -952,9 +969,9 @@ def add_mod(hist, mon_t=False, mon=None):
 
 
 def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
-                     chm_in=0, mod_in=0, data_only=False, mon_t=False, unit_key=None):
+                     data_only=False, mon_t=False, unit_key=None):
 
-    print(f"{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{chm_in=}\n{mod_in=}\n")
+    print(f"\ncompare_hist_sim:\n{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n{mon_t=}\n{unit_key=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
@@ -978,9 +995,6 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
     # Data work
     cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat', 'e_w_f', 'fltw', 'falw')
-
-    # Load configuration
-    batt = BatteryMonitor(mod_code=chm_in)
 
     # Load mon to extract mod information
     # # Load mon v4 (old)
@@ -1010,6 +1024,18 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         print("data from", temp_flt_file_clean, "empty after loading")
         exit(1)
 
+    # Load configuration
+    if mon_t is True:
+        chm = int(mon_old.chm[0])
+    else:
+        if unit_key.__contains__('bb'):
+            chm = 0
+        elif unit_key.__contains__('ch'):
+            chm = 1
+        else:
+            chm = None
+    batt = BatteryMonitor(mod_code=chm)
+
     # Sort and augment data
     f_raw = np.unique(f_raw)
     f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in)
@@ -1018,9 +1044,9 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     h_raw = np.unique(h_raw)
     print("\nh raw:\n", h_raw.dtype.names, "\n", h_raw, "\n", h_raw.dtype.names, "\n")
     h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in)
-    if mon_t is True:
-        h = add_mod(h, mon_t, mon_old)
-    print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n")
+    h = add_mod(h, mon_t, mon_old)
+    h = add_chm(h, mon_t, mon_old, chm)
+    print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after add_stuff\n")
 
     # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
     h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
@@ -1041,7 +1067,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
             h_20C_resamp.dt[i] = h_20C_resamp.time[i] - h_20C_resamp.time[i-1]
             
     # Hand fix oddities
-    mon_old, sim_old = bandaid(h_20C_resamp, chm_in=chm_in)
+    mon_old, sim_old = bandaid(h_20C_resamp)
 
     # Replicate
     data_file_clean = path_to_temp+'/'+data_file_txt.replace('.csv', '_hist' + '.csv', 1)
@@ -1095,4 +1121,4 @@ if __name__ == '__main__':
 
     # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
-    compare_hist_sim(data_file=data_file_full, mod_in=255, mon_t=True, unit_key=key)
+    compare_hist_sim(data_file=data_file_full, mon_t=True, unit_key=key)

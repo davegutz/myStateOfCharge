@@ -32,7 +32,7 @@ plt.rcParams['axes.grid'] = True
 
 
 def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_path_to_save_pdf_='./figures',
-                     rel_path_to_temp_='./temp', chm_in_=0, mod_in_=0, data_only_=True):
+                     rel_path_to_temp_='./temp', data_only_=True):
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
@@ -44,7 +44,7 @@ def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_pat
     mo_h, so_h, mv_h, sv_h, ssv_h =\
         compare_hist_sim(data_file=data_file_, unit_key=unit_key_, time_end_in=time_end_in_,
                          rel_path_to_save_pdf=rel_path_to_save_pdf_, rel_path_to_temp=rel_path_to_temp_,
-                         chm_in=chm_in_, mod_in=mod_in_, data_only=data_only_)
+                         data_only=data_only_, mon_t=True)
 
     # Plots
     fig_list = []
