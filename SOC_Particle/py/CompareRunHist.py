@@ -66,7 +66,8 @@ def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_pat
     plot_title = dir_root_ref + '/' + data_root_ref + '   ' + date_time
 
     fig_list, fig_files = dom_plot(mo_r, mo_h, so_r, so_h, ssv_h, filename, fig_files,
-                                   plot_title=plot_title, fig_list=fig_list)  # all over all
+                                   plot_title=plot_title, fig_list=fig_list,
+                                   ref_str='_run', test_str='_hist')  # all over all
 
     # Copies
     precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=rel_path_to_save_pdf_)

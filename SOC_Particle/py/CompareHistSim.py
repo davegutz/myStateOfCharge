@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from Hysteresis_20220917d import Hysteresis_20220917d
 from Hysteresis_20220926 import Hysteresis_20220926
 from Battery import Battery, BatteryMonitor, is_sat, Retained
-from MonSim import replicate
+from MonSim import replicate, save_clean_file
 # from Util import cat
 from resample import resample
 from PlotKiller import show_killer
@@ -927,13 +927,27 @@ def look_it(x, tab, temp):
     return voc
 
 
+def shift_time(mo, so, extra_shift=0.):
+    # Shift time
+    first_non_zero = 0
+    n = len(mo.time)
+    while abs(mo.ib[first_non_zero]) < 0.5 and first_non_zero < n:
+        first_non_zero += 1
+    if first_non_zero < n:  # success
+        shift = mo.time[first_non_zero-1]
+        print('shift time by', shift)
+        mo.time = mo.time - shift + extra_shift
+        so.time = so.time - shift + extra_shift
+    return mo, so
+
+
 def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
                      chm_in=0, mod_in=0, data_only=False):
 
     print(f"{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{chm_in=}\n{mod_in=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-    # date_ = datetime.now().strftime("%y%m%d")
+    date_ = datetime.now().strftime("%y%m%d")
 
     # Save these
     scale_in = 1
@@ -981,11 +995,12 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     # Sort and augment data
     f_raw = np.unique(f_raw)
     f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, modeling=mod_in)
-    print("\nf:\n", f, "\n")
+    print("\nf:\n", f.dtype.names, f, "\n")
     f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)
     h_raw = np.unique(h_raw)
-    h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
-    print("\nh:\n", h, "\n")
+    print("\nh raw:\n", h_raw.dtype.names, "\n", h_raw, "\n", h_raw.dtype.names, "\n")
+    h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, modeling=mod_in)
+    print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n")
     
     # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
     h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
@@ -1007,10 +1022,16 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     # Hand fix oddities
     mon_old, sim_old = bandaid(h_20C_resamp, chm_in=chm_in)
 
+    # Shift time by detecting when ib changes
+    mon_old, sim_old = shift_time(mon_old, sim_old, -1.5)
+
     # Replicate
+    data_file_clean = path_to_temp+'/'+data_file_txt.replace('.csv', '_hist' + '.csv', 1)
+    mon_file_save = data_file_clean.replace(".csv", "_rep_hist.csv")
     mon_ver, sim_ver, sim_s_ver, mon_r, sim_r =\
         replicate(mon_old, sim_old=sim_old, init_time=1., verbose=False, t_max=time_end_in, use_vb_sim=False,
                   scale_in=scale_in, use_mon_soc=use_mon_soc_in, dvoc_mon=dvoc_mon_in, dvoc_sim=dvoc_sim_in)
+    save_clean_file(mon_ver, mon_file_save, 'mon_rep_hist' + date_)
 
     # Plots
     if data_only is False:
@@ -1055,4 +1076,4 @@ if __name__ == '__main__':
 
     # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
-    compare_hist_sim(data_file=data_file_full)
+    compare_hist_sim(data_file=data_file_full, mod_in=255)

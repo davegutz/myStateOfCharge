@@ -56,7 +56,6 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
 
                 case ( 0 ):  // Xp0:  reset stop
                     Serial.printf("**************Xp0\n");
-                    if ( !sp.tweak_test() ) chit("Xm247;", ASAP);  // Prevent upset of time in Xp7, Xp9, Xp10, Xp11, etc
                     chit("Xf0;Xa0;Xtn;", ASAP);
                     if ( !sp.tweak_test() ) chit("Xb0;", ASAP);
                     chit("BZ;", SOON);
@@ -209,7 +208,6 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             Sen->end_inj = 0UL;
             Sen->elapsed_inj = 0UL;
             chit("vv0;", ASAP);     // Turn off echo
-            chit("Xm247;", SOON);  // Turn off tweak_test
             chit("Xp0;", SOON);    // Reset
             break;
 

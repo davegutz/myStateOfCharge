@@ -146,6 +146,7 @@ void Flt_st::print(const String code)
       float(this->e_wrap_filt)/1200.,
       this->fltw,
       this->falw);
+  if ( sp.Debug()==-1) Serial.printf("ib %d  ib %7.3f\n", this->ib, float(this->ib)/600.*sp.Ib_hist_slr());
     Serial1.printf("unit_f, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
       buffer, this->t,
       float(this->Tb_hdwe)/600.,
