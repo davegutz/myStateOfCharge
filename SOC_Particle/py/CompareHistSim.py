@@ -147,7 +147,7 @@ def add_ib_lag(data, mon):
 
 
 # Add schedule lookups and do some rack and stack
-def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., modeling=247):
+def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
     voc_soc = []
     soc_min = []
     vsat = []
@@ -267,10 +267,8 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., modeling=247
     # d_mod = rf.rec_append_fields(d_mod, 'ib', np.array(ib, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_sel', np.array(ib, dtype=float))
     d_zero = d_mod.ib.copy()*0.
-    mod_ = np.ones(len(d_mod), dtype=int) * modeling
     d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_amp', np.array(d_zero, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'tweak_sclr_noa', np.array(d_zero, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'mod_data', np.array(mod_, dtype=int))
 
     return d_mod
 
@@ -946,11 +944,11 @@ def add_mod(hist, mon_t=False, mon=None):
         print("add_mod:  not executing")
         return
     else:
-        mod = []
+        mod_data = []
         for i in range(len(hist.time)):
             t_sec = float(hist.time[i]) - float(hist.time[0]) + mon.time[0]
-            mod.append(np.interp(t_sec, mon.time, mon.mod))
-        return rf.rec_append_fields(hist, 'mod', np.array(mod, dtype=int))
+            mod_data.append(np.interp(t_sec, mon.time, mon.mod_data))
+        return rf.rec_append_fields(hist, 'mod_data', np.array(mod_data, dtype=int))
 
 
 def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
@@ -984,7 +982,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     # Load configuration
     batt = BatteryMonitor(mod_code=chm_in)
 
-    # Load mon
+    # Load mon to extract mod information
     # # Load mon v4 (old)
     mon_old = None
     sim_old = None
@@ -1014,15 +1012,15 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
     # Sort and augment data
     f_raw = np.unique(f_raw)
-    f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, modeling=mod_in)
+    f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in)
     print("\nf:\n", f.dtype.names, f, "\n")
     f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)
     h_raw = np.unique(h_raw)
     print("\nh raw:\n", h_raw.dtype.names, "\n", h_raw, "\n", h_raw.dtype.names, "\n")
-    h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, modeling=mod_in)
-    print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n")
+    h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in)
     if mon_t is True:
         h = add_mod(h, mon_t, mon_old)
+    print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n")
 
     # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
     h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
