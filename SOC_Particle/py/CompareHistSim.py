@@ -927,18 +927,17 @@ def look_it(x, tab, temp):
     return voc
 
 
-def shift_time(mo, so, extra_shift=0.):
+def shift_time(mo, extra_shift=0.):
     # Shift time
     first_non_zero = 0
     n = len(mo.time)
     while abs(mo.ib[first_non_zero]) < 0.5 and first_non_zero < n:
         first_non_zero += 1
     if first_non_zero < n:  # success
-        shift = mo.time[first_non_zero-1]
+        shift = mo.time[first_non_zero]
         print('shift time by', shift)
         mo.time = mo.time - shift + extra_shift
-        so.time = so.time - shift + extra_shift
-    return mo, so
+    return mo
 
 
 def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
@@ -1005,9 +1004,10 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
     h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
 
-    # Correct time by shifting and covert to fast update rate
-    time0 = h_20C.time[0]
-    h_20C.time -= time0
+    # Shift time by detecting when ib changes
+    h_20C = shift_time(h_20C)
+
+    # Covert to fast update rate
     T_100 = 0.1
     h_20C_resamp = resample(data=h_20C, dt_resamp=T_100, time_var='time',
                             specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
@@ -1021,9 +1021,6 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
             
     # Hand fix oddities
     mon_old, sim_old = bandaid(h_20C_resamp, chm_in=chm_in)
-
-    # Shift time by detecting when ib changes
-    mon_old, sim_old = shift_time(mon_old, sim_old, -1.5)
 
     # Replicate
     data_file_clean = path_to_temp+'/'+data_file_txt.replace('.csv', '_hist' + '.csv', 1)
