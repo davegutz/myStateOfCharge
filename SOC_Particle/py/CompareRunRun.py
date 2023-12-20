@@ -85,7 +85,7 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
     filename = data_root_ref + '__' + data_root_test
     plot_title = dir_root_ref + '/' + data_root_ref + '__' + dir_root_test + '/' + data_root_test + '   ' + date_time
 
-    if temp_flt_file_ref_clean and len(f_ref.time) > 1:
+    if temp_flt_file_ref_clean and len(f_ref.time_ux) > 1:
         fig_list, fig_files = over_fault(f_ref, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                          fig_list=fig_list)
 
