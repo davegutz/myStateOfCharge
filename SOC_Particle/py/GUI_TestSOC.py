@@ -705,7 +705,6 @@ def ref_remove():
     Ref.label.forget()
 
 
-
 def ref_restore():
     top_panel_right.pack(expand=True, fill='both')
     run_button.config(text='Compare Run Run')
