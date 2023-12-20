@@ -363,10 +363,28 @@ def clear_data(silent=False, nowait=False):
             tkinter.messagebox.showwarning(message="Nothing to clear")
 
 
+# Choose file to perform compare_run_sim on
+def compare_hist_sim_choose():
+    # Select file
+    print('compare_hist_sim_choose')
+    testpaths = filedialog.askopenfilenames(title='Please select files', filetypes=[('csv', '.csv')])
+    if testpaths is None or testpaths == '':
+        print("No file chosen")
+    else:
+        for testpath in testpaths:
+            test_folder_path, test_parent, basename, test_txt, key = contain_all(testpath)
+            if key != '':
+                compare_hist_sim(data_file=testpath, unit_key=key,
+                                 rel_path_to_save_pdf=os.path.join(test_folder_path, './figures'),
+                                 rel_path_to_temp=os.path.join(test_folder_path, './temp'))
+            else:
+                tk.messagebox.showerror(message='key not found in' + testpath)
+
+
 def compare_hist_to_sim():
-    if not Test.key_exists_in_file:
-        tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
-        return
+    # if not Test.key_exists_in_file:
+    #     tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
+    #     return
     if modeling.get():
         print('compare_hist_to_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
         # master.withdraw()
@@ -1095,6 +1113,9 @@ if __name__ == '__main__':
     run_run_choose_button = myButton(compare_panel, text='Compare Run Run Choose', command=compare_run_run_choose,
                                      fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT, font=butt_font)
     run_run_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
+    run_sim_choose_button = myButton(compare_panel, text='Compare Hist Sim Choose', command=compare_hist_sim_choose,
+                                     fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT, font=butt_font)
+    run_sim_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
 
     # Begin
     handle_test_unit()

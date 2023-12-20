@@ -23,6 +23,9 @@ from Battery import Battery, BatteryMonitor
 # Load from files
 def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_batt_cap=Battery.UNIT_CAP_RATED,
               legacy=False, v1_only=False):
+
+    print(f"load_data: {path_to_data=}\n{skip=}\n{unit_key=}\n{zero_zero_in=}\n{time_end_in=}\n{rated_batt_cap=}\n{legacy=}\n{v1_only=}")
+
     title_key = "unit,"  # Find one instance of title
     title_key_sel = "unit_s,"  # Find one instance of title
     unit_key_sel = "unit_sel"
@@ -38,7 +41,9 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     else:
         cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'voc_soc',
                 'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
-    mon_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float, encoding=None).view(np.recarray)
+    mon_raw = None
+    if data_file_clean is  not None:
+        mon_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float, encoding=None).view(np.recarray)
 
     # Load sel (old)
     sel_file_clean = write_clean_file(path_to_data, type_='_sel', title_key=title_key_sel,
@@ -67,7 +72,15 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         ekf_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float, encoding=None).view(np.recarray)
 
     mon = SavedData(data=mon_raw, sel=sel_raw, ekf=ekf_raw, time_end=time_end_in, zero_zero=zero_zero_in)
-    batt = BatteryMonitor(mon.chm[0])
+    if mon.chm is not None:
+        chm = mon.chm[0]
+    if path_to_data.__contains__('bb'):
+        chm = 0
+    elif path_to_data.__contains__('ch'):
+        chm = 1
+    else:
+        chm = None
+    batt = BatteryMonitor(chm)
 
     # Load sim _s v24 portion of real-time run (old)
     data_file_sim_clean = write_clean_file(path_to_data, type_='_sim', title_key=title_key_sim,

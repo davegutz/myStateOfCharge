@@ -942,14 +942,15 @@ def shift_time(mo, extra_shift=0.):
     return mo
 
 
-def add_chm(hist, mon_t=False, mon=None, chm=None):
-    if mon_t is False or mon is None:
+def add_chm(hist, mon_t_=False, mon=None, chm=None):
+    if mon_t_ is False or mon is None:
         print("add_chm:  not executing")
         if chm is not None:
             chm_s = []
             for i in range(len(hist.time)):
                 chm_s.append(chm)
             hist = rf.rec_append_fields(hist, 'chm_s', np.array(chm_s, dtype=int))
+            hist = rf.rec_append_fields(hist, 'chm', np.array(chm_s, dtype=int))
         return hist
     else:
         chm = []
@@ -961,10 +962,10 @@ def add_chm(hist, mon_t=False, mon=None, chm=None):
     return hist
 
 
-def add_mod(hist, mon_t=False, mon=None):
-    if mon_t is False or mon is None:
+def add_mod(hist, mon_t_=False, mon=None):
+    if mon_t_ is False or mon is None:
         print("add_mod:  not executing")
-        return
+        return hist
     else:
         mod_data = []
         for i in range(len(hist.time_ux)):
@@ -1122,9 +1123,12 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
 if __name__ == '__main__':
     # User inputs (multiple input_files allowed
-    data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+    # data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+    # mon_t = True
+    data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegressionHistX_pro3p2_bb.csv'
+    mon_t = False
     key = 'pro3p2_bb'
 
     # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
-    compare_hist_sim(data_file=data_file_full, mon_t=True, unit_key=key)
+    compare_hist_sim(data_file=data_file_full, mon_t=mon_t, unit_key=key)
