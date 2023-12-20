@@ -261,7 +261,7 @@ public:
     void put_S_cap_mon(const float input) { S_cap_mon_p->check_set_put(input); }
     void put_S_cap_sim(const float input) { S_cap_sim_p->check_set_put(input); }
     void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->check_set_put(input); }
-    void put_Time_now(const float input) { Time_now_p->check_set_put(input); }
+    void put_Time_now(const unsigned long input) { Time_now_p->check_set_put(input); }
     void put_Type(const uint8_t input) { Type_p->check_set_put(input); }
     void put_T_state(const float input) { T_state_p->check_set_put(input); }
     void put_T_state_model(const float input) { T_state_model_p->check_set_put(input); }

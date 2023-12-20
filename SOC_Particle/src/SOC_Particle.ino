@@ -463,6 +463,8 @@ void loop()
     #ifdef CONFIG_47L16_EERAM
       // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
+    #else
+      sp.put_Time_now(max( sp.Time_now_z, (unsigned long)Time.now()));  // If happen to connect to wifi (assume updated automatically), save new time
     #endif
   }
 
