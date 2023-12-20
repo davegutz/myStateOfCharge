@@ -105,28 +105,13 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 if __name__ == '__main__':
-    # keys = [('ampHiFail vA20221220.txt', 'soc1a_2022', 'legacy'), ('ampHiFail v20230128.txt', 'pro0p', 'legacy')]
-    # keys = [('ampHiFail v20230128.txt', 'pro0p_20221220', 'legacy'), ('ampHiFail v20230303 CH.txt', 'pro0p_2023', 'legacy')]
-    # keys = [('ampHiFail v20230303 CH.txt', 'pro0p_2023', 'legacy'), ('ampHiFail v20230305 CH.txt', 'pro0p_2023')];
-    # keys = [('ampHiFail vA20221220.txt', 'soc1a_2022', 'legacy'), ('ampHiFail vA20230305 BB.txt', 'pro1a_2023')];
-    # keys = [('rapidTweakRegression vA20230219.txt', 'pro1a_2023', 'legacy'), ('rapidTweakRegression vA20230305 BB.txt', 'pro1a_2023')];
-    # keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p_2023'), ('rapidTweakRegression vA20230305 BB.txt', 'pro1a_2023')];
-    # keys = [('rapidTweakRegression v20230305 CH.txt', 'pro0p'), ('rapidTweakRegression vA20230305 CH.txt', 'pro1a')]
-    # keys = [('offSitHysBms vA20221220.txt', 'soc1a', 'legacy'), ('offSitHysBms vA20230305 BB.txt', 'pro1a_2023')];
-    # keys = [('offSitHysBms v20230303 CH.txt', 'pro0p_2023', 'legacy'), ('offSitHysBms v20230305 CH.txt', 'pro0p_2023')];
-    # keys = [('ampLoFail v20230303 CH.txt', 'pro0p', 'legacy'), ('ampLoFail v20230305 CH.txt', 'pro0p')]
-    # Compare
-    # keys = [('offSitHysBms v20221220.txt', 'pro0p_2022', 'legacy'), ('offSitHysBms vA20221220.txt', 'soc1a_2022', 'legacy')]
-    # keys = [('ampHiFail v20230305 CH.txt', 'pro0p_2023'), ('ampHiFail vA20230305 BB.txt', 'pro1a_2023')];
-    # keys = [('slowTweakRegression v20230305 CH.txt', 'pro0p_2023'), ('slowTweakRegression vA20230305 BB.txt', 'pro1a_2023')];
-
     data_file_folder_ref_ = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111'
     data_file_folder_test_ = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b'
     rel_path_to_save_pdf_ = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
     rel_path_to_temp_ = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'
 
     keys_ref_test = [('rapidTweakRegression_pro1a_bb.csv', 'pro1a_bb'),
-                     ('rapidTweakRegression_pro3p2_bb.csv', 'pro3p2_bb')]
+                     ('rapidTweakRegression_pro1a_bb.csv', 'pro1a_bb')]
 
     compare_run_run(keys=keys_ref_test,
                     data_file_folder_ref=data_file_folder_ref_, data_file_folder_test=data_file_folder_test_,

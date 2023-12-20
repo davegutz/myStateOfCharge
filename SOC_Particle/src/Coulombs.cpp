@@ -55,7 +55,14 @@ void Coulombs::pretty_print(void)
   Serial.printf("Coulombs:\n");
   Serial.printf(" coul_eff%9.5f\n", coul_eff_);
   Serial.printf(" delta_q%9.1f, C\n", *sp_delta_q_);
-  Serial.printf(" delta_q_inf/delta_q_abs%9.1f / %9.1f %8.4f, C\n", delta_q_inf_, delta_q_abs_, delta_q_inf_/delta_q_abs_);
+  float dqa = 1e-6;
+  if ( abs(delta_q_abs_) < 1e-6 )
+  {
+    if ( delta_q_abs_ < 0. ) dqa = -1e-6; 
+  }
+  else
+    dqa = delta_q_abs_;
+  Serial.printf(" delta_q_inf/delta_q_abs%9.1f / %9.1f %8.4f, C\n", delta_q_inf_, delta_q_abs_, delta_q_inf_/dqa);
   Serial.printf(" delta_q_neg%9.1f C, time_neg%9.1f s\n", delta_q_neg_, time_neg_);
   Serial.printf(" delta_q_pos%9.1f C, time_pos%9.1f s\n", delta_q_pos_, time_pos_);
   Serial.printf(" mod %s\n", chem_.decode(mod_code()).c_str());

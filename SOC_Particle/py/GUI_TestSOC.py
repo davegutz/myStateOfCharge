@@ -700,14 +700,17 @@ def ref_remove():
     run_button.config(text='Compare Run Sim')
     run_hist_button.config(text='Compare Run Hist')
     hist_sim_button.config(text='Compare Hist Sim')
+    hist_sim_button.pack(side=tk.RIGHT, padx=5, pady=5)
+    run_hist_button.pack(side=tk.RIGHT, padx=5, pady=5)
     Ref.label.forget()
+
 
 
 def ref_restore():
     top_panel_right.pack(expand=True, fill='both')
     run_button.config(text='Compare Run Run')
-    run_hist_button.config(text='Compare Run Hist')
-    hist_sim_button.config(text='Compare Hist Run')
+    run_hist_button.forget()
+    hist_sim_button.forget()
     Ref.label.pack(padx=5, pady=5)
 
 

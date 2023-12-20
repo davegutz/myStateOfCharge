@@ -41,9 +41,11 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     else:
         cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'voc_soc',
                 'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
-    mon_raw = None
     if data_file_clean is  not None:
         mon_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float, encoding=None).view(np.recarray)
+    else:
+        mon_raw = None
+        print(f"load_data: returning mon=None")
 
     # Load sel (old)
     sel_file_clean = write_clean_file(path_to_data, type_='_sel', title_key=title_key_sel,
@@ -60,6 +62,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         sel_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float, encoding=None).view(np.recarray)
     else:
         sel_raw = None
+        print(f"load_data: returning sel_raw=None")
 
     # Load ekf (old)
     ekf_file_clean = write_clean_file(path_to_data, type_='_ekf', title_key=title_key_ekf,
@@ -67,9 +70,11 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
 
     cols_ekf = ('c_time', 'Fx_', 'Bu_', 'Q_', 'R_', 'P_', 'S_', 'K_', 'u_', 'x_', 'y_', 'z_', 'x_prior_',
                 'P_prior_', 'x_post_', 'P_post_', 'hx_', 'H_')
-    ekf_raw = None
     if ekf_file_clean and not v1_only:
         ekf_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float, encoding=None).view(np.recarray)
+    else:
+        ekf_raw = None
+        print(f"load_data: returning ekf_raw=None")
 
     mon = SavedData(data=mon_raw, sel=sel_raw, ekf=ekf_raw, time_end=time_end_in, zero_zero=zero_zero_in)
     if mon.chm is not None:
@@ -96,37 +101,37 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         sim = SavedDataSim(time_ref=mon.time_ref, data=sim_raw, time_end=time_end_in)
     else:
         sim = None
+        print(f"load_data: returning sim=None")
 
     # Load fault
     temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', title_key='fltb',
                                            unit_key='unit_f', skip=skip, comment_str='---')
     cols_f = ('time_ux', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
               'e_w_f', 'fltw', 'falw')
-    f_raw = None
     if temp_flt_file_clean and not v1_only:
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None, encoding=None).view(np.recarray)
     else:
         print("data from", temp_flt_file, "empty after loading")
-        return None, None, None, None, None
-    if temp_flt_file_clean and not v1_only:
+        f_raw = None
+    if f_raw is not None:
         f_raw = np.unique(f_raw)
         f = add_stuff_f(f_raw, batt, ib_band=IB_BAND)
         print("\nf:\n", f, "\n")
         f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap)
     else:
         f = None
+        print(f"load_data: returning f=None")
+
     return mon, sim, f, data_file_clean, temp_flt_file_clean
 
 
-
-
 if __name__ == '__main__':
-    path_to_data='G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro1a_bb.csv'
+    path_to_data='G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111\\rapidTweakRegression_pro1a_bb.csv'
     skip=1
-    unit_key='g20231111b_pro1a_bb'
+    unit_key='g20231111_pro1a_bb'
     zero_zero_in=False
     time_end_in=None
-    rated_batt_cap=100.0
+    rated_batt_cap=108.4
     legacy=False
     v1_only=False
     load_data(path_to_data=path_to_data, skip=skip, unit_key=unit_key, zero_zero_in=zero_zero_in, time_end_in=time_end_in,
