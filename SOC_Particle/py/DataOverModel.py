@@ -400,7 +400,7 @@ def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, sk
                         if have_header_str is None:
                             have_header_str = True  # write one title only
                             output.write(line)
-            except:
+            except IOError:
                 print("DataOverModel381:", line)  # last line
     # Data
     num_lines = 0
@@ -488,7 +488,7 @@ class SavedData:
                     while self.ib[self.zero_end] == 0.0:  # stop after first non-zero
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
-                except:
+                except IOError:
                     self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
             self.time -= self.time_ref
@@ -904,9 +904,9 @@ if __name__ == '__main__':
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         fig_list, fig_files = overall_batt(mon_ver, sim_ver, filename, fig_files, plot_title=plot_title,
-                                        fig_list=fig_list, suffix='_ver')  # Could be confusing because sim over mon
+                                           fig_list=fig_list, suffix='_ver')  # Could be confusing because sim over mon
         fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                    plot_title=plot_title, fig_list=fig_list, ref_str='', test_str='_ver')
+                                       plot_title=plot_title, fig_list=fig_list, ref_str='', test_str='_ver')
         # fig_list, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename, fig_files,
         #                           plot_title=plot_title, fig_list=fig_list, ref_str='', test_str='_ver')
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf',

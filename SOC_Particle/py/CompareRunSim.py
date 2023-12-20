@@ -124,7 +124,7 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
         dir_root_test = data_file_clean.split('/')[-3].split('\\')[-1]
         filename = data_root_test
         plot_title = dir_root_test + '/' + data_root_test + '   ' + date_time
-        if temp_flt_file_clean and len(f.time) > 1:
+        if temp_flt_file_clean and len(f.time_ux) > 1:
             fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                              fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
         fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,

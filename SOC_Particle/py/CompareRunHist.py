@@ -19,7 +19,6 @@ the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
 Coulomb Counter built in."""
 
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
-from CompareFault import over_fault
 import matplotlib.pyplot as plt
 from DataOverModel import dom_plot
 from PlotKiller import show_killer
@@ -35,7 +34,7 @@ def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_pat
                      rel_path_to_temp_='./temp', data_only_=True):
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-    date_ = datetime.now().strftime("%y%m%d")
+    # date_ = datetime.now().strftime("%y%m%d")
 
     dfcs, mo_r, so_r, mv_r, sv_r, ssv_r =\
         compare_run_sim(data_file=data_file_, unit_key=unit_key_, time_end_in=time_end_in_,

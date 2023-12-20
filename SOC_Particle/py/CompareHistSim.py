@@ -67,18 +67,19 @@ def add_stuff(d_ra, mon, ib_band=0.5):
     vsat = []
     time_sec = []
     dt = []
-    for i in range(len(d_ra.time)):
+    for i in range(len(d_ra.time_ux)):
         voc_soc.append(mon.chemistry.lut_voc_soc.interp(d_ra.soc[i], d_ra.Tb[i]))
         soc_min.append((mon.chemistry.lut_min_soc.interp(d_ra.Tb[i])))
         vsat.append(mon.chemistry.nom_vsat + (d_ra.Tb[i] - mon.chemistry.rated_temp) * mon.chemistry.dvoc_dt)
-        time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
+        time_sec.append(float(d_ra.time_ux[i] - d_ra.time_ux[0]))
         if i > 0:
-            dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
+            dt.append(float(d_ra.time_ux[i] - d_ra.time_ux[i - 1]))
         else:
-            dt.append(float(d_ra.time[1] - d_ra.time[0]))
-    time_min = (d_ra.time-d_ra.time[0])/60.
-    time_day = (d_ra.time-d_ra.time[0])/3600./24.
+            dt.append(float(d_ra.time_ux[1] - d_ra.time_ux[0]))
+    time_min = (d_ra.time_ux-d_ra.time_ux[0])/60.
+    time_day = (d_ra.time_ux-d_ra.time_ux[0])/3600./24.
     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'time', np.array(time_sec, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
@@ -165,7 +166,7 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
     bms_off_init = False
     bms_off = False
     rp = Retained()
-    for i in range(len(d_ra.time)):
+    for i in range(len(d_ra.time_ux)):
         soc = d_ra.soc[i]
         voc_stat = d_ra.voc_stat[i]
         Tb = d_ra.Tb[i]
@@ -203,19 +204,20 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
         ib_quiet_thr.append(ib_quiet_thr_)
         soc_min.append((BB.chemistry.lut_min_soc.interp(d_ra.Tb[i])))
         vsat.append(mon.chemistry.nom_vsat + (d_ra.Tb[i] - mon.chemistry.rated_temp) * mon.chemistry.dvoc_dt)
-        time_sec.append(float(d_ra.time[i] - d_ra.time[0]))
+        time_sec.append(float(d_ra.time_ux[i] - d_ra.time_ux[0]))
         if i > 0:
-            dt.append(float(d_ra.time[i] - d_ra.time[i - 1]))
-        elif len(d_ra.time) > 1:
-            dt.append(float(d_ra.time[1] - d_ra.time[0]))
+            dt.append(float(d_ra.time_ux[i] - d_ra.time_ux[i - 1]))
+        elif len(d_ra.time_ux) > 1:
+            dt.append(float(d_ra.time_ux[1] - d_ra.time_ux[0]))
         else:
             pass
         dv_dyn_ = vb_ - voc_
         ib_charge.append(ib_charge_)
         dv_dyn.append(dv_dyn_)
-    time_min = (d_ra.time-d_ra.time[0])/60.
-    time_day = (d_ra.time-d_ra.time[0])/3600./24.
+    time_min = (d_ra.time_ux-d_ra.time_ux[0])/60.
+    time_day = (d_ra.time_ux-d_ra.time_ux[0])/3600./24.
     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
+    d_mod = rf.rec_append_fields(d_mod, 'time', np.array(time_sec, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
@@ -723,7 +725,7 @@ def calc_fault(d_ra, d_mod):
 
 # Fake stuff to get replicate to accept inputs and run
 def bandaid(h):
-    res = np.zeros(len(h.time))
+    res = np.zeros(len(h.time_ux))
     res[0:10] = 1
     ib_sel = h['ib'].copy()
     vb_sel = h['vb'].copy()
@@ -734,8 +736,8 @@ def bandaid(h):
     bms_off_s = h['bms_off'].copy()
     sat_s = h['sat'].copy()
     chm_s = h['chm_s'].copy()
-    sel = np.zeros(len(h.time))
-    preserving = np.ones(len(h.time))
+    sel = np.zeros(len(h.time_ux))
+    preserving = np.ones(len(h.time_ux))
     mon_old = rf.rec_append_fields(h, 'res', res)
     mon_old = rf.rec_append_fields(mon_old, 'ib_past', ib_in_s)
     if not hasattr(mon_old, 'ib_sel'):
@@ -752,7 +754,7 @@ def bandaid(h):
     mon_old = rf.rec_append_fields(mon_old, 'ccd_thr', sel)
     mon_old = rf.rec_append_fields(mon_old, 'voc_ekf', sel)
     mon_old = rf.rec_append_fields(mon_old, 'y_ekf', sel)
-    sim_old = np.array(np.zeros(len(h.time), dtype=[('time', '<i4')])).view(np.recarray)
+    sim_old = np.array(np.zeros(len(h.time), dtype=[('time', '<f8')])).view(np.recarray)
     sim_old.time = mon_old.time.copy()
     sim_old = rf.rec_append_fields(sim_old, 'chm_s', chm_s)
     sim_old = rf.rec_append_fields(sim_old, 'sat_s', sat_s)
@@ -805,7 +807,7 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
             voc_stat_rescaled_r_chg[i] = None
 
     # Hysteresis_20220917d confirm equals data with HYS_SCALE_20220917d
-    if len(h.time) > 1:
+    if len(h.time_ux) > 1:
         hys_remodel = Hysteresis_20220917d(scale=HYS_SCALE_20220917d)  # Battery hysteresis model - drift of voc
         t_s_min = h.time_min[0]
         t_e_min = h.time_min[-1]
@@ -823,8 +825,8 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
             dv_hys_remodel.append(dvh)
         dv_hys_remodel = np.array(dv_hys_remodel)
         dv_hys_remodel_ = np.copy(h.soc)
-        for i in range(len(h.time)):
-            t_min = int(float(h.time[i]) / 60.)
+        for i in range(len(h.time_ux)):
+            t_min = int(float(h.time_ux[i]) / 60.)
             dv_hys_remodel_[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
 
         hys_redesign = Hysteresis_20220926(scale=HYS_SCALE_20220926, cap=HYS_CAP_REDESIGN)  # Battery hysteresis model - drift of voc
@@ -870,7 +872,7 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
         dv_dot_redesign_ = np.copy(h.soc)
         voc_stat_redesign_ = np.copy(h.soc)
         voc_stat_redesign_r_ = np.copy(h.soc)
-        for i in range(len(h.time)):
+        for i in range(len(h.time_ux)):
             t_min = h.time_min[i]
             dv_hys_redesign_[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
             res_redesign_[i] = np.interp(t_min, hys_time_min, res_redesign)
@@ -931,7 +933,10 @@ def shift_time(mo, extra_shift=0.):
     while abs(mo.ib[first_non_zero]) < 0.5 and first_non_zero < n:
         first_non_zero += 1
     if first_non_zero < n:  # success
-        shift = mo.time[first_non_zero]
+        if first_non_zero > 0:
+            shift = ( mo.time[first_non_zero] + mo.time[first_non_zero-1] ) / 2.
+        else:
+            shift = mo.time[first_non_zero]
         print('shift time by', shift)
         mo.time = mo.time - shift + extra_shift
     return mo
@@ -945,11 +950,11 @@ def add_chm(hist, mon_t=False, mon=None, chm=None):
             for i in range(len(hist.time)):
                 chm_s.append(chm)
             hist = rf.rec_append_fields(hist, 'chm_s', np.array(chm_s, dtype=int))
-        return
+        return hist
     else:
         chm = []
-        for i in range(len(hist.time)):
-            t_sec = float(hist.time[i]) - float(hist.time[0]) + mon.time[0]
+        for i in range(len(hist.time_ux)):
+            t_sec = float(hist.time_ux[i] - hist.time_ux[0]) + mon.time[0]
             chm.append(np.interp(t_sec, mon.time, mon.chm))
         hist = rf.rec_append_fields(hist, 'chm_s', np.array(chm, dtype=int))
         hist = rf.rec_append_fields(hist, 'chm', np.array(chm, dtype=int))
@@ -962,8 +967,8 @@ def add_mod(hist, mon_t=False, mon=None):
         return
     else:
         mod_data = []
-        for i in range(len(hist.time)):
-            t_sec = float(hist.time[i]) - float(hist.time[0]) + mon.time[0]
+        for i in range(len(hist.time_ux)):
+            t_sec = float(hist.time_ux[i]) - float(hist.time_ux[0]) + mon.time[0]
             mod_data.append(np.interp(t_sec, mon.time, mon.mod_data))
         return rf.rec_append_fields(hist, 'mod_data', np.array(mod_data, dtype=int))
 
@@ -994,15 +999,15 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         os.mkdir(path_to_temp)
 
     # Data work
-    cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat', 'e_w_f', 'fltw', 'falw')
+    cols_f = ('time_ux', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat', 'e_w_f', 'fltw', 'falw')
 
     # Load mon to extract mod information
     # # Load mon v4 (old)
-    mon_old = None
-    sim_old = None
     if mon_t is True:
         mon_old, sim_old, f, mon_t_file_clean, temp_mont_t_file_clean = \
             load_data(data_file, 1, unit_key=unit_key, time_end_in=time_end_in, zero_zero_in=False)
+    else:
+        mon_old = None
 
     # Load history
     temp_hist_file_clean = write_clean_file(data_file, type_='_hist', title_key='fltb', unit_key='unit_h',
@@ -1113,6 +1118,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         show_killer(string, 'CompareFault', fig_list=fig_list)
 
     return mon_old, sim_old, mon_ver, sim_ver, sim_s_ver
+
 
 if __name__ == '__main__':
     # User inputs (multiple input_files allowed

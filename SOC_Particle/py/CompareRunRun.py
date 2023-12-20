@@ -18,8 +18,8 @@ a monitor object (MON) and a simulation object (SIM).   The monitor is
 the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
 Coulomb Counter built in."""
 
-from DataOverModel import SavedData, SavedDataSim, write_clean_file, dom_plot
-from CompareFault import add_stuff_f, over_fault, filter_Tb, IB_BAND
+from DataOverModel import dom_plot
+from CompareFault import over_fault
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -51,12 +51,8 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
     # Regression suite
     data_file_txt_ref = keys[0][0]
     unit_key_ref = keys[0][1]
-    if len(keys[0]) > 2 and keys[0][2] == 'legacy':
-        legacy_in_ref = True
     data_file_txt_test = keys[1][0]
     unit_key_test = keys[1][1]
-    if len(keys[1]) > 2 and keys[1][2] == 'legacy':
-        legacy_in_test = True
 
     # Folder operations
 

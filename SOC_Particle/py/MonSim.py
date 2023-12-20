@@ -142,10 +142,11 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     print('use_ib_mon is', use_ib_mon)
     tweak_test = rp.tweak_test()
     temp_c = mon_old.Tb[0]
+    lut_dTb = None
     if dTb_in is not None:
         dTb_in = np.array(dTb_in)
         temp_c += dTb_in[1, 0]
-        lut_dTb = myTables.TableInterp1D( np.array(dTb_in[0, :]), np.array(dTb_in[1, :]))
+        lut_dTb = myTables.TableInterp1D(np.array(dTb_in[0, :]), np.array(dTb_in[1, :]))
 
     # Setup
     if hasattr(mon_old, 'qcrs'):
@@ -183,6 +184,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         if reset_sel is not None:
             reset = reset or reset_sel[i]
         mon_old.i = i
+        T = None
         if i == 0:
             T = t[1] - t[0]
         else:
@@ -321,7 +323,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
 
 if __name__ == '__main__':
     import sys
-    from DataOverModel import SavedData, SavedDataSim, write_clean_file, overall
+    from DataOverModel import SavedData, SavedDataSim, write_clean_file
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
     import matplotlib.pyplot as plt
     plt.rcParams['axes.grid'] = True
@@ -342,7 +344,6 @@ if __name__ == '__main__':
         data_file_old_txt = None
         scale_r_ss_in = 1.
         scale_hys_sim_in = 1.
-        scale_hys_mon_in = 1.
         dvoc_sim_in = 0.
         dvoc_mon_in = 0.
         Bmon_in = None
@@ -384,7 +385,6 @@ if __name__ == '__main__':
         title_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
         save_pdf_path = '../dataReduction/figures'
-        path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
         import os
         if not os.path.isdir(path_to_temp):
@@ -438,13 +438,11 @@ if __name__ == '__main__':
 
         # New run
         mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
-        mon_ver, sim_ver, sim_s_ver = replicate(mon_old, sim_old=sim_old, init_time=init_time,
-                                                sres0=1.0, sresct=1.0, t_ib_fail=t_ib_fail,
-                                                use_ib_mon=use_ib_mon_in, scale_in=scale_in,
-                                                use_vb_raw=use_vb_raw, scale_r_ss=scale_r_ss_in,
-                                                s_hys_sim=scale_hys_sim_in,
-                                                dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in,
-                                                Bmon=Bmon_in, Bsim=Bsim_in)
+        mon_ver, sim_ver, sim_s_ver, _mon, _sim =\
+            replicate(mon_old, sim_old=sim_old, init_time=init_time, sres0=1.0, sresct=1.0, t_ib_fail=t_ib_fail,
+                      use_ib_mon=use_ib_mon_in, scale_in=scale_in, use_vb_raw=use_vb_raw, scale_r_ss=scale_r_ss_in,
+                      s_hys_sim=scale_hys_sim_in, dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in,
+                      Bmon=Bmon_in, Bsim=Bsim_in)
         save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
 
         # Plots
@@ -454,9 +452,7 @@ if __name__ == '__main__':
         filename = data_root + sys.argv[0].split('/')[-1]
         plot_title = filename + '   ' + date_time
         fig_list, fig_files = overall_batt(mon_ver, sim_ver, filename, fig_files, plot_title=plot_title,
-                                        fig_list=fig_list, suffix='_ver')  # sim over mon verify
-        fig_list, fig_files = overall(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                   plot_title=plot_title, fig_list=fig_list)  # all over all
+                                           fig_list=fig_list, suffix='_ver')  # sim over mon verify
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
         cleanup_fig_files(fig_files)
 

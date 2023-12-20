@@ -38,8 +38,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     else:
         cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'voc_soc',
                 'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
-    mon_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
-                            encoding=None).view(np.recarray)
+    mon_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float, encoding=None).view(np.recarray)
 
     # Load sel (old)
     sel_file_clean = write_clean_file(path_to_data, type_='_sel', title_key=title_key_sel,
@@ -53,8 +52,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
                 'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
                 'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
     if sel_file_clean and not v1_only:
-        sel_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
-                                encoding=None).view(np.recarray)
+        sel_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float, encoding=None).view(np.recarray)
     else:
         sel_raw = None
 
@@ -66,11 +64,9 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
                 'P_prior_', 'x_post_', 'P_post_', 'hx_', 'H_')
     ekf_raw = None
     if ekf_file_clean and not v1_only:
-        ekf_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float,
-                                encoding=None).view(np.recarray)
+        ekf_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float, encoding=None).view(np.recarray)
 
-    mon = SavedData(data=mon_raw, sel=sel_raw, ekf=ekf_raw, time_end=time_end_in,
-                    zero_zero=zero_zero_in)
+    mon = SavedData(data=mon_raw, sel=sel_raw, ekf=ekf_raw, time_end=time_end_in, zero_zero=zero_zero_in)
     batt = BatteryMonitor(mon.chm[0])
 
     # Load sim _s v24 portion of real-time run (old)
@@ -83,8 +79,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         cols_sim = ('c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
                     'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
     if data_file_sim_clean and not v1_only:
-        sim_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
-                                dtype=float, encoding=None).view(np.recarray)
+        sim_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=float, encoding=None).view(np.recarray)
         sim = SavedDataSim(time_ref=mon.time_ref, data=sim_raw, time_end=time_end_in)
     else:
         sim = None
@@ -92,12 +87,11 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     # Load fault
     temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', title_key='fltb',
                                            unit_key='unit_f', skip=skip, comment_str='---')
-    cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
+    cols_f = ('time_ux', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
               'e_w_f', 'fltw', 'falw')
     f_raw = None
     if temp_flt_file_clean and not v1_only:
-        f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
-                              encoding=None).view(np.recarray)
+        f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None, encoding=None).view(np.recarray)
     else:
         print("data from", temp_flt_file, "empty after loading")
     if temp_flt_file_clean and not v1_only:
