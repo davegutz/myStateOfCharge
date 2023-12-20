@@ -212,7 +212,6 @@ void setup()
   #ifdef CONFIG_SSD1306_OLED
     //Log.info("setup display");
     display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-delay(5000);
     Serial.printf("Init DISP\n");
     if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
     {
