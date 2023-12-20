@@ -59,6 +59,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xf0;Xa0;Xtn;", ASAP);
                     if ( !sp.tweak_test() ) chit("Xb0;", ASAP);
                     chit("BZ;", SOON);
+                    chit("Dh1800000;", SOON);
                     break;
 
                 #ifndef CONFIG_PHOTON
@@ -130,7 +131,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT5000;", QUEUE);    // Wait time after cycle to print
                         chit("XC3;", QUEUE);    // Number of injection cycles
                         chit("W2;", QUEUE);     // Wait
-                        chit("vv4;Dh1000;", QUEUE);     // Data collection
+                        chit("HR;Pr;Pf;vv4;Dh1000;", QUEUE);     // Data collection
                     }
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
@@ -140,7 +141,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT60000;", QUEUE);  // Wait time after cycle to print
                         chit("XC1;", QUEUE);    // Number of injection cycles
                         chit("W2;", QUEUE);     // Wait
-                        chit("vv2;Dh1000;", QUEUE);     // Data collection
+                        chit("HR;Pr;Pf;vv2;Dh1000;", QUEUE);     // Data collection
                     }
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
@@ -150,7 +151,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT240000;", QUEUE);   // Wait time after cycle to print
                         chit("XC.5;", QUEUE);     // Number of injection cycles
                         chit("W2;", QUEUE);       // Wait
-                        chit("vv2;Dh1000;", QUEUE);       // Data collection
+                        chit("HR;Pr;Pf;vv2;Dh1000;", QUEUE);     // Data collection
                     }
                     else if ( INT_in == 13 )  // Xp13:  tri tweak
                     {
@@ -161,7 +162,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("XT5000;", QUEUE);    // Wait time after cycle to print
                         chit("XC3;", QUEUE);    // Number of injection cycles
                         chit("W2;", QUEUE);     // Wait
-                        chit("vv2;DH1000;", QUEUE);     // Data collection
+                        chit("HR;Pr;Pf;vv2;Dh1000;", QUEUE);     // Data collection
                     }
                     chit("W2;", QUEUE);       // Wait
                     chit("XR;", QUEUE);       // Run cycle

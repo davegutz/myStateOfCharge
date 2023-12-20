@@ -106,7 +106,7 @@ void  VolatilePars::initialize()
     // Memory map
     // Input definitions
     n_ = -1;
-    Z_ = new Z*[36];
+    Z_ = new Z*[37];
     Z_[n_] = (cc_diff_slr_p    = new FloatZ(&n_, "  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_slr,       1));
     Z_[n_] = (cycles_inj_p     = new FloatZ(&n_, "  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
     Z_[n_] = (dc_dc_on_p     = new BooleanZ(&n_, "  ", "Xd", NULL,"DC-DC charger on",     "T=on",   0,    1,    &dc_dc_on,          false));
@@ -144,6 +144,7 @@ void  VolatilePars::initialize()
     Z_[n_] = (vb_add_p         = new FloatZ(&n_, "  ", "Dv", NULL,"Bias on vb",           "v",      -15,  15,   &vb_add,            0));
     Z_[n_] = (Vb_noise_amp_p   = new FloatZ(&n_, "  ", "DV", NULL,"Vb noise",             "v pk-pk",0,    10,   &Vb_noise_amp,      VB_NOISE));
     Z_[n_] = (wait_inj_p       = new ULongZ(&n_, "  ", "XW", NULL,"Wait start inj",       "ms",     0UL,  120000UL, &wait_inj,      0UL));
+    n_++;
 }
 
 // Print only the volatile paramters (non-eeram)
@@ -242,7 +243,7 @@ void SavedPars::initialize()
     // Memory map
     // Input definitions
     n_ = -1;
-    Z_ = new Z*[32];
+    Z_ = new Z*[33];
     Z_[n_] = (Amp_p            = new FloatZ(&n_, "* ", "Xa", rP_, "Inj amp",              "Amps pk",-1e6, 1e6,  &Amp_z,         0));
     Z_[n_] = (Cutback_gain_slr_p=new FloatZ(&n_, "* ", "Sk", rP_, "Cutback gain scalar",  "slr",    -1e6, 1e6,  &Cutback_gain_slr_z,1));
     Z_[n_] = (Debug_p            = new IntZ(&n_, "* ", "vv", rP_, "Verbosity",            "int",    -128, 128,  &Debug_z,       0));
@@ -275,6 +276,7 @@ void SavedPars::initialize()
     Z_[n_] = (T_state_p        = new FloatZ(&n_, "* ", "tm", rP_, "Tb rate lim mem",      "dg C",   -10,  70,   &T_state_z,     RATED_TEMP,         false));
     Z_[n_] = (Vb_bias_hdwe_p   = new FloatZ(&n_, "* ", "Dc", rP_, "Bias Vb sensor",       "v",      -10,  70,   &Vb_bias_hdwe_z,VOLT_BIAS));
     Z_[n_] = (Vb_scale_p       = new FloatZ(&n_, "* ", "SV", rP_, "Scale Vb sensor",      "v",      -1e5, 1e5,  &Vb_scale_z,    VB_SCALE));
+    n_++;
 }
 
 // Assign all save EERAM to RAM
