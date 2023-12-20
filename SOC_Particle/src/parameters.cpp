@@ -88,7 +88,7 @@ boolean Parameters::is_corrupt()
 
 void Parameters::set_nominal()
 {
-    for ( uint16_t i=0; i<n_; i++ ) Z_[i]->set_nominal();
+    for ( uint16_t i=0; i<n_; i++ )  if ( Z_[i]->code() != "UT" ) Z_[i]->set_nominal();
 }
 
 
@@ -103,48 +103,45 @@ VolatilePars::~VolatilePars(){}
 
 void  VolatilePars::initialize()
 {
-    // Memory map
-    // Input definitions
-    n_ = -1;
-    Z_ = new Z*[37];
-    Z_[n_] = (cc_diff_slr_p    = new FloatZ(&n_, "  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_slr,       1));
-    Z_[n_] = (cycles_inj_p     = new FloatZ(&n_, "  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
-    Z_[n_] = (dc_dc_on_p     = new BooleanZ(&n_, "  ", "Xd", NULL,"DC-DC charger on",     "T=on",   0,    1,    &dc_dc_on,          false));
-    Z_[n_] = (disab_ib_fa_p  = new BooleanZ(&n_, "  ", "FI", NULL,"Disab hard range ib",  "T=disab",0,    1,    &disab_ib_fa,       false));
-    Z_[n_] = (disab_tb_fa_p  = new BooleanZ(&n_, "  ", "FT", NULL,"Disab hard range tb",  "T=disab",0,    1,    &disab_tb_fa,       false));
-    Z_[n_] = (disab_vb_fa_p  = new BooleanZ(&n_, "  ", "FV", NULL,"Disab hard range vb",  "T=disab",0,    1,    &disab_vb_fa,       false));
-    Z_[n_] = (ds_voc_soc_p     = new FloatZ(&n_, "  ", "Ds", NULL,"VOC(SOC) del soc",     "slr",    -0.5, 0.5,  &ds_voc_soc,        0));
-    Z_[n_] = (dv_voc_soc_p     = new FloatZ(&n_, "  ", "Dy", NULL,"VOC(SOC) del v",       "v",      -50,  50,   &dv_voc_soc,        0));
-    Z_[n_] = (eframe_mult_p   = new Uint8tZ(&n_, "  ", "DE", NULL,"EKF frame rate x Dr",  "uint",   0,    UINT8_MAX, &eframe_mult,  EKF_EFRAME_MULT));
-    Z_[n_] = (ewhi_slr_p       = new FloatZ(&n_, "  ", "Fi", NULL,"Slr wrap hi thr",      "slr",    0,    1000, &ewhi_slr,          1));
-    Z_[n_] = (ewlo_slr_p       = new FloatZ(&n_, "  ", "Fo", NULL,"Slr wrap lo thr",      "slr",    0,    1000, &ewlo_slr,          1));
-    Z_[n_] = (fail_tb_p      = new BooleanZ(&n_, "  ", "Xu", NULL,"Ignore Tb & fail",     "T=Fail", false,true, &fail_tb,           false));
-    Z_[n_] = (fake_faults_p  = new BooleanZ(&n_, "  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,    &fake_faults,       FAKE_FAULTS));
-    Z_[n_] = (his_delay_p      = new ULongZ(&n_, "  ", "Dh", NULL,"History frame",        "ms",    1000UL,SUMMARY_DELAY,&his_delay, SUMMARY_DELAY));
-    Z_[n_] = (hys_scale_p      = new FloatZ(&n_, "  ", "Sh", NULL,"Sim hys scale",        "slr",    0,    100,  &hys_scale,         HYS_SCALE));
-    Z_[n_] = (hys_state_p      = new FloatZ(&n_, "  ", "SH", NULL,"Sim hys state",        "v",      -10,  10,   &hys_state,         0));
-    Z_[n_] = (ib_amp_add_p     = new FloatZ(&n_, "  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
-    Z_[n_] = (ib_diff_slr_p    = new FloatZ(&n_, "  ", "Fd", NULL,"Slr ib_diff thr",      "A",      0,    1000, &ib_diff_slr,       1));
-    Z_[n_] = (ib_noa_add_p     = new FloatZ(&n_, "  ", "Dn", NULL,"No amp signal add",    "A",      -1000,1000, &ib_noa_add,        0));
-    Z_[n_] = (Ib_amp_noise_amp_p= new FloatZ(&n_,"  ", "DM", NULL,"Amp amp noise",        "A",      0,    1000, &Ib_amp_noise_amp,  IB_AMP_NOISE));
-    Z_[n_] = (Ib_noa_noise_amp_p= new FloatZ(&n_,"  ", "DN", NULL,"Amp noa noise",        "A",      0,    1000, &Ib_noa_noise_amp,  IB_NOA_NOISE));
-    Z_[n_] = (ib_quiet_slr_p   = new FloatZ(&n_, "  ", "Fq", NULL,"Ib quiet det slr",     "slr",    0,    1000, &ib_quiet_slr,      1));
-    Z_[n_] = (init_all_soc_p   = new FloatZ(&n_, "  ", "Ca", NULL,"Init all to this",     "soc",    -0.5, 1.1,  &init_all_soc,      1));
-    Z_[n_] = (init_sim_soc_p   = new FloatZ(&n_, "  ", "Cm", NULL,"Init sim to this",     "soc",    -0.5, 1.1,  &init_sim_soc,      1));
-    Z_[n_] = (print_mult_p    = new Uint8tZ(&n_, "  ", "DP", NULL,"Print mult x Dr",      "uint",   0,    UINT8_MAX, &print_mult,   DP_MULT));
-    Z_[n_] = (read_delay_p     = new ULongZ(&n_, "  ", "Dr", NULL,"Minor frame",          "ms",     0UL,  1000000UL,  &read_delay,  READ_DELAY));
-    Z_[n_] = (slr_res_p        = new FloatZ(&n_, "  ", "Sr", NULL,"Scalar Randles R0",    "slr",    0,    100,  &slr_res,           1));
-    Z_[n_] = (s_t_sat_p        = new FloatZ(&n_, "  ", "Xs", NULL,"Scalar on T_SAT",      "slr",    0,    100,  &s_t_sat,           1));
-    Z_[n_] = (tail_inj_p       = new ULongZ(&n_, "  ", "XT", NULL,"Tail end inj",         "ms",     0UL,  120000UL,&tail_inj,       0UL));
-    Z_[n_] = (talk_delay_p     = new ULongZ(&n_, "  ", "D>", NULL,"Talk frame",           "ms",     0UL,  120000UL,&talk_delay,     TALK_DELAY));
-    Z_[n_] = (Tb_bias_model_p  = new FloatZ(&n_, "  ", "D^", NULL,"Del model",            "dg C",   -50,  50,   &Tb_bias_model,     TEMP_BIAS));
-    Z_[n_] = (Tb_noise_amp_p   = new FloatZ(&n_, "  ", "DT", NULL,"Tb noise",             "dg C pk-pk", 0,50,   &Tb_noise_amp,      TB_NOISE));
-    Z_[n_] = (tb_stale_time_slr_p=new FloatZ(&n_,"  ", "Xv", NULL,"Scale Tb 1-wire pers", "slr",    0,    100,  &tb_stale_time_slr,1));
-    Z_[n_] = (until_q_p        = new ULongZ(&n_, "  ", "XQ", NULL,"Time until v0",        "ms",     0UL,  1000000UL,  &until_q,     0UL));
-    Z_[n_] = (vb_add_p         = new FloatZ(&n_, "  ", "Dv", NULL,"Bias on vb",           "v",      -15,  15,   &vb_add,            0));
-    Z_[n_] = (Vb_noise_amp_p   = new FloatZ(&n_, "  ", "DV", NULL,"Vb noise",             "v pk-pk",0,    10,   &Vb_noise_amp,      VB_NOISE));
-    Z_[n_] = (wait_inj_p       = new ULongZ(&n_, "  ", "XW", NULL,"Wait start inj",       "ms",     0UL,  120000UL, &wait_inj,      0UL));
-    n_++;
+    #define NVOL 37
+    Z_ = new Z*[NVOL];
+    Z_[n_++] =(cc_diff_slr_p    = new FloatZ("  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_slr,       1));
+    Z_[n_++] =(cycles_inj_p     = new FloatZ("  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
+    Z_[n_++] =(dc_dc_on_p     = new BooleanZ("  ", "Xd", NULL,"DC-DC charger on",     "T=on",   0,    1,    &dc_dc_on,          false));
+    Z_[n_++] =(disab_ib_fa_p  = new BooleanZ("  ", "FI", NULL,"Disab hard range ib",  "T=disab",0,    1,    &disab_ib_fa,       false));
+    Z_[n_++] =(disab_tb_fa_p  = new BooleanZ("  ", "FT", NULL,"Disab hard range tb",  "T=disab",0,    1,    &disab_tb_fa,       false));
+    Z_[n_++] =(disab_vb_fa_p  = new BooleanZ("  ", "FV", NULL,"Disab hard range vb",  "T=disab",0,    1,    &disab_vb_fa,       false));
+    Z_[n_++] =(ds_voc_soc_p     = new FloatZ("  ", "Ds", NULL,"VOC(SOC) del soc",     "slr",    -0.5, 0.5,  &ds_voc_soc,        0));
+    Z_[n_++] =(dv_voc_soc_p     = new FloatZ("  ", "Dy", NULL,"VOC(SOC) del v",       "v",      -50,  50,   &dv_voc_soc,        0));
+    Z_[n_++] =(eframe_mult_p   = new Uint8tZ("  ", "DE", NULL,"EKF frame rate x Dr",  "uint",   0,    UINT8_MAX, &eframe_mult,  EKF_EFRAME_MULT));
+    Z_[n_++] =(ewhi_slr_p       = new FloatZ("  ", "Fi", NULL,"Slr wrap hi thr",      "slr",    0,    1000, &ewhi_slr,          1));
+    Z_[n_++] =(ewlo_slr_p       = new FloatZ("  ", "Fo", NULL,"Slr wrap lo thr",      "slr",    0,    1000, &ewlo_slr,          1));
+    Z_[n_++] =(fail_tb_p      = new BooleanZ("  ", "Xu", NULL,"Ignore Tb & fail",     "T=Fail", false,true, &fail_tb,           false));
+    Z_[n_++] =(fake_faults_p  = new BooleanZ("  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,    &fake_faults,       FAKE_FAULTS));
+    Z_[n_++] =(his_delay_p      = new ULongZ("  ", "Dh", NULL,"History frame",        "ms",    1000UL,SUMMARY_DELAY,&his_delay, SUMMARY_DELAY));
+    Z_[n_++] =(hys_scale_p      = new FloatZ("  ", "Sh", NULL,"Sim hys scale",        "slr",    0,    100,  &hys_scale,         HYS_SCALE));
+    Z_[n_++] =(hys_state_p      = new FloatZ("  ", "SH", NULL,"Sim hys state",        "v",      -10,  10,   &hys_state,         0));
+    Z_[n_++] =(ib_amp_add_p     = new FloatZ("  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
+    Z_[n_++] =(ib_diff_slr_p    = new FloatZ("  ", "Fd", NULL,"Slr ib_diff thr",      "A",      0,    1000, &ib_diff_slr,       1));
+    Z_[n_++] =(ib_noa_add_p     = new FloatZ("  ", "Dn", NULL,"No amp signal add",    "A",      -1000,1000, &ib_noa_add,        0));
+    Z_[n_++] =(Ib_amp_noise_amp_p= new FloatZ("  ","DM", NULL,"Amp amp noise",        "A",      0,    1000, &Ib_amp_noise_amp,  IB_AMP_NOISE));
+    Z_[n_++] =(Ib_noa_noise_amp_p= new FloatZ("  ","DN", NULL,"Amp noa noise",        "A",      0,    1000, &Ib_noa_noise_amp,  IB_NOA_NOISE));
+    Z_[n_++] =(ib_quiet_slr_p   = new FloatZ("  ", "Fq", NULL,"Ib quiet det slr",     "slr",    0,    1000, &ib_quiet_slr,      1));
+    Z_[n_++] =(init_all_soc_p   = new FloatZ("  ", "Ca", NULL,"Init all to this",     "soc",    -0.5, 1.1,  &init_all_soc,      1));
+    Z_[n_++] =(init_sim_soc_p   = new FloatZ("  ", "Cm", NULL,"Init sim to this",     "soc",    -0.5, 1.1,  &init_sim_soc,      1));
+    Z_[n_++] =(print_mult_p    = new Uint8tZ("  ", "DP", NULL,"Print mult x Dr",      "uint",   0,    UINT8_MAX, &print_mult,   DP_MULT));
+    Z_[n_++] =(read_delay_p     = new ULongZ("  ", "Dr", NULL,"Minor frame",          "ms",     0UL,  1000000UL,  &read_delay,  READ_DELAY));
+    Z_[n_++] =(slr_res_p        = new FloatZ("  ", "Sr", NULL,"Scalar Randles R0",    "slr",    0,    100,  &slr_res,           1));
+    Z_[n_++] =(s_t_sat_p        = new FloatZ("  ", "Xs", NULL,"Scalar on T_SAT",      "slr",    0,    100,  &s_t_sat,           1));
+    Z_[n_++] =(tail_inj_p       = new ULongZ("  ", "XT", NULL,"Tail end inj",         "ms",     0UL,  120000UL,&tail_inj,       0UL));
+    Z_[n_++] =(talk_delay_p     = new ULongZ("  ", "D>", NULL,"Talk frame",           "ms",     0UL,  120000UL,&talk_delay,     TALK_DELAY));
+    Z_[n_++] =(Tb_bias_model_p  = new FloatZ("  ", "D^", NULL,"Del model",            "dg C",   -50,  50,   &Tb_bias_model,     TEMP_BIAS));
+    Z_[n_++] =(Tb_noise_amp_p   = new FloatZ("  ", "DT", NULL,"Tb noise",             "dg C pk-pk", 0,50,   &Tb_noise_amp,      TB_NOISE));
+    Z_[n_++] =(tb_stale_time_slr_p=new FloatZ("  ","Xv", NULL,"Scale Tb 1-wire pers", "slr",    0,    100,  &tb_stale_time_slr,1));
+    Z_[n_++] =(until_q_p        = new ULongZ("  ", "XQ", NULL,"Time until v0",        "ms",     0UL,  1000000UL,  &until_q,     0UL));
+    Z_[n_++] =(vb_add_p         = new FloatZ("  ", "Dv", NULL,"Bias on vb",           "v",      -15,  15,   &vb_add,            0));
+    Z_[n_++] =(Vb_noise_amp_p   = new FloatZ("  ", "DV", NULL,"Vb noise",             "v pk-pk",0,    10,   &Vb_noise_amp,      VB_NOISE));
+    Z_[n_++] =(wait_inj_p       = new ULongZ("  ", "XW", NULL,"Wait start inj",       "ms",     0UL,  120000UL, &wait_inj,      0UL));
 }
 
 // Print only the volatile paramters (non-eeram)
@@ -180,6 +177,7 @@ void VolatilePars::pretty_print(const boolean all)
         }
         if ( count==0 ) Serial.printf("**none**\n\n");
     }
+    while ( n_ != NVOL ) { delay(5000); Serial.printf("set NVOL=%d\n", n_); }
 }
 
 
@@ -204,8 +202,6 @@ SavedPars::SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const ui
         history_ = hist;
         fault_ = faults;
     #endif
-    n_ = 0;
-    // Memory map
     initialize();
 }
 
@@ -215,7 +211,9 @@ SavedPars::SavedPars(SerialRAM *ram): Parameters()
     next_ = 0x000;
     nflt_ = uint16_t( NFLT ); 
     initialize();
-    for ( uint8_t i=0; i<n_; i++ ) if ( !Z_[i]->is_eeram() ) Z_[i]->set_nominal();
+
+    // TODO:  why was this here?  land mine!!
+    // for ( uint8_t i=0; i<n_; i++ ) if ( !Z_[i]->is_eeram() ) Z_[i]->set_nominal();
 
     #ifdef CONFIG_47L16_EERAM
         for ( int i=0; i<n_; i++ )
@@ -240,43 +238,40 @@ SavedPars::~SavedPars() {}
 
 void SavedPars::initialize()
 {
-    // Memory map
-    // Input definitions
-    n_ = -1;
-    Z_ = new Z*[33];
-    Z_[n_] = (Amp_p            = new FloatZ(&n_, "* ", "Xa", rP_, "Inj amp",              "Amps pk",-1e6, 1e6,  &Amp_z,         0));
-    Z_[n_] = (Cutback_gain_slr_p=new FloatZ(&n_, "* ", "Sk", rP_, "Cutback gain scalar",  "slr",    -1e6, 1e6,  &Cutback_gain_slr_z,1));
-    Z_[n_] = (Debug_p            = new IntZ(&n_, "* ", "vv", rP_, "Verbosity",            "int",    -128, 128,  &Debug_z,       0));
-    Z_[n_] = (Delta_q_model_p = new DoubleZ(&n_, "* ", "qs", rP_, "Charge chg Sim",       "C",      -1e8, 1e5,  &Delta_q_model_z, 0,                false));
-    Z_[n_] = (Delta_q_p       = new DoubleZ(&n_, "* ", "qm", rP_, "Charge chg",           "C",      -1e8, 1e5,  &Delta_q_z,     0,                  false ));
-    Z_[n_] = (Dw_p             = new FloatZ(&n_, "* ", "Dw", rP_, "Tab mon adj",          "v",      -1e2, 1e2,  &Dw_z,          VTAB_BIAS));
-    Z_[n_] = (Freq_p           = new FloatZ(&n_, "* ", "Xf", rP_, "Inj freq",             "Hz",     0,    2,    &Freq_z,        0));
-    Z_[n_] = (Ib_bias_all_p    = new FloatZ(&n_, "* ", "DI", rP_, "Del all",              "A",      -1e5, 1e5,  &Ib_bias_all_z, CURR_BIAS_ALL));
-    Z_[n_] = (Ib_bias_amp_p    = new FloatZ(&n_, "* ", "DA", rP_, "Add amp",              "A",      -1e5, 1e5,  &Ib_bias_amp_z, CURR_BIAS_AMP));
-    Z_[n_] = (Ib_bias_noa_p    = new FloatZ(&n_, "* ", "DB", rP_, "Add noa",              "A",      -1e5, 1e5,  &Ib_bias_noa_z, CURR_BIAS_NOA));
-    Z_[n_] = (Ib_scale_amp_p   = new FloatZ(&n_, "* ", "SA", rP_, "Slr amp",              "A",      -1e5, 1e5,  &Ib_scale_amp_z,CURR_SCALE_AMP));
-    Z_[n_] = (Ib_scale_noa_p   = new FloatZ(&n_, "* ", "SB", rP_, "Slr noa",              "A",      -1e5, 1e5,  &Ib_scale_noa_z,CURR_SCALE_NOA));
-    Z_[n_] = (Ib_select_p      = new Int8tZ(&n_, "* ", "si", rP_, "curr sel mode",        "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS)));
-    Z_[n_] = (Iflt_p         = new Uint16tZ(&n_, "* ", "if", rP_, "Fault buffer indx",    "uint",   0,nflt_+1,  &Iflt_z,        nflt_,              false));
-    Z_[n_] = (Ihis_p         = new Uint16tZ(&n_, "* ", "ih", rP_, "Hist buffer indx",     "uint",   0,nhis_+1,  &Ihis_z,        nhis_,              false));
-    Z_[n_] = (Inj_bias_p       = new FloatZ(&n_, "* ", "Xb", rP_, "Injection bias",       "A",      -1e5, 1e5,  &Inj_bias_z,    0.));
-    Z_[n_] = (Isum_p         = new Uint16tZ(&n_, "* ", "is", rP_, "Summ buffer indx",     "uint",   0, NSUM+1,  &Isum_z,        NSUM,               false));
-    Z_[n_] = (Modeling_p      = new Uint8tZ(&n_, "* ", "Xm", rP_, "Modeling bitmap",      "[0x]",   0,    255,  &Modeling_z,    MODELING));
-    Z_[n_] = (Mon_chm_p       = new Uint8tZ(&n_, "* ", "Bm", rP_, "Monitor battery",      "0=BB, 1=CH",0,   1,  &Mon_chm_z,     MON_CHEM));
-    Z_[n_] = (nP_p             = new FloatZ(&n_, "* ", "BP", rP_, "Number parallel",      "units",  1e-6, 100,  &nP_z,          NP));
-    Z_[n_] = (nS_p             = new FloatZ(&n_, "* ", "BS", rP_, "Number series",        "units",  1e-6, 100,  &nS_z,          NS));
-    Z_[n_] = (Preserving_p    = new Uint8tZ(&n_, "* ", "X?", rP_, "Preserving fault",     "T=Preserve",0,   1,  &Preserving_z,  0,                  false));
-    Z_[n_] = (Sim_chm_p       = new Uint8tZ(&n_, "* ", "Bs", rP_, "Sim battery",          "0=BB, 1=CH",0,   1,  &Sim_chm_z,     SIM_CHEM));
-    Z_[n_] = (S_cap_mon_p      = new FloatZ(&n_, "* ", "SQ", rP_, "Scalar cap Mon",       "slr",    0,    1000, &S_cap_mon_z,   1.));
-    Z_[n_] = (S_cap_sim_p      = new FloatZ(&n_, "* ", "Sq", rP_, "Scalar cap Sim",       "slr",    0,    1000, &S_cap_sim_z,   1.));
-    Z_[n_] = (Tb_bias_hdwe_p   = new FloatZ(&n_, "* ", "Dt", rP_, "Bias Tb sensor",       "dg C",   -500, 500,  &Tb_bias_hdwe_z,TEMP_BIAS));
-    Z_[n_] = (Time_now_p       = new ULongZ(&n_, "* ", "UT", rP_, "UNIX time epoch",      "sec",    0UL,  2100000000UL, &Time_now_z, 1669801880UL,  false));
-    Z_[n_] = (Type_p          = new Uint8tZ(&n_, "* ", "Xt", rP_, "Inj type",             "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",  0,   10,  &Type_z, 0));
-    Z_[n_] = (T_state_model_p  = new FloatZ(&n_, "* ", "ts", rP_, "Tb Sim rate lim mem",  "dg C",   -10,  70,   &T_state_model_z,RATED_TEMP,       false));
-    Z_[n_] = (T_state_p        = new FloatZ(&n_, "* ", "tm", rP_, "Tb rate lim mem",      "dg C",   -10,  70,   &T_state_z,     RATED_TEMP,         false));
-    Z_[n_] = (Vb_bias_hdwe_p   = new FloatZ(&n_, "* ", "Dc", rP_, "Bias Vb sensor",       "v",      -10,  70,   &Vb_bias_hdwe_z,VOLT_BIAS));
-    Z_[n_] = (Vb_scale_p       = new FloatZ(&n_, "* ", "SV", rP_, "Scale Vb sensor",      "v",      -1e5, 1e5,  &Vb_scale_z,    VB_SCALE));
-    n_++;
+    #define NSAV 32
+    Z_ = new Z*[NSAV];
+    Z_[n_++] =(Amp_p            = new FloatZ("* ", "Xa", rP_, "Inj amp",              "Amps pk",-1e6, 1e6,  &Amp_z,         0));
+    Z_[n_++] =(Cutback_gain_slr_p=new FloatZ("* ", "Sk", rP_, "Cutback gain scalar",  "slr",    -1e6, 1e6,  &Cutback_gain_slr_z,1));
+    Z_[n_++] =(Debug_p            = new IntZ("* ", "vv", rP_, "Verbosity",            "int",    -128, 128,  &Debug_z,       0));
+    Z_[n_++] =(Delta_q_model_p = new DoubleZ("* ", "qs", rP_, "Charge chg Sim",       "C",      -1e8, 1e5,  &Delta_q_model_z, 0,                false));
+    Z_[n_++] =(Delta_q_p       = new DoubleZ("* ", "qm", rP_, "Charge chg",           "C",      -1e8, 1e5,  &Delta_q_z,     0,                  false ));
+    Z_[n_++] =(Dw_p             = new FloatZ("* ", "Dw", rP_, "Tab mon adj",          "v",      -1e2, 1e2,  &Dw_z,          VTAB_BIAS));
+    Z_[n_++] =(Freq_p           = new FloatZ("* ", "Xf", rP_, "Inj freq",             "Hz",     0,    2,    &Freq_z,        0));
+    Z_[n_++] =(Ib_bias_all_p    = new FloatZ("* ", "DI", rP_, "Del all",              "A",      -1e5, 1e5,  &Ib_bias_all_z, CURR_BIAS_ALL));
+    Z_[n_++] =(Ib_bias_amp_p    = new FloatZ("* ", "DA", rP_, "Add amp",              "A",      -1e5, 1e5,  &Ib_bias_amp_z, CURR_BIAS_AMP));
+    Z_[n_++] =(Ib_bias_noa_p    = new FloatZ("* ", "DB", rP_, "Add noa",              "A",      -1e5, 1e5,  &Ib_bias_noa_z, CURR_BIAS_NOA));
+    Z_[n_++] =(Ib_scale_amp_p   = new FloatZ("* ", "SA", rP_, "Slr amp",              "A",      -1e5, 1e5,  &Ib_scale_amp_z,CURR_SCALE_AMP));
+    Z_[n_++] =(Ib_scale_noa_p   = new FloatZ("* ", "SB", rP_, "Slr noa",              "A",      -1e5, 1e5,  &Ib_scale_noa_z,CURR_SCALE_NOA));
+    Z_[n_++] =(Ib_select_p      = new Int8tZ("* ", "si", rP_, "curr sel mode",        "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS)));
+    Z_[n_++] =(Iflt_p         = new Uint16tZ("* ", "if", rP_, "Fault buffer indx",    "uint",   0,nflt_+1,  &Iflt_z,        nflt_,              false));
+    Z_[n_++] =(Ihis_p         = new Uint16tZ("* ", "ih", rP_, "Hist buffer indx",     "uint",   0,nhis_+1,  &Ihis_z,        nhis_,              false));
+    Z_[n_++] =(Inj_bias_p       = new FloatZ("* ", "Xb", rP_, "Injection bias",       "A",      -1e5, 1e5,  &Inj_bias_z,    0.));
+    Z_[n_++] =(Isum_p         = new Uint16tZ("* ", "is", rP_, "Summ buffer indx",     "uint",   0, NSUM+1,  &Isum_z,        NSUM,               false));
+    Z_[n_++] =(Modeling_p      = new Uint8tZ("* ", "Xm", rP_, "Modeling bitmap",      "[0x]",   0,    255,  &Modeling_z,    MODELING));
+    Z_[n_++] =(Mon_chm_p       = new Uint8tZ("* ", "Bm", rP_, "Monitor battery",      "0=BB, 1=CH",0,   1,  &Mon_chm_z,     MON_CHEM));
+    Z_[n_++] =(nP_p             = new FloatZ("* ", "BP", rP_, "Number parallel",      "units",  1e-6, 100,  &nP_z,          NP));
+    Z_[n_++] =(nS_p             = new FloatZ("* ", "BS", rP_, "Number series",        "units",  1e-6, 100,  &nS_z,          NS));
+    Z_[n_++] =(Preserving_p    = new Uint8tZ("* ", "X?", rP_, "Preserving fault",     "T=Preserve",0,   1,  &Preserving_z,  0,                  false));
+    Z_[n_++] =(Sim_chm_p       = new Uint8tZ("* ", "Bs", rP_, "Sim battery",          "0=BB, 1=CH",0,   1,  &Sim_chm_z,     SIM_CHEM));
+    Z_[n_++] =(S_cap_mon_p      = new FloatZ("* ", "SQ", rP_, "Scalar cap Mon",       "slr",    0,    1000, &S_cap_mon_z,   1.));
+    Z_[n_++] =(S_cap_sim_p      = new FloatZ("* ", "Sq", rP_, "Scalar cap Sim",       "slr",    0,    1000, &S_cap_sim_z,   1.));
+    Z_[n_++] =(Tb_bias_hdwe_p   = new FloatZ("* ", "Dt", rP_, "Bias Tb sensor",       "dg C",   -500, 500,  &Tb_bias_hdwe_z,TEMP_BIAS));
+    Z_[n_++] =(Time_now_p       = new ULongZ("* ", "UT", rP_, "UNIX time epoch",      "sec",    0UL,  2100000000UL, &Time_now_z, 1669801880UL,  false));
+    Z_[n_++] =(Type_p          = new Uint8tZ("* ", "Xt", rP_, "Inj type",             "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",  0,   10,  &Type_z, 0));
+    Z_[n_++] =(T_state_model_p  = new FloatZ("* ", "ts", rP_, "Tb Sim rate lim mem",  "dg C",   -10,  70,   &T_state_model_z,RATED_TEMP,       false));
+    Z_[n_++] =(T_state_p        = new FloatZ("* ", "tm", rP_, "Tb rate lim mem",      "dg C",   -10,  70,   &T_state_z,     RATED_TEMP,         false));
+    Z_[n_++] =(Vb_bias_hdwe_p   = new FloatZ("* ", "Dc", rP_, "Bias Vb sensor",       "v",      -10,  70,   &Vb_bias_hdwe_z,VOLT_BIAS));
+    Z_[n_++] =(Vb_scale_p       = new FloatZ("* ", "SV", rP_, "Scale Vb sensor",      "v",      -1e5, 1e5,  &Vb_scale_z,    VB_SCALE));
 }
 
 // Assign all save EERAM to RAM
@@ -344,6 +339,9 @@ void SavedPars::pretty_print(const boolean all)
             }
         }
         if ( count==0 ) Serial.printf("**none**\n\n");
+
+        // Build integrity test
+        while ( n_ != NSAV ) { delay(5000); Serial.printf("set NSAV=%d\n", n_); }
     }
 
     #ifdef CONFIG_47L16_EERAM

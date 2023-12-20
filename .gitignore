@@ -27,6 +27,6 @@ SOC_Photon/.vscode/settings.json
 SOC_Photon/dataReduction/temp/*
 SOC_Photon/py/.idea/misc.xml
 SOC_Photon/py/.idea/py.iml
-SOC_Photon/src/SOC_Photon.cpp
 SOC_Photon/target/3.0.0-beta.1/photon/obj/src/user_export.o.d
 SOC_Photon/target/3.0.0-beta.1/photon/SOC_Photon.bin.crc_block
+SOC_Particle/src/SOC_Particle.cpp
