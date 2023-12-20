@@ -33,7 +33,7 @@ void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
 {
   char buffer[32];
   time_long_2_str(now, buffer);
-  this->t = now;
+  this->t = (unsigned long int) now;
   this->Tb_hdwe = int16_t(Sen->Tb_hdwe*600.);
   this->vb_hdwe = int16_t(Sen->Vb/sp.nS()*1200./sp.Vb_hist_slr());
   this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/sp.nP()*600./sp.Ib_hist_slr());
@@ -75,7 +75,7 @@ void Flt_st::copy_to_Flt_ram_from(Flt_st input)
 // Nominal values
 void Flt_st::nominal()
 {
-  this->t = 1L;
+  this->t = 1UL;
   this->Tb_hdwe = int16_t(0);
   this->vb_hdwe = int16_t(0);
   this->ib_amp_hdwe = int16_t(0);
@@ -91,14 +91,14 @@ void Flt_st::nominal()
   this->e_wrap_filt = int16_t(0);
   this->fltw = uint16_t(0);
   this->falw = uint16_t(0);
-  this->dummy = 0L;
+  this->dummy = 0UL;
 }
 
 // Print functions
 void Flt_st::pretty_print(const String code)
 {
   char buffer[32] = "---";
-  if ( this->t>1 )
+  if ( this->t > 1UL )
   {
     time_long_2_str(this->t, buffer);
     Serial.printf("code %s\n", code.c_str());
@@ -125,7 +125,7 @@ void Flt_st::pretty_print(const String code)
 void Flt_st::print(const String code)
 {
   char buffer[32] = "---";
-  if ( this->t>1 )
+  if ( this->t > 1UL )
   {
     time_long_2_str(this->t, buffer);
     Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",

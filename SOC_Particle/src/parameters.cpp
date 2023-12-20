@@ -187,9 +187,9 @@ void VolatilePars::pretty_print(const boolean all)
 // class SavedPars 
 SavedPars::SavedPars(): Parameters()
 {
-  nflt_ = uint16_t( NFLT ); 
-  nhis_ = uint16_t( NHIS ); 
-  nsum_ = uint16_t( NSUM ); 
+    nflt_ = uint16_t( NFLT ); 
+    nhis_ = uint16_t( NHIS );
+    nsum_ = 0;
 }
 
 SavedPars::SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const uint16_t nflt): Parameters()
@@ -197,7 +197,7 @@ SavedPars::SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const ui
     rP_ = NULL;
     nflt_ = nflt;
     nhis_ = nhis;
-    nsum_ = int( NSUM );
+    nsum_ = 0;
     #ifndef CONFIG_47L16_EERAM
         history_ = hist;
         fault_ = faults;

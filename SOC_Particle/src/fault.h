@@ -32,7 +32,7 @@ String time_long_2_str(const unsigned long current_time, char *tempStr);
 // SRAM retention summary
 struct Flt_st
 {
-  unsigned long t = 1L; // Timestamp seconds since start of epoch
+  unsigned long t = 1UL; // Timestamp seconds since start of epoch
   int16_t Tb_hdwe = 0;  // Battery temperature, hardware, C
   int16_t vb_hdwe = 0;  // Battery measured potential, hardware, V
   int16_t ib_amp_hdwe = 0;  // Battery measured input current, amp, A

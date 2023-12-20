@@ -276,6 +276,7 @@ void setup()
     sp.print_history_array();
     sp.print_fault_header();
   }
+  sp.nsum(NSUM);  // Store
 
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
@@ -289,13 +290,7 @@ void setup()
         wait_on_user_input();
       #endif
     }
-    else
-    {
-      // sp.pretty_print( true );
-      Serial.printf(" No diffs in retained...\n\n"); Serial1.printf(" No diffs in retained...\n\n");
-    }
   }
-  Serial.printf("sp %d bytes <3068?\n", sizeof(sp));
 
   //Log.info("setup end");
   Serial.printf("End setup()\n\n");
@@ -495,10 +490,9 @@ void loop()
     hist_snap.assign(time_now, Mon, Sen);
     hist_bounced = sp.put_history(hist_snap, sp.Ihis_z);
 
-    sp.put_Isum(sp.Isum_z+1);
-    if ( sp.Isum_z > NSUM-1 ) sp.put_Isum(0);  // wrap buffer
+    sp.put_Isum(sp.Isum_z + 1);
+    if ( sp.Isum_z > (uint16_t)(sp.nsum()-1) ) sp.put_Isum(0);  // wrap buffer
     mySum[sp.Isum_z].copy_to_Flt_ram_from(hist_bounced);
-
     Serial.printf("Summ...\n");
     cp.write_summary = false;
   }

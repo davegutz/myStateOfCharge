@@ -193,6 +193,7 @@ public:
     void mem_print();
     uint16_t nflt() { return nflt_; }
     uint16_t nhis() { return nhis_; }
+    void nsum(const uint16_t in) { nsum_ = in; }
     uint16_t nsum() { return nsum_; }
     void nominalize_fault_array();
     void nominalize_history_array();

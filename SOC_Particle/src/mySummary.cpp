@@ -25,22 +25,23 @@
 #include "parameters.h"
 
 // print helper
-void print_all_fault_buffer(const String code, struct Flt_st *flt, const int iflt, const int nflt)
+void print_all_fault_buffer(const String code, struct Flt_st *flt, const uint16_t iflt, const uint16_t nflt)
 {
-  int i = iflt;  // Last one written was iflt
-  int n = -1;
-  while ( ++n < nflt )
+Serial.printf("print_all_fault_buffer: iflt %d nflt %d\n", iflt, nflt);
+  uint16_t i = iflt;  // Last one written was iflt
+  uint16_t n = 0;
+  while ( n++ < nflt )
   {
     if ( ++i > (nflt-1) ) i = 0; // circular buffer
     flt[i].print(code);
   }
 }
 
-void reset_all_fault_buffer(const String code, struct Flt_st *flt, const int iflt, const int nflt)
+void reset_all_fault_buffer(const String code, struct Flt_st *flt, const uint16_t iflt, const uint16_t nflt)
 {
-  int i = iflt;  // Last one written was iflt
-  int n = -1;
-  while ( ++n < nflt )
+  uint16_t i = iflt;  // Last one written was iflt
+  uint16_t n = 0;
+  while ( n++ < nflt )
   {
     if ( ++i > (nflt-1) ) i = 0; // circular buffer
     flt[i].put_nominal();
