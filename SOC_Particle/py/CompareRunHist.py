@@ -26,12 +26,15 @@ from CompareRunSim import compare_run_sim
 from CompareHistSim import compare_hist_sim
 from datetime import datetime
 import os
+import tkinter.messagebox
 
 plt.rcParams['axes.grid'] = True
 
 
 def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_path_to_save_pdf_='./figures',
                      rel_path_to_temp_='./temp', data_only_=True):
+
+    print(f"\ncompare_run_hist:\n{data_file_=}\n{rel_path_to_save_pdf_=}\n{rel_path_to_temp_=}\n{data_only_=}\n{unit_key_=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     # date_ = datetime.now().strftime("%y%m%d")
@@ -46,42 +49,49 @@ def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_pat
                          data_only=data_only_, mon_t=True)
 
     # Plots
-    fig_list = []
-    fig_files = []
+    if mo_r is not None and mo_h is not None:
+        fig_list = []
+        fig_files = []
 
-    # File path operations
-    (data_file_folder, data_file_txt) = os.path.split(data_file_)
-    save_pdf_path = os.path.join(data_file_folder, rel_path_to_save_pdf_)
-    if not os.path.isdir(save_pdf_path):
-        os.mkdir(save_pdf_path)
-    path_to_temp = os.path.join(data_file_folder, rel_path_to_temp_)
-    if not os.path.isdir(path_to_temp):
-        os.mkdir(path_to_temp)
-    data_root_ref = dfcs.split('/')[-1].replace('.csv', '')
-    dir_root_ref = data_file_folder.split('/')[-1].split('\\')[-1]
-    filename = data_root_ref + '__hist'
+        # File path operations
+        (data_file_folder, data_file_txt) = os.path.split(data_file_)
+        save_pdf_path = os.path.join(data_file_folder, rel_path_to_save_pdf_)
+        if not os.path.isdir(save_pdf_path):
+            os.mkdir(save_pdf_path)
+        path_to_temp = os.path.join(data_file_folder, rel_path_to_temp_)
+        if not os.path.isdir(path_to_temp):
+            os.mkdir(path_to_temp)
+        data_root_ref = dfcs.split('/')[-1].replace('.csv', '')
+        dir_root_ref = data_file_folder.split('/')[-1].split('\\')[-1]
+        filename = data_root_ref + '__hist'
 
-    # Plots
-    plot_title = dir_root_ref + '/' + data_root_ref + '   ' + date_time
+        # Plots
+        plot_title = dir_root_ref + '/' + data_root_ref + '   ' + date_time
 
-    fig_list, fig_files = dom_plot(mo_r, mo_h, so_r, so_h, ssv_h, filename, fig_files,
-                                   plot_title=plot_title, fig_list=fig_list,
-                                   ref_str='_run', test_str='_hist')  # all over all
+        fig_list, fig_files = dom_plot(mo_r, mo_h, so_r, so_h, ssv_h, filename, fig_files,
+                                       plot_title=plot_title, fig_list=fig_list,
+                                       ref_str='_run', test_str='_hist')  # all over all
 
-    # Copies
-    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=rel_path_to_save_pdf_)
-    unite_pictures_into_pdf(outputPdfName=filename+'-'+date_time+'.pdf', save_pdf_path=save_pdf_path,
-                            listWithImagesExtensions=["png"])
-    cleanup_fig_files(fig_files)
-    plt.show(block=False)
-    string = 'plots ' + str(fig_list[0].number) + ' - ' + str(fig_list[-1].number)
-    show_killer(string, 'CompareRunRun', fig_list=fig_list)
+        # Copies
+        precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=rel_path_to_save_pdf_)
+        unite_pictures_into_pdf(outputPdfName=filename+'-'+date_time+'.pdf', save_pdf_path=save_pdf_path,
+                                listWithImagesExtensions=["png"])
+        cleanup_fig_files(fig_files)
+        plt.show(block=False)
+        string = 'plots ' + str(fig_list[0].number) + ' - ' + str(fig_list[-1].number)
+        show_killer(string, 'CompareRunRun', fig_list=fig_list)
 
-    return True
+        return True
+    else:
+        tkinter.messagebox.showwarning(message="One or more sets of data missing.  See monitor window for info.")
+        return False
 
 
 if __name__ == '__main__':
-    data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
-    unit_key_full = 'pro3p2_bb'
+    # data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+    # unit_key_full = 'pro3p2_bb'
+
+    data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro1a_bb.csv'
+    unit_key_full = 'g20231111b_pro1a_bb'
 
     compare_run_hist(data_file_=data_file_full, unit_key_=unit_key_full)

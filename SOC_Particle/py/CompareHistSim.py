@@ -36,6 +36,7 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanu
 from datetime import datetime
 import os
 from load_data import load_data
+import tkinter.messagebox
 
 plt.rcParams['axes.grid'] = True
 
@@ -1018,7 +1019,8 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
                               encoding=None).view(np.recarray)
     else:
         print("data from", temp_hist_file_clean, "empty after loading")
-        exit(1)
+        tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
+        return None, None, None, None, None
 
     # Load fault
     temp_flt_file_clean = write_clean_file(data_file, type_='_flt', title_key='fltb', unit_key='unit_f',
@@ -1028,7 +1030,8 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
                               encoding=None).view(np.recarray)
     else:
         print("data from", temp_flt_file_clean, "empty after loading")
-        exit(1)
+        tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
+        return None, None, None, None, None
 
     # Load configuration
     if mon_t is True:

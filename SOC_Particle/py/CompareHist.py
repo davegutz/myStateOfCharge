@@ -621,7 +621,7 @@ if __name__ == '__main__':
                                   encoding=None).view(np.recarray)
         else:
             print("data from temp hist", temp_hist_file, "empty after loading")
-            exit(1)
+            return None, None, None, None, None
 
         # Load fault
         temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
@@ -631,7 +631,7 @@ if __name__ == '__main__':
                                   encoding=None).view(np.recarray)
         else:
             print("data from temp flt", temp_flt_file, "empty after loading")
-            exit(1)
+            return None, None, None, None, None
 
         # Load configuration
         from Battery import BatteryMonitor

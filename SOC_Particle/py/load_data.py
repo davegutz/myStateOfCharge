@@ -107,6 +107,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None, encoding=None).view(np.recarray)
     else:
         print("data from", temp_flt_file, "empty after loading")
+        return None, None, None, None, None
     if temp_flt_file_clean and not v1_only:
         f_raw = np.unique(f_raw)
         f = add_stuff_f(f_raw, batt, ib_band=IB_BAND)
@@ -115,3 +116,18 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     else:
         f = None
     return mon, sim, f, data_file_clean, temp_flt_file_clean
+
+
+
+
+if __name__ == '__main__':
+    path_to_data='G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro1a_bb.csv'
+    skip=1
+    unit_key='g20231111b_pro1a_bb'
+    zero_zero_in=False
+    time_end_in=None
+    rated_batt_cap=100.0
+    legacy=False
+    v1_only=False
+    load_data(path_to_data=path_to_data, skip=skip, unit_key=unit_key, zero_zero_in=zero_zero_in, time_end_in=time_end_in,
+              rated_batt_cap=rated_batt_cap, legacy=legacy, v1_only=v1_only)

@@ -32,13 +32,15 @@ from PlotOffOn import off_on_plot
 import easygui
 import os
 from PlotKiller import show_killer
+import tkinter.messagebox
+
 plt.rcParams['axes.grid'] = True
 
 
 def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to_save_pdf='./figures',
                     rel_path_to_temp='./temp', data_only=False):
 
-    print(f"{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n")
+    print(f"compare_run_sim:  {data_file=}\n{unit_key=}\n{time_end_in=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
@@ -98,15 +100,17 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
         load_data(data_file, 1, unit_key, zero_zero_in, time_end_in, legacy=legacy_in)
 
     # How to initialize
-    if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
-        init_time = 1.
-    else:
-        if init_time_in:
-            init_time = init_time_in
+    if mon_old is not None:
+        if mon_old.time[0] == 0.:  # no initialization flat detected at beginning of recording
+            init_time = 1.
         else:
-            init_time = -4.
-    # Get dv_hys from data
-    # dv_hys = mon_old.dv_hys[0]
+            if init_time_in:
+                init_time = init_time_in
+            else:
+                init_time = -4.
+    else:
+        tkinter.messagebox.showwarning(message="CompareRunSim:  Data missing.  See monitor window for info.")
+        return None, None, None, None, None, None
 
     # New run
     mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
@@ -187,7 +191,12 @@ if __name__ == '__main__':
     # data_file_txt = 'real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110
     # data_file_txt = 'real world Xp20 v20220917a.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -69900
 
-    data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
-    unit_key_full = 'pro3p2_bb'
-    compare_run_sim(data_file=data_file_full, unit_key=unit_key_full)
-    # compare_run_sim()
+    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+    # unit_key = 'pro3p2_bb'
+    # data_only = False
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro1a_bb.csv'
+    unit_key = 'g20231111b_pro1a_bb'
+    time_end_in = None
+    data_only = True
+
+    compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only)
