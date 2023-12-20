@@ -138,7 +138,7 @@ void  VolatilePars::initialize()
     Z_[n_++] =(Tb_bias_model_p  = new FloatZ("  ", "D^", NULL,"Del model",            "dg C",   -50,  50,   &Tb_bias_model,     TEMP_BIAS));
     Z_[n_++] =(Tb_noise_amp_p   = new FloatZ("  ", "DT", NULL,"Tb noise",             "dg C pk-pk", 0,50,   &Tb_noise_amp,      TB_NOISE));
     Z_[n_++] =(tb_stale_time_slr_p=new FloatZ("  ","Xv", NULL,"Scale Tb 1-wire pers", "slr",    0,    100,  &tb_stale_time_slr,1));
-    Z_[n_++] =(until_q_p        = new ULongZ("  ", "XQ", NULL,"Time until v0",        "ms",     0UL,  1000000UL,  &until_q,     0UL));
+    Z_[n_++] =(until_q_p        = new ULongZ("  ", "XQ", NULL,"Time until vv0",       "ms",     0UL,  1000000UL,  &until_q,     0UL));
     Z_[n_++] =(vb_add_p         = new FloatZ("  ", "Dv", NULL,"Bias on vb",           "v",      -15,  15,   &vb_add,            0));
     Z_[n_++] =(Vb_noise_amp_p   = new FloatZ("  ", "DV", NULL,"Vb noise",             "v pk-pk",0,    10,   &Vb_noise_amp,      VB_NOISE));
     Z_[n_++] =(wait_inj_p       = new ULongZ("  ", "XW", NULL,"Wait start inj",       "ms",     0UL,  120000UL, &wait_inj,      0UL));
