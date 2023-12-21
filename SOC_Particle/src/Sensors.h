@@ -287,7 +287,7 @@ class Sensors
 {
 public:
   Sensors();
-  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize);
+  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, time32_t time_now);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
@@ -313,7 +313,7 @@ public:
   float Ib_model;             // Modeled battery bank current, A
   float Ib_model_in;          // Battery bank current input to model (modified by cutback), A
   float Wb;                   // Sensed battery bank power, use to compare to other shunts, W
-  unsigned long int now;      // Time at sample, ms
+  unsigned long long now;     // Time at sample, ms
   double T;                   // Update time, s
   boolean reset;              // Reset flag, T = reset
   double T_filt;              // Filter update time, s
@@ -328,13 +328,14 @@ public:
   General2_Pole* TbSenseFilt; // Linear filter for Tb. There are 1 Hz AAFs in hardware for Vb and Ib
   SlidingDeadband *SdTb;      // Non-linear filter for Tb
   BatterySim *Sim;            // Used to model Vb and Ib.   Use Talk 'Xp?' to toggle model on/off
-  unsigned long int elapsed_inj;  // Injection elapsed time, ms
-  unsigned long int start_inj;// Start of calculated injection, ms
-  unsigned long int stop_inj; // Stop of calculated injection, ms
-  unsigned long int end_inj;  // End of print injection, ms
+  unsigned long long elapsed_inj;  // Injection elapsed time, ms
+  unsigned long long start_inj;// Start of calculated injection, ms
+  unsigned long long stop_inj; // Stop of calculated injection, ms
+  unsigned long long end_inj;  // End of print injection, ms
   double control_time;        // Decimal time, seconds since 1/1/2021
   boolean display;            // Use display
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
+  unsigned long long boot_time() { return boot_time_; }
   unsigned long int dt_ib(void) { return dt_ib_; };
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
   float ib() { return Ib / sp.nP(); };                            // Battery unit current, A
@@ -383,6 +384,7 @@ protected:
   unsigned long int sample_time_vb_hdwe_;     // Exact moment of Vb sample, ms
   unsigned long int dt_ib_hdwe_;          // Delta update of Ib sample, ms
   unsigned long int dt_ib_;               // Delta update of selected Ib sample, ms
+  unsigned long long boot_time_;          // UTC Zulu at instantiation, s
 };
 
 

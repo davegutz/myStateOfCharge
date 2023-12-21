@@ -118,9 +118,10 @@ void print_serial_ekf_header(void)
 void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   double cTime;
-  if ( sp.tweak_test() ) cTime = double(Sen->now)/1000.;
-  else cTime = Sen->control_time;
-
+  // if ( sp.tweak_test() ) cTime = double(Sen->now)/1000.;
+  // else cTime = Sen->control_time;
+  cTime = double(Sen->now)/1000.;
+  
   sprintf(pr.buff, "%s, %s,%13.3f,%6.3f, %d,%7.0f,%d, %d, %d, %d, %6.3f,%6.3f,%9.3f,%9.3f,%7.5f,  %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%5.3f,", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
     sp.Mon_chm(), Mon->q_cap_rated_scaled(), pubList->sat, sp.ib_select(), sp.modeling(), Mon->bms_off(),
@@ -669,10 +670,10 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   Sen->Sim->count_coulombs(Sen, reset_temp, Mon, false);
 
   // Injection test
-  if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->end_inj) && (Sen->now > 0UL) ) // in range, test in progress
+  if ( (Sen->start_inj <= Sen->now) && (Sen->now <= Sen->end_inj) && (Sen->now > 0ULL) ) // in range, test in progress
   {
     // Shift times because sampling is asynchronous: improve repeatibility
-    if ( Sen->elapsed_inj==0UL )
+    if ( Sen->elapsed_inj==0ULL )
     {
       Sen->end_inj += Sen->now - Sen->start_inj;
       Sen->stop_inj += Sen->now - Sen->start_inj;
@@ -688,7 +689,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   else if ( Sen->elapsed_inj && sp.tweak_test() )  // Done.  elapsed_inj set to 0 is the reset button
   {
     Serial.printf("STOP echo\n");
-    Sen->elapsed_inj = 0UL;
+    Sen->elapsed_inj = 0ULL;
     Serial.printf("running -vv0;*Xp0\n");
     chit("vv0;", ASAP);    // Turn off echo
     chit("Xp0;", SOON);    // Reset

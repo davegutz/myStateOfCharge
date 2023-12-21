@@ -708,7 +708,7 @@ float BatterySim::calc_soc_voc(const float soc, const float temp_c, float *dv_ds
 }
 
 // Injection model, calculate inj bias based on time since boot
-float BatterySim::calc_inj(const unsigned long now, const uint8_t type, const float amp, const double freq)
+float BatterySim::calc_inj(const unsigned long long now, const uint8_t type, const float amp, const double freq)
 {
 
     // Sample at instant of signal injection

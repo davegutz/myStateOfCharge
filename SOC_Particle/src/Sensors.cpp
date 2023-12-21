@@ -742,8 +742,8 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 
 // Class Sensors
-Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize):
-  reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL), sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL)
+Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, time32_t time_now):
+  reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL), sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL), boot_time_(time_now)
 {
   this->T = T;
   this->T_filt = T;
@@ -758,10 +758,10 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   this->SensorTb = new TempSensor(pins->pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
   this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
   this->Sim = new BatterySim();
-  this->elapsed_inj = 0UL;
-  this->start_inj = 0UL;
-  this->stop_inj = 0UL;
-  this->end_inj = 0UL;
+  this->elapsed_inj = 0ULL;
+  this->start_inj = 0ULL;
+  this->stop_inj = 0ULL;
+  this->end_inj = 0ULL;
   this->ReadSensors = ReadSensors;
   this->Summarize = Summarize;
   this->Talk = Talk;
@@ -891,7 +891,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
     sample_time_ib_ = sample_time_ib_hdwe_;
     dt_ib_ = dt_ib_hdwe_;
   }
-  now = sample_time_ib_;
+  now = sample_time_ib_ + ((unsigned long long) boot_time_)*1000;
 
   // print_signal_select for data collection
   if ( (sp.debug()==2 || sp.debug()==4)  && cp.publishS )

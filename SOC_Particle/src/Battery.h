@@ -206,7 +206,7 @@ public:
   // operators
   // functions
   float calculate(Sensors *Sen, const boolean dc_dc_on, const boolean reset);
-  float calc_inj(const unsigned long now, const uint8_t type, const float amp, const double freq);
+  float calc_inj(const unsigned long long now, const uint8_t type, const float amp, const double freq);
   virtual float calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc);
   float count_coulombs(Sensors *Sen, const boolean reset, BatteryMonitor *Mon, const boolean initializing_all);
   boolean cutback() { return model_cutback_; };

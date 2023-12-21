@@ -301,6 +301,9 @@ void setup()
 void loop()
 {
   // Synchronization
+  static unsigned long now = millis();
+  time32_t time_now = Time.now();
+  now = millis();
   boolean chitchat = false;
   static Sync *Talk = new Sync(TALK_DELAY);
   boolean read = false;
@@ -315,8 +318,6 @@ void loop()
   boolean control;
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
   unsigned long current_time;
-  static unsigned long now = millis();
-  time32_t time_now;
   static unsigned long start = millis();
   unsigned long elapsed = 0;
   static boolean reset = true;
@@ -324,7 +325,7 @@ void loop()
   static boolean reset_publish = true;
 
   // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize);
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize, time_now);
 
    // Monitor to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor();
@@ -338,8 +339,6 @@ void loop()
   #ifdef CONFIG_DS2482_1WIRE
     Ds2482.loop();
   #endif
-  now = millis();
-  time_now = Time.now();
   if ( now - last_sync > ONE_DAY_MILLIS || reset )  sync_time(now, &last_sync, &millis_flip); 
   Sen->control_time = decimalTime(&current_time, pr.buff, Sen->now, millis_flip);
   hm_string = String(pr.buff);
