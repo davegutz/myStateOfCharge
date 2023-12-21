@@ -28,6 +28,10 @@
 #include "Chemistry_BMS.h"
 
 
+// Functions
+float nice_zero(const float in, const float thr=1.e-6);
+
+
 // Coulomb Counter Class
 class Coulombs
 {
@@ -52,10 +56,10 @@ public:
   virtual float count_coulombs(const double dt, const boolean reset, const float temp_c, const float charge_curr,
     const boolean sat, const double delta_q_ekf);
   double delta_q() { return(*sp_delta_q_); };
-  double delta_q_abs(){ return (delta_q_abs_); };
+  double delta_q_abs() { return nice_zero(delta_q_abs_); }
   double delta_q_inf() { return(delta_q_inf_); };
-  double delta_q_neg(){ return (delta_q_neg_); };
-  double delta_q_pos(){ return (delta_q_pos_); };
+  double delta_q_neg() { return nice_zero(delta_q_neg_); }
+  double delta_q_pos() { return nice_zero(delta_q_pos_); }
   uint8_t mod_code() { return (*(chem_.sp_mod_code)); };
   virtual void pretty_print();
   double q(){ return (q_); };

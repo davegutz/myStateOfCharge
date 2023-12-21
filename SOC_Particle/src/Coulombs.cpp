@@ -55,14 +55,7 @@ void Coulombs::pretty_print(void)
   Serial.printf("Coulombs:\n");
   Serial.printf(" coul_eff%9.5f\n", coul_eff_);
   Serial.printf(" delta_q%9.1f, C\n", *sp_delta_q_);
-  float dqa = 1e-6;
-  if ( abs(delta_q_abs_) < 1e-6 )
-  {
-    if ( delta_q_abs_ < 0. ) dqa = -1e-6; 
-  }
-  else
-    dqa = delta_q_abs_;
-  Serial.printf(" delta_q_inf/delta_q_abs%9.1f / %9.1f %8.4f, C\n", delta_q_inf_, delta_q_abs_, delta_q_inf_/dqa);
+  Serial.printf(" delta_q_inf/delta_q_abs%9.1f / %9.1f %8.4f, C\n", delta_q_inf_, delta_q_abs(), delta_q_inf_/delta_q_abs());
   Serial.printf(" delta_q_neg%9.1f C, time_neg%9.1f s\n", delta_q_neg_, time_neg_);
   Serial.printf(" delta_q_pos%9.1f C, time_pos%9.1f s\n", delta_q_pos_, time_pos_);
   Serial.printf(" mod %s\n", chem_.decode(mod_code()).c_str());
@@ -247,3 +240,17 @@ float Coulombs::count_coulombs(const double dt, const boolean reset_temp, const 
     *sp_t_last_ = temp_lim;
     return ( soc_ );
 }
+
+// Prevent overflows
+float nice_zero(const float in, const float thr)
+{
+    float out = thr;
+    if ( abs(in) < thr )
+    {
+      if ( in < 0. ) out = -thr; 
+    }
+    else
+      out = in;
+    return (out);
+}
+
