@@ -268,11 +268,8 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     break;
 
                 case ( 'a' ): // Xa<>:  injection amplitude
-                    if ( sp.Amp_p->success() )
-                    {
-                        sp.Amp_z *= sp.nP();
-                        Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
-                    }
+                    if ( sp.amp_p->success() )
+                        Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.amp_p->units(), sp.amp_p->description(), sp.Amp(), sp.Inj_bias());
                     break;
 
                 case ( 'f' ): //*  Xf<>:  injection frequency
@@ -280,11 +277,13 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     break;
 
                 case ( 'b' ): //*  Xb<>:  injection bias
-                    Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.Amp_p->units(), sp.Amp_p->description(), sp.Amp(), sp.Inj_bias());
+                    if ( sp.Inj_bias_p->success() )
+                        Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.amp_p->units(), sp.amp_p->description(), sp.Amp(), sp.Inj_bias());
                     break;
 
                 case ( 'Q' ): //  XQ<>: time to quiet
-                    Serial.printf("Going black in %7.1f seconds\n", float(ap.until_q) / 1000.);
+                    if ( ap.until_q_p->success() )
+                        Serial.printf("Going black in %7.1f seconds\n", float(ap.until_q) / 1000.);
                     break;
             }
             break;

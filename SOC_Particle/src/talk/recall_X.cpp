@@ -48,50 +48,13 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             switch ( INT_in )
             {
 
-                case ( -1 ):  // Xp-1:  full reset
-                    chit("Xp0;", ASAP);
-                    chit("Ca.5;", SOON);
-                    chit("Xm0;", SOON);
-                    break;
-
                 case ( 0 ):  // Xp0:  reset stop
                     Serial.printf("**************Xp0\n");
-                    chit("Xf0;Xa0;Xtn;", ASAP);
+                    chit("Xf0;Xtn;", ASAP);
                     if ( !sp.tweak_test() ) chit("Xb0;", ASAP);
                     chit("BZ;", SOON);
                     chit("Dh1800000;", SOON);
                     break;
-
-                #ifndef CONFIG_PHOTON
-                case ( 2 ):  // Xp2:  
-                    chit("Xp0;", QUEUE);
-                    chit("Xtc;", QUEUE);
-                    chit("DI-40;", QUEUE);
-                    chit("Rs", QUEUE);
-                    break;
-
-                case ( 3 ):  // Xp3:  
-                    chit("Xp0;", QUEUE);
-                    chit("Xtc;", QUEUE);
-                    chit("DI40;", QUEUE);
-                    chit("Rs", QUEUE);
-                    break;
-
-                case ( 4 ):  // Xp4:  
-                    chit("Xp0;", QUEUE);
-                    chit("Xtc;", QUEUE);
-                    chit("DI-100;", QUEUE);
-                    chit("Rs", QUEUE);
-                    break;
-
-                case ( 5 ):  // Xp5:  
-                    chit("Xp0;", QUEUE);
-                    chit("Xtc;", QUEUE);
-                    chit("DI100;", QUEUE);
-                    chit("Rs", QUEUE);
-                    break;
-
-                #endif
 
                 case ( 6 ):  // Xp6:  Program a pulse for EKF test
                     chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;Dr100;DP20;vv4;", QUEUE);  // setup
@@ -173,7 +136,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     chit("Pa;", QUEUE);       // Print all for record
                     if ( INT_in == 20 )
                     {
-                        chit("Dr500;", QUEUE);  // 5x sample time, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Photon
+                        chit("Dr500;", QUEUE);  // 5x sample time, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Python
                         chit("DP4;", QUEUE);    // 4x data collection, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Python
                         chit("vv2;", QUEUE);     // Large data set
                     }

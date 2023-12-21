@@ -154,7 +154,7 @@ public:
     ~SavedPars();
  
     // parameter list
-    float Amp() { return Amp_z; }
+    float Amp() { return amp_z * nP_z; }
     float Cutback_gain_slr() { return Cutback_gain_slr_z; }
     int Debug() { return Debug_z;}
     double Delta_q() { return Delta_q_z;}
@@ -206,9 +206,8 @@ public:
     void reset_flt();
     void reset_his();
     virtual void set_nominal();
-
-    float Ib_hist_slr() { if ( Modeling() == 255 ) return 40.; else return 1.; }
-    float Vb_hist_slr() { if ( Modeling() == 255 ) return 2.; else return 1.; }
+    float ib_hist_slr() { if ( abs(amp_z) > 40. ) return 30000./abs(amp_z); else return 600.; }
+    float vb_hist_slr() { if ( abs(amp_z) > 40. ) return 1500./abs(amp_z); else return 1200.; }
     boolean mod_all_dscn() { return ( 111<Modeling() ); }                // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
     boolean mod_any_dscn() { return ( 15<Modeling() ); }                 // Bare any
@@ -233,7 +232,7 @@ public:
 
     // put
     void put_all_dynamic();
-    void put_Amp(const float input) { Amp_p->check_set_put(input); }
+    void put_amp(const float input) { amp_p->check_set_put(input); }
     void put_Cutback_gain_slr(const float input) { Cutback_gain_slr_p->check_set_put(input); }
     void put_Debug(const int input) { Debug_p->check_set_put(input); }
     void put_Delta_q(const double input) { Delta_q_p->check_set_put(input); }
@@ -283,7 +282,7 @@ public:
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
     boolean tweak_test() { return ( 1<<3 & Modeling() ); } // Driving signal injection completely using software inj_bias 
-    FloatZ *Amp_p;
+    FloatZ *amp_p;
     FloatZ *Cutback_gain_slr_p;
     IntZ *Debug_p;
     DoubleZ *Delta_q_p;
@@ -317,7 +316,7 @@ public:
     FloatZ *Vb_scale_p;
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
-    float Amp_z;
+    float amp_z;
     float Cutback_gain_slr_z;
     int Debug_z;
     double Delta_q_z;

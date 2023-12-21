@@ -204,20 +204,13 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   #endif
 
-  sp.Amp_p->print_help();  //* Xa
+  sp.amp_p->print_help();  //* Xa
   sp.Freq_p->print_help();  //* Xf
   sp.Type_p->print_help();  //* Xt
 
   #ifndef HELPLESS
   Serial.printf(" Xp= <?>, scripted tests...\n"); 
-  Serial.printf("  Xp-1: Off, modeling false\n");
   Serial.printf("  Xp0: reset tests\n");
-  #ifndef CONFIG_PHOTON
-    Serial.printf("  Xp2: -0.4C soft disch, reset xp0 or Di0\n");
-    Serial.printf("  Xp3: +0.4C soft chg\n");
-    Serial.printf("  Xp4: -1C soft disch, reset xp0 or Di0\n");
-    Serial.printf("  Xp5: +1C soft chg\n");
-  #endif
   Serial.printf("  Xp6: +/-500 A pulse EKF\n");
   Serial.printf("  Xp7: +/-500 A sw pulse SS\n");
   Serial.printf("  Xp8: +/-500 A hw pulse SS\n");

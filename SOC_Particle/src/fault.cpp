@@ -35,18 +35,18 @@ void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
   time_long_2_str(now, buffer);
   this->t = (unsigned long int) now;
   this->Tb_hdwe = int16_t(Sen->Tb_hdwe*600.);
-  this->vb_hdwe = int16_t(Sen->Vb/sp.nS()*1200./sp.Vb_hist_slr());
-  this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/sp.nP()*600./sp.Ib_hist_slr());
-  this->ib_noa_hdwe = int16_t(Sen->Ib_noa_hdwe/sp.nP()*600./sp.Ib_hist_slr());
+  this->vb_hdwe = int16_t(Sen->Vb/sp.nS()*sp.vb_hist_slr());
+  this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/sp.nP()*sp.ib_hist_slr());
+  this->ib_noa_hdwe = int16_t(Sen->Ib_noa_hdwe/sp.nP()*sp.ib_hist_slr());
   this->Tb = int16_t(Sen->Tb*600.);
-  this->vb = int16_t(Sen->Vb/sp.nS()*1200./sp.Vb_hist_slr());
-  this->ib = int16_t(Sen->Ib/sp.nP()*600./sp.Ib_hist_slr());
+  this->vb = int16_t(Sen->Vb/sp.nS()*sp.vb_hist_slr());
+  this->ib = int16_t(Sen->Ib/sp.nP()*sp.ib_hist_slr());
   this->soc = int16_t(Mon->soc()*16000.);
   this->soc_min = int16_t(Mon->soc_min()*16000.);
   this->soc_ekf = int16_t(Mon->soc_ekf()*16000.);
-  this->voc = int16_t(Mon->voc()*1200./sp.Vb_hist_slr());
-  this->voc_stat = int16_t(Mon->voc_stat()*1200./sp.Vb_hist_slr());
-  this->e_wrap_filt = int16_t(Sen->Flt->e_wrap_filt()*1200./sp.Vb_hist_slr());
+  this->voc = int16_t(Mon->voc()*sp.vb_hist_slr());
+  this->voc_stat = int16_t(Mon->voc_stat()*sp.vb_hist_slr());
+  this->e_wrap_filt = int16_t(Sen->Flt->e_wrap_filt()*sp.vb_hist_slr());
   this->fltw = Sen->Flt->fltw();
   this->falw = Sen->Flt->falw();
 }
@@ -105,18 +105,18 @@ void Flt_st::pretty_print(const String code)
     Serial.printf("buffer %s\n", buffer);
     Serial.printf("t %ld\n", this->t);
     Serial.printf("Tb_hdwe %7.3f\n", float(this->Tb_hdwe)/600.);
-    Serial.printf("vb_hdwe %7.3f\n", float(this->vb_hdwe)/1200./sp.Vb_hist_slr());
-    Serial.printf("ib_amp_hdwe %7.3f\n", float(this->ib_amp_hdwe)/600.*sp.Ib_hist_slr());
-    Serial.printf("ib_noa_hdwe %7.3f\n", float(this->ib_noa_hdwe)/600.*sp.Ib_hist_slr());
+    Serial.printf("vb_hdwe %7.3f\n", float(this->vb_hdwe)/sp.vb_hist_slr());
+    Serial.printf("ib_amp_hdwe %7.3f\n", float(this->ib_amp_hdwe)/sp.ib_hist_slr());
+    Serial.printf("ib_noa_hdwe %7.3f\n", float(this->ib_noa_hdwe)/sp.ib_hist_slr());
     Serial.printf("Tb %7.3f\n", float(this->Tb)/600.);
-    Serial.printf("vb %7.3f\n", float(this->vb)/1200./sp.Vb_hist_slr());
-    Serial.printf("ib %7.3f\n", float(this->ib)/600.*sp.Ib_hist_slr());
+    Serial.printf("vb %7.3f\n", float(this->vb)/sp.vb_hist_slr());
+    Serial.printf("ib %7.3f\n", float(this->ib)/sp.ib_hist_slr());
     Serial.printf("soc %7.4f\n", float(this->soc)/16000.);
     Serial.printf("soc_min %7.4f\n", float(this->soc_min)/16000.);
     Serial.printf("soc_ekf %7.4f\n", float(this->soc_ekf)/16000.);
-    Serial.printf("voc %7.3f\n", float(this->voc)/1200./sp.Vb_hist_slr());
-    Serial.printf("voc_stat %7.3f\n", float(this->voc_stat)/1200./sp.Vb_hist_slr());
-    Serial.printf("e_wrap_filt %7.3f\n", float(this->e_wrap_filt)/1200./sp.Vb_hist_slr());
+    Serial.printf("voc %7.3f\n", float(this->voc)/sp.vb_hist_slr());
+    Serial.printf("voc_stat %7.3f\n", float(this->voc_stat)/sp.vb_hist_slr());
+    Serial.printf("e_wrap_filt %7.3f\n", float(this->e_wrap_filt)/sp.vb_hist_slr());
     Serial.printf("fltw %d falw %d\n", this->fltw, this->falw);
   }
 }
@@ -131,35 +131,35 @@ void Flt_st::print(const String code)
     Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
       code.c_str(), buffer, this->t,
       float(this->Tb_hdwe)/600.,
-      float(this->vb_hdwe)/1200.*sp.Vb_hist_slr(),
-      float(this->ib_amp_hdwe)/600.*sp.Ib_hist_slr(),
-      float(this->ib_noa_hdwe)/600.*sp.Ib_hist_slr(),
+      float(this->vb_hdwe)/sp.vb_hist_slr(),
+      float(this->ib_amp_hdwe)/sp.ib_hist_slr(),
+      float(this->ib_noa_hdwe)/sp.ib_hist_slr(),
       float(this->Tb)/600.,
-      float(this->vb)/1200.*sp.Vb_hist_slr(),
-      float(this->ib)/600.*sp.Ib_hist_slr(),
+      float(this->vb)/sp.vb_hist_slr(),
+      float(this->ib)/sp.ib_hist_slr(),
       float(this->soc)/16000.,
       float(this->soc_min)/16000.,
       float(this->soc_ekf)/16000.,
-      float(this->voc)/1200.*sp.Vb_hist_slr(),
-      float(this->voc_stat)/1200.*sp.Vb_hist_slr(),
-      float(this->e_wrap_filt)/1200.*sp.Vb_hist_slr(),
+      float(this->voc)/sp.vb_hist_slr(),
+      float(this->voc_stat)/sp.vb_hist_slr(),
+      float(this->e_wrap_filt)/sp.vb_hist_slr(),
       this->fltw,
       this->falw);
     Serial1.printf("unit_f, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
       buffer, this->t,
       float(this->Tb_hdwe)/600.,
-      float(this->vb_hdwe)/1200.*sp.Vb_hist_slr(),
-      float(this->ib_amp_hdwe)/600.*sp.Ib_hist_slr(),
-      float(this->ib_noa_hdwe)/600.*sp.Ib_hist_slr(),
+      float(this->vb_hdwe)/sp.vb_hist_slr(),
+      float(this->ib_amp_hdwe)/sp.ib_hist_slr(),
+      float(this->ib_noa_hdwe)/sp.ib_hist_slr(),
       float(this->Tb)/600.,
-      float(this->vb)/1200.*sp.Vb_hist_slr(),
-      float(this->ib)/600.*sp.Ib_hist_slr(),
+      float(this->vb)/sp.vb_hist_slr(),
+      float(this->ib)/sp.ib_hist_slr(),
       float(this->soc)/16000.,
       float(this->soc_min)/16000.,
       float(this->soc_ekf)/16000.,
-      float(this->voc)/1200.*sp.Vb_hist_slr(),
-      float(this->voc_stat)/1200.*sp.Vb_hist_slr(),
-      float(this->e_wrap_filt)/1200.*sp.Vb_hist_slr(),
+      float(this->voc)/sp.vb_hist_slr(),
+      float(this->voc_stat)/sp.vb_hist_slr(),
+      float(this->e_wrap_filt)/sp.vb_hist_slr(),
       this->fltw,
       this->falw);
   }

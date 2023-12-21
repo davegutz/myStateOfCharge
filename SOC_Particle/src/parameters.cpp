@@ -240,7 +240,7 @@ void SavedPars::initialize()
 {
     #define NSAV 32
     Z_ = new Z*[NSAV];
-    Z_[n_++] =(Amp_p            = new FloatZ("* ", "Xa", rP_, "Inj amp",              "Amps pk",-1e6, 1e6,  &Amp_z,         0));
+    Z_[n_++] =(amp_p            = new FloatZ("* ", "Xa", rP_, "Inj amp",              "Amps pk",-1e6, 1e6,  &amp_z,         0));
     Z_[n_++] =(Cutback_gain_slr_p=new FloatZ("* ", "Sk", rP_, "Cutback gain scalar",  "slr",    -1e6, 1e6,  &Cutback_gain_slr_z,1));
     Z_[n_++] =(Debug_p            = new IntZ("* ", "vv", rP_, "Verbosity",            "int",    -128, 128,  &Debug_z,       0));
     Z_[n_++] =(Delta_q_model_p = new DoubleZ("* ", "qs", rP_, "Charge chg Sim",       "C",      -1e8, 1e5,  &Delta_q_model_z, 0,                false));
