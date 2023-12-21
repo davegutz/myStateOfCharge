@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #include "application.h"
-#include "../mySubs.h"
+#include "../subs.h"
 #include "../command.h"
 #include "../parameters.h"
 #include "../debug.h"

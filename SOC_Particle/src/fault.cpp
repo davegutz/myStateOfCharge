@@ -22,8 +22,8 @@
 // SOFTWARE.
 
 #include "application.h"
-#include "fault.h"
-#include "mySensors.h"
+#include "Fault.h"
+#include "Sensors.h"
 
 extern SavedPars sp;       // Various parameters to be static at system level and saved through power cycle
 extern VolatilePars ap; // Various adjustment parameters shared at system level
@@ -31,8 +31,7 @@ extern VolatilePars ap; // Various adjustment parameters shared at system level
 // struct Flt_st.  This file needed to avoid circular reference to sp in header files
 void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
 {
-  char buffer[32];
-  time_long_2_str(now, buffer);
+  time_long_2_str(now, pr.buff);  // TODO: does this do anything/
   this->t = (unsigned long int) now;
   this->Tb_hdwe = int16_t(Sen->Tb_hdwe*600.);
   this->vb_hdwe = int16_t(Sen->Vb/sp.nS()*sp.vb_hist_slr());
@@ -97,12 +96,12 @@ void Flt_st::nominal()
 // Print functions
 void Flt_st::pretty_print(const String code)
 {
-  char buffer[32] = "---";
+  strcpy(pr.buff, "---");
   if ( this->t > 1UL )
   {
-    time_long_2_str(this->t, buffer);
+    time_long_2_str(this->t, pr.buff);
     Serial.printf("code %s\n", code.c_str());
-    Serial.printf("buffer %s\n", buffer);
+    Serial.printf("buffer %s\n", pr.buff);
     Serial.printf("t %ld\n", this->t);
     Serial.printf("Tb_hdwe %7.3f\n", float(this->Tb_hdwe)/600.);
     Serial.printf("vb_hdwe %7.3f\n", float(this->vb_hdwe)/sp.vb_hist_slr());
@@ -124,12 +123,12 @@ void Flt_st::pretty_print(const String code)
 
 void Flt_st::print(const String code)
 {
-  char buffer[32] = "---";
+  strcpy(pr.buff, "---");
   if ( this->t > 1UL )
   {
-    time_long_2_str(this->t, buffer);
+    time_long_2_str(this->t, pr.buff);
     Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
-      code.c_str(), buffer, this->t,
+      code.c_str(), pr.buff, this->t,
       float(this->Tb_hdwe)/600.,
       float(this->vb_hdwe)/sp.vb_hist_slr(),
       float(this->ib_amp_hdwe)/sp.ib_hist_slr(),
@@ -146,7 +145,7 @@ void Flt_st::print(const String code)
       this->fltw,
       this->falw);
     Serial1.printf("unit_f, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
-      buffer, this->t,
+      pr.buff, this->t,
       float(this->Tb_hdwe)/600.,
       float(this->vb_hdwe)/sp.vb_hist_slr(),
       float(this->ib_amp_hdwe)/sp.ib_hist_slr(),

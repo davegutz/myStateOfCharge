@@ -26,9 +26,9 @@
 
 #include "local_config.h"
 #include "Battery.h"
-#include "fault.h"
+#include "Fault.h"
 #include "PrinterPars.h"
-#include "Z.h"
+#include "Variable.h"
 
 void app_no();
 void app_mon_chem();
@@ -46,7 +46,7 @@ public:
     void set_nominal();
 protected:
     int8_t n_;
-    Z **Z_;
+    Variable **V_;
 };
 
 
@@ -97,43 +97,43 @@ public:
     float vb_add;               // Fault injection bias, V
     float Vb_noise_amp;         // Vb bank noise amplitude model only, V pk-pk
     unsigned long int wait_inj; // Wait before start injection, ms
-    FloatZ *cc_diff_slr_p;
-    FloatZ *cycles_inj_p;
-    BooleanZ *dc_dc_on_p;
-    BooleanZ *disab_ib_fa_p;
-    BooleanZ *disab_tb_fa_p;
-    BooleanZ *disab_vb_fa_p;
-    FloatZ *ds_voc_soc_p;
-    FloatZ *dv_voc_soc_p;
-    Uint8tZ *eframe_mult_p;
-    FloatZ *ewhi_slr_p;
-    FloatZ *ewlo_slr_p;
-    BooleanZ *fail_tb_p;
-    BooleanZ *fake_faults_p;
-    ULongZ *his_delay_p;
-    FloatZ *hys_scale_p;
-    FloatZ *hys_state_p;
-    FloatZ *ib_amp_add_p;
-    FloatZ *ib_diff_slr_p;
-    FloatZ *ib_noa_add_p;
-    FloatZ *Ib_amp_noise_amp_p;
-    FloatZ *Ib_noa_noise_amp_p;
-    FloatZ *ib_quiet_slr_p;
-    FloatZ *init_all_soc_p;
-    FloatZ *init_sim_soc_p;
-    Uint8tZ *print_mult_p;
-    ULongZ *read_delay_p;
-    FloatZ *slr_res_p;
-    FloatZ *s_t_sat_p;
-    ULongZ *tail_inj_p;
-    ULongZ *talk_delay_p;
-    FloatZ *Tb_bias_model_p;
-    FloatZ *Tb_noise_amp_p;
-    FloatZ *tb_stale_time_slr_p;
-    ULongZ *until_q_p;
-    FloatZ *vb_add_p;
-    FloatZ *Vb_noise_amp_p;
-    ULongZ *wait_inj_p;
+    FloatV *cc_diff_slr_p;
+    FloatV *cycles_inj_p;
+    BooleanV *dc_dc_on_p;
+    BooleanV *disab_ib_fa_p;
+    BooleanV *disab_tb_fa_p;
+    BooleanV *disab_vb_fa_p;
+    FloatV *ds_voc_soc_p;
+    FloatV *dv_voc_soc_p;
+    Uint8tV *eframe_mult_p;
+    FloatV *ewhi_slr_p;
+    FloatV *ewlo_slr_p;
+    BooleanV *fail_tb_p;
+    BooleanV *fake_faults_p;
+    ULongV *his_delay_p;
+    FloatV *hys_scale_p;
+    FloatV *hys_state_p;
+    FloatV *ib_amp_add_p;
+    FloatV *ib_diff_slr_p;
+    FloatV *ib_noa_add_p;
+    FloatV *Ib_amp_noise_amp_p;
+    FloatV *Ib_noa_noise_amp_p;
+    FloatV *ib_quiet_slr_p;
+    FloatV *init_all_soc_p;
+    FloatV *init_sim_soc_p;
+    Uint8tV *print_mult_p;
+    ULongV *read_delay_p;
+    FloatV *slr_res_p;
+    FloatV *s_t_sat_p;
+    ULongV *tail_inj_p;
+    ULongV *talk_delay_p;
+    FloatV *Tb_bias_model_p;
+    FloatV *Tb_noise_amp_p;
+    FloatV *tb_stale_time_slr_p;
+    ULongV *until_q_p;
+    FloatV *vb_add_p;
+    FloatV *Vb_noise_amp_p;
+    ULongV *wait_inj_p;
 
 protected:
 };
@@ -282,38 +282,38 @@ public:
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
     boolean tweak_test() { return ( 1<<3 & modeling() ); } // Driving signal injection completely using software inj_bias 
-    FloatZ *amp_p;
-    FloatZ *cutback_gain_slr_p;
-    IntZ *debug_p;
-    DoubleZ *delta_q_p;
-    DoubleZ *delta_q_model_p;
-    FloatZ *Dw_p;
-    FloatZ *freq_p;
-    FloatZ *ib_bias_all_p;
-    FloatZ *ib_bias_amp_p;
-    FloatZ *ib_bias_noa_p;
-    FloatZ *ib_scale_amp_p;
-    FloatZ *ib_scale_noa_p;
-    Int8tZ *ib_select_p;
-    Uint16tZ *iflt_p;
-    Uint16tZ *ihis_p;
-    FloatZ *inj_bias_p;
-    Uint16tZ *isum_p;
-    Uint8tZ *modeling_p;
-    Uint8tZ *Mon_chm_p;
-    FloatZ *nP_p;
-    FloatZ *nS_p;
-    Uint8tZ *preserving_p;
-    Uint8tZ *Sim_chm_p;
-    FloatZ *s_cap_mon_p;
-    FloatZ *s_cap_sim_p;
-    FloatZ *Tb_bias_hdwe_p;
-    ULongZ *Time_now_p;
-    FloatZ *T_state_p;
-    FloatZ *T_state_model_p;
-    Uint8tZ *Type_p;
-    FloatZ *Vb_bias_hdwe_p;
-    FloatZ *Vb_scale_p;
+    FloatV *amp_p;
+    FloatV *cutback_gain_slr_p;
+    IntV *debug_p;
+    DoubleV *delta_q_p;
+    DoubleV *delta_q_model_p;
+    FloatV *Dw_p;
+    FloatV *freq_p;
+    FloatV *ib_bias_all_p;
+    FloatV *ib_bias_amp_p;
+    FloatV *ib_bias_noa_p;
+    FloatV *ib_scale_amp_p;
+    FloatV *ib_scale_noa_p;
+    Int8tV *ib_select_p;
+    Uint16tV *iflt_p;
+    Uint16tV *ihis_p;
+    FloatV *inj_bias_p;
+    Uint16tV *isum_p;
+    Uint8tV *modeling_p;
+    Uint8tV *Mon_chm_p;
+    FloatV *nP_p;
+    FloatV *nS_p;
+    Uint8tV *preserving_p;
+    Uint8tV *Sim_chm_p;
+    FloatV *s_cap_mon_p;
+    FloatV *s_cap_sim_p;
+    FloatV *Tb_bias_hdwe_p;
+    ULongV *Time_now_p;
+    FloatV *T_state_p;
+    FloatV *T_state_model_p;
+    Uint8tV *Type_p;
+    FloatV *Vb_bias_hdwe_p;
+    FloatV *Vb_scale_p;
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
     float amp_z;

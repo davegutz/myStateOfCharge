@@ -242,6 +242,18 @@ float Coulombs::count_coulombs(const double dt, const boolean reset_temp, const 
 }
 
 // Prevent overflows
+double nice_zero(const double in, const double thr)
+{
+    double out = thr;
+    if ( abs(in) < thr )
+    {
+      if ( in < 0. ) out = -thr; 
+    }
+    else
+      out = in;
+    return (out);
+}
+
 float nice_zero(const float in, const float thr)
 {
     float out = thr;

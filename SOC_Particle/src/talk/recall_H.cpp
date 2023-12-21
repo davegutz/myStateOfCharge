@@ -23,7 +23,7 @@
 #include "application.h"
 #include "recall_H.h"
 #include "../command.h"
-#include "../mySummary.h"
+#include "../Summary.h"
 #include "../parameters.h"
 
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle

@@ -21,8 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "mySubs.h"
-#include "myCloud.h"
+#include "subs.h"
+#include "Cloud.h"
 #include "constants.h"
 #include <math.h>
 

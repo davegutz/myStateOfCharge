@@ -21,12 +21,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "mySubs.h"
+#include "subs.h"
 #include "command.h"
 #include "local_config.h"
 #include <math.h>
 #include "debug.h"
-#include "mySummary.h"
+#include "Summary.h"
 
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 extern VolatilePars ap; // Various adjustment parameters shared at system level
@@ -160,7 +160,7 @@ double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now
   // Convert the string
   time_long_2_str(*current_time, tempStr);
 
-  // Convert the decimal
+  // Convert to decimal
   static double cTimeInit = ((( (double(year-2021)*12 + double(month))*30.4375 + double(day))*24.0 + double(hours))*60.0 + double(minutes))*60.0 + \
                       double(seconds) + double(now-millis_flip)/1000.;
   // Ignore Time.now if corrupt

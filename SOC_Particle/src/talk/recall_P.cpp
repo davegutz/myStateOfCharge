@@ -22,10 +22,10 @@
 // SOFTWARE.
 #include "application.h"
 #include "recall_P.h"
-#include "../mySubs.h"
+#include "../subs.h"
 #include "../command.h"
 #include "../local_config.h"
-#include "../mySummary.h"
+#include "../Summary.h"
 #include "../parameters.h"
 #include <math.h>
 #include "../debug.h"

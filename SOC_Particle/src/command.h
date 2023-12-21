@@ -24,9 +24,9 @@
 #ifndef _COMMAND_H
 #define _COMMAND_H
 
-#include "myCloud.h"
+#include "Cloud.h"
 #include "constants.h"
-#include "Z.h"
+#include "Variable.h"
 
 // DS2482 data union
 typedef union {

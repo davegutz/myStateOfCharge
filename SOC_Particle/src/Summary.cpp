@@ -21,16 +21,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "Summary.h"
+#include "parameters.h"
 
-#ifndef _MY_SUMMARY_H
-#define _MY_SUMMARY_H
+// print helper
+void print_all_fault_buffer(const String code, struct Flt_st *flt, const uint16_t iflt, const uint16_t nflt)
+{
+Serial.printf("print_all_fault_buffer: iflt %d nflt %d\n", iflt, nflt);
+  uint16_t i = iflt;  // Last one written was iflt
+  uint16_t n = 0;
+  while ( n++ < nflt )
+  {
+    if ( ++i > (nflt-1) ) i = 0; // circular buffer
+    flt[i].print(code);
+  }
+}
 
-#include "mySensors.h"
-#include "command.h"
-#include "fault.h"
-
-// Function prototypes
-void print_all_fault_buffer(const String code, struct Flt_st *sum, const uint16_t iflt, const uint16_t nflt);
-void reset_all_fault_buffer(const String code, struct Flt_st *sum, const uint16_t iflt, const uint16_t nflt);
-
-#endif
+void reset_all_fault_buffer(const String code, struct Flt_st *flt, const uint16_t iflt, const uint16_t nflt)
+{
+  uint16_t i = iflt;  // Last one written was iflt
+  uint16_t n = 0;
+  while ( n++ < nflt )
+  {
+    if ( ++i > (nflt-1) ) i = 0; // circular buffer
+    flt[i].put_nominal();
+  }
+}

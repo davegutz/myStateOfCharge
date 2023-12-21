@@ -98,7 +98,7 @@ bool FatFile::parsePathName(const char* path, fname_t* fname,
       if ('a' <= c && c <= 'z') {
         c += 'A' - 'a';
         lc |= bit;
-      } else if ('A' <= c && c <= 'Z') {
+      } else if ('A' <= c && c <= 'Variable') {
         uc |= bit;
       }
       fname->sfn[i++] = c;

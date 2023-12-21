@@ -1,4 +1,3 @@
-//
 // MIT License
 //
 // Copyright (C) 2023 - Dave Gutz
@@ -20,30 +19,40 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+//
+// 17-Feb-2021  Dave Gutz   Create
 
-#include "mySummary.h"
-#include "parameters.h"
+#ifndef _SYNC_H
+#define _SYNC_H
 
-// print helper
-void print_all_fault_buffer(const String code, struct Flt_st *flt, const uint16_t iflt, const uint16_t nflt)
+// Duct Sim Class
+class Sync
 {
-Serial.printf("print_all_fault_buffer: iflt %d nflt %d\n", iflt, nflt);
-  uint16_t i = iflt;  // Last one written was iflt
-  uint16_t n = 0;
-  while ( n++ < nflt )
-  {
-    if ( ++i > (nflt-1) ) i = 0; // circular buffer
-    flt[i].print(code);
-  }
-}
+public:
+  // Constructors
+  Sync(void);
+  Sync(unsigned long delay);
+  // Functions
+  boolean update(boolean reset, unsigned long now, boolean andCheck);
+  boolean update(unsigned long now, boolean reset, boolean andCheck);
+  boolean update(unsigned long now, boolean reset);
+  boolean updateN(unsigned long now, boolean reset, boolean orCheck);
+  unsigned long delay() { return(delay_); };
+  void delay(unsigned long new_delay) { delay_ = new_delay; updateTimeInput_ = float(delay_)/1000.; };
+  unsigned long last() { return(last_); };
+  boolean stat() { return(stat_); };
+  unsigned long updateDiff() { return(updateDiff_); };
+  double updateTime() { return(updateTime_); };
+  double updateTimeInput() { return(updateTimeInput_); };
+  unsigned long now() { return(now_); };
+private:
+  unsigned long delay_;
+  unsigned long last_;
+  unsigned long now_;
+  boolean stat_;
+  unsigned long updateDiff_;
+  double updateTime_;
+  double updateTimeInput_;
+};
 
-void reset_all_fault_buffer(const String code, struct Flt_st *flt, const uint16_t iflt, const uint16_t nflt)
-{
-  uint16_t i = iflt;  // Last one written was iflt
-  uint16_t n = 0;
-  while ( n++ < nflt )
-  {
-    if ( ++i > (nflt-1) ) i = 0; // circular buffer
-    flt[i].put_nominal();
-  }
-}
+#endif

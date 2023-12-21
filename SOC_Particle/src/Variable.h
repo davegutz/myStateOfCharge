@@ -21,8 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef Z_H_
-#define Z_H_
+#ifndef VARIABLE_H_
+#define VARIABLE_H_
 
 #include "hardware/SerialRAM.h"
 #include "PrinterPars.h"
@@ -39,12 +39,12 @@ typedef void (*fptr)();
 /* Using pointers in building class so all that stuff does not get saved by 'retained' keyword in SOC_Particle.ino.
     Only the *_z parameters at the bottom of Parameters.h are stored in SRAM.  Class initialized by *init in arg list.
 */
-class Z
+class Variable
 {
 public:
-    Z(){}
+    Variable(){}
 
-    Z(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units,
+    Variable(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units,
         const boolean check_for_off_on_init=true)
     {
         prefix_ = prefix;
@@ -57,7 +57,7 @@ public:
         // app_ = app;
     }
 
-    ~Z(){}
+    ~Variable(){}
 
     fptr app_;
     fptr app() { return app_; }
@@ -91,14 +91,14 @@ protected:
 };
 
 
-class BooleanZ: public Z
+class BooleanV: public Variable
 {
 public:
-    BooleanZ(){}
+    BooleanV(){}
 
-    BooleanZ(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean min, const boolean max,
+    BooleanV(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const boolean min, const boolean max,
     boolean *store, const boolean _default=false, const boolean check_for_off_on_init=true):
-        Z(prefix, code, ram, description, units, check_for_off_on_init)
+        Variable(prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
@@ -107,7 +107,7 @@ public:
         if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
-    ~BooleanZ(){}
+    ~BooleanV(){}
 
     uint16_t assign_addr(boolean next)
     {
@@ -220,14 +220,14 @@ protected:
 };
 
 
-class DoubleZ: public Z
+class DoubleV: public Variable
 {
 public:
-    DoubleZ(){}
+    DoubleV(){}
 
-    DoubleZ(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, double *store,
+    DoubleV(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const double min, const double max, double *store,
         const double _default=0, const boolean check_for_off_on_init=true):
-        Z(prefix, code, ram, description, units, check_for_off_on_init)
+        Variable(prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
@@ -236,7 +236,7 @@ public:
         if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
-    ~DoubleZ(){}
+    ~DoubleV(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -352,14 +352,14 @@ protected:
 };
 
 
-class FloatZ: public Z
+class FloatV: public Variable
 {
 public:
-    FloatZ(){}
+    FloatV(){}
 
-    FloatZ(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+    FloatV(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
     float *store, const float _default=0, const boolean check_for_off_on_init=true):
-        Z(prefix, code, ram, description, units, check_for_off_on_init)
+        Variable(prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
@@ -368,7 +368,7 @@ public:
         if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
-    ~FloatZ(){}
+    ~FloatV(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -484,14 +484,14 @@ protected:
 };
 
 
-class IntZ: public Z
+class IntV: public Variable
 {
 public:
-    IntZ(){}
+    IntV(){}
 
-    IntZ(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
+    IntV(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
         const int _default=0, const boolean check_for_off_on_init=true):
-        Z(prefix, code, ram, description, units, check_for_off_on_init)
+        Variable(prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
@@ -500,7 +500,7 @@ public:
         if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
-    ~IntZ(){}
+    ~IntV(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -615,14 +615,14 @@ protected:
 };
 
 
-class Int8tZ: public Z
+class Int8tV: public Variable
 {
 public:
-    Int8tZ(){}
+    Int8tV(){}
 
-    Int8tZ(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
+    Int8tV(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
         int8_t *store, const int8_t _default=0, const boolean check_for_off_on_init=true):
-        Z(prefix, code, ram, description, units, check_for_off_on_init)
+        Variable(prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
@@ -631,7 +631,7 @@ public:
         if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
-    ~Int8tZ(){}
+    ~Int8tV(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -747,14 +747,14 @@ protected:
 };
 
 
-class Uint16tZ: public Z
+class Uint16tV: public Variable
 {
 public:
-    Uint16tZ(){}
+    Uint16tV(){}
 
-    Uint16tZ(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
+    Uint16tV(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
     uint16_t *store, const uint16_t _default=0, const boolean check_for_off_on_init=true):
-        Z(prefix, code, ram, description, units, check_for_off_on_init)
+        Variable(prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
@@ -763,7 +763,7 @@ public:
         if ( check_for_off_on_init_ ) check_set_put(*val_);
      }
 
-    ~Uint16tZ(){}
+    ~Uint16tV(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -875,14 +875,14 @@ protected:
     uint16_t default_;
 };
 
-class Uint8tZ: public Z
+class Uint8tV: public Variable
 {
 public:
-    Uint8tZ(){}
+    Uint8tV(){}
 
-    Uint8tZ(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
+    Uint8tV(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
     uint8_t *store, const uint8_t _default=0, const boolean check_for_off_on_init=true):
-        Z(prefix, code, ram, description, units, check_for_off_on_init)
+        Variable(prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
@@ -891,7 +891,7 @@ public:
         if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
-    ~Uint8tZ(){}
+    ~Uint8tV(){}
 
     uint16_t assign_addr(uint16_t next)
     {
@@ -1004,14 +1004,14 @@ protected:
 };
 
 
-class ULongZ: public Z
+class ULongV: public Variable
 {
 public:
-    ULongZ(){}
+    ULongV(){}
 
-    ULongZ(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
+    ULongV(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
     unsigned long *store, const unsigned long _default=0, const boolean check_for_off_on_init=true):
-        Z(prefix, code, ram, description, units, check_for_off_on_init)
+        Variable(prefix, code, ram, description, units, check_for_off_on_init)
     {
         min_ = min;
         max_ = max;
@@ -1020,7 +1020,7 @@ public:
         if ( check_for_off_on_init_ ) check_set_put(*val_);
     }
 
-    ~ULongZ(){}
+    ~ULongV(){}
 
     uint16_t assign_addr(uint16_t next)
     {

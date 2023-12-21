@@ -25,7 +25,7 @@
 
 #ifndef DEBUG_H_
 #define DEBUG_H_
-#include "mySubs.h"
+#include "subs.h"
 
 #ifdef DEBUG_INIT
     void debug_m1(BatteryMonitor *Mon, Sensors *Sen);

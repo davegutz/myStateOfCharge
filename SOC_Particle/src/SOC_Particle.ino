@@ -79,10 +79,10 @@
 #endif
 
 // Dependent includes.   Easier to sp.debug code if remove unused include files
-#include "mySync.h"
-#include "mySubs.h"
-#include "mySummary.h"
-#include "myCloud.h"
+#include "Sync.h"
+#include "subs.h"
+#include "Summary.h"
+#include "Cloud.h"
 #include "debug.h"
 #include "parameters.h"
 
@@ -187,7 +187,6 @@ void setup()
   //Log.info("setup Pins");
   #ifdef CONFIG_PHOTON2
     myPins = new Pins(D3, D7, D12, D11, D13);
-    // pinMode(D3, INPUT_PULLUP);
   #else
     myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
   #endif
@@ -236,7 +235,7 @@ void setup()
   // Synchronize clock
   // Device needs to be configured for wifi (hold setup 3 sec run Particle app) and in range of wifi
   // Phone hotspot is very convenient
-  //Log.info("setup WiFi or lack of");
+  Log.info("setup WiFi or lack of");
   WiFi.disconnect();
   delay(2000);
   WiFi.off();
@@ -246,6 +245,7 @@ void setup()
 
   // Clean boot logic.  This occurs only when doing a structural rebuild clean make on initial flash, because
   // the SRAM is not explicitly initialized.   This is by design, as SRAM must be remembered between boots
+  // Time is never changed by this operation.  It could be corrupt.  Change using "UT" talk feature.
   Serial.printf("Check corruption......");
   if ( sp.is_corrupt() ) 
   {
@@ -341,9 +341,8 @@ void loop()
   now = millis();
   time_now = Time.now();
   if ( now - last_sync > ONE_DAY_MILLIS || reset )  sync_time(now, &last_sync, &millis_flip); 
-  char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
-  Sen->control_time = decimalTime(&current_time, tempStr, Sen->now, millis_flip);
-  hm_string = String(tempStr);
+  Sen->control_time = decimalTime(&current_time, pr.buff, Sen->now, millis_flip);
+  hm_string = String(pr.buff);
   read_temp = ReadTemp->update(millis(), reset);
   read = ReadSensors->update(millis(), reset);
   chitchat = Talk->update(millis(), reset);

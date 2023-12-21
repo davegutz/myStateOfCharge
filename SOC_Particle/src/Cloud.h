@@ -1,5 +1,5 @@
-#ifndef my_cloud_h
-#define my_cloud_h
+#ifndef _cloud_h
+#define _cloud_h
 
 #include "Battery.h"
 

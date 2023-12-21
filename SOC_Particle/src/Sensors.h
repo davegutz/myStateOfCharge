@@ -27,10 +27,10 @@
 #include "myLibrary/myFilters.h"
 #include "Battery.h"
 #include "constants.h"
-#include "myCloud.h"
+#include "Cloud.h"
 #include "talk/transcribe.h"
 #include "command.h"
-#include "mySync.h"
+#include "Sync.h"
 #include "parameters.h"
 
 // Temp sensor

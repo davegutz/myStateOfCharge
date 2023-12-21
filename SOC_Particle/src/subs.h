@@ -27,14 +27,14 @@
 #include "myLibrary/myFilters.h"
 #include "Battery.h"
 #include "constants.h"
-#include "myCloud.h"
+#include "Cloud.h"
 #include "talk/transcribe.h"
 #include "parameters.h"
 #include "command.h"
-#include "mySync.h"
+#include "Sync.h"
 
 // Sensors
-#include "mySensors.h"
+#include "Sensors.h"
 
 // Display
 #include "Adafruit/Adafruit_GFX.h"

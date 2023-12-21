@@ -21,11 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "../mySubs.h"
+#include "../subs.h"
 #include "../command.h"
 #include "../Battery.h"
 #include "../local_config.h"
-#include "../mySummary.h"
+#include "../Summary.h"
 #include "../parameters.h"
 #include <math.h>
 #include "../debug.h"

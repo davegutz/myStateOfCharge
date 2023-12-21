@@ -23,7 +23,7 @@
 // 17-Feb-2021  Dave Gutz   Create
 
 #include "application.h"
-#include "mySync.h"
+#include "Sync.h"
 #include "parameters.h"
 extern SavedPars sp;  // Various parameters to be static at system level and saved through power cycle
 

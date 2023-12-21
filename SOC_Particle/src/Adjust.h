@@ -288,14 +288,14 @@ protected:
 };
 
 
-// class FloatZ: public Z
+// class FloatV: public Variable
 // {
 // public:
-//     FloatZ(){}
+//     FloatV(){}
 
-//     FloatZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+//     FloatV(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
 //     float *store, const float _default=0, const boolean no_check=false):
-//         Z(n, code, ram, description, units, false)
+//         Variable(n, code, ram, description, units, false)
 //     {
 //         min_ = min;
 //         max_ = max;
@@ -314,7 +314,7 @@ protected:
 //         pull_set_nominal();
 //     }
 
-//     ~FloatZ(){}
+//     ~FloatV(){}
 
 //     uint16_t assign_addr(uint16_t next)
 //     {
@@ -419,14 +419,14 @@ protected:
 // };
 
 
-// class FloatNoZ: public Z
+// class FloatNoV: public Variable
 // {
 // public:
-//     FloatNoZ(){}
+//     FloatNoV(){}
 
-//     FloatNoZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
+//     FloatNoV(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const float min, const float max,
 //     const float _default=0):
-//         Z(n, code, ram, description, units, false)
+//         Variable(n, code, ram, description, units, false)
 //     {
 //         min_ = min;
 //         max_ = max;
@@ -434,7 +434,7 @@ protected:
 //         prefix_ = "  ";
 //     }
 
-//     ~FloatNoZ(){}
+//     ~FloatNoV(){}
 
 //     uint16_t assign_addr(uint16_t next)
 //     {
@@ -485,14 +485,14 @@ protected:
 // };
 
 
-// class IntZ: public Z
+// class IntV: public Variable
 // {
 // public:
-//     IntZ(){}
+//     IntV(){}
 
-//     IntZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
+//     IntV(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const int min, const int max, int *store,
 //     const int _default=0, const boolean no_check=false):
-//         Z(n, code, ram, description, units, false)
+//         Variable(n, code, ram, description, units, false)
 //     {
 //         min_ = min;
 //         max_ = max;
@@ -511,7 +511,7 @@ protected:
 //         pull_set_nominal();
 //     }
 
-//     ~IntZ(){}
+//     ~IntV(){}
 
 //     uint16_t assign_addr(uint16_t next)
 //     {
@@ -615,14 +615,14 @@ protected:
 // };
 
 
-// class Int8tZ: public Z
+// class Int8tV: public Variable
 // {
 // public:
-//     Int8tZ(){}
+//     Int8tV(){}
 
-//     Int8tZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
+//     Int8tV(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const int8_t min, const int8_t max,
 //     int8_t *store, const int8_t _default=0, const boolean no_check=false):
-//         Z(n, code, ram, description, units, false)
+//         Variable(n, code, ram, description, units, false)
 //     {
 //         min_ = min;
 //         max_ = max;
@@ -641,7 +641,7 @@ protected:
 //         pull_set_nominal();
 //     }
 
-//     ~Int8tZ(){}
+//     ~Int8tV(){}
 
 //     uint16_t assign_addr(uint16_t next)
 //     {
@@ -746,14 +746,14 @@ protected:
 // };
 
 
-// class Uint16tZ: public Z
+// class Uint16tV: public Variable
 // {
 // public:
-//     Uint16tZ(){}
+//     Uint16tV(){}
 
-//     Uint16tZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
+//     Uint16tV(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
 //     uint16_t *store, const uint16_t _default=0, const boolean no_check=false):
-//         Z(n, code, ram, description, units, true)
+//         Variable(n, code, ram, description, units, true)
 //     {
 //         min_ = min;
 //         max_ = max;
@@ -772,7 +772,7 @@ protected:
 //         pull_set_nominal();
 //      }
 
-//     ~Uint16tZ(){}
+//     ~Uint16tV(){}
 
 //     uint16_t assign_addr(uint16_t next)
 //     {
@@ -873,14 +873,14 @@ protected:
 //     String prefix_;
 // };
 
-// class Uint8tZ: public Z
+// class Uint8tV: public Variable
 // {
 // public:
-//     Uint8tZ(){}
+//     Uint8tV(){}
 
-//     Uint8tZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
+//     Uint8tV(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const uint8_t min, const uint8_t max,
 //     uint8_t *store, const uint8_t _default=0, const boolean no_check=false):
-//         Z(n, code, ram, description, units, true)
+//         Variable(n, code, ram, description, units, true)
 //     {
 //         min_ = min;
 //         max_ = max;
@@ -899,7 +899,7 @@ protected:
 //         pull_set_nominal();
 //     }
 
-//     ~Uint8tZ(){}
+//     ~Uint8tV(){}
 
 //     uint16_t assign_addr(uint16_t next)
 //     {
@@ -1001,14 +1001,14 @@ protected:
 // };
 
 
-// class ULongZ: public Z
+// class ULongV: public Variable
 // {
 // public:
-//     ULongZ(){}
+//     ULongV(){}
 
-//     ULongZ(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
+//     ULongV(uint8_t *n, const String &code, SerialRAM *ram, const String &description, const String &units, const unsigned long min, const unsigned long max,
 //     unsigned long *store, const unsigned long _default=0, const boolean no_check=true):
-//         Z(n, code, ram, description, units, true)
+//         Variable(n, code, ram, description, units, true)
 //     {
 //         min_ = min;
 //         max_ = max;
@@ -1027,7 +1027,7 @@ protected:
 //         pull_set_nominal();
 //     }
 
-//     ~ULongZ(){}
+//     ~ULongV(){}
 
 //     uint16_t assign_addr(uint16_t next)
 //     {
@@ -1132,7 +1132,7 @@ protected:
 // };
 
 
-// This is a dumb attempt to reinvent the Z wheel.  I didn't see that ptr_ = new AjBoolean would not work for Z* ptr_
+// This is a dumb attempt to reinvent the Variable wheel.  I didn't see that ptr_ = new AjBoolean would not work for Variable* ptr_
 // class Adjustment
 // {
 // public:
@@ -1161,7 +1161,7 @@ protected:
 //     void set_push(const boolean input) { ptr_->set_push(input); }
 
 // protected:
-//     Z* ptr_;
+//     Variable* ptr_;
 // };
 
 #endif

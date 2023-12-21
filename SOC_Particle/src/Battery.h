@@ -33,7 +33,7 @@
 #include "constants.h"
 #include "myLibrary/iterate.h"
 #include "Hysteresis.h"
-#include "Z.h"
+#include "Variable.h"
 
 class Sensors;
 

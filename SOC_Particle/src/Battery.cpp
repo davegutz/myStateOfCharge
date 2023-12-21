@@ -27,8 +27,8 @@
 #include <math.h>
 #include "constants.h"
 #include "command.h"
-#include "mySubs.h"
-#include "Z.h"
+#include "subs.h"
+#include "Variable.h"
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 extern VolatilePars ap; // Various adjustment parameters shared at system level
 extern CommandPars cp;  // Various parameters to be static at system level
