@@ -241,33 +241,33 @@ void SavedPars::initialize()
     #define NSAV 32
     Z_ = new Z*[NSAV];
     Z_[n_++] =(amp_p            = new FloatZ("* ", "Xa", rP_, "Inj amp",              "Amps pk",-1e6, 1e6,  &amp_z,         0));
-    Z_[n_++] =(Cutback_gain_slr_p=new FloatZ("* ", "Sk", rP_, "Cutback gain scalar",  "slr",    -1e6, 1e6,  &Cutback_gain_slr_z,1));
-    Z_[n_++] =(Debug_p            = new IntZ("* ", "vv", rP_, "Verbosity",            "int",    -128, 128,  &Debug_z,       0));
-    Z_[n_++] =(Delta_q_model_p = new DoubleZ("* ", "qs", rP_, "Charge chg Sim",       "C",      -1e8, 1e5,  &Delta_q_model_z, 0,                false));
-    Z_[n_++] =(Delta_q_p       = new DoubleZ("* ", "qm", rP_, "Charge chg",           "C",      -1e8, 1e5,  &Delta_q_z,     0,                  false ));
+    Z_[n_++] =(cutback_gain_slr_p=new FloatZ("* ", "Sk", rP_, "Cutback gain scalar",  "slr",    -1e6, 1e6,  &cutback_gain_slr_z,1));
+    Z_[n_++] =(debug_p            = new IntZ("* ", "vv", rP_, "Verbosity",            "int",    -128, 128,  &debug_z,       0));
+    Z_[n_++] =(delta_q_model_p = new DoubleZ("* ", "qs", rP_, "Charge chg Sim",       "C",      -1e8, 1e5,  &delta_q_model_z, 0,                false));
+    Z_[n_++] =(delta_q_p       = new DoubleZ("* ", "qm", rP_, "Charge chg",           "C",      -1e8, 1e5,  &delta_q_z,     0,                  false ));
     Z_[n_++] =(Dw_p             = new FloatZ("* ", "Dw", rP_, "Tab mon adj",          "v",      -1e2, 1e2,  &Dw_z,          VTAB_BIAS));
-    Z_[n_++] =(Freq_p           = new FloatZ("* ", "Xf", rP_, "Inj freq",             "Hz",     0,    2,    &Freq_z,        0));
-    Z_[n_++] =(Ib_bias_all_p    = new FloatZ("* ", "DI", rP_, "Del all",              "A",      -1e5, 1e5,  &Ib_bias_all_z, CURR_BIAS_ALL));
-    Z_[n_++] =(Ib_bias_amp_p    = new FloatZ("* ", "DA", rP_, "Add amp",              "A",      -1e5, 1e5,  &Ib_bias_amp_z, CURR_BIAS_AMP));
-    Z_[n_++] =(Ib_bias_noa_p    = new FloatZ("* ", "DB", rP_, "Add noa",              "A",      -1e5, 1e5,  &Ib_bias_noa_z, CURR_BIAS_NOA));
-    Z_[n_++] =(Ib_scale_amp_p   = new FloatZ("* ", "SA", rP_, "Slr amp",              "A",      -1e5, 1e5,  &Ib_scale_amp_z,CURR_SCALE_AMP));
-    Z_[n_++] =(Ib_scale_noa_p   = new FloatZ("* ", "SB", rP_, "Slr noa",              "A",      -1e5, 1e5,  &Ib_scale_noa_z,CURR_SCALE_NOA));
-    Z_[n_++] =(Ib_select_p      = new Int8tZ("* ", "si", rP_, "curr sel mode",        "(-1=n, 0=auto, 1=M)", -1, 1, &Ib_select_z, int8_t(FAKE_FAULTS)));
-    Z_[n_++] =(Iflt_p         = new Uint16tZ("* ", "if", rP_, "Fault buffer indx",    "uint",   0,nflt_+1,  &Iflt_z,        nflt_,              false));
-    Z_[n_++] =(Ihis_p         = new Uint16tZ("* ", "ih", rP_, "Hist buffer indx",     "uint",   0,nhis_+1,  &Ihis_z,        nhis_,              false));
-    Z_[n_++] =(Inj_bias_p       = new FloatZ("* ", "Xb", rP_, "Injection bias",       "A",      -1e5, 1e5,  &Inj_bias_z,    0.));
-    Z_[n_++] =(Isum_p         = new Uint16tZ("* ", "is", rP_, "Summ buffer indx",     "uint",   0, NSUM+1,  &Isum_z,        NSUM,               false));
-    Z_[n_++] =(Modeling_p      = new Uint8tZ("* ", "Xm", rP_, "Modeling bitmap",      "[0x]",   0,    255,  &Modeling_z,    MODELING));
+    Z_[n_++] =(freq_p           = new FloatZ("* ", "Xf", rP_, "Inj freq",             "Hz",     0,    2,    &freq_z,        0));
+    Z_[n_++] =(ib_bias_all_p    = new FloatZ("* ", "DI", rP_, "Del all",              "A",      -1e5, 1e5,  &ib_bias_all_z, CURR_BIAS_ALL));
+    Z_[n_++] =(ib_bias_amp_p    = new FloatZ("* ", "DA", rP_, "Add amp",              "A",      -1e5, 1e5,  &ib_bias_amp_z, CURR_BIAS_AMP));
+    Z_[n_++] =(ib_bias_noa_p    = new FloatZ("* ", "DB", rP_, "Add noa",              "A",      -1e5, 1e5,  &ib_bias_noa_z, CURR_BIAS_NOA));
+    Z_[n_++] =(ib_scale_amp_p   = new FloatZ("* ", "SA", rP_, "Slr amp",              "A",      -1e5, 1e5,  &ib_scale_amp_z,CURR_SCALE_AMP));
+    Z_[n_++] =(ib_scale_noa_p   = new FloatZ("* ", "SB", rP_, "Slr noa",              "A",      -1e5, 1e5,  &ib_scale_noa_z,CURR_SCALE_NOA));
+    Z_[n_++] =(ib_select_p      = new Int8tZ("* ", "si", rP_, "curr sel mode",        "(-1=n, 0=auto, 1=M)", -1, 1, &ib_select_z, int8_t(FAKE_FAULTS)));
+    Z_[n_++] =(iflt_p         = new Uint16tZ("* ", "if", rP_, "Fault buffer indx",    "uint",   0,nflt_+1,  &iflt_z,        nflt_,              false));
+    Z_[n_++] =(ihis_p         = new Uint16tZ("* ", "ih", rP_, "Hist buffer indx",     "uint",   0,nhis_+1,  &ihis_z,        nhis_,              false));
+    Z_[n_++] =(inj_bias_p       = new FloatZ("* ", "Xb", rP_, "Injection bias",       "A",      -1e5, 1e5,  &inj_bias_z,    0.));
+    Z_[n_++] =(isum_p         = new Uint16tZ("* ", "is", rP_, "Summ buffer indx",     "uint",   0, NSUM+1,  &isum_z,        NSUM,               false));
+    Z_[n_++] =(modeling_p      = new Uint8tZ("* ", "Xm", rP_, "Modeling bitmap",      "[0x]",   0,    255,  &modeling_z,    MODELING));
     Z_[n_++] =(Mon_chm_p       = new Uint8tZ("* ", "Bm", rP_, "Monitor battery",      "0=BB, 1=CH",0,   1,  &Mon_chm_z,     MON_CHEM));
     Z_[n_++] =(nP_p             = new FloatZ("* ", "BP", rP_, "Number parallel",      "units",  1e-6, 100,  &nP_z,          NP));
     Z_[n_++] =(nS_p             = new FloatZ("* ", "BS", rP_, "Number series",        "units",  1e-6, 100,  &nS_z,          NS));
-    Z_[n_++] =(Preserving_p    = new Uint8tZ("* ", "X?", rP_, "Preserving fault",     "T=Preserve",0,   1,  &Preserving_z,  0,                  false));
+    Z_[n_++] =(preserving_p    = new Uint8tZ("* ", "X?", rP_, "Preserving fault",     "T=Preserve",0,   1,  &preserving_z,  0,                  false));
     Z_[n_++] =(Sim_chm_p       = new Uint8tZ("* ", "Bs", rP_, "Sim battery",          "0=BB, 1=CH",0,   1,  &Sim_chm_z,     SIM_CHEM));
-    Z_[n_++] =(S_cap_mon_p      = new FloatZ("* ", "SQ", rP_, "Scalar cap Mon",       "slr",    0,    1000, &S_cap_mon_z,   1.));
-    Z_[n_++] =(S_cap_sim_p      = new FloatZ("* ", "Sq", rP_, "Scalar cap Sim",       "slr",    0,    1000, &S_cap_sim_z,   1.));
+    Z_[n_++] =(s_cap_mon_p      = new FloatZ("* ", "SQ", rP_, "Scalar cap Mon",       "slr",    0,    1000, &s_cap_mon_z,   1.));
+    Z_[n_++] =(s_cap_sim_p      = new FloatZ("* ", "Sq", rP_, "Scalar cap Sim",       "slr",    0,    1000, &s_cap_sim_z,   1.));
     Z_[n_++] =(Tb_bias_hdwe_p   = new FloatZ("* ", "Dt", rP_, "Bias Tb sensor",       "dg C",   -500, 500,  &Tb_bias_hdwe_z,TEMP_BIAS));
     Z_[n_++] =(Time_now_p       = new ULongZ("* ", "UT", rP_, "UNIX time epoch",      "sec",    0UL,  2100000000UL, &Time_now_z, 1669801880UL,  false));
-    Z_[n_++] =(Type_p          = new Uint8tZ("* ", "Xt", rP_, "Inj type",             "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",  0,   10,  &Type_z, 0));
+    Z_[n_++] =(Type_p          = new Uint8tZ("* ", "Xt", rP_, "Inj type",             "1sn 2sq 3tr 4 1C, 5 -1C, 8cs",  0,   10,  &type_z, 0));
     Z_[n_++] =(T_state_model_p  = new FloatZ("* ", "ts", rP_, "Tb Sim rate lim mem",  "dg C",   -10,  70,   &T_state_model_z,RATED_TEMP,       false));
     Z_[n_++] =(T_state_p        = new FloatZ("* ", "tm", rP_, "Tb rate lim mem",      "dg C",   -10,  70,   &T_state_z,     RATED_TEMP,         false));
     Z_[n_++] =(Vb_bias_hdwe_p   = new FloatZ("* ", "Dc", rP_, "Bias Vb sensor",       "v",      -10,  70,   &Vb_bias_hdwe_z,VOLT_BIAS));
@@ -353,7 +353,7 @@ void SavedPars::pretty_print(const boolean all)
 
 void SavedPars::pretty_print_modeling()
 {
-  bitMapPrint(pr.buff, sp.Modeling(), 8);
+  bitMapPrint(pr.buff, sp.modeling(), 8);
   Serial.printf(" 0x%s\n", pr.buff);
   Serial.printf(" 0x128 ib_noa_dscn %d\n", mod_ib_noa_dscn());
   Serial.printf(" 0x64  ib_amp_dscn %d\n", mod_ib_amp_dscn());
@@ -368,7 +368,7 @@ void SavedPars::pretty_print_modeling()
 // Print faults
 void SavedPars::print_fault_array()
 {
-  uint16_t i = Iflt_z;  // Last one written was iflt
+  uint16_t i = iflt_z;  // Last one written was iflt
   uint16_t n = 0;
   while ( ++n < nflt_+1 )
   {
@@ -387,7 +387,7 @@ void SavedPars::print_fault_header()
 // Print history
 void SavedPars::print_history_array()
 {
-  int i = Ihis_z;  // Last one written was Ihis_z
+  int i = ihis_z;  // Last one written was ihis_z
   int n = -1;
   while ( ++n < nhis_ )
   {
@@ -404,11 +404,11 @@ void SavedPars::put_all_dynamic()
     switch ( blink++ )
     {
         case ( 0 ):
-            put_Delta_q();
+            put_delta_q();
             break;
 
         case ( 1 ):
-            put_Delta_q_model();
+            put_delta_q_model();
             break;
 
         case ( 2 ):

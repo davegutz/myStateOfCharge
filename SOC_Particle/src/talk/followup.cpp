@@ -101,9 +101,9 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     {
                         initialize_all(Mon, Sen, ap.init_all_soc, true);
                         #ifdef DEBUG_INIT
-                        if ( sp.Debug()==-1 ){ Serial.printf("after initialize_all:"); debug_m1(Mon, Sen);}
+                        if ( sp.debug()==-1 ){ Serial.printf("after initialize_all:"); debug_m1(Mon, Sen);}
                         #endif
-                        if ( sp.Modeling() )
+                        if ( sp.modeling() )
                         {
                         cp.cmd_reset();
                         chit("W3;", SOON);  // Wait 10 passes of Control
@@ -124,7 +124,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                         Sen->Sim->apply_soc(ap.init_sim_soc, Sen->Tb_filt);
                         Serial.printf("soc%8.4f, dq%7.3f, soc_mod%8.4f, dq mod%7.3f,\n",
                             Mon->soc(), Mon->delta_q(), Sen->Sim->soc(), Sen->Sim->delta_q());
-                        if ( sp.Modeling() ) cp.cmd_reset_sim(); // Does not block.  Commands a reset
+                        if ( sp.modeling() ) cp.cmd_reset_sim(); // Does not block.  Commands a reset
                     }
                     else
                         Serial.printf("soc%8.4f; must be 0-1.1\n", ap.init_sim_soc);
@@ -181,17 +181,17 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     break;
 
                 case ( 'q' ):  //*  Sq<>: scale capacity sim
-                    if ( sp.S_cap_sim_p->success() )
+                    if ( sp.s_cap_sim_p->success() )
                     {
-                        Sen->Sim->apply_cap_scale(sp.S_cap_sim());
-                        if ( sp.Modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
+                        Sen->Sim->apply_cap_scale(sp.s_cap_sim());
+                        if ( sp.modeling() ) Mon->init_soc_ekf(Sen->Sim->soc());
                     }
                     break;
             
                 case ( 'Q' ):  //*  SQ<>: scale capacity mon
-                    if ( sp.S_cap_mon_p->success() )
+                    if ( sp.s_cap_mon_p->success() )
                     {
-                        Mon->apply_cap_scale(sp.S_cap_mon());
+                        Mon->apply_cap_scale(sp.s_cap_mon());
                     }
                     break;
             
@@ -206,7 +206,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                 if ( ap.fake_faults_p->success() )
                 {
                     Sen->Flt->reset_all_faults();
-                    sp.put_Ib_select(cp.input_str.substring(2).toInt());
+                    sp.put_ib_select(cp.input_str.substring(2).toInt());
                 }
                 break;
 
@@ -215,8 +215,8 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
 
 
         case ( 'l' ):
-            if ( sp.Debug_p->success() )
-            switch ( sp.Debug() )
+            if ( sp.debug_p->success() )
+            switch ( sp.debug() )
             {
                 case ( -1 ):  // l-1:
                 // Serial.printf("SOCu_s-90  ,SOCu_fa-90  ,Ishunt_amp  ,Ishunt_noa  ,Vb_fo*10-110  ,voc_s*10-110  ,dv_dyn_s*10  ,v_s*10-110  , voc_dyn*10-110,,,,,,,,,,,\n");
@@ -256,9 +256,9 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
             {
 
                 case ( 'm' ):  // Xm<>:  code for modeling level
-                    if ( sp.Modeling_p->success() )
+                    if ( sp.modeling_p->success() )
                     {
-                        reset = sp.Modeling() != modeling_past;
+                        reset = sp.modeling() != modeling_past;
                         if ( reset )
                         {
                         Serial.printf("Chg...reset\n");
@@ -269,16 +269,16 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
 
                 case ( 'a' ): // Xa<>:  injection amplitude
                     if ( sp.amp_p->success() )
-                        Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.amp_p->units(), sp.amp_p->description(), sp.Amp(), sp.Inj_bias());
+                        Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.amp_p->units(), sp.amp_p->description(), sp.Amp(), sp.inj_bias());
                     break;
 
                 case ( 'f' ): //*  Xf<>:  injection frequency
-                    if ( sp.Freq_p->success() ) sp.Freq_z = sp.Freq_z*(2. * PI);
+                    if ( sp.freq_p->success() ) sp.freq_z = sp.freq_z*(2. * PI);
                     break;
 
                 case ( 'b' ): //*  Xb<>:  injection bias
-                    if ( sp.Inj_bias_p->success() )
-                        Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.amp_p->units(), sp.amp_p->description(), sp.Amp(), sp.Inj_bias());
+                    if ( sp.inj_bias_p->success() )
+                        Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.amp_p->units(), sp.amp_p->description(), sp.Amp(), sp.inj_bias());
                     break;
 
                 case ( 'Q' ): //  XQ<>: time to quiet

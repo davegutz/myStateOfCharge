@@ -53,7 +53,7 @@ boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
 
         case ( 'b' ):  // Pb:  Print Vb measure
             Serial.printf("\nVolt:");   Serial.printf("Vb_bias_hdwe,Vb_m,mod,Vb=,%7.3f,%7.3f,%d,%7.3f,\n", 
-                sp.Vb_bias_hdwe(), Sen->Vb_model, sp.Modeling(), Sen->Vb);
+                sp.Vb_bias_hdwe(), Sen->Vb_model, sp.modeling(), Sen->Vb);
             break;
 
         case ( 'e' ):  // Pe:  Print EKF
@@ -76,7 +76,7 @@ boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             Serial.printf ("\nM:"); Mon->pretty_print(Sen);
             Serial.printf ("M::"); Mon->Coulombs::pretty_print();
             Serial.printf ("M::"); Mon->EKF_1x1::pretty_print();
-            Serial.printf ("\nmodeling %d\n", sp.Modeling());
+            Serial.printf ("\nmodeling %d\n", sp.modeling());
             break;
 
         case ( 'M' ):  // PM:  Print shunt Amp
@@ -97,7 +97,7 @@ boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             break;
 
         case ( 's' ):  // Ps:  Print sim
-            Serial.printf("\nmodeling=%d\n", sp.Modeling());
+            Serial.printf("\nmodeling=%d\n", sp.modeling());
             Serial.printf("S:");  Sen->Sim->pretty_print();
             Serial.printf("S::"); Sen->Sim->Coulombs::pretty_print();
             break;
@@ -117,7 +117,7 @@ boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                 Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->Vc(), Sen->ShuntAmp->Vo(), Sen->ShuntAmp->Ishunt_cal());
             Serial.printf("Noa:"); Serial.printf("Vshunt_int,Vshunt,Vc,Vo,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
                 Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->Vc(), Sen->ShuntNoAmp->Vo(), Sen->ShuntNoAmp->Ishunt_cal());
-            Serial.printf("Sel:Noa,Ib=,%d,%7.3f\n", sp.Ib_select(), Sen->Ib);
+            Serial.printf("Sel:Noa,Ib=,%d,%7.3f\n", sp.ib_select(), Sen->Ib);
             break;
 
         default:

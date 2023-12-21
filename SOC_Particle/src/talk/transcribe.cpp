@@ -49,7 +49,7 @@ void transcribe(BatteryMonitor *Mon, Sensors *Sen)
   int INT_in = -1;
   boolean found = false;
   urgency request;
-  uint16_t modeling_past = sp.Modeling();
+  uint16_t modeling_past = sp.modeling();
   char letter_0, letter_1;
 
   // Serial event

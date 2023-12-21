@@ -155,33 +155,33 @@ public:
  
     // parameter list
     float Amp() { return amp_z * nP_z; }
-    float Cutback_gain_slr() { return Cutback_gain_slr_z; }
-    int Debug() { return Debug_z;}
-    double Delta_q() { return Delta_q_z;}
-    double Delta_q_model() { return Delta_q_model_z;}
+    float cutback_gain_slr() { return cutback_gain_slr_z; }
+    int debug() { return debug_z;}
+    double delta_q() { return delta_q_z;}
+    double delta_q_model() { return delta_q_model_z;}
     float Dw() { return Dw_z; }
-    float Freq() { return Freq_z; }
+    float freq() { return freq_z; }
     uint8_t Mon_chm() { return Mon_chm_z; }
-    float S_cap_mon() { return S_cap_mon_z; }
-    float S_cap_sim() { return S_cap_sim_z; }
+    float s_cap_mon() { return s_cap_mon_z; }
+    float s_cap_sim() { return s_cap_sim_z; }
     uint8_t Sim_chm() { return Sim_chm_z; }
-    float Ib_bias_all() { return Ib_bias_all_z; }
-    float Ib_bias_amp() { return Ib_bias_amp_z; }
-    float Ib_bias_noa() { return Ib_bias_noa_z; }
-    float ib_scale_amp() { return Ib_scale_amp_z; }
-    float ib_scale_noa() { return Ib_scale_noa_z; }
-    int8_t Ib_select() { return Ib_select_z; }
-    uint16_t Iflt() { return Iflt_z; }
-    uint16_t Ihis() { return Ihis_z; }
-    float Inj_bias() { return Inj_bias_z; }
-    uint16_t Isum() { return Isum_z; }
-    uint8_t Modeling() { return Modeling_z; }
+    float ib_bias_all() { return ib_bias_all_z; }
+    float ib_bias_amp() { return ib_bias_amp_z; }
+    float ib_bias_noa() { return ib_bias_noa_z; }
+    float ib_scale_amp() { return ib_scale_amp_z; }
+    float ib_scale_noa() { return ib_scale_noa_z; }
+    int8_t ib_select() { return ib_select_z; }
+    uint16_t Iflt() { return iflt_z; }
+    uint16_t Ihis() { return ihis_z; }
+    float inj_bias() { return inj_bias_z; }
+    uint16_t isum() { return isum_z; }
+    uint8_t modeling() { return modeling_z; }
     float nP() { return nP_z; }
     float nS() { return nS_z; }
-    uint8_t Preserving() { return Preserving_z; }
+    uint8_t preserving() { return preserving_z; }
     float Tb_bias_hdwe() { return Tb_bias_hdwe_z; }
     unsigned long Time_now() { return Time_now_z; }
-    uint8_t type() { return Type_z; }
+    uint8_t type() { return type_z; }
     float T_state() { return T_state_z; }
     float T_state_model() { return T_state_model_z; }
     float Vb_bias_hdwe() { return Vb_bias_hdwe_z; }
@@ -208,20 +208,20 @@ public:
     virtual void set_nominal();
     float ib_hist_slr() { if ( abs(amp_z) > 40. ) return 30000./abs(amp_z); else return 600.; }
     float vb_hist_slr() { if ( abs(amp_z) > 40. ) return 1500./abs(amp_z); else return 1200.; }
-    boolean mod_all_dscn() { return ( 111<Modeling() ); }                // Bare all
+    boolean mod_all_dscn() { return ( 111<modeling() ); }                // Bare all
     boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
-    boolean mod_any_dscn() { return ( 15<Modeling() ); }                 // Bare any
-    boolean mod_ib() { return ( 1<<2 & Modeling() || mod_ib_all_dscn() ); }  // Using Sim as source of ib
-    boolean mod_ib_all_dscn() { return ( 191<Modeling() ); }             // Nothing connected to ib sensors in I2C on SDA/SCL
-    boolean mod_ib_amp_dscn() { return ( 1<<6 & Modeling() ); }          // Nothing connected to amp ib sensors in I2C on SDA/SCL
+    boolean mod_any_dscn() { return ( 15<modeling() ); }                 // Bare any
+    boolean mod_ib() { return ( 1<<2 & modeling() || mod_ib_all_dscn() ); }  // Using Sim as source of ib
+    boolean mod_ib_all_dscn() { return ( 191<modeling() ); }             // Nothing connected to ib sensors in I2C on SDA/SCL
+    boolean mod_ib_amp_dscn() { return ( 1<<6 & modeling() ); }          // Nothing connected to amp ib sensors in I2C on SDA/SCL
     boolean mod_ib_any_dscn() { return ( mod_ib_amp_dscn() || mod_ib_noa_dscn() ); }  // Nothing connected to ib sensors in I2C on SDA/SCL
-    boolean mod_ib_noa_dscn() { return ( 1<<7 & Modeling() ); }          // Nothing connected to noa ib sensors in I2C on SDA/SCL
-    boolean mod_none() { return ( 0==Modeling() ); }                     // Using all
-    boolean mod_none_dscn() { return ( 16>Modeling() ); }                // Bare nothing
-    boolean mod_tb() { return ( 1<<0 & Modeling() || mod_tb_dscn() ); }  // Using Sim as source of tb
-    boolean mod_tb_dscn() { return ( 1<<4 & Modeling() ); }              // Nothing connected to one-wire Tb sensor on D6
-    boolean mod_vb() { return ( 1<<1 & Modeling() || mod_vb_dscn() ); }  // Using Sim as source of vb
-    boolean mod_vb_dscn() { return ( 1<<5 & Modeling() ); }              // Nothing connected to vb on A1
+    boolean mod_ib_noa_dscn() { return ( 1<<7 & modeling() ); }          // Nothing connected to noa ib sensors in I2C on SDA/SCL
+    boolean mod_none() { return ( 0==modeling() ); }                     // Using all
+    boolean mod_none_dscn() { return ( 16>modeling() ); }                // Bare nothing
+    boolean mod_tb() { return ( 1<<0 & modeling() || mod_tb_dscn() ); }  // Using Sim as source of tb
+    boolean mod_tb_dscn() { return ( 1<<4 & modeling() ); }              // Nothing connected to one-wire Tb sensor on D6
+    boolean mod_vb() { return ( 1<<1 & modeling() || mod_vb_dscn() ); }  // Using Sim as source of vb
+    boolean mod_vb_dscn() { return ( 1<<5 & modeling() ); }              // Nothing connected to vb on A1
 
     #ifdef CONFIG_47L16_EERAM
         void get_fault(const uint8_t i) { fault_[i].get(); }
@@ -233,33 +233,33 @@ public:
     // put
     void put_all_dynamic();
     void put_amp(const float input) { amp_p->check_set_put(input); }
-    void put_Cutback_gain_slr(const float input) { Cutback_gain_slr_p->check_set_put(input); }
-    void put_Debug(const int input) { Debug_p->check_set_put(input); }
-    void put_Delta_q(const double input) { Delta_q_p->check_set_put(input); }
-    void put_Delta_q() {}
-    void put_Delta_q_model(const double input) { Delta_q_model_p->check_set_put(input); }
-    void put_Delta_q_model() {}
+    void put_cutback_gain_slr(const float input) { cutback_gain_slr_p->check_set_put(input); }
+    void put_Debug(const int input) { debug_p->check_set_put(input); }
+    void put_Delta_q(const double input) { delta_q_p->check_set_put(input); }
+    void put_delta_q() {}
+    void put_delta_q_model(const double input) { delta_q_model_p->check_set_put(input); }
+    void put_delta_q_model() {}
     void put_Dw(const float input) { Dw_p->check_set_put(input); }
-    void put_Freq(const float input) { Freq_p->check_set_put(input); }
-    void put_Ib_bias_all(const float input) { Ib_bias_all_p->check_set_put(input); }
-    void put_Ib_bias_amp(const float input) { Ib_bias_amp_p->check_set_put(input); }
-    void put_Ib_bias_noa(const float input) { Ib_bias_noa_p->check_set_put(input); }
-    void put_Ib_scale_amp(const float input) { Ib_scale_amp_p->check_set_put(input); }
-    void put_Ib_scale_noa(const float input) { Ib_scale_noa_p->check_set_put(input); }
-    void put_Ib_select(const int8_t input) { Ib_select_p->check_set_put(input); }
-    void put_Iflt(const int input) { Iflt_p->check_set_put(input); }
-    void put_Ihis(const int input) { Ihis_p->check_set_put(input); }
-    void put_Isum(const int input) { Isum_p->check_set_put(input); }
-    void put_Inj_bias(const float input) { Inj_bias_p->check_set_put(input); }
+    void put_Freq(const float input) { freq_p->check_set_put(input); }
+    void put_ib_bias_all(const float input) { ib_bias_all_p->check_set_put(input); }
+    void put_ib_bias_amp(const float input) { ib_bias_amp_p->check_set_put(input); }
+    void put_ib_bias_noa(const float input) { ib_bias_noa_p->check_set_put(input); }
+    void put_ib_scale_amp(const float input) { ib_scale_amp_p->check_set_put(input); }
+    void put_ib_scale_noa(const float input) { ib_scale_noa_p->check_set_put(input); }
+    void put_ib_select(const int8_t input) { ib_select_p->check_set_put(input); }
+    void put_Iflt(const int input) { iflt_p->check_set_put(input); }
+    void put_Ihis(const int input) { ihis_p->check_set_put(input); }
+    void put_Isum(const int input) { isum_p->check_set_put(input); }
+    void put_Inj_bias(const float input) { inj_bias_p->check_set_put(input); }
     void put_Mon_chm(const uint8_t input) { Mon_chm_p->check_set_put(input); }
     void put_Mon_chm() {}
     void put_nP(const float input) { nP_p->check_set_put(input); }
     void put_nS(const float input) { nS_p->check_set_put(input); }
-    void put_Preserving(const uint8_t input) { Preserving_p->check_set_put(input); }
+    void put_Preserving(const uint8_t input) { preserving_p->check_set_put(input); }
     void put_Sim_chm(const uint8_t input) { Sim_chm_p->check_set_put(input); }
     void put_Sim_chm() {}
-    void put_S_cap_mon(const float input) { S_cap_mon_p->check_set_put(input); }
-    void put_S_cap_sim(const float input) { S_cap_sim_p->check_set_put(input); }
+    void put_s_cap_mon(const float input) { s_cap_mon_p->check_set_put(input); }
+    void put_s_cap_sim(const float input) { s_cap_sim_p->check_set_put(input); }
     void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->check_set_put(input); }
     void put_Time_now(const unsigned long input) { Time_now_p->check_set_put(input); }
     void put_Type(const uint8_t input) { Type_p->check_set_put(input); }
@@ -268,12 +268,12 @@ public:
     void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->check_set_put(input); }
     void put_Vb_scale(const float input) { Vb_scale_p->check_set_put(input); }
     #ifndef CONFIG_47L16_EERAM
-        void put_Modeling(const uint8_t input) { Modeling_p->check_set_put(input); Modeling_z = Modeling();}
+        void put_modeling(const uint8_t input) { modeling_p->check_set_put(input); modeling_z = modeling();}
         void put_T_state() {}
         void put_T_state_model() {}
         void put_fault(const Flt_st input, const uint8_t i) { fault_[i].copy_to_Flt_ram_from(input); }
     #else
-        void put_Modeling(const uint8_t input) { Modeling_p->check_set_put(input); }
+        void put_modeling(const uint8_t input) { modeling_p->check_set_put(input); }
         void put_T_state() { T_state_p->check_set_put(T_state_z); }
         void put_T_state_model() { T_state_p->check_set_put(T_state_model_z); }
 
@@ -281,32 +281,32 @@ public:
     #endif
     //
     Flt_st put_history(const Flt_st input, const uint8_t i);
-    boolean tweak_test() { return ( 1<<3 & Modeling() ); } // Driving signal injection completely using software inj_bias 
+    boolean tweak_test() { return ( 1<<3 & modeling() ); } // Driving signal injection completely using software inj_bias 
     FloatZ *amp_p;
-    FloatZ *Cutback_gain_slr_p;
-    IntZ *Debug_p;
-    DoubleZ *Delta_q_p;
-    DoubleZ *Delta_q_model_p;
+    FloatZ *cutback_gain_slr_p;
+    IntZ *debug_p;
+    DoubleZ *delta_q_p;
+    DoubleZ *delta_q_model_p;
     FloatZ *Dw_p;
-    FloatZ *Freq_p;
-    FloatZ *Ib_bias_all_p;
-    FloatZ *Ib_bias_amp_p;
-    FloatZ *Ib_bias_noa_p;
-    FloatZ *Ib_scale_amp_p;
-    FloatZ *Ib_scale_noa_p;
-    Int8tZ *Ib_select_p;
-    Uint16tZ *Iflt_p;
-    Uint16tZ *Ihis_p;
-    FloatZ *Inj_bias_p;
-    Uint16tZ *Isum_p;
-    Uint8tZ *Modeling_p;
+    FloatZ *freq_p;
+    FloatZ *ib_bias_all_p;
+    FloatZ *ib_bias_amp_p;
+    FloatZ *ib_bias_noa_p;
+    FloatZ *ib_scale_amp_p;
+    FloatZ *ib_scale_noa_p;
+    Int8tZ *ib_select_p;
+    Uint16tZ *iflt_p;
+    Uint16tZ *ihis_p;
+    FloatZ *inj_bias_p;
+    Uint16tZ *isum_p;
+    Uint8tZ *modeling_p;
     Uint8tZ *Mon_chm_p;
     FloatZ *nP_p;
     FloatZ *nS_p;
-    Uint8tZ *Preserving_p;
+    Uint8tZ *preserving_p;
     Uint8tZ *Sim_chm_p;
-    FloatZ *S_cap_mon_p;
-    FloatZ *S_cap_sim_p;
+    FloatZ *s_cap_mon_p;
+    FloatZ *s_cap_sim_p;
     FloatZ *Tb_bias_hdwe_p;
     ULongZ *Time_now_p;
     FloatZ *T_state_p;
@@ -317,33 +317,33 @@ public:
 
     // SRAM storage state "retained" in SOC_Particle.ino.  Very few elements
     float amp_z;
-    float Cutback_gain_slr_z;
-    int Debug_z;
-    double Delta_q_z;
-    double Delta_q_model_z;
+    float cutback_gain_slr_z;
+    int debug_z;
+    double delta_q_z;
+    double delta_q_model_z;
     float Dw_z;
-    float Freq_z;
-    float Ib_bias_all_z;
-    float Ib_bias_amp_z;
-    float Ib_bias_noa_z;
-    float Ib_scale_amp_z;
-    float Ib_scale_noa_z;
-    int8_t Ib_select_z;
-    uint16_t Iflt_z;
-    uint16_t Ihis_z;
-    float Inj_bias_z;
-    uint16_t Isum_z;
-    uint8_t Modeling_z;
+    float freq_z;
+    float ib_bias_all_z;
+    float ib_bias_amp_z;
+    float ib_bias_noa_z;
+    float ib_scale_amp_z;
+    float ib_scale_noa_z;
+    int8_t ib_select_z;
+    uint16_t iflt_z;
+    uint16_t ihis_z;
+    float inj_bias_z;
+    uint16_t isum_z;
+    uint8_t modeling_z;
     uint8_t Mon_chm_z;
     float nP_z;
     float nS_z;
-    uint8_t Preserving_z;
+    uint8_t preserving_z;
     uint8_t Sim_chm_z;
-    float S_cap_mon_z;
-    float S_cap_sim_z;
+    float s_cap_mon_z;
+    float s_cap_sim_z;
     float Tb_bias_hdwe_z;
     unsigned long Time_now_z;
-    uint8_t Type_z;
+    uint8_t type_z;
     float T_state_z;
     float T_state_model_z;
     float Vb_bias_hdwe_z;

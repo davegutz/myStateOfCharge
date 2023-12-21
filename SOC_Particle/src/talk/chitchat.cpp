@@ -124,7 +124,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   // Model
   ap.hys_scale = HYS_SCALE;  // Sh 1
   ap.slr_res = 1;  // Sr 1
-  sp.Cutback_gain_slr_p->print_adj_print(1); // Sk 1
+  sp.cutback_gain_slr_p->print_adj_print(1); // Sk 1
   ap.hys_state = 0;  // SH 0
 
   // Injection
@@ -152,7 +152,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen)  // BZ
   ap.cc_diff_slr = 1;  // Fc 1
   ap.ib_diff_slr = 1;  // Fd 1
   ap.fake_faults = 0;  // Ff 0
-  sp.put_Ib_select(0);  // Ff 0
+  sp.put_ib_select(0);  // Ff 0
   ap.ewhi_slr = 1;  // Fi
   ap.ewlo_slr = 1;  // Fo
   ap.ib_quiet_slr = 1;  // Fq 1

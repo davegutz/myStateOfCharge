@@ -104,7 +104,7 @@ protected:
   int16_t vshunt_int_1_;// Interim conversion, count
   float vshunt_;        // Sensed shunt voltage, V
   float Ishunt_cal_;    // Sensed bank current, calibrated ADC, A
-  float *sp_Ib_bias_;   // Global bias, A
+  float *sp_ib_bias_;   // Global bias, A
   float *sp_ib_scale_;  // Global scale, A
   unsigned long int sample_time_;   // Exact moment of hardware sample
   unsigned long int sample_time_z_; // Exact moment of past hardware sample

@@ -157,7 +157,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             if ( Sen->now>TEMP_INIT_DELAY )
             {
                 Sen->start_inj = ap.wait_inj + Sen->now;
-                Sen->stop_inj = ap.wait_inj + (Sen->now + min((unsigned long int)(ap.cycles_inj / max(sp.Freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
+                Sen->stop_inj = ap.wait_inj + (Sen->now + min((unsigned long int)(ap.cycles_inj / max(sp.freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
                 Sen->end_inj = Sen->stop_inj + ap.tail_inj;
                 Serial.printf("**\n*** RUN: at %ld, %7.3f cycles %ld to %ld with %ld wait and %ld tail\n\n",
                 Sen->now, ap.cycles_inj, Sen->start_inj, Sen->stop_inj, ap.wait_inj, ap.tail_inj);
