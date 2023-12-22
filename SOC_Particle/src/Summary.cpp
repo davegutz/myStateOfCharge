@@ -33,7 +33,7 @@ Serial.printf("print_all_fault_buffer: iflt %d nflt %d\n", iflt, nflt);
   while ( n++ < nflt )
   {
     if ( ++i > (nflt-1) ) i = 0; // circular buffer
-    flt[i].print(code);
+    flt[i].print_flt(code);
   }
 }
 

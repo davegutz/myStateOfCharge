@@ -127,8 +127,8 @@ PrinterPars pr = PrinterPars();       // Print buffer
 VolatilePars ap = VolatilePars();     // Various adjustment parameters commanding at system level.  Initialized on start up.  Not retained.
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level.  Initialized on start up.  Not retained.
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
-unsigned long millis_flip = millis(); // Timekeeping
-unsigned long last_sync = millis();   // Timekeeping
+unsigned long long millis_flip = millis(); // Timekeeping
+unsigned long long last_sync = millis();   // Timekeeping
 
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
@@ -301,9 +301,9 @@ void setup()
 void loop()
 {
   // Synchronization
-  static unsigned long now = millis();
-  time32_t time_now = Time.now();
-  now = millis();
+  static unsigned long long now = (unsigned long long) millis();
+  unsigned long long time_now = (unsigned long long) Time.now();
+  now = (unsigned long long) millis();
   boolean chitchat = false;
   static Sync *Talk = new Sync(TALK_DELAY);
   boolean read = false;
@@ -317,9 +317,8 @@ void loop()
   static Sync *Summarize = new Sync(SUMMARY_DELAY);
   boolean control;
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
-  unsigned long current_time;
-  static unsigned long start = millis();
-  unsigned long elapsed = 0;
+  static unsigned long long start = millis();
+  unsigned long long elapsed = 0;
   static boolean reset = true;
   static boolean reset_temp = true;
   static boolean reset_publish = true;
@@ -340,8 +339,10 @@ void loop()
     Ds2482.loop();
   #endif
   if ( now - last_sync > ONE_DAY_MILLIS || reset )  sync_time(now, &last_sync, &millis_flip); 
-  Sen->control_time = decimalTime(&current_time, pr.buff, Sen->now, millis_flip);
-  hm_string = String(pr.buff);
+  Sen->control_time = double(Sen->now/1000);
+  char buffer[32];
+  time_long_2_str(time_now, buffer);
+  hm_string = String(buffer);
   read_temp = ReadTemp->update(millis(), reset);
   read = ReadSensors->update(millis(), reset);
   chitchat = Talk->update(millis(), reset);
@@ -462,13 +463,12 @@ void loop()
   }
 
   // Discuss things with the user
-  // When open interactive serial monitor such as CoolTerm
+  // When open interactive serial monitor such as puTTY
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   // Control
   if ( control ){} // placeholder
-
 
   // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   asap();
@@ -485,7 +485,7 @@ void loop()
     sp.put_Ihis(sp.ihis_z + 1);
     if ( sp.ihis_z > (sp.nhis() - 1) ) sp.put_Ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
-    hist_snap.assign(time_now, Mon, Sen);
+    hist_snap.assign(Time.now(), Mon, Sen);
     hist_bounced = sp.put_history(hist_snap, sp.ihis_z);
 
     sp.put_Isum(sp.isum_z + 1);

@@ -233,7 +233,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
   Vo_raw_ = analogRead(vo_pin_);
   Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
   Vo_Vc_ = Vo_ - Vc_;
-  if  ( sp.debug()==14 )Serial.printf("ADCref %7.3f samp_t %ld vo_pin_%d V0_raw_%d Vo_%7.3f Vo_Vc_%7.3f\n", (float)analogGetReference(), sample_time_, vo_pin_, Vo_raw_, Vo_, Vo_Vc_);
+  if  ( sp.debug()==14 )Serial.printf("ADCref %7.3f samp_t %lld vo_pin_%d V0_raw_%d Vo_%7.3f Vo_Vc_%7.3f\n", (float)analogGetReference(), sample_time_, vo_pin_, Vo_raw_, Vo_, Vo_Vc_);
 }
 
 
@@ -742,7 +742,7 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 
 // Class Sensors
-Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, time32_t time_now):
+Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now):
   reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL), sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL), boot_time_(time_now)
 {
   this->T = T;
@@ -891,14 +891,12 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
     sample_time_ib_ = sample_time_ib_hdwe_;
     dt_ib_ = dt_ib_hdwe_;
   }
-  now = sample_time_ib_ + ((unsigned long long) boot_time_)*1000;
+  now = sample_time_ib_ + boot_time_*1000;
 
   // print_signal_select for data collection
   if ( (sp.debug()==2 || sp.debug()==4)  && cp.publishS )
   {
-      double cTime;
-      if ( sp.tweak_test() ) cTime = double(now)/1000.;
-      else cTime = control_time;
+      double cTime = double(now)/1000.;
       sprintf(pr.buff, "unit_sel,%13.3f, %d, %d,  %10.7f,  %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,  %7.5f,%7.5f, ",
           cTime, reset, sp.ib_select(),
           Flt->cc_diff(),

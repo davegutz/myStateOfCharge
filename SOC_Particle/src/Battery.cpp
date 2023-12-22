@@ -267,7 +267,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     if ( eframe_ == 0 )
     {
         float ddq_dt = ib_;
-        dt_eframe_ = dt_ * float(ap.eframe_mult);  // TODO:  this is noisy error if dt_ varies
+        dt_eframe_ = dt_ * float(ap.eframe_mult);  // Introduces noisy error if dt_ varies
         if ( ddq_dt>0. && !sp.tweak_test() ) ddq_dt *= coul_eff_;
         ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
         predict_ekf(ddq_dt);       // u = d(dq)/dt
@@ -283,7 +283,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     }
     eframe_++;
     if ( reset_temp || cp.soft_reset || eframe_ >= ap.eframe_mult ) eframe_ = 0;  // '>=' allows changing ap.eframe_mult on the fly
-    if ( (sp.debug()==3 || sp.debug()==4) && cp.publishS ) EKF_1x1::serial_print(Sen->control_time, Sen->now, dt_eframe_);  // print EKF in Read frame
+    if ( (sp.debug()==3 || sp.debug()==4) && cp.publishS ) EKF_1x1::serial_print(Sen->now, dt_eframe_);  // print EKF in Read frame
 
     // Filter
     voc_filt_ = SdVb_->update(voc_);   // used for saturation test
@@ -716,7 +716,7 @@ float BatterySim::calc_inj(const unsigned long long now, const uint8_t type, con
     sample_time_ = millis();
 
     // Return if time 0
-    if ( now== 0UL )
+    if ( now== 0ULL )
     {
         duty_ = 0UL;
         sp.put_Inj_bias(0.);
@@ -724,7 +724,7 @@ float BatterySim::calc_inj(const unsigned long long now, const uint8_t type, con
     }
 
     // Injection.  time shifted by 1UL
-    double t = (now-1UL)/1e3;
+    double t = (now-1ULL)/1e3;
     float inj_bias = 0.;
     // Calculate injection amounts from user inputs (talk).
 
@@ -827,9 +827,7 @@ float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Battery
     // print_serial_sim
     if ( (sp.debug()==2 || sp.debug()==3 || sp.debug()==4 )  && cp.publishS && !initializing_all)
     {
-        double cTime;
-        if ( sp.tweak_test() ) cTime = float(Sen->now)/1000.;
-        else cTime = Sen->control_time;
+        double cTime = double(Sen->now)/1000.;
         sprintf(pr.buff, "unit_sim, %13.3f, %d, %7.0f, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
             cTime, sp.Sim_chm_z, q_cap_rated_scaled_, bms_off_, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ib_charge_, ioc_, model_saturated_, *sp_delta_q_, soc_, reset_temp,'\0');
         Serial.printf("%s\n", pr.buff);

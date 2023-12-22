@@ -31,26 +31,27 @@ class Sync
 public:
   // Constructors
   Sync(void);
-  Sync(unsigned long delay);
+  Sync(unsigned long long delay);
   // Functions
-  boolean update(boolean reset, unsigned long now, boolean andCheck);
-  boolean update(unsigned long now, boolean reset, boolean andCheck);
-  boolean update(unsigned long now, boolean reset);
-  boolean updateN(unsigned long now, boolean reset, boolean orCheck);
-  unsigned long delay() { return(delay_); };
-  void delay(unsigned long new_delay) { delay_ = new_delay; updateTimeInput_ = float(delay_)/1000.; };
-  unsigned long last() { return(last_); };
-  boolean stat() { return(stat_); };
-  unsigned long updateDiff() { return(updateDiff_); };
-  double updateTime() { return(updateTime_); };
-  double updateTimeInput() { return(updateTimeInput_); };
-  unsigned long now() { return(now_); };
+  boolean update(boolean reset, unsigned long long now, boolean andCheck);
+  boolean update(unsigned long long now, boolean reset, boolean andCheck);
+  boolean update(unsigned long long now, boolean reset);
+  boolean updateN(unsigned long long now, boolean reset, boolean orCheck);
+  unsigned long long delay() { return(delay_); }
+  void delay(unsigned long long new_delay) { delay_ = new_delay; updateTimeInput_ = float(delay_)/1000.; }
+  void delay(unsigned long long new_delay, unsigned long long now) { delay_ = new_delay; updateTimeInput_ = float(delay_)/1000.; last_ = now; }
+  unsigned long long last() { return(last_); }
+  boolean stat() { return(stat_); }
+  unsigned long long updateDiff() { return(updateDiff_); }
+  double updateTime() { return(updateTime_); }
+  double updateTimeInput() { return(updateTimeInput_); }
+  unsigned long long now() { return(now_); }
 private:
-  unsigned long delay_;
-  unsigned long last_;
-  unsigned long now_;
+  unsigned long long delay_;
+  unsigned long long last_;
+  unsigned long long now_;
   boolean stat_;
-  unsigned long updateDiff_;
+  unsigned long long updateDiff_;
   double updateTime_;
   double updateTimeInput_;
 };

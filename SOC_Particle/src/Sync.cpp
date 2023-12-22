@@ -29,16 +29,16 @@ extern SavedPars sp;  // Various parameters to be static at system level and sav
 
 // Constructors
 Sync::Sync()
-  : delay_(0), last_(0UL), now_(0UL), stat_(false), updateDiff_(0), updateTime_(0)
+  : delay_(0), last_(0ULL), now_(0ULL), stat_(false), updateDiff_(0), updateTime_(0)
 {}
-Sync::Sync(unsigned long delay)
-    : delay_(delay), last_(0UL), now_(0UL), stat_(false), updateDiff_(0), updateTime_(0)
+Sync::Sync(unsigned long long delay)
+    : delay_(delay), last_(0ULL), now_(0ULL), stat_(false), updateDiff_(0), updateTime_(0)
 {
   updateTimeInput_ = float(delay_)/1000.;
 }
 
 // Check and count 
-boolean Sync::update(boolean reset, unsigned long now, boolean andCheck)
+boolean Sync::update(boolean reset, unsigned long long now, boolean andCheck)
 {
   now_ = now;
   updateDiff_ = now_ - last_;
@@ -50,7 +50,7 @@ boolean Sync::update(boolean reset, unsigned long now, boolean andCheck)
   }
   return( stat_ );
 }
-boolean Sync::update(unsigned long now, boolean reset, boolean andCheck)
+boolean Sync::update(unsigned long long now, boolean reset, boolean andCheck)
 {
   now_ = now;
   updateDiff_ = now_ - last_;
@@ -62,7 +62,7 @@ boolean Sync::update(unsigned long now, boolean reset, boolean andCheck)
   }
   return( stat_ );
 }
-boolean Sync::update(unsigned long now, boolean reset)
+boolean Sync::update(unsigned long long now, boolean reset)
 {
   now_ = now;
   updateDiff_ = now_ - last_;
@@ -74,7 +74,7 @@ boolean Sync::update(unsigned long now, boolean reset)
   }
   return( stat_ );
 }
-boolean Sync::updateN(unsigned long now, boolean reset, boolean orCheck)
+boolean Sync::updateN(unsigned long long now, boolean reset, boolean orCheck)
 {
   now_ = now;
   updateDiff_ = now_ - last_;

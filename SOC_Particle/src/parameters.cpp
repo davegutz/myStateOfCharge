@@ -212,8 +212,8 @@ SavedPars::SavedPars(SerialRAM *ram): Parameters()
     nflt_ = uint16_t( NFLT ); 
     initialize();
 
-    // TODO:  why was this here?  land mine!!
-    // for ( uint8_t i=0; i<n_; i++ ) if ( !V_[i]->is_eeram() ) V_[i]->set_nominal();
+    // Don't nominalize SavedPars on load.  Defeats the whole purpose of EERAM
+    // for ( uint8_t i=0; i<n_; i++ ) if ( !V_[i]->is_eeram() ) V_[i]->set_nominal();  no!!
 
     #ifdef CONFIG_47L16_EERAM
         for ( int i=0; i<n_; i++ )
@@ -345,7 +345,8 @@ void SavedPars::pretty_print(const boolean all)
     }
 
     #ifdef CONFIG_47L16_EERAM
-        Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
+        // Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
+        Serial.printf("SavedPars::SavedPars - \n");
         // Serial.printf("Temp mem map print\n");
         // mem_print();
     #endif
@@ -353,8 +354,9 @@ void SavedPars::pretty_print(const boolean all)
 
 void SavedPars::pretty_print_modeling()
 {
-  bitMapPrint(pr.buff, sp.modeling(), 8);
-  Serial.printf(" 0x%s\n", pr.buff);
+  char buffer[32];
+  bitMapPrint(buffer, sp.modeling(), 8);
+  Serial.printf(" 0x%s\n", buffer);
   Serial.printf(" 0x128 ib_noa_dscn %d\n", mod_ib_noa_dscn());
   Serial.printf(" 0x64  ib_amp_dscn %d\n", mod_ib_amp_dscn());
   Serial.printf(" 0x32  vb_dscn %d\n", mod_vb_dscn());
@@ -364,8 +366,9 @@ void SavedPars::pretty_print_modeling()
   Serial.printf(" 0x2   voltage %d\n", mod_vb());
   Serial.printf(" 0x1   temp %d\n", mod_tb());
 
-  time_long_2_str(Time_now_z, pr.buff);  // TODO: does this do anything/
-  Serial.printf(" time %ld hms:  %s\n", Time_now_z, pr.buff);
+  
+  time_long_2_str((time_t)Time_now_z, buffer);
+  Serial.printf(" time %ld hms:  %s\n", Time_now_z, buffer);
 }
 
 // Print faults
@@ -376,7 +379,7 @@ void SavedPars::print_fault_array()
   while ( ++n < nflt_+1 )
   {
     if ( ++i > (nflt_-1) ) i = 0; // circular buffer
-    fault_[i].print("unit_f");
+    fault_[i].print_flt("unit_f");
   }
 }
 
@@ -395,7 +398,7 @@ void SavedPars::print_history_array()
   while ( ++n < nhis_ )
   {
     if ( ++i > (nhis_-1) ) i = 0; // circular buffer
-    history_[i].print("unit_h");
+    history_[i].print_flt("unit_h");
   }
 }
 

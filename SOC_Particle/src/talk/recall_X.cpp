@@ -42,6 +42,9 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
     String murmur;
     switch ( letter_1 )
     {
+        case ( 'D' ): // XD  display a message
+            Serial.printf("\n\n************** DONE*****\n\n");
+            break;
 
         case ( 'p' ): // Xp<>:  injection program
             INT_in = cp.input_str.substring(2).toInt();
@@ -77,25 +80,17 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
 
                 case ( 9 ): case( 10 ): case ( 11 ): case( 12 ): case( 13 ): // Xp9: Xp10: Xp11: Xp12: Xp13:  Program regression
                     // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
-                    chit("Xp0;", QUEUE);      // Reset nominal
-                    chit("vv0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
-                    chit("Xm255;", QUEUE);    // Modeling (for totally digital test of logic) and tweak_test=true to disable cutback in Sim.  Leaving cutback on would mean long run times (~30:00) (May need a way to test features affected by cutback, such as tweak, saturation logic)
-                    chit("Xts;", QUEUE);      // Start up a sine wave
-                    chit("Ca1;", QUEUE);      // After restarting with sine running, soc will not be at 1.  Reset them all to 1
-                    chit("Dm.01;Dn.01;", ASAP);   // Slight positive current so sat logic is functional.  ASAP so synchronized and ib_diff flat.
-                    chit("DP1;", QUEUE);      // Fast data collection (may cause trouble in CoolTerm.  if so, try Dr200)
-                    chit("Rb;", QUEUE);       // Reset battery states
-                    // chit("Pa;", QUEUE);       // Print all for record
+
+                    chit("Xp0;vv0;Xm255;Xts;Ca1;", QUEUE);
+                    chit("Dm.01;Dn.01;", ASAP); 
+                    chit("DP1;Rb;", QUEUE); 
+
                     if ( INT_in == 10 )  // Xp10:  rapid tweak
                     {
-                        chit("Xf.02;", QUEUE);  // Frequency 0.02 Hz
-                        chit("Xa-2000;", QUEUE);// Amplitude -2000 A
-                        chit("XW5000;", QUEUE);    // Wait time before starting to cycle
-                        chit("XT5000;", QUEUE);    // Wait time after cycle to print
-                        chit("XC3;", QUEUE);    // Number of injection cycles
-                        chit("W2;", QUEUE);     // Wait
-                        chit("HR;Pr;Pf;vv4;Dh1000;", QUEUE);     // Data collection
+                        chit("Xf.02;Xa-2000;XW5000;XT5000;XC3;", QUEUE);  // Frequency 0.02 Hz
+                        chit("W2;W2;W2;HR;Pr;Pf;vv4;Dh1000;", QUEUE);  // Frequency 0.02 Hz
                     }
+
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
                         chit("Xf.002;", QUEUE); // Frequency 0.002 Hz
@@ -106,6 +101,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("W2;", QUEUE);     // Wait
                         chit("HR;Pr;Pf;vv2;Dh1000;", QUEUE);     // Data collection
                     }
+
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
                         chit("Xf.0002;", QUEUE);  // Frequency 0.002 Hz
@@ -116,6 +112,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                         chit("W2;", QUEUE);       // Wait
                         chit("HR;Pr;Pf;vv2;Dh1000;", QUEUE);     // Data collection
                     }
+
                     else if ( INT_in == 13 )  // Xp13:  tri tweak
                     {
                         chit("Xtt;", QUEUE);      // Start up a triangle wave
@@ -160,7 +157,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                 Sen->stop_inj = ap.wait_inj + (Sen->now + min((unsigned long long)(ap.cycles_inj / max(sp.freq()/(2.*PI), 1e-6) *1000.), ULLONG_MAX));
                 Sen->end_inj = Sen->stop_inj + ap.tail_inj;
                 Serial.printf("**\n*** RUN: at %lld, %7.3f cycles %lld to %lld with %ld wait and %ld tail\n\n",
-                Sen->now, ap.cycles_inj, Sen->start_inj, Sen->stop_inj, ap.wait_inj, ap.tail_inj);
+                    Sen->now, ap.cycles_inj, Sen->start_inj, Sen->stop_inj, ap.wait_inj, ap.tail_inj);
             }
             else Serial.printf("Wait%5.1fs for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
             break;

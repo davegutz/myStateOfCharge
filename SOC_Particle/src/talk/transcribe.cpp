@@ -162,7 +162,6 @@ void transcribe(BatteryMonitor *Mon, Sensors *Sen)
             {
               case ( 'Z' ):  // BZ :  Benign zeroing of settings to make clearing test easier
                 benign_zero(Mon, Sen);
-                Serial.printf("Benign Zero\n");
                 break;
 
               default:

@@ -162,41 +162,11 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
 
 
 if __name__ == '__main__':
-    # Save these examples
-    # data_file_txt = '../dataReduction/slowTweakRegression_pro0p_ch.csv'; unit_key = 'g20231111_pro0p_ch'; #use_ib_mon_in=True; scale_in=1.12
-    # data_file_txt = '../dataReduction/ampHiFail_pro0p_ch.csv'; unit_key = 'g20230530d_pro0p_ch'; #use_ib_mon_in=True; scale_in=1.12
-    # data_file_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
-    # data_file_txt = 'ampHiFail v20230305 CH.txt'; unit_key = 'pro0p'; cc_dif_tol_in = 0.5
-    # data_file_txt = 'ampHiFail vA20230305 BB.txt'; unit_key = 'pro1a'
-    # data_file_txt = 'coldStart vA20230305 BB.txt'; unit_key = 'pro1a'; cutback_gain_sclr_in = 0.5; ds_voc_soc_in = 0.06
-    # data_file_txt = 'dwell noise Ca.5 v20221028.txt'  # ; dTb = [[0., 18000.],  [0, 8.]]
-    # data_file_txt = 'dwell Ca.5 v20221028.txt'  # ; time_end_in=0.5  # ; dTb = [[0., 18000.],  [0, 8.]]
-
-    # The following CHINS runs were sources of figures in the .odt report.  Chem is in data stream
-    # in the following line I forgot to nominalize sp on load so scale_hys was 1.5 by mistake for baseline run.
-    # data_file_txt = 'sat v20230128 20230201.txt'; unit_key = 'soc0p';  scale_in = 1.127; s_hys_in = 1.5; s_hys_in = 1.15; #stauct_in=0.1; s_hys_cap_in=1.;
-    # data_file_txt = 'steps v20230128 20230203.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True # 0.9 tune 4, 5
-    # data_file_txt = 'steps v20230128 20230204.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # 0.8 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
-    # data_file_txt = 'steps v20230128 20230214.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.4 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
-    # data_file_txt = 'steps v20230128 20230218.txt'; unit_key = 'soc0p';  scale_in = 1.127; sres0_in = 1; sresct_in = 1; stauct_in = 1; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; tune_in = True  # ; time_end_in = 450  # 0.1 tune 4, 5 set s_hys_chg/dis = 0 to see prediction for R
-    # data_file_txt = 'dw_pro1a_bb.csv'; unit_key = 'pro1a'; dvoc_mon_in = 0.2
-
-    # Repeat of CHINS steps but for BB in truck
-    # data_file_txt = 'steps vA20230305 20230324 BB.txt'; unit_key = 'soc1a'  ; tune_in = True; dvoc_mon_in = 0.16; dvoc_sim_in = 0.16;
-    # temp_file = 'steps vA20230326 20230328.txt'; cat(temp_file, ('puttyLog20230328_113851.csv', 'puttyLog20230328_131552.csv'), in_path=path_to_data, out_path=rel_path_to_temp); unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in; sres0_in = 2.5; sresct_in = 0.13; stauct_in = 1.;
-    # temp_file = 'steps vA20230326 20230328.txt'; cat(temp_file, ('puttyLog20230328_113851.csv', 'puttyLog20230328_131552.csv'), in_path=path_to_data, out_path=rel_path_to_temp); unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in;
-    # data_file_txt = 'puttyLog20230328_131552_short.txt'; unit_key = 'soc1a'; tune_in = True; dvoc_mon_in = 0.11; dvoc_sim_in = dvoc_mon_in; sres0_in = 2.5; sresct_in = 0.13; stauct_in = 1;
-    # data_file_txt = 'real world Xp20 30C 20220914.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; s_hys_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
-    # data_file_txt = 'real world Xp20 30C 20220914a+b.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; use_vb_raw = False; scale_r_ss_in = 1.; scale_hys_mon_in = 3.33; s_hys_in = 3.33; dvoc_mon_in = -0.05; dvoc_sim_in = -0.05
-    # data_file_txt = 'real world Xp20 30C 20220917.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -11110
-    # data_file_txt = 'real world Xp20 v20220917a.txt'; unit_key = 'soc0_2022'; scale_in = 1.084; init_time_in = -69900
-
-    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
-    # unit_key = 'pro3p2_bb'
-    # data_only = False
     data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro1a_bb.csv'
     unit_key = 'g20231111b_pro1a_bb'
     time_end_in = None
+    rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
+    rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'
     data_only = True
 
-    compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only)
+compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only)

@@ -29,10 +29,9 @@ extern SavedPars sp;       // Various parameters to be static at system level an
 extern VolatilePars ap; // Various adjustment parameters shared at system level
 
 // struct Flt_st.  This file needed to avoid circular reference to sp in header files
-void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
+void Flt_st::assign(const unsigned long now, BatteryMonitor *Mon, Sensors *Sen)
 {
-  time_long_2_str(now, pr.buff);  // TODO: does this do anything/
-  this->t = (unsigned long int) now;
+  this->t_flt = now;
   this->Tb_hdwe = int16_t(Sen->Tb_hdwe*600.);
   this->vb_hdwe = int16_t(Sen->Vb/sp.nS()*sp.vb_hist_slr());
   this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/sp.nP()*sp.ib_hist_slr());
@@ -53,7 +52,7 @@ void Flt_st::assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen)
 // Copy function
 void Flt_st::copy_to_Flt_ram_from(Flt_st input)
 {
-  t = input.t;
+  t_flt = input.t_flt;
   Tb_hdwe = input.Tb_hdwe;
   vb_hdwe = input.vb_hdwe;
   ib_amp_hdwe = input.ib_amp_hdwe;
@@ -74,7 +73,7 @@ void Flt_st::copy_to_Flt_ram_from(Flt_st input)
 // Nominal values
 void Flt_st::nominal()
 {
-  this->t = 1UL;
+  this->t_flt = 1UL;
   this->Tb_hdwe = int16_t(0);
   this->vb_hdwe = int16_t(0);
   this->ib_amp_hdwe = int16_t(0);
@@ -96,13 +95,14 @@ void Flt_st::nominal()
 // Print functions
 void Flt_st::pretty_print(const String code)
 {
-  strcpy(pr.buff, "---");
-  if ( this->t > 1UL )
+  char buffer[32];
+  strcpy(buffer, "---");
+  if ( this->t_flt > 1UL )
   {
-    time_long_2_str(this->t, pr.buff);
     Serial.printf("code %s\n", code.c_str());
-    Serial.printf("buffer %s\n", pr.buff);
-    Serial.printf("t %ld\n", this->t);
+    time_long_2_str((time_t)this->t_flt, buffer);
+    Serial.printf("buffer %s\n", buffer);
+    Serial.printf("t %ld\n", this->t_flt);
     Serial.printf("Tb_hdwe %7.3f\n", float(this->Tb_hdwe)/600.);
     Serial.printf("vb_hdwe %7.3f\n", float(this->vb_hdwe)/sp.vb_hist_slr());
     Serial.printf("ib_amp_hdwe %7.3f\n", float(this->ib_amp_hdwe)/sp.ib_hist_slr());
@@ -121,14 +121,15 @@ void Flt_st::pretty_print(const String code)
 }
 
 
-void Flt_st::print(const String code)
+void Flt_st::print_flt(const String code)
 {
-  strcpy(pr.buff, "---");
-  if ( this->t > 1UL )
+  char buffer[32];
+  strcpy(buffer, "---");
+  if ( this->t_flt > 1UL )
   {
-    time_long_2_str(this->t, pr.buff);
+    time_long_2_str(this->t_flt, buffer);
     Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
-      code.c_str(), pr.buff, this->t,
+      code.c_str(), buffer, this->t_flt,
       float(this->Tb_hdwe)/600.,
       float(this->vb_hdwe)/sp.vb_hist_slr(),
       float(this->ib_amp_hdwe)/sp.ib_hist_slr(),
@@ -145,7 +146,7 @@ void Flt_st::print(const String code)
       this->fltw,
       this->falw);
     Serial1.printf("unit_f, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
-      pr.buff, this->t,
+      buffer, this->t_flt,
       float(this->Tb_hdwe)/600.,
       float(this->vb_hdwe)/sp.vb_hist_slr(),
       float(this->ib_amp_hdwe)/sp.ib_hist_slr(),
@@ -189,7 +190,7 @@ Flt_ram::~Flt_ram(){}
 #ifdef CONFIG_47L16_EERAM
   void Flt_ram::get()
   {
-    get_t();
+    get_t_flt();
     get_Tb_hdwe();
     get_vb_hdwe();
     get_ib_amp_hdwe();
@@ -209,7 +210,7 @@ Flt_ram::~Flt_ram(){}
   // Initialize each structure
   void Flt_ram::instantiate(SerialRAM *ram, uint16_t *next)
   {
-    t_eeram_.a16 = *next; *next += sizeof(t);
+    t_flt_eeram_.a16 = *next; *next += sizeof(t_flt);
     Tb_hdwe_eeram_.a16 = *next; *next += sizeof(Tb_hdwe);
     vb_hdwe_eeram_.a16 = *next; *next += sizeof(vb_hdwe);
     ib_amp_hdwe_eeram_.a16 = *next; *next += sizeof(ib_amp_hdwe);
@@ -235,7 +236,7 @@ void Flt_ram::put(const Flt_st value)
 {
   copy_to_Flt_ram_from(value);
   #ifdef CONFIG_47L16_EERAM
-    put_t();
+    put_t_flt();
     put_Tb_hdwe();
     put_vb_hdwe();
     put_ib_amp_hdwe();

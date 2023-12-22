@@ -41,14 +41,7 @@ boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
     switch ( letter_1 )
     {
         case ( 'a' ):  // Pa:  Print all
-            chit("Pm;", SOON);
-            chit("Ps;", SOON);
-            chit("Pr;", SOON);
-            chit("PM;", SOON);
-            chit("PN;", SOON);
-            chit("Hd;", SOON);
-            chit("Pf;", SOON);
-            chit("Q;", SOON);
+            chit("Pm;Ps;Pr;PM;PN;Hd;Pf;Q;", SOON);
             break;
 
         case ( 'b' ):  // Pb:  Print Vb measure
@@ -99,7 +92,7 @@ boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
         case ( 's' ):  // Ps:  Print sim
             Serial.printf("\nmodeling=%d\n", sp.modeling());
             Serial.printf("S:");  Sen->Sim->pretty_print();
-            Serial.printf("S::"); Sen->Sim->Coulombs::pretty_print();
+            // Serial.printf("S::"); Sen->Sim->Coulombs::pretty_print();
             break;
 
         case ( 'V' ):  // PV:  Print all volatile

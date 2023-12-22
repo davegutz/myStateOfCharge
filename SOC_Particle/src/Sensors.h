@@ -78,13 +78,13 @@ public:
   // functions
   boolean bare_detected() { return ( bare_detected_ ); };
   void dscn_cmd(const boolean cmd) { dscn_cmd_ = cmd; };
-  unsigned long int dt() { return sample_time_ - sample_time_z_; };
+  unsigned long long dt() { return sample_time_ - sample_time_z_; };
   void convert(const boolean disconnect);
   float Ishunt_cal() { return Ishunt_cal_; };
   void pretty_print();
   void sample(const boolean reset_loc, const float T);
   float scale() { return ( *sp_ib_scale_ ); };
-  unsigned long int sample_time(void) { return sample_time_; };
+  unsigned long long sample_time(void) { return sample_time_; };
   float v2a_s() { return v2a_s_ ; };
   float vshunt() { return vshunt_; };
   int16_t vshunt_int() { return vshunt_int_; };
@@ -106,8 +106,8 @@ protected:
   float Ishunt_cal_;    // Sensed bank current, calibrated ADC, A
   float *sp_ib_bias_;   // Global bias, A
   float *sp_ib_scale_;  // Global scale, A
-  unsigned long int sample_time_;   // Exact moment of hardware sample
-  unsigned long int sample_time_z_; // Exact moment of past hardware sample
+  unsigned long long sample_time_;   // Exact moment of hardware sample
+  unsigned long long sample_time_z_; // Exact moment of past hardware sample
   boolean dscn_cmd_;    // User command to ignore hardware, T=ignore
   uint8_t vc_pin_;      // Common voltage pin, for !CONFIG_ADS1013_OPAMP
   uint8_t vo_pin_;      // Output voltage pin, for !CONFIG_ADS1013_OPAMP
@@ -287,7 +287,7 @@ class Sensors
 {
 public:
   Sensors();
-  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, time32_t time_now);
+  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
@@ -336,7 +336,7 @@ public:
   boolean display;            // Use display
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
   unsigned long long boot_time() { return boot_time_; }
-  unsigned long int dt_ib(void) { return dt_ib_; };
+  unsigned long long dt_ib(void) { return dt_ib_; };
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
   float ib() { return Ib / sp.nP(); };                            // Battery unit current, A
   float ib_amp_hdwe() { return Ib_amp_hdwe / sp.nP(); };          // Battery amp unit current, A
@@ -354,8 +354,8 @@ public:
   float Ib_noise();
   void reset_temp(const boolean reset) { reset_temp_ = reset; };
   boolean reset_temp() { return ( reset_temp_ ); };
-  unsigned long int sample_time_ib(void) { return sample_time_ib_; };
-  unsigned long int sample_time_vb(void) { return sample_time_vb_; };
+  unsigned long long sample_time_ib(void) { return sample_time_ib_; };
+  unsigned long long sample_time_vb(void) { return sample_time_vb_; };
   void shunt_print();         // Print selection result
   void shunt_select_initial(const boolean reset);   // Choose between shunts for model
   void temp_load_and_filter(Sensors *Sen, const boolean reset_temp);
@@ -378,12 +378,12 @@ protected:
   PRBS_7 *Prbn_Ib_amp_; // Ib amplified sensor noise generator model only
   PRBS_7 *Prbn_Ib_noa_; // Ib non-amplified sensor noise generator model only
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
-  unsigned long int sample_time_ib_;          // Exact moment of selected Ib sample, ms
-  unsigned long int sample_time_vb_;          // Exact moment of selected Vb sample, ms
-  unsigned long int sample_time_ib_hdwe_;     // Exact moment of Ib sample, ms
-  unsigned long int sample_time_vb_hdwe_;     // Exact moment of Vb sample, ms
-  unsigned long int dt_ib_hdwe_;          // Delta update of Ib sample, ms
-  unsigned long int dt_ib_;               // Delta update of selected Ib sample, ms
+  unsigned long long sample_time_ib_;          // Exact moment of selected Ib sample, ms
+  unsigned long long sample_time_vb_;          // Exact moment of selected Vb sample, ms
+  unsigned long long sample_time_ib_hdwe_;     // Exact moment of Ib sample, ms
+  unsigned long long sample_time_vb_hdwe_;     // Exact moment of Vb sample, ms
+  unsigned long long dt_ib_hdwe_;          // Delta update of Ib sample, ms
+  unsigned long long dt_ib_;               // Delta update of selected Ib sample, ms
   unsigned long long boot_time_;          // UTC Zulu at instantiation, s
 };
 

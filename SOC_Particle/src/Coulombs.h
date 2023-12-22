@@ -29,7 +29,8 @@
 
 
 // Functions
-float nice_zero(const float in, const float thr=1.e-6);
+float nice_zero(const float in, const float thr);
+double nice_zero(const double in, const double thr);
 
 
 // Coulomb Counter Class
@@ -56,10 +57,10 @@ public:
   virtual float count_coulombs(const double dt, const boolean reset, const float temp_c, const float charge_curr,
     const boolean sat, const double delta_q_ekf);
   double delta_q() { return(*sp_delta_q_); };
-  double delta_q_abs() { return nice_zero(delta_q_abs_); }
+  double delta_q_abs() { return nice_zero(delta_q_abs_, 1e-6); }
   double delta_q_inf() { return(delta_q_inf_); };
-  double delta_q_neg() { return nice_zero(delta_q_neg_); }
-  double delta_q_pos() { return nice_zero(delta_q_pos_); }
+  double delta_q_neg() { return nice_zero(delta_q_neg_, 1e-6); }
+  double delta_q_pos() { return nice_zero(delta_q_pos_, 1e-6); }
   uint8_t mod_code() { return (*(chem_.sp_mod_code)); };
   virtual void pretty_print();
   double q(){ return (q_); };

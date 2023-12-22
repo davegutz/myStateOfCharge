@@ -55,6 +55,7 @@ void print_all_header(void)
     print_serial_ekf_header();
   }
 }
+
 void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   static uint8_t last_read_debug = 0;     // Remember first time with new debug to print headers
@@ -78,6 +79,7 @@ void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   }
   last_read_debug = sp.debug();
 }
+
 void print_serial_header(void)
 {
   if ( ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 ) )
@@ -88,26 +90,21 @@ void print_serial_header(void)
     #endif
   }
 }
+
 void print_serial_sim_header(void)
 {
   if ( sp.debug()==2  || sp.debug()==3 || sp.debug()==4 ) // print_serial_sim_header
     Serial.printf("unit_m,  c_time,       chm_s, qcrs_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
 }
+
 void print_signal_sel_header(void)
 {
   if ( sp.debug()==2 || sp.debug()==4 ) // print_signal_sel_header
     Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,");
     Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel_stat,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,\n");
-          // -----, cTime, reset, sp.ib_select,
-          //                                     cc_diff_,
-          //                                              ib_amp_hdwe, ib_noa_hdwe, ib_amp_model, ib_noa_model, ib_model,
-          //                                                                           ib_diff_, ib_diff_f,
-          //         voc_soc, e_wrap_, e_wrap_filt_, ib_sel_stat_, ib_hdwe, ib_hdwe_model, mod_ib(), ib,
-          //                                                          vb_sel_stat, vb_hdwe, vb_model,mod_vb(), Vb,
-          //                                                                                    Tb_hdwe, Tb, mod_tb(), Tb_filt,
-          //         fltw_, falw_, ib_rate_, ib_quiet_, tb_sel_stat_, cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_,
 }
+
 void print_serial_ekf_header(void)
 {
   if ( sp.debug()==3 || sp.debug()==4 ) // print_serial_ekf_header
@@ -117,10 +114,7 @@ void print_serial_ekf_header(void)
 // Print strings
 void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
-  double cTime;
-  // if ( sp.tweak_test() ) cTime = double(Sen->now)/1000.;
-  // else cTime = Sen->control_time;
-  cTime = double(Sen->now)/1000.;
+  double cTime = double(Sen->now)/1000;
   
   sprintf(pr.buff, "%s, %s,%13.3f,%6.3f, %d,%7.0f,%d, %d, %d, %d, %6.3f,%6.3f,%9.3f,%9.3f,%7.5f,  %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%5.3f,", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
@@ -131,52 +125,11 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
     Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_min());
 }
 
-// Convert time to decimal for easy lookup
-double decimalTime(unsigned long *current_time, char* tempStr, unsigned long now, unsigned long millis_flip)
-{
-  *current_time = Time.now();  // Seconds since start of epoch
-  uint32_t year = Time.year(*current_time);
-  uint8_t month = Time.month(*current_time);
-  uint8_t day = Time.day(*current_time);
-  uint8_t hours = Time.hour(*current_time);
-
-  // Second Sunday Mar and First Sunday Nov; 2:00 am; crude DST handling
-  if ( USE_DST )
-  {
-    uint8_t dayOfWeek = Time.weekday(*current_time);     // 1-7
-    if (  month>2   && month<12 &&
-      !(month==3  && ((day-dayOfWeek)<7 ) && hours>1) &&  // <second Sunday Mar
-      !(month==11 && ((day-dayOfWeek)>=0) && hours>0) )  // >=first Sunday Nov
-      {
-        Time.zone(GMT+1);
-        *current_time = Time.now();  // Seconds since start of epoch
-        day = Time.day(*current_time);
-        hours = Time.hour(*current_time);
-      }
-  }
-  // uint8_t dayOfWeek = Time.weekday(*current_time)-1;  // 0-6
-  uint8_t minutes   = Time.minute(*current_time);
-  uint8_t seconds   = Time.second(*current_time);
-
-  // Convert the string
-  time_long_2_str(*current_time, tempStr);
-
-  // Convert to decimal
-  static double cTimeInit = ((( (double(year-2021)*12 + double(month))*30.4375 + double(day))*24.0 + double(hours))*60.0 + double(minutes))*60.0 + \
-                      double(seconds) + double(now-millis_flip)/1000.;
-  // Ignore Time.now if corrupt
-  if ( year<2020 ) cTimeInit = 0.;
-  // Serial.printf("y %ld m %d d %d h %d m %d s %d now %ld millis_flip %ld\n", year, month, day, hours, minutes, seconds, now, millis_flip);
-  double cTime = cTimeInit + double(now-millis_flip)/1000.;
-  // Serial.printf("%ld - %ld %18.12g cTimeInit%18.12g cTime%18.12g\n", now, millis_flip, double(now-millis_flip)/1000., cTimeInit, cTime);
-  return ( cTime );
-}
-
 // Non-blocking delay
-void delay_no_block(const unsigned long int interval)
+void delay_no_block(const unsigned long long interval)
 {
-  unsigned long int previousMillis = millis();
-  unsigned long currentMillis = previousMillis;
+  unsigned long long previousMillis = millis();
+  unsigned long long currentMillis = previousMillis;
   while( currentMillis - previousMillis < interval )
   {
     currentMillis = millis();
@@ -211,9 +164,6 @@ void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const
       Serial.printf("\n\n");
       sp.pretty_print(true);
       Serial.printf("falw %d tb_fa %d\n", Sen->Flt->falw(), Sen->Flt->tb_fa());
-      // Sen->Flt->disab_tb_fa(1);
-      // Serial.printf("S/M.a_d_q_t:"); debug_m1(Mon, Sen);
-      // Serial.printf("af cal: Tb_f=%5.2f Vb=%7.3f Ib=%7.3f :", Sen->Tb_filt, Sen->Vb, Sen->Ib); Serial.printf("Top:"); debug_m1(Mon, Sen);
     }
   #endif
 
@@ -359,7 +309,7 @@ void load_ib_vb(const boolean reset, const boolean reset_temp, Sensors *Sen, Pin
 // Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt
 // States:  Mon.soc, Mon.soc_ekf
 // Outputs: tcharge_wt, tcharge_ekf, Voc, Voc_filt
-void  monitor(const boolean reset, const boolean reset_temp, const unsigned long now,
+void  monitor(const boolean reset, const boolean reset_temp, const unsigned long long now,
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen)
 {
   // EKF - calculates temp_c_, voc_stat_, voc_ as functions of sensed parameters vb & ib (not soc)
@@ -587,10 +537,10 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
 // States:  Sim.soc
 // Outputs: Sim.temp_c_, Sen->Tb_filt, Sen->Ib, Sen->Ib_model,
 //   Sen->Vb_model, Sen->Tb_filt, sp.inj_bias
-void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long now, const unsigned long elapsed,
+void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long long now, const unsigned long long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen)
 {
-  static unsigned long int last_snap = now;
+  static unsigned long long int last_snap = now;
   boolean storing_fault_data = ( now - last_snap )>SNAP_WAIT;
   if ( storing_fault_data || reset ) last_snap = now;
 
@@ -704,6 +654,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   if ( ap.until_q==0UL && until_q_past>0UL )
   {
     chit("vv0;Pa;BZ;Rf;", QUEUE);
+    chit("XD;", LAST);
   }
   until_q_past = ap.until_q;
   millis_past = millis();
@@ -824,7 +775,7 @@ void rapid_print(Sensors *Sen, BatteryMonitor *Mon)
 }
 
 // Time synchro for web information
-void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *millis_flip)
+void sync_time(unsigned long long now, unsigned long long *last_sync, unsigned long long *millis_flip)
 {
   *last_sync = millis();
 
@@ -842,30 +793,19 @@ void sync_time(unsigned long now, unsigned long *last_sync, unsigned long *milli
 }
 
 // For summary prints
-String time_long_2_str(const unsigned long current_time, char *tempStr)
+String time_long_2_str(const time_t time, char *tempStr)
 {
-    uint32_t year = Time.year(current_time);
-    uint8_t month = Time.month(current_time);
-    uint8_t day = Time.day(current_time);
-    uint8_t hours = Time.hour(current_time);
-
-    // Second Sunday Mar and First Sunday Nov; 2:00 am; crude DST handling
-    if ( USE_DST)
-    {
-      uint8_t dayOfWeek = Time.weekday(current_time);     // 1-7
-      if (  month>2   && month<12 &&
-        !(month==3  && ((day-dayOfWeek)<7 ) && hours>1) &&  // <second Sunday Mar
-        !(month==11 && ((day-dayOfWeek)>=0) && hours>0) )  // >=first Sunday Nov
-        {
-          Time.zone(GMT+1);
-          day = Time.day(current_time);
-          hours = Time.hour(current_time);
-        }
-    }
-        // uint8_t dayOfWeek = Time.weekday(current_time)-1;  // 0-6
-        uint8_t minutes   = Time.minute(current_time);
-        uint8_t seconds   = Time.second(current_time);
+    // Serial.printf("Time.year:  time_t %d ul %d as-is %d\n", 
+    //   Time.year((time_t) 1703267248), Time.year((unsigned long )1703267248), Time.year(time));
+    uint32_t year = Time.year(time);
+    uint8_t month = Time.month(time);
+    uint8_t day = Time.day(time);
+    uint8_t hours = Time.hour(time);
+    uint8_t minutes   = Time.minute(time);
+    uint8_t seconds   = Time.second(time);
     sprintf(tempStr, "%4u-%02u-%02uT%02u:%02u:%02u", int(year), month, day, hours, minutes, seconds);
+    // Serial.printf("time_long_2_str: %lld %ld %d %d %d %d %d\n", time, year, month, day, hours, minutes, seconds);
+    // sprintf(tempStr, "time_long_2_str");
     return ( String(tempStr) );
 }
 

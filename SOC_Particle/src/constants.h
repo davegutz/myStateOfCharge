@@ -57,8 +57,6 @@
 #define CONTROL_DELAY         100UL     // Control read wait, ms (100UL = 0.1 sec)
 #define SNAP_WAIT             10000UL   // Interval between fault snapshots (10000UL = 10 sec)
 #define DP_MULT               4         // Multiples of read to capture data DP
-#define GMT                   0         // Enter time different to zulu (does not respect DST) (0)
-#define USE_DST               0         // Whether to apply DST or not, 0 or 1 (0)
 #define TBATT_TEMPCAL         0.56      // Maxim 1-wire plenum temp sense calibrate (0.56), C
 #define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)
 #define TEMP_RANGE_CHECK      -5.       // Minimum expected temp reading, C (-5.)

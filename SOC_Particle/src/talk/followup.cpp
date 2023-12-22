@@ -40,7 +40,6 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
 
         case ( 'B' ):
             switch ( letter_1 )
- 
             {
 
                 case ( 'm' ):  //* Bm
@@ -129,7 +128,6 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     else
                         Serial.printf("soc%8.4f; must be 0-1.1\n", ap.init_sim_soc);
                     break;
-
             }
             break;
 
@@ -139,7 +137,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
 
                 case ( 'h' ):  //   Dh<>:  READ sample time input
                     if ( ap.his_delay_p->success() )
-                        Sen->Summarize->delay(max(ap.read_delay, ap.his_delay));  // validated
+                        Sen->Summarize->delay(max(ap.read_delay, ap.his_delay), Sen->now);  // validated
                     break;
 
                 case ( 'r' ):  //   Dr<>:  READ sample time input
@@ -164,7 +162,6 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     if ( ap.talk_delay_p->success() )
                         Sen->Talk->delay(ap.talk_delay);  // validated
                     break;
-
             }
             break;
 
@@ -193,8 +190,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     {
                         Mon->apply_cap_scale(sp.s_cap_mon());
                     }
-                    break;
-            
+                    break;      
             }
             break;
 
@@ -209,10 +205,8 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     sp.put_ib_select(cp.input_str.substring(2).toInt());
                 }
                 break;
-
             }
             break;
-
 
         case ( 'l' ):
             if ( sp.debug_p->success() )

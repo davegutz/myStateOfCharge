@@ -27,12 +27,12 @@
 #include "Battery.h"
 #include "./hardware/SerialRAM.h"
 
-String time_long_2_str(const unsigned long current_time, char *tempStr);
+String time_long_2_str(const time_t current_time, char *tempStr);
 
 // SRAM retention summary
 struct Flt_st
 {
-  unsigned long t = 1UL; // Timestamp seconds since start of epoch
+  unsigned long t_flt = 1UL; // Timestamp seconds since start of epoch
   int16_t Tb_hdwe = 0;  // Battery temperature, hardware, C
   int16_t vb_hdwe = 0;  // Battery measured potential, hardware, V
   int16_t ib_amp_hdwe = 0;  // Battery measured input current, amp, A
@@ -49,12 +49,12 @@ struct Flt_st
   uint16_t fltw = 0;    // Fault word
   uint16_t falw = 0;    // Fail word
   unsigned long dummy = 0;  // padding to absorb Wire.write corruption
-  void assign(const time32_t now, BatteryMonitor *Mon, Sensors *Sen);
+  void assign(const unsigned long now, BatteryMonitor *Mon, Sensors *Sen);
   void copy_to_Flt_ram_from(Flt_st input);
   void get() {};
   void nominal();
   void pretty_print(const String code);
-  void print(const String code);
+  void print_flt(const String code);
   void put(Flt_st source);
   void put_nominal();
 };
@@ -65,7 +65,7 @@ public:
   Flt_ram();
   ~Flt_ram();
   #ifdef CONFIG_47L16_EERAM
-    void get_t()            { unsigned long value;  rP_->get(t_eeram_.a16, value);            t = value; };
+    void get_t_flt()        { unsigned long value;  rP_->get(t_flt_eeram_.a16, value);        t_flt = value; };
     void get_Tb_hdwe()      { int16_t value;        rP_->get(Tb_hdwe_eeram_.a16, value);      Tb_hdwe = value; };
     void get_vb_hdwe()      { int16_t value;        rP_->get(vb_hdwe_eeram_.a16, value);      vb_hdwe = value; };
     void get_ib_amp_hdwe()  { int16_t value;        rP_->get(ib_amp_hdwe_eeram_.a16, value);  ib_amp_hdwe = value; };
@@ -89,7 +89,7 @@ public:
   void put_nominal();
 
   #ifndef CONFIG_47L16_EERAM
-    void put_t(const unsigned long value)         { t = value; };
+    void put_t_flt(const unsigned long value)     { t_flt = value; };
     void put_Tb_hdwe(const int16_t value)         { Tb_hdwe = value; };
     void put_vb_hdwe(const int16_t value)         { vb_hdwe = value; };
     void put_ib_amp_hdwe(const int16_t value)     { ib_amp_hdwe = value; };
@@ -106,7 +106,7 @@ public:
     void put_fltw(const uint16_t value)           { fltw = value; };
     void put_falw(const uint16_t value)           { falw = value; };
 #else
-    void put_t()            { rP_->put(t_eeram_.a16, t); };
+    void put_t_flt()        { rP_->put(t_flt_eeram_.a16, t_flt); };
     void put_Tb_hdwe()      { rP_->put(Tb_hdwe_eeram_.a16, Tb_hdwe); };
     void put_vb_hdwe()      { rP_->put(vb_hdwe_eeram_.a16, vb_hdwe); };
     void put_ib_amp_hdwe()  { rP_->put(ib_amp_hdwe_eeram_.a16, ib_amp_hdwe); };
@@ -122,7 +122,7 @@ public:
     void put_e_wrap_filt()  { rP_->put(e_wrap_filt_eeram_.a16, e_wrap_filt); };
     void put_fltw()         { rP_->put(fltw_eeram_.a16, fltw); };
     void put_falw()         { rP_->put(falw_eeram_.a16, falw); };
-    void put_t(const unsigned long value)         { rP_->put(t_eeram_.a16, value);            t = value; };
+    void put_t_flt(const unsigned long value)     { rP_->put(t_flt_eeram_.a16, value);        t_flt = value; };
     void put_Tb_hdwe(const int16_t value)         { rP_->put(Tb_hdwe_eeram_.a16, value);      Tb_hdwe = value; };
     void put_vb_hdwe(const int16_t value)         { rP_->put(vb_hdwe_eeram_.a16, value);      vb_hdwe = value; };
     void put_ib_amp_hdwe(const int16_t value)     { rP_->put(ib_amp_hdwe_eeram_.a16, value);  ib_amp_hdwe = value; };
@@ -143,7 +143,7 @@ public:
 protected:
   SerialRAM *rP_;
   #ifdef CONFIG_47L16_EERAM
-    address16b t_eeram_;
+    address16b t_flt_eeram_;
     address16b Tb_hdwe_eeram_;
     address16b vb_hdwe_eeram_;
     address16b ib_amp_hdwe_eeram_;

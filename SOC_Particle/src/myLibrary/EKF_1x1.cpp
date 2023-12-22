@@ -89,11 +89,10 @@ void EKF_1x1::init_ekf(double soc, double Pinit)
  }
 
 // Serial print
- void EKF_1x1::serial_print(const double control_time, const unsigned long int now, const float dt)
+ void EKF_1x1::serial_print(const unsigned long long now, const float dt)
  {
-  double cTime;
-  if ( sp.tweak_test() ) cTime = double(now)/1000.;
-  else cTime = control_time;
+  double cTime = double(now)/1000.;
+
   Serial.printf("unit_ekf,%13.3f,%7.3f,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,%10.7g,\n",
     cTime, dt, Fx_, Bu_, Q_, R_, P_, S_, K_, u_, x_, y_, z_, x_prior_, P_prior_, x_post_, P_post_, hx_, H_);
  }

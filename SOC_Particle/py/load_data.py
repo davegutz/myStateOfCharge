@@ -134,7 +134,6 @@ if __name__ == '__main__':
     rated_batt_cap = 100.0
     legacy = False
     v1_only = False
-
     load_data(path_to_data=path_to_data, skip=skip, unit_key=unit_key, zero_zero_in=zero_zero_in, time_end_in=time_end_in,
               rated_batt_cap=rated_batt_cap, legacy=legacy, v1_only=v1_only)
 

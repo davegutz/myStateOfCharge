@@ -90,7 +90,7 @@ void chit(const String cmd, const urgency when)
     else if (when == SOON) When = "SOON";
     else if (when == ASAP) When = "ASAP";
     else if (when == INCOMING) When = "INCOMING"; 
-    Serial.printf("chit cmd=%s [%s]\n", cmd.c_str(), When.c_str());
+    Serial.printf("chit='%s'[%s]\n", cmd.c_str(), When.c_str());
   #endif
   if ( when == LAST )
     cp.end_str += cmd;
