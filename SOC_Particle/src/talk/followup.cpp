@@ -139,7 +139,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                         Sen->Summarize->delay(max(ap.read_delay, ap.his_delay), Sen->now);  // validated
                     else if (ap.value_str()=="0" || ap.value_str()=="")
                     {
-                        Serial.printf("setting Dh nominal\n");
+                        Serial.printf("setting NOMINAL instead\n");
                         ap.his_delay_p->set_nominal();
                         Sen->Summarize->delay(max(ap.read_delay, ap.his_delay), Sen->now);
                     }
