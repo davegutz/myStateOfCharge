@@ -77,6 +77,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.Vb_bias_hdwe_p->print1_help();  //* Dc
   ap.eframe_mult_p->print_help();  //  DE
   ap.his_delay_p->print_help();  //  Dh
+  Serial.printf("    set 'Dh0;' for nominal\n");
   sp.ib_bias_all_p->print_help();  //* DI
   sp.ib_bias_all_p->print1_help();  //* DI
   sp.ib_bias_amp_p->print_help();  //  Dm

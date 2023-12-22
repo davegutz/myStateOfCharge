@@ -40,13 +40,15 @@ public:
     ~Parameters();
     // Do everything
     boolean find_adjust(const String &str);
-    virtual void initialize() {};
+    virtual void initialize() {}
     boolean is_corrupt();
-    virtual void pretty_print(const boolean all){};
+    virtual void pretty_print(const boolean all){}
     void set_nominal();
+    String value_str() { return value_str_; }
 protected:
     int8_t n_;
     Variable **V_;
+    String value_str_;
 };
 
 

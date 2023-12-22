@@ -134,10 +134,15 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
         case ( 'D' ):
             switch ( letter_1 )
             {
-
                 case ( 'h' ):  //   Dh<>:  READ sample time input
                     if ( ap.his_delay_p->success() )
                         Sen->Summarize->delay(max(ap.read_delay, ap.his_delay), Sen->now);  // validated
+                    else if (ap.value_str()=="0" || ap.value_str()=="")
+                    {
+                        Serial.printf("setting Dh nominal\n");
+                        ap.his_delay_p->set_nominal();
+                        Sen->Summarize->delay(max(ap.read_delay, ap.his_delay), Sen->now);
+                    }
                     break;
 
                 case ( 'r' ):  //   Dr<>:  READ sample time input

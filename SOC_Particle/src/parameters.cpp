@@ -40,9 +40,10 @@ Parameters::~Parameters(){};
 boolean Parameters::find_adjust(const String &str)
 {
     uint8_t count = 0;
+    boolean found = false;
     boolean success = false;
     String substr = str.substring(0, 2);
-    String value_str = str.substring(2);
+    value_str_ = str.substring(2);
     if ( substr.length()<2 )
     {
         Serial.printf("%s substr of %s is too short\n", substr.c_str(), str.c_str());
@@ -52,19 +53,19 @@ boolean Parameters::find_adjust(const String &str)
     {
         if ( substr==V_[i]->code() )
         {
-            if ( !count ) success = V_[i]->print_adjust(value_str);
+            found = true;
+            if ( !count ) success = V_[i]->print_adjust(value_str_);  // prints own error messages
             else Serial.printf("REPEAT at i %d %s\n", i, V_[i]->code().c_str());
             count++;
         }
     }
-    if ( count==1 && success )
+    if ( found )
     {
-        return success;
-    }
-    else if ( count > 1 )
-    {
-        Serial.printf("REPEAT: %s was decoded into code %s and value %s\n", str.c_str(), substr.c_str(), value_str.c_str());
-        return false;
+        if ( count > 1 )
+        {
+            Serial.printf("REPEAT: %s was decoded into code %s and value %s\n", str.c_str(), substr.c_str(), value_str_.c_str());
+        }
+        return true;
     }
     else
     {
