@@ -1,0 +1,211 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2023.12.23 12:13:29 =~=~=~=~=~=~=~=~=~=~=~=
+Pa;echo: Pa, 4
+cmd: Pa
+cmd: Pm
+
+M:BatteryMonitor: silent DEPLOY
+M::Coulombs: silent DEPLOY
+M::EKF_1x1:
+In:
+  z   14.4893, V
+  R  0.250000
+  Q  0.000002
+  H     0.300
+Out:
+  x    1.0000, Vsoc (0-1 fraction)
+  hx   0.0000
+  y    14.4893, V
+  P  0.000027
+  K  0.000032
+  S  0.250002
+
+modeling 0
+cmd: Ps
+
+modeling=0
+S:BatterySim: silent DEPLOY
+cmd: Pr
+
+saved (sp) diffs
+**none**
+
+cmd: PM
+
+Shunt: silent DEPLOY
+cmd: PN
+
+Shunt: silent DEPLOY
+cmd: Hd
+
+print_all_fault_buffer: iflt 190 nflt 190
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+cmd: Pf
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+unit_f, 2023-12-23T17:37:35, 1703353055,  13.375,  14.481,   0.013,   0.000,  13.375,  14.481,   0.013,  1.0000,  0.0343,  0.9982,  14.480,  14.480,   0.204, 1024, 0,
+unit_f, 2023-12-23T17:37:45, 1703353065,  13.375,  14.489,   0.013,   0.000,  13.375,  14.489,   0.013,  1.0000,  0.0343,  0.9987,  14.476,  14.476,   0.213, 1024, 0,
+unit_f, 2023-12-23T17:37:55, 1703353075,  13.375,  14.476,  -0.018,   0.000,  13.375,  14.476,  -0.018,  1.0000,  0.0343,  1.0000,  14.481,  14.481,   0.214, 0, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+Sen::
+Fault:
+ cc_diff    0.000  thr=500.000 Fc^
+ ib_diff   -0.044  thr= 10.000 Fd^
+ e_wrap     0.216  thr=-786.080 Fo^628.864 Fi^
+ ib_quiet  -0.004  thr=  0.005 Fq v
+
+ soc    1.000  soc_inf   1.000 voc  14.473  voc_soc  14.700
+ dis_tb_fa 0  dis_vb_fa 0  dis_ib_fa 0
+ bms_off   0
+
+ Tbh= 13.375  Tbm= 13.375 sel  13.375
+ Vbh  14.472  Vbm  14.640 sel  14.472
+ imh  -0.040  imm  -0.040 sel  -0.040
+ inh  -0.001  inm  -0.040 sel  -0.040
+
+ mod_tb 0 mod_vb 0 mod_ib  0
+ mod_tb_dscn 0 mod_vb_dscn 0 mod_ib_amp_dscn 0 mod_ib_noa_dscn 0
+ tb_s_st 1  vb_s_st 1  ib_s_st 1
+ fake_faults 1 latched_fail 0 latched_fail_fake 0 preserving 0
+
+ bare det n  0  x 
+ bare det m  0  x 
+ ib_dsc  1  0 'Fq v'
+ ibd_lo  0  0 'Fd ^  *SA/*SB'
+ ibd_hi  0  0 'Fd ^  *SA/*SB'
+ red wv  0  0   'Fd, Fi/Fo ^'
+ wl      0  0 'Fo ^'
+ wh      0  0 'Fi ^'
+ cc_dif  x  0 'Fc ^'
+ ib n    0  0 'Fi 1'
+ ib m    0  0 'Fi 1'
+ vb      0  0 'Fv 1  *SV, *Dc/*Dv'
+ tb      0  0 'Ft 1'
+  0010000000000   00000000000
+  CBA98765x3210 xxA9876543210
+  fltw=1024     falw=0
+fake_faults=>redl
+cmd: Q
+ib_amp_fail 0
+ib_noa_fail 0
+vb_fail 0
+Tb 13.375
+vb 14.490
+voc 14.489
+voc_filt 14.452
+vsat 13.753
+ib  0.015
+soc_m  1.0000
+soc_ekf  1.0000
+soc  1.0000
+soc_min  0.0343
+soc_inf  1.0000
+modeling 0
+dq_inf/dq_abs       0.1/       0.2   0.6248 coul_eff*=137234.552026, DAB+= 0.005679
+DQn      -0.1 Tn      24.2 DQp       0.0 Tp       0.0
+cmd: Pr
+
+saved (sp) diffs
+**none**
+
+cmd: Q
+ib_amp_fail 0
+ib_noa_fail 0
+vb_fail 0
+Tb 13.375
+vb 14.485
+voc 14.485
+voc_filt 14.452
+vsat 13.753
+ib  0.015
+soc_m  1.0000
+soc_ekf  1.0000
+soc  1.0000
+soc_min  0.0343
+soc_inf  1.0000
+modeling 0
+dq_inf/dq_abs       0.1/       0.2   0.5835 coul_eff*=145234.234452, DAB+= 0.005864
+DQn      -0.1 Tn      24.8 DQp       0.0 Tp       0.0
+Pf;echo: Pf, 4
+cmd: Pf
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+unit_f, 2023-12-23T17:37:35, 1703353055,  13.375,  14.481,   0.013,   0.000,  13.375,  14.481,   0.013,  1.0000,  0.0343,  0.9982,  14.480,  14.480,   0.204, 1024, 0,
+unit_f, 2023-12-23T17:37:45, 1703353065,  13.375,  14.489,   0.013,   0.000,  13.375,  14.489,   0.013,  1.0000,  0.0343,  0.9987,  14.476,  14.476,   0.213, 1024, 0,
+unit_f, 2023-12-23T17:37:55, 1703353075,  13.375,  14.476,  -0.018,   0.000,  13.375,  14.476,  -0.018,  1.0000,  0.0343,  1.0000,  14.481,  14.481,   0.214, 0, 0,
+unit_f, 2023-12-23T17:38:05, 1703353085,  13.375,  14.485,  -0.018,   0.000,  13.375,  14.485,  -0.018,  1.0000,  0.0343,  1.0000,  14.489,  14.489,   0.218, 1024, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+Sen::
+Fault:
+ cc_diff    0.000  thr=500.000 Fc^
+ ib_diff   -0.059  thr= 10.000 Fd^
+ e_wrap     0.221  thr=-786.080 Fo^628.864 Fi^
+ ib_quiet   0.016  thr=  0.005 Fq v
+
+ soc    1.000  soc_inf   1.000 voc  14.473  voc_soc  14.700
+ dis_tb_fa 0  dis_vb_fa 0  dis_ib_fa 0
+ bms_off   0
+
+ Tbh= 13.375  Tbm= 13.375 sel  13.375
+ Vbh  14.472  Vbm  14.640 sel  14.472
+ imh  -0.040  imm  -0.040 sel  -0.040
+ inh  -0.001  inm  -0.040 sel  -0.040
+
+ mod_tb 0 mod_vb 0 mod_ib  0
+ mod_tb_dscn 0 mod_vb_dscn 0 mod_ib_amp_dscn 0 mod_ib_noa_dscn 0
+ tb_s_st 1  vb_s_st 1  ib_s_st 1
+ fake_faults 1 latched_fail 0 latched_fail_fake 0 preserving 0
+
+ bare det n  0  x 
+ bare det m  0  x 
+ ib_dsc  0  0 'Fq v'
+ ibd_lo  0  0 'Fd ^  *SA/*SB'
+ ibd_hi  0  0 'Fd ^  *SA/*SB'
+ red wv  0  0   'Fd, Fi/Fo ^'
+ wl      0  0 'Fo ^'
+ wh      0  0 'Fi ^'
+ cc_dif  x  0 'Fc ^'
+ ib n    0  0 'Fi 1'
+ ib m    0  0 'Fi 1'
+ vb      0  0 'Fv 1  *SV, *Dc/*Dv'
+ tb      0  0 'Ft 1'
+  0000000000000   00000000000
+  CBA98765x3210 xxA9876543210
+  fltw=0     falw=0
+fake_faults=>redl
+Dh;echo: Dh, 4
+cmd: Dh
+ History frame         1800000 ->    1800000,         ms (  Dh)
+Dh History frame set:: out range 0 (1000, 1800000)
+ History frame         1800000 ->    1800000,         ms (  Dh)
+setting NOMINAL instead
+Hd;echo: Hd, 4
+cmd: Hd
+
+print_all_fault_buffer: iflt 190 nflt 190
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+cmd: Pr
+
+saved (sp) diffs
+**none**
+
+cmd: Q
+ib_amp_fail 0
+ib_noa_fail 0
+vb_fail 0
+Tb 13.375
+vb 14.477
+voc 14.476
+voc_filt 14.452
+vsat 13.753
+ib  0.015
+soc_m  1.0000
+soc_ekf  1.0000
+soc  1.0000
+soc_min  0.0343
+soc_inf  1.0000
+modeling 0
+dq_inf/dq_abs      -0.2/       0.4  -0.4035 coul_eff*=480880.909860, DAB+= 0.010627
+DQn      -0.5 Tn      45.3 DQp       0.0 Tp       0.0
+Summ...

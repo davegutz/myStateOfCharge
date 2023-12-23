@@ -103,6 +103,7 @@ lookup = {'init': ('Y;c;Dh1800000;*W;*vv0;*XS;*Ca1;<HR;<Rf;<Hd;<Pf;', ('',), 10,
           'faultParade': ('Ff0;Xm247;Ca0.5;Dr100;DP1;HR;Pf;Dh1000;vv2;Dm50;Dn0.0001;W200;Dm0;Dn0;W20;Rf;', ("Check fault, history, and summary logging", "Should flag faults but take no action", "", "", ""), 240, 80),
           }
 putty_connection = {'': 'test',
+                    'soc0p': 'testsoc0p',
                     'pro0p': 'testpro0p',
                     'pro1a': 'testpro1a',
                     'pro3p2': 'testpro3p2'}
