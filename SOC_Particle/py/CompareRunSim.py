@@ -169,4 +169,4 @@ if __name__ == '__main__':
     rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'
     data_only = True
 
-compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only)
+    compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only)

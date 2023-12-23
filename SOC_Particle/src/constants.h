@@ -76,14 +76,19 @@
 
 // If NSUM too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
 // For all, there are 40 bytes for each unit of NSUM
-#ifdef CONFIG_PHOTON  // dec ~133500  units: pro0p
+
+#ifdef CONFIG_PHOTON  // dec ~134000  units: pro0p
     #ifdef DEPLOY_PHOTON
-        #define NSUM 226 // Number of saved SRAM summaries (226)
+        #define NSUM 190 // Number of saved SRAM summaries (190)
     #else
         #ifdef DEBUG_INIT
-            #define NSUM -4 // Number of saved SRAM summaries (-4)
+            #define NSUM -40 // Number of saved SRAM summaries (-40)
         #else
-            #define NSUM  54 // Number of saved SRAM summaries (54)
+            #ifdef DEBUG_QUEUE
+                #define NSUM  18 // Number of saved SRAM summaries (18)
+            #else
+                #define NSUM  31 // Number of saved SRAM summaries (31)
+            #endif
         #endif
     #endif
 #endif

@@ -88,10 +88,10 @@ void loop();
 #endif
 
 // Dependent includes.   Easier to sp.debug code if remove unused include files
-#include "mySync.h"
-#include "mySubs.h"
-#include "mySummary.h"
-#include "myCloud.h"
+#include "Sync.h"
+#include "subs.h"
+#include "Summary.h"
+#include "Cloud.h"
 #include "debug.h"
 #include "parameters.h"
 
@@ -136,8 +136,8 @@ PrinterPars pr = PrinterPars();       // Print buffer
 VolatilePars ap = VolatilePars();     // Various adjustment parameters commanding at system level.  Initialized on start up.  Not retained.
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level.  Initialized on start up.  Not retained.
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
-unsigned long millis_flip = millis(); // Timekeeping
-unsigned long last_sync = millis();   // Timekeeping
+unsigned long long millis_flip = millis(); // Timekeeping
+unsigned long long last_sync = millis();   // Timekeeping
 
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
@@ -196,7 +196,6 @@ void setup()
   //Log.info("setup Pins");
   #ifdef CONFIG_PHOTON2
     myPins = new Pins(D3, D7, D12, D11, D13);
-    // pinMode(D3, INPUT_PULLUP);
   #else
     myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
   #endif
@@ -245,7 +244,7 @@ void setup()
   // Synchronize clock
   // Device needs to be configured for wifi (hold setup 3 sec run Particle app) and in range of wifi
   // Phone hotspot is very convenient
-  //Log.info("setup WiFi or lack of");
+  Log.info("setup WiFi or lack of");
   WiFi.disconnect();
   delay(2000);
   WiFi.off();
@@ -255,6 +254,7 @@ void setup()
 
   // Clean boot logic.  This occurs only when doing a structural rebuild clean make on initial flash, because
   // the SRAM is not explicitly initialized.   This is by design, as SRAM must be remembered between boots
+  // Time is never changed by this operation.  It could be corrupt.  Change using "UT" talk feature.
   Serial.printf("Check corruption......");
   if ( sp.is_corrupt() ) 
   {
@@ -280,11 +280,12 @@ void setup()
   #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)  // TODO: test that ARGON still works with the #if in place
     System.enableFeature(FEATURE_RETAINED_MEMORY);
   #endif
-  if ( sp.Debug_z==1 || sp.Debug_z==2 || sp.Debug_z==3 || sp.Debug_z==4 )
+  if ( sp.debug_z==1 || sp.debug_z==2 || sp.debug_z==3 || sp.debug_z==4 )
   {
     sp.print_history_array();
     sp.print_fault_header();
   }
+  sp.nsum(NSUM);  // Store
 
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
@@ -298,13 +299,7 @@ void setup()
         wait_on_user_input();
       #endif
     }
-    else
-    {
-      // sp.pretty_print( true );
-      Serial.printf(" No diffs in retained...\n\n"); Serial1.printf(" No diffs in retained...\n\n");
-    }
   }
-  Serial.printf("sp %d bytes <3068?\n", sizeof(sp));
 
   //Log.info("setup end");
   Serial.printf("End setup()\n\n");
@@ -315,6 +310,9 @@ void setup()
 void loop()
 {
   // Synchronization
+  static unsigned long long now = (unsigned long long) millis();
+  unsigned long long time_now = (unsigned long long) Time.now();
+  now = (unsigned long long) millis();
   boolean chitchat = false;
   static Sync *Talk = new Sync(TALK_DELAY);
   boolean read = false;
@@ -328,17 +326,14 @@ void loop()
   static Sync *Summarize = new Sync(SUMMARY_DELAY);
   boolean control;
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
-  unsigned long current_time;
-  static unsigned long now = millis();
-  time32_t time_now;
-  static unsigned long start = millis();
-  unsigned long elapsed = 0;
+  static unsigned long long start = millis();
+  unsigned long long elapsed = 0;
   static boolean reset = true;
   static boolean reset_temp = true;
   static boolean reset_publish = true;
 
   // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize);
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize, time_now);
 
    // Monitor to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor();
@@ -352,19 +347,18 @@ void loop()
   #ifdef CONFIG_DS2482_1WIRE
     Ds2482.loop();
   #endif
-  now = millis();
-  time_now = Time.now();
   if ( now - last_sync > ONE_DAY_MILLIS || reset )  sync_time(now, &last_sync, &millis_flip); 
-  char  tempStr[23];  // time, year-mo-dyThh:mm:ss iso format, no time zone
-  Sen->control_time = decimalTime(&current_time, tempStr, Sen->now, millis_flip);
-  hm_string = String(tempStr);
+  Sen->control_time = double(Sen->now/1000);
+  char buffer[32];
+  time_long_2_str(time_now, buffer);
+  hm_string = String(buffer);
   read_temp = ReadTemp->update(millis(), reset);
   read = ReadSensors->update(millis(), reset);
   chitchat = Talk->update(millis(), reset);
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(millis(), reset);
   display_and_remember = DisplayUserSync->update(millis(), reset);
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) && !sp.Modeling_z;
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) && !sp.modeling_z;
   if ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) boot_wait = false;
   summarizing = Summarize->update(millis(), false) || boot_summ;
 
@@ -434,11 +428,11 @@ void loop()
     Mon->regauge(Sen->Tb_filt);
 
     // Empty battery
-    if ( sp.Modeling_z && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
+    if ( sp.modeling_z && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
     #ifndef CONFIG_PHOTON
-      if ( sp.Debug_z==12 ) debug_12(Mon, Sen);
+      if ( sp.debug_z==12 ) debug_12(Mon, Sen);
     #endif
     
     // Publish for variable print rate
@@ -472,17 +466,18 @@ void loop()
     #ifdef CONFIG_47L16_EERAM
       // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
+    #else
+      sp.put_Time_now(max( sp.Time_now_z, (unsigned long)Time.now()));  // If happen to connect to wifi (assume updated automatically), save new time
     #endif
   }
 
   // Discuss things with the user
-  // When open interactive serial monitor such as CoolTerm
+  // When open interactive serial monitor such as puTTY
   // then can enter commands by sending strings.   End the strings with a real carriage return
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   // Control
   if ( control ){} // placeholder
-
 
   // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   asap();
@@ -496,16 +491,15 @@ void loop()
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)
   if ( (!boot_wait && summarizing) || cp.write_summary )
   {
-    sp.put_Ihis(sp.Ihis_z + 1);
-    if ( sp.Ihis_z > (sp.nhis() - 1) ) sp.put_Ihis(0);  // wrap buffer
+    sp.put_Ihis(sp.ihis_z + 1);
+    if ( sp.ihis_z > (sp.nhis() - 1) ) sp.put_Ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
-    hist_snap.assign(time_now, Mon, Sen);
-    hist_bounced = sp.put_history(hist_snap, sp.Ihis_z);
+    hist_snap.assign(Time.now(), Mon, Sen);
+    hist_bounced = sp.put_history(hist_snap, sp.ihis_z);
 
-    sp.put_Isum(sp.Isum_z+1);
-    if ( sp.Isum_z > NSUM-1 ) sp.put_Isum(0);  // wrap buffer
-    mySum[sp.Isum_z].copy_to_Flt_ram_from(hist_bounced);
-
+    sp.put_Isum(sp.isum_z + 1);
+    if ( sp.isum_z > (uint16_t)(sp.nsum()-1) ) sp.put_Isum(0);  // wrap buffer
+    mySum[sp.isum_z].copy_to_Flt_ram_from(hist_bounced);
     Serial.printf("Summ...\n");
     cp.write_summary = false;
   }
