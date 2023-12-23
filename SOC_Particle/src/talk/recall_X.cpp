@@ -164,10 +164,10 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
 
         case ( 'S' ): // XS:  Stop injection now
             Serial.printf("STOP\n");
-            Sen->start_inj = 0UL;
-            Sen->stop_inj = 0UL;
-            Sen->end_inj = 0UL;
-            Sen->elapsed_inj = 0UL;
+            Sen->start_inj = 0ULL;
+            Sen->stop_inj = 0ULL;
+            Sen->end_inj = 0ULL;
+            Sen->elapsed_inj = 0ULL;
             chit("vv0;", ASAP);     // Turn off echo
             chit("Xp0;", SOON);    // Reset
             break;

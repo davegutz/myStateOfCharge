@@ -126,12 +126,12 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
 
 
 if __name__ == '__main__':
-    path_to_data = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro1a_bb.csv'
+    path_to_data = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111\\ampHiFail_pro3p2_bb.csv'
     skip = 1
-    unit_key = 'g20231111b_pro1a_bb'
+    unit_key = 'g20231111_pro3p2_bb'
     zero_zero_in = False
     time_end_in = None
-    rated_batt_cap = 100.0
+    rated_batt_cap = 108.4
     legacy = False
     v1_only = False
     load_data(path_to_data=path_to_data, skip=skip, unit_key=unit_key, zero_zero_in=zero_zero_in, time_end_in=time_end_in,

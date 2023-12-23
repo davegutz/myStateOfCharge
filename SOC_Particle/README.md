@@ -783,6 +783,23 @@ Amazon:  5 Pieces I2C Display Module 0.91 Inch I2C OLED Display Module Blue I2C 
 
 ## FAQ
 
+### How to save 'EERAM'
+
+This feature exists on Argon only (pro1a, soc1a) to save adjustments between boots or with power loss.   There is a capacitor on those units to power a save to the EERAM chip when main power is lost.  I2C writes are slow so they are sequenced.
+
+### '*is' is 1 on Boot
+
+The GUI scripts leave is=1 to make boot cleaner after a run.  You can manually change this back to 0 (auto mode Ib selection) or when deploy reset all to nominal ('RR') to clear it.
+
+### Photon2 complains about 'Unable to open USB device'
+
+Something happened with this unit.  The USB cord does not work with the top USB port on the OMEN.   And this message appears during flashing.  You need to press the reset buttons on the Photon2 to produce flashing amber before asking Particle Workbench to flash.  I don't know if WiFi flash works any better.
+
+
+### Photon2 complains about "DS2482 moderate headroom..."
+
+I found that high Serial traffic competes adversely with DS2482 for 1-wire temperature on the Photon2.  That product does not support 1-Wire without the DS2482.  The reason for the complaints are the buffer in the DS2482 code is too small when competing for resources.  I had to edit DS2482-RK in the lib to increase the buffer size (static const size_t COMMAND_LIST_STACK_SIZE = 12; in DS2482-RK.h).   I added the print statements to alert user if nearing that new limit (was 4).  The changes are in the GitHub repository.  The main change is the COMMAND_LIST_STACK_SiZE = 12.  If you make that to the lib you'll be OK.  The author at Particle didn't see why this change would be any problem.  He never saw 4 exceeded in any of his testing.  This application uses as much Serial as possible.  Also I tried increasing Serial baud rate without improvement.
+
 ### Particle Workbench complains about STM32_Pin_Info
 c:\users\daveg\documents\github\mystateofcharge\soc_particle\src\hardware/OneWire.h:98:5: error: 'STM32_Pin_Info' does not name a type; did you mean 'Hal_Pin_Info'?
    98 |     STM32_Pin_Info* PIN_MAP = HAL_Pin_Map(); // Pointer required for highest access 

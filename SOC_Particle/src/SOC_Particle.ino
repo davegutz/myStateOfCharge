@@ -140,7 +140,7 @@ Pins *myPins;                   // Photon hardware pin mapping used
 // Setup
 void setup()
 {
-  //Log.info("begin setup");
+  Log.info("begin setup");
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
   Serial.begin(CONFIG_SBAUD);
@@ -158,7 +158,7 @@ void setup()
 
   // EERAM chip card for I2C
   #ifdef CONFIG_47L16_EERAM
-    //Log.info("setup EERAM");
+    Log.info("setup EERAM");
     ram.begin(0, 0);
     ram.setAutoStore(true);
     delay(1000);
@@ -178,13 +178,13 @@ void setup()
   // Peripherals (Photon2)
   // D3 - one-wire temp sensor ******** to be replaced by I2C device
   // D7 - status led heartbeat
-  // A2->A0->D11 - Primary Ib amp (called by old ADS name Amplified, amp)
-  // A1->D12 - Vb
-  // A3->A2->D13 - Backup Ib amp (called by old ADS name Non Amplified, noa)
+  // A0 (pin 'D11') - Primary Ib amp (called by old ADS name Amplified, amp)
+  // A1 (pin 'D12') - Vb
+  // A2 (pin 'D13') - Backup Ib amp (called by old ADS name Non Amplified, noa)
   // A4 - not available
   // A5-->D14 - spare
   
-  //Log.info("setup Pins");
+  Log.info("setup Pins");
   #ifdef CONFIG_PHOTON2
     myPins = new Pins(D3, D7, D12, D11, D13);
   #else
@@ -209,7 +209,7 @@ void setup()
 
   // Display (after start Wire)
   #ifdef CONFIG_SSD1306_OLED
-    //Log.info("setup display");
+    Log.info("setup display");
     display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
     Serial.printf("Init DISP\n");
     if(!display->begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) // Seems to return true even if depowered
@@ -281,7 +281,7 @@ void setup()
   // Ask to renominalize
   if ( ASK_DURING_BOOT )
   {
-    //Log.info("setup renominalize");
+    Log.info("setup renominalize");
     if ( sp.num_diffs() )
     {
       #ifdef CONFIG_SSD1306_OLED
@@ -292,7 +292,7 @@ void setup()
     }
   }
 
-  //Log.info("setup end");
+  Log.info("setup end");
   Serial.printf("End setup()\n\n");
 } // setup
 

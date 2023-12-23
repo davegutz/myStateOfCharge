@@ -55,7 +55,7 @@
 #define PUBLISH_SERIAL_DELAY  400UL     // Serial print interval (400UL = 0.4 sec)
 #define DISPLAY_USER_DELAY    1200UL    // User display update (1200UL = 1.2 sec)
 #define CONTROL_DELAY         100UL     // Control read wait, ms (100UL = 0.1 sec)
-#define SNAP_WAIT             10000UL   // Interval between fault snapshots (10000UL = 10 sec)
+#define SNAP_WAIT             10000ULL  // Interval between fault snapshots (10000ULL = 10 sec)
 #define DP_MULT               4         // Multiples of read to capture data DP
 #define TBATT_TEMPCAL         0.56      // Maxim 1-wire plenum temp sense calibrate (0.56), C
 #define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)
@@ -97,8 +97,8 @@
     #define NSUM 2209   // Number of saved SRAM summaries (2212)
 #endif
 
-#ifdef CONFIG_PHOTON2  // dec ~ 276770  units: pro2p2, pro3p2
-    #define NSUM 3185   // Number of saved SRAM summaries (3185)
+#ifdef CONFIG_PHOTON2  // dec ~ 281700  units: pro2p2, pro3p2
+    #define NSUM 3184   // Number of saved SRAM summaries (3184)
 #endif
 
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)

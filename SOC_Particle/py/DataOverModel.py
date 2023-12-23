@@ -485,9 +485,12 @@ class SavedData:
                 try:
                     zero_start = np.where(self.ib == 0.0)[0][0]
                     self.zero_end = zero_start
-                    while self.ib[self.zero_end] == 0.0:  # stop after first non-zero
+                    while self.zero_end < len(self.ib) and self.ib[self.zero_end] == 0.0:  # stop after first non-zero
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
+                    if self.zero_end == len(self.ib) - 1:
+                        print(f"\n\nLikely ib is zero throught the data.  Check setup and retry\n\n")
+                        self.zero_end = 0
                 except IOError:
                     self.zero_end = 0
             self.time_ref = self.time[self.zero_end]
