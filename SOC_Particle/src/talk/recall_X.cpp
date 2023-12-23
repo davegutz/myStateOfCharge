@@ -73,7 +73,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                 case ( 8 ):  // Xp8:  Program a hardware pulse for State Space test
-                    chit("XS;Di0;Xm255;Ca.5;Pm;Dr100;DP1;vv2;", QUEUE);  // setup
+                    chit("XS;Di0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;", QUEUE);  // setup
                     chit("DI500;DI-500;DI0;", QUEUE);  // run
                     chit("W10;Pm;vv0;", QUEUE);  // finish
                     break;
