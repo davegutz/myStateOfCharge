@@ -94,6 +94,7 @@ void loop();
 #include "Cloud.h"
 #include "debug.h"
 #include "parameters.h"
+#include "serial.h"
 
 //#define BOOT_CLEAN      // Use this to clear 'lockup' problems introduced during testing using Talk
 SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network status
@@ -480,11 +481,11 @@ void loop()
   if ( control ){} // placeholder
 
   // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
-  asap();
   if ( chitchat )
   {
-    chat();         // Work on internal chit-chat
-    transcribe(Mon, Sen);   // Collect user inputs
+    chitter();
+    chatter();         // Work on internal chit-chat
+    describe(Mon, Sen);   // Collect user inputs
   }
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer

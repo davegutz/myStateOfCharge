@@ -24,7 +24,20 @@
 #ifndef _CHITCHAT
 #define _CHITCHAT
 
+enum urgency {INCOMING, ASAP, SOON, QUEUE, NEW, LAST};
+typedef enum urgency urgency;
+
+class BatteryMonitor;
+class Sensors;
+
 void chat();
+void chatter();
 String chit(const String cmd, const enum urgency when);
+void chitter();
+void cmd_echo(urgency request);
+urgency decode_from_inp(const char key);
+void describe(BatteryMonitor *Mon, Sensors *Sen);
+void benign_zero(BatteryMonitor *Mon, Sensors *Sen);
+
 
 #endif

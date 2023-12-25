@@ -155,3 +155,12 @@ void debug_99(BatteryMonitor *Mon, Sensors *Sen)
         Mon->voc_filt(), Mon->vsat(), Mon->sat(), sp.delta_q_z, Sen->Flt->latched_fail(), Sen->Flt->latched_fail_fake());
   }
 #endif
+
+#ifdef DEBUG_QUEUE
+void debug_queue()
+{
+  if (cp.inp_token && (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length()))
+    Serial.printf("\nchatter:  cp.inp_str [%s] ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] CMD[%s]\n",
+      cp.inp_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), cp.cmd_str.c_str());
+}
+#endif
