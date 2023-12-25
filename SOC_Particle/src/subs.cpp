@@ -27,6 +27,7 @@
 #include <math.h>
 #include "debug.h"
 #include "Summary.h"
+#include "talk/chitchat.h"
 
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 extern VolatilePars ap; // Various adjustment parameters shared at system level

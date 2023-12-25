@@ -30,8 +30,6 @@ typedef enum urgency urgency;
 
 void benign_zero(BatteryMonitor *Mon, Sensors *Sen);
 void asap();
-void chat();
-String chit(const String cmd, const enum urgency when);
 void clear_queues();
 void transcribe(BatteryMonitor *Mon, Sensors *Sen);
 void talkH(BatteryMonitor *batt, Sensors *Sen); // Help

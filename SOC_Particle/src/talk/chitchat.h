@@ -24,5 +24,7 @@
 #ifndef _CHITCHAT
 #define _CHITCHAT
 
+void chat();
+String chit(const String cmd, const enum urgency when);
 
 #endif

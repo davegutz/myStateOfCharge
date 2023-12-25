@@ -29,6 +29,7 @@
 #include "constants.h"
 #include "Cloud.h"
 #include "talk/transcribe.h"
+#include "talk/chitchat.h"
 #include "parameters.h"
 #include "command.h"
 #include "Sync.h"
