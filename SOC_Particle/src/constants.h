@@ -38,6 +38,7 @@
 #undef CONFIG_SSD1306_OLED
 #undef CONFIG_DS18B20_SWIRE
 #undef CONFIG_DS2482_1WIRE
+#undef DEBUG_SERIAL_QUEUE
 #undef DEBUG_QUEUE
 
 
@@ -98,7 +99,7 @@
 #endif
 
 #ifdef CONFIG_PHOTON2  // dec ~ 281700  units: pro2p2, pro3p2
-    #define NSUM 3184   // Number of saved SRAM summaries (3184)
+    #define NSUM 3182   // Number of saved SRAM summaries (3182)
 #endif
 
 #define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)

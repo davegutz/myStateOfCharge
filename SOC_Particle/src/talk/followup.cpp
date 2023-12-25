@@ -114,7 +114,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                         }
                     }
                     else
-                        Serial.printf("skipping %s\n", cp.input_str.c_str());
+                        Serial.printf("skipping %s\n", cp.cmd_str.c_str());
                     break;
 
                 case ( 'm' ):  // Cm<>:  assign curve charge state in fraction to model only (ekf if modeling)
@@ -207,7 +207,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                 if ( ap.fake_faults_p->success() )
                 {
                     Sen->Flt->reset_all_faults();
-                    sp.put_ib_select(cp.input_str.substring(2).toInt());
+                    sp.put_ib_select(cp.cmd_str.substring(2).toInt());
                 }
                 break;
             }

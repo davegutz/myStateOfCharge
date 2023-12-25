@@ -39,50 +39,95 @@ extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 // Process asap commands
 void asap()
 {
-  get_string(&cp.asap_str);
-  // if ( cp.token ) Serial.printf("asap:  transcribe('%s;')\n", cp.input_str.c_str());
+  #ifdef DEBUG_QUEUE
+    if ( cp.inp_str.length() || cp.asap_str.length() )
+      Serial.printf("\nasap exit cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
+        cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+  #endif
+
+  if ( !cp.cmd_token && cp.asap_str.length() )
+  {
+    cp.cmd_token = true;
+    cp.cmd_str = get_cmd(&cp.asap_str);
+    cp.cmd_token = false;
+  }
+
+  #ifdef DEBUG_QUEUE
+    if ( cp.inp_str.length() || cp.asap_str.length() )
+      Serial.printf("\nasap exit cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
+        cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+  #endif
 }
 
 // Process chat strings
 void chat()
 {
   #ifdef DEBUG_QUEUE
-    if ( cp.input_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() )
-      Serial.printf("cp.input_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
-        cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+    if ( !cp.inp_token && (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() ))
+      Serial.printf("\nchat enter cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] cmd_token %d\n",
+        cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str(), cp.cmd_token);
   #endif
-  if ( cp.soon_str.length() )  // Do SOON first
+
+  if ( !cp.cmd_token && cp.soon_str.length() )
   {
-    get_string(&cp.soon_str);
+    cp.cmd_token = true;
+    cp.cmd_str = get_cmd(&cp.soon_str);
+    cp.cmd_token = false;
+
+    #ifdef DEBUG_QUEUE
+      if ( cp.inp_token && (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() ))
+        Serial.printf("\nSOON cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
+          cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+    #endif
+  }
+
+  else if ( !cp.cmd_token && cp.queue_str.length() ) // Do QUEUE only after SOON empty
+  {
+    cp.cmd_token = true;
+    cp.cmd_str = get_cmd(&cp.queue_str);
+    cp.cmd_token = false;
+
+    #ifdef DEBUG_QUEUE
+      if ( cp.inp_token && (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() ))
+        Serial.printf("\nQUEUE cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
+          cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+    #endif
+  }
+
+  else if ( !cp.cmd_token && cp.end_str.length() ) // Do END only after QUEUE empty
+  {
+    cp.cmd_token = true;
+    cp.cmd_str = get_cmd(&cp.end_str);
+    cp.cmd_token = false;
+
+    #ifdef DEBUG_QUEUE
+      if ( cp.inp_token && (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() ))
+        Serial.printf("\nEND cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] cmd_token %d\n",
+          cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str(), cp.cmd_token);
+    #endif
+  }
+
+  else
+  {
+    cp.cmd_token = true;
+    cp.cmd_str = cp.inp_str;
+    cp.cmd_token = false;
+
+  }
+
   #ifdef DEBUG_QUEUE
-    if ( cp.token && (cp.input_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() ))
-      Serial.printf("chat (SOON):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n",
-        cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
+    if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() )
+      Serial.printf("\nchat exit cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
+        cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
   #endif
-  }
-  else if ( cp.queue_str.length() ) // Do QUEUE only after SOON empty
-  {
-    get_string(&cp.queue_str);
-    #ifdef DEBUG_QUEUE
-      if ( cp.token && (cp.input_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() ))
-          Serial.printf("chat (QUEUE):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n",
-           cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
-    #endif
-  }
-  else if ( cp.end_str.length() ) // Do QUEUE only after SOON empty
-  {
-    get_string(&cp.end_str);
-    #ifdef DEBUG_QUEUE
-    if ( cp.token && (cp.input_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() ))
-      Serial.printf("chat (QUEUE):  cmd('%s;') ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s]\n",
-        cp.input_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str());
-    #endif
-  }
+
+  return;
 }
 
 // Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for transcribe()
-void chit(const String cmd, const urgency when)
+String chit(const String cmd, const urgency when)
 {
+  String chit_str = "";
   #ifdef DEBUG_QUEUE
     String When;
     if ( when == NEW) When = "NEW";
@@ -90,16 +135,27 @@ void chit(const String cmd, const urgency when)
     else if (when == SOON) When = "SOON";
     else if (when == ASAP) When = "ASAP";
     else if (when == INCOMING) When = "INCOMING"; 
-    Serial.printf("chit='%s'[%s]\n", cmd.c_str(), When.c_str());
+    Serial.printf("\nchit='%s'[%s]\n", cmd.c_str(), When.c_str());
   #endif
+
   if ( when == LAST )
     cp.end_str += cmd;
   if ( when == QUEUE )
     cp.queue_str += cmd;
   else if ( when == SOON )
     cp.soon_str += cmd;
-  else
+  else if ( when == ASAP )
     cp.asap_str += cmd;
+  else
+    chit_str = cmd;
+  
+  #ifdef DEBUG_QUEUE
+    if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.end_str.length() )
+      Serial.printf("\nchit exit:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] rtn[%s]\n\n",
+        cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.end_str.c_str(), chit_str.c_str());
+  #endif
+
+  return chit_str;
 }
 
 // Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for transcribe()

@@ -47,7 +47,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             break;
 
         case ( 'p' ): // Xp<>:  injection program
-            INT_in = cp.input_str.substring(2).toInt();
+            INT_in = cp.inp_str.substring(2).toInt();
             switch ( INT_in )
             {
 
@@ -173,7 +173,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             break;
 
         case ( 't' ): //*  Xt<>:  injection type
-            switch ( cp.input_str.charAt(2) )
+            switch ( cp.inp_str.charAt(2) )
             {
                 case ( 'n' ):  // Xtn:  none
                     sp.put_Type(0);
@@ -211,13 +211,13 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                 default:
-                    if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
+                    if (!found) Serial.printf("%s NOT FOUND\n", cp.inp_str.substring(0,2).c_str());
             }
             break;
 
         default:
-            found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
-            if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
+            found = ap.find_adjust(cp.inp_str) || sp.find_adjust(cp.inp_str);
+            if (!found) Serial.printf("%s NOT FOUND\n", cp.inp_str.substring(0,2).c_str());
     }
     return found;
 }

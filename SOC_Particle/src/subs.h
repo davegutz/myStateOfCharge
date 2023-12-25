@@ -35,6 +35,7 @@
 
 // Sensors
 #include "Sensors.h"
+#include "serial.h"
 
 // Display
 #include "Adafruit/Adafruit_GFX.h"
@@ -81,10 +82,8 @@ struct Pins
 
 
 // Headers
-void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
-void delay_no_block(const unsigned long long int interval);
-void finish_request(void);
-void get_string(String *source);
+String finish_request(const String in_str);
+String get_cmd(String *source);
 void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Sim);
 void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in);
 void load_ib_vb(const boolean reset, const boolean reset_temp, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon);
@@ -92,19 +91,9 @@ void monitor(const boolean reset, const boolean reset_temp, const unsigned long 
   TFDelay *Is_sat_delay, BatteryMonitor *Mon, Sensors *Sen);
 void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon);
 void oled_display(Sensors *Sen, BatteryMonitor *Mon);
-void print_all_header(void);
-void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
-void print_serial_header(void);
-void print_serial_sim_header(void);
-void print_signal_sel_header(void);
-void print_serial_ekf_header(void);
 void sense_synth_select(const boolean reset, const boolean reset_temp, const unsigned long long now, const unsigned long long elapsed,
   Pins *myPins, BatteryMonitor *Mon, Sensors *Sen);
 void sync_time(unsigned long long now, unsigned long long *last_sync, unsigned long long *millis_flip);
 String time_long_2_str(const time_t current_time, char *tempStr);
-String tryExtractString(String str, const char* start, const char* end);
-void rapid_print(Sensors *Sen, BatteryMonitor *Mon);
-void wait_on_user_input(Adafruit_SSD1306 *display);
-void wait_on_user_input();
 
 #endif

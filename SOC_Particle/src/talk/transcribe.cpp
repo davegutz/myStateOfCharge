@@ -50,79 +50,114 @@ void transcribe(BatteryMonitor *Mon, Sensors *Sen)
   boolean found = false;
   urgency request;
   uint16_t modeling_past = sp.modeling();
-  char letter_0, letter_1;
+  char letter_0 = '\0';
+  char letter_1 = '\0';
 
   // Serial event
   request = NEW;
-  if (cp.token)
+  if ( !cp.cmd_token && ( cp.cmd_str.length() || cp.inp_str.length() ) )
   {
+    cp.cmd_token = true;
+
     // Categorize the requests
-    char key = cp.input_str.charAt(0);
-    if ( key == 'c' )
-    {
-      request = INCOMING;
-    }
-    else if ( key == '-' && cp.input_str.charAt(1)!= 'c')
-    {
-      cp.input_str = cp.input_str.substring(1);  // Delete the leading '-'
-      request = INCOMING;
-    }
-    else if ( key == '-' )
-      request = ASAP;
-    else if ( key == '+' )
-      request = QUEUE;
-    else if ( key == '*' )
-      request = SOON;
-    else if ( key == '<' )
-      request = LAST;
-    else if ( key == '>' )
-    {
-      cp.input_str = cp.input_str.substring(1);  // Delete the leading '>'
-      request = INCOMING;
-    }
-    else
-    {
-      request = NEW;
-    }
-    // Now we know the letters
-    letter_0 = cp.input_str.charAt(0);
-    letter_1 = cp.input_str.charAt(1);
 
-    // Limited echoing of Serial1 commands available
-    if ( request==0 )
+    // Priority cmd over input
+    if ( cp.cmd_str.length() )
     {
-      Serial.printf ("cmd: %s\n", cp.input_str.c_str());
-      Serial1.printf ("cmd: %s\n", cp.input_str.c_str());
+      char key = cp.cmd_str.charAt(0);
+      #ifdef DEBUG_QUEUE
+        Serial.printf("cmd_str transcribe enter: request %d of {INCOMING, ASAP, SOON, QUEUE, NEW, LAST}; key %c input_are [%s] cmd_str [%s]\n", request, key, cp.inp_str.c_str(), cp.cmd_str.c_str());
+      #endif
+      if ( key == '>' )
+      {
+        cp.cmd_str = cp.cmd_str.substring(1);  // Delete any leading '>'
+        request = INCOMING;
+      }
+      else
+      {
+        request = NEW;
+      }
     }
-    else
+    else if ( cp.inp_str.length() )
     {
-      Serial.printf ("echo: %s, %d\n", cp.input_str.c_str(), request);
-      Serial1.printf("echo: %s, %d\n", cp.input_str.c_str(), request);
-    }
+      char key = cp.inp_str.charAt(0);
+      #ifdef DEBUG_QUEUE
+        Serial.printf("inp_str transcribe enter: request %d of {INCOMING, ASAP, SOON, QUEUE, NEW, LAST}; key %c input_are [%s] cmd_str [%s]\n", request, key, cp.inp_str.c_str(), cp.cmd_str.c_str());
+      #endif
+      if ( key == 'c' )
+      {
+        request = INCOMING;
+      }
+      else if ( key == '-' && cp.inp_str.charAt(1)!= 'c')
+      {
+        cp.inp_str = cp.inp_str.substring(1);  // Delete the leading '-'
+        request = INCOMING;
+      }
+      else if ( key == '-' )
+        request = ASAP;
+      else if ( key == '+' )
+        request = QUEUE;
+      else if ( key == '*' )
+        request = SOON;
+      else if ( key == '<' )
+        request = LAST;
+      else if ( key == '>' )
+      {
+        cp.inp_str = cp.cmd_str.substring(1);  // Delete any leading '>'
+        request = INCOMING;
+      }
+      else
+      {
+        request = NEW;
+      }
+      // Now we know the letters
+      letter_0 = cp.inp_str.charAt(0);
+      letter_1 = cp.inp_str.charAt(1);
 
-    // Deal with each request
+      // Limited echoing of Serial1 commands available
+      if ( request==0 )
+      {
+        Serial.printf ("cmd: %s\n", cp.inp_str.c_str());
+        Serial1.printf ("cmd: %s\n", cp.inp_str.c_str());
+      }
+      else
+      {
+        Serial.printf ("echo: %s, %d\n", cp.inp_str.c_str(), request);
+        Serial1.printf("echo: %s, %d\n", cp.inp_str.c_str(), request);
+      }
+
+      // Deal with each request
+      #ifdef DEBUG_QUEUE
+        Serial.printf("transcribe: urgency %d of {INCOMING, ASAP, SOON, QUEUE, NEW, LAST}; str [%s]\n", request, cp.cmd_str.c_str());
+      #endif
+      switch ( request )
+      {
+        case ( NEW ):  // Defaults to QUEUE
+          cp.cmd_str = chit( cp.inp_str.substring(0) + ";", QUEUE);
+          break;
+
+        case ( ASAP ):
+          cp.cmd_str = chit( cp.inp_str.substring(1)+";", ASAP);
+          break;
+
+        case ( SOON ):
+          cp.cmd_str = chit( cp.inp_str.substring(1)+";", SOON);
+          break;
+
+        case ( QUEUE ):
+          cp.cmd_str = chit( cp.inp_str.substring(1)+";", QUEUE);
+          break;
+
+        case ( LAST ):
+          cp.cmd_str = chit( cp.inp_str.substring(1)+";", LAST);
+          break;
+      }
+    }
+  }
+  if ( cp.cmd_str.length() )
+  {
     switch ( request )
     {
-      case ( NEW ):  // Defaults to QUEUE
-        chit( cp.input_str.substring(0) + ";", QUEUE);
-        break;
-
-      case ( ASAP ):
-        chit( cp.input_str.substring(1)+";", ASAP);
-        break;
-
-      case ( SOON ):
-        chit( cp.input_str.substring(1)+";", SOON);
-        break;
-
-      case ( QUEUE ):
-        chit( cp.input_str.substring(1)+";", QUEUE);
-        break;
-
-      case ( LAST ):
-        chit( cp.input_str.substring(1)+";", LAST);
-        break;
-
       case ( INCOMING ):
         switch ( letter_0 )
         {
@@ -152,8 +187,8 @@ void transcribe(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               default:
-                found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
-                if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
+                found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
+                if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
             }
             break;
 
@@ -165,8 +200,8 @@ void transcribe(BatteryMonitor *Mon, Sensors *Sen)
                 break;
 
               default:
-                found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
-                if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
+                found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
+                if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
             }
             break;
 
@@ -201,9 +236,9 @@ void transcribe(BatteryMonitor *Mon, Sensors *Sen)
           #endif
 
           case ( 'W' ):  // W<>:  wait.  Skip
-            if ( cp.input_str.substring(1).length() )
+            if ( cp.cmd_str.substring(1).length() )
             {
-              INT_in = cp.input_str.substring(1).toInt();
+              INT_in = cp.cmd_str.substring(1).toInt();
               if ( INT_in > 0 )
               {
                 for ( int i=0; i<INT_in; i++ )
@@ -227,8 +262,8 @@ void transcribe(BatteryMonitor *Mon, Sensors *Sen)
             break;
 
           default:
-            found = ap.find_adjust(cp.input_str) || sp.find_adjust(cp.input_str);
-            if (!found) Serial.printf("%s NOT FOUND\n", cp.input_str.substring(0,2).c_str());
+            found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
+            if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
 
         }
 
@@ -236,7 +271,7 @@ void transcribe(BatteryMonitor *Mon, Sensors *Sen)
         followup(letter_0, letter_1, Mon, Sen, modeling_past);
     }
 
-    cp.input_str = "";
-    cp.token = false;
-  }  // if ( cp.token )
+    cp.cmd_str = "";
+    cp.cmd_token = false;
+  }  // if ( cp.cmd_token )
 }
