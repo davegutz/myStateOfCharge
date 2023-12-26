@@ -207,39 +207,25 @@ void chatter()
 void chit(const String from, const urgency when)
 {
   String chit_str = "";
-  String When = "";
 
-  if (when == LAST)
+  if (when == ASAP)
   {
-    cp.last_str += from;
-    When = "LAST";
+    cp.asap_str += from;
   }
-  if (when == QUEUE)
-  {
-    cp.queue_str += from;
-    When = "QUEUE";
-  }
+
   else if (when == SOON)
   {
     cp.soon_str += from;
-    When = "SOON";
   }
-  else if (when == ASAP)
+
+  if (when == QUEUE)
   {
-    cp.asap_str += from;
-    When = "ASAP";
+    cp.queue_str += from;
   }
-  else if (when == NEW)
+
+  else if (when == LAST)
   {
-    When = "NEW";
-  }
-  else if (when == INCOMING)
-  {
-    When = "INCOMING";
-  }
-  else
-  {
-    When = "Unknown";
+    cp.last_str += from;
   }
 
   #ifdef DEBUG_QUEUE
@@ -264,7 +250,7 @@ void chitter()
       // Deal with each request.  Strip off to use up to ';'.  Leave the rest for next iteration.
       switch (request)
       {
-        case (INCOMING):  // 0
+        case (INCOMING):  // 0, really not used until chatter and then as a placeholder
           chit(nibble, INCOMING);
           break;
 
@@ -392,143 +378,136 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
 {
   int INT_in = -1;
   boolean found = false;
-  urgency request;
   uint16_t modeling_past = sp.modeling();
   char letter_0 = '\0';
   char letter_1 = '\0';
   String value = "";
 
   // Serial event
-  request = NEW;
   if ( !cp.cmd_token && cp.cmd_str.length() )
   {
-    request = INCOMING;
     cp.cmd_token = true;
 
     // Now we know the letters
     letter_0 = cp.cmd_str.charAt(0);
     letter_1 = cp.cmd_str.charAt(1);
     value = cp.cmd_str.substring(2);
-    cmd_echo(request);
+    cmd_echo(INCOMING);
 
-    switch ( request )
+    switch ( letter_0 )
     {
-      case ( INCOMING ):
-        switch ( letter_0 )
+
+      case ( 'b' ):  // Fault buffer
+        switch ( letter_1 )
         {
-
-          case ( 'b' ):  // Fault buffer
-            switch ( letter_1 )
-            {
-              case ( 'd' ):  // bd: fault buffer dump
-                Serial.printf("\n");
-                sp.print_history_array();
-                sp.print_fault_header();
-                sp.print_fault_array();
-                sp.print_fault_header();
-                break;
-
-              case ( 'h' ):  // bh: History buffer reset
-                sp.reset_his();
-                break;
-
-              case ( 'r' ):  // br: Fault buffer reset
-                sp.reset_flt();
-                break;
-
-              case ( 'R' ):  // bR: Reset all buffers
-                sp.reset_flt();
-                sp.reset_his();
-                break;
-
-              default:
-                found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
-                if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
-            }
+          case ( 'd' ):  // bd: fault buffer dump
+            Serial.printf("\n");
+            sp.print_history_array();
+            sp.print_fault_header();
+            sp.print_fault_array();
+            sp.print_fault_header();
             break;
 
-          case ( 'B' ):
-            switch ( letter_1 )
-            {
-              case ( 'Z' ):  // BZ :  Benign zeroing of settings to make clearing test easier
-                benign_zero(Mon, Sen);
-                break;
-
-              default:
-                found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
-                if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
-            }
+          case ( 'h' ):  // bh: History buffer reset
+            sp.reset_his();
             break;
 
-          case ( 'c' ):  // c:  clear queues
-            Serial.printf("***CLEAR QUEUES\n");
-            clear_queues();
+          case ( 'r' ):  // br: Fault buffer reset
+            sp.reset_flt();
             break;
 
-          case ( 'H' ):  // History
-            found = recall_H(letter_1, Mon, Sen);
-            break;
-
-          case ( 'P' ):
-            found = recall_P(letter_1, Mon, Sen);
-            break;
-
-          case ( 'Q' ):  // Q:  quick critical
-            debug_q(Mon, Sen);
-            break;
-
-          case ( 'R' ):
-            found = recall_R(letter_1, Mon, Sen);
-            break;
-
-          // Photon 2 O/S waits 10 seconds between backup SRAM saves.  To save time, you can get in the habit of pressing 'w;'
-          // This was not done for all passes just to save only when an adjustment change verified by user (* parameters), to avoid SRAM life impact.
-          #ifdef CONFIG_PHOTON2
-          case ( 'w' ):  // w:  confirm write * adjustments to to SRAM
-            System.backupRamSync();
-            Serial.printf("SAVED *\n"); Serial1.printf("SAVED *\n");
-            break;
-          #endif
-
-          case ( 'W' ):  // W<>:  wait.  Skip
-            if ( cp.cmd_str.substring(1).length() )
-            {
-              INT_in = cp.cmd_str.substring(1).toInt();
-              if ( INT_in > 0 )
-              {
-                for ( int i=0; i<INT_in; i++ )
-                {
-                  chit("W;", SOON);
-                }
-              }
-            }
-            else
-            {
-              Serial.printf("..Wait.\n");
-            }
-            break;
-
-          case ( 'X' ):
-            found = recall_X(letter_1, Mon, Sen);
-            break;
-
-          case ( 'h' ):  // h: help
-            talkH(Mon, Sen);
+          case ( 'R' ):  // bR: Reset all buffers
+            sp.reset_flt();
+            sp.reset_his();
             break;
 
           default:
             found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
             if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
-
         }
+        break;
+
+      case ( 'B' ):
+        switch ( letter_1 )
+        {
+          case ( 'Z' ):  // BZ :  Benign zeroing of settings to make clearing test easier
+            benign_zero(Mon, Sen);
+            break;
+
+          default:
+            found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
+            if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
+        }
+        break;
+
+      case ( 'c' ):  // c:  clear queues
+        Serial.printf("***CLEAR QUEUES\n");
+        clear_queues();
+        break;
+
+      case ( 'H' ):  // History
+        found = recall_H(letter_1, Mon, Sen);
+        break;
+
+      case ( 'P' ):
+        found = recall_P(letter_1, Mon, Sen);
+        break;
+
+      case ( 'Q' ):  // Q:  quick critical
+        debug_q(Mon, Sen);
+        break;
+
+      case ( 'R' ):
+        found = recall_R(letter_1, Mon, Sen);
+        break;
+
+      // Photon 2 O/S waits 10 seconds between backup SRAM saves.  To save time, you can get in the habit of pressing 'w;'
+      // This was not done for all passes just to save only when an adjustment change verified by user (* parameters), to avoid SRAM life impact.
+      #ifdef CONFIG_PHOTON2
+      case ( 'w' ):  // w:  confirm write * adjustments to to SRAM
+        System.backupRamSync();
+        Serial.printf("SAVED *\n"); Serial1.printf("SAVED *\n");
+        break;
+      #endif
+
+      case ( 'W' ):  // W<>:  wait.  Skip
+        if ( cp.cmd_str.substring(1).length() )
+        {
+          INT_in = cp.cmd_str.substring(1).toInt();
+          if ( INT_in > 0 )
+          {
+            for ( int i=0; i<INT_in; i++ )
+            {
+              chit("W;", SOON);
+            }
+          }
+        }
+        else
+        {
+          Serial.printf("..Wait.\n");
+        }
+        break;
+
+      case ( 'X' ):
+        found = recall_X(letter_1, Mon, Sen);
+        break;
+
+      case ( 'h' ):  // h: help
+        talkH(Mon, Sen);
+        break;
+
+      default:
+        found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
+        if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
+
+    }
 
       ///////////PART 2/////// There may be followup to structures or new commands
       followup(letter_0, letter_1, Mon, Sen, modeling_past);
-    }
+  }
 
-    cp.cmd_str = "";
-    cp.cmd_token = false;
-  }  // if ( cp.cmd_token )
+  cp.cmd_str = "";
+  cp.cmd_token = false;
 }
 
 
