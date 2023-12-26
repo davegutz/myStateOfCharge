@@ -80,15 +80,15 @@
 
 #ifdef CONFIG_PHOTON  // dec ~134000  units: pro0p
     #ifdef DEPLOY_PHOTON
-        #define NSUM 190 // Number of saved SRAM summaries (190)
+        #define NSUM 169 // Number of saved SRAM summaries (169)
     #else
         #ifdef DEBUG_INIT
-            #define NSUM -40 // Number of saved SRAM summaries (-40)
+            #define NSUM -61 // Number of saved SRAM summaries (-61)
         #else
             #ifdef DEBUG_QUEUE
-                #define NSUM  18 // Number of saved SRAM summaries (18)
+                #define NSUM  -3 // Number of saved SRAM summaries (-3)
             #else
-                #define NSUM  31 // Number of saved SRAM summaries (31)
+                #define NSUM  10 // Number of saved SRAM summaries (10)
             #endif
         #endif
     #endif

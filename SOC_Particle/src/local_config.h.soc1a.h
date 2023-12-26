@@ -12,6 +12,11 @@ const String unit = version + "_soc1a";
 #define CONFIG_47L16_EERAM
 #define CONFIG_DS18B20_SWIRE
 
+// #define DEBUG_SERIAL_QUEUE
+// #define DEBUG_QUEUE
+// #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
+// #define LOGHANDLE
+
 // * = SRAM EEPROM adjustments, retained on power reset
 
 // Miscellaneous

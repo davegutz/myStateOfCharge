@@ -10,6 +10,11 @@ const String unit = version + "_pro2p2";
 #define CONFIG_PHOTON2
 #define CONFIG_BARE
 
+// #define DEBUG_SERIAL_QUEUE
+// #define DEBUG_QUEUE
+// #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
+// #define LOGHANDLE
+
 // * = SRAM EEPROM adjustments, retained on power reset
 
 // Miscellaneous
