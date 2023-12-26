@@ -126,6 +126,57 @@ extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 // }
 
 
+// Clear adjustments that should be benign if done instantly
+void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
+{
+
+  // Snapshots
+  cp.cmd_summarize(); // Hs
+  cp.cmd_summarize(); // Hs
+  cp.cmd_summarize(); // Hs
+  cp.cmd_summarize(); // Hs
+
+  // Model
+  ap.hys_scale = HYS_SCALE;                  // Sh 1
+  ap.slr_res = 1;                            // Sr 1
+  sp.cutback_gain_slr_p->print_adj_print(1); // Sk 1
+  ap.hys_state = 0;                          // SH 0
+
+  // Injection
+  ap.ib_amp_add = 0;        // Dm 0
+  ap.ib_noa_add = 0;        // Dn 0
+  ap.vb_add = 0;            // Dv 0
+  ap.ds_voc_soc = 0;        // Ds
+  ap.Tb_bias_model = 0;     // D^
+  ap.dv_voc_soc = 0;        // Dy
+  ap.tb_stale_time_slr = 1; // Xv 1
+  ap.fail_tb = false;       // Xu 0
+
+  // Noise
+  ap.Tb_noise_amp = TB_NOISE;         // DT 0
+  ap.Vb_noise_amp = VB_NOISE;         // DV 0
+  ap.Ib_amp_noise_amp = IB_AMP_NOISE; // DM 0
+  ap.Ib_noa_noise_amp = IB_NOA_NOISE; // DN 0
+
+  // Intervals
+  ap.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
+  ap.print_mult = max(min(DP_MULT, UINT8_MAX), 0);          // DP
+  Sen->ReadSensors->delay(READ_DELAY);                      // Dr
+
+  // Fault logic
+  ap.cc_diff_slr = 1;  // Fc 1
+  ap.ib_diff_slr = 1;  // Fd 1
+  ap.fake_faults = 0;  // Ff 0
+  sp.put_ib_select(0); // Ff 0
+  ap.ewhi_slr = 1;     // Fi
+  ap.ewlo_slr = 1;     // Fo
+  ap.ib_quiet_slr = 1; // Fq 1
+  ap.disab_ib_fa = 0;  // FI 0
+  ap.disab_tb_fa = 0;  // FT 0
+  ap.disab_vb_fa = 0;  // FV 0
+}
+
+
 // Grab cmd from queues
 void chatter()
 {
@@ -153,7 +204,7 @@ void chatter()
 
 
 // Parse commands to queue strings
-String chit(const String from, const urgency when)
+void chit(const String from, const urgency when)
 {
   String chit_str = "";
   String When = "";
@@ -188,61 +239,53 @@ String chit(const String from, const urgency when)
   }
   else
   {
-    chit_str = from;
+    When = "Unknown";
   }
 
   #ifdef DEBUG_QUEUE
-    // debug_queue("exit chit");
+    debug_queue("exit chit");
   #endif
 
-  return chit_str;
 }
 
 
 // Add to queues and clear inp_str
 void chitter()
 {
-  urgency request;
-
-  // Serial event
-  request = NEW;
+  // When info available
   if (cp.inp_str.length())
   {
     if (!cp.inp_token && !cp.cmd_token)
     {
       cp.inp_token = true;
-
-      // Categorize the requests
-      char key = cp.inp_str.charAt(0);
-      request = chit_classify_inp(key);
-      // Serial.printf("chitter enter: "); cmd_echo(request);
+      String nibble = chit_nibble_inp();
+      urgency request = chit_classify_nibble(&nibble);
 
       // Deal with each request.  Strip off to use up to ';'.  Leave the rest for next iteration.
-      // Serial.printf("\nchitter:  in [%s] ", cp.inp_str.c_str());
-      int semi_loc = cp.inp_str.indexOf(';');
-      String new_req = cp.inp_str.substring(0, semi_loc);
-      cp.inp_str = cp.inp_str.substring(semi_loc+1);
-      // Serial.printf("semi_loc %d new_req [%s] out [%s]\n", semi_loc, new_req.c_str(), cp.inp_str.c_str());
       switch (request)
       {
-        case (NEW): // Defaults to QUEUE
-          chit(new_req, QUEUE);
+        case (INCOMING):  // 0
+          chit(nibble, INCOMING);
           break;
 
-        case (ASAP):
-          chit(new_req, ASAP);
+        case (ASAP):  // 1
+          chit(nibble, ASAP);
           break;
 
-        case (SOON):
-          chit(new_req, SOON);
+        case (SOON):  // 2
+          chit(nibble, SOON);
           break;
 
-        case (QUEUE):
-          chit(new_req, QUEUE);
+        case (QUEUE):  // 3
+          chit(nibble, QUEUE);
           break;
 
-        case (LAST):
-          chit(new_req, LAST);
+        case (NEW): // 4
+          chit(nibble, QUEUE);
+          break;
+
+        case (LAST):  // 5
+          chit(nibble, LAST);
           break;
       }
 
@@ -250,14 +293,75 @@ void chitter()
 
       #ifdef DEBUG_QUEUE
         debug_queue("chitter exit");
-        // Serial.printf("chitter exit: %d of {INCOMING, ASAP, SOON, QUEUE, NEW, LAST}; key %c inp_str [%s] cmd_str [%s]\n", request, key, cp.inp_str.c_str(), cp.cmd_str.c_str());
       #endif
     }
   }
 }
 
 
-// Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for transcribe()
+// Decode key
+urgency chit_classify_nibble(String *nibble)
+{
+  char key = nibble->charAt(0);
+  urgency result;
+
+  // Validate
+  if (key == '>' || key == ';')
+  {
+    *nibble = nibble->substring(1); // Delete any leading 'junk' and redefine key
+    key = nibble->charAt(0);
+  }
+
+  // Classify
+  if (key == 'c')
+  {
+    result = ASAP;
+  }
+  else if (key == '-' && nibble->charAt(1) != 'c')
+  {
+    *nibble = nibble->substring(1); // Delete the leading '-'
+    result = ASAP;
+  }
+  else if (key == '-')
+  {
+    *nibble = nibble->substring(1); // Delete the leading '-'
+    result = ASAP;
+  }
+  else if (key == '+')
+  {
+    *nibble = nibble->substring(1); // Delete the leading '+'
+    result = QUEUE;
+  }
+  else if (key == '*')
+  {
+    *nibble = nibble->substring(1); // Delete the leading '*'
+    result = SOON;
+  }
+  else if (key == '<')
+  {
+    *nibble = nibble->substring(1); // Delete the leading '<'
+    result = LAST;
+  }
+  else
+  {
+    result = NEW;
+  }
+
+  return result;
+}
+
+
+// Get next item up to next ';'
+String chit_nibble_inp()
+{
+  int semi_loc = cp.inp_str.indexOf(';');
+  String nibble = cp.inp_str.substring(0, semi_loc+1);  // 2nd index is exclusive
+  cp.inp_str = cp.inp_str.substring(semi_loc+1);  // +1 to grab the semi-colon
+  return nibble;
+}
+
+
+// Start over with clean queues
 void clear_queues()
 {
   cp.last_str = "";
@@ -283,58 +387,6 @@ void cmd_echo(urgency request)
 }
 
 
-// Decode key
-urgency chit_classify_inp(const char key_)
-{
-  char key = key_;
-  urgency result = NEW;
-
-  if (key == '>' || key == ';')
-  {
-    cp.inp_str = cp.inp_str.substring(1); // Delete any leading 'junk'
-    key = cp.inp_str.charAt(0);
-  }
-
-
-  if (key == 'c')
-  {
-    result = ASAP;
-  }
-  else if (key == '-' && cp.inp_str.charAt(1) != 'c')
-  {
-    cp.inp_str = cp.inp_str.substring(1); // Delete the leading '-'
-    result = ASAP;
-  }
-  else if (key == '-')
-  {
-    cp.inp_str = cp.inp_str.substring(1); // Delete the leading '-'
-    result = ASAP;
-  }
-  else if (key == '+')
-  {
-    cp.inp_str = cp.inp_str.substring(1); // Delete the leading '+'
-    result = QUEUE;
-  }
-  else if (key == '*')
-  {
-    cp.inp_str = cp.inp_str.substring(1); // Delete the leading '*'
-    result = SOON;
-  }
-  else if (key == '<')
-  {
-    cp.inp_str = cp.inp_str.substring(1); // Delete the leading '<'
-    result = LAST;
-  }
-  else
-  {
-    result = NEW;
-  }
-
-  Serial.printf("chit_classify_inp exit key_[%c] key[%c] result[%d]\n", key_, key, result);
-  return result;
-}
-
-
 // Talk Executive
 void describe(BatteryMonitor *Mon, Sensors *Sen)
 {
@@ -357,7 +409,6 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
     letter_0 = cp.cmd_str.charAt(0);
     letter_1 = cp.cmd_str.charAt(1);
     value = cp.cmd_str.substring(2);
-    // Serial.printf("describe:  processing %s; = '%c' + '%c'\n", cp.cmd_str.c_str(), letter_0, letter_1);
     cmd_echo(request);
 
     switch ( request )
@@ -481,52 +532,3 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
 }
 
 
-// Clear adjustments that should be benign if done instantly
-void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
-{
-
-  // Snapshots
-  cp.cmd_summarize(); // Hs
-  cp.cmd_summarize(); // Hs
-  cp.cmd_summarize(); // Hs
-  cp.cmd_summarize(); // Hs
-
-  // Model
-  ap.hys_scale = HYS_SCALE;                  // Sh 1
-  ap.slr_res = 1;                            // Sr 1
-  sp.cutback_gain_slr_p->print_adj_print(1); // Sk 1
-  ap.hys_state = 0;                          // SH 0
-
-  // Injection
-  ap.ib_amp_add = 0;        // Dm 0
-  ap.ib_noa_add = 0;        // Dn 0
-  ap.vb_add = 0;            // Dv 0
-  ap.ds_voc_soc = 0;        // Ds
-  ap.Tb_bias_model = 0;     // D^
-  ap.dv_voc_soc = 0;        // Dy
-  ap.tb_stale_time_slr = 1; // Xv 1
-  ap.fail_tb = false;       // Xu 0
-
-  // Noise
-  ap.Tb_noise_amp = TB_NOISE;         // DT 0
-  ap.Vb_noise_amp = VB_NOISE;         // DV 0
-  ap.Ib_amp_noise_amp = IB_AMP_NOISE; // DM 0
-  ap.Ib_noa_noise_amp = IB_NOA_NOISE; // DN 0
-
-  // Intervals
-  ap.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
-  ap.print_mult = max(min(DP_MULT, UINT8_MAX), 0);          // DP
-  Sen->ReadSensors->delay(READ_DELAY);                      // Dr
-
-  // Fault logic
-  ap.cc_diff_slr = 1;  // Fc 1
-  ap.ib_diff_slr = 1;  // Fd 1
-  ap.fake_faults = 0;  // Ff 0
-  sp.put_ib_select(0); // Ff 0
-  ap.ewhi_slr = 1;     // Fi
-  ap.ewlo_slr = 1;     // Fo
-  ap.ib_quiet_slr = 1; // Fq 1
-  ap.disab_ib_fa = 0;  // FI 0
-  ap.disab_tb_fa = 0;  // FT 0
-  ap.disab_vb_fa = 0;  // FV 0
-}

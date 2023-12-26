@@ -30,14 +30,14 @@ typedef enum urgency urgency;
 class BatteryMonitor;
 class Sensors;
 
+void benign_zero(BatteryMonitor *Mon, Sensors *Sen);
 void chat();
 void chatter();
-String chit(const String cmd, const enum urgency when);
+void chit(const String cmd, const enum urgency when);
 void chitter();
+String chit_nibble_inp();
 void cmd_echo(urgency request);
-urgency chit_classify_inp(const char key);
+urgency chit_classify_nibble(String *nibble);
 void describe(BatteryMonitor *Mon, Sensors *Sen);
-void benign_zero(BatteryMonitor *Mon, Sensors *Sen);
-
 
 #endif

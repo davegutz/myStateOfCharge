@@ -472,9 +472,11 @@ void loop()
   if ( control ){} // placeholder
 
   // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
+  // Running chitter unframed allows queues of different priorities to be built from long
+  // runs of Serial inputs
+  chitter();
   if ( chitchat )
   {
-    chitter();
     chatter();         // Work on internal chit-chat
     describe(Mon, Sen);   // Collect user inputs
   }

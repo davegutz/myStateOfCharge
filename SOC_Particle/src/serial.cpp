@@ -225,7 +225,7 @@ void serialEvent()
         char in_char = (char)Serial.read();  // get the new byte
 
         // Intake
-        // if the incoming character to finish, add a ';' and set a flag so the main loop can do something about it:
+        // if the incoming character to finish, add a ';' and set flags so the main loop can do something about it:
         if ( is_finished(in_char) )
         {
             serial_str += ';';
@@ -277,7 +277,7 @@ void serialEvent1()
         char in_char1 = (char)Serial1.read();  // get the new byte
 
         // Intake
-        // if the incoming character to finish, add a ';' and set a flag so the main loop can do something about it:
+        // if the incoming character to finish, add a ';' and set flags so the main loop can do something about it:
         if ( is_finished(in_char1) )
         {
             serial_str1 += ';';
