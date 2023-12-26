@@ -50,7 +50,7 @@ extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 //   if (!cp.cmd_token && cp.asap_str.length())
 //   {
 //     cp.cmd_token = true;
-//     cp.cmd_str = strip_cmd_from(&cp.asap_str);
+//     cp.cmd_str = chat_cmd_from(&cp.asap_str);
 //     cp.cmd_token = false;
 //   }
 
@@ -73,7 +73,7 @@ extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 //   if (!cp.cmd_token && cp.soon_str.length())
 //   {
 //     cp.cmd_token = true;
-//     cp.cmd_str = strip_cmd_from(&cp.soon_str);
+//     cp.cmd_str = chat_cmd_from(&cp.soon_str);
 //     cp.cmd_token = false;
 
 // #ifdef DEBUG_QUEUE
@@ -86,7 +86,7 @@ extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 //   else if (!cp.cmd_token && cp.queue_str.length()) // Do QUEUE only after SOON empty
 //   {
 //     cp.cmd_token = true;
-//     cp.cmd_str = strip_cmd_from(&cp.queue_str);
+//     cp.cmd_str = chat_cmd_from(&cp.queue_str);
 //     cp.cmd_token = false;
 
 // #ifdef DEBUG_QUEUE
@@ -99,7 +99,7 @@ extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 //   else if (!cp.cmd_token && cp.last_str.length()) // Do END only after QUEUE empty
 //   {
 //     cp.cmd_token = true;
-//     cp.cmd_str = strip_cmd_from(&cp.last_str);
+//     cp.cmd_str = chat_cmd_from(&cp.last_str);
 //     cp.cmd_token = false;
 
 // #ifdef DEBUG_QUEUE
@@ -133,13 +133,13 @@ void chatter()
   {
     cp.cmd_token = true;
 
-    if      ( cp.asap_str.length()  ) cp.cmd_str = strip_cmd_from(&cp.asap_str);
+    if      ( cp.asap_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.asap_str);
 
-    else if ( cp.soon_str.length()  ) cp.cmd_str = strip_cmd_from(&cp.soon_str);
+    else if ( cp.soon_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.soon_str);
 
-    else if ( cp.queue_str.length() ) cp.cmd_str = strip_cmd_from(&cp.queue_str);
+    else if ( cp.queue_str.length() ) cp.cmd_str = chat_cmd_from(&cp.queue_str);
 
-    else if ( cp.last_str.length()  ) cp.cmd_str = strip_cmd_from(&cp.last_str);
+    else if ( cp.last_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.last_str);
 
     cp.cmd_token = false;
   }
@@ -157,18 +157,6 @@ String chit(const String from, const urgency when)
 {
   String chit_str = "";
   String When = "";
-
-  #ifdef DEBUG_QUEUE
-
-    debug_queue("enter chit");
-
-    // Serial.printf("enter chit[%s] to[%s]\n", from.c_str(), When.c_str());
-
-    // if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
-    //   Serial.printf("     inp[%s] ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] rtn[%s]\n\n",
-    //                 cp.inp_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), chit_str.c_str());
-
-  #endif
 
   if (when == LAST)
   {
@@ -204,15 +192,7 @@ String chit(const String from, const urgency when)
   }
 
   #ifdef DEBUG_QUEUE
-
-    debug_queue("exit chit");
-
-    // Serial.printf("exit chit[%s] to[%s]\n", from.c_str(), When.c_str());
-
-    // if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
-    //   Serial.printf("     inp[%s] ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] rtn[%s]\n\n",
-    //                 cp.inp_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), chit_str.c_str());
-
+    // debug_queue("exit chit");
   #endif
 
   return chit_str;
@@ -234,35 +214,38 @@ void chitter()
 
       // Categorize the requests
       char key = cp.inp_str.charAt(0);
-      request = clean_classify_inp(key);
+      request = chit_classify_inp(key);
       // Serial.printf("chitter enter: "); cmd_echo(request);
 
-      // Deal with each request
-      String leftover = cp.inp_str.substring(0) + ";";
+      // Deal with each request.  Strip off to use up to ';'.  Leave the rest for next iteration.
+      // Serial.printf("\nchitter:  in [%s] ", cp.inp_str.c_str());
+      int semi_loc = cp.inp_str.indexOf(';');
+      String new_req = cp.inp_str.substring(0, semi_loc);
+      cp.inp_str = cp.inp_str.substring(semi_loc+1);
+      // Serial.printf("semi_loc %d new_req [%s] out [%s]\n", semi_loc, new_req.c_str(), cp.inp_str.c_str());
       switch (request)
       {
         case (NEW): // Defaults to QUEUE
-          chit(leftover, QUEUE);
+          chit(new_req, QUEUE);
           break;
 
         case (ASAP):
-          chit(leftover, ASAP);
+          chit(new_req, ASAP);
           break;
 
         case (SOON):
-          chit(leftover, SOON);
+          chit(new_req, SOON);
           break;
 
         case (QUEUE):
-          chit(leftover, QUEUE);
+          chit(new_req, QUEUE);
           break;
 
         case (LAST):
-          chit(leftover, LAST);
+          chit(new_req, LAST);
           break;
       }
 
-      cp.inp_str = "";
       cp.inp_token = false;
 
       #ifdef DEBUG_QUEUE
@@ -289,26 +272,26 @@ void cmd_echo(urgency request)
 {
   if ( request==0 )
   {
-    Serial.printf ("cmd: %s\n", cp.inp_str.c_str());
-    Serial1.printf ("cmd: %s\n", cp.inp_str.c_str());
+    Serial.printf ("cmd: %s\n", cp.cmd_str.c_str());
+    Serial1.printf ("cmd: %s\n", cp.cmd_str.c_str());
   }
   else
   {
-    Serial.printf ("echo: %s, %d\n", cp.inp_str.c_str(), request);
-    Serial1.printf("echo: %s, %d\n", cp.inp_str.c_str(), request);
+    Serial.printf ("echo: %s, %d\n", cp.cmd_str.c_str(), request);
+    Serial1.printf("echo: %s, %d\n", cp.cmd_str.c_str(), request);
   }
 }
 
 
 // Decode key
-urgency clean_classify_inp(const char key_)
+urgency chit_classify_inp(const char key_)
 {
   char key = key_;
   urgency result = NEW;
 
   if (key == '>' || key == ';')
   {
-    cp.inp_str = cp.inp_str.substring(1); // Delete any leading '>'
+    cp.inp_str = cp.inp_str.substring(1); // Delete any leading 'junk'
     key = cp.inp_str.charAt(0);
   }
 
@@ -347,6 +330,7 @@ urgency clean_classify_inp(const char key_)
     result = NEW;
   }
 
+  Serial.printf("chit_classify_inp exit key_[%c] key[%c] result[%d]\n", key_, key, result);
   return result;
 }
 

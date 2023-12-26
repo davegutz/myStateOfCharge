@@ -74,13 +74,13 @@ String finish_request(const String in_str)
 
 
 // Strip cmd string from front of source string
-String strip_cmd_from(String *source)
+String chat_cmd_from(String *source)
 {
   String out_str = "";
 
   #ifdef DEBUG_QUEUE
-    debug_queue("strip_cmd_from enter");
-    // Serial.printf("\nstrip_cmd_from enter:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
+    debug_queue("chat_cmd_from enter");
+    // Serial.printf("\nchat_cmd_from enter:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
   #endif
 
   while ( source->length() )
@@ -97,8 +97,8 @@ String strip_cmd_from(String *source)
   }
 
   #ifdef DEBUG_QUEUE
-    debug_queue("strip_cmd_from exit");
-    // Serial.printf("\nstrip_cmd_from exit:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
+    debug_queue("chat_cmd_from exit");
+    // Serial.printf("\nchat_cmd_from exit:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
   #endif
 
   return out_str;
@@ -225,7 +225,7 @@ void serialEvent()
         char in_char = (char)Serial.read();  // get the new byte
 
         // Intake
-        // if the incoming character to finish, set a flag so the main loop can do something about it:
+        // if the incoming character to finish, add a ';' and set a flag so the main loop can do something about it:
         if ( is_finished(in_char) )
         {
             serial_str += ';';
@@ -245,7 +245,7 @@ void serialEvent()
         else
             serial_str += in_char;  // process new valid character
 
-        #if defined(DEBUG_SERIAL_QUEUE) || defined(DEBUG_QUEUE)
+        #if defined(DEBUG_SERIAL_QUEUE)
             Serial.printf("serialEvent: serial_str [%s] inp_str[%s]\n", serial_str.c_str(), cp.inp_str.c_str());
         #endif
     }
@@ -277,7 +277,7 @@ void serialEvent1()
         char in_char1 = (char)Serial1.read();  // get the new byte
 
         // Intake
-        // if the incoming character to finish, set a flag so the main loop can do something about it:
+        // if the incoming character to finish, add a ';' and set a flag so the main loop can do something about it:
         if ( is_finished(in_char1) )
         {
             serial_str1 += ';';
