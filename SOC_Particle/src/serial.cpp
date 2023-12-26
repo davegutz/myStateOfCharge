@@ -79,8 +79,7 @@ String chat_cmd_from(String *source)
   String out_str = "";
 
   #ifdef DEBUG_QUEUE
-    debug_queue("chat_cmd_from enter");
-    // Serial.printf("\nchat_cmd_from enter:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
+    // debug_queue("chat_cmd_from enter");
   #endif
 
   while ( source->length() )
@@ -97,8 +96,7 @@ String chat_cmd_from(String *source)
   }
 
   #ifdef DEBUG_QUEUE
-    debug_queue("chat_cmd_from exit");
-    // Serial.printf("\nchat_cmd_from exit:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
+    // debug_queue("chat_cmd_from exit");
   #endif
 
   return out_str;

@@ -483,12 +483,9 @@ void loop()
   // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   // Running chitter unframed allows queues of different priorities to be built from long
   // runs of Serial inputs
-  chitter();
-  if ( chitchat )
-  {
-    chatter();         // Work on internal chit-chat
-    describe(Mon, Sen);   // Collect user inputs
-  }
+  chitter(chitchat);  // Parse inputs to queues
+  chatter();  // Prioritize commands to describe.  asap_str queue always run.  Others only with chitchat
+  describe(Mon, Sen);  // Run the commands
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)

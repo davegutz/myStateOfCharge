@@ -38,93 +38,6 @@ extern VolatilePars ap;    // Various adjustment parameters shared at system lev
 extern CommandPars cp;     // Various parameters shared at system level
 extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 
-// Process asap commands
-// void asap()
-// {
-// #ifdef DEBUG_QUEUE
-//   if (cp.inp_str.length() || cp.asap_str.length())
-//     Serial.printf("\nasap exit cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
-//                   cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str());
-// #endif
-
-//   if (!cp.cmd_token && cp.asap_str.length())
-//   {
-//     cp.cmd_token = true;
-//     cp.cmd_str = chat_cmd_from(&cp.asap_str);
-//     cp.cmd_token = false;
-//   }
-
-// #ifdef DEBUG_QUEUE
-//   if (cp.inp_str.length() || cp.asap_str.length())
-//     Serial.printf("\nasap exit cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
-//                   cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str());
-// #endif
-// }
-
-// Process chat strings
-// void chat()
-// {
-// #ifdef DEBUG_QUEUE
-//   if (!cp.inp_token && (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length()))
-//     Serial.printf("\nchat enter cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] cmd_token %d\n",
-//                   cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), cp.cmd_token);
-// #endif
-
-//   if (!cp.cmd_token && cp.soon_str.length())
-//   {
-//     cp.cmd_token = true;
-//     cp.cmd_str = chat_cmd_from(&cp.soon_str);
-//     cp.cmd_token = false;
-
-// #ifdef DEBUG_QUEUE
-//     if (cp.inp_token && (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length()))
-//       Serial.printf("\nSOON cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
-//                     cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str());
-// #endif
-//   }
-
-//   else if (!cp.cmd_token && cp.queue_str.length()) // Do QUEUE only after SOON empty
-//   {
-//     cp.cmd_token = true;
-//     cp.cmd_str = chat_cmd_from(&cp.queue_str);
-//     cp.cmd_token = false;
-
-// #ifdef DEBUG_QUEUE
-//     if (cp.inp_token && (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length()))
-//       Serial.printf("\nQUEUE cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
-//                     cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str());
-// #endif
-//   }
-
-//   else if (!cp.cmd_token && cp.last_str.length()) // Do END only after QUEUE empty
-//   {
-//     cp.cmd_token = true;
-//     cp.cmd_str = chat_cmd_from(&cp.last_str);
-//     cp.cmd_token = false;
-
-// #ifdef DEBUG_QUEUE
-//     if (cp.inp_token && (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length()))
-//       Serial.printf("\nEND cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] cmd_token %d\n",
-//                     cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), cp.cmd_token);
-// #endif
-//   }
-
-//   else
-//   {
-//     cp.cmd_token = true;
-//     cp.cmd_str = cp.inp_str;
-//     cp.cmd_token = false;
-//   }
-
-// #ifdef DEBUG_QUEUE
-//   if (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length())
-//     Serial.printf("\nchat exit cp.inp_str [%s] cp.cmd_str [%s]:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s]\n",
-//                   cp.inp_str.c_str(), cp.cmd_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str());
-// #endif
-
-//   return;
-// }
-
 
 // Clear adjustments that should be benign if done instantly
 void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
@@ -177,26 +90,25 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
 }
 
 
-// Grab cmd from queues
+// Prioritize commands to describe.  asap_str queue always run.  Others only with chitchat
 void chatter()
 {
-  if ( !cp.cmd_token )
+
+  // Always pull from asap if available and run them
+  if ( cp.asap_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.asap_str);
+
+  // Otherwise run the other queues when chitchat frame is running
+  else if ( cp.chitchat )
   {
-    cp.cmd_token = true;
-
-    if      ( cp.asap_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.asap_str);
-
-    else if ( cp.soon_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.soon_str);
+    if ( cp.soon_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.soon_str);
 
     else if ( cp.queue_str.length() ) cp.cmd_str = chat_cmd_from(&cp.queue_str);
 
     else if ( cp.last_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.last_str);
-
-    cp.cmd_token = false;
   }
 
   #ifdef DEBUG_QUEUE
-    debug_queue("chatter exit");
+    if ( cp.chitchat || cp.asap_str.length() ) debug_queue("chatter exit");
   #endif
 
   return;
@@ -229,19 +141,22 @@ void chit(const String from, const urgency when)
   }
 
   #ifdef DEBUG_QUEUE
-    debug_queue("exit chit");
+    if ( cp.chitchat || cp.asap_str.length() ) debug_queue("exit chit");
   #endif
 
 }
 
 
-// Add to queues and clear inp_str
-void chitter()
+// Parse inputs to queues
+void chitter(const boolean chitchat)
 {
+  // Since this is first procedure in chitchat sequence, note the state of chitchat frame
+  cp.chitchat = chitchat;
+
   // When info available
   if (cp.inp_str.length())
   {
-    if (!cp.inp_token && !cp.cmd_token)
+    if ( !cp.inp_token )
     {
       cp.inp_token = true;
       String nibble = chit_nibble_inp();
@@ -278,7 +193,7 @@ void chitter()
       cp.inp_token = false;
 
       #ifdef DEBUG_QUEUE
-        debug_queue("chitter exit");
+        if ( cp.chitchat || cp.asap_str.length() ) debug_queue("chitter exit");
       #endif
     }
   }
@@ -373,7 +288,7 @@ void cmd_echo(urgency request)
 }
 
 
-// Talk Executive
+// Run the commands
 void describe(BatteryMonitor *Mon, Sensors *Sen)
 {
   int INT_in = -1;
@@ -384,10 +299,8 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
   String value = "";
 
   // Serial event
-  if ( !cp.cmd_token && cp.cmd_str.length() )
+  if ( cp.cmd_str.length() )
   {
-    cp.cmd_token = true;
-
     // Now we know the letters
     letter_0 = cp.cmd_str.charAt(0);
     letter_1 = cp.cmd_str.charAt(1);
@@ -507,7 +420,4 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
   }
 
   cp.cmd_str = "";
-  cp.cmd_token = false;
 }
-
-
