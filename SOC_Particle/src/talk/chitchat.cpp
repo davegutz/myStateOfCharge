@@ -353,8 +353,8 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
     cp.cmd_token = true;
 
     // Now we know the letters
-    letter_0 = cp.inp_str.charAt(0);
-    letter_1 = cp.inp_str.charAt(1);
+    letter_0 = cp.cmd_str.charAt(0);
+    letter_1 = cp.cmd_str.charAt(1);
     Serial.printf("\ndescribe:  processing %s; = '%c' + '%c'\n", cp.cmd_str.c_str(), letter_0, letter_1);
     cmd_echo(request);
 
