@@ -35,7 +35,7 @@ void chatter();
 String chit(const String cmd, const enum urgency when);
 void chitter();
 void cmd_echo(urgency request);
-urgency decode_from_inp(const char key);
+urgency clean_classify_inp(const char key);
 void describe(BatteryMonitor *Mon, Sensors *Sen);
 void benign_zero(BatteryMonitor *Mon, Sensors *Sen);
 

@@ -73,14 +73,14 @@ String finish_request(const String in_str)
 }
 
 
-// Get and return new cmd string from source
-String get_cmd(String *source)
+// Strip cmd string from front of source string
+String strip_cmd_from(String *source)
 {
   String out_str = "";
 
   #ifdef DEBUG_QUEUE
-    debug_queue("get_cmd enter");
-    // Serial.printf("\nget_cmd enter:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
+    debug_queue("strip_cmd_from enter");
+    // Serial.printf("\nstrip_cmd_from enter:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
   #endif
 
   while ( source->length() )
@@ -97,8 +97,8 @@ String get_cmd(String *source)
   }
 
   #ifdef DEBUG_QUEUE
-    debug_queue("get_cmd exit");
-    // Serial.printf("\nget_cmd exit:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
+    debug_queue("strip_cmd_from exit");
+    // Serial.printf("\nstrip_cmd_from exit:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
   #endif
 
   return out_str;

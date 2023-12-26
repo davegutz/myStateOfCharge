@@ -48,7 +48,7 @@ extern CommandPars cp;  // Various parameters to be static at system level
 void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon);
 void delay_no_block(const unsigned long long int interval);
 String finish_request(const String in_str);
-String get_cmd(String *source);
+String strip_cmd_from(String *source);
 boolean is_finished(const char in_char);
 void print_all_header(void);
 void print_rapid_data(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);

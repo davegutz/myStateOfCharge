@@ -50,7 +50,7 @@ extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 //   if (!cp.cmd_token && cp.asap_str.length())
 //   {
 //     cp.cmd_token = true;
-//     cp.cmd_str = get_cmd(&cp.asap_str);
+//     cp.cmd_str = strip_cmd_from(&cp.asap_str);
 //     cp.cmd_token = false;
 //   }
 
@@ -73,7 +73,7 @@ extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 //   if (!cp.cmd_token && cp.soon_str.length())
 //   {
 //     cp.cmd_token = true;
-//     cp.cmd_str = get_cmd(&cp.soon_str);
+//     cp.cmd_str = strip_cmd_from(&cp.soon_str);
 //     cp.cmd_token = false;
 
 // #ifdef DEBUG_QUEUE
@@ -86,7 +86,7 @@ extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 //   else if (!cp.cmd_token && cp.queue_str.length()) // Do QUEUE only after SOON empty
 //   {
 //     cp.cmd_token = true;
-//     cp.cmd_str = get_cmd(&cp.queue_str);
+//     cp.cmd_str = strip_cmd_from(&cp.queue_str);
 //     cp.cmd_token = false;
 
 // #ifdef DEBUG_QUEUE
@@ -99,7 +99,7 @@ extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 //   else if (!cp.cmd_token && cp.last_str.length()) // Do END only after QUEUE empty
 //   {
 //     cp.cmd_token = true;
-//     cp.cmd_str = get_cmd(&cp.last_str);
+//     cp.cmd_str = strip_cmd_from(&cp.last_str);
 //     cp.cmd_token = false;
 
 // #ifdef DEBUG_QUEUE
@@ -126,20 +126,20 @@ extern Flt_st mySum[NSUM]; // Summaries for saving charge history
 // }
 
 
-// Process chat strings one at a time.  Leave this with one cmd_str
+// Grab cmd from queues
 void chatter()
 {
   if ( !cp.cmd_token )
   {
     cp.cmd_token = true;
 
-    if      ( cp.asap_str.length()  ) cp.cmd_str = get_cmd(&cp.asap_str);
+    if      ( cp.asap_str.length()  ) cp.cmd_str = strip_cmd_from(&cp.asap_str);
 
-    else if ( cp.soon_str.length()  ) cp.cmd_str = get_cmd(&cp.soon_str);
+    else if ( cp.soon_str.length()  ) cp.cmd_str = strip_cmd_from(&cp.soon_str);
 
-    else if ( cp.queue_str.length() ) cp.cmd_str = get_cmd(&cp.queue_str);
+    else if ( cp.queue_str.length() ) cp.cmd_str = strip_cmd_from(&cp.queue_str);
 
-    else if ( cp.last_str.length()  ) cp.cmd_str = get_cmd(&cp.last_str);
+    else if ( cp.last_str.length()  ) cp.cmd_str = strip_cmd_from(&cp.last_str);
 
     cp.cmd_token = false;
   }
@@ -152,7 +152,7 @@ void chatter()
 }
 
 
-// Parse commands
+// Parse commands to queue strings
 String chit(const String from, const urgency when)
 {
   String chit_str = "";
@@ -219,7 +219,7 @@ String chit(const String from, const urgency when)
 }
 
 
-// Generate commands
+// Add to queues and clear inp_str
 void chitter()
 {
   urgency request;
@@ -231,40 +231,39 @@ void chitter()
     if (!cp.inp_token && !cp.cmd_token)
     {
       cp.inp_token = true;
-      cp.cmd_token = true;
 
       // Categorize the requests
       char key = cp.inp_str.charAt(0);
-      request = decode_from_inp(key);
+      request = clean_classify_inp(key);
       // Serial.printf("chitter enter: "); cmd_echo(request);
 
       // Deal with each request
+      String leftover = cp.inp_str.substring(0) + ";";
       switch (request)
       {
-      case (NEW): // Defaults to QUEUE
-        chit(cp.inp_str.substring(0) + ";", QUEUE);
-        break;
+        case (NEW): // Defaults to QUEUE
+          chit(leftover, QUEUE);
+          break;
 
-      case (ASAP):
-        chit(cp.inp_str.substring(1) + ";", ASAP);
-        break;
+        case (ASAP):
+          chit(leftover, ASAP);
+          break;
 
-      case (SOON):
-        chit(cp.inp_str.substring(1) + ";", SOON);
-        break;
+        case (SOON):
+          chit(leftover, SOON);
+          break;
 
-      case (QUEUE):
-        chit(cp.inp_str.substring(1) + ";", QUEUE);
-        break;
+        case (QUEUE):
+          chit(leftover, QUEUE);
+          break;
 
-      case (LAST):
-        chit(cp.inp_str.substring(1) + ";", LAST);
-        break;
+        case (LAST):
+          chit(leftover, LAST);
+          break;
       }
 
       cp.inp_str = "";
       cp.inp_token = false;
-      cp.cmd_token = false;
 
       #ifdef DEBUG_QUEUE
         debug_queue("chitter exit");
@@ -302,20 +301,17 @@ void cmd_echo(urgency request)
 
 
 // Decode key
-urgency decode_from_inp(const char key_)
+urgency clean_classify_inp(const char key_)
 {
   char key = key_;
   urgency result = NEW;
-  if (key == '>')
+
+  if (key == '>' || key == ';')
   {
-    cp.cmd_str = cp.cmd_str.substring(1); // Delete any leading '>'
-    key = cp.cmd_str.charAt(0);
+    cp.inp_str = cp.inp_str.substring(1); // Delete any leading '>'
+    key = cp.inp_str.charAt(0);
   }
-  else if (key == ';')
-  {
-    cp.cmd_str = cp.cmd_str.substring(1); // Delete any leading ';'
-    key = cp.cmd_str.charAt(0);
-  }
+
 
   if (key == 'c')
   {
@@ -327,17 +323,30 @@ urgency decode_from_inp(const char key_)
     result = ASAP;
   }
   else if (key == '-')
+  {
+    cp.inp_str = cp.inp_str.substring(1); // Delete the leading '-'
     result = ASAP;
+  }
   else if (key == '+')
+  {
+    cp.inp_str = cp.inp_str.substring(1); // Delete the leading '+'
     result = QUEUE;
+  }
   else if (key == '*')
+  {
+    cp.inp_str = cp.inp_str.substring(1); // Delete the leading '*'
     result = SOON;
+  }
   else if (key == '<')
+  {
+    cp.inp_str = cp.inp_str.substring(1); // Delete the leading '<'
     result = LAST;
+  }
   else
   {
     result = NEW;
   }
+
   return result;
 }
 
