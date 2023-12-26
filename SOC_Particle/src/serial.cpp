@@ -24,6 +24,7 @@
 #include "serial.h"
 #include "command.h"
 #include "local_config.h"
+#include "debug.h"
 
 extern CommandPars cp;  // Various parameters shared at system level
 
@@ -71,26 +72,35 @@ String finish_request(const String in_str)
   return out_str;
 }
 
-// If false serial_token, get new string from source
+
+// Get and return new cmd string from source
 String get_cmd(String *source)
 {
   String out_str = "";
+
+  #ifdef DEBUG_QUEUE
+    debug_queue("get_cmd enter");
+    Serial.printf("\nget_cmd enter:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
+  #endif
+
   while ( source->length() )
   {
     // get the new byte, add to input and check for completion
-    char inChar = source->charAt(0);
+    char in_char = source->charAt(0);
     source->remove(0, 1);
-    out_str += inChar;
-    if (inChar=='\n' || inChar=='\0' || inChar==';' || inChar==',') // enable reading multiple inputs
+    out_str += in_char;
+    if ( is_finished(in_char) )
     {
-      out_str = finish_request(cp.inp_str);  // remove whitespace and ;, etc
-      out_str = ">" + out_str;
+      out_str = finish_request(out_str);  // remove whitespace and ;, etc
       break;
     }
   }
+
   #ifdef DEBUG_QUEUE
-    Serial.printf("get_cmd:  out_str %s\n", out_str.c_str());
+    debug_queue("get_cmd exit");
+    Serial.printf("\nget_cmd exit:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
   #endif
+
   return out_str;
 }
 
@@ -215,10 +225,6 @@ void serialEvent()
         char in_char = (char)Serial.read();  // get the new byte
 
         // Intake
-        if ( in_char == '\r' ) Serial.printf("\n");  // scroll user terminal
-        if ( in_char != '\b' ) serial_str += in_char;
-        else if ( serial_str.length() ) serial_str.remove(serial_str.length() -1 );
-
         // if the incoming character to finish, set a flag so the main loop can do something about it:
         if ( is_finished(in_char) )
         {
@@ -226,8 +232,17 @@ void serialEvent()
             break;
         }
 
-        #if defined(DEBUG_SERIAL_QUEUE)
-            Serial.printf("serialEvent: serial_str [%s]\n", serial_str.c_str());
+        else if ( in_char == '\r' )
+            Serial.printf("\n");  // scroll user terminal
+
+        else if ( in_char == '\b' && serial_str.length() )
+            serial_str.remove(serial_str.length() -1 );  // backspace
+
+        else
+            serial_str += in_char;  // process new valid character
+
+        #if defined(DEBUG_SERIAL_QUEUE) || defined(DEBUG_QUEUE)
+            Serial.printf("serialEvent: serial_str [%s] inp_str[%s]\n", serial_str.c_str(), cp.inp_str.c_str());
         #endif
     }
 
@@ -238,14 +253,12 @@ void serialEvent()
         {
             cp.inp_token = true;
             cp.inp_str += serial_str;
+            serial_ready = false;
             cp.inp_token = false;
             serial_str = "";
         }
     }
 
-    #if defined(DEBUG_SERIAL_QUEUE) || defined(DEBUG_QUEUE)
-        Serial.printf("serialEvent: serial_str [%s] inp_str[%s]\n", serial_str.c_str(), cp.inp_str.c_str());
-    #endif
 }
 
 
@@ -260,10 +273,6 @@ void serialEvent1()
         char in_char1 = (char)Serial1.read();  // get the new byte
 
         // Intake
-        if ( in_char1 == '\r' ) Serial1.printf("\n");  // scroll user terminal
-        if ( in_char1 != '\b' ) serial_str1 += in_char1;
-        else if ( serial_str1.length() ) serial_str1.remove(serial_str1.length() -1 );
-
         // if the incoming character to finish, set a flag so the main loop can do something about it:
         if ( is_finished(in_char1) )
         {
@@ -271,8 +280,17 @@ void serialEvent1()
             break;
         }
 
-        #if defined(DEBUG_SERIAL_QUEUE)
-            Serial1.printf("serial1Event=: serial_str1 [%s]\n", serial_str1.c_str());
+        else if ( in_char1 == '\r' )
+            Serial1.printf("\n");  // scroll user terminal
+
+        else if ( in_char1 == '\b' && serial_str1.length() )
+            serial_str1.remove(serial_str1.length() -1 );  // backspace
+
+        else
+            serial_str1 += in_char1;  // process new valid character
+
+        #if defined(DEBUG_SERIAL_QUEUE) || defined(DEBUG_QUEUE)
+            Serial.printf("serialEvent1: serial_str1 [%s] inp_str[%s]\n", serial_str1.c_str(), cp.inp_str.c_str());
         #endif
     }
 
@@ -283,14 +301,12 @@ void serialEvent1()
         {
             cp.inp_token = true;
             cp.inp_str += serial_str1;
+            serial_ready1 = false;
             cp.inp_token = false;
             serial_str1 = "";
         }
     }
 
-    #if defined(DEBUG_SERIAL_QUEUE) || defined(DEBUG_QUEUE)
-        Serial.printf("serialEvent: serial_str1 [%s] inp_str[%s]\n", serial_str1.c_str(), cp.inp_str.c_str());
-    #endif
 }
 
 

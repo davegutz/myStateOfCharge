@@ -82,8 +82,6 @@ struct Pins
 
 
 // Headers
-String finish_request(const String in_str);
-String get_cmd(String *source);
 void harvest_temp_change(const float temp_c, BatteryMonitor *Mon, BatterySim *Sim);
 void initialize_all(BatteryMonitor *Mon, Sensors *Sen, const float soc_in, const boolean use_soc_in);
 void load_ib_vb(const boolean reset, const boolean reset_temp, Sensors *Sen, Pins *myPins, BatteryMonitor *Mon);

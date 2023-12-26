@@ -145,37 +145,49 @@ void chatter()
   }
 
   #ifdef DEBUG_QUEUE
-    debug_queue();
+    debug_queue("chatter");
   #endif
 
   return;
 }
 
 
-// Call talk from within, a crude macro feature.   cmd should by semi-colon delimited commands for transcribe()
-String chit(const String cmd, const urgency when)
+// Call talk from within, a crude macro feature.   'from' should by semi-colon delimited commands for transcribe()
+String chit(const String from, const urgency when)
 {
   String chit_str = "";
   String When = "";
 
+  #ifdef DEBUG_QUEUE
+
+    debug_queue("\nenter chit");
+
+    Serial.printf("\nenter chit[%s] to[%s]\n", from.c_str(), When.c_str());
+
+    if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
+      Serial.printf("     inp[%s] ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] rtn[%s]\n\n",
+                    cp.inp_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), chit_str.c_str());
+
+  #endif
+
   if (when == LAST)
   {
-    cp.last_str += cmd;
+    cp.last_str += from;
     When = "LAST";
   }
   if (when == QUEUE)
   {
-    cp.queue_str += cmd;
+    cp.queue_str += from;
     When = "QUEUE";
   }
   else if (when == SOON)
   {
-    cp.soon_str += cmd;
+    cp.soon_str += from;
     When = "SOON";
   }
   else if (when == ASAP)
   {
-    cp.asap_str += cmd;
+    cp.asap_str += from;
     When = "ASAP";
   }
   else if (when == NEW)
@@ -188,19 +200,24 @@ String chit(const String cmd, const urgency when)
   }
   else
   {
-    chit_str = cmd;
+    chit_str = from;
   }
 
   #ifdef DEBUG_QUEUE
-    debug_queue();
-    Serial.printf("\nchit='%s'[%s]\n", cmd.c_str(), When.c_str());
-    if (cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length())
-      Serial.printf("\nchit exit:  ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] rtn[%s]\n\n",
-                    cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), chit_str.c_str());
+
+    debug_queue("\nexit chit");
+
+    Serial.printf("\nexit chit[%s] to[%s]\n", from.c_str(), When.c_str());
+
+    if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
+      Serial.printf("     inp[%s] ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] rtn[%s]\n\n",
+                    cp.inp_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), chit_str.c_str());
+
   #endif
 
   return chit_str;
 }
+
 
 // Generate commands
 void chitter()
@@ -219,37 +236,39 @@ void chitter()
       // Categorize the requests
       char key = cp.inp_str.charAt(0);
       request = decode_from_inp(key);
-      cmd_echo(request);
+      Serial.printf("\nchitter enter: "); cmd_echo(request);
 
       // Deal with each request
       switch (request)
       {
       case (NEW): // Defaults to QUEUE
-        cp.cmd_str = chit(cp.inp_str.substring(0) + ";", QUEUE);
+        chit(cp.inp_str.substring(0) + ";", QUEUE);
         break;
 
       case (ASAP):
-        cp.cmd_str = chit(cp.inp_str.substring(1) + ";", ASAP);
+        chit(cp.inp_str.substring(1) + ";", ASAP);
         break;
 
       case (SOON):
-        cp.cmd_str = chit(cp.inp_str.substring(1) + ";", SOON);
+        chit(cp.inp_str.substring(1) + ";", SOON);
         break;
 
       case (QUEUE):
-        cp.cmd_str = chit(cp.inp_str.substring(1) + ";", QUEUE);
+        chit(cp.inp_str.substring(1) + ";", QUEUE);
         break;
 
       case (LAST):
-        cp.cmd_str = chit(cp.inp_str.substring(1) + ";", LAST);
+        chit(cp.inp_str.substring(1) + ";", LAST);
         break;
       }
 
+      cp.inp_str = "";
       cp.inp_token = false;
       cp.cmd_token = false;
 
       #ifdef DEBUG_QUEUE
-        Serial.printf("chitter: request %d of {INCOMING, ASAP, SOON, QUEUE, NEW, LAST}; key %c input_are [%s] cmd_str [%s]\n", request, key, cp.inp_str.c_str(), cp.cmd_str.c_str());
+        debug_queue("chitter exit");
+        Serial.printf("chitter exit: %d of {INCOMING, ASAP, SOON, QUEUE, NEW, LAST}; key %c inp_str [%s] cmd_str [%s]\n", request, key, cp.inp_str.c_str(), cp.cmd_str.c_str());
       #endif
     }
   }
@@ -271,13 +290,13 @@ void cmd_echo(urgency request)
 {
   if ( request==0 )
   {
-    Serial.printf ("cmd: %s\n", cp.inp_str.c_str());
-    Serial1.printf ("cmd: %s\n", cp.inp_str.c_str());
+    Serial.printf ("\ncmd: %s\n", cp.inp_str.c_str());
+    Serial1.printf ("\ncmd: %s\n", cp.inp_str.c_str());
   }
   else
   {
-    Serial.printf ("echo: %s, %d\n", cp.inp_str.c_str(), request);
-    Serial1.printf("echo: %s, %d\n", cp.inp_str.c_str(), request);
+    Serial.printf ("\necho: %s, %d\n", cp.inp_str.c_str(), request);
+    Serial1.printf("\necho: %s, %d\n", cp.inp_str.c_str(), request);
   }
 }
 
@@ -330,11 +349,13 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
   request = NEW;
   if ( !cp.cmd_token && cp.cmd_str.length() )
   {
+    request = INCOMING;
     cp.cmd_token = true;
 
     // Now we know the letters
     letter_0 = cp.inp_str.charAt(0);
     letter_1 = cp.inp_str.charAt(1);
+    Serial.printf("\ndescribe:  processing %s; = '%c' + '%c'\n", cp.cmd_str.c_str(), letter_0, letter_1);
     cmd_echo(request);
 
     switch ( request )
