@@ -80,7 +80,7 @@ String get_cmd(String *source)
 
   #ifdef DEBUG_QUEUE
     debug_queue("get_cmd enter");
-    Serial.printf("\nget_cmd enter:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
+    // Serial.printf("\nget_cmd enter:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
   #endif
 
   while ( source->length() )
@@ -98,7 +98,7 @@ String get_cmd(String *source)
 
   #ifdef DEBUG_QUEUE
     debug_queue("get_cmd exit");
-    Serial.printf("\nget_cmd exit:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
+    // Serial.printf("\nget_cmd exit:  source[%s] out_str[%s]\n", source->c_str(), out_str.c_str());
   #endif
 
   return out_str;
@@ -228,6 +228,7 @@ void serialEvent()
         // if the incoming character to finish, set a flag so the main loop can do something about it:
         if ( is_finished(in_char) )
         {
+            serial_str += ';';
             serial_ready = true;
             break;
         }
@@ -236,7 +237,10 @@ void serialEvent()
             Serial.printf("\n");  // scroll user terminal
 
         else if ( in_char == '\b' && serial_str.length() )
+        {
+            Serial.printf("\b \b");  // scroll user terminal
             serial_str.remove(serial_str.length() -1 );  // backspace
+        }
 
         else
             serial_str += in_char;  // process new valid character
@@ -276,6 +280,7 @@ void serialEvent1()
         // if the incoming character to finish, set a flag so the main loop can do something about it:
         if ( is_finished(in_char1) )
         {
+            serial_str1 += ';';
             serial_ready1 = true;
             break;
         }
@@ -284,7 +289,10 @@ void serialEvent1()
             Serial1.printf("\n");  // scroll user terminal
 
         else if ( in_char1 == '\b' && serial_str1.length() )
+        {
+            Serial1.printf("\b \b");  // scroll user terminal
             serial_str1.remove(serial_str1.length() -1 );  // backspace
+        }
 
         else
             serial_str1 += in_char1;  // process new valid character

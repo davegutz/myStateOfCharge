@@ -145,14 +145,14 @@ void chatter()
   }
 
   #ifdef DEBUG_QUEUE
-    debug_queue("chatter");
+    debug_queue("chatter exit");
   #endif
 
   return;
 }
 
 
-// Call talk from within, a crude macro feature.   'from' should by semi-colon delimited commands for transcribe()
+// Parse commands
 String chit(const String from, const urgency when)
 {
   String chit_str = "";
@@ -160,13 +160,13 @@ String chit(const String from, const urgency when)
 
   #ifdef DEBUG_QUEUE
 
-    debug_queue("\nenter chit");
+    debug_queue("enter chit");
 
-    Serial.printf("\nenter chit[%s] to[%s]\n", from.c_str(), When.c_str());
+    // Serial.printf("enter chit[%s] to[%s]\n", from.c_str(), When.c_str());
 
-    if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
-      Serial.printf("     inp[%s] ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] rtn[%s]\n\n",
-                    cp.inp_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), chit_str.c_str());
+    // if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
+    //   Serial.printf("     inp[%s] ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] rtn[%s]\n\n",
+    //                 cp.inp_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), chit_str.c_str());
 
   #endif
 
@@ -205,13 +205,13 @@ String chit(const String from, const urgency when)
 
   #ifdef DEBUG_QUEUE
 
-    debug_queue("\nexit chit");
+    debug_queue("exit chit");
 
-    Serial.printf("\nexit chit[%s] to[%s]\n", from.c_str(), When.c_str());
+    // Serial.printf("exit chit[%s] to[%s]\n", from.c_str(), When.c_str());
 
-    if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
-      Serial.printf("     inp[%s] ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] rtn[%s]\n\n",
-                    cp.inp_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), chit_str.c_str());
+    // if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
+    //   Serial.printf("     inp[%s] ASAP[%s] SOON[%s],QUEUE[%s] LAST[%s] rtn[%s]\n\n",
+    //                 cp.inp_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), chit_str.c_str());
 
   #endif
 
@@ -236,7 +236,7 @@ void chitter()
       // Categorize the requests
       char key = cp.inp_str.charAt(0);
       request = decode_from_inp(key);
-      Serial.printf("\nchitter enter: "); cmd_echo(request);
+      // Serial.printf("chitter enter: "); cmd_echo(request);
 
       // Deal with each request
       switch (request)
@@ -268,7 +268,7 @@ void chitter()
 
       #ifdef DEBUG_QUEUE
         debug_queue("chitter exit");
-        Serial.printf("chitter exit: %d of {INCOMING, ASAP, SOON, QUEUE, NEW, LAST}; key %c inp_str [%s] cmd_str [%s]\n", request, key, cp.inp_str.c_str(), cp.cmd_str.c_str());
+        // Serial.printf("chitter exit: %d of {INCOMING, ASAP, SOON, QUEUE, NEW, LAST}; key %c inp_str [%s] cmd_str [%s]\n", request, key, cp.inp_str.c_str(), cp.cmd_str.c_str());
       #endif
     }
   }
@@ -290,34 +290,41 @@ void cmd_echo(urgency request)
 {
   if ( request==0 )
   {
-    Serial.printf ("\ncmd: %s\n", cp.inp_str.c_str());
-    Serial1.printf ("\ncmd: %s\n", cp.inp_str.c_str());
+    Serial.printf ("cmd: %s\n", cp.inp_str.c_str());
+    Serial1.printf ("cmd: %s\n", cp.inp_str.c_str());
   }
   else
   {
-    Serial.printf ("\necho: %s, %d\n", cp.inp_str.c_str(), request);
-    Serial1.printf("\necho: %s, %d\n", cp.inp_str.c_str(), request);
+    Serial.printf ("echo: %s, %d\n", cp.inp_str.c_str(), request);
+    Serial1.printf("echo: %s, %d\n", cp.inp_str.c_str(), request);
   }
 }
 
 
 // Decode key
-urgency decode_from_inp(const char key)
+urgency decode_from_inp(const char key_)
 {
+  char key = key_;
   urgency result = NEW;
   if (key == '>')
   {
     cp.cmd_str = cp.cmd_str.substring(1); // Delete any leading '>'
-    result = INCOMING;
+    key = cp.cmd_str.charAt(0);
   }
-  else if (key == 'c')
+  else if (key == ';')
   {
-    result = INCOMING;
+    cp.cmd_str = cp.cmd_str.substring(1); // Delete any leading ';'
+    key = cp.cmd_str.charAt(0);
+  }
+
+  if (key == 'c')
+  {
+    result = ASAP;
   }
   else if (key == '-' && cp.inp_str.charAt(1) != 'c')
   {
     cp.inp_str = cp.inp_str.substring(1); // Delete the leading '-'
-    result = INCOMING;
+    result = ASAP;
   }
   else if (key == '-')
     result = ASAP;
@@ -344,6 +351,7 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
   uint16_t modeling_past = sp.modeling();
   char letter_0 = '\0';
   char letter_1 = '\0';
+  String value = "";
 
   // Serial event
   request = NEW;
@@ -355,7 +363,8 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
     // Now we know the letters
     letter_0 = cp.cmd_str.charAt(0);
     letter_1 = cp.cmd_str.charAt(1);
-    Serial.printf("\ndescribe:  processing %s; = '%c' + '%c'\n", cp.cmd_str.c_str(), letter_0, letter_1);
+    value = cp.cmd_str.substring(2);
+    // Serial.printf("describe:  processing %s; = '%c' + '%c'\n", cp.cmd_str.c_str(), letter_0, letter_1);
     cmd_echo(request);
 
     switch ( request )

@@ -96,8 +96,8 @@ boolean recall_R(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             break;
 
         default:
-            found = ap.find_adjust(cp.inp_str) || sp.find_adjust(cp.inp_str);
-            if (!found) Serial.printf("%s NOT FOUND\n", cp.inp_str.substring(0,2).c_str());
+            found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
+            if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
     }
     return found;
 }
