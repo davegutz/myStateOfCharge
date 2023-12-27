@@ -87,45 +87,29 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
 
                     if ( INT_in == 10 )  // Xp10:  rapid tweak
                     {
-                        chit("Xf.02;Xa-2000;XW5000;XT5000;XC3;", QUEUE);  // Frequency 0.02 Hz
-                        chit("W2;W2;W2;HR;Pr;Pf;vv4;Dh1000;", QUEUE);  // Frequency 0.02 Hz
+                        chit("Xf.02;Xa-2000;XW5000;XT5000;XC3;", QUEUE);
+                        chit("W2;W2;W2;HR;Pr;Pf;vv4;Dh1000;", QUEUE);
                     }
 
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
-                        chit("Xf.002;", QUEUE); // Frequency 0.002 Hz
-                        chit("Xa-60;", QUEUE);  // Amplitude -60 A
-                        chit("XW60000;", QUEUE);   // Wait time before starting to cycle
-                        chit("XT60000;", QUEUE);  // Wait time after cycle to print
-                        chit("XC1;", QUEUE);    // Number of injection cycles
-                        chit("W2;", QUEUE);     // Wait
-                        chit("HR;Pr;Pf;vv2;Dh1000;", QUEUE);     // Data collection
+                        chit("Xf.002;Xa-60;XW60000;XT60000;XC1;", QUEUE);
+                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", QUEUE);
                     }
 
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
-                        chit("Xf.0002;", QUEUE);  // Frequency 0.002 Hz
-                        chit("Xa-6;", QUEUE);     // Amplitude -60 A
-                        chit("XW60000;", QUEUE);     // Wait time before starting to cycle
-                        chit("XT240000;", QUEUE);   // Wait time after cycle to print
-                        chit("XC.5;", QUEUE);     // Number of injection cycles
-                        chit("W2;", QUEUE);       // Wait
-                        chit("HR;Pr;Pf;vv2;Dh1000;", QUEUE);     // Data collection
+                        chit("Xf.0002;Xa-6;XW60000;XT240000;XC.5;", QUEUE);
+                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", QUEUE);
                     }
 
                     else if ( INT_in == 13 )  // Xp13:  tri tweak
                     {
-                        chit("Xtt;", QUEUE);      // Start up a triangle wave
-                        chit("Xf.02;", QUEUE);  // Frequency 0.02 Hz
-                        chit("Xa-29500;", QUEUE);// Amplitude -2000 A
-                        chit("XW5000;", QUEUE);    // Wait time before starting to cycle
-                        chit("XT5000;", QUEUE);    // Wait time after cycle to print
-                        chit("XC3;", QUEUE);    // Number of injection cycles
-                        chit("W2;", QUEUE);     // Wait
-                        chit("HR;Pr;Pf;vv2;Dh1000;", QUEUE);     // Data collection
+                        chit("Xtt;Xf.02;Xa-29500;XW5000;XT5000;XC3;", QUEUE);
+                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", QUEUE);
                     }
-                    chit("W2;", QUEUE);       // Wait
-                    chit("XR;", QUEUE);       // Run cycle
+                    
+                    chit("W2;XR;", QUEUE);       // Wait
                     break;
 
                 case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20= 0.5 s sample/2.0s print, 21= 2 s sample/8 s print

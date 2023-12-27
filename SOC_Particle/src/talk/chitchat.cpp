@@ -93,20 +93,21 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
 // Prioritize commands to describe.  asap_str queue always run.  Others only with chitchat
 void chatter()
 {
-
-  // Always pull from asap if available and run them
-  if ( cp.asap_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.asap_str);
-
-  // Otherwise run the other queues when chitchat frame is running
-  else if ( cp.chitchat )
+  if ( !cp.cmd_str.length() )
   {
-    if ( cp.soon_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.soon_str);
+    // Always pull from asap if available and run them
+    if ( cp.asap_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.asap_str);
 
-    else if ( cp.queue_str.length() ) cp.cmd_str = chat_cmd_from(&cp.queue_str);
+    // Otherwise run the other queues when chitchat frame is running
+    else if ( cp.chitchat )
+    {
+      if ( cp.soon_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.soon_str);
 
-    else if ( cp.last_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.last_str);
+      else if ( cp.queue_str.length() ) cp.cmd_str = chat_cmd_from(&cp.queue_str);
+
+      else if ( cp.last_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.last_str);
+    }
   }
-
   #ifdef DEBUG_QUEUE
     if ( cp.chitchat || cp.asap_str.length() ) debug_queue("chatter exit");
   #endif
@@ -118,7 +119,9 @@ void chatter()
 // Parse commands to queue strings
 void chit(const String from, const urgency when)
 {
-  String chit_str = "";
+  #ifdef DEBUG_QUEUE
+    Serial.printf("chit enter:  from [%s]\n", from.c_str());
+  #endif
 
   if (when == ASAP)
   {
@@ -141,7 +144,7 @@ void chit(const String from, const urgency when)
   }
 
   #ifdef DEBUG_QUEUE
-    if ( cp.chitchat || cp.asap_str.length() ) debug_queue("exit chit");
+    if ( cp.chitchat || cp.asap_str.length() ) debug_queue("chit exit");
   #endif
 
 }
@@ -298,7 +301,7 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
   char letter_1 = '\0';
   String value = "";
 
-  // Serial event
+  // Command available to apply
   if ( cp.cmd_str.length() )
   {
     // Now we know the letters
@@ -415,9 +418,11 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
 
     }
 
-      ///////////PART 2/////// There may be followup to structures or new commands
-      followup(letter_0, letter_1, Mon, Sen, modeling_past);
+    ///////////PART 2/////// There may be followup to structures or new commands
+    followup(letter_0, letter_1, Mon, Sen, modeling_past);
+
+    // cmd_str has been applied.  Release the lock on cmd_str
+    cp.cmd_str = "";
   }
 
-  cp.cmd_str = "";
 }

@@ -13,7 +13,7 @@ const String unit = version + "_pro3p2";
 #define CONFIG_DS2482_1WIRE
 
 // #define DEBUG_SERIAL_QUEUE
-// #define DEBUG_QUEUE
+#define DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
 // #define LOGHANDLE
 

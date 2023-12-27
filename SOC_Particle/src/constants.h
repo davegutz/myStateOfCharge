@@ -80,30 +80,40 @@
 
 #ifdef CONFIG_PHOTON  // dec ~134000  units: pro0p
     #ifdef DEPLOY_PHOTON
-        #define NSUM 169 // Number of saved SRAM summaries (169)
+        #define NFLT   7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
+        #define NHIS  56  // Number of saved SRAM history data slices. Sized to approx match  Photon2  (56)
+        #define NSUM 169  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (169)
     #else
         #ifdef DEBUG_INIT
-            #define NSUM -61 // Number of saved SRAM summaries (-61)
+            #define NFLT  7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
+            #define NHIS 56  // Number of saved SRAM history data slices. Sized to approx match Photon2  (56)
+            #define NSUM  1  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (1)
         #else
             #ifdef DEBUG_QUEUE
-                #define NSUM  -3 // Number of saved SRAM summaries (-3)
+                #define NFLT  7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
+                #define NHIS 36  // Number of saved SRAM history data slices. Sized to approx match Photon2 (36)
+                #define NSUM 30  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (30)
             #else
-                #define NSUM  10 // Number of saved SRAM summaries (10)
+                #define NFLT  7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
+                #define NHIS 56  // Number of saved SRAM history data slices. Sized to approx match  Photon2  (56)
+                #define NSUM 10  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (10)
             #endif
         #endif
     #endif
 #endif
 
 #ifdef CONFIG_ARGON  // dec ~222350  units: pro1a, soc1a
-    #define NSUM 2209   // Number of saved SRAM summaries (2212)
+    #define NFLT    7  // Number of saved SRAM/EERAM fault data slices 10 s intervals (7)
+    #define NHIS    0  // Ignored Argon.  Actual nhis_ dynamically allocated nhis_ based on EERAM size, holding NFLT constant.
+    #define NSUM 2209  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error BACKUPSRAM (2209)
 #endif
 
 #ifdef CONFIG_PHOTON2  // dec ~ 281700  units: pro2p2, pro3p2
-    #define NSUM 3182   // Number of saved SRAM summaries (3182)
+    #define NFLT    7  // Number of saved SRAM fault data slices 10 s intervals (7)
+    #define NHIS   62  // Number of saved SRAM history data slices. If NFLT + NHIS too large will get compile error BACKUPSRAM (62)
+    #define NSUM 3182  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM (3182)
 #endif
 
-#define NFLT                  7         // Number of saved SRAM/EERAM fault data slices.  If too large, will get compile error BACKUPSRAM (7)
-#define NHIS                  56        // Number of saved SRAM history data slices.  If too large, will get compile error BACKUPSRAM (56)
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
 #define HDB_VB                0.05      // Half deadband to filter Vb, V (0.05)
 #define T_SAT                 22        // Saturation time, sec (>21 for no SAT with Dv0.82)

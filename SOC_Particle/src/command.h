@@ -59,6 +59,7 @@ public:
   String soon_str;          // Hold chit_chat soon data - priority with next Control pass, 1 per Control pass
   String asap_str;          // Hold chit_chat asap data - no waiting, ASAP all of now_str processed before Control pass
   boolean inp_token;        // Whether inp_str is complete
+  boolean cmd_token;        // Whether cmd_str has been applied
   boolean chitchat;         // Outer frame call, used in chitchat functions
   boolean inf_reset;        // Use talk to reset infinite counter
   boolean model_cutback;    // On model cutback
@@ -73,7 +74,6 @@ public:
 
   CommandPars()
   {
-    inp_token = false;
     inf_reset = false;
     model_cutback = false;
     model_saturated = false;
@@ -86,6 +86,7 @@ public:
     tb_info.t_c = 0.;
     tb_info.ready = false;
     chitchat = false;
+    inp_token = false;
     inp_str = "";
     cmd_str = "";
     last_str = "";
