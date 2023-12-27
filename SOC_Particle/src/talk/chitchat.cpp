@@ -123,24 +123,34 @@ void chit(const String from, const urgency when)
     Serial.printf("chit enter:  from [%s]\n", from.c_str());
   #endif
 
-  if (when == ASAP)
+  if ( when == ASAP )
   {
     cp.asap_str += from;
   }
 
-  else if (when == SOON)
+  else if ( when == SOON )
   {
     cp.soon_str += from;
   }
 
-  if (when == QUEUE)
+  else if ( when == QUEUE )
   {
     cp.queue_str += from;
   }
 
-  else if (when == LAST)
+  else if ( when == LAST )
   {
     cp.last_str += from;
+  }
+
+  else if ( when == INCOMING )
+  {
+    cp.queue_str += from;
+  }
+
+  else   // Add it to default queue.  Don't drop stuff
+  {
+    cp.queue_str += from;
   }
 
   #ifdef DEBUG_QUEUE
@@ -190,6 +200,10 @@ void chitter(const boolean chitchat)
 
         case (LAST):  // 5
           chit(nibble, LAST);
+          break;
+
+        default:  // Never drop a chit
+          chit(nibble, INCOMING);
           break;
       }
 
