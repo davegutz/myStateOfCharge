@@ -19,6 +19,7 @@
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
 """Define a class to manage configuration using files for memory (poor man's database)"""
+import sys
 import time
 from configparser import ConfigParser
 import re
@@ -116,7 +117,12 @@ class Begini(ConfigParser):
         ConfigParser.__init__(self)
 
         (config_path, config_basename) = os.path.split(name)
-        config_txt = os.path.splitext(config_basename)[0] + '.ini'
+        if sys.platform == 'linux':
+            config_txt = os.path.splitext(config_basename)[0] + '_linux.ini'
+        elif sys.platform == 'Darwin':
+            config_txt = os.path.splitext(config_basename)[0] + '_macos.ini'
+        else:
+            config_txt = os.path.splitext(config_basename)[0] + '.ini'
         self.config_file_path = os.path.join(config_path, config_txt)
         print('config file', self.config_file_path)
         if os.path.isfile(self.config_file_path):
@@ -1004,7 +1010,12 @@ if __name__ == '__main__':
     else:
         init_button = myButton(option_panel_ctr, text=init.get(), command=grab_init, fg="purple", bg=bg_color,
                                wraplength=wrap_length, justify=tk.LEFT, font=("Arial", 8))
+    if platform.system() == 'Linux':
+        paste_label = tk.Label(option_panel_right, text='ctrl-shift-ins to paste', font=label_font_gentle)
+    else:
+        paste_label = tk.Label(option_panel_right, text='right-click to paste', font=label_font_gentle)
     init_button.pack(padx=5, pady=5)
+    paste_label.pack(padx=5, pady=5)
 
     start = tk.StringVar(master, '')
     start_label = tk.Label(option_panel_left, text='copy start:', font=label_font_gentle)
