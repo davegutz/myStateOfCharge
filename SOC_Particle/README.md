@@ -78,6 +78,7 @@ The initial battery used to test the system, and use on RV trips, was the Battle
 [macOS Software Installation](doc/InstallationMacOS.md)
 
 ## Requirements
+
 In the spirit of Software Engineering principles, I document perceived requirements.   Many of these arose out of testing.
 
     1. Calculate state of charge of 100 Ah Battleborn LiFePO4 battery.  The state of charge is percentage of 100 Ah available.
@@ -122,6 +123,8 @@ In the spirit of Software Engineering principles, I document perceived requireme
     30. The nominal unit of configuration shall be a 12 v battery with a characteristic(soc) and rated Ah capacity. Use with multiple batteries shall include running an arbitrary number of batteries in parallel and then series (nPnS). The configuration shall be in local_config.h and in retained.h.  This is called the 'chemistry' of the configuration.
     31. The configuration shall be fully adjustable on the fly using Talk. If somebody has Battleborn or a LION they will not need to ever recompile and reflash a Particle device.
     32. Maximize system availability in presence of loss of sensor signals. Soft or hard resets cause signal fault detection and selection to reset.  Flash display to communicate signal status: every fourth update of screen indicates a minor fault. Every other update is major fault where action needed.  Print signal faults in the 'Q' talk.  Add ability to mask faults to a retained parameter rp.
+    33. No battery cyclic life logic is needed for LiFeP04 applications.
+    34. The user talk interface should have a timer / freeze / release function to allow multiple long scripts to be run together.
 
 
 ## Assumptions

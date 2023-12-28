@@ -52,12 +52,14 @@ public:
   ~CommandPars();
 
   // Small static value area for 'retained'
-  String cmd_str;           // Hold final cmd data
-  String inp_str;           // Hold incoming data
+  String ctl_str;           // Hold control queue
+  String cmd_str;           // Hold final cmd data queue
+  String inp_str;           // Hold incoming data queue
   String last_str;           // Hold chit_chat end data - after everything else, 1 per Control pass
   String queue_str;         // Hold chit_chat queue data - queue with Control pass, 1 per Control pass
   String soon_str;          // Hold chit_chat soon data - priority with next Control pass, 1 per Control pass
   String asap_str;          // Hold chit_chat asap data - no waiting, ASAP all of now_str processed before Control pass
+  boolean freeze;           // Stop applying (describe()) the queues
   boolean inp_token;        // Whether inp_str is complete
   boolean cmd_token;        // Whether cmd_str has been applied
   boolean chitchat;         // Outer frame call, used in chitchat functions
@@ -87,6 +89,8 @@ public:
     tb_info.ready = false;
     chitchat = false;
     inp_token = false;
+    freeze = false;
+    ctl_str = "";
     inp_str = "";
     cmd_str = "";
     last_str = "";

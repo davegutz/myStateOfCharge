@@ -162,8 +162,8 @@ void debug_99(BatteryMonitor *Mon, Sensors *Sen)
 #ifdef DEBUG_QUEUE
 void debug_queue(const String who)
 {
-  if ( cp.inp_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
-    Serial.printf("%s:  chitchat %d ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s] CMD[%s]\n",
-      who.c_str(), cp.chitchat, cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), cp.cmd_str.c_str());
+  if ( cp.inp_str.length() || cp.ctl_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
+    Serial.printf("%s:  chitchat %d freeze %d CONTROL[%s] ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s] CMD[%s]\n",
+      who.c_str(), cp.chitchat, cp.freeze, cp.ctl_str.c_str(), cp.asap_str.c_str(), cp.soon_str.c_str(), cp.queue_str.c_str(), cp.last_str.c_str(), cp.cmd_str.c_str());
 }
 #endif

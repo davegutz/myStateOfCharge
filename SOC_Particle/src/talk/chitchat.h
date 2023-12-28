@@ -24,7 +24,7 @@
 #ifndef _CHITCHAT
 #define _CHITCHAT
 
-enum urgency {INCOMING, ASAP, SOON, QUEUE, NEW, LAST};
+enum urgency {INCOMING, CONTROL, ASAP, SOON, QUEUE, NEW, LAST};
 typedef enum urgency urgency;
 
 class BatteryMonitor;

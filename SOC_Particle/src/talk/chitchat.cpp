@@ -90,22 +90,30 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
 }
 
 
-// Prioritize commands to describe.  asap_str queue always run.  Others only with chitchat
+// Prioritize commands to describe.  asap_str queue almost always run.  Others only with chitchat
+// Freezing with ctl_str bypasses the rest queues are allowed to keep building
 void chatter()
 {
   if ( !cp.cmd_str.length() )
   {
-    // Always pull from asap if available and run them
-    if ( cp.asap_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.asap_str);
+    // Check for control input
+    if ( cp.ctl_str.length() ) cp.cmd_str = chat_cmd_from(&cp.ctl_str);
 
-    // Otherwise run the other queues when chitchat frame is running
-    else if ( cp.chitchat )
+    // Otherwise continue
+    else if ( !cp.freeze )
     {
-      if ( cp.soon_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.soon_str);
+      // Always pull from asap if available and run them
+      if ( cp.asap_str.length() ) cp.cmd_str = chat_cmd_from(&cp.asap_str);
 
-      else if ( cp.queue_str.length() ) cp.cmd_str = chat_cmd_from(&cp.queue_str);
+      // Otherwise run the other queues when chitchat frame is running
+      else if ( cp.chitchat )
+      {
+        if ( cp.soon_str.length() ) cp.cmd_str = chat_cmd_from(&cp.soon_str);
 
-      else if ( cp.last_str.length()  ) cp.cmd_str = chat_cmd_from(&cp.last_str);
+        else if ( cp.queue_str.length() ) cp.cmd_str = chat_cmd_from(&cp.queue_str);
+
+        else if ( cp.last_str.length() ) cp.cmd_str = chat_cmd_from(&cp.last_str);
+      }
     }
   }
   #ifdef DEBUG_QUEUE
@@ -120,10 +128,15 @@ void chatter()
 void chit(const String from, const urgency when)
 {
   #ifdef DEBUG_QUEUE
-    Serial.printf("chit enter:  from [%s]\n", from.c_str());
+    Serial.printf("chit enter: urgency %d from [%s] ", when, from.c_str());
   #endif
 
-  if ( when == ASAP )
+  if ( when == CONTROL )
+  {
+    cp.ctl_str += from;
+  }
+
+  else if ( when == ASAP )
   {
     cp.asap_str += from;
   }
@@ -154,7 +167,7 @@ void chit(const String from, const urgency when)
   }
 
   #ifdef DEBUG_QUEUE
-    if ( cp.chitchat || cp.asap_str.length() ) debug_queue("chit exit");
+    if ( cp.chitchat || cp.ctl_str.length() || cp.asap_str.length() ) debug_queue("chit exit");
   #endif
 
 }
@@ -182,23 +195,27 @@ void chitter(const boolean chitchat)
           chit(nibble, INCOMING);
           break;
 
-        case (ASAP):  // 1
+        case (CONTROL):  // 1
+          chit(nibble, CONTROL);
+          break;
+
+        case (ASAP):  // 2
           chit(nibble, ASAP);
           break;
 
-        case (SOON):  // 2
+        case (SOON):  // 3
           chit(nibble, SOON);
           break;
 
-        case (QUEUE):  // 3
+        case (QUEUE):  // 4
           chit(nibble, QUEUE);
           break;
 
-        case (NEW): // 4
+        case (NEW): // 5
           chit(nibble, QUEUE);
           break;
 
-        case (LAST):  // 5
+        case (LAST):  // 6
           chit(nibble, LAST);
           break;
 
@@ -233,12 +250,12 @@ urgency chit_classify_nibble(String *nibble)
   // Classify
   if (key == 'c')
   {
-    result = ASAP;
+    result = CONTROL;
   }
   else if (key == '-' && nibble->charAt(1) != 'c')
   {
     *nibble = nibble->substring(1); // Delete the leading '-'
-    result = ASAP;
+    result = CONTROL;
   }
   else if (key == '-')
   {
@@ -282,6 +299,7 @@ String chit_nibble_inp()
 // Start over with clean queues
 void clear_queues()
 {
+  ap.until_q = 0UL;  // sets cp.freeze = false
   cp.last_str = "";
   cp.queue_str = "";
   cp.soon_str = "";
@@ -370,9 +388,24 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
         }
         break;
 
-      case ( 'c' ):  // c:  clear queues
-        Serial.printf("***CLEAR QUEUES\n");
-        clear_queues();
+      case ( 'c' ):  // c:  control
+        switch ( letter_1 )
+        {
+          case ( 'c' ):  // cc:  clear queues
+          Serial.printf("***CLEAR QUEUES\n");
+          clear_queues();
+          break;
+
+          case ( 'f' ):  // cf:  clear queues
+          Serial.printf("***FREEZE QUEUES\n");
+          cp.freeze = true;
+          break;
+
+          case ( 'u' ):  // cu:  unfreeze queues
+          Serial.printf("***UNFREEZE QUEUES.  If runing with XQ use 'cc' instead\n");
+          if ( ap.until_q == 0UL ) cp.freeze = false;
+          break;
+        }
         break;
 
       case ( 'H' ):  // History

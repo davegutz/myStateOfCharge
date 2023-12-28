@@ -280,9 +280,11 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                         Serial.printf("Inj amp, %s, %s set%7.3f & inj_bias set%7.3f\n", sp.amp_p->units(), sp.amp_p->description(), sp.Amp(), sp.inj_bias());
                     break;
 
-                case ( 'Q' ): //  XQ<>: time to quiet
+                case ( 'Q' ): //  XQ<>: time until quiet
                     if ( ap.until_q_p->success() )
                         Serial.printf("Going black in %7.1f seconds\n", float(ap.until_q) / 1000.);
+                        Serial.printf("Freezing queues.  When using 'XQ' unfreeze with 'cc'");
+                        cp.freeze = true;
                     break;
             }
             break;

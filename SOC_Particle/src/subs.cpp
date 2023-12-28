@@ -554,6 +554,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   {
     chit("vv0;Pa;BZ;Rf;", QUEUE);
     chit("XD;", LAST);
+    chit("cu;", CONTROL);  // unfreeze the queues
   }
   until_q_past = ap.until_q;
   millis_past = millis();
