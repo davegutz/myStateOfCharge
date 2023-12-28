@@ -82,7 +82,7 @@
     #ifdef DEPLOY_PHOTON
         #define NFLT   7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
         #define NHIS  56  // Number of saved SRAM history data slices. Sized to approx match  Photon2  (56)
-        #define NSUM 169  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (169)
+        #define NSUM 168  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (168)
     #else
         #ifdef DEBUG_INIT
             #define NFLT  7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
@@ -92,11 +92,11 @@
             #ifdef DEBUG_QUEUE
                 #define NFLT  7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
                 #define NHIS 36  // Number of saved SRAM history data slices. Sized to approx match Photon2 (36)
-                #define NSUM 30  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (30)
+                #define NSUM 29  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (29)
             #else
                 #define NFLT  7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
                 #define NHIS 56  // Number of saved SRAM history data slices. Sized to approx match  Photon2  (56)
-                #define NSUM 10  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (10)
+                #define NSUM  9  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (9)
             #endif
         #endif
     #endif
@@ -104,7 +104,7 @@
 
 #ifdef CONFIG_ARGON  // dec ~222350  units: pro1a, soc1a
     #define NFLT    7  // Number of saved SRAM/EERAM fault data slices 10 s intervals (7)
-    #define NHIS    0  // Ignored Argon.  Actual nhis_ dynamically allocated nhis_ based on EERAM size, holding NFLT constant.
+    #define NHIS    0  // Ignored Argon.  Actual nhis_ is dynamically allocated based on EERAM size, holding NFLT constant.
     #define NSUM 2209  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error BACKUPSRAM (2209)
 #endif
 
