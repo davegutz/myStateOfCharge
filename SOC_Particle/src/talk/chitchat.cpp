@@ -342,7 +342,7 @@ void clear_queues()
   cp.soon_str = "";
   cp.asap_str = "";
   cp.freeze = false;
-  chit("vv0;Dh;", ASAP);  // quiet with nominal chitchat rate
+  chit("XS;vv0;Dh;", ASAP);  // quiet with nominal chitchat rate
   Serial.printf("\nCLEARED queues\n");
 }
 
