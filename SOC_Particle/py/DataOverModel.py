@@ -483,9 +483,9 @@ class SavedData:
                 self.zero_end = 0
             else:
                 try:
-                    zero_start = np.where(self.ib == 0.0)[0][0]
+                    zero_start = np.where(abs(self.ib) < 0.02)[0][0]
                     self.zero_end = zero_start
-                    while self.zero_end < len(self.ib) and self.ib[self.zero_end] == 0.0:  # stop after first non-zero
+                    while self.zero_end < len(self.ib) and abs(self.ib[self.zero_end]) <0.02:  # stop after first non-zero
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
                     if self.zero_end == len(self.ib) - 1:
