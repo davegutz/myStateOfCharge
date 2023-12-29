@@ -62,7 +62,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nBZ Benignly zero test settings\n");
   
-  Serial.printf("\ncc  clear talk queues end XQ, esp '-cc;'\n");
+  Serial.printf("\ncc  clear talk queues end XQ\n");
   Serial.printf("\ncf  freeze talk queues\n");
   Serial.printf("\ncu  unfreeze talk queues\n");
 

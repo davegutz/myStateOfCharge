@@ -94,26 +94,20 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
 // Freezing with ctl_str bypasses the rest queues are allowed to keep building
 void chatter()
 {
-  if ( !cp.cmd_str.length() )
+  if ( !cp.cmd_str.length() && !cp.freeze )
   {
-    // Check for control input
+    // Always pull from control and asap if available and run them
     if ( cp.ctl_str.length() ) cp.cmd_str = chat_cmd_from(&cp.ctl_str);
+    else if ( cp.asap_str.length() ) cp.cmd_str = chat_cmd_from(&cp.asap_str);
 
-    // Otherwise continue
-    else if ( !cp.freeze )
+    // Otherwise run the other queues when chitchat frame is running
+    else if ( cp.chitchat )
     {
-      // Always pull from asap if available and run them
-      if ( cp.asap_str.length() ) cp.cmd_str = chat_cmd_from(&cp.asap_str);
+      if ( cp.soon_str.length() ) cp.cmd_str = chat_cmd_from(&cp.soon_str);
 
-      // Otherwise run the other queues when chitchat frame is running
-      else if ( cp.chitchat )
-      {
-        if ( cp.soon_str.length() ) cp.cmd_str = chat_cmd_from(&cp.soon_str);
+      else if ( cp.queue_str.length() ) cp.cmd_str = chat_cmd_from(&cp.queue_str);
 
-        else if ( cp.queue_str.length() ) cp.cmd_str = chat_cmd_from(&cp.queue_str);
-
-        else if ( cp.last_str.length() ) cp.cmd_str = chat_cmd_from(&cp.last_str);
-      }
+      else if ( cp.last_str.length() ) cp.cmd_str = chat_cmd_from(&cp.last_str);
     }
   }
   #ifdef DEBUG_QUEUE
@@ -174,8 +168,10 @@ void chit(const String from, const urgency when)
 
 
 // Parse inputs to queues
-void chitter(const boolean chitchat)
+void chitter(const boolean chitchat, BatteryMonitor *Mon, Sensors *Sen)
 {
+  urgency request;
+  String nibble;
   // Since this is first procedure in chitchat sequence, note the state of chitchat frame
   cp.chitchat = chitchat;
 
@@ -185,45 +181,66 @@ void chitter(const boolean chitchat)
     if ( !cp.inp_token )
     {
       cp.inp_token = true;
-      String nibble = chit_nibble_inp();
-      urgency request = chit_classify_nibble(&nibble);
-
-      // Deal with each request.  Strip off to use up to ';'.  Leave the rest for next iteration.
-      switch (request)
+ 
+      // Strip out first control input and reach ahead to describe() to execute it
+      // Assumes ctl cmds are not stacked.   Recode if you need to
+      cp.ctl_str = chit_nibble_ctl();
+      if ( cp.ctl_str.length() )
       {
-        case (INCOMING):  // 0, really not used until chatter and then as a placeholder
-          chit(nibble, INCOMING);
-          break;
-
-        case (CONTROL):  // 1
-          chit(nibble, CONTROL);
-          break;
-
-        case (ASAP):  // 2
-          chit(nibble, ASAP);
-          break;
-
-        case (SOON):  // 3
-          chit(nibble, SOON);
-          break;
-
-        case (QUEUE):  // 4
-          chit(nibble, QUEUE);
-          break;
-
-        case (NEW): // 5
-          chit(nibble, QUEUE);
-          break;
-
-        case (LAST):  // 6
-          chit(nibble, LAST);
-          break;
-
-        default:  // Never drop a chit
-          chit(nibble, INCOMING);
-          break;
+        cp.cmd_str = cp.ctl_str;
+        cp.ctl_str = "";
+        #ifdef DEBUG_QUEUE
+          debug_queue("chitter control:");
+        #endif
+        describe(Mon, Sen);  // may set cp.freeze
+        #ifdef DEBUG_QUEUE
+          debug_queue("chitter control response:");
+        #endif
       }
 
+      // Then continue with ctl_str stripped off (assuming just one)
+      if ( !cp.freeze )
+      {
+        nibble = chit_nibble_inp();
+        request = chit_classify_nibble(&nibble);
+
+        // Deal with each request.  Strip off to use up to ';'.  Leave the rest for next iteration
+        switch (request)
+        {
+          case (INCOMING):  // 0, really not used until chatter and then as a placeholder
+            chit(nibble, INCOMING);
+            break;
+
+          case (CONTROL):  // 1
+            chit(nibble, CONTROL);
+            break;
+
+          case (ASAP):  // 2
+            chit(nibble, ASAP);
+            break;
+
+          case (SOON):  // 3
+            chit(nibble, SOON);
+            break;
+
+          case (QUEUE):  // 4
+            chit(nibble, QUEUE);
+            break;
+
+          case (NEW): // 5
+            chit(nibble, QUEUE);
+            break;
+
+          case (LAST):  // 6
+            chit(nibble, LAST);
+            break;
+
+          default:  // Never drop a chit
+            chit(nibble, INCOMING);
+            break;
+        }
+
+      }
       cp.inp_token = false;
 
       #ifdef DEBUG_QUEUE
@@ -296,14 +313,32 @@ String chit_nibble_inp()
 }
 
 
+// Get 'c?' up to next ';' and leave the rest in inp_str
+// Urgency characters not required and assumed not there.  Would cause update delay if they are.
+String chit_nibble_ctl()
+{
+  String nibble = "";
+  if ( cp.inp_str.charAt(0) == 'c' )
+  {
+    int semi_loc = cp.inp_str.indexOf(';');
+    nibble = cp.inp_str.substring(0, semi_loc+1);  // 2nd index is exclusive
+    cp.inp_str = cp.inp_str.substring(semi_loc+1);  // +1 to grab the semi-colon
+  }
+  return nibble;
+}
+
+
 // Start over with clean queues
 void clear_queues()
 {
-  ap.until_q = 0UL;  // sets cp.freeze = false
+  ap.until_q = 0UL;
+  cp.inp_token = true;
+  cp.cmd_str = "";
   cp.last_str = "";
   cp.queue_str = "";
   cp.soon_str = "";
   cp.asap_str = "";
+  cp.freeze = false;
 }
 
 
@@ -405,6 +440,10 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
           Serial.printf("***UNFREEZE QUEUES.  If runing with XQ use 'cc' instead\n");
           if ( ap.until_q == 0UL ) cp.freeze = false;
           break;
+
+          default:
+            found = ap.find_adjust(cp.cmd_str) || sp.find_adjust(cp.cmd_str);
+            if (!found) Serial.printf("%s NOT FOUND\n", cp.cmd_str.substring(0,2).c_str());
         }
         break;
 

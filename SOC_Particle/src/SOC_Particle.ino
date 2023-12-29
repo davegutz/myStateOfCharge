@@ -474,7 +474,7 @@ void loop()
   // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   // Running chitter unframed allows queues of different priorities to be built from long
   // runs of Serial inputs
-  chitter(chitchat);  // Parse inputs to queues
+  chitter(chitchat, Mon, Sen);  // Parse inputs to queues
   chatter();  // Prioritize commands to describe.  ctl_str and asap_str queues always run.  Others only with chitchat
   describe(Mon, Sen);  // Run the commands
 
