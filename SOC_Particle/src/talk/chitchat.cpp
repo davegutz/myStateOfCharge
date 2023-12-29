@@ -111,7 +111,7 @@ void chatter()
     }
   }
   #ifdef DEBUG_QUEUE
-    if ( cp.chitchat || cp.asap_str.length() ) debug_queue("chatter exit");
+    if ( cp.chitchat || ( cp.freeze && cp.chitchat && cp.asap_str.length() ) || ( !cp.freeze && cp.asap_str.length() ) ) debug_queue("chatter exit");
   #endif
 
   return;

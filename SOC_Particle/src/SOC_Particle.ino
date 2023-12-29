@@ -128,8 +128,8 @@ PrinterPars pr = PrinterPars();       // Print buffer
 VolatilePars ap = VolatilePars();     // Various adjustment parameters commanding at system level.  Initialized on start up.  Not retained.
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level.  Initialized on start up.  Not retained.
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
-unsigned long long millis_flip = millis(); // Timekeeping
-unsigned long long last_sync = millis();   // Timekeeping
+unsigned long long millis_flip = System.millis(); // Timekeeping
+unsigned long long last_sync = System.millis();   // Timekeeping
 
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
@@ -259,13 +259,13 @@ void setup()
   }
   else Serial.printf("clean\n");
 
-  // Determine millis() at turn of Time.now   Used to improve accuracy of timing.
+  // Determine System.millis() at turn of Time.now   Used to improve accuracy of timing.
   long time_begin = Time.now();
   uint16_t count = 0;
   while ( Time.now()==time_begin && count++<1000 )
   {
     delay(1);
-    millis_flip = millis()%1000;
+    millis_flip = System.millis()%1000;
   }
 
   // Enable and print stored history
@@ -302,9 +302,8 @@ void setup()
 void loop()
 {
   // Synchronization
-  static unsigned long long now = (unsigned long long) millis();
-  unsigned long long time_now = (unsigned long long) Time.now();
-  now = (unsigned long long) millis();
+  static unsigned long long now = (unsigned long long) System.millis();
+  now = (unsigned long long) System.millis();
   boolean chitchat = false;
   static Sync *Talk = new Sync(TALK_DELAY);
   boolean read = false;
@@ -318,14 +317,16 @@ void loop()
   static Sync *Summarize = new Sync(SUMMARY_DELAY);
   boolean control;
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
-  static unsigned long long start = millis();
   unsigned long long elapsed = 0;
   static boolean reset = true;
   static boolean reset_temp = true;
   static boolean reset_publish = true;
+  static unsigned long long start = System.millis();
 
   // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize, time_now);
+  unsigned long long time_now = (unsigned long long) Time.now();
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize, time_now, start);
+if ( reset || ((sp.debug()==93 || sp.debug()==1) && read) ) Serial.printf("Time.now after Sen instantiation:  %lld  millis %lld\n", time_now, System.millis());
 
    // Monitor to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor();
@@ -343,16 +344,17 @@ void loop()
   Sen->control_time = double(Sen->now/1000);
   char buffer[32];
   time_long_2_str(time_now, buffer);
+if ( read && sp.debug()==93 ) Serial.printf("\n\nino top:  time_now %lld  buffer [%s] millis_flip %lld\n", time_now, buffer, millis_flip);
   hm_string = String(buffer);
-  read_temp = ReadTemp->update(millis(), reset);
-  read = ReadSensors->update(millis(), reset);
-  chitchat = Talk->update(millis(), reset);
+  read_temp = ReadTemp->update(System.millis(), reset);
+  read = ReadSensors->update(System.millis(), reset);
+  chitchat = Talk->update(System.millis(), reset);
   elapsed = ReadSensors->now() - start;
-  control = ControlSync->update(millis(), reset);
-  display_and_remember = DisplayUserSync->update(millis(), reset);
+  control = ControlSync->update(System.millis(), reset);
+  display_and_remember = DisplayUserSync->update(System.millis(), reset);
   boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) && !sp.modeling_z;
   if ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) boot_wait = false;
-  summarizing = Summarize->update(millis(), false) || boot_summ;
+  summarizing = Summarize->update(System.millis(), false) || boot_summ;
 
   // Sample temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt
@@ -431,6 +433,7 @@ void loop()
     if ( cp.publishS )
     {
       assign_publist(&pp.pubList, ReadSensors->now(), unit, hm_string, Sen, num_timeouts, Mon);
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("ino assign_publist: ReadSensors->now %lld hm_string %s\n", ReadSensors->now(), hm_string.c_str());
       static boolean wrote_last_time = false;
       if ( wrote_last_time )
         digitalWrite(myPins->status_led, LOW);
@@ -486,6 +489,7 @@ void loop()
     if ( sp.ihis_z > (sp.nhis() - 1) ) sp.put_Ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
     hist_snap.assign(Time.now(), Mon, Sen);
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("ino: hist_snap_assign: Time.now %ld\n", Time.now());
     hist_bounced = sp.put_history(hist_snap, sp.ihis_z);
 
     sp.put_Isum(sp.isum_z + 1);

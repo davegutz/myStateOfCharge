@@ -1,0 +1,40 @@
+Y;HR;Rf;Dr1000;Dh1000;DP1;vv1;W10;Hd;Pf;vv0;Dh;
+
+
+
+
+Sensors.cpp ~line 232
+sample_time_ = System.millis();
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("Shunt::sample:  sample_time_ %lld\n", sample_time_);
+
+
+Sensors.cpp ~line 898
+now = sample_time_ib_ - inst_millis_ + inst_time_*1000;
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("Sensors::final_assignments:  sample_time_ib_hdwe_ %lld,  cTime %7.3f = (sample_time_ib_ %lld -inst_millis_ %lld + inst_time_*1000 %lld ) 1000.\n", sample_time_ib_hdwe_, double(now)/1000., sample_time_ib_, inst_millis_, inst_time_*1000);
+
+
+Battery.cpp ~ line 714
+   // Sample at instant of signal injection
+    sample_time_z_ = sample_time_;
+    sample_time_ = System.millis();
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("BSim::calc_inj:  sample_time_ %ld\n", sample_time_);
+
+serial.cpp ~ line 44
+    Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_min());
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("create_rapid_string: hm_string [%s] cTime %12.3f\n", pubList->hm_string.c_str(), cTime);
+
+ino ~ 328
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize, time_now, start);
+if ( reset || ((sp.debug()==93 || sp.debug()==1) && read) ) Serial.printf("Time.now after Sen instantiation:  %lld  millis %lld\n", time_now, System.millis());
+
+ino ~347
+  time_long_2_str(time_now, buffer);
+if ( read && sp.debug()==93 ) Serial.printf("\n\nino top:  time_now %lld  buffer [%s] millis_flip %lld\n", time_now, buffer, millis_flip);
+
+ino~435
+  assign_publist(&pp.pubList, ReadSensors->now(), unit, hm_string, Sen, num_timeouts, Mon);
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("ino assign_publist: ReadSensors->now %lld hm_string %s\n", ReadSensors->now(), hm_string.c_str());
+
+ino ~492
+ hist_snap.assign(Time.now(), Mon, Sen);
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("ino: hist_snap_assign: Time.now %ld\n", Time.now());

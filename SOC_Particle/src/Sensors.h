@@ -287,7 +287,8 @@ class Sensors
 {
 public:
   Sensors();
-  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now);
+  Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now,
+    unsigned long long millis);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
@@ -335,7 +336,7 @@ public:
   double control_time;        // Decimal time, seconds since 1/1/2021
   boolean display;            // Use display
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
-  unsigned long long boot_time() { return boot_time_; }
+  unsigned long long inst_time() { return inst_time_; }
   unsigned long long dt_ib(void) { return dt_ib_; };
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
   float ib() { return Ib / sp.nP(); };                            // Battery unit current, A
@@ -378,13 +379,14 @@ protected:
   PRBS_7 *Prbn_Ib_amp_; // Ib amplified sensor noise generator model only
   PRBS_7 *Prbn_Ib_noa_; // Ib non-amplified sensor noise generator model only
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
-  unsigned long long sample_time_ib_;          // Exact moment of selected Ib sample, ms
-  unsigned long long sample_time_vb_;          // Exact moment of selected Vb sample, ms
-  unsigned long long sample_time_ib_hdwe_;     // Exact moment of Ib sample, ms
-  unsigned long long sample_time_vb_hdwe_;     // Exact moment of Vb sample, ms
-  unsigned long long dt_ib_hdwe_;          // Delta update of Ib sample, ms
-  unsigned long long dt_ib_;               // Delta update of selected Ib sample, ms
-  unsigned long long boot_time_;          // UTC Zulu at instantiation, s
+  unsigned long long sample_time_ib_;       // Exact moment of selected Ib sample, ms
+  unsigned long long sample_time_vb_;       // Exact moment of selected Vb sample, ms
+  unsigned long long sample_time_ib_hdwe_;  // Exact moment of Ib sample, ms
+  unsigned long long sample_time_vb_hdwe_;  // Exact moment of Vb sample, ms
+  unsigned long long dt_ib_hdwe_;           // Delta update of Ib sample, ms
+  unsigned long long dt_ib_;                // Delta update of selected Ib sample, ms
+  unsigned long long inst_time_;            // UTC Zulu at instantiation, s
+  unsigned long long inst_millis_;          // millis offset to account for setup() time, ms
 };
 
 

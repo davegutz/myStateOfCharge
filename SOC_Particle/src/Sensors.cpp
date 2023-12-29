@@ -189,7 +189,7 @@ void Shunt::convert(const boolean disconnect)
         vshunt_int_ = 0;
       #endif
       sample_time_z_ = sample_time_;
-      sample_time_ = millis();
+      sample_time_ = System.millis();
     }
     else
     {
@@ -229,7 +229,8 @@ void Shunt::sample(const boolean reset_loc, const float T)
     Vc_raw_ = analogRead(vc_pin_);
     Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
   }
-  sample_time_ = millis();
+  sample_time_ = System.millis();
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("Shunt::sample:  sample_time_ %lld\n", sample_time_);
   Vo_raw_ = analogRead(vo_pin_);
   Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
   Vo_Vc_ = Vo_ - Vc_;
@@ -744,8 +745,9 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 
 // Class Sensors
-Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now):
-  reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL), sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL), boot_time_(time_now)
+Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now,
+  unsigned long long millis):   reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL), sample_time_ib_hdwe_(0UL),
+  sample_time_vb_hdwe_(0UL), inst_time_(time_now), inst_millis_(millis)
 {
   this->T = T;
   this->T_filt = T;
@@ -893,24 +895,28 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
     sample_time_ib_ = sample_time_ib_hdwe_;
     dt_ib_ = dt_ib_hdwe_;
   }
-  now = sample_time_ib_ + boot_time_*1000;
+  now = sample_time_ib_ - inst_millis_ + inst_time_*1000;
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("Sensors::final_assignments:  sample_time_ib_hdwe_ %lld,  cTime %7.3f = (sample_time_ib_ %lld -inst_millis_ %lld + inst_time_*1000 %lld ) 1000.\n", sample_time_ib_hdwe_, double(now)/1000., sample_time_ib_, inst_millis_, inst_time_*1000);
 
   // print_signal_select for data collection
   if ( (sp.debug()==2 || sp.debug()==4)  && cp.publishS )
   {
       double cTime = double(now)/1000.;
+
       sprintf(pr.buff, "unit_sel,%13.3f, %d, %d,  %10.7f,  %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,  %7.5f,%7.5f, ",
           cTime, reset, sp.ib_select(),
           Flt->cc_diff(),
           ib_amp_hdwe(), ib_noa_hdwe(), ib_amp_model(), ib_noa_model(), ib_model(), 
           Flt->ib_diff(), Flt->ib_diff_f());
       Serial.printf("%s", pr.buff);
+
       sprintf(pr.buff, "  %7.5f,%7.5f,%7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
           Mon->voc_soc(), Flt->e_wrap(), Flt->e_wrap_filt(),
           Flt->ib_sel_stat(), ib_hdwe(), ib_hdwe_model(), sp.mod_ib(), ib(),
           Flt->vb_sel_stat(), vb_hdwe(), vb_model(), sp.mod_vb(), vb(),
           Tb_hdwe, Tb, sp.mod_tb(), Tb_filt);
       Serial.printf("%s", pr.buff);
+
       sprintf(pr.buff, "%d, %d, %7.3f, %7.3f, %d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,",
           Flt->fltw(), Flt->falw(), Flt->ib_rate(), Flt->ib_quiet(), Flt->tb_sel_status(),
           Flt->cc_diff_thr(), Flt->ewhi_thr(), Flt->ewlo_thr(), Flt->ib_diff_thr(), Flt->ib_quiet_thr(), Flt->preserving());
@@ -1058,7 +1064,7 @@ void Sensors::vb_load(const uint16_t vb_pin, const boolean reset)
     Vb_raw = 0;
     Vb_hdwe = 0.;
   }
-  sample_time_vb_hdwe_ = millis();
+  sample_time_vb_hdwe_ = System.millis();
 }
 
 // Print analog voltage

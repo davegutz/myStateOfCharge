@@ -87,28 +87,27 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     if ( INT_in == 10 )  // Xp10:  rapid tweak
                     {
                         chit("Xf.02;Xa-2000;XW5000;XT5000;XC3;", SOON);
-                        chit("W2;W2;W2;HR;Pr;Pf;vv4;Dh1000;", SOON);
+                        chit("W2;W2;W2;Pr;Pf;vv4;Dh1000;W2;XR;XQ180000;Dh;", SOON);
                     }
 
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
                         chit("Xf.002;Xa-60;XW60000;XT60000;XC1;", SOON);
-                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", SOON);
+                        chit("W2;Pr;Pf;vv4;Dh1000;W2;XR;XQ622000;Dh;", SOON);
                     }
 
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
                         chit("Xf.0002;Xa-6;XW60000;XT240000;XC.5;", SOON);
-                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", SOON);
+                        chit("W2;Pr;Pf;vv4;Dh1000;W2;XR;XQ622000;Dh;", SOON);
                     }
 
                     else if ( INT_in == 13 )  // Xp13:  tri tweak
                     {
                         chit("Xtt;Xf.02;Xa-29500;XW5000;XT5000;XC3;", SOON);
-                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", SOON);
+                        chit("W2;Pr;Pf;vv4;Dh1000;W2;XR;XQ180000;Dh;", SOON);
                     }
                     
-                    chit("W2;XR;", SOON);       // Wait
                     break;
 
                 case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20= 0.5 s sample/2.0s print, 21= 2 s sample/8 s print

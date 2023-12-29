@@ -546,10 +546,10 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type(), sp.Amp(), sp.freq());
 
   // Quiet logic.   Reset to ready state at soc=0.5; do not change Modeling.  Passes at least once before running chit.
-  static unsigned long int millis_past = millis();
+  static unsigned long long millis_past = System.millis();
   static unsigned long int until_q_past = ap.until_q;
   if ( ap.until_q>0UL && until_q_past==0UL ) until_q_past = ap.until_q;
-  ap.until_q = (unsigned long) max(0, (long) ap.until_q  - (long)(millis() - millis_past));
+  ap.until_q = (unsigned long) max(0, (long) ap.until_q  - (long)(System.millis() - millis_past));
   if ( ap.until_q==0UL && until_q_past>0UL )
   {
     chit("vv0;Pa;BZ;Rf;", SOON);
@@ -557,7 +557,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
     cp.freeze = false;  // unfreeze the queues
   }
   until_q_past = ap.until_q;
-  millis_past = millis();
+  millis_past = System.millis();
 
 }
 
@@ -565,7 +565,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 // Time synchro for web information
 void sync_time(unsigned long long now, unsigned long long *last_sync, unsigned long long *millis_flip)
 {
-  *last_sync = millis();
+  *last_sync = System.millis();
 
   // Request time synchronization from the Particle Cloud
   if ( Particle.connected() ) Particle.syncTime();
@@ -576,7 +576,7 @@ void sync_time(unsigned long long now, unsigned long long *last_sync, unsigned l
   while ( Time.now()==time_begin && ++count<1100 )  // Time.now() truncates to seconds
   {
     delay(1);
-    *millis_flip = millis()%1000;
+    *millis_flip = System.millis()%1000;
   }
 }
 

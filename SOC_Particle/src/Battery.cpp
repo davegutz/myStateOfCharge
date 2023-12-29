@@ -713,7 +713,8 @@ float BatterySim::calc_inj(const unsigned long long now, const uint8_t type, con
 
     // Sample at instant of signal injection
     sample_time_z_ = sample_time_;
-    sample_time_ = millis();
+    sample_time_ = System.millis();
+if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("BSim::calc_inj:  sample_time_ %ld\n", sample_time_);
 
     // Return if time 0
     if ( now== 0ULL )
