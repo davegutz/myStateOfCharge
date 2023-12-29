@@ -56,7 +56,6 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     chit("Xf0;Xtn;", ASAP);
                     if ( !sp.tweak_test() ) chit("Xb0;", ASAP);
                     chit("BZ;", SOON);
-                    chit("Dh1800000;", SOON);
                     break;
 
                 case ( 6 ):  // Xp6:  Program a pulse for EKF test
@@ -81,35 +80,35 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                 case ( 9 ): case( 10 ): case ( 11 ): case( 12 ): case( 13 ): // Xp9: Xp10: Xp11: Xp12: Xp13:  Program regression
                     // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
 
-                    chit("Xp0;vv0;Xm255;Xts;Ca1;", QUEUE);
+                    chit("Xp0;vv0;Xm255;Xts;Ca1;", SOON);
                     chit("Dm.01;Dn.01;", ASAP); 
-                    chit("DP1;Rb;", QUEUE); 
+                    chit("DP1;Rb;", SOON); 
 
                     if ( INT_in == 10 )  // Xp10:  rapid tweak
                     {
-                        chit("Xf.02;Xa-2000;XW5000;XT5000;XC3;", QUEUE);
-                        chit("W2;W2;W2;HR;Pr;Pf;vv4;Dh1000;", QUEUE);
+                        chit("Xf.02;Xa-2000;XW5000;XT5000;XC3;", SOON);
+                        chit("W2;W2;W2;HR;Pr;Pf;vv4;Dh1000;", SOON);
                     }
 
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
-                        chit("Xf.002;Xa-60;XW60000;XT60000;XC1;", QUEUE);
-                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", QUEUE);
+                        chit("Xf.002;Xa-60;XW60000;XT60000;XC1;", SOON);
+                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", SOON);
                     }
 
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
-                        chit("Xf.0002;Xa-6;XW60000;XT240000;XC.5;", QUEUE);
-                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", QUEUE);
+                        chit("Xf.0002;Xa-6;XW60000;XT240000;XC.5;", SOON);
+                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", SOON);
                     }
 
                     else if ( INT_in == 13 )  // Xp13:  tri tweak
                     {
-                        chit("Xtt;Xf.02;Xa-29500;XW5000;XT5000;XC3;", QUEUE);
-                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", QUEUE);
+                        chit("Xtt;Xf.02;Xa-29500;XW5000;XT5000;XC3;", SOON);
+                        chit("W2;HR;Pr;Pf;vv2;Dh1000;", SOON);
                     }
                     
-                    chit("W2;XR;", QUEUE);       // Wait
+                    chit("W2;XR;", SOON);       // Wait
                     break;
 
                 case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20= 0.5 s sample/2.0s print, 21= 2 s sample/8 s print

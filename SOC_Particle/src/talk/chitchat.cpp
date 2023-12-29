@@ -122,35 +122,37 @@ void chatter()
 void chit(const String from, const urgency when)
 {
   #ifdef DEBUG_QUEUE
-    Serial.printf("chit enter: urgency %d from [%s] ", when, from.c_str());
+    Serial.printf("chit enter: urgency %d adding [%s] \n", when, from.c_str());
   #endif
 
-  if ( when == CONTROL )
+  if ( when == CONTROL )  // 1
   {
     cp.ctl_str += from;
   }
 
-  else if ( when == ASAP )
+  else if ( when == ASAP )  // 2
   {
     cp.asap_str += from;
   }
 
-  else if ( when == SOON )
+  else if ( when == SOON )  // 3
   {
+    Serial.printf("SOON: [%s] + [%s]= ", cp.soon_str.c_str(), from.c_str());
     cp.soon_str += from;
+    Serial.printf("[%s]\n", cp.soon_str.c_str());
   }
 
-  else if ( when == QUEUE )
+  else if ( when == QUEUE )  // 4
   {
     cp.queue_str += from;
   }
 
-  else if ( when == LAST )
+  else if ( when == LAST )  // 5
   {
     cp.last_str += from;
   }
 
-  else if ( when == INCOMING )
+  else if ( when == INCOMING ) // 0
   {
     cp.queue_str += from;
   }
@@ -308,6 +310,7 @@ String chit_nibble_inp()
 {
   int semi_loc = cp.inp_str.indexOf(';');
   String nibble = cp.inp_str.substring(0, semi_loc+1);  // 2nd index is exclusive
+  nibble.replace(" ", "");  // Strip blanks again, TODO:  why didn't replace in finish_all() do the job?
   cp.inp_str = cp.inp_str.substring(semi_loc+1);  // +1 to grab the semi-colon
   return nibble;
 }
@@ -339,6 +342,8 @@ void clear_queues()
   cp.soon_str = "";
   cp.asap_str = "";
   cp.freeze = false;
+  chit("vv0;Dh;", ASAP);  // quiet with nominal chitchat rate
+  Serial.printf("\nCLEARED queues\n");
 }
 
 

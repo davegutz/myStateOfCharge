@@ -552,9 +552,9 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   ap.until_q = (unsigned long) max(0, (long) ap.until_q  - (long)(millis() - millis_past));
   if ( ap.until_q==0UL && until_q_past>0UL )
   {
-    chit("vv0;Pa;BZ;Rf;", QUEUE);
-    chit("XD;", LAST);
-    chit("cu;", CONTROL);  // unfreeze the queues
+    chit("vv0;Pa;BZ;Rf;", SOON);
+    chit("XD;", SOON);
+    cp.freeze = false;  // unfreeze the queues
   }
   until_q_past = ap.until_q;
   millis_past = millis();

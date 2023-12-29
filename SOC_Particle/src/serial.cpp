@@ -56,7 +56,7 @@ void delay_no_block(const unsigned long long interval)
 }
 
 
-// Cleanup string for final processing by talk
+// Cleanup string for final processing by chitchat
 String finish_request(const String in_str)
 {
   String out_str = in_str;
