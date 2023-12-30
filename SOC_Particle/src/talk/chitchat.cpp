@@ -127,39 +127,37 @@ void chit(const String from, const urgency when)
 
   if ( when == CONTROL )  // 1
   {
-    cp.ctl_str += from;
+    add_verify(&cp.ctl_str, from);
   }
 
   else if ( when == ASAP )  // 2
   {
-    cp.asap_str += from;
+    add_verify(&cp.asap_str, from);
   }
 
   else if ( when == SOON )  // 3
   {
-    Serial.printf("SOON: [%s] + [%s]= ", cp.soon_str.c_str(), from.c_str());
-    cp.soon_str += from;
-    Serial.printf("[%s]\n", cp.soon_str.c_str());
+    add_verify(&cp.soon_str, from);
   }
 
   else if ( when == QUEUE )  // 4
   {
-    cp.queue_str += from;
+    add_verify(&cp.queue_str, from);
   }
 
   else if ( when == LAST )  // 5
   {
-    cp.last_str += from;
+    add_verify(&cp.last_str, from);
   }
 
   else if ( when == INCOMING ) // 0
   {
-    cp.queue_str += from;
+    add_verify(&cp.queue_str, from);
   }
 
   else   // Add it to default queue.  Don't drop stuff
   {
-    cp.queue_str += from;
+    add_verify(&cp.queue_str, from);
   }
 
   #ifdef DEBUG_QUEUE

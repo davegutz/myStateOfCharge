@@ -27,6 +27,8 @@
 #define DEBUG_H_
 #include "subs.h"
 
+void add_verify(String *src, const String addend);
+
 #ifdef DEBUG_INIT
     void debug_m1(BatteryMonitor *Mon, Sensors *Sen);
 #endif

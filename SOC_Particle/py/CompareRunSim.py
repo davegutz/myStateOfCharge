@@ -162,7 +162,7 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
 
 
 if __name__ == '__main__':
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro1a_bb.csv'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\allProto_pro1a_bb.csv'
     unit_key = 'g20231111b_pro1a_bb'
     time_end_in = None
     rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'

@@ -29,6 +29,20 @@
 
 extern SavedPars sp;    // Various parameters to be static at system level and saved through power cycle
 
+
+// Check for heap fragmentation during String += operation
+// Use pointer to be sure not to miss the final assignment effect
+void add_verify(String *src, const String addend)
+{
+  int src_len = src->length();
+  *src += addend;
+  if ( src->length() != (src_len + addend.length()) )
+  {
+    Serial.printf("\n\n\n\n**FRAG**\n\n\n\n");
+  }
+}
+
+
 #ifndef CONFIG_PHOTON
   // sp.debug()==12 EKF
   void debug_12(BatteryMonitor *Mon, Sensors *Sen)

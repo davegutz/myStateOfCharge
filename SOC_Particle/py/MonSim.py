@@ -130,12 +130,12 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         sat_s_init = mon_old.voc_stat[0] > mon_old.vsat[0]
     t_len = len(t)
     rp = Retained()
-    if hasattr(mon_old, 'mod'):
-        rp.modeling = int(mon_old.mod())
-    elif hasattr(mon_old, 'mod_data'):
-        rp.modeling = mon_old.mod_data[0]
+    if hasattr(mon_old, 'mod_data'):
+        modeling = mon_old.mod_data
+    # elif hasattr(mon_old, 'mod'):
+    #     modeling = int(mon_old.mod())
     else:
-        rp.modeling = 255
+        modeling = 255 * np.ones(len(mon_old.time))
         print(f"what do we do now?  {rp.modeling=}")
         # exit(1)
     print("rp.modeling is ", rp.modeling)
@@ -198,6 +198,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         # dc_dc_on = bool(lut_dc.interp(t[i]))
         dc_dc_on = False
         Tb_ = Tb[i]+dTb
+        rp.modeling = modeling[i]
 
         # Basic reset model verification is to init to the input data
         # Tried hard not to re-implement solvers in the Python verification  tool

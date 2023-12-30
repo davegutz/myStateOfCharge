@@ -254,7 +254,7 @@ void serialEvent()
         if ( !cp.inp_token )
         {
             cp.inp_token = true;
-            cp.inp_str += serial_str;
+            add_verify(&cp.inp_str, serial_str);
             serial_ready = false;
             cp.inp_token = false;
             serial_str = "";

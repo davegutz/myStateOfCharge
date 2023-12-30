@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 from TFDelay import TFDelay
 from myFilters import LagTustin, LagExp, General2Pole, RateLimit, SlidingDeadband
 from Scale import Scale
+
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
@@ -630,7 +631,7 @@ class BatterySim(Battery):
         if reset and bms_off_init is not None:
             self.bms_off = bms_off_init
         else:
-            self.bms_off = (self.temp_c < self.chemistry.low_t) or (voltage_low and not self.tweak_test)
+            self.bms_off = (self.temp_c < self.chemistry.low_t) or (voltage_low and not rp.tweak_test())
         ib_charge_fut = self.ib_in
         if self.bms_off and not bms_charging:
             ib_charge_fut = 0.

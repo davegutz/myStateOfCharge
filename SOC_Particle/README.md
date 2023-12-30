@@ -813,13 +813,21 @@ Amazon:  5 Pieces I2C Display Module 0.91 Inch I2C OLED Display Module Blue I2C 
 
 ## FAQ
 
+### FRAG message in Serial
+
+When a Particle device's heap is corrupted by excessive 'new/delete/new' or 'String +=' operations, the default action is to drop the result of the operation without warning. I added checks for the worst offenders.  Typically the fix is to decrease NSUM in _constants.h_ by a little from the value that just works to compile without SRAM messages.
+You may get 'Insufficient room' messages too.  See that FAQ below.
+
+
 ### How to save 'EERAM'
 
 This feature exists on Argon only (pro1a, soc1a) to save adjustments between boots or with power loss.   There is a capacitor on those units to power a save to the EERAM chip when main power is lost.  I2C writes are slow so they are sequenced.
 
+
 ### '*is' is 1 on Boot
 
 The GUI scripts leave is=1 to make boot cleaner after a run.  You can manually change this back to 0 (auto mode Ib selection) or when deploy reset all to nominal ('RR') to clear it.
+
 
 ### Photon2 complains about 'Unable to open USB device'
 
@@ -830,20 +838,25 @@ Something happened with this unit.  The USB cord does not work with the top USB 
 
 I found that high Serial traffic competes adversely with DS2482 for 1-wire temperature on the Photon2.  That product does not support 1-Wire without the DS2482.  The reason for the complaints are the buffer in the DS2482 code is too small when competing for resources.  I had to edit DS2482-RK in the lib to increase the buffer size (static const size_t COMMAND_LIST_STACK_SIZE = 12; in DS2482-RK.h).   I added the print statements to alert user if nearing that new limit (was 4).  The changes are in the GitHub repository.  The main change is the COMMAND_LIST_STACK_SiZE = 12.  If you make that to the lib you'll be OK.  The author at Particle didn't see why this change would be any problem.  He never saw 4 exceeded in any of his testing.  This application uses as much Serial as possible.  Also I tried increasing Serial baud rate without improvement.
 
+
 ### Particle Workbench complains about STM32_Pin_Info
+
 c:\users\daveg\documents\github\mystateofcharge\soc_particle\src\hardware/OneWire.h:98:5: error: 'STM32_Pin_Info' does not name a type; did you mean 'Hal_Pin_Info'?
    98 |     STM32_Pin_Info* PIN_MAP = HAL_Pin_Map(); // Pointer required for highest access 
 speed
 The solution is to copy the proper 'local_config.h.<>' into 'local_confi.h'
+
 
 ### Particle Workbench throws 'Unknown argument local' error
 
     Solution:  Manually reset CLI installation.  https://community.particle.io/t/
     https://community.particle.io/t/how-to-manually-reset-your-cli-installation/54018
 
+
 ### Problem:  CLI starts acting funny:  cannot log in, gives strange errors ("cannot find module semver")
 
     Solution:  Manually reset CLI installation.  https://community.particle.io/t/how-to-manually-reset-your-cli-installation/54018
+
 
 ### Problem:  Software loads but does nothing or doesn't work sensibly at all
 
@@ -852,9 +865,11 @@ The solution is to copy the proper 'local_config.h.<>' into 'local_confi.h'
 
     Solution:  run  Particle: Flash Application and Device OS (local).   You may have to compile same before running this.  Once this is done the redo loop is Flash Application (local) only.
 
+
 ### Problem:  Local flash gives red message "Unable to connect to the device ((device name requested)). Make sure the device is connected to the host computer via USB"
 
   Find out what device you're flashing (particle.io).  In file .vscode/settings.json change "particle.targetDevice": "((device name actual))".  It may still flash correctly even with red warning message (always did for me).
+
 
 ### Problem:  Converted current wanders (sometimes after 10 minutes).   Studying using prototype without 150k/1uF LPF.   Multimeter used to  verify constant hardware volts input.  Also create solid mV input using 10k POT + 1M ohm resistor from 5v
 
@@ -863,53 +878,66 @@ The solution is to copy the proper 'local_config.h.<>' into 'local_confi.h'
     - Ground of laptop  monitoring the Photon wildly floating, biasing ADS inputs probably tripping Schottky diodes.
   DO NOT PLUG IN LAPTOP TO ANYTHING WHILE MONITORING Photon
 
+
 ### Problem:  Messages from devices:  "HTTP error 401 from ... - The access token provided is invalid."
 
   This means you haven't signed in to the particle cloud during this session.   May proceed anyway.   If you want message to go away, go to "Welcome to Particle Workbench" and click on "LOGIN."   Enter username and password for particle.io.  Usually hit enter for the 6-digit code - unless you set one up.
+
 
 ### Problem:  Hiccups in Arduino plots
 
   These are caused by time slips.   You notice that the Arduino plot x-axis is not time rather sample number.   So if a sample is missed due to time slip in Photon then it appears to be a time slip on the plot.   Usually this is caused by running Wi-Fi.   Turn off Wi-Fi.
 
+
 ### Problem:  Experimentation with 'modeling' and running near saturation results in numerical lockup
 
   The saturation logic is a feedback loop that can overflow and/or go unstable.   To break the loop, set cutback_gain to 0 in retained.h for a re-compile.   When comfortable with settings, reset it to 1.
+
 
 ### Problem:  The EKF crashes to zero after some changes to operating conditions
 
   You may temporarily fix this by running software reset talk ('Rs').   Permanently - work on the EKF to make it more robust.  One long term fix found to be running it with slower update time.
 
+
 ### Problem:  The application overflows APP_FLASH on compilation
 
   Too much text being stored by Serial.printf statements.   May temporarily co-exist with the limit by reducing NSUM summary memory size.
 
+
 ### Problem:  'Insufficient room for heap.' or 'Insufficient room for .data and .bss sections!' on compilation, or flashing red lights after flash
 
-  You probably added some code and overflowed PROM.  Smaller NSUM in constants.h or rp in retained.h or cp in command.h
+You probably added some code and overflowed PROM.  Smaller NSUM in constants.h or rp in retained.h or cp in command.h
+
 
 ### Problem:  The application overflows BACKUPSRAM on compilation
 
-  Smaller NFLT/NSLT in constants.h or sp in retained.h
+Smaller NFLT/NSLT in constants.h or sp in retained.h
+
 
 ### Problem:  The application overflows SRAM on compilation (Argon only?)
 
-  Smaller NFLT/NSLT in constants.h or sp in retained.h
+Smaller NFLT/NSLT in constants.h or sp in retained.h
+
 
 ### Problem:  . ? h
 
-  CoolTerm - Options - Terminal:  Enter Key Emulation:  CR
+CoolTerm - Options - Terminal:  Enter Key Emulation:  CR
+
 
 ### Problem:  cTime very long.  If you look at year, it is 1999.
 
-  The Photon ALPHA VBAT battery died or was disconnected.  Restore the battery.  Connect the photon to the network.   Use Particle app on phone to connect it to Wi-Fi at least once.
+The Photon ALPHA VBAT battery died or was disconnected.  Restore the battery.  Connect the photon to the network.   Use Particle app on phone to connect it to Wi-Fi at least once.
 
-  The Argon device hasn't synchronized since last power up.   Connect to Wi-Fi.  It is most convenient to set up the Argon devices' default Wi-Fi to be your phone running hotspot.   Then just do Particle setup from the phone - start and exit.   TODO:  may be possible to save time information to the Argon EERAM.
+The Argon device hasn't synchronized since last power up.   Connect to Wi-Fi.  It is most convenient to set up the Argon devices' default Wi-Fi to be your phone running hotspot.   Then just do Particle setup from the phone - start and exit.   TODO:  may be possible to save time information to the Argon EERAM.
+
 
 ### Problem:  Tbh = Tbm in display 'Pf' (print faults)
 
 This is normal for temperature.   Modeled Tb is very simple = to a constant + bias.   So I chose to display what is actually used in the model rather than what is actually used in signal selection.
 
+
 ## Author: Dave Gutz davegutz@alum.mit.edu  repository GITHUB myStateOfCharge
+
 
 ## To get debug data
 
