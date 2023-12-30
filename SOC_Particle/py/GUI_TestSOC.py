@@ -39,7 +39,7 @@ import platform
 import Colors
 from test_soc_util import run_shell_cmd
 if platform.system() == 'Darwin':
-    from ttwidgets import TTButton as myButton
+    from ttwidgets import TTButton as myButton  # ignore 'Module TTButton not found'  messages non-macos.  Need this for  macos
 else:
     from tkinter import Button as myButton
 bg_color = 'lightgray'
@@ -69,9 +69,9 @@ sel_list = ['custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression
             'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
             'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf',
             'pulseEKF', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim', 'faultParade']
-lookup = {'init': (22, 'Y;cc;Dh;*W;*vv0;*XS;*Ca1;<HR;<Rf;<Hd;<Pf;XQ10000;', ('',) ),
-          'end_early': (22, 'Y;cc;Dh1800000;*W;*vv0;*XS;*Ca1;<Hd;<Pf;XQ10000;', ('',) ),
-          'initMid': (22, 'Y;cc;Dh1800000;*W;*vv0;*XS;*Ca.5;<HR;<Rf;<Hd;<Pf;<XD;XQ10000;', ('',) ),
+lookup = {'init': (22, 'Y;cc;Dh;*W;*vv0;*XS;*Ca1;<HR;<Rf;<Hd;<Pf;', ('',)),
+          'end_early': (22, 'Y;cc;Dh1800000;*W;*vv0;*XS;*Ca1;<Hd;<Pf;', ('',)),
+          'initMid': (22, 'Y;cc;Dh1800000;*W;*vv0;*XS;*Ca.5;<HR;<Rf;<Hd;<Pf;<XD;', ('',)),
           'saveAdjusts': (60, 'DP1;vv4;Dh1000;PR;PV;Bm1;Pr;Bm0;Pr;BP2;Pr;BP1;Pr;BS2;Pr;BS1;Pr;Bs1;Pr;Bs0;Pr;DA5;Pr;DB-5;Pr;RS;Pr;Dc0.2;Pr;Dc0;DI-10;Pr;DI0;Pr;Dt5;Pr;Dt0;Pr;SA2;Pr;SA1;Pr;SB2;Pr;SB1;Pr;si-1;Pr;RS;Pr;Sk2;Pr;Sk1;Pr;SQ2;Pr;SQ1;Pr;Sq3;Pr;Sq1;Pr;SV1.1;Pr;SV1;Pr;Xb10;Pr;Xb0;Pr;Xa1000;Pr;Xa0;Pr;Xf1;Pr;RS;Pr;Xm10;Pr;RS;Pr;W3;vv0;XQ3;PR;PV;XQ60000;Dh;', ("For testing out the adjustments and memory", "Read through output and witness set and reset of all", "The DS2482 moderate headroom should not exceed limit printed.  EG 11 of 12 is ok.")),
           'custom': (72, 'XQ60000;', ("For general purpose data collection", "'save data' will present a choice of file name", "")),
           'ampHiFail': (62, 'Ff0;HR;Xm247;Ca0.5;DP1;Pf;vv2;Dh1000;W20;Dm50;Dn0.0001;XQ40000;Dh;', ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
@@ -99,7 +99,7 @@ lookup = {'init': (22, 'Y;cc;Dh;*W;*vv0;*XS;*Ca1;<HR;<Rf;<Hd;<Pf;XQ10000;', ('',
           'vHiFailFf': (72, 'Ff1;Xm247;Ca0.5;DP1;HR;Pf;vv2;W10;Dv0.8;XQ60000;Dh;', ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.", "Usually shows SAT.")),
           'pulseSSH': (18, "Xp8;Dh;", ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
           'tbFailMod': (72, 'Ff0;Ca.5;Xp0;Xm247;DP1;W2;HR;Pf;vv2;Dh1000;Xv.002;Xu1;W4;Xu0;Xv1;W20;vv0;Pf;XQ60000;Dh;', ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.",)),
-          'tbFailHdwe': (72,'Ff0;Ca.5;Xp0;Xm246;DP1;W2;HR;Pf;vv2;Dh1000;Xv.002;W10;Xu1;W20;Xu0;Xv1;W20;vv0;Pf;XQ60000;Dh;', ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.", "'Xp0' in reset puts Xm back to 247.")),
+          'tbFailHdwe': (72, 'Ff0;Ca.5;Xp0;Xm246;DP1;W2;HR;Pf;vv2;Dh1000;Xv.002;W10;Xu1;W20;Xu0;Xv1;W20;vv0;Pf;XQ60000;Dh;', ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.", "'Xp0' in reset puts Xm back to 247.")),
           'DvMon': (132, 'Ff0;Xm247;Ca0.5;DP1;HR;Pf;vv2;Dh1000;W30;Dm0.001;Dw-0.8;Dn0.0001;XQ120000;Dh;', ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
           'DvSim': (132, 'Ff0;Xm247;Ca0.5;DP1;HR;Pf;vv2;Dh1000;W30;Dm0.001;Dy-0.8;Dn0.0001;XQ120000;Dh;', ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
           'faultParade': (320, 'Ff0;Xm247;Ca0.5;DP1;HR;Pf;Dh1000;vv2;Dh1000;Dm50;Dn0.0001;W200;Dm0;Dn0;W20;Rf;XQ240000;Dh;', ("Check fault, history, and summary logging", "Should flag faults but take no action", "", "", "")),
