@@ -230,7 +230,6 @@ void Shunt::sample(const boolean reset_loc, const float T)
     Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
   }
   sample_time_ = System.millis();
-if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("Shunt::sample:  sample_time_ %lld\n", sample_time_);
   Vo_raw_ = analogRead(vo_pin_);
   Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
   Vo_Vc_ = Vo_ - Vc_;
@@ -896,7 +895,6 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
     dt_ib_ = dt_ib_hdwe_;
   }
   now = sample_time_ib_ - inst_millis_ + inst_time_*1000;
-if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("Sensors::final_assignments:  sample_time_ib_hdwe_ %lld,  cTime %7.3f = (sample_time_ib_ %lld -inst_millis_ %lld + inst_time_*1000 %lld ) 1000.\n", sample_time_ib_hdwe_, double(now)/1000., sample_time_ib_, inst_millis_, inst_time_*1000);
 
   // print_signal_select for data collection
   if ( (sp.debug()==2 || sp.debug()==4)  && cp.publishS )

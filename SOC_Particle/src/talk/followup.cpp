@@ -134,14 +134,14 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
         case ( 'D' ):
             switch ( letter_1 )
             {
-                case ( 'h' ):  //   Dh<>:  READ sample time input
-                    if ( ap.his_delay_p->success() )
-                        Sen->Summarize->delay(max(ap.read_delay, ap.his_delay), Sen->now);  // validated
+                case ( 'h' ):  //   Dh<>:  Summary sample time input
+                    if ( ap.sum_delay_p->success() )
+                        Sen->Summarize->delay(max(ap.read_delay, ap.sum_delay), Sen->now);  // validated
                     else if (ap.value_str()=="0" || ap.value_str()=="")
                     {
                         Serial.printf("setting NOMINAL instead\n");
-                        ap.his_delay_p->set_nominal();
-                        Sen->Summarize->delay(max(ap.read_delay, ap.his_delay), Sen->now);
+                        ap.sum_delay_p->set_nominal();
+                        Sen->Summarize->delay(max(ap.read_delay, ap.sum_delay), Sen->now);
                     }
                     break;
 
@@ -149,7 +149,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     if ( ap.read_delay_p->success() )
                     {
                         Sen->ReadSensors->delay(ap.read_delay);  // validated
-                        Sen->Summarize->delay(max(ap.read_delay, ap.his_delay));  // validated
+                        Sen->Summarize->delay(max(ap.read_delay, ap.sum_delay));  // validated
                     }
                     break;
 

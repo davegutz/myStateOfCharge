@@ -326,7 +326,6 @@ void loop()
   // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
   unsigned long long time_now = (unsigned long long) Time.now();
   static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize, time_now, start);
-if ( reset || ((sp.debug()==93 || sp.debug()==1) && read) ) Serial.printf("Time.now after Sen instantiation:  %lld  millis %lld\n", time_now, System.millis());
 
    // Monitor to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor();
@@ -344,7 +343,6 @@ if ( reset || ((sp.debug()==93 || sp.debug()==1) && read) ) Serial.printf("Time.
   Sen->control_time = double(Sen->now/1000);
   char buffer[32];
   time_long_2_str(time_now, buffer);
-if ( read && sp.debug()==93 ) Serial.printf("\n\nino top:  time_now %lld  buffer [%s] millis_flip %lld\n", time_now, buffer, millis_flip);
   hm_string = String(buffer);
   read_temp = ReadTemp->update(System.millis(), reset);
   read = ReadSensors->update(System.millis(), reset);
@@ -352,8 +350,8 @@ if ( read && sp.debug()==93 ) Serial.printf("\n\nino top:  time_now %lld  buffer
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(System.millis(), reset);
   display_and_remember = DisplayUserSync->update(System.millis(), reset);
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) && !sp.modeling_z;
-  if ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) boot_wait = false;
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay) ) && !sp.modeling_z;
+  if ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay) ) boot_wait = false;
   summarizing = Summarize->update(System.millis(), false) || boot_summ;
 
   // Sample temperature
@@ -433,7 +431,6 @@ if ( read && sp.debug()==93 ) Serial.printf("\n\nino top:  time_now %lld  buffer
     if ( cp.publishS )
     {
       assign_publist(&pp.pubList, ReadSensors->now(), unit, hm_string, Sen, num_timeouts, Mon);
-if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("ino assign_publist: ReadSensors->now %lld hm_string %s\n", ReadSensors->now(), hm_string.c_str());
       static boolean wrote_last_time = false;
       if ( wrote_last_time )
         digitalWrite(myPins->status_led, LOW);
@@ -489,7 +486,6 @@ if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("ino assign_publist: ReadSe
     if ( sp.ihis_z > (sp.nhis() - 1) ) sp.put_Ihis(0);  // wrap buffer
     Flt_st hist_snap, hist_bounced;
     hist_snap.assign(Time.now(), Mon, Sen);
-if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("ino: hist_snap_assign: Time.now %ld\n", Time.now());
     hist_bounced = sp.put_history(hist_snap, sp.ihis_z);
 
     sp.put_Isum(sp.isum_z + 1);

@@ -75,7 +75,6 @@ public:
     float ewlo_slr;             // Scale wrap lo detection thresh, scalar
     boolean fail_tb;            // Make hardware bus read ignore Tb and fail it
     boolean fake_faults;        // Faults faked (ignored).  Used to evaluate a configuration, deploy it without disrupting use
-    unsigned long int his_delay; // Minor frame divisor, div
     float hys_scale;            // Sim hysteresis scalar
     float hys_state;            // Sim hysteresis state
     float ib_amp_add;           // Fault injection bias on amp, A
@@ -90,6 +89,7 @@ public:
     unsigned long int read_delay; // Minor frame, ms
     float slr_res;              // Scalar Randles R0, slr
     float s_t_sat;              // Scalar on saturation test time set and reset
+    unsigned long int sum_delay; // Minor frame divisor, div
     unsigned long int tail_inj; // Tail after end injection, ms
     unsigned long int talk_delay; // Talk frame, ms
     float Tb_bias_model;        // Bias on Tb for model
@@ -112,7 +112,6 @@ public:
     FloatV *ewlo_slr_p;
     BooleanV *fail_tb_p;
     BooleanV *fake_faults_p;
-    ULongV *his_delay_p;
     FloatV *hys_scale_p;
     FloatV *hys_state_p;
     FloatV *ib_amp_add_p;
@@ -127,6 +126,7 @@ public:
     ULongV *read_delay_p;
     FloatV *slr_res_p;
     FloatV *s_t_sat_p;
+    ULongV *sum_delay_p;
     ULongV *tail_inj_p;
     ULongV *talk_delay_p;
     FloatV *Tb_bias_model_p;

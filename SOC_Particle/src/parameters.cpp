@@ -119,7 +119,6 @@ void  VolatilePars::initialize()
     V_[n_++] =(ewlo_slr_p       = new FloatV("  ", "Fo", NULL,"Slr wrap lo thr",      "slr",    0,    1000, &ewlo_slr,          1));
     V_[n_++] =(fail_tb_p      = new BooleanV("  ", "Xu", NULL,"Ignore Tb & fail",     "T=Fail", false,true, &fail_tb,           false));
     V_[n_++] =(fake_faults_p  = new BooleanV("  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,    &fake_faults,       FAKE_FAULTS));
-    V_[n_++] =(his_delay_p      = new ULongV("  ", "Dh", NULL,"History frame",        "ms",    1000UL,SUMMARY_DELAY,&his_delay, SUMMARY_DELAY));
     V_[n_++] =(hys_scale_p      = new FloatV("  ", "Sh", NULL,"Sim hys scale",        "slr",    0,    100,  &hys_scale,         HYS_SCALE));
     V_[n_++] =(hys_state_p      = new FloatV("  ", "SH", NULL,"Sim hys state",        "v",      -10,  10,   &hys_state,         0));
     V_[n_++] =(ib_amp_add_p     = new FloatV("  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
@@ -134,6 +133,7 @@ void  VolatilePars::initialize()
     V_[n_++] =(read_delay_p     = new ULongV("  ", "Dr", NULL,"Minor frame",          "ms",     0UL,  1000000UL,  &read_delay,  READ_DELAY));
     V_[n_++] =(slr_res_p        = new FloatV("  ", "Sr", NULL,"Scalar Randles R0",    "slr",    0,    100,  &slr_res,           1));
     V_[n_++] =(s_t_sat_p        = new FloatV("  ", "Xs", NULL,"Scalar on T_SAT",      "slr",    0,    100,  &s_t_sat,           1));
+    V_[n_++] =(sum_delay_p      = new ULongV("  ", "Dh", NULL,"Summary frame",        "ms",    1000UL,SUMMARY_DELAY,&sum_delay, SUMMARY_DELAY));
     V_[n_++] =(tail_inj_p       = new ULongV("  ", "XT", NULL,"Tail end inj",         "ms",     0UL,  120000UL,&tail_inj,       0UL));
     V_[n_++] =(talk_delay_p     = new ULongV("  ", "D>", NULL,"Talk frame",           "ms",     0UL,  120000UL,&talk_delay,     TALK_DELAY));
     V_[n_++] =(Tb_bias_model_p  = new FloatV("  ", "D^", NULL,"Del model",            "dg C",   -50,  50,   &Tb_bias_model,     TEMP_BIAS));
@@ -221,13 +221,18 @@ SavedPars::SavedPars(SerialRAM *ram): Parameters()
         {
             next_ = V_[i]->assign_addr(next_);
         }
+
         fault_ = new Flt_ram[nflt_];
         for ( uint16_t i=0; i<nflt_; i++ )
         {
             fault_[i].instantiate(rP_, &next_);
         }
+
         nhis_ = uint16_t( (MAX_EERAM - next_) / sizeof(Flt_st) ); 
         history_ = new Flt_ram[nhis_];
+        ihis_p->new_maximum(nhis_+1);
+        ihis_p->new_default(nhis_);
+        ihis_p->set_nominal();
         for ( uint16_t i=0; i<nhis_; i++ )
         {
             history_[i].instantiate(rP_, &next_);
@@ -346,8 +351,8 @@ void SavedPars::pretty_print(const boolean all)
     }
 
     #ifdef CONFIG_47L16_EERAM
-        // Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
-        Serial.printf("SavedPars::SavedPars - \n");
+        Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
+        Serial.printf("SavedPars::SavedPars - nflt_ %d nhis_ %d nsum_ %d \n", nflt_, nhis_, nsum_);
         // Serial.printf("Temp mem map print\n");
         // mem_print();
     #endif

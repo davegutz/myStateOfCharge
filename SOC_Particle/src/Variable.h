@@ -803,6 +803,9 @@ public:
         return off_nominal() && check_for_off_on_init_;
     }
 
+    void new_maximum(const uint16_t new_max) { max_ = new_max; }
+    void new_default(const uint16_t new_def) { default_ = max(min(new_def, max_), min_); }
+
     virtual boolean off_nominal()
     {
         return *val_ != default_;

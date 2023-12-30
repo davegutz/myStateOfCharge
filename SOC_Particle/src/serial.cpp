@@ -41,7 +41,6 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
     Mon->vsat(), Mon->dv_dyn(), Mon->voc_stat(), Mon->hx(),
     Mon->y_ekf(),
     Sen->Sim->soc(), Mon->soc_ekf(), Mon->soc(), Mon->soc_min());
-if ( sp.debug()==93 || sp.debug()==1 ) Serial.printf("create_rapid_string: hm_string [%s] cTime %12.3f\n", pubList->hm_string.c_str(), cTime);
 }
 
 

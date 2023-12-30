@@ -14,7 +14,7 @@ const String unit = version + "_pro1a";
 #define CONFIG_DS18B20_SWIRE
 
 // #define DEBUG_SERIAL_QUEUE
-#define DEBUG_QUEUE
+// #define DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
 // #define LOGHANDLE
 
