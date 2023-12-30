@@ -651,7 +651,7 @@ class BatterySim(Battery):
         # Saturation logic, both full and empty
         self.vsat = self.chemistry.nom_vsat + (temp_c - 25.) * self.chemistry.dvoc_dt
         self.sat_ib_max = self.sat_ib_null + (1 - self.soc - self.ds_voc_soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
-        if self.tweak_test or (not rp.modeling):
+        if rp.tweak_test() or (not rp.modeling):
             self.sat_ib_max = ib_charge_fut
         self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
         # self.ib_charge = ib_charge_fut  # same time plane as volt calcs.  (This prevents sat logic from working)

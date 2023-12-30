@@ -58,6 +58,7 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
     use_vb_raw = False
     dvoc_sim_in = 0.
     dvoc_mon_in = 0.
+    use_mon_soc_in = True
 
     # detect running interactively
     # this is written to run in pwd of call
@@ -115,7 +116,7 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
     # New run
     mon_file_save = data_file_clean.replace(".csv", "_rep.csv")
     mon_ver, sim_ver, sim_s_ver, mon, sim = \
-        replicate(mon_old, sim_old=sim_old, init_time=init_time, use_ib_mon=use_ib_mon_in,
+        replicate(mon_old, sim_old=sim_old, init_time=init_time, use_ib_mon=use_ib_mon_in, use_mon_soc=use_mon_soc_in,
                   use_vb_raw=use_vb_raw, dvoc_sim=dvoc_sim_in, dvoc_mon=dvoc_mon_in, use_vb_sim=use_vb_sim_in,
                   ds_voc_soc=ds_voc_soc_in)
     save_clean_file(mon_ver, mon_file_save, 'mon_rep' + date_)
