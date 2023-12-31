@@ -40,7 +40,7 @@ plt.rcParams['axes.grid'] = True
 def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to_save_pdf='./figures',
                     rel_path_to_temp='./temp', data_only=False):
 
-    print(f"compare_run_sim:  {data_file=}\n{unit_key=}\n{time_end_in=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n")
+    print(f"\ncompare_run_sim:\n{data_file=}\n{unit_key=}\n{time_end_in=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
@@ -163,8 +163,8 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
 
 
 if __name__ == '__main__':
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\allProto_pro1a_bb.csv'
-    unit_key = 'g20231111b_pro1a_bb'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\coldStart_pro0p_ch.csv'
+    unit_key = 'g20231111b_pro0p_ch'
     time_end_in = None
     rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
     rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'

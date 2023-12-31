@@ -43,7 +43,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
     switch ( letter_1 )
     {
         case ( 'D' ): // XD  display a message
-            Serial.printf("\n\n************** DONE*****\n\n");
+            Serial.printf("\n\n*** DONE***\n\n");
             break;
 
         case ( 'p' ): // Xp<>:  injection program
@@ -59,20 +59,20 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                 case ( 6 ):  // Xp6:  Program a pulse for EKF test
-                    chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;Dr100;DP20;vv4;", QUEUE);  // setup
+                    chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;Dr100;DP20;vv4;Rs;", QUEUE);  // setup
                     chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
                     chit("W10;Pm;vv0;", QUEUE);  // finish
                     break;
 
                 case ( 7 ):  // Xp7:  Program a sensor pulse for State Space test
-                    chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;", QUEUE);  // setup
+                    chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;Rs;", QUEUE);  // setup
                     chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
                     murmur = "D>" + String(TALK_DELAY) + ";W10;Pm;vv0;Dr" + String(READ_DELAY) + ";Dh" + String(SUMMARY_DELAY) + ";";
                     chit(murmur, QUEUE);  // finish
                     break;
 
                 case ( 8 ):  // Xp8:  Program a hardware pulse for State Space test
-                    chit("XS;Di0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;", QUEUE);  // setup
+                    chit("XS;Di0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;Rs;", QUEUE);  // setup
                     chit("DI500;DI-500;DI0;", QUEUE);  // run
                     chit("W10;Pm;vv0;", QUEUE);  // finish
                     break;
@@ -87,25 +87,25 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     if ( INT_in == 10 )  // Xp10:  rapid tweak
                     {
                         chit("Xf.02;Xa-2000;XW5000;XT5000;XC3;", SOON);
-                        chit("W2;W2;W2;Pr;Pf;vv4;Dh1000;W2;XR;XQ180000;Hd;Pf;HR;Pr;Xm247;", SOON);
+                        chit("W2;W2;W2;Pr;Pf;vv4;Dh1000;W;Rs;;XR;XQ180000;Hd;Pf;HR;Pr;Xm247;", SOON);
                     }
 
                     else if ( INT_in == 11 )  // Xp11:  slow tweak
                     {
                         chit("Xf.002;Xa-60;XW60000;XT60000;XC1;", SOON);
-                        chit("W2;Pr;Pf;vv4;Dh1000;W2;XR;XQ622000;Hd;Pf;HR;Pr;Xm247;", SOON);
+                        chit("W2;Pr;Pf;vv4;Dh1000;W;Rs;;XR;XQ622000;Hd;Pf;HR;Pr;Xm247;", SOON);
                     }
 
                     else if ( INT_in == 12 )  // Xp12:  slow half tweak
                     {
                         chit("Xf.0002;Xa-6;XW60000;XT240000;XC.5;", SOON);
-                        chit("W2;Pr;Pf;vv4;Dh1000;W2;XR;XQ622000;Hd;Pf;HR;Pr;Xm247;", SOON);
+                        chit("W2;Pr;Pf;vv4;Dh1000;W;Rs;;XR;XQ622000;Hd;Pf;HR;Pr;Xm247;", SOON);
                     }
 
                     else if ( INT_in == 13 )  // Xp13:  tri tweak
                     {
                         chit("Xtt;Xf.02;Xa-29500;XW5000;XT5000;XC3;", SOON);
-                        chit("W2;Pr;Pf;vv4;Dh1000;W2;XR;XQ180000;Hd;Pf;HR;Pr;Xm247;", SOON);
+                        chit("W2;Pr;Pf;vv4;Dh1000;W;Rs;;XR;XQ180000;Hd;Pf;HR;Pr;Xm247;", SOON);
                     }
                     
                     break;

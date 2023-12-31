@@ -82,7 +82,7 @@
     #ifdef DEPLOY_PHOTON
         #define NFLT   7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
         #define NHIS  56  // Number of saved SRAM history data slices. Sized to approx match  Photon2  (56)
-        #define NSUM 168  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (168)
+        #define NSUM 155  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (168)
     #else
         #ifdef DEBUG_INIT
             #define NFLT  7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)

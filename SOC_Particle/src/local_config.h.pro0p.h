@@ -11,7 +11,7 @@ const String unit = version + "_pro0p";
 #define CONFIG_SSD1306_OLED
 #define CONFIG_ADS1013_OPAMP
 #define CONFIG_DS18B20_SWIRE
-// #define DEPLOY_PHOTON
+#define DEPLOY_PHOTON
 
 // #define DEBUG_SERIAL_QUEUE
 // #define DEBUG_QUEUE

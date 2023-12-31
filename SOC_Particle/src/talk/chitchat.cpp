@@ -58,12 +58,14 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
   // Injection
   ap.ib_amp_add = 0;        // Dm 0
   ap.ib_noa_add = 0;        // Dn 0
+  sp.ib_bias_all_z = 0;     // DI 0
   ap.vb_add = 0;            // Dv 0
   ap.ds_voc_soc = 0;        // Ds
   ap.Tb_bias_model = 0;     // D^
   ap.dv_voc_soc = 0;        // Dy
   ap.tb_stale_time_slr = 1; // Xv 1
   ap.fail_tb = false;       // Xu 0
+  
 
   // Noise
   ap.Tb_noise_amp = TB_NOISE;         // DT 0
