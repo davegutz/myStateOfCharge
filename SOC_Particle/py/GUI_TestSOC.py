@@ -39,7 +39,7 @@ import platform
 import Colors
 from test_soc_util import run_shell_cmd
 if platform.system() == 'Darwin':
-    from ttwidgets import TTButton as myButton  # ignore 'Module TTButton not found'  messages non-macos.  Need this for  macos
+    from ttwidgets import TTButton as myButton  # ignore 'Module TTButton not found'  messages non-macos.  Need this for  macOS
 else:
     from tkinter import Button as myButton
 bg_color = 'lightgray'
@@ -488,17 +488,9 @@ def compare_run_to_hist():
         return
     if modeling.get():
         print('compare_hist_to_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
-        # master.withdraw()
-        chm = None
-        if Test.battery == 'bb':
-            chm = 0
-        elif Test.battery == 'ch':
-            chm = 1
-
         compare_run_hist(data_file_=Test.file_path, unit_key_=Test.key,
                          rel_path_to_save_pdf_=os.path.join(Test.version_path, './figures'),
                          rel_path_to_temp_=os.path.join(Test.version_path, './temp'))
-        # master.deiconify()
     else:
         print('not possible')
 
