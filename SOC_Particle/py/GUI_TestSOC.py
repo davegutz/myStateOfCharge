@@ -70,9 +70,6 @@ sel_list = ['custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression
             'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH',
             'flatSitHys', 'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH',
             'vHiFailFf', 'pulseEKF', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim', 'faultParade',
-            'modMidInit', 'modLowInitBB', 'modLowInitCH', 'noisePackage', 'silentPackage', 'quiet', 'cleanup',
-            'tempCleanup', 'zeroPulse', 'tranPrep', 'slowTwitchDef', 'fastTwitchDef', 'c06', 'c50', 'cm50', 'c00',
-            'twitch'
             ]
 macro_sel_list = [
             'end_early', 'modMidInit', 'modLowInitBB', 'modLowInitCH', 'noisePackage', 'silentPackage', 'quiet',

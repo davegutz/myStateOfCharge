@@ -55,6 +55,22 @@ float Battery::calculate(const float temp_C, const float soc_frac, float curr_in
     return 0.;
 }
 
+/* calc_soc_voc:  VOC-OCV model
+    INPUTS:
+        soc         Fraction of saturation charge (q_capacity_) available (0-1) 
+        temp_c      Battery temperature, deg C
+    OUTPUTS:
+        dv_dsoc     Derivative scaled, V/fraction
+        voc         Static model open circuit voltage from table (reference), V
+*/
+float Battery::calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc)
+{
+    float voc;  // return value
+    *dv_dsoc = calc_soc_voc_slope(soc, temp_c);
+    voc = chem_.voc_T_->interp(soc, temp_c);
+    return voc;
+}
+
 /* calc_soc_voc_slope:  Derivative model read from tables
     INPUTS:
         soc         Fraction of saturation charge (q_capacity_) available (0-1) 
@@ -386,7 +402,6 @@ void BatteryMonitor::ekf_update(double *hx, double *H)
     // Measurement function hx(x), x=soc ideal capacitor
     float x_lim = max(min(x_, 1.0), 0.0);
     *hx = Battery::calc_soc_voc(x_lim, temp_c_, &dv_dsoc_) + sp.Dw();
-
     // Jacodian of measurement function
     *H = dv_dsoc_;
 }
@@ -662,7 +677,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     dv_dyn_ = vb_ - voc_;
 
     // Saturation logic, both full and empty
-    sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ap.ds_voc_soc) ) * sat_cutback_gain_ * sp.cutback_gain_slr();
+    sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ap.ds_voc_soc) ) * sat_cutback_gain_ * sp.cutback_gain_slr();  // Ds
     if ( sp.tweak_test() || !sp.mod_ib() ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
     ib_fut_ = min(ib_charge_fut, sat_ib_max_);      // the feedback of ib_
     // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past value.  (This prevents sat logic from working)
@@ -702,8 +717,8 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
 float BatterySim::calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc)
 {
     float voc;  // return value
-    *dv_dsoc = calc_soc_voc_slope(soc + ap.ds_voc_soc, temp_c);
-    voc = chem_.voc_T_->interp(soc + ap.ds_voc_soc, temp_c);
+    *dv_dsoc = calc_soc_voc_slope(soc + ap.ds_voc_soc, temp_c);  // Ds
+    voc = chem_.voc_T_->interp(soc + ap.ds_voc_soc, temp_c);  // Ds
     return voc;
 }
 

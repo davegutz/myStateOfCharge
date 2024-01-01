@@ -86,7 +86,7 @@ public:
   // operators
   // functions
   boolean bms_off() { return bms_off_; };
-  virtual float calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc) { return 0.; };
+  virtual float calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc);
   float calc_soc_voc_slope(float soc, float temp_c);
   float calc_vsat(void);
   virtual float calculate(const float temp_C, const float soc_frac, float curr_in, const double dt, const boolean dc_dc_on);
