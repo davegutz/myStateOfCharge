@@ -57,6 +57,7 @@ def_dict = {'test': {"version": "g20230530",
                     "battery": "bb",
                     'dataReduction_folder': '<enter data dataReduction_folder>'},
             'others': {"option": "custom",
+                       'macro': 'end_early',
                        'mod_in_app': "247",
                        'modeling': True}
             }
@@ -64,17 +65,26 @@ def_dict = {'test': {"version": "g20230530",
 # Transient string
 unit_list = ['pro0p', 'pro1a', 'pro3p2', 'pro2p2', 'soc0p', 'soc1a']
 batt_list = ['bb', 'ch']
-sel_list = ['custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allProto', 'pulseSS', 'rapidTweakRegressionH0', 'offSitHysBmsBB',
-            'offSitHysBmsCH', 'triTweakDisch', 'coldStartBB', 'ampHiFailFf', 'ampLoFail', 'ampHiFailNoise',
-            'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'flatSitHys',
-            'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf',
-            'pulseEKF', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim', 'faultParade']
+sel_list = ['custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allProto', 'pulseSS',
+            'rapidTweakRegressionH0', 'offSitHysBmsBB', 'offSitHysBmsCH', 'triTweakDisch', 'coldStartBB', 'ampHiFailFf',
+            'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH',
+            'flatSitHys', 'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail', 'vHiFailH',
+            'vHiFailFf', 'pulseEKF', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim', 'faultParade',
+            'modMidInit', 'modLowInitBB', 'modLowInitCH', 'noisePackage', 'silentPackage', 'quiet', 'cleanup',
+            'tempCleanup', 'zeroPulse', 'tranPrep', 'slowTwitchDef', 'fastTwitchDef', 'c06', 'c50', 'cm50', 'c00',
+            'twitch'
+            ]
+macro_list = [
+            'end_early', 'modMidInit', 'modLowInitBB', 'modLowInitCH', 'noisePackage', 'silentPackage', 'quiet',
+            'cleanup', 'tempCleanup', 'zeroPulse', 'tranPrep', 'slowTwitchDef', 'fastTwitchDef', 'c06', 'c50', 'cm50',
+            'c00', 'twitch'
+]
 
-# Macros
-satInit = ''
-modMidInit = 'Xm247;Ca0.50;Pf;'
-modLowInitBB = 'Xm247;Ca0.050;'
-modLowInitCH = 'Xm247;Ca0.103;'
+# Macro
+satInit = 'cc;Dh;*W;*vv0;*XS;*Ca1;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
+modMidInit = 'cc;Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
+modLowInitBB = 'cc;Xm247;Ca0.050;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
+modLowInitCH = 'cc;Xm247;Ca0.103;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
 noisePackage = 'DT.05;DV0.05;DM.2;DN2;'
 silentPackage = 'DT.05;DV0.05;DM.2;DN2;'
 quiet = 'vv0;Dh;'
@@ -87,51 +97,66 @@ fastTwitchDef = 'Rb;Rf;Xts;Xf0.002;XW10000;XT10;XC1;'
 c06 = 'Dm6;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
 c50 = 'Dm50;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
 cm50 = 'Dm-50;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
-c00 = 'Dm0;Dn0;'
-# Events
-ampHiFail = modMidInit + tranPrep + 'Dm50; Dn0.0001;XQ40000;Dm0;Dn0;' + quiet + cleanup
-ampHiFailFf = 'Ff1;' + modMidInit + tranPrep + 'Dm50; Dn0.0001;XQ40000;' + quiet + cleanup
-ampLoFail = modMidInit + tranPrep + 'Dm-50;Dn0.0001;XQ50000;' + quiet + cleanup
-ampHiFailNoise = modMidInit + tranPrep + noisePackage + 'Dm50; Dn0.0001;XQ40000;' + quiet + cleanup
-pulseSS = "Xp7;vv0;Dh;"
-rapidTweakRegressionH0 = 'Sh0;SH0;Ff0;HR;Pf;Xp10;vv0;Dh;XD;'
-triTweakDisch = 'Xp13;vv0;Dh;XD;'
+c00 = 'Dm0;Dn0;Rf;W50;'
+twitch = 'XR;'
 
-lookup = {'satInit': (22, 'Y;cc;Dh;*W;*vv0;*XS;*Ca1;BZ;Ff0;DP1;<HR;<Rf;<Hd;<Pf;<XD;', ('',)),
-          'end_early': (22, 'Y;cc;Dh1800000;*W;*vv0;*XS;*Ca1;<Hd;<Pf;', ('',)),
-          'initMid': (22, 'Y;cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;<HR;<Rf;<Hd;<Pf;<XD;', ('',)),
-          'saveAdjusts': (60, 'vv4;Dh1000;PR;PV;Bm1;Pr;Bm0;Pr;BP2;Pr;BP1;Pr;BS2;Pr;BS1;Pr;Bs1;Pr;Bs0;Pr;DA5;Pr;DB-5;Pr;RS;Pr;Dc0.2;Pr;Dc0;DI-10;Pr;DI0;Pr;Dt5;Pr;Dt0;Pr;SA2;Pr;SA1;Pr;SB2;Pr;SB1;Pr;si-1;Pr;RS;Pr;Sk2;Pr;Sk1;Pr;SQ2;Pr;SQ1;Pr;Sq3;Pr;Sq1;Pr;SV1.1;Pr;SV1;Pr;Xb10;Pr;Xb0;Pr;Xa1000;Pr;Xa0;Pr;Xf1;Pr;RS;Pr;Xm10;Pr;RS;Pr;W3;vv0;XQ3;PR;PV;XQ60000;Dh;', ("For testing out the adjustments and memory", "Read through output and witness set and reset of all", "The DS2482 moderate headroom should not exceed limit printed.  EG 11 of 12 is ok.")),
-          'custom': (72, 'XQ60000;', ("For general purpose data collection", "'save data' will present a choice of file name", "")),
-          'ampHiFail': (62, modMidInit + tranPrep + c50 + 'XQ40000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
-          'rapidTweakRegression': (208, 'HR;Pf;Xp10;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips')),
-          'allProto': (552, modMidInit + tranPrep + c50 + 'XQ40000;' + c00 + tempCleanup + '  Pf;Xp10;  Pf;Xp13;  ' + modMidInit + 'HR;Pf;' + tranPrep + 'Dm-50;Dn0.0001;XQ50000;' + cleanup, ('Proto multi', "Must have same 'vv*' throughout", "No 'HR' either")),
-          'pulseSS': (18, "Xp7;vv0;Dh;", ("Should generate a very short <10 sec data burst with a sw pulse.  Look at plots for good overlay. e_wrap will have a delay.", "This is the shortest of all tests.  Useful for quick checks.")),
-          'rapidTweakRegressionH0': (208, 'Sh0;SH0;HR;Pf;Xp10;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!')),
-          'offSitHysBmsBB': (590, modLowInitBB + slowTwitchDef + 'Xa-162;' + tranPrep + 'XR; XQ568000;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),
-          'offSitHysBmsCH': (590, modLowInitCH + slowTwitchDef + 'Xa-162;' + tranPrep + 'XR; XQ568000;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),
-          'triTweakDisch': (215, 'Xp13;vv0;Dh;XD;', ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips')),
-          'coldStartBB': (272, 'D^-18;Xm247;Fi1000;Fo1000;Ca0.93;Sk0.5;Ds-0.06;Rb;Rf;vv4;DP1;Dh1000;W99;DI40;XQ220000;Fi1;Fo1;W10;' + quiet + cleanup, ("Should charge for a bit after hitting cutback on BMS.   Should see current gradually reduce.   Run until 'SAT' is displayed.   Could take ½ hour.", "The Ds term biases voc(soc) by delta x and makes a different type of saturation experience, to accelerate the test.", "Look at chart 'DOM 1' and verify that e_wrap misses ewlo_thr (thresholds moved as result of previous failures in this transient)", "Don't remember why this problem on cold day only.")),
-          'ampHiFailFf': (30, 'Ff1;' + modMidInit + tranPrep + c50 + 'XQ40000;' + c00 + quiet + cleanup, ("Should detect but not switch amp current failure. (See 'diff' and current!=0 on OLED).", "Run about 60s. Start by looking at 'DOM 1' fig 3. No fault record (keeps recording).  Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.", "This show when deploy with Fake Faults (Ff) don't throw false trips (it happened)", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
-          'ampLoFail': (72, modMidInit + tranPrep + cm50 + 'XQ50000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
-          'ampHiFailNoise': (52, modMidInit + 'vv4;Dh1000;Rs;' + noisePackage + c50 + 'XQ40000;' + c00 + silentPackage + quiet + cleanup, ("Noisy ampHiFail.  Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
-          'rapidTweakRegression40C': (193, 'D^15;Xp10;vv0;Dh;XD;', ("Should run three very large current discharge/recharge cycles without fault", "Self-terminates")),
-          'slowTweakRegression': (660, 'Xp11;vv0;Dh;XD;', ("Should run one very large slow (~15 min) current discharge/recharge cycle without fault.   It will take 60 seconds to start changing current.",)),
-          'satSitBB': (612, 'Xm247;Ca0.9962;' + fastTwitchDef + 'Xa17;' + tranPrep + 'XR;XQ600000;' + quiet + cleanup, ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
-          'satSitCH': (612, 'Xm247;Ca0.9920;' + fastTwitchDef + 'Xa17;' + tranPrep + 'XR;XQ600000;' + quiet + cleanup, ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
-          'flatSitHys': (580, 'Xm247;Ca0.9;Rb;Rf;Xts;Xa-81;Xf0.004;XW10000;XT10;XC2;W1;Ph;HR;Pf;vv4;Dh1000;W;Rs;XR;XQ580000;' + quiet + cleanup, ("Operate around 0.9.  For CHINS, will check EKF with flat voc(soc).   Takes about 10 minutes.", "Make sure EKF soc (soc_ekf) tracks actual soc without wandering.")),
-          'offSitHysBmsNoiseBB': (580, modLowInitBB + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + silentPackage + quiet + cleanup, ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
-          'offSitHysBmsNoiseCH': (580, modLowInitCH + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + silentPackage + quiet + cleanup, ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
-          'ampHiFailSlow': (452, modMidInit + tranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + quiet + cleanup, ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.", "Run for 6  minutes to see cc_diff_fa")),
-          'vHiFail': (65, modMidInit + 'vv4;Dh1000;W;Rs;W48;' + zeroPulse + ';Dv0.82;XQ60000;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION")),
-          'vHiFailH': (65, modMidInit + 'vv4;Dh1000;W;Rs;W48;SH.3;W10;' + zeroPulse + 'Dv0.82;XQ30000;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION.  Initial BB shift will be limited by hys table")),
-          'vHiFailFf': (65, 'Ff1;Xm247;Ca0.50;vv4;W;Rs;W8;' + zeroPulse + 'Dv0.8;XQ60000;' + quiet + cleanup, ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.", "Usually shows SAT.")),
-          'pulseSSH': (18, "Xp8;vv0;Dh;XD;", ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
-          'tbFailMod': (72, 'Ca.5;Xm247;W2;HR;Pf;vv4;Dh1000;Rs;Xv.002;Xu1;W4;Xu0;Xv1;W20;vv0;Pf;XQ60000;' + quiet + cleanup, ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.",)),
-          'tbFailHdwe': (72, 'Ca.5;Xm246;W2;HR;Pf;vv4;Dh1000;Rs;Xv.002;W10;Xu1;W20;Xu0;Xv1;W20;vv0;Pf;XQ60000;' + quiet + cleanup, ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.", "'Xp0' in reset puts Xm back to 247.")),
-          'DvMon': (132, modMidInit + 'vv4;Dh1000;W30;' + zeroPulse + 'Dw-0.8;Dn0.0001;XQ120000;' + quiet + cleanup, ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
-          'DvSim': (132, modMidInit + 'vv4;Dh1000;W;Rs;W28;' + zeroPulse + 'Dy-0.8;Dn0.0001;XQ120000;' + quiet + cleanup, ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
-          'faultParade': (320, modMidInit + 'Dh1000;vv4;Dh1000;Dm50;Dn0.0001;W200;Dm0;Dn0;W20;Rf;XQ240000;' + quiet + cleanup, ("Check fault, history, and summary logging", "Should flag faults but take no action", "", "", "")),
-          }
+lookup = {
+        'satInit': (22, 'Y;cc;Dh;*W;*vv0;*XS;*Ca1;BZ;Ff0;DP1;<HR;<Rf;<Hd;<Pf;<XD;', ('',)),
+        'initMid': (22, 'Y;cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;<HR;<Rf;<Hd;<Pf;<XD;', ('',)),
+        'saveAdjusts': (60, 'vv4;Dh1000;PR;PV;Bm1;Pr;Bm0;Pr;BP2;Pr;BP1;Pr;BS2;Pr;BS1;Pr;Bs1;Pr;Bs0;Pr;DA5;Pr;DB-5;Pr;RS;Pr;Dc0.2;Pr;Dc0;DI-10;Pr;DI0;Pr;Dt5;Pr;Dt0;Pr;SA2;Pr;SA1;Pr;SB2;Pr;SB1;Pr;si-1;Pr;RS;Pr;Sk2;Pr;Sk1;Pr;SQ2;Pr;SQ1;Pr;Sq3;Pr;Sq1;Pr;SV1.1;Pr;SV1;Pr;Xb10;Pr;Xb0;Pr;Xa1000;Pr;Xa0;Pr;Xf1;Pr;RS;Pr;Xm10;Pr;RS;Pr;W3;vv0;XQ3;PR;PV;XQ60000;Dh;', ("For testing out the adjustments and memory", "Read through output and witness set and reset of all", "The DS2482 moderate headroom should not exceed limit printed.  EG 11 of 12 is ok.")),
+        'custom': (72, 'XQ60000;', ("For general purpose data collection", "'save data' will present a choice of file name", "")),
+        'ampHiFail': (62, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
+        'rapidTweakRegression': (208, 'Xp10;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips')),
+        'allProto': (552, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + tempCleanup + '  Pf;Xp10;  Pf;Xp13;  ' + modMidInit + tranPrep + 'Dm-50;Dn0.0001;XQ50000;' + quiet + cleanup, ('Proto multi', "Must have same 'vv*' throughout", "No 'HR' either")),
+        'pulseSS': (18, "Xp7;vv0;Dh;", ("Should generate a very short <10 sec data burst with a sw pulse.  Look at plots for good overlay. e_wrap will have a delay.", "This is the shortest of all tests.  Useful for quick checks.")),
+        'rapidTweakRegressionH0': (208, 'Sh0;Xp10;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!')),
+        'offSitHysBmsBB': (590, modLowInitBB + slowTwitchDef + 'Xa-162;' + tranPrep + twitch + 'XQ568000;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),
+        'offSitHysBmsCH': (590, modLowInitCH + slowTwitchDef + 'Xa-162;' + tranPrep + twitch + 'XQ568000;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),
+        'triTweakDisch': (215, 'Xp13;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips')),
+        'coldStartBB': (272, 'D^-18;Xm247;Fi1000;Fo1000;Ca0.93;Sk0.5;Ds-0.06;Rb;Rf;vv4;DP1;Dh1000;W99;DI40;XQ220000;Fi1;Fo1;W10;' + quiet + cleanup, ("Should charge for a bit after hitting cutback on BMS.   Should see current gradually reduce.   Run until 'SAT' is displayed.   Could take ½ hour.", "The Ds term biases voc(soc) by delta x and makes a different type of saturation experience, to accelerate the test.", "Look at chart 'DOM 1' and verify that e_wrap misses ewlo_thr (thresholds moved as result of previous failures in this transient)", "Don't remember why this problem on cold day only.")),
+        'ampHiFailFf': (30, 'Ff1;' + modMidInit + tranPrep + c50 + 'XQ40000;' + c00 + quiet + cleanup, ("Should detect but not switch amp current failure. (See 'diff' and current!=0 on OLED).", "Run about 60s. Start by looking at 'DOM 1' fig 3. No fault record (keeps recording).  Verify that on Fig 3 the e_wrap goes through a threshold ~0.4 without tripping faults.", "This show when deploy with Fake Faults (Ff) don't throw false trips (it happened)", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
+        'ampLoFail': (72, modMidInit + tranPrep + cm50 + 'XQ50000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
+        'ampHiFailNoise': (52, modMidInit + tranPrep + noisePackage + c50 + 'XQ25000;' + c00 + silentPackage + quiet + cleanup, ("Noisy ampHiFail.  Should detect and switch amp current failure.", "Start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
+        'rapidTweakRegression40C': (193, 'D^15;Xp10' + quiet + cleanup, ("Should run three very large current discharge/recharge cycles without fault", "Self-terminates")),
+        'slowTweakRegression': (660, 'Xp11' + quiet + cleanup, ("Should run one very large slow (~15 min) current discharge/recharge cycle without fault.   It will take 60 seconds to start changing current.",)),
+        'satSitBB': (612, 'Xm247;Ca0.9962;' + fastTwitchDef + 'Xa17;' + tranPrep + 'XR;XQ600000;' + quiet + cleanup, ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
+        'satSitCH': (612, 'Xm247;Ca0.9920;' + fastTwitchDef + 'Xa17;' + tranPrep + 'XR;XQ600000;' + quiet + cleanup, ("Should run one saturation and de-saturation event without fault.   Takes about 15 minutes.", "operate around saturation, starting below, go above, come back down. Tune Ca to start just below vsat",)),
+        'flatSitHys': (580, 'Xm247;Ca0.9;Rb;Rf;Xts;Xa-81;Xf0.004;XW10000;XT10;XC2;W1;Ph;HR;Pf;vv4;Dh1000;W;Rs;XR;XQ580000;' + quiet + cleanup, ("Operate around 0.9.  For CHINS, will check EKF with flat voc(soc).   Takes about 10 minutes.", "Make sure EKF soc (soc_ekf) tracks actual soc without wandering.")),
+        'offSitHysBmsNoiseBB': (580, modLowInitBB + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + silentPackage + quiet + cleanup, ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
+        'offSitHysBmsNoiseCH': (580, modLowInitCH + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + silentPackage + quiet + cleanup, ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
+        'ampHiFailSlow': (452, modMidInit + tranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.", "Run for 6  minutes to see cc_diff_fa")),
+        'vHiFail': (65, modMidInit + tranPrep + zeroPulse + ';Dv0.82;XQ60000;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION")),
+        'vHiFailH': (65, modMidInit + tranPrep + 'SH.3;W10;' + zeroPulse + 'Dv0.82;XQ30000;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION.  Initial BB shift will be limited by hys table")),
+        'vHiFailFf': (65, 'Ff1;' + modMidInit + tranPrep + zeroPulse + 'Dv0.8;XQ60000;' + quiet + cleanup, ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.", "Usually shows SAT.")),
+        'pulseSSH': (18, 'Xp8;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
+        'tbFailMod': (72, modMidInit + tranPrep + 'Xv.002;Xu1;W4;Xu0;Xv1;XQ60000;' + quiet + cleanup, ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.",)),
+        'tbFailHdwe': (72, modMidInit + 'Xm246;' + tranPrep + 'Xv.002;W10;Xu1;W20;Xu0;Xv1;XQ60000;' + quiet + cleanup, ("Run for 60 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.", "'Xp0' in reset puts Xm back to 247.")),
+        'DvMon': (132, modMidInit + tranPrep + zeroPulse + 'Dw-0.8;Dn0.0001;XQ120000;' + quiet + cleanup, ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
+        'DvSim': (132, modMidInit + tranPrep + zeroPulse + 'Dy-0.8;Dn0.0001;XQ120000;' + quiet + cleanup, ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
+        'faultParade': (320, modMidInit + 'Dh1000;vv4;Dh1000;Dm50;Dn0.0001;W200;Dm0;Dn0;W20;Rf;XQ240000;' + quiet + cleanup, ("Check fault, history, and summary logging", "Should flag faults but take no action", "", "", "")),
+        }
+
+macro_lookup = {
+        'end_early': (22, 'Y;cc;Dh1800000;*W;*vv0;*XS;*Ca1;<Hd;<Pf;', ('', '', '', '')),
+        'modMidInit': (5, modMidInit, ('', '', '', '')),
+        'modLowInitBB': (5, modLowInitBB, ('', '', '', '')),
+        'modLowInitCH': (5, modLowInitCH, ('', '', '', '')),
+        'noisePackage': (5, noisePackage, ('', '', '', '')),
+        'silentPackage': (5, silentPackage, ('', '', '', '')),
+        'quiet': (5, quiet, ('', '', '', '')),
+        'cleanup': (5, cleanup, ('', '', '', '')),
+        'tempCleanup': (5, tempCleanup, ('', '', '', '')),
+        'zeroPulse': (5, zeroPulse, ('', '', '', '')),
+        'tranPrep': (5, tranPrep, ('', '', '', '')),
+        'slowTwitchDef': (5, slowTwitchDef, ('', '', '', '')),
+        'fastTwitchDef': (5, fastTwitchDef, ('', '', '', '')),
+        'c06': (5, c06, ('', '', '', '')),
+        'c50': (5, c50, ('', '', '', '')),
+        'cm50': (5, cm50, ('', '', '', '')),
+        'c00': (5, c00, ('', '', '', '')),
+        'twitch': (5, twitch, ('', '', '', '')),
+        }
+
 putty_connection = {'': 'test',
                     'soc0p': 'testsoc0p',
                     'pro0p': 'testpro0p',
@@ -572,16 +597,16 @@ def enter_mod_in_app():
     mod_in_app_button.config(text=mod_in_app.get())
 
 
-def grab_early():
-    add_to_clip_board(end_early.get())
-    end_early_butt.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
+def grab_macro():
+    add_to_clip_board(macro.get())
+    macro_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def grab_init():
     add_to_clip_board(init.get())
-    end_early_butt.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
+    macro_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
     init_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     clear_data_silent()
@@ -597,7 +622,7 @@ def grab_start():
                             text='save data')
     save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                                text='save data as')
-    end_early_butt.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
+    macro_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
     init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     start_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     start_timer()
@@ -610,6 +635,34 @@ def handle_modeling(*args):
         ref_remove()
     else:
         ref_restore()
+
+
+def handle_macro(*args):
+    lookup_macro()
+    macro_ = macro.get()
+
+    # Check if this is what you want to do
+    if macro_.__contains__('CH'):
+        if Test.battery == 'bb' or Ref.battery == 'bb':
+            confirmation = tk.messagebox.askyesno('query sensical', 'Test/Ref are "bb." Continue?')
+            if confirmation is False:
+                print('start over')
+                tkinter.messagebox.showwarning(message='try again')
+                option.set('try again')
+                return
+    elif macro.__contains__('BB'):
+        if Test.battery == 'ch' or Ref.battery == 'ch':
+            confirmation = tk.messagebox.askyesno('query sensical', 'Test/Ref are "cc." Continue?')
+            if confirmation is False:
+                print('start over')
+                tkinter.messagebox.showwarning(message='try again')
+                option.set('try again')
+                return
+
+    macro_option_show.set(macro_)
+    cf['others']['macro'] = macro_
+    cf.save_to_file()
+    macro_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def handle_option(*args):
@@ -692,6 +745,31 @@ def kill_putty(sys_=None, silent=True):
     else:
         result = run_shell_cmd(command, silent=silent)
     return result
+
+
+def lookup_macro():
+    dawdle_val_, macro_val_, ev_val = macro_lookup.get(macro.get())
+    macro.set(macro_val_)
+    macro_button.config(text=macro.get())
+    while len(ev_val) < 4:
+        ev_val = ev_val + ('',)
+    if ev_val[0]:
+        ev1_label.config(text='-' + ev_val[0])
+    else:
+        ev1_label.config(text='')
+    if ev_val[1]:
+        ev2_label.config(text='-' + ev_val[1])
+    else:
+        ev2_label.config(text='')
+    if ev_val[2]:
+        ev3_label.config(text='-' + ev_val[2])
+    else:
+        ev3_label.config(text='')
+    if ev_val[3]:
+        ev4_label.config(text='-' + ev_val[3])
+    else:
+        ev4_label.config(text='')
+    timer_val.set(dawdle_val_)
 
 
 def lookup_start():
@@ -1028,6 +1106,7 @@ if __name__ == '__main__':
     Test.create_file_path_and_key(cf['others']['option'])
     Ref.create_file_path_and_key(cf['others']['option'])
 
+    # init row
     empty_csv_path = tk.StringVar(master, os.path.join(Test.dataReduction_folder, 'empty.csv'))
     dum1, init_val, dum2 = lookup.get('satInit')
     init = tk.StringVar(master, init_val)
@@ -1046,6 +1125,7 @@ if __name__ == '__main__':
     init_button.pack(padx=5, pady=5)
     paste_label.pack(padx=5, pady=5)
 
+    # start row
     start = tk.StringVar(master, '')
     start_label = tk.Label(option_panel_left, text='copy start:', font=label_font_gentle)
     start_label.pack(padx=5, pady=5, expand=True, fill='x')
@@ -1058,17 +1138,35 @@ if __name__ == '__main__':
     start_button.pack(padx=5, pady=5, expand=True, fill='both')
     timer_val = tk.IntVar(master, 0)
 
-    dum1, end_early_val, dum2 = lookup.get('end_early')
-    end_early = tk.StringVar(master, end_early_val)
-    end_early_label = tk.Label(option_panel_left, text='end early:', font=label_font_gentle)
-    end_early_label.pack(padx=5, pady=5, expand=True, fill='x')
+    # macro panel
+    macro_sep_panel = tk.Frame(master)
+    macro_sep_panel.pack(expand=True, fill='x')
+    tk.Label(macro_sep_panel, text=' ', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    macro_panel = tk.Frame(master)
+    macro_panel.pack(expand=True, fill='both')
+    macro_panel_left = tk.Frame(macro_panel)
+    macro_panel_left.pack(side='left', fill='x')
+    macro_panel_ctr = tk.Frame(macro_panel)
+    macro_panel_ctr.pack(side='left', expand=True, fill='both')
+    macro_panel_right = tk.Frame(macro_panel)
+    macro_panel_right.pack(side='left', expand=True, fill='both')
+    macro_label = tk.Label(macro_panel_left, text='macros:', font=label_font_gentle)
+    macro_label.pack(padx=5, pady=5, expand=True, fill='x')
+    macro_option = tk.StringVar(master, str(cf['others']['macro']))
+    macro_option_show = tk.StringVar(master, str(cf['others']['macro']))
+    macro_sel = tk.OptionMenu(macro_panel_ctr, macro_option, *macro_list)
+    macro_sel.config(width=20, font=butt_font)
+    macro_sel.pack(padx=5, pady=5)
+    macro_option.trace_add('write', handle_macro)
+    dum1, macro_val_, dum2 = macro_lookup.get('end_early')
+    macro = tk.StringVar(master, macro_val_)
     if platform.system() == 'Darwin':
-        end_early_butt = myButton(option_panel_ctr, text=end_early.get(), command=grab_early, fg="purple", bg=bg_color,
-                                  justify=tk.LEFT, font=butt_font)
+        macro_button = myButton(macro_panel_right, text=macro.get(), command=grab_macro, fg="purple", bg=bg_color,
+                                justify=tk.LEFT, font=butt_font)
     else:
-        end_early_butt = myButton(option_panel_ctr, text=end_early.get(), command=grab_early, fg="purple", bg=bg_color, wraplength=wrap_length,
-                                  justify=tk.LEFT, font=butt_font)
-    end_early_butt.pack(padx=5, pady=5)
+        macro_button = myButton(macro_panel_right, text=macro.get(), command=grab_macro, fg="purple", bg=bg_color, wraplength=wrap_length,
+                                justify=tk.LEFT, font=butt_font)
+    macro_button.pack(padx=5, pady=5)
 
     # Note panel
     note_sep_panel = tk.Frame(master)
@@ -1167,4 +1265,5 @@ if __name__ == '__main__':
     handle_ref_batt()
     handle_modeling()
     handle_option()
+    # handle_macro()
     master.mainloop()
