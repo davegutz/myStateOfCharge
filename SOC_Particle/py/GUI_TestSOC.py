@@ -737,7 +737,7 @@ def kill_putty(sys_=None, silent=True):
 
 
 def lookup_macro():
-    dawdle_val_, macro_val, ev_val = macro_lookup.get(macro_option.get())
+    dum1, macro_val, ev_val = macro_lookup.get(macro_option.get())
     macro.set(macro_val)
     macro_button.config(text=macro.get())
     while len(ev_val) < 4:
@@ -758,7 +758,6 @@ def lookup_macro():
         ev4_label.config(text='-' + ev_val[3])
     else:
         ev4_label.config(text='')
-    timer_val.set(dawdle_val_)
 
 
 def lookup_start():
