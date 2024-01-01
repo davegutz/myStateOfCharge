@@ -650,7 +650,7 @@ def handle_macro(*args):
                 tkinter.messagebox.showwarning(message='try again')
                 option.set('try again')
                 return
-    elif macro.__contains__('BB'):
+    elif macro_.__contains__('BB'):
         if Test.battery == 'ch' or Ref.battery == 'ch':
             confirmation = tk.messagebox.askyesno('query sensical', 'Test/Ref are "cc." Continue?')
             if confirmation is False:
@@ -748,8 +748,8 @@ def kill_putty(sys_=None, silent=True):
 
 
 def lookup_macro():
-    dawdle_val_, macro_val_, ev_val = macro_lookup.get(macro.get())
-    macro.set(macro_val_)
+    dawdle_val_, macro_val, ev_val = macro_lookup.get(macro_option.get())
+    macro.set(macro_val)
     macro_button.config(text=macro.get())
     while len(ev_val) < 4:
         ev_val = ev_val + ('',)
@@ -1265,5 +1265,5 @@ if __name__ == '__main__':
     handle_ref_batt()
     handle_modeling()
     handle_option()
-    # handle_macro()
+    handle_macro()
     master.mainloop()
