@@ -74,7 +74,7 @@ sel_list = ['custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression
             'tempCleanup', 'zeroPulse', 'tranPrep', 'slowTwitchDef', 'fastTwitchDef', 'c06', 'c50', 'cm50', 'c00',
             'twitch'
             ]
-macro_list = [
+macro_sel_list = [
             'end_early', 'modMidInit', 'modLowInitBB', 'modLowInitCH', 'noisePackage', 'silentPackage', 'quiet',
             'cleanup', 'tempCleanup', 'zeroPulse', 'tranPrep', 'slowTwitchDef', 'fastTwitchDef', 'c06', 'c50', 'cm50',
             'c00', 'twitch'
@@ -86,7 +86,7 @@ modMidInit = 'cc;Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
 modLowInitBB = 'cc;Xm247;Ca0.050;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
 modLowInitCH = 'cc;Xm247;Ca0.103;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
 noisePackage = 'DT.05;DV0.05;DM.2;DN2;'
-silentPackage = 'DT.05;DV0.05;DM.2;DN2;'
+silentPackage = 'DT0;DV0;DM0;DN0;'
 quiet = 'vv0;Dh;'
 cleanup = 'Hd;Pf;<HR;<Rf;<XD;'
 tempCleanup = 'Hd;Pf;HR;Rf;XD;'
@@ -631,10 +631,10 @@ def handle_modeling(*args):
 
 def handle_macro(*args):
     lookup_macro()
-    macro_ = macro.get()
+    macro_option_ = macro_option.get()
 
     # Check if this is what you want to do
-    if macro_.__contains__('CH'):
+    if macro_option_.__contains__('CH'):
         if Test.battery == 'bb' or Ref.battery == 'bb':
             confirmation = tk.messagebox.askyesno('query sensical', 'Test/Ref are "bb." Continue?')
             if confirmation is False:
@@ -642,7 +642,7 @@ def handle_macro(*args):
                 tkinter.messagebox.showwarning(message='try again')
                 option.set('try again')
                 return
-    elif macro_.__contains__('BB'):
+    elif macro_option_.__contains__('BB'):
         if Test.battery == 'ch' or Ref.battery == 'ch':
             confirmation = tk.messagebox.askyesno('query sensical', 'Test/Ref are "cc." Continue?')
             if confirmation is False:
@@ -651,8 +651,8 @@ def handle_macro(*args):
                 option.set('try again')
                 return
 
-    macro_option_show.set(macro_)
-    cf['others']['macro'] = macro_
+    macro_option_show.set(macro_option_)
+    cf['others']['macro'] = macro_option_
     cf.save_to_file()
     macro_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
@@ -1142,16 +1142,18 @@ if __name__ == '__main__':
     macro_panel_ctr.pack(side='left', expand=True, fill='both')
     macro_panel_right = tk.Frame(macro_panel)
     macro_panel_right.pack(side='left', expand=True, fill='both')
+
     macro_label = tk.Label(macro_panel_left, text='macros:', font=label_font_gentle)
     macro_label.pack(padx=5, pady=5, expand=True, fill='x')
+
     macro_option = tk.StringVar(master, str(cf['others']['macro']))
     macro_option_show = tk.StringVar(master, str(cf['others']['macro']))
-    macro_sel = tk.OptionMenu(macro_panel_ctr, macro_option, *macro_list)
+
+    macro_sel = tk.OptionMenu(macro_panel_ctr, macro_option, *macro_sel_list)
     macro_sel.config(width=20, font=butt_font)
     macro_sel.pack(padx=5, pady=5)
     macro_option.trace_add('write', handle_macro)
-    dum1, macro_val_, dum2 = macro_lookup.get('end_early')
-    macro = tk.StringVar(master, macro_val_)
+    macro = tk.StringVar(master, '')
     if platform.system() == 'Darwin':
         macro_button = myButton(macro_panel_right, text=macro.get(), command=grab_macro, fg="purple", bg=bg_color,
                                 justify=tk.LEFT, font=butt_font)
