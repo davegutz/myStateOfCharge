@@ -485,10 +485,11 @@ class SavedData:
             # Ignore initial run of non-zero ib because resetting from previous run
             if zero_zero:
                 self.zero_end = 0
+                self.zero_start = 0
             else:
                 try:
-                    zero_start = np.where(abs(self.ib) < 0.02)[0][0]
-                    self.zero_end = zero_start
+                    self.zero_start = np.where(abs(self.ib) < 0.02)[0][0]
+                    self.zero_end = self.zero_start
                     while self.zero_end < len(self.ib) and abs(self.ib[self.zero_end]) <0.02:  # stop after first non-zero
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
@@ -497,6 +498,7 @@ class SavedData:
                         self.zero_end = 0
                 except IOError:
                     self.zero_end = 0
+            self.sync_time = self.time[self.zero_start]
             self.time_ref = self.time[self.zero_end]
             self.time -= self.time_ref
             self.time_min = self.time / 60.

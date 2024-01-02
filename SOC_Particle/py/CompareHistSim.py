@@ -149,7 +149,7 @@ def add_ib_lag(data, mon):
 
 
 # Add schedule lookups and do some rack and stack
-def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
+def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., time_sync=None):
     voc_soc = []
     soc_min = []
     vsat = []
@@ -167,6 +167,8 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
     bms_off_init = False
     bms_off = False
     rp = Retained()
+    if time_sync is None:
+        time_sync = d_ra.time_ux[0]
     for i in range(len(d_ra.time_ux)):
         soc = d_ra.soc[i]
         voc_stat = d_ra.voc_stat[i]
@@ -205,7 +207,7 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
         ib_quiet_thr.append(ib_quiet_thr_)
         soc_min.append((BB.chemistry.lut_min_soc.interp(d_ra.Tb[i])))
         vsat.append(mon.chemistry.nom_vsat + (d_ra.Tb[i] - mon.chemistry.rated_temp) * mon.chemistry.dvoc_dt)
-        time_sec.append(float(d_ra.time_ux[i] - d_ra.time_ux[0]))
+        time_sec.append(float(d_ra.time_ux[i] - time_sync))
         if i > 0:
             dt.append(float(d_ra.time_ux[i] - d_ra.time_ux[i - 1]))
         elif len(d_ra.time_ux) > 1:
@@ -215,8 +217,8 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
         dv_dyn_ = vb_ - voc_
         ib_charge.append(ib_charge_)
         dv_dyn.append(dv_dyn_)
-    time_min = (d_ra.time_ux-d_ra.time_ux[0])/60.
-    time_day = (d_ra.time_ux-d_ra.time_ux[0])/3600./24.
+    time_min = (d_ra.time_ux - time_sync)/60.
+    time_day = (d_ra.time_ux - time_sync)/3600./24.
     d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time', np.array(time_sec, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
@@ -931,7 +933,7 @@ def shift_time(mo, extra_shift=0.):
     # Shift time
     first_non_zero = 0
     n = len(mo.time)
-    while abs(mo.ib[first_non_zero]) < 0.5 and first_non_zero < n:
+    while abs(mo.ib[first_non_zero]) < 0.02 and first_non_zero < n:
         first_non_zero += 1
     if first_non_zero < n:  # success
         if first_non_zero > 0:
@@ -976,7 +978,7 @@ def add_mod(hist, mon_t_=False, mon=None):
 
 
 def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
-                     data_only=False, mon_t=False, unit_key=None):
+                     data_only=False, mon_t=False, unit_key=None, sync_time=None):
 
     print(f"\ncompare_hist_sim:\n{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n{mon_t=}\n{unit_key=}\n")
 
@@ -1047,12 +1049,12 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
     # Sort and augment data
     f_raw = np.unique(f_raw)
-    f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in)
+    f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
     print("\nf:\n", f.dtype.names, f, "\n")
     f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)
     h_raw = np.unique(h_raw)
     print("\nh raw:\n", h_raw.dtype.names, "\n", h_raw, "\n", h_raw.dtype.names, "\n")
-    h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in)
+    h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
     h = add_mod(h, mon_t, mon_old)
     h = add_chm(h, mon_t, mon_old, chm)
     print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after add_stuff\n")
@@ -1061,7 +1063,8 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
 
     # Shift time by detecting when ib changes
-    h_20C = shift_time(h_20C)
+    if sync_time is None:
+        h_20C = shift_time(h_20C)
 
     # Covert to fast update rate
     T_100 = 0.1
