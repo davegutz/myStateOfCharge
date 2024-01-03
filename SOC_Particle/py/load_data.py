@@ -22,7 +22,7 @@ from Battery import Battery, BatteryMonitor
 
 # Load from files
 def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_batt_cap=Battery.UNIT_CAP_RATED,
-              legacy=False, v1_only=False):
+              legacy=False, v1_only=False, zero_thr_in=0.02):
 
     print(f"load_data: \n{path_to_data=}\n{skip=}\n{unit_key=}\n{zero_zero_in=}\n{time_end_in=}\n{rated_batt_cap=}\n{legacy=}\n{v1_only=}")
 
@@ -76,10 +76,11 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         ekf_raw = None
         print(f"load_data: returning ekf_raw=None")
 
-    mon = SavedData(data=mon_raw, sel=sel_raw, ekf=ekf_raw, time_end=time_end_in, zero_zero=zero_zero_in)
+    mon = SavedData(data=mon_raw, sel=sel_raw, ekf=ekf_raw, time_end=time_end_in, zero_zero=zero_zero_in,
+                    zero_thr=zero_thr_in)
     if mon.chm is not None:
-        chm = mon.chm[0]
-    if path_to_data.__contains__('bb'):
+        chm = int(mon.chm[-1])
+    elif path_to_data.__contains__('bb'):
         chm = 0
     elif path_to_data.__contains__('ch'):
         chm = 1

@@ -351,6 +351,7 @@ if __name__ == '__main__':
         Bsim_in = None
         skip = 1
         zero_zero_in = False
+        zero_thr_in = 0.02
         # Save these
         # data_file_old_txt = '../dataReduction/real world Xp20 20220902.txt'; unit_key = 'soc0_2022'; use_ib_mon_in=True; scale_in=1.12
 
@@ -414,7 +415,8 @@ if __name__ == '__main__':
         if sel_file_clean:
             sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
                                         encoding=None).view(np.recarray)
-        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, time_end=time_end, zero_zero=zero_zero_in)
+        mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, time_end=time_end, zero_zero=zero_zero_in,
+                            zero_thr=zero_thr_in)
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,

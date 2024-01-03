@@ -437,7 +437,7 @@ def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, sk
 
 
 class SavedData:
-    def __init__(self, data=None, sel=None, ekf=None, time_end=None, zero_zero=False):
+    def __init__(self, data=None, sel=None, ekf=None, time_end=None, zero_zero=False, zero_thr=0.02):
         i_end = 0
         if data is None:
             self.i = 0
@@ -485,12 +485,10 @@ class SavedData:
             # Ignore initial run of non-zero ib because resetting from previous run
             if zero_zero:
                 self.zero_end = 0
-                self.zero_start = 0
             else:
                 try:
-                    self.zero_start = np.where(abs(self.ib) < 0.02)[0][0]
-                    self.zero_end = self.zero_start
-                    while self.zero_end < len(self.ib) and abs(self.ib[self.zero_end]) <0.02:  # stop after first non-zero
+                    self.zero_end = 0
+                    while self.zero_end < len(self.ib) and abs(self.ib[self.zero_end]) < zero_thr:  # stop after first non-zero
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
                     if self.zero_end == len(self.ib) - 1:
@@ -498,7 +496,6 @@ class SavedData:
                         self.zero_end = 0
                 except IOError:
                     self.zero_end = 0
-            self.sync_time = self.time[self.zero_start]
             self.time_ref = self.time[self.zero_end]
             self.time -= self.time_ref
             self.time_min = self.time / 60.
