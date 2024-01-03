@@ -371,6 +371,10 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.plot(mo.time, mo.ib_sel_stat - 2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')
         if hasattr(mv, 'ib_sel_stat'):
             plt.plot(mv.time, mv.ib_sel_stat - 2, color='blue', linestyle='--', label='ib_sel_stat' + test_str + '-2')
+        plt.plot(mo.time, mo.tb_flt, color='green', linestyle='-', label='tb_flt' + ref_str)
+        plt.plot(mv.time, mv.tb_flt, color='red', linestyle='--', label='tb_flt' + test_str)
+        plt.plot(mo.time, mo.tb_fa, color='magenta', linestyle='-.', label='tb_fa' + ref_str)
+        plt.plot(mv.time, mv.tb_fa, color='cyan', linestyle=':', label='tb_fa' + test_str)
         plt.plot(mo.time, mo.vb_sel + 2, color='magenta', linestyle='-', label='vb_sel_stat' + ref_str + '+2')
         plt.plot(mv.time, mv.vb_sel + 2, color='cyan', linestyle='--', label='vb_sel_stat' + test_str + '+2')
         plt.plot(mo.time, mo.tb_sel + 6, color='green', linestyle='-', label='tb_sel_stat' + ref_str + '+6')

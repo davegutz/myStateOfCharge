@@ -731,7 +731,7 @@ float BatterySim::calc_inj(const unsigned long long now, const uint8_t type, con
     sample_time_ = System.millis();
 
     // Return if time 0
-    if ( now== 0ULL )
+    if ( now == 0ULL )
     {
         duty_ = 0UL;
         sp.put_Inj_bias(0.);
@@ -770,7 +770,7 @@ float BatterySim::calc_inj(const unsigned long long now, const uint8_t type, con
             inj_bias = 0.;
             break;
     }
-    sp.put_Inj_bias(inj_bias);
+    sp.put_Inj_bias(inj_bias);  // memory
     return ( inj_bias );
 }
 

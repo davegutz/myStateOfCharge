@@ -531,15 +531,18 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 
     Sen->elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 because using ==0 as reset button
 
-    // Put a stop to this but retain sp.amp_z
-    if (Sen->now > Sen->stop_inj) sp.put_Type(0);
+    // Put a stop to this but retain sp.amp_z to scale fault and history printouts properly
+    if (Sen->now > Sen->stop_inj)
+    {
+      sp.put_Inj_bias(0);
+      sp.put_Type(0);
+    }
   }
 
   else if ( Sen->elapsed_inj && sp.tweak_test() )  // Done.  elapsed_inj set to 0 is the reset button
   {
     Serial.printf("STOP echo\n");
     Sen->elapsed_inj = 0ULL;
-    Serial.printf("running -vv0;*Xp0\n");
     chit("vv0;", ASAP);    // Turn off echo
     chit("Xp0;", SOON);    // Reset
   }
