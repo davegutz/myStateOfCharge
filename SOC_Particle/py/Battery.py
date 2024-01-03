@@ -544,8 +544,7 @@ class BatterySim(Battery):
         # self.sat_cutback_gain = 4.8  # Gain to retard ib when voc exceeds vsat, dimensionless
         self.sat_cutback_gain = 1000.*cutback_gain_sclr  # Gain to retard ib when soc approaches 1, dimensionless
         self.ds_voc_soc = ds_voc_soc
-        self.model_cutback = False  # Indicate that modeled current being limited on saturation cutback,
-        # T = cutback limited
+        self.model_cutback = False  # Indicate current being limited on saturation cutback, T = cutback limited
         self.model_saturated = False  # Indicator of maximal cutback, T = cutback saturated
         self.ib_sat = 0.5  # Threshold to declare saturation.  This regeneratively slows down charging so if too
         # small takes too long, A

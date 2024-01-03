@@ -915,9 +915,9 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
           Tb_hdwe, Tb, sp.mod_tb(), Tb_filt);
       Serial.printf("%s", pr.buff);
 
-      sprintf(pr.buff, "%d, %d, %7.3f, %7.3f, %d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,",
+      sprintf(pr.buff, "%d, %d, %7.3f, %7.3f, %d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%d,",
           Flt->fltw(), Flt->falw(), Flt->ib_rate(), Flt->ib_quiet(), Flt->tb_sel_status(),
-          Flt->cc_diff_thr(), Flt->ewhi_thr(), Flt->ewlo_thr(), Flt->ib_diff_thr(), Flt->ib_quiet_thr(), Flt->preserving());
+          Flt->cc_diff_thr(), Flt->ewhi_thr(), Flt->ewlo_thr(), Flt->ib_diff_thr(), Flt->ib_quiet_thr(), Flt->preserving(), ap.fake_faults);
       Serial.printf("%s\n", pr.buff);
   }
 }
@@ -1012,7 +1012,7 @@ void Sensors::shunt_select_initial(const boolean reset)
     // When running normally the model tracks hdwe to synthesize reference information
     if ( !sp.mod_ib() )
         Ib_model_in = Ib_hdwe;
-    // Otherwise it generates signals for feedback into hdwe
+    // Otherwise it generates signals for feedback into monitor
     else
         Ib_model_in = mod_add;
     // if ( sp.debug()==-24 ) Serial.printf("ib_bias_all%7.3f mod_add%7.3f Ib_model_in%7.3f\n", sp.ib_bias_all(), mod_add, Ib_model_in);

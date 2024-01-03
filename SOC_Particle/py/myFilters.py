@@ -242,11 +242,12 @@ class inline_exp_lag:
         if reset:
             self.lstate = inp
             self.rstate = inp
-        eTt = np.exp(-T/self.tau)
-        meTt = 1. - eTt
-        a = self.tau/T - eTt/meTt
-        b = 1./meTt - self.tau/T
-        c = meTt/T
+        if T > 0:
+            eTt = np.exp(-T/self.tau)
+            meTt = 1. - eTt
+            a = self.tau/T - eTt/meTt
+            b = 1./meTt - self.tau/T
+            c = meTt/T
         self.rate = c * (a*self.rstate + b*inp - self.lstate)
         self.rstate = inp
         self.lstate = self.lstate + T*self.rate
@@ -359,11 +360,12 @@ class LagExp(DiscreteFilter):
 
     def assign_coeff(self, _tau):
         self.tau = _tau
-        eTt = np.exp(-self.dt / self.tau)
-        meTt = 1. - eTt
-        self.a = self.tau / self.dt - eTt / meTt
-        self.b = 1.0 / meTt - self.tau / self.dt
-        self.c = meTt / self.dt
+        if self.dt > 0:
+            eTt = np.exp(-self.dt / self.tau)
+            meTt = 1. - eTt
+            self.a = self.tau / self.dt - eTt / meTt
+            self.b = 1.0 / meTt - self.tau / self.dt
+            self.c = meTt / self.dt
 
     def calc_state_(self, in_):
         self.rate = self.c * (self.a * self.rstate + self.b * in_ - self.state)
