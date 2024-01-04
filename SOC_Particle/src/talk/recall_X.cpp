@@ -59,21 +59,21 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                 case ( 6 ):  // Xp6:  Program a pulse for EKF test
-                    chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;Dr100;DP20;vv4;Rs;", QUEUE);  // setup
-                    chit("Dn.00001;Dm500;Dm-500;Dm0;", QUEUE);  // run
-                    chit("W10;Pm;vv0;", QUEUE);  // finish
+                    chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;Dr100;DP20;vv4;Rs;", SOON);  // setup
+                    chit("Dn.00001;Dm500;Dm-500;Dm0;", SOON);  // run
+                    chit("W10;Pm;vv0;", SOON);  // finish
                     break;
 
                 case ( 7 ):  // Xp7:  Program a sensor pulse for State Space test
-                    chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;Rs;", QUEUE);  // setup
-                    chit("Dn.00001;W2;Dm500;Dm-500;Dm0;W2;", QUEUE);  // run
+                    chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;Rs;", SOON);  // setup
+                    chit("Dn.00001;W2;Dm500;Dm-500;Dm0;W2;", SOON);  // run
                     break;
 
                 case ( 8 ):  // Xp8:  Program a hardware pulse for State Space test
-                    chit("XS;Di0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;Rs;", QUEUE);  // setup
-                    chit("W2;DI500;DI-500;DI0;W2;", QUEUE);  // run
+                    chit("XS;Di0;Xm255;Ca.5;Pm;Dr100;DP1;D>100;vv2;Rs;", SOON);  // setup
+                    chit("W2;DI500;DI-500;DI0;W2;", SOON);  // run
                     murmur = "D>" + String(TALK_DELAY) + ";W10;Pm;vv0;Dr" + String(READ_DELAY) + ";Dh" + String(SUMMARY_DELAY) + ";";
-                    chit(murmur, QUEUE);  // finish
+                    chit(murmur, SOON);  // finish
                     break;
 
                 case ( 9 ): case( 10 ): case ( 11 ): case( 12 ): case( 13 ): // Xp9: Xp10: Xp11: Xp12: Xp13:  Program regression
@@ -109,20 +109,20 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     break;
 
                 case( 20 ): case ( 21 ):    // Xp20:  Xp21:  20= 0.5 s sample/2.0s print, 21= 2 s sample/8 s print
-                    chit("vv0;", QUEUE);       // Turn off debug temporarily so not snowed by data dumps
-                    chit("Pa;", QUEUE);       // Print all for record
+                    chit("vv0;", SOON);       // Turn off debug temporarily so not snowed by data dumps
+                    chit("Pa;", SOON);       // Print all for record
                     if ( INT_in == 20 )
                     {
-                        chit("Dr500;", QUEUE);  // 5x sample time, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Python
-                        chit("DP4;", QUEUE);    // 4x data collection, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Python
-                        chit("vv2;", QUEUE);     // Large data set
+                        chit("Dr500;", SOON);  // 5x sample time, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Python
+                        chit("DP4;", SOON);    // 4x data collection, > ChargeTransfer_T_MAX.  ChargeTransfer dynamics disabled in Python
+                        chit("vv2;", SOON);     // Large data set
                     }
                     else if ( INT_in == 21 )
                     {
-                        chit("DP20;", QUEUE);   // 20x data collection
-                        chit("vv2;", QUEUE);     // Slow data collection
+                        chit("DP20;", SOON);   // 20x data collection
+                        chit("vv2;", SOON);     // Slow data collection
                     }
-                    chit("Rb;", QUEUE);       // Large data set
+                    chit("Rb;", SOON);       // Large data set
                     break;
 
                 default:

@@ -105,14 +105,13 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 if __name__ == '__main__':
-    data_file_folder_ref_ = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111'
-    data_file_folder_test_ = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b'
-    rel_path_to_save_pdf_ = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
-    rel_path_to_temp_ = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'
+    keys = [('offSitHysBmsNoiseBB_pro1a_bb.csv', 'g20231111_pro1a_bb'),
+            ('offSitHysBmsNoiseBB_pro1a_bb.csv', 'g20231111b_pro1a_bb')]
+    data_file_folder_ref = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111'
+    data_file_folder_test = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b'
+    rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
+    rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'
 
-    keys_ref_test = [('rapidTweakRegression_pro1a_bb.csv', 'pro1a_bb'),
-                     ('rapidTweakRegression_pro1a_bb.csv', 'pro1a_bb')]
-
-    compare_run_run(keys=keys_ref_test,
-                    data_file_folder_ref=data_file_folder_ref_, data_file_folder_test=data_file_folder_test_,
-                    rel_path_to_save_pdf=rel_path_to_save_pdf_, rel_path_to_temp=rel_path_to_temp_)
+    compare_run_run(keys=keys,
+                    data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test,
+                    rel_path_to_save_pdf=rel_path_to_save_pdf, rel_path_to_temp=rel_path_to_temp)

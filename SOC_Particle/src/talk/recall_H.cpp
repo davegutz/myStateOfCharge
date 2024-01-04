@@ -41,7 +41,7 @@ boolean recall_H(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
         Serial.printf("\n");
         print_all_fault_buffer("unit_h", mySum, sp.isum(), sp.nsum());
         sp.print_fault_header();
-        chit("Pr;Q;", QUEUE);
+        chit("Pr;Q;", SOON);
         Serial.printf("\n");
         // sp.print_history_array();
         // sp.print_fault_header();

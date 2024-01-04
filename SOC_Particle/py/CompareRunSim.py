@@ -163,8 +163,8 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
 
 
 if __name__ == '__main__':
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\coldStart_pro0p_ch.csv'
-    unit_key = 'g20231111b_pro0p_ch'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\pulseSSH_pro3p2_bb.csv'
+    unit_key = 'g20231111b_pro3p2_bb'
     time_end_in = None
     rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
     rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'

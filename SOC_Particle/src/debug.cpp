@@ -148,7 +148,7 @@ soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling %d\n",
     -(Mon->delta_q_neg() + Mon->delta_q_pos()) / nice_zero(Mon->time_neg() + Mon->time_pos(), 1e-6),
     Mon->delta_q_neg(), Mon->time_neg(), Mon->delta_q_pos(), Mon->time_pos());
 
-  if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", QUEUE);
+  if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", SOON);
 }
 
 // Calibration

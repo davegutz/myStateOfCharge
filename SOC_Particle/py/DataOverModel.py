@@ -37,6 +37,7 @@ from myFilters import LagExp
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 import Chemistry_BMS
 plt.rcParams.update({'figure.max_open_warning': 0})
+from Colors import *
 
 
 def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
@@ -496,7 +497,10 @@ class SavedData:
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
                     if self.zero_end == len(self.ib) - 1:
-                        print(f"\n\nLikely ib is zero throught the data.  Check setup and retry\n\n")
+                        print(Colors.fg.red, f"\n\nLikely ib is zero throughout the data.  Check setup and retry\n\n", Colors.reset)
+                        self.zero_end = 0
+                    elif self.zero_end == -1:
+                        print(Colors.fg.red, f"\n\nLikely ib is noisy throughout the data.  Check setup and retry\n\n", Colors.reset)
                         self.zero_end = 0
                 except IOError:
                     self.zero_end = 0

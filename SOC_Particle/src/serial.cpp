@@ -243,9 +243,6 @@ void serialEvent()
         else
             serial_str += in_char;  // process new valid character
 
-        #if defined(DEBUG_SERIAL_QUEUE)
-            Serial.printf("serialEvent: serial_str [%s] inp_str[%s]\n", serial_str.c_str(), cp.inp_str.c_str());
-        #endif
     }
 
     // Pass info to inp_str
@@ -295,9 +292,6 @@ void serialEvent1()
         else
             serial_str1 += in_char1;  // process new valid character
 
-        #if defined(DEBUG_SERIAL_QUEUE) || defined(DEBUG_QUEUE)
-            Serial.printf("serialEvent1: serial_str1 [%s] inp_str[%s]\n", serial_str1.c_str(), cp.inp_str.c_str());
-        #endif
     }
 
     // Pass info to inp_str

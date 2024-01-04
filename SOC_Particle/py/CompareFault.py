@@ -27,6 +27,7 @@ from Util import cat
 from resample import resample
 from PlotGP import tune_r
 from PlotKiller import show_killer
+from Colors import *
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 IB_BAND = 1.  # Threshold to declare charging or discharging
@@ -758,6 +759,12 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
         dt_hys_min = 1.
         dt_hys_sec = dt_hys_min * 60.
         hys_time_min = np.arange(t_s_min, t_e_min, dt_hys_min, dtype=float)
+        min_per_month = 30*24*60;
+        if len(hys_time_min) > 2 * min_per_month:
+            print(Colors.fg.red)
+            print("HUGE time range.  Something is wrong with time")
+            print(Colors.reset)
+            return None
         # Note:  Hysteresis_20220917d instantiates hysteresis state to 0. unless told otherwise
         dv_hys_remodel = []
         for i in range(len(hys_time_min)):

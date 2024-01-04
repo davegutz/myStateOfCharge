@@ -15,7 +15,6 @@ const String unit = version + "_pro3p2";
 // #define DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
 // #define LOGHANDLE
-// #define DEBUG_SERIAL_QUEUE
 
 // * = SRAM EEPROM adjustments, retained on power reset
 
