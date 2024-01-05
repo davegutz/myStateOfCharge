@@ -1615,7 +1615,8 @@ private:
 
 	// static const size_t COMMAND_LIST_STACK_SIZE = 4;   dag 12/5/2023
 
-	static const size_t COMMAND_LIST_STACK_SIZE = 12;
+	// static const size_t COMMAND_LIST_STACK_SIZE = 12;  dag 1/5/2024
+	static const size_t COMMAND_LIST_STACK_SIZE = 24;
 
 	TwoWire &wire;
 	int addr;
