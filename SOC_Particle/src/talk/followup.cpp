@@ -283,7 +283,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                 case ( 'Q' ): //  XQ<>: time until quiet
                     if ( ap.until_q_p->success() )
                         Serial.printf("Going black for %7.1f seconds\n", float(ap.until_q) / 1000.);
-                        Serial.printf("Freezing queues.  When using 'XQ' unfreeze with 'cc'");
+                        Serial.printf("Freezing queues.  When using 'XQ' unfreeze with 'cc'\n");
                         cp.freeze = true;
                     break;
             }

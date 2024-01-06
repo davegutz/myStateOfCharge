@@ -402,9 +402,8 @@ def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, sk
             try:
                 for line in input_file:
                     if line.__contains__('FRAG'):
-                        print("DataOverModel(write_clean_file): Heap fragmentation error detected in Particle.  Decrease NSUM constant and re-run")
-                        x = 1/0
-                        break
+                        print(Colors.fg.red, "\n\n\nDataOverModel(write_clean_file): Heap fragmentation error detected in Particle.  Decrease NSUM constant and re-run\n\n", Colors.reset)
+                        return None
                     if line.__contains__(title_key):
                         if have_header_str is None:
                             have_header_str = True  # write one title only

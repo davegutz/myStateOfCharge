@@ -113,7 +113,7 @@ lookup = {
                     '  D^15;Xp10' +                                                     # rapidTweakRegression40C
                     '  Pf;Xp11;  ' +                                                    # slowTweakRegression
                     'Xm247;Ca0.9;Rb;Rf;Xts;Xa-81;Xf0.004;XW10000;XT10;XC2;W1;HR;vv4;Dh1000;W;Rs;XR;XQ580000;' + tempCleanup +  # flatSitHys
-                    modMidInit + tranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + tempCleanup + # ampHiFailSlow
+                    modMidInit + tranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + tempCleanup +  # ampHiFailSlow
                     modMidInit + tranPrep + zeroPulse + ';Dv0.82;XQ60000;' + 'Dv0;' + tempCleanup +  # vHiFail
                     modMidInit + tranPrep + 'Xv.002;Xu1;XQ80000;Xu0;Xv1;W50;' + tempCleanup +  # tbFailMod
                     modMidInit + 'Xm246;' + tranPrep + 'Xv.002;W10;Xu1;XQ80000;Xu0;Xv1;W50;' + tempCleanup +  # tbFailHdwe
