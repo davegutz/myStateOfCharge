@@ -137,8 +137,8 @@ PrinterPars pr = PrinterPars();       // Print buffer
 VolatilePars ap = VolatilePars();     // Various adjustment parameters commanding at system level.  Initialized on start up.  Not retained.
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level.  Initialized on start up.  Not retained.
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
-unsigned long long millis_flip = millis(); // Timekeeping
-unsigned long long last_sync = millis();   // Timekeeping
+unsigned long long millis_flip = System.millis(); // Timekeeping
+unsigned long long last_sync = System.millis();   // Timekeeping
 
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
@@ -268,13 +268,13 @@ void setup()
   }
   else Serial.printf("clean\n");
 
-  // Determine millis() at turn of Time.now   Used to improve accuracy of timing.
+  // Determine System.millis() at turn of Time.now   Used to improve accuracy of timing.
   long time_begin = Time.now();
   uint16_t count = 0;
   while ( Time.now()==time_begin && count++<1000 )
   {
     delay(1);
-    millis_flip = millis()%1000;
+    millis_flip = System.millis()%1000;
   }
 
   // Enable and print stored history
@@ -311,9 +311,8 @@ void setup()
 void loop()
 {
   // Synchronization
-  static unsigned long long now = (unsigned long long) millis();
-  unsigned long long time_now = (unsigned long long) Time.now();
-  now = (unsigned long long) millis();
+  static unsigned long long now = (unsigned long long) System.millis();
+  now = (unsigned long long) System.millis();
   boolean chitchat = false;
   static Sync *Talk = new Sync(TALK_DELAY);
   boolean read = false;
@@ -327,14 +326,15 @@ void loop()
   static Sync *Summarize = new Sync(SUMMARY_DELAY);
   boolean control;
   static Sync *ControlSync = new Sync(CONTROL_DELAY);
-  static unsigned long long start = millis();
   unsigned long long elapsed = 0;
   static boolean reset = true;
   static boolean reset_temp = true;
   static boolean reset_publish = true;
+  static unsigned long long start = System.millis();
 
   // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize, time_now);
+  unsigned long long time_now = (unsigned long long) Time.now();
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize, time_now, start);
 
    // Monitor to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor();
@@ -353,15 +353,15 @@ void loop()
   char buffer[32];
   time_long_2_str(time_now, buffer);
   hm_string = String(buffer);
-  read_temp = ReadTemp->update(millis(), reset);
-  read = ReadSensors->update(millis(), reset);
-  chitchat = Talk->update(millis(), reset);
+  read_temp = ReadTemp->update(System.millis(), reset);
+  read = ReadSensors->update(System.millis(), reset);
+  chitchat = Talk->update(System.millis(), reset);
   elapsed = ReadSensors->now() - start;
-  control = ControlSync->update(millis(), reset);
-  display_and_remember = DisplayUserSync->update(millis(), reset);
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) && !sp.modeling_z;
-  if ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.his_delay) ) boot_wait = false;
-  summarizing = Summarize->update(millis(), false) || boot_summ;
+  control = ControlSync->update(System.millis(), reset);
+  display_and_remember = DisplayUserSync->update(System.millis(), reset);
+  boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay) ) && !sp.modeling_z;
+  if ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay) ) boot_wait = false;
+  summarizing = Summarize->update(System.millis(), false) || boot_summ;
 
   // Sample temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt
