@@ -36,8 +36,8 @@
         "chrono": "cpp",
         "xhash": "cpp"
     },
-    "particle.firmwareVersion": "3.3.1",
-    "particle.targetPlatform": "photon",
+    "particle.firmwareVersion": "5.6.0",
+    "particle.targetPlatform": "argon",
     "C_Cpp.errorSquiggles": "disabled",
     "particle.targetDevice": "soc0p"
 }
