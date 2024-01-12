@@ -39,5 +39,5 @@
     "particle.firmwareVersion": "3.3.1",
     "particle.targetPlatform": "photon",
     "C_Cpp.errorSquiggles": "disabled",
-    "particle.targetDevice": "pro0p"
+    "particle.targetDevice": "soc0p"
 }
