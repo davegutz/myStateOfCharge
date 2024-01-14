@@ -149,6 +149,10 @@ soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling %d\n",
     Mon->delta_q_neg(), Mon->time_neg(), Mon->delta_q_pos(), Mon->time_pos());
 
   if ( Sen->Flt->falw() || Sen->Flt->fltw() ) chit("Pf;", SOON);
+  time_long_2_str((time_t)sp.Time_now_z, pr.buff);
+  Serial.printf(" time %ld hms:  %s\n", sp.Time_now_z, pr.buff);
+  Serial1.printf(" time %ld hms:  %s\n", sp.Time_now_z, pr.buff);
+
 }
 
 // Calibration
