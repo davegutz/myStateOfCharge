@@ -1,0 +1,1332 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2024.01.12 12:15:07 =~=~=~=~=~=~=~=~=~=~=~=
+
+
+saved (sp) diffs
+ Add amp                  1.003 ->     0.973,          A (* DA)
+ Add noa                  0.173 ->     0.150,          A (* DB)
+Reset to defaults? [Y/n]:
+
+saved (sp) diffs
+ Add amp                  1.003 ->     0.973,          A (* DA)
+ Add noa                  0.173 ->     0.150,          A (* DB)
+Reset to defaults? [Y/n]:
+
+saved (sp) diffs
+ Add amp                  1.003 ->     0.973,          A (* DA)
+ Add noa                  0.173 ->     0.150,          A (* DB)
+Reset to defaults? [Y/n]:
+
+saved (sp) diffs
+ Add amp                  1.003 ->     0.973,          A (* DA)
+ Add noa                  0.173 ->     0.150,          A (* DB)
+Reset to defaults? [Y/n]:
+
+saved (sp) diffs
+ Add amp                  1.003 ->     0.973,          A (* DA)
+ Add noa                  0.173 ->     0.150,          A (* DB)
+Reset to defaults? [Y/n]:
+
+saved (sp) diffs
+ Add amp                  1.003 ->     0.973,          A (* DA)
+ Add noa                  0.173 ->     0.150,          A (* DB)
+Reset to defaults? [Y/n]:n
+
+saved (sp) diffs
+ Add amp                  1.003 ->     0.973,          A (* DA)
+ Add noa                  0.173 ->     0.150,          A (* DB)
+Reset to defaults? [Y/n]:
+
+saved (sp) diffs
+ Add amp                  1.003 ->     0.973,          A (* DA)
+ Add noa                  0.173 ->     0.150,          A (* DB)
+Reset to defaults? [Y/n]:
+ N.  moving on...
+
+End setup()
+
+SHUNT MON Amp started
+SHUNT MON No Amp started
+DS18 1-wire Tb started
+CH dv_min_abs=  0.060, cap=10000.0
+Vb sense ADC pin started
+CH dv_min_abs=  0.060, cap=10000.0
+
+
+temp init complete
+Summ...
+RR;
+
+cmd: RR
+RESET
+cmd: HR
+Reset sum, his, flt...done
+
+temp init complete
+cmd: Rf
+Reset latches
+reset ib flt
+reset vb flts
+reset tb flts
+cmd: Hs
+Summ...
+cmd: Pf
+unit_h, 2024-01-12T17:22:52, 1705080172,  14.625,  14.481,   0.013,   0.000,  14.625,  14.481,   0.013,  1.0000,  0.0459,  0.9982,  14.480,  14.480,   0.215, 0, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+Sen::
+Fault:
+ cc_diff   -0.002  thr=500.000 Fc^
+ ib_diff   -0.033  thr= 10.000 Fd^
+ e_wrap     0.216  thr=-786.080 Fo^628.864 Fi^
+ ib_quiet  -0.024  thr=  0.005 Fq v
+
+ soc    1.000  soc_inf   1.000 voc  14.481  voc_soc  14.700
+ dis_tb_fa 0  dis_vb_fa 0  dis_ib_fa 0
+ bms_off   0
+
+ Tbh= 14.625  Tbm= 14.625 sel  14.625
+ Vbh  14.481  Vbm  14.640 sel  14.481
+ imh   0.030  imm   0.030 sel   0.030
+ inh   0.173  inm   0.030 sel   0.030
+
+ mod_tb 0 mod_vb 0 mod_ib  0
+ mod_tb_dscn 0 mod_vb_dscn 0 mod_ib_amp_dscn 0 mod_ib_noa_dscn 0
+ tb_s_st 1  vb_s_st 1  ib_s_st 1
+ fake_faults 1 latched_fail 0 latched_fail_fake 0 preserving 0
+
+ bare det n  0  x 
+ bare det m  0  x 
+ ib_dsc  0  0 'Fq v'
+ ibd_lo  0  0 'Fd ^  *SA/*SB'
+ ibd_hi  0  0 'Fd ^  *SA/*SB'
+ red wv  0  0   'Fd, Fi/Fo ^'
+ wl      0  0 'Fo ^'
+ wh      0  0 'Fi ^'
+ cc_dif  x  0 'Fc ^'
+ ib n    0  0 'Fi 1'
+ ib m    0  0 'Fi 1'
+ vb      0  0 'Fv 1  *SV, *Dc/*Dv'
+ tb      0  0 'Ft 1'
+  0000000000000   00000000000
+  CBA98765x3210 xxA9876543210
+  fltw=0     falw=0
+fake_faults=>redl
+
+
+^M  
+
+
+
+Hd; PR; PV; Pf; Q;
+
+cmd: Hd
+
+print_all_fault_buffer: iflt 0 nflt 140
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+cmd: Pr
+
+saved (sp) diffs
+**none**
+
+cmd: Q
+ib_amp_fail 0
+ib_noa_fail 0
+vb_fail 0
+Tb 14.625
+vb 14.481
+voc 14.481
+voc_filt 14.460
+vsat 13.759
+ib -0.020
+soc_m  1.0000
+soc_ekf  0.9982
+soc  1.0000
+soc_min  0.0459
+soc_inf  1.0000
+modeling 0
+dq_inf/dq_abs       4.0/       2.0   1.9355 coul_eff*=65977.380812, DAB+= 0.000596
+DQn      -0.1 Tn     110.7 DQp       0.0 Tp       0.0
+cmd: PR
+
+saved (sp) all
+ Inj amp                  0.000 ->     0.000,    Amps pk (* Xa)
+ Cutback gain scalar      1.000 ->     1.000,        slr (* Sk)
+ Verbosity                    0 ->         0,        int (* vv)
+ Charge chg Sim             0.0 ->       0.0,          C (* qs)
+ Charge chg                 0.0 ->       0.0,          C (* qm)
+ Tab mon adj              0.000 ->     0.000,          v (* Dw)
+ Inj freq                 0.000 ->     0.000,         Hz (* Xf)
+ Del all                  0.000 ->     0.000,          A (* DI)
+ Add amp                  1.003 ->     1.003,          A (* DA)
+ Add noa                  0.173 ->     0.173,          A (* DB)
+ Slr amp                  1.006 ->     1.006,          A (* SA)
+ Slr noa                  1.042 ->     1.042,          A (* SB)
+ curr sel mode                1 ->         1, (-1=n, 0=a (* si)
+ Fault buffer indx            7 ->         3,       uint (* if)
+ Hist buffer indx            56 ->         0,       uint (* ih)
+ Injection bias           0.000 ->     0.000,          A (* Xb)
+ Summ buffer indx           140 ->         0,       uint (* is)
+ Modeling bitmap              0 ->         0,       [0x] (* Xm)
+ Monitor battery              1 ->         1, 0=BB, 1=CH (* Bm)
+ Number parallel          2.000 ->     2.000,      units (* BP)
+ Number series            1.000 ->     1.000,      units (* BS)
+ Preserving fault             0 ->         0, T=Preserve (* X?)
+ Sim battery                  1 ->         1, 0=BB, 1=CH (* Bs)
+ Scalar cap Mon           1.000 ->     1.000,        slr (* SQ)
+ Scalar cap Sim           1.000 ->     1.000,        slr (* Sq)
+ Bias Tb sensor           0.000 ->     0.000,       dg C (* Dt)
+ UNIX time epoch    1669801880 -> 1705080282,        sec (* UT)
+ Inj type                     0 ->         0, 1sn 2sq 3t (* Xt)
+ Tb Sim rate lim mem     25.000 ->    14.625,       dg C (* ts)
+ Tb rate lim mem         25.000 ->    14.625,       dg C (* tm)
+ Bias Vb sensor           0.030 ->     0.030,          v (* Dc)
+ Scale Vb sensor          1.017 ->     1.017,          v (* SV)
+
+saved (sp) diffs
+**none**
+
+cmd: PV
+
+
+
+volatile off:
+**none**
+
+cmd: Pf
+unit_h, 2024-01-12T17:22:52, 1705080172,  14.625,  14.481,   0.013,   0.000,  14.625,  14.481,   0.013,  1.0000,  0.0459,  0.9982,  14.480,  14.480,   0.215, 0, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+unit_f, 2024-01-12T17:23:42, 1705080222,  14.625,  14.498,   0.048,   0.085,  14.625,  14.498,   0.048,  1.0000,  0.0459,  0.9982,  14.497,  14.497,   0.211, 0, 0,
+unit_f, 2024-01-12T17:23:52, 1705080232,  14.625,  14.493,   0.048,   0.085,  14.625,  14.493,   0.048,  1.0000,  0.0459,  0.9982,  14.488,  14.488,   0.210, 0, 0,
+unit_f, 2024-01-12T17:24:02, 1705080242,  14.625,  14.485,   0.048,   0.085,  14.625,  14.485,   0.048,  1.0000,  0.0459,  0.9982,  14.480,  14.480,   0.209, 1024, 0,
+unit_f, 2024-01-12T17:24:12, 1705080252,  14.625,  14.493,   0.048,   0.085,  14.625,  14.493,   0.048,  1.0000,  0.0459,  0.9982,  14.505,  14.505,   0.207, 0, 0,
+unit_f, 2024-01-12T17:24:22, 1705080262,  14.625,  14.485,   0.048,   0.085,  14.625,  14.485,   0.048,  1.0000,  0.0459,  0.9982,  14.484,  14.484,   0.206, 0, 0,
+unit_f, 2024-01-12T17:24:32, 1705080272,  14.625,  14.493,   0.013,   0.085,  14.625,  14.493,   0.013,  1.0000,  0.0459,  0.9982,  14.488,  14.488,   0.209, 0, 0,
+unit_f, 2024-01-12T17:24:42, 1705080282,  14.625,  14.481,   0.013,   0.000,  14.625,  14.481,   0.013,  1.0000,  0.0459,  0.9982,  14.481,  14.481,   0.211, 0, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+Sen::
+Fault:
+ cc_diff   -0.002  thr=500.000 Fc^
+ ib_diff   -0.032  thr= 10.000 Fd^
+ e_wrap     0.211  thr=-786.080 Fo^628.864 Fi^
+ ib_quiet  -0.006  thr=  0.005 Fq v
+
+ soc    1.000  soc_inf   1.000 voc  14.489  voc_soc  14.700
+ dis_tb_fa 0  dis_vb_fa 0  dis_ib_fa 0
+ bms_off   0
+
+ Tbh= 14.625  Tbm= 14.625 sel  14.625
+ Vbh  14.490  Vbm  14.640 sel  14.490
+ imh   0.030  imm   0.030 sel   0.030
+ inh  -0.001  inm   0.030 sel   0.030
+
+ mod_tb 0 mod_vb 0 mod_ib  0
+ mod_tb_dscn 0 mod_vb_dscn 0 mod_ib_amp_dscn 0 mod_ib_noa_dscn 0
+ tb_s_st 1  vb_s_st 1  ib_s_st 1
+ fake_faults 1 latched_fail 0 latched_fail_fake 0 preserving 0
+
+ bare det n  0  x 
+ bare det m  0  x 
+ ib_dsc  0  0 'Fq v'
+ ibd_lo  0  0 'Fd ^  *SA/*SB'
+ ibd_hi  0  0 'Fd ^  *SA/*SB'
+ red wv  0  0   'Fd, Fi/Fo ^'
+ wl      0  0 'Fo ^'
+ wh      0  0 'Fi ^'
+ cc_dif  x  0 'Fc ^'
+ ib n    0  0 'Fi 1'
+ ib m    0  0 'Fi 1'
+ vb      0  0 'Fv 1  *SV, *Dc/*Dv'
+ tb      0  0 'Ft 1'
+  0000000000000   00000000000
+  CBA98765x3210 xxA9876543210
+  fltw=0     falw=0
+fake_faults=>redl
+cmd: Q
+ib_amp_fail 0
+ib_noa_fail 0
+vb_fail 0
+Tb 14.625
+vb 14.481
+voc 14.481
+voc_filt 14.460
+vsat 13.759
+ib -0.020
+soc_m  1.0000
+soc_ekf  0.9982
+soc  1.0000
+soc_min  0.0459
+soc_inf  1.0000
+modeling 0
+dq_inf/dq_abs       4.0/       2.1   1.9222 coul_eff*=79976.825058, DAB+= 0.000714
+DQn      -0.1 Tn     112.0 DQp       0.0 Tp       0.0
+cmd: Pf
+unit_h, 2024-01-12T17:22:52, 1705080172,  14.625,  14.481,   0.013,   0.000,  14.625,  14.481,   0.013,  1.0000,  0.0459,  0.9982,  14.480,  14.480,   0.215, 0, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+unit_f, 2024-01-12T17:23:42, 1705080222,  14.625,  14.498,   0.048,   0.085,  14.625,  14.498,   0.048,  1.0000,  0.0459,  0.9982,  14.497,  14.497,   0.211, 0, 0,
+unit_f, 2024-01-12T17:23:52, 1705080232,  14.625,  14.493,   0.048,   0.085,  14.625,  14.493,   0.048,  1.0000,  0.0459,  0.9982,  14.488,  14.488,   0.210, 0, 0,
+unit_f, 2024-01-12T17:24:02, 1705080242,  14.625,  14.485,   0.048,   0.085,  14.625,  14.485,   0.048,  1.0000,  0.0459,  0.9982,  14.480,  14.480,   0.209, 1024, 0,
+unit_f, 2024-01-12T17:24:12, 1705080252,  14.625,  14.493,   0.048,   0.085,  14.625,  14.493,   0.048,  1.0000,  0.0459,  0.9982,  14.505,  14.505,   0.207, 0, 0,
+unit_f, 2024-01-12T17:24:22, 1705080262,  14.625,  14.485,   0.048,   0.085,  14.625,  14.485,   0.048,  1.0000,  0.0459,  0.9982,  14.484,  14.484,   0.206, 0, 0,
+unit_f, 2024-01-12T17:24:32, 1705080272,  14.625,  14.493,   0.013,   0.085,  14.625,  14.493,   0.013,  1.0000,  0.0459,  0.9982,  14.488,  14.488,   0.209, 0, 0,
+unit_f, 2024-01-12T17:24:42, 1705080282,  14.625,  14.481,   0.013,   0.000,  14.625,  14.481,   0.013,  1.0000,  0.0459,  0.9982,  14.481,  14.481,   0.211, 0, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+Sen::
+Fault:
+ cc_diff   -0.002  thr=500.000 Fc^
+ ib_diff   -0.033  thr= 10.000 Fd^
+ e_wrap     0.211  thr=-786.080 Fo^628.864 Fi^
+ ib_quiet  -0.009  thr=  0.005 Fq v
+
+ soc    1.000  soc_inf   1.000 voc  14.485  voc_soc  14.700
+ dis_tb_fa 0  dis_vb_fa 0  dis_ib_fa 0
+ bms_off   0
+
+ Tbh= 14.625  Tbm= 14.625 sel  14.625
+ Vbh  14.485  Vbm  14.640 sel  14.485
+ imh  -0.040  imm  -0.040 sel  -0.040
+ inh   0.173  inm  -0.040 sel  -0.040
+
+ mod_tb 0 mod_vb 0 mod_ib  0
+ mod_tb_dscn 0 mod_vb_dscn 0 mod_ib_amp_dscn 0 mod_ib_noa_dscn 0
+ tb_s_st 1  vb_s_st 1  ib_s_st 1
+ fake_faults 1 latched_fail 0 latched_fail_fake 0 preserving 0
+
+ bare det n  0  x 
+ bare det m  0  x 
+ ib_dsc  0  0 'Fq v'
+ ibd_lo  0  0 'Fd ^  *SA/*SB'
+ ibd_hi  0  0 'Fd ^  *SA/*SB'
+ red wv  0  0   'Fd, Fi/Fo ^'
+ wl      0  0 'Fo ^'
+ wh      0  0 'Fi ^'
+ cc_dif  x  0 'Fc ^'
+ ib n    0  0 'Fi 1'
+ ib m    0  0 'Fi 1'
+ vb      0  0 'Fv 1  *SV, *Dc/*Dv'
+ tb      0  0 'Ft 1'
+  0000000000000   00000000000
+  CBA98765x3210 xxA9876543210
+  fltw=0     falw=0
+fake_faults=>redl
+^C  ^C1705080282            ^Z  1705080282          ^C  1705080282          UT1705080356;
+
+cmd: UT1705080356
+ UNIX time epoch    1669801880 -> 1705080469,        sec (* UT)
+ UNIX time epoch    1669801880 -> 1705080356,        sec (* UT)
+Ri;
+
+cmd: Ri
+Reset infinite counter
+Sr1' ;
+
+cmd: Sr1
+ Scalar Randles R0        1.000 ->     1.000,        slr (  Sr)
+ Scalar Randles R0        1.000 ->     1.000,        slr (  Sr)
+cmd: vv99
+ Verbosity                    0 ->         0,        int (* vv)
+ Verbosity                    0 ->        99,        int (* vv)
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.203v   0.03A   0.13A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.203v   0.03A   0.13A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.202v   0.03A   0.12A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.202v   0.03A   0.13A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.201v   0.03A   0.12A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.200v   0.03A   0.12A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.200v   0.03A   0.11A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.199v   0.03A   0.12A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.199v   0.03A   0.12A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.199v   0.03A   0.13A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.198v   0.03A   0.13A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.197v   0.03A   0.13A   0.20v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.197v   0.03A   0.13A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.196v   0.03A   0.13A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.196v   0.03A   0.12A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.195v   0.03A   0.12A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.195v   0.03A   0.11A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.194v   0.03A   0.10A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.193v   0.03A   0.10A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.193v   0.03A   0.09A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.192v   0.03A   0.10A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.192v   0.03A   0.09A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.191v   0.03A   0.07A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.191v   0.03A   0.06A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.190v   0.03A   0.05A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.190v   0.03A   0.05A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.190v   0.03A   0.06A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.189v   0.03A   0.07A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.189v   0.03A   0.07A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.188v   0.03A   0.08A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.188v   0.03A   0.08A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.187v   0.03A   0.09A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.186v   0.03A   0.09A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.186v   0.03A   0.09A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.185v   0.03A   0.10A   0.19v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.185v   0.03A   0.10A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.185v   0.03A   0.10A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.184v   0.03A   0.12A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.184v   0.03A   0.10A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.183v   0.03A   0.11A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.183v   0.03A   0.10A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.182v   0.03A   0.09A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.182v   0.03A   0.08A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.181v   0.03A   0.10A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.181v   0.03A   0.11A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.181v   0.03A   0.11A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.180v   0.03A   0.11A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.180v   0.03A   0.12A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.179v   0.03A   0.12A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.178v   0.03A   0.12A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.178v   0.03A   0.12A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.178v   0.03A   0.11A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.177v   0.03A   0.11A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.177v   0.03A   0.12A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.176v   0.03A   0.13A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.176v   0.03A   0.13A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.176v   0.03A   0.14A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.175v   0.03A   0.14A   0.18v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.175v   0.03A   0.14A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.174v   0.03A   0.13A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.174v   0.03A   0.12A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.173v   0.03A   0.12A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.173v   0.03A   0.10A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.173v   0.03A   0.10A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.172v   0.03A   0.09A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.172v   0.03A   0.09A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.172v   0.03A   0.08A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.171v   0.03A   0.08A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.170v   0.03A   0.09A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.170v   0.03A   0.08A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.169v   0.03A   0.07A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.169v   0.03A   0.08A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.169v   0.03A   0.08A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.169v   0.03A   0.10A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.168v   0.03A   0.10A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.168v   0.03A   0.10A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.168v   0.03A   0.10A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.168v   0.03A   0.11A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.168v   0.03A   0.10A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.167v   0.03A   0.11A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.167v   0.03A   0.10A   0.17v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.69C   0.166v   0.03A   0.11A   0.16v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.166v   0.03A   0.11A   0.16v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.165v   0.03A   0.12A   0.16v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.165v   0.03A   0.12A   0.16v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.165v   0.03A   0.12A   0.16v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.164v   0.03A   0.12A   0.16v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.164v   0.03A   0.13A   0.16v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.164v   0.03A   0.11A   0.16v  14.61v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.163v   0.03A   0.11A   0.16v  14.61v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.163v   0.03A   0.12A   0.16v  14.61v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.162v   0.03A   0.12A   0.16v  14.61v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.162v   0.03A   0.11A   0.16v  14.61v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.162v   0.03A   0.10A   0.16v  14.60v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.161v   0.03A   0.12A   0.16v  14.60v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.161v   0.03A   0.11A   0.16v  14.60v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.160v   0.03A   0.11A   0.16v  14.60v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.160v   0.03A   0.11A   0.16v  14.60v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.160v   0.03A   0.11A   0.16v  14.59v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.159v   0.03A   0.12A   0.15v  14.59v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.159v   0.03A   0.13A   0.15v  14.59v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.159v   0.03A   0.13A   0.16v  14.59v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.158v   0.03A   0.12A   0.16v  14.59v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.158v   0.03A   0.11A   0.15v  14.58v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.157v   0.03A   0.12A   0.15v  14.58v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.157v   0.03A   0.12A   0.15v  14.58v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.156v   0.03A   0.12A   0.15v  14.58v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.156v   0.03A   0.11A   0.15v  14.58v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.156v   0.03A   0.11A   0.15v  14.57v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.155v   0.03A   0.10A   0.15v  14.57v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.155v   0.03A   0.11A   0.15v  14.57v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.155v   0.03A   0.11A   0.15v  14.57v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.154v   0.03A   0.10A   0.15v  14.57v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.154v   0.03A   0.10A   0.15v  14.57v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.153v   0.03A   0.08A   0.15v  14.57v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.153v   0.03A   0.08A   0.15v  14.57v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.152v   0.03A   0.08A   0.15v  14.57v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.152v   0.03A   0.09A   0.15v  14.57v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.152v   0.03A   0.08A   0.15v  14.56v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.151v   0.03A   0.08A   0.15v  14.56v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.151v   0.03A   0.08A   0.15v  14.56v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.151v   0.03A   0.07A   0.15v  14.56v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.151v   0.03A   0.08A   0.15v  14.56v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.151v   0.03A   0.09A   0.15v  14.56v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.151v   0.03A   0.10A   0.15v  14.56v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.150v   0.03A   0.09A   0.15v  14.56v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.150v   0.03A   0.09A   0.15v  14.56v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.150v   0.03A   0.11A   0.15v  14.56v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.149v   0.03A   0.09A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.149v   0.03A   0.10A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.149v   0.03A   0.10A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.148v   0.03A   0.10A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.148v   0.03A   0.11A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.148v   0.03A   0.12A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.147v   0.03A   0.12A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.147v   0.03A   0.13A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.147v   0.03A   0.13A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.147v   0.03A   0.13A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.146v   0.03A   0.12A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.146v   0.03A   0.10A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.146v   0.03A   0.11A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.145v   0.03A   0.11A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.145v   0.03A   0.11A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.145v   0.03A   0.12A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.145v   0.03A   0.13A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.144v   0.03A   0.13A   0.15v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.144v   0.03A   0.12A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.144v   0.03A   0.12A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.143v   0.03A   0.13A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.143v   0.03A   0.14A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.143v   0.03A   0.14A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.142v   0.03A   0.15A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.142v   0.03A   0.14A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.142v   0.03A   0.13A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.142v   0.03A   0.13A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.142v   0.03A   0.12A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.142v   0.03A   0.12A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.141v   0.03A   0.12A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.141v   0.03A   0.11A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.140v   0.03A   0.10A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.140v   0.03A   0.08A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.140v   0.03A   0.08A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.139v   0.03A   0.09A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.139v   0.03A   0.08A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.139v   0.03A   0.09A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.138v   0.03A   0.09A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.138v   0.03A   0.08A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.138v   0.03A   0.08A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.138v   0.03A   0.08A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.138v   0.03A   0.07A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.138v   0.03A   0.08A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.137v   0.03A   0.10A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.137v   0.03A   0.10A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.137v   0.03A   0.10A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.137v   0.03A   0.10A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.136v   0.03A   0.11A   0.14v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.136v   0.03A   0.11A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.136v   0.03A   0.11A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.136v   0.03A   0.12A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.135v   0.03A   0.12A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.135v   0.03A   0.12A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.135v   0.03A   0.12A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.134v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.134v   0.03A   0.13A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.134v   0.03A   0.13A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.134v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.134v   0.03A   0.13A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.134v   0.03A   0.13A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.133v   0.03A   0.13A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.133v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.133v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.133v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.133v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.132v   0.03A   0.15A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.132v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.132v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.131v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.131v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.130v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.131v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.130v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.130v   0.03A   0.13A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.130v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.130v   0.03A   0.13A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.129v   0.03A   0.14A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.129v   0.03A   0.13A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.129v   0.03A   0.13A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.129v   0.03A   0.13A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.129v   0.03A   0.12A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.129v   0.03A   0.10A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.128v   0.03A   0.11A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.128v   0.03A   0.11A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.128v   0.03A   0.10A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.127v   0.03A   0.10A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.127v   0.03A   0.10A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.127v   0.03A   0.10A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.127v   0.03A   0.10A   0.13v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.126v   0.03A   0.09A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.126v   0.03A   0.10A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.126v   0.03A   0.10A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.126v   0.03A   0.11A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.126v   0.03A   0.11A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.125v   0.03A   0.11A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.125v   0.03A   0.11A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.125v   0.03A   0.11A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.125v   0.03A   0.12A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.125v   0.03A   0.12A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.125v   0.03A   0.12A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.124v   0.03A   0.11A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.124v   0.03A   0.11A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.124v   0.03A   0.10A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.124v   0.03A   0.10A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   0.124v   0.03A   0.11A   0.12v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   2.464v  -0.18A  -0.40A  14.19v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   5.535v  -0.23A  -0.38A  14.36v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   7.822v  -0.27A  -0.37A  14.36v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C   9.515v  -0.30A  -0.36A  14.35v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  10.769v  -0.32A  -0.35A  14.36v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  11.697v  -0.34A  -0.35A  14.35v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  12.384v  -0.35A  -0.35A  14.36v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  12.894v  -0.36A  -0.35A  14.36v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  13.271v  -0.37A  -0.36A  14.35v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  13.549v  -0.38A  -0.36A  14.35v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  13.756v  -0.38A  -0.37A  14.35v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  13.908v  -0.38A  -0.36A  14.35v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.021v  -0.39A  -0.35A  14.35v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.104v  -0.39A  -0.35A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.166v  -0.39A  -0.34A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.211v  -0.39A  -0.34A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.244v  -0.39A  -0.33A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.267v  -0.39A  -0.33A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.284v  -0.39A  -0.31A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.297v  -0.39A  -0.33A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.307v  -0.39A  -0.32A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.314v  -0.39A  -0.32A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.317v  -0.39A  -0.34A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.320v  -0.39A  -0.34A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.322v  -0.39A  -0.35A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.321v  -0.40A  -0.36A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.321v  -0.40A  -0.36A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.321v  -0.40A  -0.35A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.320v  -0.40A  -0.34A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.319v  -0.39A  -0.33A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.319v  -0.39A  -0.34A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.319v  -0.39A  -0.34A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.318v  -0.39A  -0.34A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.318v  -0.39A  -0.33A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.318v  -0.39A  -0.32A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.317v  -0.38A  -0.31A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.318v  -0.36A  -0.29A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.318v  -0.35A  -0.29A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.321v  -0.28A  -0.22A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.323v  -0.22A  -0.16A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.326v  -0.17A  -0.11A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.328v  -0.14A  -0.07A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.329v  -0.11A  -0.04A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.330v  -0.09A  -0.02A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.330v  -0.08A   0.01A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.330v  -0.07A   0.02A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.331v  -0.06A   0.03A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.331v  -0.06A   0.02A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.330v  -0.05A   0.02A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.331v  -0.05A   0.01A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.331v  -0.05A   0.02A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.332v  -0.04A   0.02A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.333v  -0.04A   0.02A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.332v  -0.04A   0.03A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.332v  -0.04A   0.03A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.333v  -0.04A   0.03A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.333v  -0.04A   0.03A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.332v  -0.04A   0.03A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.332v  -0.04A   0.02A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.331v  -0.04A   0.02A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.331v  -0.04A   0.03A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.331v  -0.04A   0.03A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.330v  -0.04A   0.02A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.330v  -0.04A   0.02A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.329v  -0.04A   0.02A  14.32v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.329v  -0.05A   0.01A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.328v  -0.05A   0.00A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.329v  -0.05A  -0.01A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.329v  -0.05A  -0.01A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.329v  -0.06A  -0.01A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Summ...
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.329v  -0.06A  -0.03A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.328v  -0.05A  -0.03A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.329v  -0.05A  -0.01A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.328v  -0.05A   0.01A  14.34v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.75C  14.328v  -0.05A   0.02A  14.33v  14.55v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.01A  14.32v  14.54v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A  -0.01A  14.33v  14.54v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A  -0.01A  14.33v  14.54v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.00A  14.33v  14.54v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.00A  14.32v  14.54v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.00A  14.34v  14.53v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A  -0.00A  14.33v  14.53v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A  -0.00A  14.33v  14.53v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A  -0.00A  14.32v  14.53v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A  -0.00A  14.34v  14.53v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.329v  -0.04A   0.02A  14.34v  14.52v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.329v  -0.04A   0.01A  14.33v  14.52v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.329v  -0.04A   0.01A  14.34v  14.52v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.02A  14.33v  14.52v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.04A  14.33v  14.52v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.03A  14.33v  14.51v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.04A  14.33v  14.51v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.06A  14.32v  14.51v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.327v  -0.04A   0.06A  14.33v  14.51v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.05A  14.33v  14.51v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.328v  -0.04A   0.04A  14.32v  14.50v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.327v  -0.04A   0.02A  14.33v  14.50v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.327v  -0.04A   0.01A  14.33v  14.50v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.327v  -0.04A   0.01A  14.33v  14.50v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.327v  -0.04A   0.01A  14.32v  14.50v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.326v  -0.04A   0.02A  14.32v  14.49v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.326v  -0.04A   0.02A  14.33v  14.49v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.326v  -0.04A   0.03A  14.33v  14.49v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.326v  -0.04A   0.01A  14.32v  14.49v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.326v  -0.04A   0.02A  14.33v  14.49v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.327v  -0.04A   0.02A  14.33v  14.49v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.326v  -0.04A   0.02A  14.33v  14.49v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.326v  -0.04A   0.01A  14.33v  14.49v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.326v  -0.04A   0.01A  14.33v  14.49v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.325v  -0.04A   0.00A  14.33v  14.49v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.325v  -0.04A   0.00A  14.32v  14.48v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.325v  -0.04A   0.00A  14.33v  14.48v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.325v  -0.04A  -0.01A  14.33v  14.48v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.326v  -0.04A  -0.01A  14.33v  14.48v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.326v  -0.04A  -0.00A  14.33v  14.48v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.325v  -0.04A   0.01A  14.33v  14.48v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.324v  -0.05A   0.00A  14.32v  14.48v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.323v  -0.04A   0.00A  14.32v  14.48v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.323v  -0.04A  -0.01A  14.33v  14.48v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.324v  -0.05A  -0.02A  14.32v  14.48v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.323v  -0.05A  -0.02A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.322v  -0.05A   0.00A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.322v  -0.05A   0.01A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.322v  -0.06A   0.01A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.322v  -0.06A   0.02A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.323v  -0.06A   0.02A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.322v  -0.06A   0.00A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.322v  -0.06A  -0.01A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.323v  -0.06A  -0.00A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.323v  -0.06A  -0.00A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.323v  -0.06A  -0.00A  14.34v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.323v  -0.06A   0.00A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.322v  -0.06A   0.01A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.322v  -0.06A   0.01A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.321v  -0.06A   0.01A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.321v  -0.06A   0.01A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.321v  -0.06A   0.02A  14.31v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.321v  -0.06A   0.04A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.321v  -0.06A   0.04A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.321v  -0.06A   0.04A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.320v  -0.06A   0.05A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.320v  -0.06A   0.05A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.05A  14.31v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.320v  -0.06A   0.03A  14.31v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.03A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.03A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.02A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.02A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.320v  -0.06A   0.03A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.03A  14.31v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.318v  -0.06A   0.02A  14.31v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.02A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.02A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.01A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.01A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.318v  -0.06A   0.02A  14.33v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.318v  -0.06A   0.01A  14.32v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.319v  -0.06A   0.01A  14.31v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.318v  -0.06A   0.02A  14.31v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.318v  -0.06A   0.03A  14.31v  14.47v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.06A   0.03A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.06A   0.02A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.06A   0.02A  14.33v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.06A   0.01A  14.33v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.06A   0.01A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.07A  -0.00A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.06A  -0.00A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.06A  -0.00A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.06A  -0.00A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.06A  -0.01A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.317v  -0.06A  -0.02A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.316v  -0.06A  -0.03A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.316v  -0.06A  -0.02A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.316v  -0.06A  -0.03A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.316v  -0.06A  -0.02A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.316v  -0.06A  -0.02A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.316v  -0.06A  -0.00A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.315v  -0.06A   0.00A  14.33v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.315v  -0.06A   0.01A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.315v  -0.06A   0.02A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.314v  -0.06A   0.01A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.315v  -0.06A   0.01A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.315v  -0.06A   0.00A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.316v  -0.06A   0.00A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.315v  -0.06A   0.01A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.315v  -0.06A   0.03A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.314v  -0.06A   0.02A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.315v  -0.06A   0.03A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.315v  -0.06A   0.02A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.314v  -0.06A   0.02A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.314v  -0.06A   0.02A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.314v  -0.06A   0.01A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.313v  -0.06A  -0.00A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.313v  -0.06A  -0.00A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.313v  -0.06A   0.00A  14.32v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.312v  -0.06A   0.01A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.313v  -0.06A   0.03A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.313v  -0.06A   0.02A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.312v  -0.06A   0.02A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.81C  14.313v  -0.06A   0.02A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.313v  -0.06A   0.02A  14.31v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.312v  -0.06A   0.01A  14.31v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.313v  -0.06A   0.01A  14.32v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.313v  -0.06A   0.02A  14.32v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.312v  -0.06A   0.01A  14.32v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.313v  -0.06A  -0.01A  14.31v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.312v  -0.06A   0.00A  14.31v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.311v  -0.06A  -0.00A  14.31v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.312v  -0.06A   0.00A  14.31v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.313v  -0.06A   0.01A  14.31v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.312v  -0.06A   0.00A  14.32v  14.68v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.312v  -0.06A  -0.01A  14.31v  14.68v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.312v  -0.06A  -0.01A  14.32v  14.68v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.312v  -0.06A  -0.01A  14.31v  14.68v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.312v  -0.06A  -0.01A  14.31v  14.68v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.311v  -0.06A  -0.01A  14.31v  14.67v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.311v  -0.06A  -0.00A  14.31v  14.67v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.310v  -0.06A  -0.00A  14.31v  14.67v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.310v  -0.06A   0.00A  14.32v  14.67v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.310v  -0.06A  -0.03A  14.31v  14.67v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.310v  -0.06A  -0.03A  14.31v  14.66v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.310v  -0.06A  -0.03A  14.31v  14.66v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A  -0.03A  14.31v  14.66v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A  -0.01A  14.31v  14.66v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A   0.01A  14.30v  14.66v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.310v  -0.06A  -0.01A  14.30v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A  -0.00A  14.32v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A   0.01A  14.32v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A   0.02A  14.31v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A   0.01A  14.31v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A   0.02A  14.30v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A   0.01A  14.30v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A   0.02A  14.30v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.309v  -0.06A   0.03A  14.32v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.308v  -0.06A   0.03A  14.31v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.308v  -0.06A   0.05A  14.31v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.307v  -0.06A   0.04A  14.30v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.307v  -0.06A   0.03A  14.31v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.307v  -0.06A   0.02A  14.30v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.307v  -0.06A   0.00A  14.30v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.307v  -0.06A  -0.01A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.306v  -0.06A  -0.01A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.307v  -0.06A  -0.00A  14.32v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.307v  -0.06A   0.01A  14.31v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.307v  -0.06A   0.00A  14.31v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.307v  -0.06A  -0.00A  14.31v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.306v  -0.06A  -0.00A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.306v  -0.06A  -0.01A  14.31v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.306v  -0.06A  -0.00A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.306v  -0.06A  -0.00A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.306v  -0.06A  -0.01A  14.32v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.305v  -0.06A  -0.01A  14.32v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.305v  -0.06A  -0.01A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.305v  -0.06A  -0.01A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.305v  -0.06A  -0.01A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.305v  -0.06A  -0.01A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.305v  -0.06A  -0.02A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.305v  -0.06A  -0.02A  14.31v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.306v  -0.06A  -0.01A  14.31v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.305v  -0.06A  -0.02A  14.31v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.305v  -0.06A  -0.03A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.304v  -0.06A  -0.01A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.304v  -0.06A  -0.02A  14.31v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.303v  -0.06A  -0.03A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A  -0.03A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A  -0.03A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A  -0.05A  14.31v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A  -0.03A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A  -0.03A  14.31v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A  -0.02A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A  -0.01A  14.29v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A   0.00A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A   0.01A  14.31v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A   0.02A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A   0.03A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.302v  -0.06A   0.04A  14.31v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.02A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.02A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.02A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.03A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.03A  14.31v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.04A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.03A  14.31v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.03A  14.31v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.300v  -0.07A   0.02A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.300v  -0.07A   0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.00A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.300v  -0.06A   0.00A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.301v  -0.06A   0.00A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.300v  -0.06A   0.00A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.300v  -0.06A  -0.00A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.300v  -0.06A   0.00A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.300v  -0.06A   0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.300v  -0.06A   0.00A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.300v  -0.06A   0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.299v  -0.06A   0.01A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.299v  -0.06A   0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.300v  -0.06A   0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.299v  -0.06A   0.00A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.299v  -0.06A   0.00A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.298v  -0.06A  -0.00A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.299v  -0.06A  -0.02A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.299v  -0.06A  -0.02A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.299v  -0.06A  -0.02A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.298v  -0.06A  -0.02A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.298v  -0.06A  -0.03A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.297v  -0.06A  -0.02A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.297v  -0.06A  -0.00A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.297v  -0.06A   0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.296v  -0.06A   0.01A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.296v  -0.06A   0.02A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.296v  -0.06A   0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A  -0.02A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A  -0.02A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A  -0.02A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A  -0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.296v  -0.06A  -0.02A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.296v  -0.06A  -0.01A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A  -0.02A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A  -0.01A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A  -0.00A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A  -0.00A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A   0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A   0.01A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A   0.02A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A   0.03A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A   0.04A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.295v  -0.06A   0.04A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.88C  14.294v  -0.06A   0.05A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.294v  -0.06A   0.05A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.294v  -0.06A   0.03A  14.30v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.294v  -0.06A   0.03A  14.30v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.293v  -0.07A   0.01A  14.30v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.294v  -0.07A   0.01A  14.29v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.294v  -0.07A   0.01A  14.29v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.293v  -0.06A   0.01A  14.28v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.294v  -0.06A   0.00A  14.30v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.293v  -0.07A   0.00A  14.30v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.293v  -0.06A   0.00A  14.30v  14.69v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.293v  -0.06A   0.01A  14.30v  14.68v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.292v  -0.06A   0.02A  14.30v  14.68v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.292v  -0.06A   0.03A  14.28v  14.68v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.293v  -0.06A   0.03A  14.29v  14.68v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.293v  -0.06A   0.01A  14.29v  14.68v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.292v  -0.06A   0.01A  14.29v  14.67v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.293v  -0.06A   0.00A  14.30v  14.67v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.292v  -0.07A  -0.00A  14.30v  14.67v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.293v  -0.06A   0.01A  14.29v  14.67v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.292v  -0.07A   0.00A  14.29v  14.67v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.292v  -0.07A   0.01A  14.29v  14.66v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.291v  -0.07A   0.00A  14.28v  14.66v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.291v  -0.06A   0.01A  14.29v  14.66v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.291v  -0.06A  -0.03A  14.29v  14.66v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.291v  -0.07A  -0.05A  14.30v  14.66v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.291v  -0.06A  -0.05A  14.29v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.290v  -0.06A  -0.03A  14.30v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.290v  -0.06A  -0.01A  14.28v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.289v  -0.06A  -0.01A  14.29v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.289v  -0.06A  -0.03A  14.29v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.289v  -0.06A  -0.03A  14.28v  14.65v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.289v  -0.06A  -0.04A  14.29v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.290v  -0.06A  -0.04A  14.30v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.289v  -0.06A  -0.05A  14.30v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.289v  -0.07A  -0.03A  14.29v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.289v  -0.07A  -0.03A  14.28v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.290v  -0.07A  -0.01A  14.28v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.289v  -0.07A   0.01A  14.28v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.289v  -0.06A   0.02A  14.29v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.289v  -0.06A   0.03A  14.30v  14.64v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.288v  -0.07A   0.03A  14.29v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.288v  -0.07A   0.02A  14.29v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.288v  -0.07A   0.02A  14.29v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.287v  -0.06A   0.03A  14.28v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.287v  -0.06A   0.03A  14.29v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.287v  -0.06A   0.02A  14.29v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.288v  -0.07A   0.02A  14.28v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.288v  -0.07A   0.02A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.287v  -0.08A   0.01A  14.29v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.287v  -0.08A  -0.01A  14.29v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.286v  -0.09A   0.00A  14.28v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.286v  -0.09A  -0.00A  14.27v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.286v  -0.09A  -0.00A  14.28v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.286v  -0.10A  -0.01A  14.28v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.285v  -0.10A  -0.02A  14.29v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.285v  -0.10A  -0.01A  14.29v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.286v  -0.10A  -0.00A  14.30v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.286v  -0.10A   0.01A  14.29v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.286v  -0.10A  -0.00A  14.28v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.285v  -0.10A  -0.02A  14.27v  14.63v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.285v  -0.11A  -0.03A  14.28v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.284v  -0.11A  -0.03A  14.28v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.285v  -0.11A  -0.04A  14.28v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.284v  -0.11A  -0.04A  14.30v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.284v  -0.11A  -0.04A  14.29v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.285v  -0.11A  -0.04A  14.29v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.284v  -0.11A  -0.03A  14.29v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.284v  -0.11A  -0.03A  14.27v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.284v  -0.11A  -0.04A  14.29v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.282v  -0.21A  -0.16A  14.28v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.280v  -0.26A  -0.21A  14.28v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.279v  -0.29A  -0.25A  14.28v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.277v  -0.32A  -0.28A  14.27v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.276v  -0.34A  -0.30A  14.28v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.274v  -0.36A  -0.32A  14.27v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.272v  -0.37A  -0.34A  14.27v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.271v  -0.38A  -0.35A  14.26v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.269v  -0.39A  -0.36A  14.26v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.268v  -0.40A  -0.38A  14.27v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.267v  -0.40A  -0.38A  14.27v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.265v  -0.40A  -0.38A  14.27v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.265v  -0.40A  -0.37A  14.27v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.264v  -0.40A  -0.36A  14.26v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.262v  -0.39A  -0.34A  14.26v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.261v  -0.39A  -0.32A  14.26v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.260v  -0.38A  -0.30A  14.25v  14.62v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.260v  -0.37A  -0.31A  14.26v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.259v  -0.37A  -0.30A  14.26v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.258v  -0.37A  -0.31A  14.26v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.256v  -0.37A  -0.31A  14.26v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.255v  -0.36A  -0.30A  14.25v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.254v  -0.36A  -0.31A  14.26v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.253v  -0.36A  -0.29A  14.25v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.252v  -0.36A  -0.29A  14.24v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.251v  -0.37A  -0.30A  14.26v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.250v  -0.37A  -0.30A  14.25v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.249v  -0.37A  -0.30A  14.26v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.248v  -0.37A  -0.30A  14.25v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.246v  -0.38A  -0.31A  14.24v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.245v  -0.37A  -0.32A  14.23v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.246v  -0.24A  -0.20A  14.23v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.250v   0.16A   0.22A  14.26v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.255v   0.40A   0.48A  14.27v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.263v   0.79A   0.88A  14.28v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.271v   1.07A   1.17A  14.29v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.279v   1.33A   1.45A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.287v   1.51A   1.63A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.295v   1.63A   1.75A  14.30v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.302v   1.74A   1.87A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.310v   1.84A   1.97A  14.31v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.318v   1.92A   2.06A  14.33v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.327v   1.99A   2.13A  14.34v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.335v   2.05A   2.20A  14.35v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.343v   2.10A   2.24A  14.35v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.351v   2.14A   2.27A  14.37v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.361v   2.17A   2.30A  14.37v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.370v   2.19A   2.32A  14.38v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.378v   2.21A   2.33A  14.38v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.387v   2.22A   2.34A  14.39v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.395v   2.22A   2.33A  14.41v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.404v   2.22A   2.35A  14.41v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.412v   2.21A   2.34A  14.41v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.419v   2.17A   2.31A  14.43v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.426v   2.13A   2.28A  14.42v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.433v   2.09A   2.24A  14.43v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.441v   2.06A   2.21A  14.44v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.447v   2.04A   2.19A  14.45v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.454v   2.02A   2.15A  14.46v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.462v   2.00A   2.11A  14.49v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.469v   1.97A   2.08A  14.47v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.476v   1.91A   2.02A  14.49v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.482v   1.83A   1.96A  14.48v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.487v   1.71A   1.83A  14.48v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.491v   1.59A   1.72A  14.49v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  14.94C  14.494v   1.48A   1.60A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.498v   1.37A   1.49A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.501v   1.28A   1.40A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.504v   1.20A   1.34A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.507v   1.15A   1.27A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.510v   1.06A   1.19A  14.52v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.512v   1.00A   1.13A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.515v   0.99A   1.11A  14.52v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.516v   0.84A   0.97A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.516v   0.68A   0.80A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.515v   0.55A   0.65A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.515v   0.46A   0.57A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.515v   0.38A   0.48A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.515v   0.33A   0.42A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.514v   0.29A   0.39A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.514v   0.26A   0.37A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.513v   0.23A   0.34A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.513v   0.22A   0.32A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.512v   0.20A   0.31A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.511v   0.19A   0.28A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.510v   0.17A   0.27A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.509v   0.16A   0.27A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.508v   0.15A   0.25A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.508v   0.15A   0.24A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.508v   0.14A   0.24A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.508v   0.13A   0.23A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.508v   0.12A   0.23A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.507v   0.12A   0.21A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.506v   0.11A   0.19A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.506v   0.11A   0.18A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.506v   0.11A   0.17A  14.49v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.506v   0.10A   0.17A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.506v   0.10A   0.17A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.505v   0.10A   0.15A  14.51v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.504v   0.10A   0.16A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.503v   0.10A   0.16A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.503v   0.10A   0.15A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr:  15.00C  14.502v   0.10A   0.14A  14.50v  14.70v | 1.017  0.030v  | 1.006  1.003A |  1.042  0.173A | 0.000v| 1.000,
+cmd: vv0
+ Verbosity                    0 ->        99,        int (* vv)
+ Verbosity                    0 ->         0,        int (* vv)
+cmd: DA.95
+ Add amp                  1.003 ->     1.003,          A (* DA)
+ Add amp                  1.003 ->     0.950,          A (* DA)
+cmd: DB.067
+ Add noa                  0.173 ->     0.173,          A (* DB)
+ Add noa                  0.173 ->     0.067,          A (* DB)
+cmd: Pf
+unit_h, 2024-01-12T17:22:52, 1705080172,  14.625,  14.481,   0.013,   0.000,  14.625,  14.481,   0.013,  1.0000,  0.0459,  0.9982,  14.480,  14.480,   0.215, 0, 0,
+unit_h, 2024-01-12T17:44:43, 1705081483,  14.750,  14.326,  -0.053,   0.000,  14.750,  14.326,  -0.053,  0.9987,  0.0471,  0.1578,  14.327,  14.327,   0.215, 0, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+unit_f, 2024-01-12T17:55:35, 1705082135,  15.000,  14.485,   0.022,   0.033,  15.000,  14.485,   0.022,  1.0000,  0.0494,  0.6389,  14.480,  14.480,   0.217, 0, 0,
+unit_f, 2024-01-12T17:55:45, 1705082145,  15.000,  14.489,   0.022,   0.033,  15.000,  14.489,   0.022,  1.0000,  0.0494,  0.6469,  14.488,  14.488,   0.217, 0, 0,
+unit_f, 2024-01-12T17:55:55, 1705082155,  15.062,  14.489,   0.022,   0.120,  15.062,  14.489,   0.022,  1.0000,  0.0494,  0.6550,  14.488,  14.488,   0.215, 1024, 0,
+unit_f, 2024-01-12T17:56:05, 1705082165,  15.062,  14.489,   0.022,   0.033,  15.062,  14.489,   0.022,  1.0000,  0.0496,  0.6632,  14.488,  14.488,   0.213, 0, 0,
+unit_f, 2024-01-12T17:56:15, 1705082175,  15.062,  14.502,   0.022,   0.033,  15.062,  14.502,   0.022,  1.0000,  0.0497,  0.6714,  14.488,  14.488,   0.213, 0, 0,
+unit_f, 2024-01-12T17:56:25, 1705082185,  15.062,  14.493,   0.022,   0.033,  15.062,  14.493,   0.022,  1.0000,  0.0498,  0.6798,  14.493,  14.493,   0.210, 0, 0,
+unit_f, 2024-01-12T17:56:35, 1705082195,  15.062,  14.489,  -0.012,  -0.052,  15.062,  14.489,  -0.012,  1.0000,  0.0499,  0.6883,  14.488,  14.488,   0.211, 1024, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+Sen::
+Fault:
+ cc_diff   -0.305  thr=500.000 Fc^
+ ib_diff   -0.022  thr= 10.000 Fd^
+ e_wrap     0.212  thr=-786.080 Fo^628.864 Fi^
+ ib_quiet   0.003  thr=  0.005 Fq v
+
+ soc    1.000  soc_inf   0.996 voc  14.490  voc_soc  14.700
+ dis_tb_fa 0  dis_vb_fa 0  dis_ib_fa 0
+ bms_off   0
+
+ Tbh= 15.062  Tbm= 15.055 sel  15.062
+ Vbh  14.490  Vbm  14.640 sel  14.490
+ imh  -0.023  imm  -0.023 sel  -0.023
+ inh   0.067  inm  -0.023 sel  -0.023
+
+ mod_tb 0 mod_vb 0 mod_ib  0
+ mod_tb_dscn 0 mod_vb_dscn 0 mod_ib_amp_dscn 0 mod_ib_noa_dscn 0
+ tb_s_st 1  vb_s_st 1  ib_s_st 1
+ fake_faults 1 latched_fail 0 latched_fail_fake 0 preserving 0
+
+ bare det n  0  x 
+ bare det m  0  x 
+ ib_dsc  1  0 'Fq v'
+ ibd_lo  0  0 'Fd ^  *SA/*SB'
+ ibd_hi  0  0 'Fd ^  *SA/*SB'
+ red wv  0  0   'Fd, Fi/Fo ^'
+ wl      0  0 'Fo ^'
+ wh      0  0 'Fi ^'
+ cc_dif  x  0 'Fc ^'
+ ib n    0  0 'Fi 1'
+ ib m    0  0 'Fi 1'
+ vb      0  0 'Fv 1  *SV, *Dc/*Dv'
+ tb      0  0 'Ft 1'
+  0010000000000   00000000000
+  CBA98765x3210 xxA9876543210
+  fltw=1024     falw=0
+fake_faults=>redl
+cmd: PR
+
+saved (sp) all
+ Inj amp                  0.000 ->     0.000,    Amps pk (* Xa)
+ Cutback gain scalar      1.000 ->     1.000,        slr (* Sk)
+ Verbosity                    0 ->         0,        int (* vv)
+ Charge chg Sim             0.0 ->      -0.0,          C (* qs)
+ Charge chg                 0.0 ->      -0.0,          C (* qm)
+ Tab mon adj              0.000 ->     0.000,          v (* Dw)
+ Inj freq                 0.000 ->     0.000,         Hz (* Xf)
+ Del all                  0.000 ->     0.000,          A (* DI)
+ Add amp                  1.003 ->     0.950,          A (* DA)
+ Add noa                  0.173 ->     0.067,          A (* DB)
+ Slr amp                  1.006 ->     1.006,          A (* SA)
+ Slr noa                  1.042 ->     1.042,          A (* SB)
+ curr sel mode                1 ->         1, (-1=n, 0=a (* si)
+ Fault buffer indx            7 ->         5,       uint (* if)
+ Hist buffer indx            56 ->         1,       uint (* ih)
+ Injection bias           0.000 ->     0.000,          A (* Xb)
+ Summ buffer indx           140 ->         1,       uint (* is)
+ Modeling bitmap              0 ->         0,       [0x] (* Xm)
+ Monitor battery              1 ->         1, 0=BB, 1=CH (* Bm)
+ Number parallel          2.000 ->     2.000,      units (* BP)
+ Number series            1.000 ->     1.000,      units (* BS)
+ Preserving fault             0 ->         0, T=Preserve (* X?)
+ Sim battery                  1 ->         1, 0=BB, 1=CH (* Bs)
+ Scalar cap Mon           1.000 ->     1.000,        slr (* SQ)
+ Scalar cap Sim           1.000 ->     1.000,        slr (* Sq)
+ Bias Tb sensor           0.000 ->     0.000,       dg C (* Dt)
+ UNIX time epoch    1669801880 -> 1705082243,        sec (* UT)
+ Inj type                     0 ->         0, 1sn 2sq 3t (* Xt)
+ Tb Sim rate lim mem     25.000 ->    15.062,       dg C (* ts)
+ Tb rate lim mem         25.000 ->    15.063,       dg C (* tm)
+ Bias Vb sensor           0.030 ->     0.030,          v (* Dc)
+ Scale Vb sensor          1.017 ->     1.017,          v (* SV)
+
+saved (sp) diffs
+ Add amp                  1.003 ->     0.950,          A (* DA)
+ Add noa                  0.173 ->     0.067,          A (* DB)
+cmd: Q
+ib_amp_fail 0
+ib_noa_fail 0
+vb_fail 0
+Tb 15.063
+vb 14.485
+voc 14.485
+voc_filt 14.475
+vsat 13.760
+ib  0.023
+soc_m  1.0000
+soc_ekf  0.7339
+soc  1.0000
+soc_min  0.0500
+soc_inf  0.9957
+modeling 0
+dq_inf/dq_abs   -1572.4/     861.5  -1.8252 coul_eff*=245.964758, DAB+= 0.875216
+DQn   -1647.8 Tn    1871.6 DQp       6.7 Tp       3.5
+cmd: Pf
+unit_h, 2024-01-12T17:22:52, 1705080172,  14.625,  14.481,   0.013,   0.000,  14.625,  14.481,   0.013,  1.0000,  0.0459,  0.9982,  14.480,  14.480,   0.215, 0, 0,
+unit_h, 2024-01-12T17:44:43, 1705081483,  14.750,  14.326,  -0.053,   0.000,  14.750,  14.326,  -0.053,  0.9987,  0.0471,  0.1578,  14.327,  14.327,   0.215, 0, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+unit_f, 2024-01-12T17:56:45, 1705082205,  15.062,  14.485,  -0.012,   0.033,  15.062,  14.485,  -0.012,  0.9999,  0.0499,  0.6967,  14.493,  14.493,   0.210, 0, 0,
+unit_f, 2024-01-12T17:56:55, 1705082215,  15.062,  14.476,  -0.012,   0.033,  15.062,  14.476,  -0.012,  0.9999,  0.0499,  0.7049,  14.489,  14.489,   0.213, 0, 0,
+unit_f, 2024-01-12T17:57:06, 1705082226,  15.062,  14.489,  -0.012,  -0.052,  15.062,  14.489,  -0.012,  0.9999,  0.0499,  0.7109,  14.477,  14.477,   0.212, 1024, 0,
+unit_f, 2024-01-12T17:57:16, 1705082236,  15.062,  14.481,  -0.012,   0.033,  15.062,  14.481,  -0.012,  0.9999,  0.0500,  0.7160,  14.481,  14.481,   0.213, 0, 0,
+unit_f, 2024-01-12T17:57:26, 1705082246,  15.062,  14.476,  -0.012,  -0.052,  15.062,  14.476,  -0.012,  1.0000,  0.0500,  0.7212,  14.485,  14.485,   0.218, 0, 0,
+unit_f, 2024-01-12T17:57:36, 1705082256,  15.062,  14.472,  -0.012,  -0.052,  15.062,  14.472,  -0.012,  1.0000,  0.0500,  0.7264,  14.480,  14.480,   0.221, 0, 0,
+unit_f, 2024-01-12T17:57:46, 1705082266,  15.062,  14.476,   0.022,   0.033,  15.062,  14.476,   0.022,  1.0000,  0.0500,  0.7318,  14.476,  14.476,   0.220, 1024, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+Sen::
+Fault:
+ cc_diff   -0.266  thr=500.000 Fc^
+ ib_diff   -0.014  thr= 10.000 Fd^
+ e_wrap     0.221  thr=-786.080 Fo^628.864 Fi^
+ ib_quiet   0.003  thr=  0.005 Fq v
+
+ soc    1.000  soc_inf   0.996 voc  14.476  voc_soc  14.700
+ dis_tb_fa 0  dis_vb_fa 0  dis_ib_fa 0
+ bms_off   0
+
+ Tbh= 15.062  Tbm= 15.063 sel  15.062
+ Vbh  14.477  Vbm  14.640 sel  14.477
+ imh   0.046  imm   0.046 sel   0.046
+ inh   0.067  inm   0.046 sel   0.046
+
+ mod_tb 0 mod_vb 0 mod_ib  0
+ mod_tb_dscn 0 mod_vb_dscn 0 mod_ib_amp_dscn 0 mod_ib_noa_dscn 0
+ tb_s_st 1  vb_s_st 1  ib_s_st 1
+ fake_faults 1 latched_fail 0 latched_fail_fake 0 preserving 0
+
+ bare det n  0  x 
+ bare det m  0  x 
+ ib_dsc  1  0 'Fq v'
+ ibd_lo  0  0 'Fd ^  *SA/*SB'
+ ibd_hi  0  0 'Fd ^  *SA/*SB'
+ red wv  0  0   'Fd, Fi/Fo ^'
+ wl      0  0 'Fo ^'
+ wh      0  0 'Fi ^'
+ cc_dif  x  0 'Fc ^'
+ ib n    0  0 'Fi 1'
+ ib m    0  0 'Fi 1'
+ vb      0  0 'Fv 1  *SV, *Dc/*Dv'
+ tb      0  0 'Ft 1'
+  0010000000000   00000000000
+  CBA98765x3210 xxA9876543210
+  fltw=1024     falw=0
+fake_faults=>redl
+Pf;
+
+cmd: Pf
+unit_h, 2024-01-12T17:22:52, 1705080172,  14.625,  14.481,   0.013,   0.000,  14.625,  14.481,   0.013,  1.0000,  0.0459,  0.9982,  14.480,  14.480,   0.215, 0, 0,
+unit_h, 2024-01-12T17:44:43, 1705081483,  14.750,  14.326,  -0.053,   0.000,  14.750,  14.326,  -0.053,  0.9987,  0.0471,  0.1578,  14.327,  14.327,   0.215, 0, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+unit_f, 2024-01-12T17:58:36, 1705082316,  15.062,  14.489,   0.022,  -0.052,  15.062,  14.489,   0.022,  1.0000,  0.0500,  0.7592,  14.480,  14.480,   0.216, 0, 0,
+unit_f, 2024-01-12T17:58:46, 1705082326,  15.062,  14.472,   0.022,  -0.052,  15.062,  14.472,   0.022,  1.0000,  0.0500,  0.7649,  14.476,  14.476,   0.213, 0, 0,
+unit_f, 2024-01-12T17:58:56, 1705082336,  15.062,  14.489,   0.022,   0.033,  15.062,  14.489,   0.022,  1.0000,  0.0499,  0.7707,  14.493,  14.493,   0.213, 0, 0,
+unit_f, 2024-01-12T17:59:06, 1705082346,  15.062,  14.498,   0.022,  -0.052,  15.062,  14.498,   0.022,  1.0000,  0.0499,  0.7765,  14.488,  14.488,   0.213, 0, 0,
+unit_f, 2024-01-12T17:59:16, 1705082356,  15.062,  14.489,  -0.012,   0.033,  15.062,  14.489,  -0.012,  1.0000,  0.0499,  0.7824,  14.493,  14.493,   0.210, 0, 0,
+unit_f, 2024-01-12T17:59:27, 1705082367,  15.125,  14.485,  -0.012,   0.033,  15.125,  14.485,  -0.012,  0.9999,  0.0501,  0.7884,  14.480,  14.480,   0.210, 1024, 0,
+unit_f, 2024-01-12T17:59:37, 1705082377,  15.125,  14.489,  -0.012,  -0.052,  15.125,  14.489,  -0.012,  0.9999,  0.0501,  0.7943,  14.493,  14.493,   0.209, 0, 0,
+fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,
+
+Sen::
+Fault:
+ cc_diff   -0.199  thr=500.000 Fc^
+ ib_diff   -0.028  thr= 10.000 Fd^
+ e_wrap     0.202  thr=-786.080 Fo^628.864 Fi^
+ ib_quiet  -0.006  thr=  0.005 Fq v
+
+ soc    1.000  soc_inf   0.995 voc  14.494  voc_soc  14.682
+ dis_tb_fa 0  dis_vb_fa 0  dis_ib_fa 0
+ bms_off   0
+
+ Tbh= 15.125  Tbm= 15.098 sel  15.125
+ Vbh  14.494  Vbm  14.621 sel  14.494
+ imh  -0.023  imm  -0.023 sel  -0.023
+ inh  -0.107  inm  -0.023 sel  -0.023
+
+ mod_tb 0 mod_vb 0 mod_ib  0
+ mod_tb_dscn 0 mod_vb_dscn 0 mod_ib_amp_dscn 0 mod_ib_noa_dscn 0
+ tb_s_st 1  vb_s_st 1  ib_s_st 1
+ fake_faults 1 latched_fail 0 latched_fail_fake 0 preserving 0
+
+ bare det n  0  x 
+ bare det m  0  x 
+ ib_dsc  0  0 'Fq v'
+ ibd_lo  0  0 'Fd ^  *SA/*SB'
+ ibd_hi  0  0 'Fd ^  *SA/*SB'
+ red wv  0  0   'Fd, Fi/Fo ^'
+ wl      0  0 'Fo ^'
+ wh      0  0 'Fi ^'
+ cc_dif  x  0 'Fc ^'
+ ib n    0  0 'Fi 1'
+ ib m    0  0 'Fi 1'
+ vb      0  0 'Fv 1  *SV, *Dc/*Dv'
+ tb      0  0 'Ft 1'
+  0000000000000   00000000000
+  CBA98765x3210 xxA9876543210
+  fltw=0     falw=0
+fake_faults=>redl
+PR
+
+;
+
+cmd: PR
+
+saved (sp) all
+ Inj amp                  0.000 ->     0.000,    Amps pk (* Xa)
+ Cutback gain scalar      1.000 ->     1.000,        slr (* Sk)
+ Verbosity                    0 ->         0,        int (* vv)
+ Charge chg Sim             0.0 ->    -115.1,          C (* qs)
+ Charge chg                 0.0 ->    -115.1,          C (* qm)
+ Tab mon adj              0.000 ->     0.000,          v (* Dw)
+ Inj freq                 0.000 ->     0.000,         Hz (* Xf)
+ Del all                  0.000 ->     0.000,          A (* DI)
+ Add amp                  1.003 ->     0.950,          A (* DA)
+ Add noa                  0.173 ->     0.067,          A (* DB)
+ Slr amp                  1.006 ->     1.006,          A (* SA)
+ Slr noa                  1.042 ->     1.042,          A (* SB)
+ curr sel mode                1 ->         1, (-1=n, 0=a (* si)
+ Fault buffer indx            7 ->         0,       uint (* if)
+ Hist buffer indx            56 ->         1,       uint (* ih)
+ Injection bias           0.000 ->     0.000,          A (* Xb)
+ Summ buffer indx           140 ->         1,       uint (* is)
+ Modeling bitmap              0 ->         0,       [0x] (* Xm)
+ Monitor battery              1 ->         1, 0=BB, 1=CH (* Bm)
+ Number parallel          2.000 ->     2.000,      units (* BP)
+ Number series            1.000 ->     1.000,      units (* BS)
+ Preserving fault             0 ->         0, T=Preserve (* X?)
+ Sim battery                  1 ->         1, 0=BB, 1=CH (* Bs)
+ Scalar cap Mon           1.000 ->     1.000,        slr (* SQ)
+ Scalar cap Sim           1.000 ->     1.000,        slr (* Sq)
+ Bias Tb sensor           0.000 ->     0.000,       dg C (* Dt)
+ UNIX time epoch    1669801880 -> 1705082403,        sec (* UT)
+ Inj type                     0 ->         0, 1sn 2sq 3t (* Xt)
+ Tb Sim rate lim mem     25.000 ->    15.125,       dg C (* ts)
+ Tb rate lim mem         25.000 ->    15.114,       dg C (* tm)
+ Bias Vb sensor           0.030 ->     0.030,          v (* Dc)
+ Scale Vb sensor          1.017 ->     1.017,          v (* SV)
+
+saved (sp) diffs
+ Add amp                  1.003 ->     0.950,          A (* DA)
+ Add noa                  0.173 ->     0.067,          A (* DB)
+^C

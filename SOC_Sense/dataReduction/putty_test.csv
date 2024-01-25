@@ -1,0 +1,75 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2024.01.15 08:53:24 =~=~=~=~=~=~=~=~=~=~=~=
+
+
+saved (sp) diffs
+ Add amp                 -0.940 ->     0.973,          A (* DA)
+ Add noa                 -0.170 ->     0.150,          A (* DB)
+ Slr amp                  0.968 ->     1.006,          A (* SA)
+ Slr noa                  1.016 ->     1.042,          A (* SB)
+ curr sel mode                0 ->         1, (-1=n, 0=a (* si)
+ Modeling bitmap            247 ->         0,       [0x] (* Xm)
+ Bias Vb sensor           1.800 ->     0.030,          v (* Dc)
+Reset to defaults? [Y/n]:Y  Y
+
+saved (sp) all
+ Inj amp                  0.000 ->     0.000,    Amps pk (* Xa)
+ Cutback gain scalar      1.000 ->     1.000,        slr (* Sk)
+ Verbosity                    0 ->         0,        int (* vv)
+ Charge chg Sim             0.0 ->       0.0,          C (* qs)
+ Charge chg                 0.0 ->       0.0,          C (* qm)
+ Tab mon adj              0.000 ->     0.000,          v (* Dw)
+ Inj freq                 0.000 ->     0.000,         Hz (* Xf)
+ Del all                  0.000 ->     0.000,          A (* DI)
+ Add amp                 -0.940 ->    -0.940,          A (* DA)
+ Add noa                 -0.170 ->    -0.170,          A (* DB)
+ Slr amp                  0.968 ->     0.968,          A (* SA)
+ Slr noa                  1.016 ->     1.016,          A (* SB)
+ curr sel mode                0 ->         0, (-1=n, 0=a (* si)
+ Fault buffer indx            7 ->         7,       uint (* if)
+ Hist buffer indx            56 ->        56,       uint (* ih)
+ Injection bias           0.000 ->     0.000,          A (* Xb)
+ Summ buffer indx           140 ->       140,       uint (* is)
+ Modeling bitmap            247 ->       247,       [0x] (* Xm)
+ Monitor battery              1 ->         1, 0=BB, 1=CH (* Bm)
+ Number parallel          2.000 ->     2.000,      units (* BP)
+ Number series            1.000 ->     1.000,      units (* BS)
+ Preserving fault             0 ->         0, T=Preserve (* X?)
+ Sim battery                  1 ->         1, 0=BB, 1=CH (* Bs)
+ Scalar cap Mon           1.000 ->     1.000,        slr (* SQ)
+ Scalar cap Sim           1.000 ->     1.000,        slr (* Sq)
+ Bias Tb sensor           0.000 ->     0.000,       dg C (* Dt)
+ UNIX time epoch    1669801880 -> 1705326886,        sec (* UT)
+ Inj type                     0 ->         0, 1sn 2sq 3t (* Xt)
+ Tb Sim rate lim mem     25.000 ->    25.000,       dg C (* ts)
+ Tb rate lim mem         25.000 ->    25.000,       dg C (* tm)
+ Bias Vb sensor           1.800 ->     1.800,          v (* Dc)
+ Scale Vb sensor          1.017 ->     1.017,          v (* SV)
+End setup()
+
+SHUNT MON Amp started
+SHUNT MON No Amp started
+DS18 1-wire Tb started
+CH dv_min_abs=  0.060, cap=10000.0
+Vb sense ADC pin started
+CH dv_min_abs=  0.060, cap=10000.0
+Q;cmd: Q
+ib_amp_fail 0
+ib_noa_fail 0
+vb_fail 0
+Tb 25.000
+vb 14.640
+voc 14.640
+voc_filt 14.690voc_stat 14.640
+vsat 13.800
+ib  0.000
+soc_m  1.0000
+soc_ekf  0.9995
+soc  1.0000
+soc_min  0.1100
+soc_inf  1.0000
+modeling 247
+dq_inf/dq_abs       0.0/       0.0   0.0000 coul_eff*=-1.000000, DAB+=-2.000000
+DQn       0.0 Tn       0.0 DQp       0.0 Tp       0.0
+ time 1705326901 hms:  2024-01-15T13:55:01
+
+temp init complete
