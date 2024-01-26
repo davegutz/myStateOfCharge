@@ -317,11 +317,11 @@ void loop()
   static Sync *Talk = new Sync(TALK_DELAY);
   boolean read = false;
   static Sync *ReadSensors = new Sync(READ_DELAY);
-  boolean read_temp = false;
-  static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
+  // boolean read_temp = false;
+  // static Sync *ReadTemp = new Sync(READ_TEMP_DELAY);
   boolean display_and_remember;
   static Sync *DisplayUserSync = new Sync(DISPLAY_USER_DELAY);
-  boolean summarizing;
+  // boolean summarizing;
   static boolean boot_wait = true;  // waiting for a while before summarizing
   static Sync *Summarize = new Sync(SUMMARY_DELAY);
   boolean control;
@@ -353,15 +353,15 @@ void loop()
   char buffer[32];
   time_long_2_str(time_now, buffer);
   hm_string = String(buffer);
-  read_temp = ReadTemp->update(micros(), reset);
+  // read_temp = ReadTemp->update(micros(), reset);
   read = ReadSensors->update(micros(), reset);
   chitchat = Talk->update(micros(), reset);
   elapsed = ReadSensors->now() - start;
   control = ControlSync->update(micros(), reset);
   display_and_remember = DisplayUserSync->update(micros(), reset);
-  boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay) ) && !sp.modeling_z;
+  // boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay) ) && !sp.modeling_z;
   if ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay) ) boot_wait = false;
-  summarizing = Summarize->update(micros(), false) || boot_summ;
+  // summarizing = Summarize->update(micros(), false) || boot_summ;
 
   // Sample temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt
@@ -401,8 +401,8 @@ void loop()
     ap.eframe_mult = max(int(float(READ_DELAY)*float(EKF_EFRAME_MULT)/float(ReadSensors->delay())+0.9999), 1);
 
     // Set print frame
-    static uint8_t print_count = 0;
-    if ( print_count>=ap.print_mult-1 || print_count==UINT8_MAX )  // > avoids lockup on change by user
+    static uint16_t print_count = 0;
+    if ( print_count>=ap.print_mult-1 || print_count==UINT16_MAX )  // > avoids lockup on change by user
     {
       print_count = 0;
       cp.publishS = true;
@@ -478,14 +478,19 @@ void loop()
   // right in the "Send String" box then press "Send."
   // String definitions are below.
   // Control
-  if ( control ){} // placeholder
+  if ( control ){
+    chitter(chitchat, Mon, Sen);  // Parse inputs to queues
+  chatter();  // Prioritize commands to describe.  ctl_str and asap_str queues always run.  Others only with chitchat
+  describe(Mon, Sen);  // Run the commands
+
+  } // placeholder
 
   // Chit-chat requires 'read' timing so 'DP' and 'Dr' can manage sequencing
   // Running chitter unframed allows queues of different priorities to be built from long
   // runs of Serial inputs
-  chitter(chitchat, Mon, Sen);  // Parse inputs to queues
-  chatter();  // Prioritize commands to describe.  ctl_str and asap_str queues always run.  Others only with chitchat
-  describe(Mon, Sen);  // Run the commands
+  // chitter(chitchat, Mon, Sen);  // Parse inputs to queues
+  // chatter();  // Prioritize commands to describe.  ctl_str and asap_str queues always run.  Others only with chitchat
+  // describe(Mon, Sen);  // Run the commands
 
   // Summary management.   Every boot after a wait an initial summary is saved in rotating buffer
   // Then every half-hour unless modeling.   Can also request manually via cp.write_summary (Talk)

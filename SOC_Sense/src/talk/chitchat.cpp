@@ -75,7 +75,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
 
   // Intervals
   ap.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
-  ap.print_mult = max(min(DP_MULT, UINT8_MAX), 0);          // DP
+  ap.print_mult = max(min(DP_MULT, UINT16_MAX), 0);          // DP
   Sen->ReadSensors->delay(READ_DELAY);                      // Dr
 
   // Fault logic

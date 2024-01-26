@@ -85,7 +85,7 @@ public:
     float ib_quiet_slr;         // Scale ib_quiet detection thresh, scalar
     float init_all_soc;         // Reinitialize all models to this soc
     float init_sim_soc;         // Reinitialize sim model only to this soc
-    uint8_t print_mult;         // Print multiplier for objects
+    uint16_t print_mult;         // Print multiplier for objects
     unsigned long int read_delay; // Minor frame, ms
     float slr_res;              // Scalar Randles R0, slr
     float s_t_sat;              // Scalar on saturation test time set and reset
@@ -122,7 +122,7 @@ public:
     FloatV *ib_quiet_slr_p;
     FloatV *init_all_soc_p;
     FloatV *init_sim_soc_p;
-    Uint8tV *print_mult_p;
+    Uint16tV *print_mult_p;
     ULongV *read_delay_p;
     FloatV *slr_res_p;
     FloatV *s_t_sat_p;

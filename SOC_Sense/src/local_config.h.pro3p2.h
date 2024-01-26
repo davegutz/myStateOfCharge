@@ -8,7 +8,7 @@ const String unit = version + "_pro3p2";
 #define CONFIG_SBAUD               460800      // Default Serial baud when able
 #define CONFIG_S1BAUD              230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define CONFIG_PHOTON2
-#define CONFIG_SSD1306_OLED
+// #define CONFIG_SSD1306_OLED
 #define CONFIG_TSC2010_DIFFAMP
 // #define CONFIG_DS2482_1WIRE
 

@@ -750,7 +750,7 @@ protected:
 class Uint16tV: public Variable
 {
 public:
-    Uint16tV(){}
+    // Uint16tV(){}
 
     Uint16tV(const String &prefix, const String &code, SerialRAM *ram, const String &description, const String &units, const uint16_t min, const uint16_t max,
     uint16_t *store, const uint16_t _default=0, const boolean check_for_off_on_init=true):
