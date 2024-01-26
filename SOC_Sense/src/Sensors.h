@@ -290,7 +290,7 @@ class Sensors
 public:
   Sensors();
   Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now,
-    unsigned long long millis);
+    unsigned long long micros);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V
@@ -388,7 +388,7 @@ protected:
   unsigned long long dt_ib_hdwe_;           // Delta update of Ib sample, ms
   unsigned long long dt_ib_;                // Delta update of selected Ib sample, ms
   unsigned long long inst_time_;            // UTC Zulu at instantiation, s
-  unsigned long long inst_millis_;          // millis offset to account for setup() time, ms
+  unsigned long long inst_millis_;          // micros offset to account for setup() time, ms
 };
 
 

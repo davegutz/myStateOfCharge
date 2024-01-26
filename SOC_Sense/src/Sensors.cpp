@@ -190,7 +190,7 @@ void Shunt::convert(const boolean disconnect)
         vshunt_int_ = 0;
       #endif
       sample_time_z_ = sample_time_;
-      sample_time_ = System.millis();
+      sample_time_ = micros();
     }
     else
     {
@@ -230,7 +230,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
     Vc_raw_ = analogRead(vc_pin_);
     Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
   }
-  sample_time_ = System.millis();
+  sample_time_ = micros();
   Vo_raw_ = analogRead(vo_pin_);
   Vo_ =  float(Vo_raw_)*VO_CONV_GAIN;
   Vo_Vc_ = Vo_ - Vc_;
@@ -746,8 +746,8 @@ void Fault::vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, con
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now,
-  unsigned long long millis):   reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL), sample_time_ib_hdwe_(0UL),
-  sample_time_vb_hdwe_(0UL), inst_time_(time_now), inst_millis_(millis)
+  unsigned long long micros):   reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL), sample_time_ib_hdwe_(0UL),
+  sample_time_vb_hdwe_(0UL), inst_time_(time_now), inst_millis_(micros)
 {
   this->T = T;
   this->T_filt = T;
@@ -760,7 +760,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_z, &sp.ib_bias_noa_z, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin);
   #endif
   this->SensorTb = new TempSensor(pins->pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
-  this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
+  this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000000., F_W_T, F_Z_T, -20.0, 150.);
   this->Sim = new BatterySim();
   this->elapsed_inj = 0ULL;
   this->start_inj = 0ULL;
@@ -900,7 +900,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   // print_signal_select for data collection
   if ( (sp.debug()==2 || sp.debug()==4)  && cp.publishS )
   {
-      double cTime = double(now)/1000.;
+      double cTime = double(now)/1000000.;
 
       sprintf(pr.buff, "unit_sel,%13.3f, %d, %d,  %10.7f,  %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,  %7.5f,%7.5f, ",
           cTime, reset, sp.ib_select(),
@@ -1063,7 +1063,7 @@ void Sensors::vb_load(const uint16_t vb_pin, const boolean reset)
     Vb_raw = 0;
     Vb_hdwe = 0.;
   }
-  sample_time_vb_hdwe_ = System.millis();
+  sample_time_vb_hdwe_ = micros();
 }
 
 // Print analog voltage

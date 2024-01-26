@@ -32,9 +32,9 @@ extern CommandPars cp;  // Various parameters shared at system level
 // vv1 serial output
 void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
-  double cTime = double(Sen->now)/1000;
+  double cTime = double(Sen->now)/1000000;
   
-  sprintf(pr.buff, "%s, %s,%13.3f,%6.3f, %d,%7.0f,%d, %d, %d, %d, %6.3f,%6.3f,%9.3f,%9.3f,%7.5f,  %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%5.3f,", \
+  sprintf(pr.buff, "%s, %s,%16.6f,%9.6f, %d,%7.0f,%d, %d, %d, %d, %6.3f,%6.3f,%9.3f,%9.3f,%7.5f,  %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%5.3f,", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
     sp.Mon_chm(), Mon->q_cap_rated_scaled(), pubList->sat, sp.ib_select(), sp.modeling(), Mon->bms_off(),
     Mon->Tb(), Mon->vb(), Mon->ib(), Mon->ib_charge(), Mon->voc_soc(), 
@@ -47,11 +47,11 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 // Non-blocking delay
 void delay_no_block(const unsigned long long interval)
 {
-  unsigned long long previousMillis = System.millis();
+  unsigned long long previousMillis = micros();
   unsigned long long currentMillis = previousMillis;
   while( currentMillis - previousMillis < interval )
   {
-    currentMillis = System.millis();
+    currentMillis = micros();
   }
 }
 

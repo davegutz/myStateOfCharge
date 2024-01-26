@@ -139,7 +139,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                 Serial.printf("**\n*** RUN: at %lld, %7.3f cycles %lld to %lld with %ld wait and %ld tail\n\n",
                     Sen->now, ap.cycles_inj, Sen->start_inj, Sen->stop_inj, ap.wait_inj, ap.tail_inj);
             }
-            else Serial.printf("Wait%5.1fs for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000.);
+            else Serial.printf("Wait%5.1fs for init\n", float(TEMP_INIT_DELAY-Sen->now)/1000000.);
             break;
 
         case ( 'S' ): // XS:  Stop injection now

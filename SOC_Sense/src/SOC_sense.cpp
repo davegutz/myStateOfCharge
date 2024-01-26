@@ -137,8 +137,8 @@ PrinterPars pr = PrinterPars();       // Print buffer
 VolatilePars ap = VolatilePars();     // Various adjustment parameters commanding at system level.  Initialized on start up.  Not retained.
 CommandPars cp = CommandPars();       // Various control parameters commanding at system level.  Initialized on start up.  Not retained.
 PublishPars pp = PublishPars();       // Common parameters for publishing.  Future-proof cloud monitoring
-unsigned long long millis_flip = System.millis(); // Timekeeping
-unsigned long long last_sync = System.millis();   // Timekeeping
+unsigned long long millis_flip = micros(); // Timekeeping
+unsigned long long last_sync = micros();   // Timekeeping
 
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
@@ -268,13 +268,13 @@ void setup()
   }
   else Serial.printf("clean\n");
 
-  // Determine System.millis() at turn of Time.now   Used to improve accuracy of timing.
+  // Determine micros() at turn of Time.now   Used to improve accuracy of timing.
   long time_begin = Time.now();
   uint16_t count = 0;
   while ( Time.now()==time_begin && count++<1000 )
   {
     delay(1);
-    millis_flip = System.millis()%1000;
+    millis_flip = micros()%1000;
   }
 
   // Enable and print stored history
@@ -311,8 +311,8 @@ void setup()
 void loop()
 {
   // Synchronization
-  static unsigned long long now = (unsigned long long) System.millis();
-  now = (unsigned long long) System.millis();
+  static unsigned long long now = (unsigned long long) micros();
+  now = (unsigned long long) micros();
   boolean chitchat = false;
   static Sync *Talk = new Sync(TALK_DELAY);
   boolean read = false;
@@ -330,7 +330,7 @@ void loop()
   static boolean reset = true;
   static boolean reset_temp = true;
   static boolean reset_publish = true;
-  static unsigned long long start = System.millis();
+  static unsigned long long start = micros();
 
   // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
   unsigned long long time_now = (unsigned long long) Time.now();
@@ -349,19 +349,19 @@ void loop()
     Ds2482.loop();
   #endif
   if ( now - last_sync > ONE_DAY_MILLIS || reset )  sync_time(now, &last_sync, &millis_flip); 
-  Sen->control_time = double(Sen->now/1000);
+  Sen->control_time = double(Sen->now/1000000);
   char buffer[32];
   time_long_2_str(time_now, buffer);
   hm_string = String(buffer);
-  read_temp = ReadTemp->update(System.millis(), reset);
-  read = ReadSensors->update(System.millis(), reset);
-  chitchat = Talk->update(System.millis(), reset);
+  read_temp = ReadTemp->update(micros(), reset);
+  read = ReadSensors->update(micros(), reset);
+  chitchat = Talk->update(micros(), reset);
   elapsed = ReadSensors->now() - start;
-  control = ControlSync->update(System.millis(), reset);
-  display_and_remember = DisplayUserSync->update(System.millis(), reset);
+  control = ControlSync->update(micros(), reset);
+  display_and_remember = DisplayUserSync->update(micros(), reset);
   boolean boot_summ = boot_wait && ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay) ) && !sp.modeling_z;
   if ( elapsed >= SUMMARY_WAIT / (SUMMARY_DELAY / ap.sum_delay) ) boot_wait = false;
-  summarizing = Summarize->update(System.millis(), false) || boot_summ;
+  summarizing = Summarize->update(micros(), false) || boot_summ;
 
   // Sample temperature
   // Outputs:   Sen->Tb,  Sen->Tb_filt
@@ -417,7 +417,7 @@ void loop()
     // Inputs:  sp.config, sp.sim_chm
     // Outputs: Sen->Ib, Sen->Vb, Sen->Tb_filt, sp.inj_bias
     sense_synth_select(reset, reset_temp, ReadSensors->now(), elapsed, myPins, Mon, Sen);
-    Sen->T =  double(Sen->dt_ib())/1000.;
+    Sen->T =  double(Sen->dt_ib())/1000000.;
 
     // Calculate Ah remaining`
     // Inputs:  sp.mon_chm, Sen->Ib, Sen->Vb, Sen->Tb_filt

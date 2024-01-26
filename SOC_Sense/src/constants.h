@@ -45,17 +45,17 @@
 #include "local_config.h"       // this is not in GitHub repository.  Copy appropriate local_config??.h to match configure
 
 // Constants always defined
-#define ONE_HOUR_MILLIS       3600000UL // Number of milliseconds in one hour (60*60*1000)
-#define ONE_DAY_MILLIS        86400000UL// Number of milliseconds in one day (24*60*60*1000)
-#define TALK_DELAY            313UL      // Talk wait, ms (313UL = 0.313 sec)
-#define READ_DELAY            100UL     // Sensor read wait, ms (100UL = 0.1 sec) Dr
-#define READ_TEMP_DELAY       6011UL    // Sensor read wait, ms (6011UL = 6.011 sec)
-#define SUMMARY_DELAY         1800000UL // Battery state tracking and reporting, ms (1800000UL = 30 min) Dh
-#define SUMMARY_WAIT          60000UL   // Summarize alive time before first save, ms (60000UL = 1 min) Dh
-#define PUBLISH_SERIAL_DELAY  400UL     // Serial print interval (400UL = 0.4 sec)
-#define DISPLAY_USER_DELAY    1200UL    // User display update (1200UL = 1.2 sec)
-#define CONTROL_DELAY         100UL     // Control read wait, ms (100UL = 0.1 sec)
-#define SNAP_WAIT             10000ULL  // Interval between fault snapshots (10000ULL = 10 sec)
+#define ONE_HOUR_MILLIS       3600000000UL // Number of milliseconds in one hour (60*60*1000)
+#define ONE_DAY_MILLIS        86400000000UL// Number of milliseconds in one day (24*60*60*1000)
+#define TALK_DELAY            313000UL      // Talk wait, ms (313UL = 0.313 sec)
+#define READ_DELAY            100000UL     // Sensor read wait, ms (100UL = 0.1 sec) Dr
+#define READ_TEMP_DELAY       6011000UL    // Sensor read wait, ms (6011UL = 6.011 sec)
+#define SUMMARY_DELAY         1800000000UL // Battery state tracking and reporting, ms (1800000UL = 30 min) Dh
+#define SUMMARY_WAIT          60000000UL   // Summarize alive time before first save, ms (60000UL = 1 min) Dh
+#define PUBLISH_SERIAL_DELAY  400000UL     // Serial print interval (400UL = 0.4 sec)
+#define DISPLAY_USER_DELAY    1200000UL    // User display update (1200UL = 1.2 sec)
+#define CONTROL_DELAY         100000UL     // Control read wait, ms (100UL = 0.1 sec)
+#define SNAP_WAIT             10000000ULL  // Interval between fault snapshots (10000ULL = 10 sec)
 #define DP_MULT               4         // Multiples of read to capture data DP
 #define TBATT_TEMPCAL         0.56      // Maxim 1-wire plenum temp sense calibrate (0.56), C
 #define MAX_TEMP_READS        10        // Number of consequetive temp queries allowed (10)

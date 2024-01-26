@@ -549,17 +549,17 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Sen->Sim->calc_inj(Sen->elapsed_inj, sp.type(), sp.Amp(), sp.freq());
 
   // Quiet logic.   Reset to ready state at soc=0.5; do not change Modeling.  Passes at least once before running chit.
-  // static unsigned long long millis_past = System.millis();
+  // static unsigned long long millis_past = micros();
   // static unsigned long int until_q_past = ap.until_q;
   // if ( ap.until_q>0UL && until_q_past==0UL ) until_q_past = ap.until_q;
-  // ap.until_q = (unsigned long) max(0, (long) ap.until_q  - (long)(System.millis() - millis_past));
+  // ap.until_q = (unsigned long) max(0, (long) ap.until_q  - (long)(micros() - millis_past));
   // if ( ap.until_q==0UL && until_q_past>0UL )
   // {
   //   chit("BZ;", SOON);
   //   cp.freeze = false;  // unfreeze the queues
   // }
   // until_q_past = ap.until_q;
-  // millis_past = System.millis();
+  // millis_past = micros();
 
 }
 
@@ -567,18 +567,18 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 // Time synchro for web information
 void sync_time(unsigned long long now, unsigned long long *last_sync, unsigned long long *millis_flip)
 {
-  *last_sync = System.millis();
+  *last_sync = micros();
 
   // Request time synchronization from the Particle Cloud
   if ( Particle.connected() ) Particle.syncTime();
 
-  // Refresh millis() at turn of Time.now
+  // Refresh micros() at turn of Time.now
   int count = 0;
   long time_begin = Time.now();  // Seconds since start of epoch
   while ( Time.now()==time_begin && ++count<1100 )  // Time.now() truncates to seconds
   {
     delay(1);
-    *millis_flip = System.millis()%1000;
+    *millis_flip = micros()%1000;
   }
 }
 

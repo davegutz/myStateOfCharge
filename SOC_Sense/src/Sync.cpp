@@ -34,7 +34,7 @@ Sync::Sync()
 Sync::Sync(unsigned long long delay)
     : delay_(delay), last_(0ULL), now_(0ULL), stat_(false), updateDiff_(0), updateTime_(0)
 {
-  updateTimeInput_ = float(delay_)/1000.;
+  updateTimeInput_ = float(delay_)/1000000.;
 }
 
 // Check and count 
@@ -46,7 +46,7 @@ boolean Sync::update(boolean reset, unsigned long long now, boolean andCheck)
   if ( stat_ )
   {
     last_ = now_;
-    updateTime_ = double(updateDiff_)/1000.;
+    updateTime_ = double(updateDiff_)/1000000.;
   }
   return( stat_ );
 }
@@ -58,7 +58,7 @@ boolean Sync::update(unsigned long long now, boolean reset, boolean andCheck)
   if ( stat_ )
   {
     last_ = now_;
-    updateTime_ = double(updateDiff_)/1000.;
+    updateTime_ = double(updateDiff_)/1000000.;
   }
   return( stat_ );
 }
@@ -70,7 +70,7 @@ boolean Sync::update(unsigned long long now, boolean reset)
   if ( stat_ )
   {
     last_ = now_;
-    updateTime_ = double(updateDiff_)/1000.;
+    updateTime_ = double(updateDiff_)/1000000.;
   }
   return( stat_ );
 }
@@ -82,7 +82,7 @@ boolean Sync::updateN(unsigned long long now, boolean reset, boolean orCheck)
   if ( stat_ )
   {
     last_ = now_;
-    updateTime_ = double(updateDiff_)/1000.;
+    updateTime_ = double(updateDiff_)/1000000.;
   }
   return( stat_ );
 }
