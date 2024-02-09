@@ -122,8 +122,6 @@ if __name__ == '__main__':
         import os
         if not os.path.isdir(path_to_temp):
             os.mkdir(path_to_temp)
-        cols = ('time', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc_dyn', 'voc_stat', 'tweak_sclr_amp',
-                'tweak_sclr_noa', 'falw')
 
         # cat files
         cat(data_file, input_files, in_path=path_to_data, out_path=path_to_temp)
@@ -137,8 +135,7 @@ if __name__ == '__main__':
             exit(1)
 
         # load
-        raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
-                            encoding=None).view(np.recarray)
+        raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
 
         # Sort unique
         raw = np.unique(raw)

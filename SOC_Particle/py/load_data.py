@@ -37,14 +37,8 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     data_file_clean = write_clean_file(path_to_data, type_='_mon', title_key=title_key, unit_key=unit_key, skip=skip)
     if data_file_clean is None:
         return None, None, None, None, None
-    if not legacy:
-        cols = ('cTime', 'dt', 'chm', 'qcrs', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'voc_soc',
-                'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
-    else:
-        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib', 'ib_charge', 'voc_soc',
-                'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
     if data_file_clean is  not None:
-        mon_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float, encoding=None).view(np.recarray)
+        mon_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
     else:
         mon_raw = None
         print(f"load_data: returning mon=None")
@@ -52,16 +46,8 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     # Load sel (old)
     sel_file_clean = write_clean_file(path_to_data, type_='_sel', title_key=title_key_sel,
                                       unit_key=unit_key_sel, skip=skip)
-    cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
-                'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
-                'voc_soc', 'e_w', 'e_w_f',
-                'ib_sel_stat', 'ib_h', 'ib_s', 'mib', 'ib',
-                'vb_sel', 'vb_h', 'vb_s', 'mvb', 'vb',
-                'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
-                'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
-                'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
     if sel_file_clean and not v1_only:
-        sel_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float, encoding=None).view(np.recarray)
+        sel_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
     else:
         sel_raw = None
         print(f"load_data: returning sel_raw=None")
@@ -69,11 +55,8 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     # Load ekf (old)
     ekf_file_clean = write_clean_file(path_to_data, type_='_ekf', title_key=title_key_ekf,
                                       unit_key=unit_key_ekf, skip=skip)
-
-    cols_ekf = ('c_time', 'Fx_', 'Bu_', 'Q_', 'R_', 'P_', 'S_', 'K_', 'u_', 'x_', 'y_', 'z_', 'x_prior_',
-                'P_prior_', 'x_post_', 'P_post_', 'hx_', 'H_')
     if ekf_file_clean and not v1_only:
-        ekf_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, usecols=cols_ekf, dtype=float, encoding=None).view(np.recarray)
+        ekf_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
     else:
         ekf_raw = None
         print(f"load_data: returning ekf_raw=None")
@@ -93,14 +76,8 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     # Load sim _s v24 portion of real-time run (old)
     data_file_sim_clean = write_clean_file(path_to_data, type_='_sim', title_key=title_key_sim,
                                            unit_key=unit_key_sim, skip=skip)
-    if not legacy:
-        cols_sim = ('c_time', 'chm_s', 'qcrs_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
-                    'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
-    else:
-        cols_sim = ('c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
-                    'ib_in_s', 'ib_charge_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
     if data_file_sim_clean and not v1_only:
-        sim_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim, dtype=float, encoding=None).view(np.recarray)
+        sim_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         sim = SavedDataSim(time_ref=mon.time_ref, data=sim_raw, time_end=time_end_in)
     else:
         sim = None
@@ -109,10 +86,8 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     # Load fault
     temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', title_key='fltb',
                                            unit_key='unit_f', skip=skip, comment_str='---')
-    cols_f = ('time_ux', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
-              'e_w_f', 'fltw', 'falw')
     if temp_flt_file_clean and not v1_only:
-        f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None, encoding=None).view(np.recarray)
+        f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=None).view(np.recarray)
     else:
         print("data from", temp_flt_file, "empty after loading")
         f_raw = None

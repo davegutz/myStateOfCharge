@@ -540,8 +540,6 @@ if __name__ == '__main__':
         path_to_pdfs = '../dataReduction/figures'
         path_to_data = '../dataReduction'
         path_to_temp = '../dataReduction/temp'
-        cols = ('date', 'time', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc_dyn', 'voc_stat', 'tweak_sclr_amp',
-                'tweak_sclr_noa', 'falw')
 
         # cat files
         cat(data_file, input_files, in_path=path_to_data, out_path=path_to_temp)
@@ -551,8 +549,7 @@ if __name__ == '__main__':
                                            skip=skip, path_to_data=path_to_temp, path_to_temp=path_to_temp,
                                            comment_str='---')
         if data_file_clean:
-            h_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
-                                  encoding=None).view(np.recarray)
+            h_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         else:
             print("data from", data_file, "empty after loading")
             exit(1)

@@ -926,10 +926,6 @@ if __name__ == '__main__':
         path_to_temp = '../dataReduction/temp'
         if not os.path.isdir(path_to_temp):
             os.mkdir(path_to_temp)
-        cols_h = ('time', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc_dyn', 'voc_stat', 'tweak_sclr_amp',
-                  'tweak_sclr_noa', 'falw')
-        cols_f = ('time', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
-                  'e_wrap_filt', 'fltw', 'falw')
 
         # cat files
         cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
@@ -939,8 +935,7 @@ if __name__ == '__main__':
                                                 skip=skip, path_to_data=path_to_temp, path_to_temp=path_to_temp,
                                                 comment_str='---')
         if temp_hist_file_clean:
-            h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_h, dtype=None,
-                                  encoding=None).view(np.recarray)
+            h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         else:
             print("data from", temp_hist_file, "empty after loading")
             exit(1)
@@ -950,8 +945,7 @@ if __name__ == '__main__':
                                                skip=skip, path_to_data=path_to_temp, path_to_temp=path_to_temp,
                                                comment_str='---')
         if temp_flt_file_clean:
-            f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
-                                  encoding=None).view(np.recarray)
+            f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         else:
             print("data from", temp_flt_file, "empty after loading")
             exit(1)

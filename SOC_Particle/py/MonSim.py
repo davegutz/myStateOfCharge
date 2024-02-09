@@ -395,37 +395,22 @@ if __name__ == '__main__':
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
                                            skip=skip)
-        cols = ('cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'vb', 'ib', 'ioc', 'voc_soc', 'vsat', 'dv_dyn', 'voc_stat',
-                'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
-        mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols,  dtype=float,
-                                    encoding=None).view(np.recarray)
+        mon_old_raw = np.genfromtxt(data_file_clean, ddelimiter=',', names=True, dtype=float).view(np.recarray)
 
         # Load sel (old)
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
                                           unit_key=unit_key_sel, skip=skip)
-        cols_sel = ('c_time', 'res', 'user_sel', 'cc_dif',
-                    'ibmh', 'ibnh', 'ibmm', 'ibnm', 'ibm', 'ib_diff', 'ib_diff_f',
-                    'voc_soc', 'e_wrap', 'e_wrap_filt',
-                    'ib_sel_stat', 'ib_h', 'ib_s', 'mib', 'ib',
-                    'vb_sel', 'vb_h', 'vb_s', 'mvb', 'vb',
-                    'Tb_h', 'Tb_s', 'mtb', 'Tb_f',
-                    'fltw', 'falw', 'ib_rate', 'ib_quiet', 'tb_sel',
-                    'ccd_thr', 'ewh_thr', 'ewl_thr', 'ibd_thr', 'ibq_thr', 'preserving')
         sel_old_raw = None
         if sel_file_clean:
-            sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, usecols=cols_sel, dtype=float,
-                                        encoding=None).view(np.recarray)
+            sel_old_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         mon_old = SavedData(data=mon_old_raw, sel=sel_old_raw, time_end=time_end, zero_zero=zero_zero_in,
                             zero_thr=zero_thr_in)
 
         # Load _m v24 portion of real-time run (old)
         data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
                                                unit_key=unit_key_sim, skip=skip)
-        cols_sim = ('c_time', 'chm_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s',
-                    'ib_in_s', 'ioc_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         if data_file_sim_clean:
-            sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
-                                        dtype=float, encoding=None).view(np.recarray)
+            sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
             sim_old = SavedDataSim(time_ref=mon_old.time_ref, data=sim_old_raw, time_end=time_end)
         else:
             sim_old = None

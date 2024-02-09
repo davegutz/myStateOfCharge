@@ -882,16 +882,10 @@ if __name__ == '__main__':
                                                unit_key='unit_sim,')
 
         # Load
-        cols = ('unit', 'hm', 'cTime', 'dt', 'chm', 'sat', 'sel', 'mod', 'Tb', 'vb', 'ib', 'vsat', 'dv_dyn',
-                'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s', 'soc_ekf', 'soc')
-        mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols, dtype=None,
-                                    encoding=None).view(np.recarray)
+        mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         mon_old = SavedData(mon_old_raw, time_end, zero_zero=zero_zero_in)
-        cols_sim = ('unit_m', 'c_time', 'chm_s', 'bmso_s', 'Tb_s', 'Tbl_s', 'vsat_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s',
-                    'ib_s', 'ib_in_s', 'sat_s', 'dq_s', 'soc_s', 'reset_s')
         try:
-            sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, usecols=cols_sim,
-                                        dtype=None, encoding=None).view(np.recarray)
+            sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
             sim_old = SavedDataSim(mon_old.time_ref, sim_old_raw, time_end)
         except IOError:
             sim_old = None

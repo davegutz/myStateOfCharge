@@ -25,11 +25,6 @@ temp_file3 = data_file(os.getcwd(), file3)
 temp_file4 = data_file(os.getcwd(), file4)
 temp_file5 = data_file(os.getcwd(), file5)
 
-# The numerical columns of interest
-cols_t = ('cTime', 'unit', 'dt', 'chm', 'qcrs', 'sat', 'sel', 'mod', 'bmso', 'Tb', 'vb', 'ib',
-          'ib_charge', 'ioc', 'voc_soc', 'vsat', 'dv_dyn', 'voc_stat', 'voc_ekf', 'y_ekf', 'soc_s',
-          'soc_ekf', 'soc', 'soc_min', 'Tbl')
-
 # Make clean files
 temp_file0_clean = write_clean_file(temp_file0, type_='', title_key='unit', unit_key='g20230530')
 temp_file1_clean = write_clean_file(temp_file1, type_='', title_key='unit', unit_key='g20230530')
@@ -39,18 +34,12 @@ temp_file4_clean = write_clean_file(temp_file4, type_='', title_key='unit', unit
 temp_file5_clean = write_clean_file(temp_file5, type_='', title_key='unit', unit_key='g20230530')
 
 # Load all clean
-t0_raw = np.genfromtxt(temp_file0_clean, delimiter=',', names=True, usecols=cols_t, dtype=None,
-                       encoding=None).view(np.recarray)
-t1_raw = np.genfromtxt(temp_file1_clean, delimiter=',', names=True, usecols=cols_t, dtype=None,
-                       encoding=None).view(np.recarray)
-t2_raw = np.genfromtxt(temp_file2_clean, delimiter=',', names=True, usecols=cols_t, dtype=None,
-                       encoding=None).view(np.recarray)
-t3_raw = np.genfromtxt(temp_file3_clean, delimiter=',', names=True, usecols=cols_t, dtype=None,
-                       encoding=None).view(np.recarray)
-t4_raw = np.genfromtxt(temp_file4_clean, delimiter=',', names=True, usecols=cols_t, dtype=None,
-                       encoding=None).view(np.recarray)
-t5_raw = np.genfromtxt(temp_file5_clean, delimiter=',', names=True, usecols=cols_t, dtype=None,
-                       encoding=None).view(np.recarray)
+t0_raw = np.genfromtxt(temp_file0_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+t1_raw = np.genfromtxt(temp_file1_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+t2_raw = np.genfromtxt(temp_file2_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+t3_raw = np.genfromtxt(temp_file3_clean, ddelimiter=',', names=True, dtype=float).view(np.recarray)
+t4_raw = np.genfromtxt(temp_file4_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+t5_raw = np.genfromtxt(temp_file5_clean, delimiter=',', names=True, dtype=float.view(np.recarray)
 
 # Resample transitions
 t01_raw = t1_raw[0:2].copy()

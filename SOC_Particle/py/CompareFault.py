@@ -72,7 +72,8 @@ def add_stuff(d_ra, mon, ib_band=0.5):
     d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
+    if not hasattr(d_mod, 'soc_min'):
+        d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_sel', np.array(d_mod.ib, dtype=float))
     if hasattr(d_mod, 'voc_dyn'):
@@ -165,7 +166,8 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0.):
     d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
+    if not hasattr(d_mod, 'soc_min'):
+        d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff', np.array(ib_diff, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'cc_diff_thr', np.array(cc_diff_thr, dtype=float))
@@ -935,8 +937,6 @@ if __name__ == '__main__':
         import os
         if not os.path.isdir(path_to_temp):
             os.mkdir(path_to_temp)
-        cols_f = ('time_ux', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat',
-                  'e_w_f', 'fltw', 'falw')
 
         # Load configuration
         batt = BatteryMonitor(mod_code=chm_in)
@@ -949,8 +949,7 @@ if __name__ == '__main__':
         temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                 skip=skip, comment_str='---')
         if temp_hist_file_clean:
-            h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
-                                  encoding=None).view(np.recarray)
+            h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         else:
             h_raw = None
             print("data from", temp_hist_file, "empty after loading")
@@ -960,8 +959,7 @@ if __name__ == '__main__':
         temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                skip=skip, comment_str='---')
         if temp_flt_file_clean:
-            f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
-                                  encoding=None).view(np.recarray)
+            f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         else:
             f_raw = None
             print("data from", temp_flt_file, "empty after loading")

@@ -617,8 +617,7 @@ if __name__ == '__main__':
         temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                 skip=skip, comment_str='---')
         if temp_hist_file_clean:
-            h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
-                                  encoding=None).view(np.recarray)
+            h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         else:
             print("data from temp hist", temp_hist_file, "empty after loading")
             return None, None, None, None, None
@@ -627,8 +626,7 @@ if __name__ == '__main__':
         temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                skip=skip, comment_str='---')
         if temp_flt_file_clean:
-            f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, usecols=cols_f, dtype=None,
-                                  encoding=None).view(np.recarray)
+            f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         else:
             print("data from temp flt", temp_flt_file, "empty after loading")
             return None, None, None, None, None
