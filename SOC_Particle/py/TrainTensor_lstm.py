@@ -18,7 +18,7 @@
 import math
 import numpy as np
 import pandas as pd
-import tensorflow as tf  # install scikit-learn
+import tensorflow as tf  # need to use with python 3.11 or earlier as of 2/11/2024
 from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.models import load_model, Model
@@ -115,7 +115,10 @@ def plot_hys(trn_x, trn_y, trn_predict):
 def plot_fail(trn_y, trn_predict, trn_predict_fail_ib, t_samp_, ib_bias_):
     n_fail = trn_predict_fail_ib.shape[0]
     rows = len(trn_y)
-    time = range(rows) * t_samp_
+    # time = range(rows) * t_samp_
+    time = []
+    for i in range(rows):
+        time.append(i * t_samp_)
     plt.figure(figsize=(15, 6), dpi=80)
     plt.plot(time, trn_y[:, 5, :], label='actual')
     plt.plot(time, trn_predict[:, 5, :], label='prediction')
@@ -143,7 +146,10 @@ def plot_input(trn_x, trn_y, val_x, val_y, tst_x, tst_y, t_samp_, use_ib_lag_, u
     inp_dv = np.append(inp_dv, tst_y[:, :, 0])
     rows = len(inp_ib)  # inp is unstacked while all the x's are stacked
     plt.figure(figsize=(15, 6), dpi=80)
-    time = range(rows) * t_samp_
+    # time = range(rows) * t_samp_
+    time = []
+    for i in range(rows):
+        time.append(i * t_samp_)
     plt.plot(time, inp_dv, label='dv_scaled', color='blue')
     if use_ib_lag_:
         plt.plot(time, inp_ib,  label='ib_lag scaled', color='orange')
@@ -185,9 +191,15 @@ def plot_result(trn_y, val_y, tst_y, trn_pred, val_pred, tst_pred, trn_dv_hys_ol
     errors_old_train = -(dv_hys_old_train - actual_train)*scale_in_dv_*1000.
     errors_old = -(dv_hys_old - actual)*scale_in_dv_*1000.
     rows = len(actual)
-    time = range(rows) * t_samp_
+    # time = range(rows) * t_samp_
+    time = []
+    for i in range(rows):
+        time.append(i * t_samp_)
     rows_train_ = len(actual_train)
-    time_train = range(rows_train_) * t_samp_
+    # time_train = range(rows_train_) * t_samp_
+    time_train = []
+    for i in range(rows_train_):
+        time_train.append(i * t_samp_)
     plt.figure(figsize=(15, 9), dpi=80)
     plt.subplot(2, 1, 1)
     plt.title('Actual and Predicted Values and old model. The Red Line Separates The Training, Validation, and Test Examples')

@@ -21,6 +21,7 @@ import pyautogui
 import time
 import platform
 if platform.system() == 'Darwin':
+    # noinspection PyUnresolvedReferences
     from ttwidgets import TTButton as myButton  # Need for macOS - ignore warning
 else:
     import tkinter as tk

@@ -71,7 +71,7 @@ class MessageBox(object):
         self.returning = None
 
         # ctrl+c to copy self.msg
-        root.bind('<Control-c>', func=self.to_clip)
+        root.bind("<Control-c>", func=self.to_clip)
 
         # remove the outer frame if frame=False
         if not frame:
@@ -157,7 +157,7 @@ class MessageBox(object):
         if t:
             root.after(int(t*1000), func=self.time_out)
 
-    def b1_action(self):
+    def b1_action(self, _event):
         try:
             x = self.entry.get()
         except AttributeError:
@@ -168,20 +168,19 @@ class MessageBox(object):
                 self.returning = x
                 self.root.quit()
 
-
-    def b2_action(self):
+    def b2_action(self, _event):
         self.returning = self.b2_return
         self.root.quit()
 
-    def b3_action(self):
+    def b3_action(self, _event):
         self.returning = self.b3_return
         self.root.quit()
 
-    def b4_action(self):
+    def b4_action(self, _event):
         self.returning = self.b4_return
         self.root.quit()
 
-    def b5_action(self):
+    def b5_action(self, _event):
         self.returning = self.b5_return
         self.root.quit()
 
@@ -200,6 +199,6 @@ class MessageBox(object):
         finally:
             self.root.quit()
 
-    def to_clip(self):
+    def to_clip(self, _event):
         self.root.clipboard_clear()
         self.root.clipboard_append(self.msg)

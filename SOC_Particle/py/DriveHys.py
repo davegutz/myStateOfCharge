@@ -95,7 +95,7 @@ class Hysteresis:
         if self.disabled:
             self.res = 0.
         else:
-            self.res = self.lut.lookup(x=dv/self.scale, y=soc)*self.scale
+            self.res = self.lut.interp(x_=dv/self.scale, y_=soc)*self.scale
         return self.res
 
     def save(self, time):

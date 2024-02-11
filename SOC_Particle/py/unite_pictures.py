@@ -6,15 +6,20 @@ from reportlab.lib import utils
 from reportlab.pdfgen import canvas
 
 
-# ----------------------------------------------------------------------
+def convert(text):
+    return int(text) if text.isdigit() else text
+
+
+def alphanum_key(key):
+    return [convert(c) for c in re.split('([0-9]+)', key)]
+
+
 def sorted_nicely(_l):
     """
     # http://stackoverflow.com/questions/2669059/how-to-sort-alpha-numeric-set-in-python
 
     Sort the given iterable in the way that humans expect.
     """
-    convert = lambda text: int(text) if text.isdigit() else text
-    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
     return sorted(_l, key=alphanum_key)
 
 
@@ -43,11 +48,16 @@ def precleanup_fig_files(output_pdf_name='unite_pictures.pdf', path_to_pdfs='.')
 
 # ----------------------------------------------------------------------
 def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', save_pdf_path='.', pathToPictures='.', splitType="picture",
-                            numberOfEntitiesInOnePdf=9, listWithImagesExtensions=["png", "jpg"],
+                            numberOfEntitiesInOnePdf=9, listWithImagesExtensions=None,
                             picturesAreInRootFolder=True, nameOfPart="picture"):
+
+    if listWithImagesExtensions is None:
+        listWithImagesExtensions = ["png", "jpg"]
+
     if numberOfEntitiesInOnePdf < 1:
         print("Wrong value of numberOfEntitiesInOnePdf.")
         return
+
     if len(listWithImagesExtensions) == 0:
         print("listWithImagesExtensions is empty.")
         return

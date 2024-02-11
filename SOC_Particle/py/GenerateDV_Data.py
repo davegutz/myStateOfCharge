@@ -14,8 +14,7 @@
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
 """Simulate a v1 verbose run on battery monitor"""
-
-from datetime import datetime as dt
+import datetime
 from myFilters import LagExp
 
 build = 'g20230530_soc0p_ch'
@@ -56,7 +55,7 @@ with open(csv_file, "w") as output:
     for i in range(n):
         ctime = float(i) * T
         time = time_start + int(ctime)
-        DATE = dt.utcfromtimestamp(time)
+        DATE = datetime.datetime.fromtimestamp(time, datetime.UTC)
         time_str = DATE.strftime('%Y-%m-%d:%H:%M:%S')
         tod = DATE.hour
         ib_charge = 0.

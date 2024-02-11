@@ -10,4 +10,3 @@ def cat(out_file_name, in_file_names, in_path='./', out_path='./'):
                 for line in in_file:
                     if line.strip():
                         out_file.write(line)
-

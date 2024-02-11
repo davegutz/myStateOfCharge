@@ -141,6 +141,7 @@ if __name__ == '__main__':
         # Rack and stack
         if exclusions:
             for i in range(len(exclusions)):
+                # noinspection PyUnresolvedReferences
                 test_res0 = np.where(raw.time < exclusions[i][0])
                 test_res1 = np.where(raw.time > exclusions[i][1])
                 raw = raw[np.hstack((test_res0, test_res1))[0]]
@@ -149,6 +150,7 @@ if __name__ == '__main__':
         print(raw)
 
         # Now do the resample
+        # noinspection PyUnresolvedReferences
         T_raw = raw.time[1] - raw.time[0]
         T = 0.1
         resamp = resample(data=raw, dt_resamp=T, specials=[('falw', 0)], time_var='time')

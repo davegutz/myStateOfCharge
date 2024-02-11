@@ -70,7 +70,8 @@ class Tail(object):
         """ Overrides default callback function to provided function. """
         self.callback = func
 
-    def check_file_validity(self, _file):
+    @staticmethod
+    def check_file_validity(_file):
         """ Check whether a given file exists, readable and is a file """
         if not os.access(_file, os.F_OK):
             raise TailError("File '%s' does not exist" % _file)
@@ -204,6 +205,8 @@ if __name__ == '__main__':
         import tkinter as tk
         from tkinter import Button as myButton
     bg_color = "lightgray"
+
+    global of
 
     root = tk.Tk()
     root.title('tail -f')

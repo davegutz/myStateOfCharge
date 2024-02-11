@@ -15,7 +15,7 @@
 
 """Simulate a v1 verbose run on battery monitor"""
 
-from datetime import datetime as dt
+import datetime
 from myFilters import LagExp
 import numpy as np
 from Util import cat
@@ -107,7 +107,7 @@ for prof_type, Tb, csv_file in prof_types:
                 tim_n += T
                 ctime = float(n) * T
                 time = time_start + int(ctime)
-                DATE = dt.utcfromtimestamp(time)
+                DATE = datetime.datetime.fromtimestamp(time, datetime.UTC)
                 time_str = DATE.strftime('%Y-%m-%d:%H:%M:%S')
                 tod = DATE.hour
                 ib_hys = ib_charge * dv_hys_di
