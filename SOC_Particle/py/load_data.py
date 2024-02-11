@@ -87,7 +87,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', title_key='fltb',
                                            unit_key='unit_f', skip=skip, comment_str='---')
     if temp_flt_file_clean and not v1_only:
-        f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=None, encoding=None).view(np.recarray)
+        f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
     else:
         print("data from", temp_flt_file, "empty after loading")
         f_raw = None
