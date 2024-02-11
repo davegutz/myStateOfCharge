@@ -761,7 +761,7 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
         dt_hys_min = 1.
         dt_hys_sec = dt_hys_min * 60.
         hys_time_min = np.arange(t_s_min, t_e_min, dt_hys_min, dtype=float)
-        min_per_month = 30*24*60;
+        min_per_month = 30*24*60
         if len(hys_time_min) > 2 * min_per_month:
             print(Colors.fg.red)
             print("HUGE time range.  Something is wrong with time")
@@ -897,7 +897,7 @@ if __name__ == '__main__':
         sres0_in = 1.
         sresct_in = 1.
         stauct_in = 1.
-        chm_in = 0
+        # chm_in = 0
         s_hys_in = 1.
         s_hys_cap_in = 1.
         s_cap_chg_in = 1.
@@ -949,9 +949,8 @@ if __name__ == '__main__':
         temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                 skip=skip, comment_str='---')
         if temp_hist_file_clean:
-            h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+            h_raw_ = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         else:
-            h_raw = None
             print("data from", temp_hist_file, "empty after loading")
             exit(1)
 
@@ -959,18 +958,17 @@ if __name__ == '__main__':
         temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
                                                skip=skip, comment_str='---')
         if temp_flt_file_clean:
-            f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+            f_raw_ = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
         else:
-            f_raw = None
             print("data from", temp_flt_file, "empty after loading")
             exit(1)
-        f_raw = np.unique(f_raw)
+        f_raw = np.unique(f_raw_)
         f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in)
         print("\nf:\n", f, "\n")
         f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)
 
         # Sort unique
-        h_raw = np.unique(h_raw)
+        h_raw = np.unique(h_raw_)
         h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
         # h = add_stuff(h_raw, batt, ib_band=IB_BAND)
         print("\nh:\n", h, "\n")
@@ -979,8 +977,8 @@ if __name__ == '__main__':
         time0 = h_20C.time_ux[0]
         h_20C.time_ux -= time0
         # T_100 = 0.1
-        T_100 = 0.3
-        T_100 = 5
+        # T_100 = 0.3
+        # T_100 = 5
         T_100 = 60
         h_20C_resamp_100 = resample(data=h_20C, dt_resamp=T_100, time_var='time_ux',
                                     specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
@@ -1008,15 +1006,15 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
         if len(f.time_ux) > 1:
             fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                          fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
+                                             fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
         if len(h_20C.time_ux) > 1:
             fig_list, fig_files = overall_batt(mon_ver_100, sim_ver_100, suffix='_100',
-                                            filename=filename, fig_files=fig_files,
-                                            plot_title=plot_title, fig_list=fig_list)
+                                               filename=filename, fig_files=fig_files,
+                                               plot_title=plot_title, fig_list=fig_list)
             fig_list, fig_files = overall_fault(mon_old_100, mon_ver_100, sim_ver_100, sim_s_ver_100, filename,
-                                             fig_files, plot_title=plot_title, fig_list=fig_list)
+                                                fig_files, plot_title=plot_title, fig_list=fig_list)
             fig_list, fig_files = tune_r(mon_old_100, mon_ver_100, sim_s_ver_100, filename,
-                                      fig_files, plot_title=plot_title, fig_list=fig_list)
+                                         fig_files, plot_title=plot_title, fig_list=fig_list)
 
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=path_to_pdfs)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=path_to_pdfs)

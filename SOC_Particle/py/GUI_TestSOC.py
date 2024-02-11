@@ -39,7 +39,8 @@ import platform
 from Colors import *
 from test_soc_util import run_shell_cmd
 if platform.system() == 'Darwin':
-    from ttwidgets import TTButton as myButton  # ignore 'Module TTButton not found'  messages non-macos.  Need this for  macOS
+    # noinspection PyUnresolvedReferences
+    from ttwidgets import TTButton as myButton  # Need this for  macOS - ignore warnings
 else:
     from tkinter import Button as myButton
 bg_color = 'lightgray'
@@ -108,7 +109,7 @@ lookup = {
                     '  Pf;Xp10;  ' +                                                    # rapidTweakRegression
                     '  Pf;Xp7;  ' +                                                     # pulseSS
                     '  Pf;Xp13;  ' +                                                    # triTweakDisch
-                    modMidInit + tranPrep + 'Ff1;' + c50 + 'XQ40000;' + c00 + tempCleanup + # ampHiFailFf
+                    modMidInit + tranPrep + 'Ff1;' + c50 + 'XQ40000;' + c00 + tempCleanup +  # ampHiFailFf
                     modMidInit + tranPrep + cm50 + 'XQ50000;' + c00 + tempCleanup +     # ampLoFail
                     '  D^15;Xp10' +                                                     # rapidTweakRegression40C
                     '  Pf;Xp11;  ' +                                                    # slowTweakRegression
@@ -271,14 +272,14 @@ class Exec:
         self.version_button = None
         if self.version is None:
             self.version = 'undefined'
-        self.version_path = os.path.join(self.dataReduction_folder, self.version)
+        self.version_path = str(os.path.join(self.dataReduction_folder, self.version))
         os.makedirs(self.version_path, exist_ok=True)
         self.battery = self.cf[self.ind]['battery']
         self.battery_button = None
         self.level = level
         self.level_button = None
         self.folder_butt = myButton(master, text=self.dataReduction_folder[-20:],
-                                    command=self.enter_dataReduction_folder, fg="blue", bg=bg_color)
+                                    command=self.enter_data_reduction_folder, fg="blue", bg=bg_color)
         self.unit = self.cf[self.ind]['unit']
         self.unit_button = None
         self.key_label = None
@@ -317,7 +318,7 @@ class Exec:
         self.create_file_path_and_key()
         self.update_key_label()
 
-    def enter_dataReduction_folder(self):
+    def enter_data_reduction_folder(self):
         answer = tk.filedialog.askdirectory(title="Select a destination (i.e. Library) dataReduction folder",
                                             initialdir=self.dataReduction_folder)
         if answer is not None and answer != '':
@@ -468,9 +469,6 @@ def compare_hist_sim_choose():
 
 
 def compare_hist_to_sim():
-    # if not Test.key_exists_in_file:
-    #     tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
-    #     return
     if modeling.get():
         print('compare_hist_to_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
         # master.withdraw()
@@ -645,7 +643,7 @@ def grab_start():
     start_timer()
 
 
-def handle_modeling(*args):
+def handle_modeling(*_args):
     cf['others']['modeling'] = str(modeling.get())
     cf.save_to_file()
     if modeling.get() is True:
@@ -654,7 +652,7 @@ def handle_modeling(*args):
         ref_restore()
 
 
-def handle_macro(*args):
+def handle_macro(*_args):
     lookup_macro()
     macro_option_ = macro_option.get()
 
@@ -682,7 +680,7 @@ def handle_macro(*args):
     macro_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
-def handle_option(*args):
+def handle_option(*_args):
     lookup_start()
     option_ = option.get()
 
@@ -716,25 +714,25 @@ def handle_option(*args):
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
-def handle_ref_batt(*args):
+def handle_ref_batt(*_args):
     Ref.battery = ref_batt.get()
     Ref.update_battery_stuff()
     update_data_buttons()
 
 
-def handle_ref_unit(*args):
+def handle_ref_unit(*_args):
     Ref.unit = ref_unit.get()
     Ref.update_battery_stuff()
     update_data_buttons()
 
 
-def handle_test_batt(*args):
+def handle_test_batt(*_args):
     Test.battery = test_batt.get()
     Test.update_battery_stuff()
     update_data_buttons()
 
 
-def handle_test_unit(*args):
+def handle_test_unit(*_args):
     Test.unit = test_unit.get()
     Test.update_battery_stuff()
     update_data_buttons()
@@ -1044,9 +1042,9 @@ if __name__ == '__main__':
 
     # Folder row
     working_label = tk.Label(top_panel_left, text="dataReduction Folder", font=label_font)
-    Test.folder_butt = myButton(top_panel_left_ctr, text=Test.dataReduction_folder[-folder_reveal:], command=Test.enter_dataReduction_folder,
+    Test.folder_butt = myButton(top_panel_left_ctr, text=Test.dataReduction_folder[-folder_reveal:], command=Test.enter_data_reduction_folder,
                                 fg="blue", bg=bg_color)
-    Ref.folder_butt = myButton(top_panel_right, text=Ref.dataReduction_folder[-folder_reveal:], command=Ref.enter_dataReduction_folder,
+    Ref.folder_butt = myButton(top_panel_right, text=Ref.dataReduction_folder[-folder_reveal:], command=Ref.enter_data_reduction_folder,
                                fg="blue", bg=bg_color)
     working_label.pack(padx=5, pady=5)
     Test.folder_butt.pack(padx=5, pady=5, anchor=tk.W)

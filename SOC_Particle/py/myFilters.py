@@ -19,6 +19,7 @@ __date__ = '$Date: 2022/06/10 13:15:02 $'
 
 import numpy as np
 
+
 class RateLimit:
     def __init__(self):
         self.rate_min = 0.
@@ -48,7 +49,7 @@ class SlidingDeadband:
         self.hdb = hdb
 
     def update(self, in_):
-        self.z = max(min( self.z, in_+self.hdb), in_-self.hdb)
+        self.z = max(min(self.z, in_+self.hdb), in_-self.hdb)
         return self.z
 
     def update_res(self, in_, reset):
@@ -229,7 +230,7 @@ class AB2Integrator(DiscreteIntegrator):
         return s
 
 
-class inline_exp_lag:
+class InlineExpLag:
     """Inline exponential lag"""
     def __init__(self, tau):
         self.tau = tau
@@ -248,6 +249,7 @@ class inline_exp_lag:
             a = self.tau/T - eTt/meTt
             b = 1./meTt - self.tau/T
             c = meTt/T
+        # noinspection PyUnboundLocalVariable
         self.rate = c * (a*self.rstate + b*inp - self.lstate)
         self.rstate = inp
         self.lstate = self.lstate + T*self.rate
@@ -378,11 +380,6 @@ class LagExp(DiscreteFilter):
         self.assign_coeff(self.tau)
         self.calc_state_(in_)
 
-    def calc_state(self, in_, dt):
-        self.dt = dt
-        self.assign_coeff(self.tau)
-        self.calc_state_(in_)
-
     def calculate(self, in_, reset, dt):
         self.in_ = in_
         if reset:
@@ -409,32 +406,6 @@ class LagExp(DiscreteFilter):
         self.saved.state.append(self.state)
         self.saved.in_.append(self.in_)
         self.saved.out_.append(self.out_)
-
-
-class Saved1:
-    # For plot 1st order filter savings.
-    # A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
-    def __init__(self):
-        self.time = []
-        self.rstate = []
-        self.state = []
-        self.rate = []
-        self.in_ = []
-        self.out_ = []
-
-
-class Saved2:
-    # For plot 1st order filter savings.
-    # A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
-    def __init__(self):
-        self.time = []
-        self.in_ = []
-        self.out_ = []
-        self.accel = []
-        self.AB2_state = []
-        self.AB2_rate_state = []
-        self.Tustin_state = []
-        self.Tustin_rate_state = []
 
 
 class LagTustin(DiscreteFilter):
@@ -496,6 +467,7 @@ class Saved1:
     # A better way is 'Saver' class in pyfilter helpers and requires making a __dict__
     def __init__(self):
         self.time = []
+        self.rstate = []
         self.state = []
         self.rate = []
         self.in_ = []
@@ -514,11 +486,12 @@ class Saved2:
         self.AB2_rate_state = []
         self.Tustin_state = []
         self.Tustin_rate_state = []
+        
+        
 if __name__ == '__main__':
     import sys
     import doctest
     from datetime import datetime
-    import numpy as np
 
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
@@ -628,4 +601,6 @@ if __name__ == '__main__':
         overall(filter_1.saved, filter_2.saved, filename, fig_files, plot_title=plot_title, fig_list=fig_list)
         plt.show()
 
-    main()
+
+    if __name__ == '__main__':
+        main()

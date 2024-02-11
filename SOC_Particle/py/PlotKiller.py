@@ -27,10 +27,11 @@ import time
 import platform
 if platform.system() == 'Darwin':
     import tkinter as tk
+    # noinspection PyUnresolvedReferences
     from ttwidgets import TTButton as myButton
 else:
     import tkinter as tk
-    from tkinter import Button as myButton
+    # from tkinter import Button as myButton
 bg_color = "lightgray"
 
 

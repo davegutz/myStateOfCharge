@@ -21,7 +21,6 @@
 
 """Replace string in files"""
 import os
-import shutil
 from tkinter import filedialog, messagebox, simpledialog
 import tkinter as tk
 from configparser import ConfigParser
@@ -86,8 +85,8 @@ def replace(filepaths=None, silent=False, supported='*'):
 
     # Configuration for entire folder selection read with filepaths
     def_dict = {'replace':  {'source': 'source',
-                         'target': 'target',
-                         'filepaths': ['file1', 'file2', 'file3']},
+                             'target': 'target',
+                             'filepaths': ['file1', 'file2', 'file3']},
                 }
     cf = Begini(__file__, def_dict)
     # print(list(cf))

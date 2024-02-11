@@ -37,7 +37,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     data_file_clean = write_clean_file(path_to_data, type_='_mon', title_key=title_key, unit_key=unit_key, skip=skip)
     if data_file_clean is None:
         return None, None, None, None, None
-    if data_file_clean is  not None:
+    if data_file_clean is not None:
         mon_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
     else:
         mon_raw = None
@@ -87,7 +87,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', title_key='fltb',
                                            unit_key='unit_f', skip=skip, comment_str='---')
     if temp_flt_file_clean and not v1_only:
-        f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=None).view(np.recarray)
+        f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=None, encoding=None).view(np.recarray)
     else:
         print("data from", temp_flt_file, "empty after loading")
         f_raw = None
@@ -103,7 +103,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     return mon, sim, f, data_file_clean, temp_flt_file_clean
 
 
-if __name__ == '__main__':
+def main():
     path_to_data = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\offSitHysBmsNoiseBB_pro1a_bb.csv'
     skip = 1
     unit_key = 'g20231111b_pro1a_bb'
@@ -115,3 +115,6 @@ if __name__ == '__main__':
     load_data(path_to_data=path_to_data, skip=skip, unit_key=unit_key, zero_zero_in=zero_zero_in, time_end_in=time_end_in,
               rated_batt_cap=rated_batt_cap, legacy=legacy, v1_only=v1_only)
 
+
+if __name__ == '__main__':
+    main()

@@ -69,7 +69,7 @@ class Battery(Coulombs):
     IB_MIN_UP = 0.2  # Min up charge current for come alive, BMS logic, and fault
     cp_eframe_mult = 20  # Run EKF 20 times slower than Coulomb Counter
     READ_DELAY = 100  # nominal read time, ms
-    EKF_EFRAME_MULT = 20  # Multiframe rate consistent with READ_DELAY (20 for READ_DELAY=100)
+    EKF_EFRAME_MULT = 20  # Multi-frame rate consistent with READ_DELAY (20 for READ_DELAY=100)
     VB_DC_DC = 13.5  # Estimated dc-dc charger, V
     HDB_VBATT = 0.05  # Half deadband to filter vb, V (0.05)
     WRAP_ERR_FILT = 4.  # Wrap error filter time constant, s (4)
@@ -328,7 +328,6 @@ class BatteryMonitor(Battery, EKF1x1):
             self.ib_past = self.ib
 
         # Dynamic emf
-        ib_dyn = 0.
         if rp.modeling:
             ib_dyn = self.ib_past
         else:
@@ -614,7 +613,7 @@ class BatterySim(Battery):
         self.hys.calculate_hys(curr_in, self.soc, self.chm)
         init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR)
         self.dv_hys, self.tau_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.,
-                                                    chem=self.chm, scale_in=self.s_hys)
+                                                    chem=self.chm)
         self.voc = self.voc_stat + self.dv_hys
         self.ioc = self.hys.ioc
 
@@ -1096,6 +1095,7 @@ def overall_batt(mv, sv, filename,
             except IOError:
                 pass
         reset_max = max(abs(min(mv.vbc_dot)), max(mv.vbc_dot), abs(min(mv1.vbc_dot)), max(mv1.vbc_dot))
+        # noinspection PyTypeChecker
         reset_index_max = max(np.where(np.array(mv1.reset) > 0))
         t_init = mv1.time[reset_index_max[-1]]
         mv.time -= t_init

@@ -4,6 +4,7 @@ from DataOverModel import write_clean_file
 import numpy as np
 import pandas as pd
 
+
 def data_file(data_file_path, data_file_txt):
     path_to_data = os.path.join(data_file_path, data_file_txt)
     return path_to_data
@@ -37,9 +38,9 @@ temp_file5_clean = write_clean_file(temp_file5, type_='', title_key='unit', unit
 t0_raw = np.genfromtxt(temp_file0_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
 t1_raw = np.genfromtxt(temp_file1_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
 t2_raw = np.genfromtxt(temp_file2_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
-t3_raw = np.genfromtxt(temp_file3_clean, ddelimiter=',', names=True, dtype=float).view(np.recarray)
+t3_raw = np.genfromtxt(temp_file3_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
 t4_raw = np.genfromtxt(temp_file4_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
-t5_raw = np.genfromtxt(temp_file5_clean, delimiter=',', names=True, dtype=float.view(np.recarray)
+t5_raw = np.genfromtxt(temp_file5_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
 
 # Resample transitions
 t01_raw = t1_raw[0:2].copy()

@@ -39,7 +39,6 @@ line1.axes.set_xticklabels(date_vector)
 This will maintain the limits, the x-axis tick alignments, the bounds, but change the labels on the x-axis.
 """
 
-from numpy.random import randn
 import matplotlib.pyplot as plt
 
 # use ggplot style for more sophisticated visuals

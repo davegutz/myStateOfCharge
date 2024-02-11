@@ -15,14 +15,13 @@
 
 """Raise a window visible at task bar to close all plots"""
 
-import matplotlib.pyplot as plt
 import tkinter as tk
 from threading import Thread
 import pyautogui
 import time
 import platform
 if platform.system() == 'Darwin':
-    from ttwidgets import TTButton as myButton
+    from ttwidgets import TTButton as myButton  # Need for macOS - ignore warning
 else:
     import tkinter as tk
     from tkinter import Button as myButton
@@ -126,7 +125,7 @@ class CountdownTimer(tk.Toplevel):
 
 
 def start_timer():
-    CountdownTimer(root,5, max_flash=5, exit_function=None, trigger=True)
+    CountdownTimer(root, 5, max_flash=5, exit_function=None, trigger=True)
 
 
 def stay_awake(up_set_min=3.):

@@ -104,7 +104,7 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
     return True
 
 
-if __name__ == '__main__':
+def main():
     keys = [('offSitHysBmsNoiseBB_pro1a_bb.csv', 'g20231111_pro1a_bb'),
             ('offSitHysBmsNoiseBB_pro1a_bb.csv', 'g20231111b_pro1a_bb')]
     data_file_folder_ref = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111'
@@ -115,3 +115,7 @@ if __name__ == '__main__':
     compare_run_run(keys=keys,
                     data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test,
                     rel_path_to_save_pdf=rel_path_to_save_pdf, rel_path_to_temp=rel_path_to_temp)
+
+
+if __name__ == '__main__':
+    main()

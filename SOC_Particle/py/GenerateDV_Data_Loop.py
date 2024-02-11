@@ -135,10 +135,10 @@ for prof_type, Tb, csv_file in prof_types:
                 sat = voc_soc > vsat
                 if reset:
                     output.write('unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min, dv,\n')
-                output.write("{:s}, {:s},{:12.3f},  {:6.3f},  {:2d},{:8.0f},{:2d}, {:2d}, {:2d}, {:2d},{:7.3f},{:6.3f},  {:7.3f}, {:10.3f},{:10.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},\n"\
-                      .format(build, time_str, ctime, 0.1, chm, qcrs, sat, sel, mod, bmso,
-                              Tb, vb, ib, ib_charge, ioc, voc_soc, vsat, dv_dyn, voc_stat,
-                              voc_ekf, y_ekf, soc_s, soc_ekf, soc, soc_min_fake, dv))
+                output.write("{:s}, {:s},{:12.3f},  {:6.3f},  {:2d},{:8.0f},{:2d}, {:2d}, {:2d}, {:2d},{:7.3f},{:6.3f},  {:7.3f}, {:10.3f},{:10.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},\n"
+                             .format(build, time_str, ctime, 0.1, chm, qcrs, sat, sel, mod, bmso,
+                                     Tb, vb, ib, ib_charge, ioc, voc_soc, vsat, dv_dyn, voc_stat,
+                                     voc_ekf, y_ekf, soc_s, soc_ekf, soc, soc_min_fake, dv))
                 reset = False
 # cat the csv files
 cat(cat_name, csv_files)

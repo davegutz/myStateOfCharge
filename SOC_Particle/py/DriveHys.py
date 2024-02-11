@@ -21,6 +21,7 @@ import numpy as np
 # from pyDAGx.lookup_table import LookupTable
 from pyDAGx.myTables import TableInterp2D
 from unite_pictures import cleanup_fig_files
+from Hysteresis_20220917d import Hysteresis_20220917d
 
 
 class Hysteresis:
@@ -189,16 +190,14 @@ if __name__ == '__main__':
     def main():
         # Transient  inputs
         data_file_clean = '../dataReduction/real world Xp20 20220626_sim.txt'
-        cols_sim = ('unit_m', 'c_time', 'Tb_s', 'voc_stat_s', 'dv_dyn_s', 'vb_s', 'ib_s', 'soc_s', 'reset_s')
-        mon_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, usecols=cols_sim, dtype=None,
-                                encoding=None).view(np.recarray)
+        mon_old = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=None).view(np.recarray)
         t_v = mon_old.c_time - mon_old.c_time[0]
-        vb_t = mon_old.vb_m   # not useful except to back out voc
+        # vb_t = mon_old.vb_m   # not useful except to back out voc
         ib_t = mon_old.ib_s
-        voc_stat_target_t = mon_old.voc_stat_m
+        # voc_stat_target_t = mon_old.voc_stat_m
         soc_t = mon_old.soc_s
-        dv_dyn_t = mon_old.dv_dyn_m
-        voc_t = vb_t - dv_dyn_t
+        # dv_dyn_t = mon_old.dv_dyn_m
+        # voc_t = vb_t - dv_dyn_t
         hys = Hysteresis_20220917d(dv_hys=-0.0, cap=3.6e5)
         dt = t_v[1] - t_v[0]
 
@@ -208,13 +207,13 @@ if __name__ == '__main__':
             if i > 0:
                 dt = t - t_v[i-1]
             ib = ib_t[i]
-            voc_stat_target = voc_stat_target_t[i]
+            # voc_stat_target = voc_stat_target_t[i]
             soc = soc_t[i]
-            voc = voc_t[i]
+            # voc = voc_t[i]
 
             # Models
             hys.calculate_hys(ib=ib, soc=soc)
-            hys.update(dt=dt, voc=voc, voc_stat_target=voc_stat_target)
+            hys.update(dt=dt)
 
             # Plot stuff
             hys.save(t)

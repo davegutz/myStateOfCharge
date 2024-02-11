@@ -87,7 +87,7 @@ def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_pat
         return False
 
 
-if __name__ == '__main__':
+def main():
     # data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
     # unit_key_full = 'pro3p2_bb'
 
@@ -95,3 +95,7 @@ if __name__ == '__main__':
     unit_key_full = 'g20231111b_pro1a_bb'
 
     compare_run_hist(data_file_=data_file_full, unit_key_=unit_key_full)
+
+
+if __name__ == '__main__':
+    main()

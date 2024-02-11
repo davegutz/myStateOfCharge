@@ -224,7 +224,8 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., time_sync=No
     d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
+    if not hasattr(d_mod, 'soc_min'):
+        d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'ib_diff', np.array(ib_diff, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'cc_diff_thr', np.array(cc_diff_thr, dtype=float))
@@ -682,16 +683,18 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fi
 
 
 def calc_fault(d_ra, d_mod):
-    dscn_fa = np.bool_(d_ra.falw & 2 ** 10)
-    ib_diff_fa = np.bool_((d_ra.falw & 2 ** 8) | (d_ra.falw & 2 ** 9))
-    wv_fa = np.bool_(d_ra.falw & 2 ** 7)
-    wl_fa = np.bool_(d_ra.falw & 2 ** 6)
-    wh_fa = np.bool_(d_ra.falw & 2 ** 5)
-    ccd_fa = np.bool_(d_ra.falw & 2 ** 4)
-    ib_noa_fa = np.bool_(d_ra.falw & 2 ** 3)
-    ib_amp_fa = np.bool_(d_ra.falw & 2 ** 2)
-    vb_fa = np.bool_(d_ra.falw & 2 ** 1)
-    tb_fa = np.bool_(d_ra.falw & 2 ** 0)
+    falw = d_ra.falw.astype(int)
+    fltw = d_ra.fltw.astype(int)
+    dscn_fa = np.bool_(falw & 2 ** 10)
+    ib_diff_fa = np.bool_((falw & 2 ** 8) | (falw & 2 ** 9))
+    wv_fa = np.bool_(falw & 2 ** 7)
+    wl_fa = np.bool_(falw & 2 ** 6)
+    wh_fa = np.bool_(falw & 2 ** 5)
+    ccd_fa = np.bool_(falw & 2 ** 4)
+    ib_noa_fa = np.bool_(falw & 2 ** 3)
+    ib_amp_fa = np.bool_(falw & 2 ** 2)
+    vb_fa = np.bool_(falw & 2 ** 1)
+    tb_fa = np.bool_(falw & 2 ** 0)
     e_wrap = d_mod.voc_soc - d_mod.voc
     d_mod = rf.rec_append_fields(d_mod, 'e_wrap', np.array(e_wrap, dtype=float))
     d_mod = rf.rec_append_fields(d_mod, 'dscn_fa', np.array(dscn_fa, dtype=float))
@@ -706,13 +709,13 @@ def calc_fault(d_ra, d_mod):
     d_mod = rf.rec_append_fields(d_mod, 'tb_fa', np.array(tb_fa, dtype=float))
 
     try:
-        ib_diff_flt = np.bool_(d_ra.fltw & 2 ** 8) | (d_ra.fltw & 2 ** 9)
-        wh_flt = np.bool_(d_ra.fltw & 2 ** 5)
-        wl_flt = np.bool_(d_ra.fltw & 2 ** 6)
-        red_loss = np.bool_(d_ra.fltw & 2 ** 7)
-        dscn_flt = np.bool_(d_ra.fltw & 2 ** 10)
-        vb_flt = np.bool_(d_ra.fltw & 2 ** 1)
-        tb_flt = np.bool_(d_ra.fltw & 2 ** 0)
+        ib_diff_flt = np.bool_(fltw & 2 ** 8) | (fltw & 2 ** 9)
+        wh_flt = np.bool_(fltw & 2 ** 5)
+        wl_flt = np.bool_(fltw & 2 ** 6)
+        red_loss = np.bool_(fltw & 2 ** 7)
+        dscn_flt = np.bool_(fltw & 2 ** 10)
+        vb_flt = np.bool_(fltw & 2 ** 1)
+        tb_flt = np.bool_(fltw & 2 ** 0)
         d_mod = rf.rec_append_fields(d_mod, 'ib_diff_flt', np.array(ib_diff_flt, dtype=float))
         d_mod = rf.rec_append_fields(d_mod, 'wh_flt', np.array(wh_flt, dtype=float))
         d_mod = rf.rec_append_fields(d_mod, 'wl_flt', np.array(wl_flt, dtype=float))
@@ -937,7 +940,7 @@ def shift_time(mo, extra_shift=0.):
         first_non_zero += 1
     if first_non_zero < n:  # success
         if first_non_zero > 0:
-            shift = ( mo.time[first_non_zero] + mo.time[first_non_zero-1] ) / 2.
+            shift = (mo.time[first_non_zero] + mo.time[first_non_zero-1]) / 2.
         else:
             shift = mo.time[first_non_zero]
         print('shift time by', shift)
@@ -1002,9 +1005,6 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     if not os.path.isdir(path_to_temp):
         os.mkdir(path_to_temp)
 
-    # Data work
-    cols_f = ('time_ux', 'Tb_h', 'vb_h', 'ibmh', 'ibnh', 'Tb', 'vb', 'ib', 'soc', 'soc_ekf', 'voc', 'voc_stat', 'e_w_f', 'fltw', 'falw')
-
     # Load mon to extract mod information
     # # Load mon v4 (old)
     if mon_t is True:
@@ -1047,11 +1047,13 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
     # Sort and augment data
     f_raw = np.unique(f_raw)
+    # noinspection PyTypeChecker
     f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
     print("\nf:\n", f.dtype.names, f, "\n")
     f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)
     h_raw = np.unique(h_raw)
     print("\nh raw:\n", h_raw.dtype.names, "\n", h_raw, "\n", h_raw.dtype.names, "\n")
+    # noinspection PyTypeChecker
     h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
     h = add_mod(h, mon_t, mon_old)
     h = add_chm(h, mon_t, mon_old, chm)
@@ -1105,10 +1107,10 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
                                            plot_init_in=plot_init_in, ref_str='', test_str='_ver')
             fig_list, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename,
                                           fig_files, plot_title=plot_title, fig_list=fig_list,
-                                          plot_init_in=plot_init_in, ref_str='', test_str='_ver')
+                                          ref_str='', test_str='_ver')
             fig_list, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename,
                                               fig_files, plot_title=plot_title, fig_list=fig_list,
-                                              plot_init_in=plot_init_in, ref_str='', test_str='_ver')
+                                              ref_str='', test_str='_ver')
             fig_list, fig_files = overall_fault(mon_old, mon_ver, sim_ver, sim_s_ver, filename,
                                                 fig_files, plot_title=plot_title, fig_list=fig_list)
             fig_list, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename,
@@ -1125,7 +1127,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     return mon_old, sim_old, mon_ver, sim_ver, sim_s_ver
 
 
-if __name__ == '__main__':
+def main():
     # User inputs (multiple input_files allowed
     # data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
     # mon_t = True
@@ -1136,3 +1138,7 @@ if __name__ == '__main__':
     # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
     compare_hist_sim(data_file=data_file_full, mon_t=mon_t, unit_key=key)
+
+
+if __name__ == '__main__':
+    main()

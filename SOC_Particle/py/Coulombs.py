@@ -18,7 +18,6 @@ of the totals and standardize the calculations."""
 
 # Constants
 from Chemistry_BMS import Chemistry
-from myFilters import LagExp
 
 
 class Coulombs:
@@ -112,7 +111,7 @@ class Coulombs:
         """Capacity"""
         try:
             res = self.q_cap_rated_scaled * (1. + self.chemistry.dqdt * (temp_c - self.chemistry.rated_temp))
-        except:
+        except IOError:
             res = 1
         return res
 

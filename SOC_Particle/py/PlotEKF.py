@@ -23,20 +23,10 @@ Dependencies:
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
-from MonSim import replicate, save_clean_file, save_clean_file_sim
-from Battery import overall_batt
-# below suppresses runtime error display******************
-# import os
-# os.environ["KIVY_NO_CONSOLELOG"] = "1"
-# from kivy.utils import platform  # failed experiment to run BLE data plotting realtime on android
-# if platform != 'linux':
-#     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
-from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
-def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
+def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None,
              ref_str='_ref', test_str='_test'):
     if so and smv:
         if mo.Fx is not None:  # ekf
@@ -184,8 +174,6 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         elif hasattr(sv, 'dv_hys_s'):
             plt.plot(sv.time, sv.dv_hys_s, marker='.', markersize='1', markevery=64, linestyle='None', color='black',
                      label='dv_hys_s' + test_str)
-        # plt.plot(mo.time, mo.dv_hys_chg, linestyle='-.', color='green', label='dv_hys_chg'+ref_str)
-        # plt.plot(mo.time, mo.dv_hys_dis, linestyle=':', color='red', label='dv_hys_dis'+ref_str)
         plt.xlabel('sec')
         plt.legend(loc=4)
         plt.subplot(332)
@@ -203,8 +191,6 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         elif hasattr(sv, 'dv_hys_s'):
             plt.plot(sv.soc_s, sv.dv_hys_s, marker='.', markersize='1', markevery=5, linestyle='None', color='black',
                      label='dv_hys_s' + test_str)
-        # plt.plot(mo.soc, mo.dv_hys_chg, linestyle='-.', color='green', label='dv_hys_chg'+ref_str)
-        # plt.plot(mo.soc, mo.dv_hys_dis, linestyle=':', color='red', label='dv_hys_dis'+ref_str)
         plt.xlabel('soc')
         plt.legend(loc=4)
         plt.subplot(333)

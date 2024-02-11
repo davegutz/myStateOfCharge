@@ -33,7 +33,7 @@ ctime = 0.  # seconds since boot
 days_data = 4  # days of data collection
 time = time_start
 time_end = time_start + float(days_data) * 24. * 3600.
-n = int((float(days_data) * 24. * 3600.)/ T) + 1
+n = int((float(days_data) * 24. * 3600.) / T) + 1
 ib = 0.
 soc = float(1.)
 vb = 13.3
@@ -92,8 +92,8 @@ with open(csv_file, "w") as output:
         sat = voc_soc > vsat
         if reset:
             output.write('unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, ioc, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min, dv,\n')
-        output.write("{:s}, {:s},{:12.3f},  {:6.3f},  {:2d},{:8.0f},{:2d}, {:2d}, {:2d}, {:2d},{:7.3f},{:6.3f},  {:7.3f}, {:10.3f},{:10.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},\n"\
-              .format(build, time_str, ctime, 0.1, chm, qcrs, sat, sel, mod, bmso,
-                      Tb, vb, ib, ib_charge, ioc, voc_soc, vsat, dv_dyn, voc_stat,
-                      voc_ekf, y_ekf, soc_s, soc_ekf, soc, soc_min, dv))
+        output.write("{:s}, {:s},{:12.3f},  {:6.3f},  {:2d},{:8.0f},{:2d}, {:2d}, {:2d}, {:2d},{:7.3f},{:6.3f},  {:7.3f}, {:10.3f},{:10.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},{:7.3f},\n"
+                     .format(build, time_str, ctime, 0.1, chm, qcrs, sat, sel, mod, bmso,
+                             Tb, vb, ib, ib_charge, ioc, voc_soc, vsat, dv_dyn, voc_stat,
+                             voc_ekf, y_ekf, soc_s, soc_ekf, soc, soc_min, dv))
         reset = False

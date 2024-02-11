@@ -18,8 +18,6 @@ __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/11/12 13:15:02 $'
 
 import numpy as np
-# from pyDAGx.lookup_table import LookupTable
-from pyDAGx.myTables import TableInterp2D, TableInterp1D
 from unite_pictures import cleanup_fig_files
 
 
@@ -122,7 +120,7 @@ class Hysteresis:
         self.saved.ioc.append(self.ioc)
         self.saved.tau.append(self.tau)
 
-    def update(self, dt, trusting_sensors=False, init_high=False, init_low=False, scale_in=1., e_wrap=0., chem=0):
+    def update(self, dt, init_high=False, init_low=False, e_wrap=0., chem=0):
         self.chm = chem
         dv_max = self.lu_x.interp(x_=self.soc)
         dv_min = self.lu_n.interp(x_=self.soc)

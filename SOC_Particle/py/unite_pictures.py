@@ -7,7 +7,7 @@ from reportlab.pdfgen import canvas
 
 
 # ----------------------------------------------------------------------
-def sorted_nicely(l):
+def sorted_nicely(_l):
     """
     # http://stackoverflow.com/questions/2669059/how-to-sort-alpha-numeric-set-in-python
 
@@ -15,7 +15,7 @@ def sorted_nicely(l):
     """
     convert = lambda text: int(text) if text.isdigit() else text
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
-    return sorted(l, key=alphanum_key)
+    return sorted(_l, key=alphanum_key)
 
 
 def cleanup_fig_files(fig_files):
@@ -32,9 +32,7 @@ def precleanup_fig_files(output_pdf_name='unite_pictures.pdf', path_to_pdfs='.')
     # Clean up before itself.   Other fig files already in root will get plotted by unite_pictures_into_pdf
     # Cleanup other figures in root folder by hand
     from glob import glob
-    from os import chdir, remove
-    # chdir(path_to_pdfs)
-    # for file in glob(path_to_pdfs+'/'+output_pdf_name + '*.pdf'):
+    from os import remove
     for file in glob(os.path.join(path_to_pdfs, output_pdf_name+'*.pdf')):
         print("removing", file)
         try:
@@ -82,12 +80,14 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', save_pdf_path='.
                     for jPicture in iFolder:
                         img = utils.ImageReader(jPicture)
                         imagesize = img.getSize()
+                        # noinspection PyUnboundLocalVariable
                         c.setPageSize(imagesize)
                         c.drawImage(jPicture, 0, 0)
                         c.showPage()
                     numberOfFoldersAdded += 1
                     if (numberOfFoldersAdded % numberOfEntitiesInOnePdf) == 0:
                         c.save()
+                        # noinspection PyUnboundLocalVariable
                         print("created", filename)
                 if (numberOfFoldersAdded % numberOfEntitiesInOnePdf) != 0:
                     c.save()
@@ -114,12 +114,14 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', save_pdf_path='.
                             c = canvas.Canvas(filename)
                         img = utils.ImageReader(jPicture)
                         imagesize = img.getSize()
+                        # noinspection PyUnboundLocalVariable
                         c.setPageSize(imagesize)
                         c.drawImage(jPicture, 0, 0)
                         c.showPage()
                         numberOfPicturesAdded += 1
                         if (numberOfPicturesAdded % numberOfEntitiesInOnePdf) == 0:
                             c.save()
+                            # noinspection PyUnboundLocalVariable
                             print("created", filename)
                 if (numberOfPicturesAdded % numberOfEntitiesInOnePdf) != 0:
                     c.save()
@@ -167,12 +169,14 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', save_pdf_path='.
                         c = canvas.Canvas(filename)
                     img = utils.ImageReader(iPicture)
                     imagesize = img.getSize()
+                    # noinspection PyUnboundLocalVariable
                     c.setPageSize(imagesize)
                     c.drawImage(iPicture, 0, 0)
                     c.showPage()
                     numberOfPicturesAdded += 1
                     if (numberOfPicturesAdded % numberOfEntitiesInOnePdf) == 0:
                         c.save()
+                        # noinspection PyUnboundLocalVariable
                         print("created", filename)
                 if (numberOfPicturesAdded % numberOfEntitiesInOnePdf) != 0:
                     c.save()
@@ -195,8 +199,7 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', save_pdf_path='.
         return
 
 
-# ----------------------------------------------------------------------
-if __name__ == "__main__":
+def main():
     outputPdfName = "pdf_with_pictures"
     save_pdf_path = "D:\\pictures"
     pathToPictures = "D:\\pictures"
@@ -208,3 +211,8 @@ if __name__ == "__main__":
 
     unite_pictures_into_pdf(outputPdfName, save_pdf_path, pathToPictures, splitType, numberOfEntitiesInOnePdf,
                             listWithImagesExtensions, picturesAreInRootFolder, nameOfPart)
+
+
+# ----------------------------------------------------------------------
+if __name__ == "__main__":
+    main()

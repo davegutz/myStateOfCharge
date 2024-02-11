@@ -341,8 +341,8 @@ if __name__ == '__main__':
         use_ib_mon_in = False
         scale_in = None
         use_vb_raw = False
-        unit_key = None
-        data_file_old_txt = None
+        # unit_key = None
+        # data_file_old_txt = None
         scale_r_ss_in = 1.
         scale_hys_sim_in = 1.
         dvoc_sim_in = 0.
@@ -395,7 +395,7 @@ if __name__ == '__main__':
         # Load mon v4 (old)
         data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
                                            skip=skip)
-        mon_old_raw = np.genfromtxt(data_file_clean, ddelimiter=',', names=True, dtype=float).view(np.recarray)
+        mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
 
         # Load sel (old)
         sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,

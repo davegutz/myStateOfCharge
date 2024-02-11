@@ -23,20 +23,16 @@ Dependencies:
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
-from MonSim import replicate, save_clean_file, save_clean_file_sim
-from Battery import overall_batt
 # below suppresses runtime error display******************
 # import os
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
 # from kivy.utils import platform  # failed experiment to run BLE data plotting realtime on android
 # if platform != 'linux':
 #     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
-from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
-def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
+def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None,
                ref_str='_ref', test_str='_test'):
     if so and smv:
         fig_list.append(plt.figure())  # sim_s  1

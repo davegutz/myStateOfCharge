@@ -67,6 +67,7 @@ def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
         # Add interpolated values
         new_var = []
         num = 0
+        ext = None
         for i in range(n-1):
             time_base = float(data[time_var][i])
             time_ext = float(data[time_var][i+1])
@@ -88,7 +89,6 @@ def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
                         num += 1
                         time = new_time[num]
             else:
-                val = var[i]
                 ext = var[i+1]
                 print('ext', ext)
         new_var.append(ext)
@@ -127,9 +127,7 @@ if __name__ == '__main__':
         cat(data_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
         # Load mon v4 (old)
-        data_file_clean = write_clean_file(data_file, type_='', title_key='hist', unit_key='unit_f',
-                                           path_to_data=path_to_temp, path_to_temp=path_to_temp,
-                                           comment_str='---')
+        data_file_clean = write_clean_file(data_file, type_='', title_key='hist', unit_key='unit_f', comment_str='---')
         if not data_file_clean:
             print("data from", data_file, "empty after loading")
             exit(1)

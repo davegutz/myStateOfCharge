@@ -31,8 +31,9 @@ def serial_ports():
     return result
 
 
-if __name__ == '__main__':
-    def main():
-        print(serial_ports())
+def main():
+    print(serial_ports())
 
+
+if __name__ == '__main__':
     main()

@@ -4,7 +4,7 @@
 from pandas import read_csv
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense, SimpleRNN, LSTM
+from keras.layers import Dense, SimpleRNN
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import math
@@ -48,8 +48,8 @@ def print_error(trainY, testY, train_predict, test_predict):
     train_rmse = math.sqrt(mean_squared_error(trainY, train_predict))
     test_rmse = math.sqrt(mean_squared_error(testY, test_predict))
     # Print RMSE
-    print('Train RMSE: %.3f RMSE' % (train_rmse))
-    print('Test RMSE: %.3f RMSE' % (test_rmse))
+    print('Train RMSE: %.3f RMSE' % train_rmse)
+    print('Test RMSE: %.3f RMSE' % test_rmse)
 
 
 # Plot the result
@@ -67,24 +67,29 @@ def plot_result(trainY, testY, train_predict, test_predict):
     plt.title('Actual and Predicted Values. The Red Line Separates The Training And Test Examples')
 
 
-sunspots_url = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/monthly-sunspots.csv'
-time_steps = 12
-train_data, test_data, data = get_train_test(sunspots_url)
-trainX, trainY = get_XY(train_data, time_steps)
-testX, testY = get_XY(test_data, time_steps)
+def main():
+    sunspots_url = 'https://raw.githubusercontent.com/jbrownlee/Datasets/master/monthly-sunspots.csv'
+    time_steps = 12
+    train_data, test_data, data = get_train_test(sunspots_url)
+    trainX, trainY = get_XY(train_data, time_steps)
+    testX, testY = get_XY(test_data, time_steps)
 
-# Create model and train
-model = create_RNN(hidden_units=3, dense_units=1, input_shape=(time_steps, 1),
-                   activation=['tanh', 'tanh'])
-model.fit(trainX, trainY, epochs=20, batch_size=1, verbose=2)
+    # Create model and train
+    model = create_RNN(hidden_units=3, dense_units=1, input_shape=(time_steps, 1),
+                       activation=['tanh', 'tanh'])
+    model.fit(trainX, trainY, epochs=20, batch_size=1, verbose=2)
 
-# make predictions
-train_predict = model.predict(trainX)
-test_predict = model.predict(testX)
+    # make predictions
+    train_predict = model.predict(trainX)
+    test_predict = model.predict(testX)
 
-# Print error
-print_error(trainY, testY, train_predict, test_predict)
+    # Print error
+    print_error(trainY, testY, train_predict, test_predict)
 
-# Plot result
-plot_result(trainY, testY, train_predict, test_predict)
-plt.show()
+    # Plot result
+    plot_result(trainY, testY, train_predict, test_predict)
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()

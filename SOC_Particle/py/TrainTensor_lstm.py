@@ -18,11 +18,11 @@
 import math
 import numpy as np
 import pandas as pd
-import tensorflow as tf
+import tensorflow as tf  # install scikit-learn
 from matplotlib import pyplot as plt
 from keras.models import Sequential
 from keras.models import load_model, Model
-from sklearn.model_selection import train_test_split  # in package scikit-learn
+from sklearn.model_selection import train_test_split  # install scikit-learn
 from keras.layers import Dense, LSTM, Dropout, Input, concatenate
 from keras.losses import huber
 from sklearn.metrics import mean_squared_error, mean_absolute_error

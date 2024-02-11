@@ -87,7 +87,7 @@ def scale_sres0(data, sres0):
     return data
 
 
-def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_path='./figures', path_to_temp='./temp'):
+def seek_tensor(save_pdf_path='./figures', path_to_temp='./temp'):
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
     if not os.path.isdir(save_pdf_path):
@@ -100,16 +100,16 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     use_ib_mon_in = True
     skip = 1
     time_end_in = None
-    plot_init_in = False
+    # plot_init_in = False
     long_term_in = False
     plot_overall_in = True
     use_vb_sim_in = False
     cc_dif_tol_in = 0.2
     verbose_in = False
     legacy_in = False
-    data_file_txt = None
+    # data_file_txt = None
     temp_file = ''
-    sat_init_in = None
+    # sat_init_in = None
     use_mon_soc_in = True
     v1_only_in = True
     dDA_in = 0.
@@ -186,23 +186,23 @@ def seek_tensor(data_file_path=None, unit_key=None, time_end_in=None, save_pdf_p
     plot_title = dir_root_test + '/' + data_root_test + '   ' + date_time
     if temp_flt_file_clean and len(f.time) > 1:
         fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                      fig_list=fig_list, long_term=long_term_in, cc_dif_tol=cc_dif_tol_in)
+                                         fig_list=fig_list, long_term=long_term_in, cc_dif_tol=cc_dif_tol_in)
     if plot_overall_in:
         fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                    plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
-                                    test_str='_ver')
-        fig_list, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                    plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
-                                    test_str='_ver')
-        fig_list, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                      plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
-                                      test_str='_ver')
-        fig_list, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                   plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
-                                   test_str='_ver')
-        fig_list, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
-                                       plot_title=plot_title, fig_list=fig_list, plot_init_in=plot_init_in, ref_str='',
+                                       plot_title=plot_title, fig_list=fig_list, ref_str='',
                                        test_str='_ver')
+        fig_list, fig_files = ekf_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                       plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                       test_str='_ver')
+        fig_list, fig_files = sim_s_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                         plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                         test_str='_ver')
+        fig_list, fig_files = gp_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                      plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                      test_str='_ver')
+        fig_list, fig_files = off_on_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename, fig_files,
+                                          plot_title=plot_title, fig_list=fig_list, ref_str='',
+                                          test_str='_ver')
 
     precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
     print('filename', filename, 'path', save_pdf_path)

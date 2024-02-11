@@ -36,8 +36,9 @@ from myFilters import LagExp
 #     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 import Chemistry_BMS
-plt.rcParams.update({'figure.max_open_warning': 0})
 from Colors import *
+
+plt.rcParams.update({'figure.max_open_warning': 0})
 
 
 def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,

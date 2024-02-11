@@ -15,14 +15,12 @@
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 import os
 import sys
-import json
 import inspect
 import subprocess
 import configparser
-import pkg_resources  # setuptools
+import setuptools
 from Colors import Colors
 from mbox import MessageBox
-from typing import Callable, TextIO
 
 
 def str2bool(string):
@@ -57,7 +55,7 @@ else:
 # Assume that we're either starting with a good python installation
 #   or
 # a working PyCharm installation
-def check_install(platform, pure_python=True):
+def check_install(platform):
     print("checking for dependencies...", end='')
 
     # Check status
@@ -88,7 +86,8 @@ def check_install(platform, pure_python=True):
 def check_install_pkg(pkg, verbose=False):
     if verbose:
         print("checking for {:s}...".format(pkg), end='')
-    installed_packages = pkg_resources.working_set
+    # noinspection PyUnresolvedReferences
+    installed_packages = setuptools.working_set
     installed_packages_list = sorted(["%s" % i.key for i in installed_packages])
     return installed_packages_list.__contains__(pkg)
 

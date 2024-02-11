@@ -144,7 +144,6 @@ if __name__ == '__main__':
     import sys
     import doctest
     from datetime import datetime
-    from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 
     doctest.testmod(sys.modules['__main__'])
     import matplotlib.pyplot as plt
@@ -216,10 +215,12 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
 
         fig_list, fig_files = overall(tfd_long.saved, filename, fig_files, plot_title='long '+plot_title, fig_list=fig_list)
-        fig_list, fig_files = overall(tfd_short.saved, filename, fig_files, plot_title='short '+plot_title, fig_list=fig_list)
+        overall(tfd_short.saved, filename, fig_files, plot_title='short '+plot_title, fig_list=fig_list)
 
         # unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path='figures')
         # cleanup_fig_files(fig_files)
         plt.show()
 
-    main()
+
+    if __name__ == '__main__':
+        main()

@@ -26,8 +26,7 @@ import os
 import sys
 import tkinter.filedialog
 from threading import Thread
-import tkinter as tk
-from tkinter import filedialog, simpledialog
+from tkinter import simpledialog
 
 
 class Tail(object):
@@ -43,7 +42,7 @@ class Tail(object):
         self.tailed_file = tailed_file
         self.callback = sys.stdout.write
 
-    def follow(self, s=1, str=None):
+    def follow(self, s=1, _str=None):
         """Do a tail follow. If a callback function is registered it is called with every new line. 
         Else printed to standard out.
     
@@ -63,7 +62,7 @@ class Tail(object):
                     if str is None:
                         self.callback(line)
                     else:
-                        if line.__contains__(str):
+                        if line.__contains__(_str):
                             print(line)
                             # self.callback(line)
 
@@ -71,14 +70,14 @@ class Tail(object):
         """ Overrides default callback function to provided function. """
         self.callback = func
 
-    def check_file_validity(self, file_):
+    def check_file_validity(self, _file):
         """ Check whether a given file exists, readable and is a file """
-        if not os.access(file_, os.F_OK):
-            raise TailError("File '%s' does not exist" % file_)
-        if not os.access(file_, os.R_OK):
-            raise TailError("File '%s' not readable" % file_)
-        if os.path.isdir(file_):
-            raise TailError("File '%s' is a directory" % file_)
+        if not os.access(_file, os.F_OK):
+            raise TailError("File '%s' does not exist" % _file)
+        if not os.access(_file, os.R_OK):
+            raise TailError("File '%s' not readable" % _file)
+        if os.path.isdir(_file):
+            raise TailError("File '%s' is a directory" % _file)
 
 
 class TailError(Exception):
@@ -188,9 +187,9 @@ def watch_target_string():
     thread.start()
 
 
-def write_to_out_path(input):
+def write_to_out_path(_input):
     global of
-    of.write(input)
+    of.write(_input)
 
 
 if __name__ == '__main__':
@@ -199,6 +198,7 @@ if __name__ == '__main__':
     import platform
 
     if platform.system() == 'Darwin':
+        # noinspection PyUnresolvedReferences
         from ttwidgets import TTButton as myButton
     else:
         import tkinter as tk

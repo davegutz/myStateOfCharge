@@ -23,7 +23,7 @@ Dependencies:
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from myFilters import inline_exp_lag
+from myFilters import InlineExpLag
 # below suppresses runtime error display******************
 # import os
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
@@ -33,7 +33,7 @@ from myFilters import inline_exp_lag
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
-def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
+def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None,
             ref_str='_ref', test_str='_test'):
     fig_list.append(plt.figure())  # GP 1
     plt.subplot(221)
@@ -268,11 +268,11 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, fig_list=None
     tau = 20
     cap = 1000
     n = len(dv_hys_req)
-    dv_hys_calc_filter = inline_exp_lag(tau)
-    dv_hys_req_filter = inline_exp_lag(tau)
-    ib_filter = inline_exp_lag(tau)
-    ios_filter = inline_exp_lag(tau)
-    dv_hys_dot_filter = inline_exp_lag(tau)
+    dv_hys_calc_filter = InlineExpLag(tau)
+    dv_hys_req_filter = InlineExpLag(tau)
+    ib_filter = InlineExpLag(tau)
+    ios_filter = InlineExpLag(tau)
+    dv_hys_dot_filter = InlineExpLag(tau)
     for i in range(n-1):
         reset = i == 0
         T = t[i+1]-t[i]
@@ -292,10 +292,12 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, fig_list=None
         if abs(ib_f[i]) < 0.5:
             r_req[i] = 0
         else:
+            # noinspection PyTypeChecker
             r_req[i] = max(min(dv_hys_req_f[i] / ioc_req[i], 0.1), -0.1)
 
         ioc_calc_from_dot[i] = ib_f[i] - cap*dv_dot_calc[i]
         if abs(ioc_calc_from_dot[i]) > 1e-9:
+            # noinspection PyTypeChecker
             r_calc_from_dot[i] = max(min(dv_hys_calc_f[i] / ioc_calc_from_dot[i], 0.1), -0.1)
         else:
             r_calc_from_dot[i] = 0.
@@ -305,6 +307,7 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, fig_list=None
         if abs(ioc_f[i]) < .5:
             r_calc[i] = 0
         else:
+            # noinspection PyTypeChecker
             r_calc[i] = max(min(dv_hys_calc_f[i] / ioc_f[i], 0.1), -0.1)
 
     dv_dot_calc[n-1] = dv_dot_calc[n-2]

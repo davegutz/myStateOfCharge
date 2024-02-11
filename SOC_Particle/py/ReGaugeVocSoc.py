@@ -15,7 +15,7 @@
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 
 """ Python script that takes table input of measured voc_stat (in the form of an interim t_voc_soc and
-RATED_BATT_CAPACITY/RATED_TEMP that may have soc breakpoints < 0.   Rescale and define RATED_BATT_CAPACITY that gives
+RATED_BATT_CAPACITY/RATED_TEMP that may have soc breakpoints < 0).   Rescale and define RATED_BATT_CAPACITY that gives
 q=0 at soc=0 when temp_c is RATED_TEMP."""
 
 import numpy as np
@@ -39,9 +39,9 @@ def pretty_print_vec(vec, prefix='', spacer=''):
 
 
 # New class with observation def added
-class localChem(Chemistry):
-    def __init__(self, mod_code=0, rated_batt_cap=100., scale=1., keep_sim_happy=0.5, dvoc=0.):
-        Chemistry.__init__(self, mod_code=mod_code, dvoc=0.)
+class LocalChem(Chemistry):
+    def __init__(self, mod_code=0, rated_batt_cap=100., scale=1., dvoc=0.):
+        Chemistry.__init__(self, mod_code=mod_code, dvoc=dvoc)
         self.rated_batt_cap = rated_batt_cap
         self.scale = scale
         self.new_rated_batt_cap = None
@@ -74,7 +74,7 @@ class localChem(Chemistry):
         self.coul_eff = 0.9976  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (.9976)
         self.dqdt = 0.01  # Change of charge with temperature, fraction/deg C (0.01 from literature)
         self.dvoc_dt = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
-        self.dvoc = 0.  # Adjustment for calibration error, V (systematic error; may change in future, 0)
+        self.dvoc = 0.  # Adjustment for calibration error, V (systematic error; may change in the future, 0)
         self.hys_cap = 1.e4  # Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s (1e4)
         self.low_voc = 9.0  # Voltage threshold for BMS to turn off battery (9.0)
         self.low_t = 0.  # Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0.)
@@ -222,16 +222,15 @@ if __name__ == '__main__':
     plt.rcParams['axes.grid'] = True
 
     #  Instructions:
-    #  Copy current values of obs battery from Chemistry_BMS for mod_code entered below in localChem, into assign_obs above
-    #  Check values below in localChem() for mod_code, rated_batt_cap, scale
-    #    mod_code agrees with entries (for proper plotting and book-keeping)
+    #  Copy current values of obs battery from Chemistry_BMS for mod_code entered below in LocalChem, into assign_obs above
+    #  Check values below in LocalChem() for mod_code, rated_batt_cap, scale
+    #    mod_code agrees with entries (for proper plotting and bookkeeping)
     #    rated_batt_cap from Battery.UNIT_CAP_RATED in Python, not #define in app
-    #    scale from scale_in in CompareRunSim.   If doesn't appear in CompareRunSim there is a default value of 1.
+    #    scale from scale_in in CompareRunSim.   It doesn't appear in CompareRunSim there is a default value of 1.
     def main():
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-        date_ = datetime.now().strftime("%y%m%d")
 
-        obs = localChem(mod_code=1, rated_batt_cap=100., scale=1.05)  # rated_batt_cap/scale in Python
+        obs = LocalChem(mod_code=1, rated_batt_cap=100., scale=1.05)  # rated_batt_cap/scale in Python
         obs.assign_all_mod()
         obs.regauge()  # rescale and fix
         print('chemistry for observation', obs)  # print the observation

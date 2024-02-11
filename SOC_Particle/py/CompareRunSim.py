@@ -84,15 +84,15 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
         elif unit_key == 'soc1a':
             pass
     elif temp_file is not None:
-        rel_path_to_temp = os.path.join(rel_path_to_temp, temp_file)
+        rel_path_to_temp = os.path.join(str(rel_path_to_temp), str(temp_file))
         data_file = rel_path_to_temp
 
     # Folder operations
     (data_file_folder, data_file_txt) = os.path.split(data_file)
-    save_pdf_path = os.path.join(data_file_folder, rel_path_to_save_pdf)
+    save_pdf_path = os.path.join(str(data_file_folder), str(rel_path_to_save_pdf))
     if not os.path.isdir(rel_path_to_save_pdf):
         os.mkdir(rel_path_to_save_pdf)
-    path_to_temp = os.path.join(data_file_folder, rel_path_to_temp)
+    path_to_temp = os.path.join(str(data_file_folder), str(rel_path_to_temp))
     if not os.path.isdir(path_to_temp):
         os.mkdir(path_to_temp)
 
@@ -162,12 +162,16 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
     return data_file_clean, mon_old, sim_old, mon_ver, sim_ver, sim_s_ver
 
 
-if __name__ == '__main__':
+def main():
     data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\pulseSSH_pro3p2_bb.csv'
     unit_key = 'g20231111b_pro3p2_bb'
-    time_end_in = None
-    rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
-    rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'
+    # time_end_in = None
+    # rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
+    # rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'
     data_only = False
 
     compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only)
+
+
+if __name__ == '__main__':
+    main()
