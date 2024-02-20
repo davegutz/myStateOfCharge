@@ -17,7 +17,7 @@
 
 import tkinter as tk
 from threading import Thread
-import pyautogui
+from pynput.keyboard import Key, Controller
 import time
 import platform
 if platform.system() == 'Darwin':
@@ -135,14 +135,11 @@ def stay_awake(up_set_min=3.):
     # Timer starts
     start_time = float(time.time())
     up_time_min = 0.0
-    # FAILSAFE to FALSE feature is enabled by default so that you can easily stop execution of
-    # your pyautogui program by manually moving the mouse to the upper left corner of the screen.
-    # Once the mouse is in this location, pyautogui will throw an exception and exit.
-    pyautogui.FAILSAFE = False
     while True and (up_time_min < up_set_min):
         time.sleep(30.)
+        keyboard = Controller()
         for i in range(0, 3):
-            pyautogui.press('shift')  # Shift key does not disturb fullscreen
+            keyboard.press(Key.shift)  # Shift key does not disturb fullscreen
         up_time_min = (time.time() - start_time) / 60.
         print(f"stay_awake: {up_time_min=}")
     print(f"stay_awake: ending\n")
