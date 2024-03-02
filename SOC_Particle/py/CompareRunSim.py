@@ -163,15 +163,15 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
 
 
 def main():
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\pulseSSH_pro3p2_bb.csv'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro3p2_bb.csv'
     unit_key = 'g20231111b_pro3p2_bb'
-    # time_end_in = None
-    # rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
-    # rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'
+    time_end_in = None
+    rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
+    rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'
     data_only = False
-
     compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only)
 
 
+import cProfile
 if __name__ == '__main__':
-    main()
+    cProfile.run('main()')
