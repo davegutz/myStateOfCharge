@@ -64,7 +64,7 @@ def_dict = {'test': {"version": "g20230530",
             }
 
 # Transient string
-unit_list = ['pro0p', 'pro1a', 'pro3p2', 'pro2p2', 'soc0p', 'soc1a']
+unit_list = ['pro0p', 'pro1a', 'pro3p2', 'pro2p2', 'soc0p', 'soc1a', 'soc3p2']
 batt_list = ['bb', 'ch']
 sel_list = ['custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
             'allProto', 'pulseSS', 'rapidTweakRegressionH0', 'offSitHysBmsBB', 'offSitHysBmsCH', 'triTweakDisch',
@@ -187,7 +187,8 @@ putty_connection = {'': 'test',
                     'soc0p': 'testsoc0p',
                     'pro0p': 'testpro0p',
                     'pro1a': 'testpro1a',
-                    'pro3p2': 'testpro3p2'}
+                    'pro3p2': 'testpro3p2',
+                    'soc3p2': 'testsoc3p2'}
 
 
 # Begini - configuration class using .ini files
@@ -330,7 +331,7 @@ class Exec:
 
     def enter_unit(self):
         self.unit = tk.simpledialog.askstring(title=self.level, initialvalue=self.unit,
-                                              prompt="Enter unit e.g. 'pro0p', 'pro1a', 'soc0p', 'soc1a':")
+                                              prompt="Enter unit e.g. 'pro0p', 'pro1a', pro3p2', 'soc0p', 'soc1a', 'soc3p2':")
         self.cf[self.ind]['unit'] = self.unit
         self.cf.save_to_file()
         self.unit_button.config(text=self.unit)
