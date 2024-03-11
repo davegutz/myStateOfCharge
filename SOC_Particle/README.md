@@ -813,6 +813,11 @@ Amazon:  5 Pieces I2C Display Module 0.91 Inch I2C OLED Display Module Blue I2C 
 
 ## FAQ
 
+### DS2482SearchBusCommand status=-7 in serial monitor
+
+This is caused by OLED failure.  Such a failure has taken out the entire 
+I2C monitor function including Tb measurement on DS2482.  You may temporarily correct this be recompiling and reflashing with '// #define CONFIG_SSD1306_OLED' in the local_config.h.<> file.  Permanently by replacing OLED.
+
 ### FRAG message in Serial
 
 When a Particle device's heap is corrupted by excessive 'new/delete/new' or 'String +=' operations, the default action is to drop the result of the operation without warning. I added checks for the worst offenders.  Typically the fix is to decrease NSUM in _constants.h_ by a little from the value that just works to compile without SRAM messages.
