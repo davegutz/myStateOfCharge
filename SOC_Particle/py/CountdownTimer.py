@@ -17,8 +17,11 @@
 
 import tkinter as tk
 from threading import Thread
-# from pynput.keyboard import Key, Controller
-import pyautogui
+import sys
+if sys.version_info < (3, 12):
+    import pyautogui
+else:
+    from pynput.keyboard import Key, Controller
 import time
 import platform
 if platform.system() == 'Darwin':
@@ -142,10 +145,13 @@ def stay_awake(up_set_min=3.):
     pyautogui.FAILSAFE = False
     while True and (up_time_min < up_set_min):
         time.sleep(30.)
-        # keyboard = Controller()
+        if sys.version_info < (3, 12):
+            keyboard = Controller()
         for i in range(0, 3):
-            # keyboard.press(Key.shift)  # Shift key does not disturb fullscreen
-            pyautogui.press('shift')  # Shift key does not disturb fullscreen
+            if sys.version_info < (3, 12):
+                keyboard.press(Key.shift)  # Shift key does not disturb fullscreen
+            else:
+                pyautogui.press('shift')  # Shift key does not disturb fullscreen
         up_time_min = (time.time() - start_time) / 60.
         print(f"stay_awake: {up_time_min=}")
     print(f"stay_awake: ending\n")
