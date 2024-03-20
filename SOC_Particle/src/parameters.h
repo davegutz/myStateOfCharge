@@ -211,7 +211,7 @@ public:
     float ib_hist_slr() { if ( abs(amp_z) > 40. ) return 30000./abs(amp_z); else return 600.; }
     float vb_hist_slr() { if ( abs(amp_z) > 40. ) return 1500./abs(amp_z); else return 1200.; }
     boolean mod_all_dscn() { return ( 111<modeling() ); }                // Bare all
-    boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeing any
+    boolean mod_any() { return ( mod_ib() || mod_tb() || mod_vb() ); }  // Modeling any
     boolean mod_any_dscn() { return ( 15<modeling() ); }                 // Bare any
     boolean mod_ib() { return ( 1<<2 & modeling() || mod_ib_all_dscn() ); }  // Using Sim as source of ib
     boolean mod_ib_all_dscn() { return ( 191<modeling() ); }             // Nothing connected to ib sensors in I2C on SDA/SCL

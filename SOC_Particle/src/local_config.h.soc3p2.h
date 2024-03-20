@@ -20,14 +20,14 @@ const String unit = version + "_soc3p2";
 
 // Miscellaneous
 #define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
-#define MODELING              247 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
+#define MODELING              0 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
 
 // Sensor biases
 #define CURR_BIAS_AMP         0.0   // Calibration of amplified shunt sensor (* 'DA'), A
 #define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SA')
 #define CURR_BIAS_NOA         0.0 // Calibration of non-amplified shunt sensor (* 'DB'), A
 #define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
-#define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (1333 is 100A/0.075V)
+#define SHUNT_GAIN            2666. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (2666 is 200A/0.075V)
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms (5k6)  100/5.6  = 17.86
 #define SHUNT_AMP_R2          100000.   // Amplifed shunt ADS resistance, ohms (100k) 0.075v  = 1.34 v => 3.3/2+1.34 = 2.99 < 3.3
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
