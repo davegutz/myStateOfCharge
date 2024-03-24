@@ -571,8 +571,9 @@ def contain_all(testpath):
     with open(testpath, 'r') as file:
         for line in file:
             if line.__contains__(txt):
-                us_loc = line.find('_' + txt)
-                key = (basename, line[:us_loc])
+                shorter = line[line.find(txt):]
+                end_key = shorter.find(',')
+                key = shorter[:end_key]
                 break
     return folder_path, parent, basename, txt, key
 
