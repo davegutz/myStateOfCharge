@@ -148,6 +148,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("\nQ      vital stats\n");
 
   Serial.printf("\nR<?>   Reset\n");
+  Serial.printf("  Ca=<val> "); Serial.printf("initialize_all to present inputs\n");
   Serial.printf("  Rb= "); Serial.printf("batteries to present inputs\n");
   Serial.printf("  Rf= "); Serial.printf("fault logic latches\n");
   Serial.printf("  Ri= "); Serial.printf("infinite counter\n");
