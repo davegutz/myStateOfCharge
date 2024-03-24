@@ -111,7 +111,7 @@ lookup = {
                     '  Pf;Xp13;  ' +                                                    # triTweakDisch
                     modMidInit + tranPrep + 'Ff1;' + c50 + 'XQ40000;' + c00 + tempCleanup +  # ampHiFailFf
                     modMidInit + tranPrep + cm50 + 'XQ50000;' + c00 + tempCleanup +     # ampLoFail
-                    '  D^15;Xp10' +                                                     # rapidTweakRegression40C
+                    '  D^15;Xp10; ' +                                                    # rapidTweakRegression40C
                     '  Pf;Xp11;  ' +                                                    # slowTweakRegression
                     'Xm247;Ca0.9;Rb;Rf;Xts;Xa-81;Xf0.004;XW10000;XT10;XC2;W1;HR;vv4;Dh1000;W;Rs;XR;XQ580000;' + tempCleanup +  # flatSitHys
                     modMidInit + tranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + tempCleanup +  # ampHiFailSlow
