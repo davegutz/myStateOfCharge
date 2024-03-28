@@ -182,6 +182,8 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.subplot(223)
         plt.plot(mo.time, mo.dv_dyn, color='black', linestyle='-', label='dv_dyn' + ref_str)
         plt.plot(so.time, so.dv_dyn_s, color='red', linestyle='--', label='dv_dyn_s' + ref_str)
+        plt.plot(mo.time, mo.voc-mo.voc_soc, color='magenta', linestyle='-.', label='dv_hys_est' + ref_str)
+        plt.plot(so.time, so.voc_s-so.voc_stat_s, color='cyan', linestyle=':', label='dv_hyst_s_est' + ref_str)
         plt.legend(loc=1)
         plt.subplot(224)
         plt.plot(mo.time, mo.ib_charge, color='black', linestyle='-', label='ib_charge' + ref_str)
