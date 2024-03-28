@@ -981,9 +981,9 @@ def add_mod(hist, mon_t_=False, mon=None):
 
 
 def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
-                     data_only=False, mon_t=False, unit_key=None, sync_time=None):
+                     data_only=False, mon_t=False, unit_key=None, sync_time=None, dt_resample=0.1):
 
-    print(f"\ncompare_hist_sim:\n{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n{mon_t=}\n{unit_key=}\n")
+    print(f"\ncompare_hist_sim:\n{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n{mon_t=}\n{unit_key=}\n{dt_resample=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
@@ -1067,8 +1067,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         h_20C = shift_time(h_20C)
 
     # Covert to fast update rate
-    T_100 = 0.1
-    h_20C_resamp = resample(data=h_20C, dt_resamp=T_100, time_var='time',
+    h_20C_resamp = resample(data=h_20C, dt_resamp=dt_resample, time_var='time',
                             specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                       ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
                                       ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
@@ -1129,15 +1128,22 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
 def main():
     # User inputs (multiple input_files allowed
-    # data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
+    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
     # mon_t = True
-    data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegressionHistX_pro3p2_bb.csv'
+    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegressionHistX_pro3p2_bb.csv'
+    # mon_t = False
+    # unit_key = 'pro3p2_bb'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109/SrSeries_soc2p2_ch.csv'
+    rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109\\./figures'
+    rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109\\./temp'
+    data_only = False
     mon_t = False
-    key = 'pro3p2_bb'
+    unit_key = 'g20240109_soc2p2_ch'
+    dt_resample = 1
 
     # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
-    compare_hist_sim(data_file=data_file_full, mon_t=mon_t, unit_key=key)
+    compare_hist_sim(data_file=data_file, mon_t=mon_t, unit_key=unit_key, dt_resample=dt_resample)
 
 
 if __name__ == '__main__':
