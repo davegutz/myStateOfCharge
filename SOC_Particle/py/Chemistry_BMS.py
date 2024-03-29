@@ -40,7 +40,8 @@ class BMS:
     """Battery Management System Properties"""
     def __init__(self):
         self.low_voc = 0.  # Voltage threshold for BMS to turn off battery, V
-        self.low_t = 0.  # Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C
+        self.low_t = 0.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.\
+        # Heater should keep >4, too. deg C
         self.vb_off = 0.  # Shutoff point in Mon, V
         self.vb_down = 0.  # Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V
         self.vb_rising = 0.  # Shutoff point when off, V
@@ -53,7 +54,8 @@ class Chemistry(BMS):
     def __init__(self, mod_code=0, dvoc=0.):
         BMS.__init__(self)
         self.rated_temp = 0.  # Temperature at UNIT_CAP_RATED, deg C
-        self.coul_eff = 0.  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
+        self.coul_eff = 0.  # Coulombic efficiency - the fraction of charging input that gets\
+        # turned into usable Coulombs
         self.cap = 0.  # Hysteresis capacitance, F
         self.mod_code = mod_code  # Chemistry code integer
         self.dqdt = 0.  # Change of charge with temperature, fraction/deg C (0.01 from literature)
@@ -95,14 +97,16 @@ class Chemistry(BMS):
         # Constants
         # self.cap = see below
         self.rated_temp = 25.  # Temperature at UNIT_CAP_RATED, deg C
-        self.coul_eff = 0.9985  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9985)
+        self.coul_eff = 0.9985  # Coulombic efficiency - the fraction of charging input that gets\
+        # turned into usable Coulombs (0.9985)
         self.dqdt = 0.01  # Change of charge with temperature, fraction/deg C (0.01 from literature)
         self.dvoc_dt = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
         self.dvoc = 0.  # Adjustment for calibration error, V (systematic error; may change in the future, 0)
-        self.hys_cap = 3.6e3  # Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022 (3.6e3)
-                                # tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
+        self.hys_cap = 3.6e3  # Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data.\
+        # // div 10 again 9/29/2022 // div 10 again 11/30/2022 (3.6e3) # tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
         self.low_voc = 9.0  # Voltage threshold for BMS to turn off battery, V (9.0)
-        self.low_t = 0  # Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0)
+        self.low_t = 0  # Minimum temperature for valid saturation check, because BMS shuts off battery low.\
+        # Heater should keep >4, too. deg C (0)
         self.r_0 = 0.0113  # ChargeTransfer R0, ohms (0.0113)
         self.r_ct = 0.001  # ChargeTransfer diffusion resistance, ohms (0.001)
         self.r_sd = 70  # Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms (70.)
@@ -120,14 +124,9 @@ class Chemistry(BMS):
 
         # Tables Battleborn Bmon=0, Bsim=0
         # VOC_SOC table
-        t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.99, 0.995,
-                    1.00]
+        t_x_soc0 = [-0.15, 0.00, 0.05, 0.10, 0.14, 0.17, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.99,
+                    0.995, 1.00]
         t_y_t0 = [5., 11.1, 20., 30., 40.]
-        # t_voc0 = [4.00, 4.00, 4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
-        #           4.00, 4.00, 4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.60, 14.46,
-        #           4.00, 4.00, 10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
-        #           4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26, 13.27, 13.72, 14.50,
-        #           4.00, 4.00, 4.00,  4.00,  10.50, 11.93, 12.78, 12.83, 12.89, 12.97, 13.06, 13.10, 13.13, 13.16, 13.19, 13.20, 13.72, 14.50]
         t_voc0 = [4.00, 4.00, 4.00,  4.00,  10.50, 12.00, 12.75, 13.00, 13.07, 13.20, 13.21, 13.28, 13.35, 13.41, 13.47, 13.52, 13.69, 14.25,
                   4.00, 4.00, 4.00,  9.80,  12.30, 12.80, 13.00, 13.10, 13.20, 13.26, 13.31, 13.36, 13.41, 13.47, 13.50, 13.53, 13.70, 14.26,
                   4.00, 4.00, 10.30, 12.90, 13.07, 13.15, 13.19, 13.25, 13.29, 13.33, 13.34, 13.39, 13.44, 13.51, 13.55, 13.57, 13.82, 14.30,
@@ -166,13 +165,15 @@ class Chemistry(BMS):
         # Constants
         # self.cap = see below
         self.rated_temp = 25.  # Temperature at UNIT_CAP_RATED, deg C
-        self.coul_eff = 0.9976  # Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (.9976)
+        self.coul_eff = 0.9976  # Coulombic efficiency - the fraction of charging input that gets turned into\
+        # usable Coulombs (.9976)
         self.dqdt = 0.01  # Change of charge with temperature, fraction/deg C (0.01 from literature)
         self.dvoc_dt = 0.004  # Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
         self.dvoc = 0.  # Adjustment for calibration error, V (systematic error; may change in the future, 0)
         self.hys_cap = 1.e4  # Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s (1e4)
         self.low_voc = 9.0  # Voltage threshold for BMS to turn off battery (9.0)
-        self.low_t = 0.  # Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0.)
+        self.low_t = 0.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.\
+        # Heater should keep >4, too. deg C (0.)
         self.r_0 = 0.0046*3.  # ChargeTransfer R0, ohms  (3*0.0046)
         self.r_ct = 0.0077*0.76  # ChargeTransfer diffusion resistance, ohms (0.0077*0.76)
         self.r_sd = 70  # Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms (70)
@@ -191,12 +192,6 @@ class Chemistry(BMS):
 
         # Tables CHINS Bmon=1, Bsim=1, from ReGaugeVocSoc 3/2/2023
         # VOC_SOC table
-        # t_x_soc1 = [-0.100,  -0.060,  -0.035,   0.000,   0.050,   0.100,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.980,   0.990,   1.000]
-        # t_y_t1 = [5.,  11.1,   11.2,  40.]
-        # t_voc1 = [4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   5.370,  10.042,  12.683,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
-        #           4.000,   4.000,   4.000,   4.000,   4.000,   4.000,   6.963,  10.292,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
-        #           4.000,   4.000,   4.000,   9.000,  12.453,  12.746,  12.869,  12.931,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
-        #           4.000,   4.000,   4.000,   9.000,  12.453,  12.746,  12.869,  12.931,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700]
         # Tables CHINS Bmon=1, Bsim=1, from CompareTensorData 8/31/2023
         t_x_soc1 = [-0.035,   0.000,   0.050,   0.100,  0.108,  0.120,  0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.980,   0.990,   1.000]
         t_y_t1 = [11.1,   11.2,  21.5]

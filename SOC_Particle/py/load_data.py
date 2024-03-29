@@ -18,13 +18,15 @@ import numpy as np
 from DataOverModel import SavedData, SavedDataSim, write_clean_file
 from CompareFault import add_stuff_f, filter_Tb, IB_BAND
 from Battery import Battery, BatteryMonitor
+from resample import remove_nan
 
 
 # Load from files
 def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_batt_cap=Battery.UNIT_CAP_RATED,
               legacy=False, v1_only=False, zero_thr_in=0.02):
 
-    print(f"load_data: \n{path_to_data=}\n{skip=}\n{unit_key=}\n{zero_zero_in=}\n{time_end_in=}\n{rated_batt_cap=}\n{legacy=}\n{v1_only=}")
+    print(f"load_data: \n{path_to_data=}\n{skip=}\n{unit_key=}\n{zero_zero_in=}\n{time_end_in=}\n{rated_batt_cap=}\n"
+          f"{legacy=}\n{v1_only=}")
 
     title_key = "unit,"  # Find one instance of title
     title_key_sel = "unit_s,"  # Find one instance of title
@@ -93,6 +95,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         f_raw = None
     if f_raw is not None:
         f_raw = np.unique(f_raw)
+        f_raw = remove_nan(f_raw)
         f = add_stuff_f(f_raw, batt, ib_band=IB_BAND)
         print("\nf:\n", f, "\n")
         f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap)
@@ -112,8 +115,8 @@ def main():
     rated_batt_cap = 108.4
     legacy = False
     v1_only = False
-    load_data(path_to_data=path_to_data, skip=skip, unit_key=unit_key, zero_zero_in=zero_zero_in, time_end_in=time_end_in,
-              rated_batt_cap=rated_batt_cap, legacy=legacy, v1_only=v1_only)
+    load_data(path_to_data=path_to_data, skip=skip, unit_key=unit_key, zero_zero_in=zero_zero_in,
+              time_end_in=time_end_in, rated_batt_cap=rated_batt_cap, legacy=legacy, v1_only=v1_only)
 
 
 if __name__ == '__main__':

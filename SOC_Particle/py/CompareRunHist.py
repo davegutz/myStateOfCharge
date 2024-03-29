@@ -34,7 +34,8 @@ plt.rcParams['axes.grid'] = True
 def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_path_to_save_pdf_='./figures',
                      rel_path_to_temp_='./temp', data_only_=True):
 
-    print(f"\ncompare_run_hist:\n{data_file_=}\n{rel_path_to_save_pdf_=}\n{rel_path_to_temp_=}\n{data_only_=}\n{unit_key_=}\n")
+    print(f"\ncompare_run_hist:\n{data_file_=}\n{rel_path_to_save_pdf_=}\n{rel_path_to_temp_=}\n{data_only_=}\
+    \n{unit_key_=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     # date_ = datetime.now().strftime("%y%m%d")
@@ -88,10 +89,8 @@ def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_pat
 
 
 def main():
-    # data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro3p2_bb.csv'
-    # unit_key_full = 'pro3p2_bb'
-
-    data_file_full = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro1a_bb.csv'
+    data_file_full = \
+        'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro1a_bb.csv'
     unit_key_full = 'g20231111b_pro1a_bb'
 
     compare_run_hist(data_file_=data_file_full, unit_key_=unit_key_full)

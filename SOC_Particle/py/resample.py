@@ -24,6 +24,16 @@ import numpy.lib.recfunctions as rf
 from Util import cat
 
 
+def remove_nan(d_ra):
+    """Remove useless nan elements"""
+    names = list(d_ra.dtype.names)
+    new_names = []
+    for name in names:
+        if not all(np.isnan(d_ra[name])):
+            new_names.append(name)
+    return d_ra[new_names]
+
+
 # Limited capability resample.   Interpolates floating point (foh) or holds value (zoh) according to order input
 def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
 
@@ -40,7 +50,8 @@ def resample(data, dt_resamp, time_var, specials=None, make_time_float=True):
         new_n += 1
         new_time.append(start + float(new_n) * dt_resamp)
     # print("resample:  new time", new_time)
-    print("resample:  start new", new_time[0], "end new", new_time[-1], "len new", len(new_time), "end new - end", new_time[-1]-end, "dt_resamp", dt_resamp)
+    print("resample:  start new", new_time[0], "end new", new_time[-1], "len new", len(new_time), "end new - end",
+          new_time[-1]-end, "dt_resamp", dt_resamp)
 
     # Index for new array
     irec = np.zeros(new_n)
@@ -139,6 +150,7 @@ if __name__ == '__main__':
         raw = np.unique(raw)
 
         # Rack and stack
+        raw = remove_nan(raw)
         if exclusions:
             for i in range(len(exclusions)):
                 # noinspection PyUnresolvedReferences
@@ -151,13 +163,13 @@ if __name__ == '__main__':
 
         # Now do the resample
         # noinspection PyUnresolvedReferences
-        T_raw = raw.time[1] - raw.time[0]
-        T = 0.1
-        resamp = resample(data=raw, dt_resamp=T, specials=[('falw', 0)], time_var='time')
+        dt_raw = raw.time[1] - raw.time[0]
+        dt = 0.1
+        resamp = resample(data=raw, dt_resamp=dt, specials=[('falw', 0)], time_var='time')
 
         print("resamp")
         print(resamp)
-        print("raw time range", raw['time'][0], '-', raw['time'][-1], "length=", len(raw), "dt=", T_raw)
-        print("resamp time range", resamp['time'][0], '-', resamp['time'][-1], "length=", len(resamp), "dt=", T)
+        print("raw time range", raw['time'][0], '-', raw['time'][-1], "length=", len(raw), "dt=", dt_raw)
+        print("resamp time range", resamp['time'][0], '-', resamp['time'][-1], "length=", len(resamp), "dt=", dt)
 
     main()

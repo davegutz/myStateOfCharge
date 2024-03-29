@@ -28,6 +28,7 @@ from resample import resample
 from PlotGP import tune_r
 from PlotKiller import show_killer
 from Colors import *
+from resample import remove_nan
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 IB_BAND = 1.  # Threshold to declare charging or discharging
@@ -278,7 +279,8 @@ def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, bb):
     return cc_diff_thr, ewhi_thr, ewlo_thr, ib_diff_thr, ib_quiet_thr
 
 
-def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, subtitle=None, long_term=True, cc_dif_tol=0.2):
+def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, subtitle=None, long_term=True,
+               cc_dif_tol=0.2):
     if fig_files is None:
         fig_files = []
 
@@ -288,7 +290,8 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
         plt.title(plot_title + ' f1')
         plt.suptitle(subtitle)
         plt.plot(hi.time_ux, hi.soc, marker='.', markersize='3', linestyle='-', color='black', label='soc')
-        plt.plot(hi.time_ux, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue', label='soc_ekf')
+        plt.plot(hi.time_ux, hi.soc_ekf, marker='+', markersize='3', linestyle='--', color='blue',
+                 label='soc_ekf')
         plt.legend(loc=1)
         plt.subplot(332)
         plt.plot(hi.time_ux, hi.Tb, marker='.', markersize='3', linestyle='-', color='black', label='Tb')
@@ -297,8 +300,10 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
         plt.plot(hi.time_ux, hi.ib, marker='+', markersize='3', linestyle='-', color='green', label='ib')
         plt.legend(loc=1)
         plt.subplot(334)
-        plt.plot(hi.time_ux, hi.tweak_sclr_amp, marker='+', markersize='3', linestyle='None', color='orange', label='tweak_sclr_amp')
-        plt.plot(hi.time_ux, hi.tweak_sclr_noa, marker='^', markersize='3', linestyle='None', color='green', label='tweak_sclr_noa')
+        plt.plot(hi.time_ux, hi.tweak_sclr_amp, marker='+', markersize='3', linestyle='None', color='orange',
+                 label='tweak_sclr_amp')
+        plt.plot(hi.time_ux, hi.tweak_sclr_noa, marker='^', markersize='3', linestyle='None', color='green',
+                 label='tweak_sclr_noa')
         plt.ylim(-6, 6)
         plt.legend(loc=1)
         plt.subplot(335)
@@ -314,26 +319,35 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
         plt.legend(loc=4)
         plt.subplot(337)
         plt.plot(hi.time_ux, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
-        plt.plot(hi.time_ux, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
+        plt.plot(hi.time_ux, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan',
+                 label='dv_hys_rescaled')
         plt.plot(hi.time_ux, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
-        plt.plot(hi.time_ux, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
-        plt.plot(hi.time_ux, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='lawngreen', label='dv_hys_remodel')
-        plt.plot(hi.time_ux, hi.dv_hys_redesign_chg, marker=3, markersize='3', linestyle=':', color='springgreen', label='dv_hys_redesign_chg')
-        plt.plot(hi.time_ux, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle=':', color='orangered', label='dv_hys_redesign_dis')
+        plt.plot(hi.time_ux, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red',
+                 label='-e_wrap')
+        plt.plot(hi.time_ux, hi.dv_hys_remodel, marker='x', markersize='3', linestyle=':', color='lawngreen',
+                 label='dv_hys_remodel')
+        plt.plot(hi.time_ux, hi.dv_hys_redesign_chg, marker=3, markersize='3', linestyle=':', color='springgreen',
+                 label='dv_hys_redesign_chg')
+        plt.plot(hi.time_ux, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle=':', color='orangered',
+                 label='dv_hys_redesign_dis')
         plt.xlabel('days')
         plt.legend(loc=1)
         plt.subplot(338)
         plt.plot(hi.time_ux, hi.e_wrap, marker='o', markersize='3', linestyle='-', color='black', label='e_wrap')
         plt.plot(hi.time_ux, hi.wv_fa, marker=0, markersize='4', linestyle=':', color='red', label='wrap_vb_fa')
-        plt.plot(hi.time_ux, hi.wl_fa-1, marker=2, markersize='4', linestyle=':', color='orange', label='wrap_lo_fa-1')
-        plt.plot(hi.time_ux, hi.wh_fa+1, marker=3, markersize='4', linestyle=':', color='green', label='wrap_hi_fa+1')
+        plt.plot(hi.time_ux, hi.wl_fa-1, marker=2, markersize='4', linestyle=':', color='orange',
+                 label='wrap_lo_fa-1')
+        plt.plot(hi.time_ux, hi.wh_fa+1, marker=3, markersize='4', linestyle=':', color='green',
+                 label='wrap_hi_fa+1')
         plt.xlabel('days')
         plt.legend(loc=1)
         plt.subplot(339)
         plt.plot(hi.time_ux, hi.vb, marker='.', markersize='3', linestyle='None', color='red', label='vb')
         plt.plot(hi.time_ux, hi.voc, marker='.', markersize='3', linestyle='None', color='blue', label='voc')
-        plt.plot(hi.time_ux, hi.voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green', label='voc_stat_chg')
-        plt.plot(hi.time_ux, hi.voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red', label='voc_stat_dis')
+        plt.plot(hi.time_ux, hi.voc_stat_chg, marker='.', markersize='3', linestyle='None', color='green',
+                 label='voc_stat_chg')
+        plt.plot(hi.time_ux, hi.voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red',
+                 label='voc_stat_dis')
         plt.xlabel('days')
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
@@ -344,27 +358,41 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
         plt.subplot(221)
         plt.title(plot_title + ' f2')
         plt.suptitle(subtitle)
-        plt.plot(hi.time_ux, hi.vsat, marker='.', markersize='1', linestyle='-', color='orange', linewidth='1', label='vsat')
+        plt.plot(hi.time_ux, hi.vsat, marker='.', markersize='1', linestyle='-', color='orange', linewidth='1',
+                 label='vsat')
         plt.plot(hi.time_ux, hi.vb, marker='1', markersize='3', linestyle='None', color='black', label='vb')
         plt.plot(hi.time_ux, hi.voc, marker='.', markersize='3', linestyle='None', color='orange', label='voc')
-        plt.plot(hi.time_ux, hi.voc_stat_chg, marker='.', markersize='3', linestyle='-', color='green', label='voc_stat_chg')
-        plt.plot(hi.time_ux, hi.voc_stat_dis, marker='.', markersize='3', linestyle='-', color='red', label='voc_stat_dis')
+        plt.plot(hi.time_ux, hi.voc_stat_chg, marker='.', markersize='3', linestyle='-', color='green',
+                 label='voc_stat_chg')
+        plt.plot(hi.time_ux, hi.voc_stat_dis, marker='.', markersize='3', linestyle='-', color='red',
+                 label='voc_stat_dis')
         plt.plot(hi.time_ux, hi.voc_soc, marker='2', markersize='3', linestyle=':', color='cyan', label='voc_soc')
         plt.xlabel('days')
         plt.legend(loc=1)
         plt.subplot(122)
-        plt.plot(hi.time_ux, hi.bms_off + 22, marker='h', markersize='3', linestyle='-', color='blue', label='bms_off+22')
+        plt.plot(hi.time_ux, hi.bms_off + 22, marker='h', markersize='3', linestyle='-', color='blue',
+                 label='bms_off+22')
         plt.plot(hi.time_ux, hi.sat + 20, marker='s', markersize='3', linestyle='-', color='red', label='sat+20')
-        plt.plot(hi.time_ux, hi.dscn_fa + 18, marker='o', markersize='3', linestyle='-', color='black', label='dscn_fa+18')
-        plt.plot(hi.time_ux, hi.ib_diff_fa + 16, marker='^', markersize='3', linestyle='-', color='blue', label='ib_diff_fa+16')
-        plt.plot(hi.time_ux, hi.wv_fa + 14, marker='s', markersize='3', linestyle='-', color='cyan', label='wrap_vb_fa+14')
-        plt.plot(hi.time_ux, hi.wl_fa + 12, marker='p', markersize='3', linestyle='-', color='orange', label='wrap_lo_fa+12')
-        plt.plot(hi.time_ux, hi.wh_fa + 10, marker='h', markersize='3', linestyle='-', color='green', label='wrap_hi_fa+10')
-        plt.plot(hi.time_ux, hi.ccd_fa + 8, marker='H', markersize='3', linestyle='-', color='blue', label='cc_diff_fa+8')
-        plt.plot(hi.time_ux, hi.ib_noa_fa + 6, marker='+', markersize='3', linestyle='-', color='red', label='ib_noa_fa+6')
-        plt.plot(hi.time_ux, hi.ib_amp_fa + 4, marker='_', markersize='3', linestyle='-', color='magenta', label='ib_amp_fa+4')
-        plt.plot(hi.time_ux, hi.vb_fa + 2, marker='1', markersize='3', linestyle='-', color='cyan', label='vb_fa+2')
-        plt.plot(hi.time_ux, hi.tb_fa, marker='2', markersize='3', linestyle='-', color='orange', label='tb_fa')
+        plt.plot(hi.time_ux, hi.dscn_fa + 18, marker='o', markersize='3', linestyle='-', color='black',
+                 label='dscn_fa+18')
+        plt.plot(hi.time_ux, hi.ib_diff_fa + 16, marker='^', markersize='3', linestyle='-', color='blue',
+                 label='ib_diff_fa+16')
+        plt.plot(hi.time_ux, hi.wv_fa + 14, marker='s', markersize='3', linestyle='-', color='cyan',
+                 label='wrap_vb_fa+14')
+        plt.plot(hi.time_ux, hi.wl_fa + 12, marker='p', markersize='3', linestyle='-', color='orange',
+                 label='wrap_lo_fa+12')
+        plt.plot(hi.time_ux, hi.wh_fa + 10, marker='h', markersize='3', linestyle='-', color='green',
+                 label='wrap_hi_fa+10')
+        plt.plot(hi.time_ux, hi.ccd_fa + 8, marker='H', markersize='3', linestyle='-', color='blue',
+                 label='cc_diff_fa+8')
+        plt.plot(hi.time_ux, hi.ib_noa_fa + 6, marker='+', markersize='3', linestyle='-', color='red',
+                 label='ib_noa_fa+6')
+        plt.plot(hi.time_ux, hi.ib_amp_fa + 4, marker='_', markersize='3', linestyle='-', color='magenta',
+                 label='ib_amp_fa+4')
+        plt.plot(hi.time_ux, hi.vb_fa + 2, marker='1', markersize='3', linestyle='-', color='cyan',
+                 label='vb_fa+2')
+        plt.plot(hi.time_ux, hi.tb_fa, marker='2', markersize='3', linestyle='-', color='orange',
+                 label='tb_fa')
         plt.ylim(-1, 24)
         plt.xlabel('days')
         plt.legend(loc=1)
@@ -381,24 +409,31 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
         plt.title(plot_title + ' f3')
         plt.suptitle(subtitle)
         plt.plot(hi.time_ux, hi.dv_hys, marker='o', markersize='3', linestyle='-', color='blue', label='dv_hys')
-        plt.plot(hi.time_ux, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan', label='dv_hys_rescaled')
+        plt.plot(hi.time_ux, hi.dv_hys_rescaled, marker='o', markersize='3', linestyle='-', color='cyan',
+                 label='dv_hys_rescaled')
         plt.plot(hi.time_ux, hi.dv_hys_required, linestyle='--', color='black', label='dv_hys_required')
-        plt.plot(hi.time_ux, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red', label='-e_wrap')
-        plt.plot(hi.time_ux, hi.dv_hys_redesign_chg, marker=3, markersize='3', linestyle='-', color='green', label='dv_hys_redesign_chg')
-        plt.plot(hi.time_ux, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle='-', color='red', label='dv_hys_redesign_dis')
+        plt.plot(hi.time_ux, -hi.e_wrap, marker='o', markersize='3', linestyle='None', color='red',
+                 label='-e_wrap')
+        plt.plot(hi.time_ux, hi.dv_hys_redesign_chg, marker=3, markersize='3', linestyle='-', color='green',
+                 label='dv_hys_redesign_chg')
+        plt.plot(hi.time_ux, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle='-', color='red',
+                 label='dv_hys_redesign_dis')
         plt.xlabel('days')
         plt.legend(loc=4)
         # plt.ylim(-0.7, 0.7)
         plt.ylim(bottom=-0.7)
         plt.subplot(222)
-        plt.plot(hi.time_ux, hi.res_redesign_chg, marker='o', markersize='3', linestyle='-', color='green', label='res_redesign_chg')
-        plt.plot(hi.time_ux, hi.res_redesign_dis, marker='o', markersize='3', linestyle='-', color='red', label='res_redesign_dis')
+        plt.plot(hi.time_ux, hi.res_redesign_chg, marker='o', markersize='3', linestyle='-', color='green',
+                 label='res_redesign_chg')
+        plt.plot(hi.time_ux, hi.res_redesign_dis, marker='o', markersize='3', linestyle='-', color='red',
+                 label='res_redesign_dis')
         plt.xlabel('days')
         plt.legend(loc=4)
         plt.subplot(223)
         plt.plot(hi.time_ux, hi.ib, color='black', label='ib')
         plt.plot(hi.time_ux, hi.soc*10, color='green', label='soc*10')
-        plt.plot(hi.time_ux, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan', label='ioc_redesign')
+        plt.plot(hi.time_ux, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan',
+                 label='ioc_redesign')
         plt.xlabel('days')
         plt.legend(loc=4)
         plt.subplot(224)
@@ -517,12 +552,16 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fi
     plt.legend(loc=1)
     plt.subplot(338)
     plt.plot(mo.time_ux, mo.e_wrap, color='black', linestyle='-', label='e_wrap')
-    plt.plot(mv.time_ux, np.array(mv.voc_soc) - np.array(mv.voc_stat), color='cyan', linestyle='--', label='e_wrap_ver')
-    plt.plot(mo.time_ux, np.array(mo.soc_ekf) - np.array(mo.soc), color='blue', linestyle='-', label='cc_dif')
-    plt.plot(mv.time_ux, np.array(mv.soc_ekf) - np.array(mv.soc), color='red', linestyle='--', label='cc_dif_ver')
+    plt.plot(mv.time_ux, np.array(mv.voc_soc) - np.array(mv.voc_stat), color='cyan', linestyle='--',
+             label='e_wrap_ver')
+    plt.plot(mo.time_ux, np.array(mo.soc_ekf) - np.array(mo.soc), color='blue', linestyle='-',
+             label='cc_dif')
+    plt.plot(mv.time_ux, np.array(mv.soc_ekf) - np.array(mv.soc), color='red', linestyle='--',
+             label='cc_dif_ver')
     plt.plot(mo.time_ux, mo.cc_diff_thr, color='cyan', linestyle='--', label='cc_diff_thr')
     plt.plot(mo.time_ux, -mo.cc_diff_thr, color='cyan', linestyle='--')
-    # plt.plot(smv.time_ux, np.array(smv.voc_soc_s) - np.array(smv.voc_stat_s), color='orange', linestyle='-.', label='e_wrap_filt_s_ver')
+    # plt.plot(smv.time_ux, np.array(smv.voc_soc_s) - np.array(smv.voc_stat_s), color='orange', linestyle='-.',
+    # label='e_wrap_filt_s_ver')
     if hasattr(mo, 'ewhi_thr'):
         plt.plot(mo.time_ux, mo.ewhi_thr, color='red', linestyle='-.', label='ewhi_thr')
     if hasattr(mo, 'ewlo_thr'):
@@ -727,12 +766,14 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
     sat_ = np.copy(h.Tb)
     bms_off_ = np.copy(h.Tb)
     for i in range(len(h.Tb)):
-        sat_[i] = is_sat(h.Tb[i], h.voc[i], h.soc[i], mon.chemistry.nom_vsat, mon.chemistry.dvoc_dt, mon.chemistry.low_t)
+        sat_[i] = is_sat(h.Tb[i], h.voc[i], h.soc[i], mon.chemistry.nom_vsat, mon.chemistry.dvoc_dt,
+                         mon.chemistry.low_t)
         # h.bms_off[i] = (h.Tb[i] < low_t) or ((h.voc[i] < low_voc) and (h.ib[i] < IB_MIN_UP))
         bms_off_[i] = (h.Tb[i] < mon.chemistry.low_t) or ((h.voc_stat[i] < 10.5) and (h.ib[i] < Battery.IB_MIN_UP))
 
     # Correct for temp
-    q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=mon.chemistry.dqdt, temp=h.Tb, t_rated=mon.chemistry.rated_temp)
+    q_cap = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=mon.chemistry.dqdt, temp=h.Tb,
+                               t_rated=mon.chemistry.rated_temp)
     dq = (h.soc - 1.) * q_cap
     dq -= mon.chemistry.dqdt * q_cap * (temp_corr - h.Tb)
     q_cap_r = calculate_capacity(q_cap_rated_scaled=rated_batt_cap * 3600., dqdt=mon.chemistry.dqdt, temp=temp_corr,
@@ -784,7 +825,8 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
             t_min = int(float(h.time_ux[i]) / 60.)
             dv_hys_remodel_[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
 
-        hys_redesign = Hysteresis_20220926(scale=HYS_SCALE_20220926, cap=HYS_CAP_REDESIGN)  # Battery hysteresis model - drift of voc
+        hys_redesign = Hysteresis_20220926(scale=HYS_SCALE_20220926, cap=HYS_CAP_REDESIGN)
+        # Battery hysteresis model - drift of voc
         t_s_min = h.time_min[0]
         t_e_min = h.time_min[-1]
         dt_hys_min = 1.
@@ -908,29 +950,41 @@ if __name__ == '__main__':
         s_hys_dis_in = 1.
         scale_in = 1
         cc_dif_tol_in = 0.2
-        use_mon_soc_in = True  # Reconstruction of soc using sub-sampled data is poor.  Drive everything with soc from Monitor
+        use_mon_soc_in = True  # Reconstruction of soc using sub-sampled data is poor.
+        #  Drive everything with soc from Monitor
         rated_batt_cap_in = 108.4  # A-hr capacity of test article
         dvoc_mon_in = 0.
         dvoc_sim_in = 0.
 
         # User inputs
-        # input_files = ['fail 20221125.txt']
-        # input_files = ['coldCharge1 v20221028.txt']
-        # input_files = ['fault_20221206.txt']
-        # input_files = ['CH 20230128.txt']; chm_in = 1
-        # input_files = ['hist v20230205 20230206.txt']; chm_in = 1; rated_batt_cap_in = 100.; scale_in = 1.127; sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.; s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
-        # input_files = ['g20230530/Hd_20230714_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
-        # input_files = ['g20230530/hist_Dc06_20230715_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
-        # input_files = ['g20230530/Hd_Dc06_20230725_soc1a_bb.csv']
+        """
+        input_files = ['fail 20221125.txt']
+        input_files = ['coldCharge1 v20221028.txt']
+        input_files = ['fault_20221206.txt']
+        input_files = ['CH 20230128.txt']; chm_in = 1
+        
+        input_files = ['hist v20230205 20230206.txt']; chm_in = 1; rated_batt_cap_in = 100.; scale_in = 1.127;
+        sres0_in = 3.; sresct_in = 0.76; stauct_in = 0.8; s_hys_chg_in = 1; s_hys_dis_in = 1; s_cap_chg_in = 1.;
+        s_cap_dis_in = 1.; myCH_Tuner_in = 4  # 0.9 - 1.0 Tune 3
+        
+        input_files = ['g20230530/Hd_20230714_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
+        input_files = ['g20230530/hist_Dc06_20230715_soc1a_bb.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
+        input_files = ['g20230530/Hd_Dc06_20230725_soc1a_bb.csv']
+        """
         input_files = ['g20231111b/ampHiFail_pro3p2_bb.csv']; chm_in = 0
-        # input_files = ['g20230530/serial_20231002_104351.csv']; chm_in = 0; rated_batt_cap_in = 108.4; dvoc_mon_in = -0.3; dvoc_sim_in = dvoc_mon_in
-        # input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt', 'serial_20230212_202717.txt',
-        #                'serial_20230215_064843.txt', 'serial_20230215_165025.txt', 'serial_20230216_145024.txt', 'serial_20230217_072709.txt',
-        #                'serial_20230217_185204.txt', 'serial_20230218_050029.txt', 'serial_20230218_134250.txt', 'serial_20230219_164928.txt',
-        #                'serial_20230220_134304.txt', 'serial_20230223_055858.txt', 'serial_20230224_171855.txt', 'serial_20230225_180933.txt',
-        #                'serial_20230227_130855.txt']; chm_in = 1;  rated_batt_cap_in = 100.; scale_in = 1.127; cc_dif_tol_in = 0.5
-        # temp_hist_file = 'hist20221028.txt'
-        # temp_flt_file = 'flt20221028.txt'
+        """
+        input_files = ['g20230530/serial_20231002_104351.csv']; chm_in = 0; rated_batt_cap_in = 108.4;
+        dvoc_mon_in = -0.3; dvoc_sim_in = dvoc_mon_in
+        input_files = ['serial_20230206_141936.txt', 'serial_20230210_133437.txt', 'serial_20230211_151501.txt',
+                        'serial_20230212_202717.txt', 'serial_20230215_064843.txt', 'serial_20230215_165025.txt',
+                        'serial_20230216_145024.txt', 'serial_20230217_072709.txt', 'serial_20230217_185204.txt',
+                        'serial_20230218_050029.txt', 'serial_20230218_134250.txt', 'serial_20230219_164928.txt',
+                        'serial_20230220_134304.txt', 'serial_20230223_055858.txt', 'serial_20230224_171855.txt',
+                        'serial_20230225_180933.txt', 'serial_20230227_130855.txt']; chm_in = 1;
+        rated_batt_cap_in = 100.; scale_in = 1.127; cc_dif_tol_in = 0.5
+        temp_hist_file = 'hist20221028.txt'
+        temp_flt_file = 'flt20221028.txt'
+        """
         temp_hist_file = 'hist_CompareFault.txt'
         temp_flt_file = 'flt_CompareFault.txt'
         path_to_pdfs = '../dataReduction/figures'
@@ -965,6 +1019,7 @@ if __name__ == '__main__':
             print("data from", temp_flt_file, "empty after loading")
             exit(1)
         f_raw = np.unique(f_raw_)
+        f_raw = remove_nan(f_raw)
         # noinspection PyTypeChecker
         f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in)
         print("\nf:\n", f, "\n")
@@ -972,6 +1027,7 @@ if __name__ == '__main__':
 
         # Sort unique
         h_raw = np.unique(h_raw_)
+        h_raw = remove_nan(h_raw)
         # noinspection PyTypeChecker
         h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in)
         # h = add_stuff(h_raw, batt, ib_band=IB_BAND)

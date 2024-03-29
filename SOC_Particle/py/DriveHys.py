@@ -71,7 +71,8 @@ class Hysteresis:
         s += "  res      =    {:7.3f}  // Variable resistance value, ohms\n".format(self.res)
         s += "  dv_dot   =    {:7.3f}  // Calculated voltage rate, V/s\n".format(self.dv_dot)
         s += "  dv_hys   =    {:7.3f}  // Delta voltage state, V\n".format(self.dv_hys)
-        s += "  disabled =     {:2.0f}      // Hysteresis_20220917d disabled by low scale input < 1e-5, T=disabled\n".format(self.disabled)
+        s += "  disabled =     {:2.0f}      // Hysteresis_20220917d disabled by low scale input < 1e-5, T=disabled\n"\
+            .format(self.disabled)
         s += "  hys_scale=    {:7.3f}  // Scalar on hys\n".format(self.scale)
         return s
 

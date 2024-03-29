@@ -33,7 +33,8 @@ plt.rcParams['axes.grid'] = True
 def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=None,
                     rel_path_to_save_pdf='../dataReduction/figures', rel_path_to_temp='../dataReduction/temp'):
 
-    print(f"compare_run_run:\n{keys=}\n{data_file_folder_ref=}\n{data_file_folder_test=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n")
+    print(f"compare_run_run:\n{keys=}\n{data_file_folder_ref=}\n{data_file_folder_test=}\n{rel_path_to_save_pdf=}\
+    \n{rel_path_to_temp=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     # date_ = datetime.now().strftime("%y%m%d")

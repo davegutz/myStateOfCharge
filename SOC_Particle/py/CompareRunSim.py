@@ -165,10 +165,11 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
 
 def main():
     data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109/SrSeries_soc2p2_ch.csv'
+    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109/SrSeries_soc2p2_ch_escbug.csv'
     unit_key = 'g20240109_soc2p2_ch'
     time_end_in = None
-    rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109\\./figures'
-    rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109\\./temp'
+    # rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109\\./figures'
+    # rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109\\./temp'
     data_only = False
     compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only, time_end_in=time_end_in)
 

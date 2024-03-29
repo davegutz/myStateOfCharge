@@ -67,8 +67,10 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.plot(sv.time, sv.soc, color='red', linestyle='--', label='soc_s'+test_str)
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-.', label='soc'+ref_str)
         plt.plot(mv.time, mv.soc, color='green', linestyle=':', label='soc'+test_str)
-        plt.plot(mo.time, mo.soc_ekf, marker='^', markersize='5', markevery=32, linestyle='None', color='orange', label='soc_ekf'+ref_str)
-        plt.plot(mv.time, mv.soc_ekf, marker='+', markersize='5', markevery=32, linestyle='None', color='cyan',  label='soc_ekf'+test_str)
+        plt.plot(mo.time, mo.soc_ekf, marker='^', markersize='5', markevery=32, linestyle='None', color='orange',
+                 label='soc_ekf'+ref_str)
+        plt.plot(mv.time, mv.soc_ekf, marker='+', markersize='5', markevery=32, linestyle='None', color='cyan',
+                 label='soc_ekf'+test_str)
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
@@ -138,9 +140,11 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
             plt.plot(so.time, np.array(so.bms_off_s)+4, color='blue', linestyle='-.', label='bms_off_s'+ref_str+'+4')
         if smv is not None:
             if hasattr(smv, 'bmso_s'):
-                plt.plot(smv.time, np.array(smv.bmso_s)+4, color='orange', linestyle=':', label='bms_off_s'+test_str+'+4')
+                plt.plot(smv.time, np.array(smv.bmso_s)+4, color='orange', linestyle=':',
+                         label='bms_off_s'+test_str+'+4')
             elif hasattr(smv, 'bms_off_s'):
-                plt.plot(smv.time, np.array(smv.bms_off_s) + 4, color='orange', linestyle=':', label='bms_off_s' + test_str + '+4')
+                plt.plot(smv.time, np.array(smv.bms_off_s) + 4, color='orange', linestyle=':',
+                         label='bms_off_s' + test_str + '+4')
         plt.plot(mo.time, mo.sel, color='red', linestyle='-.', label='sel'+ref_str)
         plt.plot(mv.time, mv.sel, color='blue', linestyle=':', label='sel'+test_str)
         plt.plot(mo.time, mo.ib_sel_stat-2, color='black', linestyle='-', label='ib_sel_stat'+ref_str+'-2')
@@ -390,6 +394,7 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
 
 
 def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, skip=1, comment_str='#'):
+    """First line with title_key defines the number of fields to be imported cleanly"""
     import os
     (path, basename) = os.path.split(path_to_data)
     path_to_temp = path + '/temp'
@@ -398,17 +403,20 @@ def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, sk
     csv_file = path_to_temp+'/'+basename.replace('.csv', type_ + '.csv', 1)
     # Header
     have_header_str = None
+    num_fields = 0
     with open(path_to_data, "r", encoding='cp437') as input_file:
         with open(csv_file, "w") as output:
             try:
                 for line in input_file:
                     if line.__contains__('FRAG'):
-                        print(Colors.fg.red, "\n\n\nDataOverModel(write_clean_file): Heap fragmentation error detected in Particle.  Decrease NSUM constant and re-run\n\n", Colors.reset)
+                        print(Colors.fg.red, "\n\n\nDataOverModel(write_clean_file): Heap fragmentation error\
+                         detected in Particle.  Decrease NSUM constant and re-run\n\n", Colors.reset)
                         return None
                     if line.__contains__(title_key):
                         if have_header_str is None:
                             have_header_str = True  # write one title only
                             output.write(line)
+                            num_fields = line.count(',')  # first line with title_key defines number of fields
             except IOError:
                 print("DataOverModel381:", line)  # last line
     # Data
@@ -417,15 +425,13 @@ def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, sk
     num_skips = 0
     length = 0
     unit_key_found = False
-    with open(path_to_data, "r", encoding='cp437') as input_file:  # reads all characters even bad ones
+    with (open(path_to_data, "r", encoding='cp437') as input_file):  # reads all characters even bad ones
         with open(csv_file, "a") as output:
             for line in input_file:
                 if line.__contains__(unit_key):
                     unit_key_found = True
-                    if num_lines == 0:  # use first data line to screen out short and long lines that have key
-                        length = line.count(",")
-                    if line.count(",") == length and (num_lines == 0 or ((num_lines_in+1) % skip) == 0)\
-                            and line.count(comment_str) == 0:
+                    if line.count(",") == num_fields and line.count(";") == 0 and \
+                            (num_lines == 0 or ((num_lines_in+1) % skip) == 0) and line.count(comment_str) == 0:
                         output.write(line)
                         num_lines += 1
                     else:
@@ -493,14 +499,17 @@ class SavedData:
             else:
                 try:
                     self.zero_end = 0
-                    while self.zero_end < len(self.ib) and abs(self.ib[self.zero_end]) < zero_thr:  # stop after first non-zero
+                    # stop after first non-zero
+                    while self.zero_end < len(self.ib) and abs(self.ib[self.zero_end]) < zero_thr:
                         self.zero_end += 1
                     self.zero_end -= 1  # backup one
                     if self.zero_end == len(self.ib) - 1:
-                        print(Colors.fg.red, f"\n\nLikely ib is zero throughout the data.  Check setup and retry\n\n", Colors.reset)
+                        print(Colors.fg.red, f"\n\nLikely ib is zero throughout the data.  Check setup and retry\n\n",
+                              Colors.reset)
                         self.zero_end = 0
                     elif self.zero_end == -1:
-                        print(Colors.fg.red, f"\n\nLikely ib is noisy throughout the data.  Check setup and retry\n\n", Colors.reset)
+                        print(Colors.fg.red, f"\n\nLikely ib is noisy throughout the data.  Check setup and retry\n\n",
+                              Colors.reset)
                         self.zero_end = 0
                 except IOError:
                     self.zero_end = 0

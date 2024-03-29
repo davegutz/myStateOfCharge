@@ -143,19 +143,24 @@ class Battery(Coulombs):
         s = prefix + "Battery:\n"
         s += "  chem    = {:7.3f}  // Chemistry: 0=Battleborn, 1=CHINS\n".format(self.chem)
         s += "  temp_c  = {:7.3f}  // Battery temperature, deg C\n".format(self.temp_c)
-        s += "  dvoc_dt = {:9.6f}  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n".format(self.chemistry.dvoc_dt)
+        s += "  dvoc_dt = {:9.6f}  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n"\
+            .format(self.chemistry.dvoc_dt)
         s += "  r_0     = {:9.6f}  // Charge Transfer R0, ohms\n".format(self.chemistry.r_0)
         s += "  r_ct    = {:9.6f}  // Charge Transfer resistance, ohms\n".format(self.chemistry.r_ct)
         s += "  tau_ct = {:9.6f}  // Charge Transfer time constant, s (=1/Rdif/Cdif)\n".format(self.chemistry.tau_ct)
-        s += "  r_ss    = {:9.6f}  // Steady state equivalent battery resistance, for solver, Ohms\n".format(self.chemistry.r_ss)
-        s += "  r_sd    = {:9.6f}  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n".format(self.chemistry.r_sd)
-        s += "  tau_sd  = {:9.1f}  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n".format(self.chemistry.tau_sd)
+        s += "  r_ss    = {:9.6f}  // Steady state equivalent battery resistance, for solver, Ohms\n"\
+            .format(self.chemistry.r_ss)
+        s += "  r_sd    = {:9.6f}  // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms\n"\
+            .format(self.chemistry.r_sd)
+        s += "  tau_sd  = {:9.1f}  // Equivalent model for EKF reference.	Parasitic discharge time constant, sec\n"\
+            .format(self.chemistry.tau_sd)
         s += "  bms_off  = {:7.1f}      // BMS off\n".format(self.bms_off)
         s += "  dv_dsoc = {:9.6f}  // Derivative scaled, V/fraction\n".format(self.dv_dsoc)
         s += "  ib =      {:7.3f}  // Battery terminal current, A\n".format(self.ib)
         s += "  vb =      {:7.3f}  // Battery terminal voltage, V\n".format(self.vb)
         s += "  voc      ={:7.3f}  // Static model open circuit voltage, V\n".format(self.voc)
-        s += "  voc_stat ={:7.3f}  // Static model open circuit voltage from table (reference), V\n".format(self.voc_stat)
+        s += "  voc_stat ={:7.3f}  // Static model open circuit voltage from table (reference), V\n"\
+            .format(self.voc_stat)
         s += "  vsat =    {:7.3f}  // Saturation threshold at temperature, V\n".format(self.vsat)
         s += "  dv_dyn =  {:7.3f}  // Current-induced back emf, V\n".format(self.dv_dyn)
         s += "  q =       {:7.3f}  // Present charge available to use, except q_min_, C\n".format(self.q)
@@ -164,7 +169,8 @@ class Battery(Coulombs):
         s += "  dt_ =     {:7.3f}  // Update time, s\n".format(self.dt)
         s += "  dv_hys  = {:7.3f}  // Hysteresis delta v, V\n".format(self.dv_hys)
         s += "  tau_hys = {:7.3f}  // Hysteresis time const, s\n".format(self.tau_hys)
-        s += "  tweak_test={:d}     // Driving signal injection completely using software inj_soft_bias\n".format(self.tweak_test)
+        s += "  tweak_test={:d}     // Driving signal injection completely using software inj_soft_bias\n"\
+            .format(self.tweak_test)
         s += "\n  "
         s += Coulombs.__str__(self, prefix + 'Battery:')
         return s
@@ -181,9 +187,11 @@ class Battery(Coulombs):
 
     def calc_h_jacobian(self, soc_lim, temp_c):
         if soc_lim > 0.5:
-            dv_dsoc = (self.chemistry.lut_voc_soc.interp(soc_lim, temp_c) - self.chemistry.lut_voc_soc.interp(soc_lim-0.01, temp_c)) / 0.01
+            dv_dsoc = (self.chemistry.lut_voc_soc.interp(soc_lim, temp_c) -
+                       self.chemistry.lut_voc_soc.interp(soc_lim-0.01, temp_c)) / 0.01
         else:
-            dv_dsoc = (self.chemistry.lut_voc_soc.interp(soc_lim+0.01, temp_c) - self.chemistry.lut_voc_soc.interp(soc_lim, temp_c)) / 0.01
+            dv_dsoc = (self.chemistry.lut_voc_soc.interp(soc_lim+0.01, temp_c) -
+                       self.chemistry.lut_voc_soc.interp(soc_lim, temp_c)) / 0.01
         return dv_dsoc
 
     def calc_soc_voc(self, soc, temp_c):
@@ -274,10 +282,13 @@ class BatteryMonitor(Battery, EKF1x1):
         """Returns representation of the object"""
         s = prefix
         s += Battery.__str__(self, prefix + 'BatteryMonitor:')
-        s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n".format(self.amp_hrs_remaining_ekf)
-        s += "  amp_hrs_remaining_wt_  =  {:7.3f}  // Discharge amp*time left if drain soc_wt_ to 0, A-h\n".format(self.amp_hrs_remaining_wt)
+        s += "  amp_hrs_remaining_ekf_ =  {:7.3f}  // Discharge amp*time left if drain to q_ekf=0, A-h\n"\
+            .format(self.amp_hrs_remaining_ekf)
+        s += "  amp_hrs_remaining_wt_  =  {:7.3f}  // Discharge amp*time left if drain soc_wt_ to 0, A-h\n"\
+            .format(self.amp_hrs_remaining_wt)
         s += "  q_ekf     {:7.3f}  // Filtered charge calculated by ekf, C\n".format(self.q_ekf)
-        s += "  voc_soc  ={:7.3f}  // Static model open circuit voltage from table (reference), V\n".format(self.voc_soc)
+        s += "  voc_soc  ={:7.3f}  // Static model open circuit voltage from table (reference), V\n"\
+            .format(self.voc_soc)
         s += "  soc_ekf = {:7.3f}  // Solved state of charge, fraction\n".format(self.soc_ekf)
         s += "  tcharge = {:7.3f}  // Charging time to full, hr\n".format(self.tcharge)
         s += "  tcharge_ekf = {:7.3f}   // Charging time to full from ekf, hr\n".format(self.tcharge_ekf)
@@ -290,7 +301,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.soc_s = soc_s
 
     # BatteryMonitor::calculate()
-    def calculate(self, chem, temp_c, vb, ib, dt, reset, update_time_in, q_capacity=None, dc_dc_on=None,  # BatteryMonitor
+    def calculate(self, chem, temp_c, vb, ib, dt, reset, update_time_in, q_capacity=None, dc_dc_on=None,
                   rp=None, u_old=None, z_old=None, x_old=None, bms_off_init=None):
         if self.chm != chem:
             self.chemistry.assign_all_mod(chem)
@@ -303,7 +314,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.mod = rp.modeling
         self.Temp_Rlim.update(x=self.temp_c, reset=reset, dt=self.dt, max_=0.017, min_=-.017)
         temp_rate = self.Temp_Rlim.rate
-        self.ib = max(min(self.ib_in, Battery.IMAX_NUM), -Battery.IMAX_NUM)  # Overflow protection since ib past value used
+        # Overflow protection since ib past value used
+        self.ib = max(min(self.ib_in, Battery.IMAX_NUM), -Battery.IMAX_NUM)
 
         # Table lookup
         self.voc_soc, self.dv_dsoc = self.calc_soc_voc(self.soc, temp_c)
@@ -345,7 +357,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.voc_stat = self.voc - self.dv_hys
         self.e_wrap = self.voc_soc - self.voc_stat
         self.ioc = self.ib
-        self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, Battery.F_MAX_T_WRAP), reset=reset)
+        self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, Battery.F_MAX_T_WRAP),
+                                                      reset=reset)
 
         # Reversionary model
         self.vb_model_rev = self.voc_soc + self.dv_dyn + self.dv_hys
@@ -396,13 +409,6 @@ class BatteryMonitor(Battery, EKF1x1):
 
         self.dv_dyn = self.dv_dyn
         self.voc_ekf = self.hx
-        # check bms_off for offSit
-        # print('MON:  tweak_test, soc, ib_in, ib_charge, vb, voc_stat, voc_stat_past, vb_down, vb_rising, charging, voltage_low,  bms_off',
-        #       "{:3d}".format(rp.tweak_test()), "{:9.5f}".format(self.soc), "{:7.3f}".format(self.ib_in), "{:7.3f}".format(self.ib_charge), "{:7.3f}".format(self.vb),
-        #       "{:7.3f}".format(self.voc_stat), "{:7.3f}".format(voc_stat_past), "{:7.3f}".format(self.chemistry.vb_down),
-        #       "{:7.3f}".format(self.chemistry.vb_rising), "{:3d}".format(bms_charging), "{:3d}".format(voltage_low),
-        #       "{:3.0f}".format(self.bms_off))
-
         self.ib_past = self.ib
 
         return self.vb_model_rev
@@ -611,7 +617,8 @@ class BatterySim(Battery):
 
         # Hysteresis model
         self.hys.calculate_hys(curr_in, self.soc, self.chm)
-        init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and self.ib > Battery.HYS_IB_THR)
+        init_low = self.bms_off or (self.soc < (self.soc_min + Battery.HYS_SOC_MIN_MARG) and
+                                    self.ib > Battery.HYS_IB_THR)
         self.dv_hys, self.tau_hys = self.hys.update(self.dt, init_high=self.sat, init_low=init_low, e_wrap=0.,
                                                     chem=self.chm)
         self.voc = self.voc_stat + self.dv_hys
@@ -648,7 +655,8 @@ class BatterySim(Battery):
 
         # Saturation logic, both full and empty
         self.vsat = self.chemistry.nom_vsat + (temp_c - 25.) * self.chemistry.dvoc_dt
-        self.sat_ib_max = self.sat_ib_null + (1 - self.soc - self.ds_voc_soc) * self.sat_cutback_gain * rp.cutback_gain_scalar
+        self.sat_ib_max = (self.sat_ib_null + (1 - self.soc - self.ds_voc_soc) * self.sat_cutback_gain *
+                           rp.cutback_gain_scalar)
         if rp.tweak_test() or (not rp.modeling):
             self.sat_ib_max = ib_charge_fut
         self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
@@ -664,7 +672,6 @@ class BatterySim(Battery):
             self.model_saturated = sat_init
             self.sat = sat_init
         self.sat = self.model_saturated
-        # print('SIM:   soc', self.soc, 'q', self.q, 'voc_stat', self.voc_stat, 'vb_down', self.chemistry.vb_down, 'charging', bms_charging, 'voltage_low', voltage_low, 'tweak_test', rp.tweak_test(), 'bms_off', self.bms_off, 'ib', self.ib, 'ib_charge', self.ib_charge)
 
         return self.vb
 
@@ -1261,7 +1268,8 @@ class SavedS:
         self.reset_s = []
 
     def __str__(self):
-        s = "unit_m,c_time,Tb_s,Tbl_s,vsat_s,voc_stat_s,dv_dyn_s,vb_s,ib_s,sat_s,ddq_s,dq_s,q_s,qcap_s,soc_s,reset_s,tau_s,\n"
+        s = "unit_m,c_time,Tb_s,Tbl_s,vsat_s,voc_stat_s,dv_dyn_s,vb_s,ib_s,sat_s,ddq_s,dq_s,q_s,qcap_s,soc_s,\
+        reset_s,tau_s,\n"
         for i in range(len(self.time)):
             s += 'sim,'
             s += "{:13.3f},".format(self.time[i])
