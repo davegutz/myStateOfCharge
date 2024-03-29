@@ -37,6 +37,7 @@ from myFilters import LagExp
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 import Chemistry_BMS
 from Colors import *
+import re
 
 plt.rcParams.update({'figure.max_open_warning': 0})
 
@@ -431,10 +432,12 @@ def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, sk
                 if line.__contains__(unit_key):
                     unit_key_found = True
                     if line.count(",") == num_fields and line.count(";") == 0 and \
+                            re.search(r'[^a-zA-Z0-9+-_.:, ]', line[:-1]) is None and \
                             (num_lines == 0 or ((num_lines_in+1) % skip) == 0) and line.count(comment_str) == 0:
                         output.write(line)
                         num_lines += 1
                     else:
+                        print('discarding: ', line)
                         num_skips += 1
                     num_lines_in += 1
     if not num_lines:
