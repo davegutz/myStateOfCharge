@@ -1015,7 +1015,7 @@ def add_mod(hist, mon_t_=False, mon=None):
 
 
 def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
-                     data_only=False, mon_t=False, unit_key=None, sync_time=None, dt_resample=0.1):
+                     data_only=False, mon_t=False, unit_key=None, sync_time=None, dt_resample=10):
 
     print(f"\ncompare_hist_sim:\n{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n{mon_t=}"
           f"\n{unit_key=}\n{dt_resample=}\n")
@@ -1172,7 +1172,7 @@ def main():
     # data_only = False
     mon_t = False
     unit_key = 'g20240109_soc2p2_ch'
-    dt_resample = 1
+    dt_resample = 10
 
     # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
