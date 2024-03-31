@@ -187,8 +187,8 @@ void load_ib_vb(const boolean reset, const boolean reset_temp, Sensors *Sen, Pin
 {
   // Load shunts Ib
   // Outputs:  Sen->Ib_model_in, Sen->Ib_hdwe, Sen->Vb, Sen->Wb
-  Sen->ShuntAmp->convert( sp.mod_ib_amp_dscn() );
-  Sen->ShuntNoAmp->convert( sp.mod_ib_noa_dscn() );
+  Sen->ShuntAmp->convert(sp.mod_ib_amp_dscn(), reset, Sen);
+  Sen->ShuntNoAmp->convert(sp.mod_ib_noa_dscn(), reset, Sen);
   Sen->Flt->shunt_check(Sen, Mon, reset);
   Sen->shunt_select_initial(reset);
   if ( sp.debug()==14 ) Sen->shunt_print();
@@ -331,6 +331,8 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   // Text basic Bluetooth (use serial bluetooth app)
   if ( sp.debug()==99 ) // Calibration mode
     debug_99(Mon, Sen);
+  else if ( sp.debug()==98 ) // Calibration mode
+    debug_98(Mon, Sen);
   else if ( sp.debug()!=4 && sp.debug()!=-2 )  // Normal display
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
@@ -417,6 +419,8 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
   // Text basic Bluetooth (use serial bluetooth app)
   if ( sp.debug()==99 ) // Calibration mode
     debug_99(Mon, Sen);
+  else if ( sp.debug()==98 ) // Calibration mode
+    debug_98(Mon, Sen);
   else if ( sp.debug()!=4 && sp.debug()!=-2 )  // Normal display
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);

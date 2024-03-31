@@ -44,6 +44,7 @@ void debug_m7(BatteryMonitor *Mon, Sensors *Sen);
     void debug_m24(Sensors *Sen);
 #endif
 
+void debug_98(BatteryMonitor *Mon, Sensors *Sen);
 void debug_99(BatteryMonitor *Mon, Sensors *Sen);
 void debug_q(BatteryMonitor *Mon, Sensors *Sen);
 

@@ -156,6 +156,14 @@ soc_ekf%8.4f\nsoc%8.4f\nsoc_min%8.4f\nsoc_inf%8.4f\nmodeling %d\n",
 }
 
 // Calibration
+void debug_98(BatteryMonitor *Mon, Sensors *Sen)
+{
+  Serial.printf("imh imfh inh infh: %6.2fA %6.2fA, %6.2fA %6.2fA,\n",
+  Sen->Ib_amp_hdwe_f, Sen->ShuntAmp->Ishunt_cal_filt(), Sen->Ib_noa_hdwe_f, Sen->ShuntNoAmp->Ishunt_cal_filt());
+  
+  Serial1.printf("imh imfh inh infh: %6.2fA %6.2fA, %6.2fA %6.2fA,\n",
+  Sen->Ib_amp_hdwe_f, Sen->ShuntAmp->Ishunt_cal_filt(), Sen->Ib_noa_hdwe_f, Sen->ShuntNoAmp->Ishunt_cal_filt());
+}
 void debug_99(BatteryMonitor *Mon, Sensors *Sen)
 {
   Serial.printf("Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr: %6.2fC %7.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3fv|%6.3f,\n",

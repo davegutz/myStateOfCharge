@@ -79,8 +79,9 @@ public:
   boolean bare_detected() { return ( bare_detected_ ); };
   void dscn_cmd(const boolean cmd) { dscn_cmd_ = cmd; };
   unsigned long long dt() { return sample_time_ - sample_time_z_; };
-  void convert(const boolean disconnect);
+  void convert(const boolean disconnect, const boolean reset, Sensors *Sen);
   float Ishunt_cal() { return Ishunt_cal_; };
+  float Ishunt_cal_filt() { return Ishunt_cal_filt_; };
   void pretty_print();
   void sample(const boolean reset_loc, const float T);
   float scale() { return ( *sp_ib_scale_ ); };
@@ -104,6 +105,7 @@ protected:
   int16_t vshunt_int_1_;// Interim conversion, count
   float vshunt_;        // Sensed shunt voltage, V
   float Ishunt_cal_;    // Sensed bank current, calibrated ADC, A
+  float Ishunt_cal_filt_; // Filtered bank current, calibrated ADC, A
   float *sp_ib_bias_;   // Global bias, A
   float *sp_ib_scale_;  // Global scale, A
   unsigned long long sample_time_;   // Exact moment of hardware sample
@@ -118,6 +120,7 @@ protected:
   float Vo_Vc_;         // Sensed Vo-Vc, difference in output of op amps, V
   float Vo_Vc_f_;       // Sensed, filtered Vo-Vc, difference in output of op amps, V
   boolean using_tsc2010_; // Using differential hardware amp
+  General2_Pole *Filt_; // Linear filter to test for direction
 };
 
 // Fault word bits.   All faults heal

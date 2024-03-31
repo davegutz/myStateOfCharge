@@ -73,15 +73,17 @@
 #define F_MAX_T_TEMP          18.0      // Maximum call update time filters (18.0)
 #define F_W_T                 0.05      // Temperature filter wn, r/s (0.05)   
 #define F_Z_T                 0.80      // Temperature filter zeta (0.80)
+#define F_W_I                 0.5       // Current filter wn, r/s (0.5)   
+#define F_Z_I                 0.80      // Current filter zeta (0.80)
 
 // If NSUM too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
 // For all, there are 40 bytes for each unit of NSUM
 
-#ifdef CONFIG_PHOTON  // dec ~134000  units: pro0p
+#ifdef CONFIG_PHOTON  // dec ~134000  units: pro0p, soc0p
     #ifdef DEPLOY_PHOTON
         #define NFLT   7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
         #define NHIS  56  // Number of saved SRAM history data slices. Sized to approx match  Photon2  (56)
-        #define NSUM 140  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg  (155)
+        #define NSUM 139  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg  (139)
     #else
         #ifdef DEBUG_INIT
             #define NFLT  7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
@@ -107,10 +109,10 @@
     #define NSUM 2000  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error BACKUPSRAM, or GUI FRAG msg (2000)
 #endif
 
-#ifdef CONFIG_PHOTON2  // dec ~ 281700  units: pro2p2, pro3p2
+#ifdef CONFIG_PHOTON2  // dec ~ 281700  units: pro2p2, pro3p2, soc2p2, soc3p2(scrapped)
     #define NFLT    7  // Number of saved SRAM fault data slices 10 s intervals (7)
-    #define NHIS   62  // Number of saved SRAM history data slices. If NFLT + NHIS too large will get compile error BACKUPSRAM (62)
-    #define NSUM 3172  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg (3172)
+    #define NHIS   61  // Number of saved SRAM history data slices. If NFLT + NHIS too large will get compile error BACKUPSRAM (62)
+    #define NSUM 3171  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg (3171)
 #endif
 
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)

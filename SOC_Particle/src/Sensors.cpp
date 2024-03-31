@@ -117,7 +117,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *
   const uint8_t vc_pin, const uint8_t vo_pin)
 : Adafruit_ADS1015(),
   name_(name), port_(port), bare_detected_(false), v2a_s_(v2a_s),
-  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0),
+  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0), Ishunt_cal_filt_(0),
   sp_ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
   vc_pin_(vc_pin), vo_pin_(vo_pin), Vc_raw_(0), Vc_(HALF_3V3), Vo_Vc_(0.), using_tsc2010_(false)
 {
@@ -140,16 +140,18 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *
   #else
     Serial.printf("Ib %s sense ADC pins %d and %d started\n", name_.c_str(), vo_pin_, vc_pin_);
   #endif
+  Filt_ = new General2_Pole(0.1, F_W_I, F_Z_I, -NOM_UNIT_CAP*sp.nP(), NOM_UNIT_CAP*sp.nP());  // actual update time provided run time
 }
 Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *sp_Ib_bias, const float v2a_s,
   const uint8_t vo_pin)
 : Adafruit_ADS1015(),
   name_(name), port_(port), bare_detected_(false), v2a_s_(v2a_s),
-  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0),
+  vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0), Ishunt_cal_filt_(0),
   sp_ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
   vo_pin_(vo_pin), Vc_raw_(0), Vc_(HALF_3V3), Vo_Vc_(0.), using_tsc2010_(true)
 {
   Serial.printf("Ib %s sense ADC pin %d started using TSC2010\n", name_.c_str(), vo_pin_);
+  Filt_ = new General2_Pole(0.1, F_W_I, F_Z_I, -NOM_UNIT_CAP*sp.nP(), NOM_UNIT_CAP*sp.nP());  // actual update time provided run time
 }
 Shunt::~Shunt() {}
 // operators
@@ -162,6 +164,7 @@ void Shunt::pretty_print()
   Serial.printf(" *sp_ib_scale%7.3f; A\n", *sp_ib_scale_);
   Serial.printf(" bare_det %d dscn_cmd %d\n", bare_detected_, dscn_cmd_);
   Serial.printf(" Ishunt_cal%7.3f; A\n", Ishunt_cal_);
+  Serial.printf(" Ishunt_cal_filt%7.3f; A\n", Ishunt_cal_filt_);
   Serial.printf(" port 0x%X;\n", port_);
   Serial.printf(" v2a_s%7.2f; A/V\n", v2a_s_);
   Serial.printf(" Vc%10.6f; V\n", Vc_);
@@ -178,7 +181,7 @@ void Shunt::pretty_print()
 }
 
 // Convert sampled shunt data to Ib engineering units
-void Shunt::convert(const boolean disconnect)
+void Shunt::convert(const boolean disconnect, const boolean reset, Sensors *Sen)
 {
   #ifdef CONFIG_ADS1013_OPAMP
     if ( !bare_detected_ && !dscn_cmd_ )
@@ -218,6 +221,11 @@ void Shunt::convert(const boolean disconnect)
     Ishunt_cal_ = 0.;
   else
     Ishunt_cal_ = vshunt_*v2a_s_*(*sp_ib_scale_) + *sp_ib_bias_;
+
+      // 2-pole filter
+  Ishunt_cal_filt_ = Filt_->calculate(Ishunt_cal_, disconnect || reset, min(Sen->T, MAX_T_Q_FILT));
+  if ( Ishunt_cal_filt_ < 0. ) Ishunt_cal_ *= sp.ib_disch_slr();
+
 }
 
 // Sample amplifier Vo-Vc

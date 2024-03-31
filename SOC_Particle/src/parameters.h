@@ -170,6 +170,7 @@ public:
     float ib_bias_all() { return ib_bias_all_z; }
     float ib_bias_amp() { return ib_bias_amp_z; }
     float ib_bias_noa() { return ib_bias_noa_z; }
+    float ib_disch_slr() { return ib_disch_slr_z; }
     float ib_scale_amp() { return ib_scale_amp_z; }
     float ib_scale_noa() { return ib_scale_noa_z; }
     int8_t ib_select() { return ib_select_z; }
@@ -246,6 +247,7 @@ public:
     void put_ib_bias_all(const float input) { ib_bias_all_p->check_set_put(input); }
     void put_ib_bias_amp(const float input) { ib_bias_amp_p->check_set_put(input); }
     void put_ib_bias_noa(const float input) { ib_bias_noa_p->check_set_put(input); }
+    void put_ib_disch_slr(const float input) { ib_disch_slr_p->check_set_put(input); }
     void put_ib_scale_amp(const float input) { ib_scale_amp_p->check_set_put(input); }
     void put_ib_scale_noa(const float input) { ib_scale_noa_p->check_set_put(input); }
     void put_ib_select(const int8_t input) { ib_select_p->check_set_put(input); }
@@ -294,6 +296,7 @@ public:
     FloatV *ib_bias_all_p;
     FloatV *ib_bias_amp_p;
     FloatV *ib_bias_noa_p;
+    FloatV *ib_disch_slr_p;
     FloatV *ib_scale_amp_p;
     FloatV *ib_scale_noa_p;
     Int8tV *ib_select_p;
@@ -328,6 +331,7 @@ public:
     float ib_bias_all_z;
     float ib_bias_amp_z;
     float ib_bias_noa_z;
+    float ib_disch_slr_z;
     float ib_scale_amp_z;
     float ib_scale_noa_z;
     int8_t ib_select_z;

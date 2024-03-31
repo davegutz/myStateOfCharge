@@ -103,6 +103,8 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   sp.ib_scale_amp_p->print1_help();  //* SA
   sp.ib_scale_noa_p->print_help();  //* SB
   sp.ib_scale_noa_p->print1_help();  //* SB
+  sp.ib_disch_slr_p->print_help();  //* SD
+  sp.ib_disch_slr_p->print1_help();  //* SD
   ap.hys_scale_p->print_help();  //  Sh
   ap.hys_state_p->print_help();  //  SH
   sp.cutback_gain_slr_p->print_help();  //* Sk

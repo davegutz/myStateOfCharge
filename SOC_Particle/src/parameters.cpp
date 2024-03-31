@@ -244,7 +244,7 @@ SavedPars::~SavedPars() {}
 
 void SavedPars::initialize()
 {
-    #define NSAV 32
+    #define NSAV 33
     V_ = new Variable*[NSAV];
     V_[n_++] =(amp_p            = new FloatV("* ", "Xa", rP_, "Inj amp",              "Amps pk",-1e6, 1e6,  &amp_z,         0));
     V_[n_++] =(cutback_gain_slr_p=new FloatV("* ", "Sk", rP_, "Cutback gain scalar",  "slr",    -1e6, 1e6,  &cutback_gain_slr_z,1));
@@ -258,6 +258,7 @@ void SavedPars::initialize()
     V_[n_++] =(ib_bias_noa_p    = new FloatV("* ", "DB", rP_, "Add noa",              "A",      -1e5, 1e5,  &ib_bias_noa_z, CURR_BIAS_NOA));
     V_[n_++] =(ib_scale_amp_p   = new FloatV("* ", "SA", rP_, "Slr amp",              "A",      -1e5, 1e5,  &ib_scale_amp_z,CURR_SCALE_AMP));
     V_[n_++] =(ib_scale_noa_p   = new FloatV("* ", "SB", rP_, "Slr noa",              "A",      -1e5, 1e5,  &ib_scale_noa_z,CURR_SCALE_NOA));
+    V_[n_++] =(ib_disch_slr_p   = new FloatV("* ", "SD", rP_, "Slr disch",            "slr",    -1e5, 1e5,  &ib_disch_slr_z,CURR_SCALE_DISCH));
     V_[n_++] =(ib_select_p      = new Int8tV("* ", "si", rP_, "curr sel mode",        "(-1=n, 0=auto, 1=M)", -1, 1, &ib_select_z, int8_t(FAKE_FAULTS)));
     V_[n_++] =(iflt_p         = new Uint16tV("* ", "if", rP_, "Fault buffer indx",    "uint",   0,nflt_+1,  &iflt_z,        nflt_,              false));
     V_[n_++] =(ihis_p         = new Uint16tV("* ", "ih", rP_, "Hist buffer indx",     "uint",   0,nhis_+1,  &ihis_z,        nhis_,              false));

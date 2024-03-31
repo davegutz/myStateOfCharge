@@ -28,6 +28,7 @@ const String unit = version + "_pro1a";
 #define CURR_SCALE_AMP        0.990 // Hardware to match data (* 'SA')
 #define CURR_BIAS_NOA         0.5   // Calibration of non-amplified shunt sensor (* 'DB'), A
 #define CURR_SCALE_NOA        0.980 // Hardware to match data (* 'SB')
+#define CURR_SCALE_DISCH      1.0   // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
 #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (1333 is 100A/0.075V)
 #define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms (5k6)  100/5.6  = 17.86
 #define SHUNT_AMP_R2          100000.   // Amplifed shunt ADS resistance, ohms (100k) 0.075v  = 1.34 v => 3.3/2+1.34 = 2.99 < 3.3
