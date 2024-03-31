@@ -194,6 +194,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
     Serial.printf(" vv78: Batt model sat\n");
     Serial.printf(" vv79: sat_ib model\n");
   #endif
+  Serial.printf(" vv98: shunt filtering check\n");
   Serial.printf(" vv99: calibration\n");
 
   Serial.printf("\nW<?> - iters to wait\n");
