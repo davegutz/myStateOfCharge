@@ -166,12 +166,12 @@ void debug_98(BatteryMonitor *Mon, Sensors *Sen)
 }
 void debug_99(BatteryMonitor *Mon, Sensors *Sen)
 {
-  Serial.printf("Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr: %6.2fC %7.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3fv|%6.3f,\n",
-  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.ib_bias_amp(), sp.ib_scale_noa(), sp.ib_bias_noa(), sp.Dw(), ap.slr_res);
+  Serial.printf("Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *SD| *Dw| *Sr: %6.2fC %7.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3f|%6.3fv|%6.3f,\n",
+  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.ib_bias_amp(), sp.ib_scale_noa(), sp.ib_bias_noa(), sp.ib_disch_slr(), sp.Dw(), ap.slr_res);
   
-  Serial1.printf("Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *Dw| *Sr: %6.2fC %7.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3fv|%6.3f,\n",
-  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.ib_bias_amp(), sp.ib_scale_noa(), sp.ib_bias_noa(), sp.Dw(), ap.slr_res);
-}
+  Serial1.printf("Tb Vb imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *SD| *Dw| *Sr: %6.2fC %7.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3f|%6.3fv|%6.3f,\n",
+  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.ib_bias_amp(), sp.ib_scale_noa(), sp.ib_bias_noa(), sp.ib_disch_slr(), sp.Dw(), ap.slr_res);
+ }
 
 #ifdef DEBUG_INIT
   // Various parameters to debug initialization stuff as needed
