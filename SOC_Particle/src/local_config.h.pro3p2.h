@@ -44,8 +44,8 @@ const String unit = version + "_pro3p2";
 // Four 12 V 200 Ah with two in parallel joined with two more in series
 //   would have  NOM_UNIT_CAP 200, NS 2, and NP 2
 #define COULOMBIC_EFF_SCALE   1.0     // Scalar on Coulombic efficiency of battery, fraction of charge that gets used (1.0)
-#define MON_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
-#define SIM_CHEM              1       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
+#define MON_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
+#define SIM_CHEM              0       // Chemistry code integer (* 'Bm' for mon, * 'Bs' for sim), 0=Battleborn, 1=CHINS, 2=Spare
 #define NOM_UNIT_CAP          100.    // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define HYS_SCALE             1.0     // Scalar on hysteresis (1.0)
 #define NS                    2.0     // Number of series batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BS')
