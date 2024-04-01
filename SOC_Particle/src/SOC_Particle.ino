@@ -25,11 +25,12 @@
   * 12-Dec-2022   RetainedPars-->SavedPars to support Argon with 47L16 EERAM device
   * 22-Dec-2022   Dual amplifier replaces dual ADS.  Beta release v20221220.  ADS still used on Photon.
   * 01-Dec-2023   g20231111 Photon 2, DS2482
+  * 01-Apr-2024   g20230331 ib_charge = ib_ / sp.nS() while Randles uses ib_.  Tune Tb initialization
   * 
 //
 // MIT License
 //
-// Copyright (C) 2023 - Dave Gutz
+// Copyright (C) 2024 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal

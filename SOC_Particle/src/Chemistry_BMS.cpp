@@ -163,7 +163,7 @@ void Chemistry::assign_BB()
 const uint8_t M_T_CH = 3;    // Number temperature breakpoints for voc table
 const uint8_t N_S_CH = 20;   // Number soc breakpoints for voc table
 const float Y_T_CH[M_T_CH] = // Temperature breakpoints for voc table
-    {11.1, 11.2, 21.5};
+    {5.1, 5.2, 21.5};
 const float X_SOC_CH[N_S_CH] = // soc breakpoints for voc table
     {-0.035,   0.000,   0.050,   0.100,   0.108,   0.120,   0.140,   0.170,   0.200,   0.250,   0.300,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.980,   0.990,   1.000};
 const float T_VOC_CH[M_T_CH * N_S_CH] = // r(soc, dv) table
@@ -171,7 +171,7 @@ const float T_VOC_CH[M_T_CH * N_S_CH] = // r(soc, dv) table
      4.000,   9.000,  12.453,  12.746,  12.771, 12.808, 12.869,  12.931,  12.971,  13.025,  13.059,  13.107,  13.152,  13.205,  13.243,  13.284,  13.299,  13.310,  13.486,  14.700,
      4.000,   4.000,  9.0000,  9.500,   11.260, 11.850, 12.400,  12.650,  12.730,  12.810,  12.920,  13.020,  13.060,  13.220,  13.280,  13.284,  13.299,  13.310,  13.486,  14.700};
 const uint8_t N_N_CH = 5;                                        // Number of temperature breakpoints for x_soc_min table
-const float X_SOC_MIN_CH[N_N_CH] = {5.000,  11.100,  11.200,  21.5,  40.000};  // Temperature breakpoints for soc_min table
+const float X_SOC_MIN_CH[N_N_CH] = {0.000,   5.100,   5.200,  21.5,  40.000};  // Temperature breakpoints for soc_min table
 const float T_SOC_MIN_CH[N_N_CH] = {0.167,   0.167,   0.014,  0.11,  0.11};  // soc_min(t)
 
 // CHINS Hysteresis
@@ -202,7 +202,7 @@ void Chemistry::assign_CH()
     coul_eff = 0.9976; // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9976 for sres=1.6)
     dqdt = 0.01;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
     dv_min_abs = 0.06; // Absolute value of +/- hysteresis limit, V (0.06)
-    dvoc_dt = 0.004;   // Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
+    dvoc_dt = -0.01;   // Change of VOC with operating temperature in range 0 - 50 C V/deg C (-0.01)
     hys_cap = 1.e4;    // Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s (1e4)
     Serial.printf("CH dv_min_abs=%7.3f, cap=%7.1f\n", dv_min_abs, hys_cap);
     low_voc = 9.;         // Voltage threshold for BMS to turn off battery (9.)

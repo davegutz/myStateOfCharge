@@ -249,7 +249,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     bms_charging_ = ib_ > IB_MIN_UP;
     bms_off_ = (temp_c_ <= chem_.low_t) || ( voltage_low_ && !Sen->Flt->vb_fa() && !sp.tweak_test() );    // KISS
     Sen->bms_off = bms_off_;
-    ib_charge_ = ib_;
+    ib_charge_ = ib_ / sp.nS();
     if ( bms_off_ && !bms_charging_ )
         ib_charge_ = 0.;
     if ( bms_off_ && voltage_low_ )
@@ -656,7 +656,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
         voltage_low_ = voc_stat_ < chem_.vb_rising_sim;
     bms_charging_ = ib_in_ > IB_MIN_UP;
     bms_off_ = (temp_c_ <= chem_.low_t) || (voltage_low_ && !sp.tweak_test());
-    float ib_charge_fut = ib_in_;  // Pass along current to charge unless bms_off
+    float ib_charge_fut = ib_in_ / sp.nS();  // Pass along current to charge unless bms_off
     if ( bms_off_ && sp.mod_ib() && !bms_charging_)
         ib_charge_fut = 0.;
     if ( bms_off_ && voltage_low_ )
@@ -679,12 +679,12 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     // Saturation logic, both full and empty
     sat_ib_max_ = sat_ib_null_ + (1. - (soc_ + ap.ds_voc_soc) ) * sat_cutback_gain_ * sp.cutback_gain_slr();  // Ds, Sk
     if ( sp.tweak_test() || !sp.mod_ib() ) sat_ib_max_ = ib_charge_fut;   // Disable cutback when real world or when doing tweak_test test
-    ib_fut_ = min(ib_charge_fut, sat_ib_max_);      // the feedback of ib_
-    // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past value.  (This prevents sat logic from working)
-    ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value
+    ib_fut_ = min(ib_charge_fut, sat_ib_max_) * sp.nS();      // the feedback of ib_
+    // ib_charge_ = ib_charge_fut / sp.nS();  // Same time plane as volt calcs, added past value.  (This prevents sat logic from working)
+    ib_charge_ = ib_fut_ / sp.nS();  // Same time plane as volt calcs, added past value
     if ( (q_ <= 0.) && (ib_charge_ < 0.) && sp.mod_ib() ) ib_charge_ = 0.;   //  empty
-    model_cutback_ = (voc_stat_ > vsat_) && (ib_fut_ == sat_ib_max_);
-    model_saturated_ = model_cutback_ && (ib_fut_ < ib_sat_);
+    model_cutback_ = (voc_stat_ > vsat_) && (ib_charge_ == sat_ib_max_);
+    model_saturated_ = model_cutback_ && (ib_charge_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
     
     #ifndef CONFIG_PHOTON
