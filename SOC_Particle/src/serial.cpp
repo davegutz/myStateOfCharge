@@ -34,9 +34,9 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   double cTime = double(Sen->now)/1000;
   
-  sprintf(pr.buff, "%s, %s,%13.3f,%6.3f, %d,%7.0f,%d, %d, %d, %d, %6.3f,%6.3f,%9.3f,%9.3f,%7.5f,  %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%5.3f,", \
+  sprintf(pr.buff, "%s, %s,%13.3f,%6.3f, %d,%7.0f,%d, %d, %d, %d, %4.2f, %6.3f,%6.3f,%9.3f,%9.3f,%7.5f,  %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%5.3f,", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
-    sp.Mon_chm(), Mon->q_cap_rated_scaled(), pubList->sat, sp.ib_select(), sp.modeling(), Mon->bms_off(),
+    sp.Mon_chm(), Mon->q_cap_rated_scaled(), pubList->sat, sp.ib_select(), sp.modeling(), Mon->bms_off(), sp.nS(),
     Mon->Tb(), Mon->vb(), Mon->ib(), Mon->ib_charge(), Mon->voc_soc(), 
     Mon->vsat(), Mon->dv_dyn(), Mon->voc_stat(), Mon->hx(),
     Mon->y_ekf(),
@@ -163,9 +163,9 @@ void print_serial_header(void)
 {
   if ( ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 ) )
   {
-    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,\n");
+    Serial.printf ("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso,nS, Tb,  vb,  ib,   ib_charge, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,\n");
     #ifndef CONFIG_PHOTON
-      Serial1.printf("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,\n");
+      Serial1.printf("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso,nS, Tb,  vb,  ib,   ib_charge, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,\n");
     #endif
   }
 }
@@ -173,7 +173,7 @@ void print_serial_header(void)
 void print_serial_sim_header(void)
 {
   if ( sp.debug()==2  || sp.debug()==3 || sp.debug()==4 ) // print_serial_sim_header
-    Serial.printf("unit_m,  c_time,       chm_s, qcrs_s, bmso_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
+    Serial.printf("unit_m,  c_time,       chm_s, qcrs_s, bmso_s, nS_s, Tb_s,Tbl_s,  vsat_s, voc_stat_s, dv_dyn_s, vb_s, ib_s, ib_in_s, ib_charge_s, ioc_s, sat_s, dq_s, soc_s, reset_s,\n");
 }
 
 void print_signal_sel_header(void)

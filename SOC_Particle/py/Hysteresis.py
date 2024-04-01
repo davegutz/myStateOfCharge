@@ -72,20 +72,20 @@ class Hysteresis:
         s += "  scale_cap=    {:7.3f}  // Scalar on cap\n".format(self.scale_cap)
         return s
 
-    def calculate_hys(self, ib, soc, chem=0):
+    def calculate_hys(self, ib, soc, chem=0, nS=1):
         self.chm = chem
         self.ib = ib
         self.soc = soc
         if self.disabled:
             self.res = 0.
             self.slr = 1.
-            self.ibs = self.ib
-            self.ioc = ib
+            self.ibs = self.ib / nS
+            self.ioc = ib / nS
             self.dv_dot = 0.
         else:
             self.res, self.slr = self.look_hys(self.dv_hys, self.soc, self.chm)
             self.ioc = self.dv_hys / self.res
-            self.ibs = self.ib * self.slr
+            self.ibs = self.ib * self.slr / nS
             self.dv_dot = (self.ibs - self.ioc) / (self.cap*self.scale_cap)
             self.tau = self.res * self.cap * self.scale_cap
             if self.dv_hys >= 0.:

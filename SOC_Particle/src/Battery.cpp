@@ -282,7 +282,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     // EKF 1x1
     if ( eframe_ == 0 )
     {
-        float ddq_dt = ib_;
+        float ddq_dt = ib_charge_;
         dt_eframe_ = dt_ * float(ap.eframe_mult);  // Introduces noisy error if dt_ varies
         if ( ddq_dt>0. && !sp.tweak_test() ) ddq_dt *= coul_eff_;
         ddq_dt -= chem_.dqdt * q_capacity_ * T_rate;
@@ -843,8 +843,8 @@ float BatterySim::count_coulombs(Sensors *Sen, const boolean reset_temp, Battery
     if ( (sp.debug()==2 || sp.debug()==3 || sp.debug()==4 )  && cp.publishS && !initializing_all)
     {
         double cTime = double(Sen->now)/1000.;
-        sprintf(pr.buff, "unit_sim, %13.3f, %d, %7.0f, %d, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
-            cTime, sp.Sim_chm_z, q_cap_rated_scaled_, bms_off_, Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ib_charge_, ioc_, model_saturated_, *sp_delta_q_, soc_, reset_temp,'\0');
+        sprintf(pr.buff, "unit_sim, %13.3f, %d, %7.0f, %d, %4.2f, %7.5f,%7.5f, %7.5f,%7.5f,%7.5f,%7.5f, %7.3f,%7.3f,%7.3f,%7.3f,  %d,  %9.1f,  %8.5f, %d, %c",
+            cTime, sp.Sim_chm_z, q_cap_rated_scaled_, bms_off_, sp.nS(), Sen->Tb, temp_lim, vsat_, voc_stat_, dv_dyn_, vb_, ib_, ib_in_, ib_charge_, ioc_, model_saturated_, *sp_delta_q_, soc_, reset_temp,'\0');
         Serial.printf("%s\n", pr.buff);
     }
 

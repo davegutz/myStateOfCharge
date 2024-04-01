@@ -118,14 +118,17 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
     # ib_past = mon_old.ib_past
     ib_in = mon_old.ib
     Tb = mon_old.Tb
+    nS_m = mon_old.nS[0]
     soc_s_init = mon_old.soc_s[0]
     sat_init = mon_old.sat[0]
     dv_hys_init = mon_old.dv_hys[0]
     chm_m = mon_old.chm
     if sim_old is not None:
+        nS_s = sim_old.nS_s[0]
         chm_s = sim_old.chm_s
         sat_s_init = sim_old.sat_s[0]
     else:
+        nS_s = nS_m
         chm_s = chm_m
         sat_s_init = mon_old.voc_stat[0] > mon_old.vsat[0]
     t_len = len(t)
@@ -227,7 +230,7 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
             _chm_s = Bsim
         sim.calculate(chem=_chm_s, temp_c=Tb_, soc=sim.soc, curr_in=ib_in_s, dt=T, q_capacity=sim.q_capacity,
                       dc_dc_on=dc_dc_on, reset=reset, update_time_in=update_time_in, rp=rp, sat_init=sat_s_init,
-                      bms_off_init=bms_off_init)
+                      bms_off_init=bms_off_init, nS=nS_s)
         sim.count_coulombs(chem=_chm_s, dt=T, reset=reset, temp_c=Tb_, charge_curr=sim.ib_charge, sat=False, soc_s_init=soc_s_init,
                            mon_sat=mon.sat, mon_delta_q=mon.delta_q, use_soc_in=use_mon_soc, soc_in=mon_old.soc[i])
 
@@ -269,11 +272,11 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
             x_old = None
         if rp.modeling == 0:
             mon.calculate(_chm_m, Tb_, vb_, ib_, T, rp=rp, reset=reset, update_time_in=update_time_in, u_old=u_old,
-                          z_old=z_old, x_old=x_old, bms_off_init=bms_off_init)
+                          z_old=z_old, x_old=x_old, bms_off_init=bms_off_init, nS=nS_m)
         else:
             mon.calculate(_chm_m, Tb_, vb_ + randn() * v_std + dv_sense, ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, update_time_in=update_time_in, u_old=u_old, z_old=z_old, x_old=x_old,
-                          bms_off_init=bms_off_init)
+                          bms_off_init=bms_off_init, nS=nS_m)
         ib_charge = mon.ib_charge
         sat = is_sat(Tb_, mon.voc_filt, mon.soc, mon.chemistry.nom_vsat, mon.chemistry.dvoc_dt, mon.chemistry.low_t)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
