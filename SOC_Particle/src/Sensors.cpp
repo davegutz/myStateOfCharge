@@ -717,7 +717,7 @@ void Fault::tb_stale(const boolean reset, Sensors *Sen)
 {
   boolean reset_loc = reset | reset_all_faults_;
 
-  if ( ap.disab_tb_fa || (sp.mod_tb() && !ap.fail_tb) )
+  if ( ap.disab_tb_fa || reset_loc || (sp.mod_tb() && !ap.fail_tb) )
   {
     faultAssign( false, TB_FLT );
     failAssign( false, TB_FA );
