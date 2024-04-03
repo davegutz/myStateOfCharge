@@ -311,8 +311,12 @@ class Exec:
         self.update_folder_butt()
 
     def enter_battery(self):
-        self.battery = tk.simpledialog.askstring(title=self.level,
-                                                 prompt="Enter battery e.g. 'bb for Battleborn', 'ch' for CHINS:")
+        answer = tk.simpledialog.askstring(title=self.level,
+                                           prompt="Enter battery e.g. 'bb for Battleborn', 'ch' for CHINS:")
+        if answer is None or answer == ():
+            print('enter operation cancelled')
+            return
+        self.battery = answer
         self.cf[self.ind]['battery'] = self.battery
         self.cf.save_to_file()
         self.battery_button.config(text=self.battery)
@@ -322,16 +326,22 @@ class Exec:
     def enter_data_reduction_folder(self):
         answer = tk.filedialog.askdirectory(title="Select a destination (i.e. Library) dataReduction folder",
                                             initialdir=self.dataReduction_folder)
-        if answer is not None and answer != '':
-            self.dataReduction_folder = answer
+        if answer is None or answer == ():
+            print('enter operation cancelled')
+            return
+        self.dataReduction_folder = answer
         self.cf[self.ind]['dataReduction_folder'] = self.dataReduction_folder
         self.cf.save_to_file()
         self.folder_butt.config(text=self.dataReduction_folder[self.path_disp_len:])
         self.update_folder_butt()
 
     def enter_unit(self):
-        self.unit = tk.simpledialog.askstring(title=self.level, initialvalue=self.unit,
-                                              prompt="Enter unit e.g. 'pro0p', 'pro1a', pro3p2', 'soc0p', 'soc1a', 'soc3p2':")
+        answer = tk.simpledialog.askstring(title=self.level, initialvalue=self.unit,
+                                           prompt="Enter unit e.g. 'pro0p', 'pro1a', pro3p2', 'soc0p', 'soc1a', 'soc3p2':")
+        if answer is None or answer == ():
+            print('enter operation cancelled')
+            return
+        self.unit = answer
         self.cf[self.ind]['unit'] = self.unit
         self.cf.save_to_file()
         self.unit_button.config(text=self.unit)
@@ -340,8 +350,12 @@ class Exec:
         self.update_file_label()
 
     def enter_version(self):
-        self.version = tk.simpledialog.askstring(title=__file__, prompt="Enter version <vYYYYMMDD>:",
-                                                 initialvalue=self.version)
+        answer = tk.simpledialog.askstring(title=__file__, prompt="Enter version <vYYYYMMDD>:",
+                                           initialvalue=self.version)
+        if answer is None or answer == ():
+            print('enter operation cancelled')
+            return
+        self.version = answer
         self.cf[self.ind]['version'] = self.version
         self.cf.save_to_file()
         self.version_button.config(text=self.version)
@@ -445,6 +459,8 @@ def clear_data(silent=False, nowait=False):
             if not save_putty():
                 if silent is False:
                     tkinter.messagebox.showwarning(message="putty may be open already")
+                else:
+                    update_data_buttons()
     else:
         if silent is False:
             print('putty test file non-existent or too small (<64 bytes) probably already done')
@@ -459,6 +475,7 @@ def compare_hist_sim_choose():
     if testpaths is None or testpaths == '':
         print("No file chosen")
     else:
+        update_data_buttons()
         for testpath in testpaths:
             test_folder_path, test_parent, basename, test_txt, key = contain_all(testpath)
             if key != '':
@@ -471,6 +488,7 @@ def compare_hist_sim_choose():
 
 def compare_hist_to_sim():
     if modeling.get():
+        update_data_buttons()
         print('compare_hist_to_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
         # master.withdraw()
         compare_hist_sim(data_file=Test.file_path, unit_key=Test.key,
@@ -485,6 +503,7 @@ def compare_run():
     if not Test.key_exists_in_file:
         tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
         return
+    update_data_buttons()
     if modeling.get():
         print('compare_run_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
         # master.withdraw()
@@ -510,6 +529,7 @@ def compare_run_to_hist():
     if not Test.key_exists_in_file:
         tkinter.messagebox.showwarning(message="Test Key '" + Test.key + "' does not exist in " + Test.file_txt)
         return
+    update_data_buttons()
     if modeling.get():
         print('compare_hist_to_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
         compare_run_hist(data_file_=Test.file_path, unit_key_=Test.key,
@@ -541,6 +561,7 @@ def compare_run_run_choose():
                 # master.deiconify()
             else:
                 tk.messagebox.showerror(message='key not found in' + testpath)
+        update_data_buttons()
 
 
 # Choose file to perform compare_run_sim on
@@ -559,6 +580,7 @@ def compare_run_sim_choose():
                                 rel_path_to_temp=os.path.join(test_folder_path, './temp'))
             else:
                 tk.messagebox.showerror(message='key not found in' + testpath)
+        update_data_buttons()
 
 
 # Split all information contained in file path
@@ -608,7 +630,11 @@ def empty_file(target):
 
 
 def enter_mod_in_app():
-    mod_in_app.set(tk.simpledialog.askinteger(title=__file__, prompt="enter the value of Modeling in app to assume", initialvalue=mod_in_app.get()))
+    answer = tk.simpledialog.askinteger(title=__file__, prompt="enter the value of Modeling in app to assume", initialvalue=mod_in_app.get())
+    if answer is None:
+        print('enter operation cancelled')
+        return
+    mod_in_app.set(answer)
     cf['others']['mod_in_app'] = str(mod_in_app.get())
     cf.save_to_file()
     mod_in_app_button.config(text=mod_in_app.get())
@@ -714,6 +740,7 @@ def handle_option(*_args):
     save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                                text='save data as')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    update_data_buttons()
 
 
 def handle_ref_batt(*_args):
@@ -843,6 +870,15 @@ def ref_restore():
     Ref.label.pack(padx=5, pady=5)
 
 
+def tksleep(t):
+    'emulating time.sleep(seconds)'
+    ms = int(t*1000)
+    root = tk._get_default_root()
+    var = tk.IntVar(root)
+    root.after(ms, lambda: var.set(1))
+    root.wait_variable(var)
+
+
 def save_data():
     if size_of(putty_test_csv_path.get()) > 64:  # bytes
         # For custom option, redefine Test.file_path if requested
@@ -859,12 +895,13 @@ def save_data():
                 print('skipped overwrite')
                 tkinter.messagebox.showwarning(message='retained ' + Test.file_path)
                 return
+        save_data_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black',
+                                text='data saving')
+        tksleep(0.1)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
         save_data_button.config(bg='green', activebackground='green', fg='red', activeforeground='red',
                                 text='data saved')
-        save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
-                                   text='data saved')
         empty_file(putty_test_csv_path.get())
         print('updating Test file label')
         Test.create_file_path_and_key(name_override=new_file_txt)
@@ -896,10 +933,11 @@ def save_data_as():
                 print('reset and use clear')
                 tkinter.messagebox.showwarning(message='reset and use clear')
                 return
+        save_data_as_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black',
+                                   text='data saving')
+        tksleep(0.1)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
-        save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
-                                text='data saved')
         save_data_as_button.config(bg='green', activebackground='green', fg='red', activeforeground='red',
                                    text='data saved as')
         empty_file(putty_test_csv_path.get())
@@ -925,12 +963,19 @@ def save_progress():
             confirmation = tk.messagebox.askyesno('query overwrite', 'File exists:  overwrite?')
             if confirmation is False:
                 print('skipped overwrite')
-                tkinter.messagebox.showwarning(message='retained ' + Test.file_path)
+                tkinter.messagebox.showwarning(message='Nothing changed')
                 return
+        save_progress_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black',
+                                    text='data saving')
+        tksleep(0.1)
         copy_clean(putty_test_csv_path.get(), Test.file_path)
+        save_progress_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
+                                    text='save_progress')
         print('copied ', putty_test_csv_path.get(), '\nto\n', Test.file_path)
         print('updating Test file label')
         Test.create_file_path_and_key(name_override=new_file_txt)
+        tkinter.messagebox.showwarning(message="Progress saved")
+        update_data_buttons()
     else:
         print('putty test file non-existent or too small (<64 bytes) probably already done')
         tkinter.messagebox.showwarning(message="Nothing to save")

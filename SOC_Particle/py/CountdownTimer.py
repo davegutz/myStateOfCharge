@@ -112,19 +112,25 @@ class CountdownTimer(tk.Toplevel):
 
     def flasher_update(self):
         """function which changes background in displayed window"""
-        if self.flashes < self.max_flashes:
-            if self.flasher_label['bg'] == 'red':
-                self.flasher_label['bg'] = 'white'
-                self.flasher_window.configure(bg='white')
-            else:
-                self.flashes += 1
-                self.flasher_label['text'] = str(self.flashes)
-                self.flasher_label['bg'] = 'red'
-                self.flasher_window.configure(bg='red')
+        try:
+            if self.flashes < self.max_flashes:
+                if self.flasher_label['bg'] == 'red':
+                    self.flasher_label['bg'] = 'white'
+                    self.flasher_window.configure(bg='white')
+                else:
+                    self.flashes += 1
+                    self.flasher_label['text'] = str(self.flashes)
+                    self.flasher_label['bg'] = 'red'
+                    self.flasher_window.configure(bg='red')
 
-            # update window
-            self.after(500, self.flasher_update)
-        else:
+                # update window
+                self.after(500, self.flasher_update)
+            else:
+                self.flasher_window.destroy()
+                self.destroy()
+        except Exception as e:
+            print('e=', e)
+            print('killing flasher window')
             self.flasher_window.destroy()
             self.destroy()
 
