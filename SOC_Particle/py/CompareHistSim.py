@@ -761,7 +761,7 @@ def calc_fault(d_ra, d_mod):
 
 
 # Fake stuff to get replicate to accept inputs and run
-def bandaid(h):
+def bandaid(h, nS):
     res = np.zeros(len(h.time_ux))
     res[0:10] = 1
     ib_sel = h['ib'].copy()
@@ -774,6 +774,7 @@ def bandaid(h):
     sat_s = h['sat'].copy()
     chm_s = h['chm_s'].copy()
     sel = np.zeros(len(h.time_ux))
+    nS_m = np.ones(len(h.time_ux)) * nS
     preserving = np.ones(len(h.time_ux))
     mon_old = rf.rec_append_fields(h, 'res', res)
     mon_old = rf.rec_append_fields(mon_old, 'ib_past', ib_in_s)
@@ -791,6 +792,7 @@ def bandaid(h):
     mon_old = rf.rec_append_fields(mon_old, 'ccd_thr', sel)
     mon_old = rf.rec_append_fields(mon_old, 'voc_ekf', sel)
     mon_old = rf.rec_append_fields(mon_old, 'y_ekf', sel)
+    mon_old = rf.rec_append_fields(mon_old, 'nS', nS_m)
     sim_old = np.array(np.zeros(len(h.time), dtype=[('time', '<f8')])).view(np.recarray)
     sim_old.time = mon_old.time.copy()
     sim_old = rf.rec_append_fields(sim_old, 'chm_s', chm_s)
@@ -800,6 +802,7 @@ def bandaid(h):
     sim_old = rf.rec_append_fields(sim_old, 'dv_dyn_s', bms_off_s)
     sim_old = rf.rec_append_fields(sim_old, 'dv_hys_s', bms_off_s)
     sim_old = rf.rec_append_fields(sim_old, 'voc_stat_s', bms_off_s)
+    sim_old = rf.rec_append_fields(sim_old, 'nS_s', nS_m)
     return mon_old, sim_old
 
 
@@ -1015,7 +1018,7 @@ def add_mod(hist, mon_t_=False, mon=None):
 
 
 def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
-                     data_only=False, mon_t=False, unit_key=None, sync_time=None, dt_resample=10):
+                     data_only=False, mon_t=False, unit_key=None, sync_time=None, dt_resample=10, nS=2):
 
     print(f"\ncompare_hist_sim:\n{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n{mon_t=}"
           f"\n{unit_key=}\n{dt_resample=}\n")
@@ -1070,6 +1073,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         return None, None, None, None, None
 
     # Load configuration
+    nS = 1
     if mon_t is True:
         chm = int(mon_old.chm[0])
     else:
@@ -1077,6 +1081,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
             chm = 0
         elif unit_key.__contains__('ch'):
             chm = 1
+            nS = 2
         else:
             chm = None
     batt = BatteryMonitor(mod_code=chm)
@@ -1116,7 +1121,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
             h_20C_resamp.dt[i] = h_20C_resamp.time[i] - h_20C_resamp.time[i-1]
             
     # Hand fix oddities
-    mon_old, sim_old = bandaid(h_20C_resamp)
+    mon_old, sim_old = bandaid(h_20C_resamp, nS)
 
     # Replicate
     data_file_clean = path_to_temp+'/'+data_file_txt.replace('.csv', '_hist' + '.csv', 1)
@@ -1166,17 +1171,19 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
 def main():
     # User inputs (multiple input_files allowed
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109/SrSeries_soc2p2_ch.csv'
-    # rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109\\./figures'
-    # rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109\\./temp'
-    # data_only = False
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/discharge10C_soc2p2_ch.csv'
+    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
+    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
+    data_only = False
+    # mon_t = True
     mon_t = False
-    unit_key = 'g20240109_soc2p2_ch'
+    unit_key = 'g20240331_soc2p2_ch'
     dt_resample = 10
 
     # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
-    compare_hist_sim(data_file=data_file, mon_t=mon_t, unit_key=unit_key, dt_resample=dt_resample)
+    compare_hist_sim(data_file=data_file, mon_t=mon_t, unit_key=unit_key, dt_resample=dt_resample,
+                     rel_path_to_save_pdf=rel_path_to_save_pdf, rel_path_to_temp=rel_path_to_temp, data_only=data_only)
 
 
 if __name__ == '__main__':
