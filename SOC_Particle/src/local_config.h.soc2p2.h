@@ -25,7 +25,7 @@ const String unit = version + "_soc2p2";
 // Sensor biases
 #define CURR_BIAS_AMP        -1.8   // Calibration of amplified shunt sensor (* 'DA'), A
 #define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SA')
-#define CURR_BIAS_NOA        -9.3   // Calibration of non-amplified shunt sensor (* 'DB'), A
+#define CURR_BIAS_NOA        -3.8   // Calibration of non-amplified shunt sensor (* 'DB'), A
 #define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
 #define CURR_SCALE_DISCH      1.0   // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
 #define SHUNT_GAIN            2666. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (2666 is 200A/0.075V)
