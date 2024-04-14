@@ -32,3 +32,4 @@ SOC_Photon/target/3.0.0-beta.1/photon/SOC_Photon.bin.crc_block
 SOC_Particle/src/SOC_Particle.cpp
 SOC_Particle/dataReduction/g20240109/.~lock.curve_20240115_soc0p_ch.csv\#
 *.spec
+.idea/workspace.xml
