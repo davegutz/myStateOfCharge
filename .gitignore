@@ -33,3 +33,5 @@ SOC_Particle/src/SOC_Particle.cpp
 SOC_Particle/dataReduction/g20240109/.~lock.curve_20240115_soc0p_ch.csv\#
 *.spec
 .idea/workspace.xml
+SOC_Particle/py/build/*
+SOC_Particle/py/dist/*
