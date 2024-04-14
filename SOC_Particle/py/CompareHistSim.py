@@ -1156,8 +1156,9 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
             fig_list, fig_files = overall_fault(mon_old, mon_ver, sim_ver, sim_s_ver, filename,
                                                 fig_files, plot_title=plot_title, fig_list=fig_list)
             fig_list, fig_files = tune_r(mon_old, mon_ver, sim_s_ver, filename,
-                                         fig_files, plot_title=plot_title, fig_list=fig_list)
-    
+                                         fig_files, plot_title=plot_title, fig_list=fig_list,
+                                         ref_str='', test_str='_ver')
+
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
         unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
         cleanup_fig_files(fig_files)
