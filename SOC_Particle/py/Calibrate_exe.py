@@ -21,6 +21,7 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanu
 from DataOverModel import write_clean_file
 import matplotlib.pyplot as plt
 from datetime import datetime
+from pyDAGx import myTables
 import numpy as np
 import sys
 
@@ -44,16 +45,55 @@ class DataC:
         return s
 
 
-def plot_all_raw(data, fig_files=None, plot_title=None, fig_list=None, filename='Calibrate_exe'):
+class DataC_P(DataC):
+    def __init__(self, temp, xdata=None, ydata=None, data_file=''):
+        DataC.__init__(self, temp, None, data_file=data_file)
+        if xdata is None or ydata is None:
+            self.soc = None
+            self.voc_soc = None
+        else:
+            self.i = 0
+            self.soc = np.array(xdata)
+            self.voc_soc = np.array(ydata)
+
+
+def mash(raw_data):
+    soc = []
+    for (item, temp, p_color, p_style, marker, marker_size) in raw_data:
+        for soc_data in item.soc:
+            soc.append(soc_data)
+    soc_sort = np.unique(np.array(soc))
+    mashed_data = []
+    for (item, temp, p_color, p_style, marker, marker_size) in raw_data:
+        lut_voc_soc = myTables.TableInterp1D(item.soc, item.voc_soc)
+        voc_soc_sort = []
+        for soc in soc_sort:
+            voc_soc_sort.append(lut_voc_soc.interp(soc))
+        new_raw_data = (soc_sort, voc_soc_sort)
+        New_raw_data = DataC_P(item.temp_c, soc_sort, voc_soc_sort, item.data_file)
+        mashed_data.append((New_raw_data, temp, p_color, p_style, marker, marker_size))
+    return mashed_data
+
+
+def plot_all_raw(raw_data, mashed_data, fig_files=None, plot_title=None, fig_list=None, filename='Calibrate_exe'):
     if fig_files is None:
         fig_files = []
 
-    fig_list.append(plt.figure())  # init 1
-    plt.subplot(221)
-    plt.title(plot_title + ' plot_all_raw 1')
-    for (item, temp, p_color, p_style, marker, marker_size) in data:
+    fig_list.append(plt.figure())  #raw data 1
+    plt.subplot(111)
+    plt.title(plot_title + ' raw')
+    for (item, temp, p_color, p_style, marker, marker_size) in raw_data:
         plt.plot(item.soc, item.voc_soc, color=p_color, linestyle=p_style, marker=marker, markersize=marker_size, label='voc_soc ' + str(temp) + 'C')
     plt.legend(loc=1)
+    plt.grid()
+
+    fig_list.append(plt.figure())  # raw data 2
+    plt.subplot(111)
+    plt.title(plot_title + ' mashed')
+    for (item, temp, p_color, p_style, marker, marker_size) in mashed_data:
+        plt.plot(item.soc, item.voc_soc, color=p_color, linestyle=p_style, marker=marker, markersize=marker_size, label='voc_soc ' + str(temp) + 'C')
+    plt.legend(loc=1)
+    plt.grid()
 
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
@@ -73,6 +113,7 @@ def main():
 
     raw_files = []
     Raw_files = []
+    Mashed_data = []
     fig_list = []
     fig_files = []
     data_file_clean = None
@@ -83,16 +124,17 @@ def main():
             continue
         else:
             raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
-            Raw = DataC(temp, raw, data_file_clean)
+            Raw_data = DataC(temp, raw, data_file_clean)
             # print(Raw)
             raw_files.append((raw, temp))
-            Raw_files.append((Raw, temp, p_color, p_style, marker, marker_size))
+            Raw_files.append((Raw_data, temp, p_color, p_style, marker, marker_size))
+    Mashed_data = mash(Raw_files)
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     data_root = data_file_clean.split('/')[-1].replace('.csv', '_')
     filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
     plot_title = filename + '   ' + date_time
-    plot_all_raw(Raw_files, fig_files=fig_files, plot_title=plot_title, fig_list=fig_list, filename='Calibrate_exe')
+    plot_all_raw(Raw_files, Mashed_data, fig_files=fig_files, plot_title=plot_title, fig_list=fig_list, filename='Calibrate_exe')
     plt.show()
     cleanup_fig_files(fig_files)
 
