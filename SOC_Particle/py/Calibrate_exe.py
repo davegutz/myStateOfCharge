@@ -17,7 +17,7 @@
 to enter fitted values of raw data, extract actual NOM_BATT_CAP then form it into final schedules.
 """
 from Battery import Battery, BatteryMonitor
-from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
+from unite_pictures import cleanup_fig_files
 from DataOverModel import write_clean_file
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -45,7 +45,7 @@ class DataC:
         return s
 
 
-class DataC_P(DataC):
+class DataCP(DataC):
     def __init__(self, temp, xdata=None, ydata=None, data_file=''):
         DataC.__init__(self, temp, None, data_file=data_file)
         if xdata is None or ydata is None:
@@ -69,8 +69,7 @@ def mash(raw_data):
         voc_soc_sort = []
         for soc in soc_sort:
             voc_soc_sort.append(lut_voc_soc.interp(soc))
-        new_raw_data = (soc_sort, voc_soc_sort)
-        New_raw_data = DataC_P(item.temp_c, soc_sort, voc_soc_sort, item.data_file)
+        New_raw_data = DataCP(item.temp_c, soc_sort, voc_soc_sort, item.data_file)
         mashed_data.append((New_raw_data, temp, p_color, p_style, marker, marker_size))
     return mashed_data
 
@@ -79,7 +78,7 @@ def plot_all_raw(raw_data, mashed_data, fig_files=None, plot_title=None, fig_lis
     if fig_files is None:
         fig_files = []
 
-    fig_list.append(plt.figure())  #raw data 1
+    fig_list.append(plt.figure())  # raw data 1
     plt.subplot(111)
     plt.title(plot_title + ' raw')
     for (item, temp, p_color, p_style, marker, marker_size) in raw_data:
@@ -113,7 +112,6 @@ def main():
 
     raw_files = []
     Raw_files = []
-    Mashed_data = []
     fig_list = []
     fig_files = []
     data_file_clean = None
@@ -138,6 +136,6 @@ def main():
     plt.show()
     cleanup_fig_files(fig_files)
 
+
 if __name__ == '__main__':
     main()
-
