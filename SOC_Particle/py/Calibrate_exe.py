@@ -51,8 +51,8 @@ def plot_all_raw(data, fig_files=None, plot_title=None, fig_list=None, filename=
     fig_list.append(plt.figure())  # init 1
     plt.subplot(221)
     plt.title(plot_title + ' plot_all_raw 1')
-    for (item, temp, p_color, p_style) in data:
-        plt.plot(item.soc, item.voc_soc, color=p_color, linestyle=p_style, label='voc_soc' + str(temp))
+    for (item, temp, p_color, p_style, marker, marker_size) in data:
+        plt.plot(item.soc, item.voc_soc, color=p_color, linestyle=p_style, marker=marker, markersize=marker_size, label='voc_soc ' + str(temp) + 'C')
     plt.legend(loc=1)
 
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
@@ -64,8 +64,8 @@ def plot_all_raw(data, fig_files=None, plot_title=None, fig_list=None, filename=
 
 def main():
 
-    data_files = [('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_voc 11C.csv', 11, 'blue', '-.'),
-                  ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_voc 21p5C.csv', 21.5, 'orange', '-')]
+    data_files = [('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_voc 11C soc2p2_ch.csv', 11, 'blue', '-.', 'o', 4),
+                  ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_voc 21p5C soc2p2_ch.csv', 21.5, 'orange', '-', 'x', 4)]
     chm = 'ch'
     unit = 'soc2p2'
     unit_key = unit + '_' + chm
@@ -76,7 +76,7 @@ def main():
     fig_list = []
     fig_files = []
     data_file_clean = None
-    for (data_file, temp, p_color, p_style) in data_files:
+    for (data_file, temp, p_color, p_style, marker, marker_size) in data_files:
         data_file_clean = write_clean_file(data_file, type_='', title_key=title_key, unit_key=unit_key)
         if data_file_clean is None:
             print(f"case {data_file=} {temp=} is dirty...skipping")
@@ -84,9 +84,9 @@ def main():
         else:
             raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
             Raw = DataC(temp, raw, data_file_clean)
-            print(Raw)
+            # print(Raw)
             raw_files.append((raw, temp))
-            Raw_files.append((Raw, temp, p_color, p_style))
+            Raw_files.append((Raw, temp, p_color, p_style, marker, marker_size))
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     data_root = data_file_clean.split('/')[-1].replace('.csv', '_')
