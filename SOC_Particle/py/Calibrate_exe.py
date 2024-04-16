@@ -118,8 +118,8 @@ def plot_all(raw_data, mashed_data, finished_data, act_unit_cap, fig_files=None,
         plt.plot(item.soc, item.vstat, color=p_color, linestyle=p_style, marker=marker, markersize=marker_size,
                  label='vstat ' + str(nom_unit_cap) + '  ' + str(temp) + 'C')
     plt.legend(loc=1)
-    plt.xlabel('soc')
-    plt.ylabel('voc unit, v')
+    plt.xlabel('soc data')
+    plt.ylabel('vstat unit, v')
     plt.grid()
 
     fig_list.append(plt.figure())  # normalized data 2
@@ -129,8 +129,8 @@ def plot_all(raw_data, mashed_data, finished_data, act_unit_cap, fig_files=None,
         plt.plot(item.soc, item.vstat, color=p_color, linestyle=p_style, marker=marker, markersize=marker_size,
                  label='vstat ' + str(nom_unit_cap) + '  ' + str(temp) + 'C')
     plt.legend(loc=1)
-    plt.xlabel('soc normal')
-    plt.ylabel('voc unit, v')
+    plt.xlabel('soc data normal')
+    plt.ylabel('vstat unit, v')
     plt.grid()
 
     fig_list.append(plt.figure())  # finished data 3
@@ -143,10 +143,10 @@ def plot_all(raw_data, mashed_data, finished_data, act_unit_cap, fig_files=None,
     plt.title(plot_title + ' finished')
     for (item, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in finished_data:
         plt.plot(item.soc, item.vstat, color=p_color, linestyle=p_style, marker=marker, markersize=marker_size,
-                 label='vstat ' + cap_str + '  ' + str(temp) + 'C')
+                 label='voc ' + cap_str + '  ' + str(temp) + 'C')
     plt.legend(loc=1)
-    plt.xlabel('soc normal')
-    plt.ylabel('voc unit, v')
+    plt.xlabel('soc')
+    plt.ylabel('voc(soc), v')
     plt.grid()
 
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
