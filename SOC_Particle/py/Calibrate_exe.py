@@ -58,12 +58,21 @@ class DataCP(DataC):
             self.vstat = np.array(ydata)
 
 
+def finish(mash_data, actual_nom_unit_cap):
+    """Reform data into table for application plus the capacity to use in constants"""
+    
+    fin_data = mash_data.copy()
+    # for (item, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in fin_data:
+
+    return fin_data        
+
+
 def mash(raw_data, v_off_thresh=Battery.VB_OFF):
     """Mash all data together normalized with same ordinates"""
 
     # Aggregate the normalized soc data
     soc = []
-    soc_aggregate_off = 1.
+    soc_aggregate_off = 1.  # initial value only
     for (item, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in raw_data:
         for i in np.arange(len(item.soc)):
             soc_data = item.soc[i]
@@ -97,7 +106,7 @@ def normalize_soc(soc_data, nom_unit_cap_data, unit_cap_rated=100.):
     return soc_normal
 
 
-def plot_all_raw(raw_data, mashed_data, fig_files=None, plot_title=None, fig_list=None, filename='Calibrate_exe'):
+def plot_all(raw_data, mashed_data, finished_data, act_unit_cap, fig_files=None, plot_title=None, fig_list=None, filename='Calibrate_exe'):
     """Plot the various stages of data reduction"""
     if fig_files is None:
         fig_files = []
@@ -113,12 +122,28 @@ def plot_all_raw(raw_data, mashed_data, fig_files=None, plot_title=None, fig_lis
     plt.ylabel('voc unit, v')
     plt.grid()
 
-    fig_list.append(plt.figure())  # raw data 2
+    fig_list.append(plt.figure())  # normalized data 2
     plt.subplot(111)
     plt.title(plot_title + ' mashed')
     for (item, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in mashed_data:
         plt.plot(item.soc, item.vstat, color=p_color, linestyle=p_style, marker=marker, markersize=marker_size,
                  label='vstat ' + str(nom_unit_cap) + '  ' + str(temp) + 'C')
+    plt.legend(loc=1)
+    plt.xlabel('soc normal')
+    plt.ylabel('voc unit, v')
+    plt.grid()
+
+    fig_list.append(plt.figure())  # finished data 3
+    cap_str = "{:5.1f}".format(act_unit_cap)
+    ax = plt.subplot(111)
+    # place a text box in upper left in axes coords
+    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+    ax.text(0.4, 0.2, 'Set NOM_UNIT_CAP = ' + cap_str, transform=ax.transAxes, fontsize=14,
+            verticalalignment='top', bbox=props)
+    plt.title(plot_title + ' finished')
+    for (item, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in finished_data:
+        plt.plot(item.soc, item.vstat, color=p_color, linestyle=p_style, marker=marker, markersize=marker_size,
+                 label='vstat ' + cap_str + '  ' + str(temp) + 'C')
     plt.legend(loc=1)
     plt.xlabel('soc normal')
     plt.ylabel('voc unit, v')
@@ -173,13 +198,14 @@ def main():
     print("\nAfter mashing:  capacity = {:5.1f}".format(actual_nom_unit_cap))
 
     # Shift and scale curves for calculated capacity
+    Finished_curves = finish(Mashed_data, actual_nom_unit_cap)
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     data_root = data_file_clean.split('/')[-1].replace('.csv', '_')
     filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
     plot_title = filename + '   ' + date_time
-    plot_all_raw(Raw_files, Mashed_data, fig_files=fig_files, plot_title=plot_title, fig_list=fig_list,
-                 filename='Calibrate_exe')
+    plot_all(Raw_files, Mashed_data, Finished_curves, actual_nom_unit_cap, fig_files=fig_files, plot_title=plot_title, fig_list=fig_list,
+             filename='Calibrate_exe')
     plt.show()
     cleanup_fig_files(fig_files)
 
