@@ -394,8 +394,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     return fig_list, fig_files
 
 
-def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, skip=1, comment_str='#'):
-    """First line with title_key defines the number of fields to be imported cleanly"""
+def write_clean_file(path_to_data, type_=None, hdr_key=None, unit_key=None, skip=1, comment_str='#'):
+    """First line with hdr_key defines the number of fields to be imported cleanly"""
     import os
     (path, basename) = os.path.split(path_to_data)
     path_to_temp = path + '/temp'
@@ -413,11 +413,11 @@ def write_clean_file(path_to_data, type_=None, title_key=None, unit_key=None, sk
                         print(Colors.fg.red, "\n\n\nDataOverModel(write_clean_file): Heap fragmentation error\
                          detected in Particle.  Decrease NSUM constant and re-run\n\n", Colors.reset)
                         return None
-                    if line.__contains__(title_key):
+                    if line.__contains__(hdr_key):
                         if have_header_str is None:
                             have_header_str = True  # write one title only
                             output.write(line)
-                            num_fields = line.count(',')  # first line with title_key defines number of fields
+                            num_fields = line.count(',')  # first line with hdr_key defines number of fields
             except IOError:
                 print("DataOverModel381:", line)  # last line
     # Data
@@ -898,10 +898,10 @@ if __name__ == '__main__':
         zero_zero_in = False
         # time_end = 1500.
 
-        # Load data (must end in .txt) txt_file, type, title_key, unit_key
-        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key='unit,',
+        # Load data (must end in .txt) txt_file, type, hdr_key, unit_key
+        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', hdr_key='unit,',
                                            unit_key=unit_key)
-        data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key='unit_m',
+        data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', hdr_key='unit_m',
                                                unit_key='unit_sim,')
 
         # Load

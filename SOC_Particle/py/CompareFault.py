@@ -1002,7 +1002,7 @@ if __name__ == '__main__':
 
         # Load history
         temp_hist_file = os.path.join(path_to_temp, temp_hist_file)
-        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
+        temp_hist_file_clean = write_clean_file(temp_hist_file, type_='', hdr_key='fltb', unit_key='unit_f',
                                                 skip=skip, comment_str='---')
         if temp_hist_file_clean:
             h_raw_ = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
@@ -1011,7 +1011,7 @@ if __name__ == '__main__':
             exit(1)
 
         # Load fault
-        temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', title_key='fltb', unit_key='unit_f',
+        temp_flt_file_clean = write_clean_file(temp_hist_file, type_='', hdr_key='fltb', unit_key='unit_f',
                                                skip=skip, comment_str='---')
         if temp_flt_file_clean:
             f_raw_ = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
