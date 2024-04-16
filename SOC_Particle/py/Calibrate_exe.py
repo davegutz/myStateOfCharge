@@ -100,6 +100,18 @@ def mash(raw_data, v_off_thresh=Battery.VB_OFF):
     return mashed_data, soc_aggregate_off
 
 
+def minimums(fin_data):
+    """Find minimum soc schedule"""
+    t_min = []
+    soc_min = []
+    for (curve, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in fin_data:
+        t_min.append(temp)
+        lut_voc_soc = myTables.TableInterp1D(curve.vstat, curve.soc)
+        soc_min.append(lut_voc_soc.interp(Battery.VB_OFF))
+
+    return t_min, soc_min
+
+
 def normalize_soc(soc_data, nom_unit_cap_data, unit_cap_rated=100.):
     """Normalize for saturation defined to be soc = 1"""
     soc_normal = 1. - (1. - soc_data) * nom_unit_cap_data / unit_cap_rated
@@ -158,12 +170,14 @@ def plot_all(raw_data, mashed_data, finished_data, act_unit_cap, fig_files=None,
 
 def main():
 
-    data_files = [('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 11C soc2p2_ch.csv',
-                   100., 11., 'blue', '-.', 'o', 4),
-                  ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 21p5C soc2p2_ch.csv',
-                   100., 21.5, 'orange', '--', 'x', 4),
-                  ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C soc2p2_ch.csv',
-                   110., 25., 'red', '-', '1', 4),]
+    data_files = [
+        ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 11C soc2p2_ch.csv',
+         100., 11., 'blue', '-.', 'o', 4),
+        ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 21p5C soc2p2_ch.csv',
+         100., 21.5, 'orange', '--', 'x', 4),
+        ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C soc2p2_ch.csv',
+         110., 25., 'red', '-', '1', 4),
+    ]
     #  data_files[( data_file, nom_unit_cap, temp_c, p_color, marker, marker_size), (...), ...]  List of tuples of data from experiments
     #   data_file       Full path to data file
     #   nom_unit_cap    Nominal applied battery unit (100 Ah unit) capacity, Ah
@@ -175,6 +189,9 @@ def main():
     unit = 'soc2p2'  # Particle unit name
     unit_key = unit + '_' + chm  # key to be found in each line of data
     hdr_key = 'vstat'  # key to be found in header for data
+
+    # Sort by temperature lowest to highest for consistency throughout
+    data_files = sorted(data_files, key=lambda x: x[2])
 
     # Initialize
     raw_files = []
@@ -200,6 +217,13 @@ def main():
 
     # Shift and scale curves for calculated capacity
     Finished_curves = finish(Mashed_data, soc_aggregate_off, actual_cap)
+
+    # Find minimums
+    t_min, soc_min = minimums(Finished_curves)
+
+    # Print results TODO
+    print('t_min   = ', ', '.join(f'{q:.1f}' for q in t_min))
+    print('soc_min = ', ', '.join(f'{q:.2f}' for q in soc_min))
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     data_root = data_file_clean.split('/')[-1].replace('.csv', '_')
