@@ -205,7 +205,7 @@ class LocalChem(Chemistry):
         # plt.legend(loc=1)
         fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
-        plt.savefig(fig_file_name, format="png")
+        # plt.savefig(fig_file_name, format="png")
 
         return fig_list, fig_files
 
@@ -244,7 +244,7 @@ if __name__ == '__main__':
         plot_title = filename + '   ' + date_time
         fig_list, fig_files = obs.plot(filename, fig_files=fig_files, plot_title=plot_title, fig_list=fig_list)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
-        unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
+        # unite_pictures_into_pdf(outputPdfName=filename+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
         cleanup_fig_files(fig_files)
 
         plt.show()

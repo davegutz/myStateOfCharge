@@ -27,12 +27,12 @@ temp_file4 = data_file(os.getcwd(), file4)
 temp_file5 = data_file(os.getcwd(), file5)
 
 # Make clean files
-temp_file0_clean = write_clean_file(temp_file0, type_='', title_key='unit', unit_key='g20230530')
-temp_file1_clean = write_clean_file(temp_file1, type_='', title_key='unit', unit_key='g20230530')
-temp_file2_clean = write_clean_file(temp_file2, type_='', title_key='unit', unit_key='g20230530')
-temp_file3_clean = write_clean_file(temp_file3, type_='', title_key='unit', unit_key='g20230530')
-temp_file4_clean = write_clean_file(temp_file4, type_='', title_key='unit', unit_key='g20230530')
-temp_file5_clean = write_clean_file(temp_file5, type_='', title_key='unit', unit_key='g20230530')
+temp_file0_clean = write_clean_file(temp_file0, type_='', hdr_key='unit', unit_key='g20230530')
+temp_file1_clean = write_clean_file(temp_file1, type_='', hdr_key='unit', unit_key='g20230530')
+temp_file2_clean = write_clean_file(temp_file2, type_='', hdr_key='unit', unit_key='g20230530')
+temp_file3_clean = write_clean_file(temp_file3, type_='', hdr_key='unit', unit_key='g20230530')
+temp_file4_clean = write_clean_file(temp_file4, type_='', hdr_key='unit', unit_key='g20230530')
+temp_file5_clean = write_clean_file(temp_file5, type_='', hdr_key='unit', unit_key='g20230530')
 
 # Load all clean
 t0_raw = np.genfromtxt(temp_file0_clean, delimiter=',', names=True, dtype=float).view(np.recarray)

@@ -28,15 +28,15 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     print(f"load_data: \n{path_to_data=}\n{skip=}\n{unit_key=}\n{zero_zero_in=}\n{time_end_in=}\n{rated_batt_cap=}\n"
           f"{legacy=}\n{v1_only=}")
 
-    title_key = "unit,"  # Find one instance of title
-    title_key_sel = "unit_s,"  # Find one instance of title
+    hdr_key = "unit,"  # Find one instance of title
+    hdr_key_sel = "unit_s,"  # Find one instance of title
     unit_key_sel = "unit_sel"
-    title_key_ekf = "unit_e,"  # Find one instance of title
+    hdr_key_ekf = "unit_e,"  # Find one instance of title
     unit_key_ekf = "unit_ekf"
-    title_key_sim = "unit_m,"  # Find one instance of title
+    hdr_key_sim = "unit_m,"  # Find one instance of title
     unit_key_sim = "unit_sim"
     temp_flt_file = 'flt_compareRunSim.txt'
-    data_file_clean = write_clean_file(path_to_data, type_='_mon', title_key=title_key, unit_key=unit_key, skip=skip)
+    data_file_clean = write_clean_file(path_to_data, type_='_mon', hdr_key=hdr_key, unit_key=unit_key, skip=skip)
     if data_file_clean is None:
         return None, None, None, None, None
     if data_file_clean is not None:
@@ -46,7 +46,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         print(f"load_data: returning mon=None")
 
     # Load sel (old)
-    sel_file_clean = write_clean_file(path_to_data, type_='_sel', title_key=title_key_sel,
+    sel_file_clean = write_clean_file(path_to_data, type_='_sel', hdr_key=hdr_key_sel,
                                       unit_key=unit_key_sel, skip=skip)
     if sel_file_clean and not v1_only:
         sel_raw = np.genfromtxt(sel_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
@@ -55,7 +55,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         print(f"load_data: returning sel_raw=None")
 
     # Load ekf (old)
-    ekf_file_clean = write_clean_file(path_to_data, type_='_ekf', title_key=title_key_ekf,
+    ekf_file_clean = write_clean_file(path_to_data, type_='_ekf', hdr_key=hdr_key_ekf,
                                       unit_key=unit_key_ekf, skip=skip)
     if ekf_file_clean and not v1_only:
         ekf_raw = np.genfromtxt(ekf_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
@@ -76,7 +76,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     batt = BatteryMonitor(chm)
 
     # Load sim _s v24 portion of real-time run (old)
-    data_file_sim_clean = write_clean_file(path_to_data, type_='_sim', title_key=title_key_sim,
+    data_file_sim_clean = write_clean_file(path_to_data, type_='_sim', hdr_key=hdr_key_sim,
                                            unit_key=unit_key_sim, skip=skip)
     if data_file_sim_clean and not v1_only:
         sim_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
@@ -86,7 +86,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         print(f"load_data: returning sim=None")
 
     # Load fault
-    temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', title_key='fltb',
+    temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', hdr_key='fltb',
                                            unit_key='unit_f', skip=skip, comment_str='---')
     if temp_flt_file_clean and not v1_only:
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)

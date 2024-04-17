@@ -381,10 +381,10 @@ if __name__ == '__main__':
         # data_file_old_txt = 'EKF_Track Dr200 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr400 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
         # data_file_old_txt = 'EKF_Track Dr800 Xf0p04 v20220917.txt'; unit_key = 'pro_2022'
-        title_key = "unit,"  # Find one instance of title
-        title_key_sel = "unit_s,"  # Find one instance of title
+        hdr_key = "unit,"  # Find one instance of title
+        hdr_key_sel = "unit_s,"  # Find one instance of title
         unit_key_sel = "unit_sel"
-        title_key_sim = "unit_m,"  # Find one instance of title
+        hdr_key_sim = "unit_m,"  # Find one instance of title
         unit_key_sim = "unit_sim"
         save_pdf_path = '../dataReduction/figures'
         path_to_temp = '../dataReduction/temp'
@@ -393,12 +393,12 @@ if __name__ == '__main__':
             os.mkdir(path_to_temp)
 
         # Load mon v4 (old)
-        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', title_key=title_key, unit_key=unit_key,
+        data_file_clean = write_clean_file(data_file_old_txt, type_='_mon', hdr_key=hdr_key, unit_key=unit_key,
                                            skip=skip)
         mon_old_raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
 
         # Load sel (old)
-        sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', title_key=title_key_sel,
+        sel_file_clean = write_clean_file(data_file_old_txt, type_='_sel', hdr_key=hdr_key_sel,
                                           unit_key=unit_key_sel, skip=skip)
         sel_old_raw = None
         if sel_file_clean:
@@ -407,7 +407,7 @@ if __name__ == '__main__':
                             zero_thr=zero_thr_in)
 
         # Load _m v24 portion of real-time run (old)
-        data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', title_key=title_key_sim,
+        data_file_sim_clean = write_clean_file(data_file_old_txt, type_='_sim', hdr_key=hdr_key_sim,
                                                unit_key=unit_key_sim, skip=skip)
         if data_file_sim_clean:
             sim_old_raw = np.genfromtxt(data_file_sim_clean, delimiter=',', names=True, dtype=float).view(np.recarray)

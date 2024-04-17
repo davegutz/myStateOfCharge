@@ -1051,7 +1051,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         mon_old = None
 
     # Load history
-    temp_hist_file_clean = write_clean_file(data_file, type_='_hist', title_key='fltb', unit_key='unit_h',
+    temp_hist_file_clean = write_clean_file(data_file, type_='_hist', hdr_key='fltb', unit_key='unit_h',
                                             skip=1, comment_str='---')
     if temp_hist_file_clean:
         h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
@@ -1061,7 +1061,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         return None, None, None, None, None
 
     # Load fault
-    temp_flt_file_clean = write_clean_file(data_file, type_='_flt', title_key='fltb', unit_key='unit_f',
+    temp_flt_file_clean = write_clean_file(data_file, type_='_flt', hdr_key='fltb', unit_key='unit_f',
                                            skip=1, comment_str='---')
     if temp_flt_file_clean:
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
