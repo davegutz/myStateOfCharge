@@ -786,7 +786,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   Serial.printf("Vb sense ADC pin started\n");
   AmpFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
   NoaFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
-  VbFilt = new LagExp(T, AMP_FILT_TAU, 0., NOMINAL_VB*2.);
+  VbFilt = new LagExp(T, AMP_FILT_TAU, 0., NOMINAL_VB*2.5);
 }
 
 // Deliberate choice based on results and inputs

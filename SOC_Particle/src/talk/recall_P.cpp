@@ -56,9 +56,9 @@ boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
 
         case ( 'f' ):  // Pf:  Print faults
             sp.print_history_array();
-            sp.print_fault_header();
+            sp.print_fault_header(&pp.pubList);
             sp.print_fault_array();
-            sp.print_fault_header();
+            sp.print_fault_header(&pp.pubList);
             Serial.printf ("\nSen::\n");
             Sen->Flt->pretty_print (Sen, Mon);
             Serial1.printf("\nSen::\n");

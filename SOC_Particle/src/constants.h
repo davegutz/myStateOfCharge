@@ -166,7 +166,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define TB_STALE_SET    3600.           // Tb read from one-wire stale persistence for failure, s (3600, 1 hr)
 #define TB_STALE_RESET  0.              // Tb read from one-wire stale persistence for reset, s (0)
 #define NOMINAL_TB      15.             // Middle of the road Tb for decent reversionary operation, deg C (15.)
-#define NOMINAL_VB      13.             // Middle of the road Vb for decent reversionary operation, V (13.)
+#define NOMINAL_VB   (13.*NS)           // Middle of the road Vb for decent reversionary operation, V (13.)
 #define NOMINAL_VSAT    13.85           // Nominal saturation voltage, V (13.85)
 #define IMAX_NUM        100000.         // Simulation limit to prevent NaN, A (1e5)
 #define WRAP_SOC_HI_OFF     0.97        // Disable e_wrap_hi when saturated (0.97)

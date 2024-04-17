@@ -391,9 +391,9 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
           case ( 'd' ):  // bd: fault buffer dump
             Serial.printf("\n");
             sp.print_history_array();
-            sp.print_fault_header();
+            sp.print_fault_header(&pp.pubList);
             sp.print_fault_array();
-            sp.print_fault_header();
+            sp.print_fault_header(&pp.pubList);
             break;
 
           case ( 'h' ):  // bh: History buffer reset

@@ -40,7 +40,7 @@ boolean recall_H(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
     case ( 'd' ):  // Hd: History dump
         Serial.printf("\n");
         print_all_fault_buffer("unit_h", mySum, sp.isum(), sp.nsum());
-        sp.print_fault_header();
+        sp.print_fault_header(&pp.pubList);
         chit("Pr;Q;", SOON);
         Serial.printf("\n");
         // sp.print_history_array();
@@ -52,7 +52,7 @@ boolean recall_H(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
     case ( 'f' ):  // Hf: History dump faults only
         Serial.printf("\n");
         sp.print_fault_array();
-        sp.print_fault_header();
+        sp.print_fault_header(&pp.pubList);
         break;
 
     case ( 'R' ):  // HR: History reset

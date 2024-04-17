@@ -208,6 +208,7 @@ void setup()
       Serial.printf("Wire started\n");
     #endif
     Wire.begin();
+    delay(1000);
   #endif
 
   // Display (after start Wire)
@@ -224,6 +225,10 @@ void setup()
       Serial.printf("DISP ok\n");
     #ifndef CONFIG_BARE
       display->clearDisplay();
+    #endif
+    // Minimize power transients
+    #ifdef CONFIG_PHOTON2
+      delay(1000);
     #endif
   #endif
 
@@ -277,7 +282,7 @@ void setup()
   if ( sp.debug_z==1 || sp.debug_z==2 || sp.debug_z==3 || sp.debug_z==4 )
   {
     sp.print_history_array();
-    sp.print_fault_header();
+    sp.print_fault_header(&pp.pubList);
   }
   sp.nsum(NSUM);  // Store
 
