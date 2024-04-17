@@ -45,15 +45,15 @@ float Hysteresis::calculate(const float ib, const float soc, const float hys_sca
     {
         res_ = 0.;
         slr_ = 1.;
-        ibs_ = ib / sp.nS();
-        ioc_ = ib / sp.nS();
+        ibs_ = ib;
+        ioc_ = ib;
         dv_dot_ = 0.;
     }
     else
     {
         res_ = look_hys(dv_hys_, soc_);
         slr_ = look_slr(dv_hys_, soc_);
-        ibs_ = ib_ * slr_ / sp.nS();
+        ibs_ = ib_ * slr_;
         ioc_ = dv_hys_ / res_;
         dv_dot_ = (ibs_ - dv_hys_/res_) / chem_->hys_cap;  // Capacitor ode
     }

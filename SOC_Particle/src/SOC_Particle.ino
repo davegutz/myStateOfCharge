@@ -26,6 +26,7 @@
   * 22-Dec-2022   Dual amplifier replaces dual ADS.  Beta release v20221220.  ADS still used on Photon.
   * 01-Dec-2023   g20231111 Photon 2, DS2482
   * 01-Apr-2024   g20230331 ib_charge = ib_ / sp.nS() while Randles uses ib_.  Tune Tb initialization
+  * 17-Apr-2024   Undo previous ib_/sp.nS() change
   * 
 //
 // MIT License

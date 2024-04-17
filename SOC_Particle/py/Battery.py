@@ -302,7 +302,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
     # BatteryMonitor::calculate()
     def calculate(self, chem, temp_c, vb, ib, dt, reset, update_time_in, q_capacity=None, dc_dc_on=None,
-                  rp=None, u_old=None, z_old=None, x_old=None, bms_off_init=None, nS=1):
+                  rp=None, u_old=None, z_old=None, x_old=None, bms_off_init=None):
         if self.chm != chem:
             self.chemistry.assign_all_mod(chem)
             self.chm = chem
@@ -330,7 +330,7 @@ class BatteryMonitor(Battery, EKF1x1):
             self.bms_off = bms_off_init
         else:
             self.bms_off = (self.temp_c <= self.chemistry.low_t) or (voltage_low and not rp.tweak_test())  # KISS
-        self.ib_charge = self.ib / nS
+        self.ib_charge = self.ib
         if self.bms_off and not bms_charging:
             self.ib_charge = 0.
         if self.bms_off and voltage_low:
@@ -356,7 +356,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.dv_hys = 0.
         self.voc_stat = self.voc - self.dv_hys
         self.e_wrap = self.voc_soc - self.voc_stat
-        self.ioc = self.ib / nS
+        self.ioc = self.ib
         self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, Battery.F_MAX_T_WRAP),
                                                       reset=reset)
 
@@ -596,7 +596,7 @@ class BatterySim(Battery):
 
     # BatterySim::calculate()
     def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, update_time_in,  # BatterySim
-                  rp=None, sat_init=None, bms_off_init=None, nS=1):
+                  rp=None, sat_init=None, bms_off_init=None):
         if self.chm != chem:
             self.chemistry.assign_all_mod(chem)
             self.chm = chem
@@ -637,7 +637,7 @@ class BatterySim(Battery):
             self.bms_off = bms_off_init
         else:
             self.bms_off = (self.temp_c < self.chemistry.low_t) or (voltage_low and not rp.tweak_test())
-        ib_charge_fut = self.ib_in / nS
+        ib_charge_fut = self.ib_in
         if self.bms_off and not bms_charging:
             ib_charge_fut = 0.
         if self.bms_off and voltage_low:
@@ -659,9 +659,9 @@ class BatterySim(Battery):
                            rp.cutback_gain_scalar)
         if rp.tweak_test() or (not rp.modeling):
             self.sat_ib_max = ib_charge_fut
-        self.ib_fut = min(ib_charge_fut, self.sat_ib_max) * nS  # the feedback of self.ib
-        # self.ib_charge = ib_charge_fut / nS # same time plane as volt calcs.  (This prevents sat logic from working)
-        self.ib_charge = self.ib_fut / nS  # same time plane as volt calcs
+        self.ib_fut = min(ib_charge_fut, self.sat_ib_max)  # the feedback of self.ib
+        # self.ib_charge = ib_charge_fut# same time plane as volt calcs.  (This prevents sat logic from working)
+        self.ib_charge = self.ib_fut  # same time plane as volt calcs
         if self.mod > 0.:
             if (self.q <= 0.) & (self.ib_charge < 0.):
                 print("q", self.q, "empty")

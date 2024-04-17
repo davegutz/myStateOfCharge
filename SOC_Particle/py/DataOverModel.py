@@ -476,7 +476,6 @@ class SavedData:
             self.sel = None  # Current source selection, 0=amp, 1=no amp
             self.mod = None  # Configuration control code, 0=all hardware, 7=all simulated, +8 tweak test
             self.bms_off = None  # Battery management system off, T=off
-            self.nS = None  # Number series battery bank
             self.Tb = None  # Battery bank temperature, deg C
             self.vsat = None  # Monitor Bank saturation threshold at temperature, deg C
             self.dv_dyn = None  # Monitor Bank current induced back emf, V
@@ -570,10 +569,6 @@ class SavedData:
             self.sel = np.array(data.sel[:i_end])
             self.mod_data = np.array(data.mod[:i_end])
             self.bms_off = np.array(data.bmso[:i_end])
-            if hasattr(data, 'nS'):
-                self.nS = np.array(data.nS[:i_end])
-            else:
-                self.nS = np.array(data.bmso[:i_end]) * 0 + 1
             # not_bms_off = self.bms_off < 1
             # bms_off_and_not_charging = self.bms_off * not_bms_off
             # self.ib_charge = self.ib * (bms_off_and_not_charging < 1)

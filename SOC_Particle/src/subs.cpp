@@ -223,7 +223,7 @@ void  monitor(const boolean reset, const boolean reset_temp, const unsigned long
   Mon->count_coulombs(Sen->T, reset_temp, Sen->Tb_filt, Mon->ib_charge(), Sen->saturated, Mon->delta_q_ekf());
 
   // Charge charge time for display
-  Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->ib()/sp.nS(), Mon->soc());
+  Mon->calc_charge_time(Mon->q(), Mon->q_capacity(), Sen->ib(), Mon->soc());
 }
 
 /* OLED display drive
