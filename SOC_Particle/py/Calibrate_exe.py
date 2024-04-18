@@ -171,8 +171,8 @@ def plot_all(raw_data, mashed_data, finished_data, act_unit_cap, fig_files=None,
 def main():
 
     data_files = [
-        ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 11C soc2p2_ch.csv',
-         100., 11., 'blue', '-.', 'o', 4),
+        ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 13C soc2p2_ch.csv',
+         100., 13., 'green', '-.', '^', 4),
         ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 21p5C soc2p2_ch.csv',
          100., 21.5, 'orange', '--', 'x', 4),
         ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C soc2p2_ch.csv',
