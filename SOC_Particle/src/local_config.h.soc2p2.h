@@ -29,8 +29,8 @@ const String unit = version + "_soc2p2";
 #define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
 #define CURR_SCALE_DISCH      1.0   // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
 #define SHUNT_GAIN            2666. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (2666 is 200A/0.075V)
-#define SHUNT_AMP_R1          5000.     // Amplifed shunt ADS resistance, ohms (5k)  100/5.  = 20
-#define SHUNT_AMP_R2          100000.   // Amplifed shunt ADS resistance, ohms (100k) 0.075v  = 1.34 v => 3.3/2+1.34 = 2.99 < 3.3
+#define SHUNT_AMP_R1          5000.     // Amplifed shunt internal resistance, ohms (5k)  100/5.  = 20
+#define SHUNT_AMP_R2          100000.   // Amplifed shunt internal resistance, ohms (100k) 0.075v  = 1.34 v => 3.3/2+1.34 = 2.99 < 3.3
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
 #define VOLT_BIAS             0.085 // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C

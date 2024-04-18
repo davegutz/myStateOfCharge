@@ -29,6 +29,7 @@
 #include "Fault.h"
 #include "PrinterPars.h"
 #include "Variable.h"
+#include "Cloud.h"
 
 void app_no();
 void app_mon_chem();
@@ -204,7 +205,7 @@ public:
     virtual void pretty_print(const boolean all);
     void pretty_print_modeling();
     void print_fault_array();
-    void print_fault_header();
+    void print_fault_header(Publish *pubList);
     void print_history_array();
     void reset_flt();
     void reset_his();
