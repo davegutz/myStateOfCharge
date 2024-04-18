@@ -180,7 +180,8 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define VO_S                1.0         // Vo sense scalar (1.0)
 #define AMP_FILT_TAU        4.0         // Ib filters time constant for calibration only, s (4.0)
 #define VC_BARE_DETECTED    0.16        // Level of common voltage to declare circuit unconnected, V (0.16)
-#define HALF_3V3            1.65        // Theoretical center of differential TSC2010
+#define V3V3                3.3         // Theoretical nominal V3v3, V (3.3)
+#define HALF_V3V3         (V3V3/2.)     // Theoretical center of differential TSC2010
 
 // Conversion gains
 #ifdef CONFIG_ADS1013_OPAMP
@@ -197,5 +198,6 @@ const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SEN
                               float(VB_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VB_S);
 const float VC_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VC_S);
 const float VO_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VO_S);
+const float VH3V3_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT);
 
 #endif // CONSTANTS_H_

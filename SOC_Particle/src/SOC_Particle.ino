@@ -184,12 +184,13 @@ void setup()
   // A0 (pin 'D11') - Primary Ib amp (called by old ADS name Amplified, amp)
   // A1 (pin 'D12') - Vb
   // A2 (pin 'D13') - Backup Ib amp (called by old ADS name Non Amplified, noa)
+  // A5 (pin 'D14') - 3v3
   // A4 - not available
   // A5-->D14 - spare
   
   Log.info("setup Pins");
   #ifdef CONFIG_PHOTON2
-    myPins = new Pins(D3, D7, D12, D11, D13);
+    myPins = new Pins(D3, D7, D12, D11, D13, D14);
   #else
     myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
   #endif
