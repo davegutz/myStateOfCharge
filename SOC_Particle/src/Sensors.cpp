@@ -431,6 +431,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 
   Serial1.printf(" Tbh=%7.3f  Tbm=%7.3f\n", Sen->Tb_hdwe, Sen->Tb_model);
   Serial1.printf(" Vbh %7.3f  Vbm %7.3f\n", Sen->Vb_hdwe, Sen->Vb_model);
+  Serial1.printf(" V3v3 %7.3f \n", Sen->ShuntAmp->Vh3v3()*2.);
   Serial1.printf(" imh %7.3f  imm %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model);
   Serial1.printf(" inh %7.3f  inm %7.3f\n\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model);
 
