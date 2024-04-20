@@ -229,6 +229,7 @@ def main():
     fig_list = []
     fig_files = []
     data_file_clean = None
+    CHM = None
     for (data_file, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in data_files:
         (data_file_folder, data_file_txt) = os.path.split(data_file)
         unit_key = data_file_txt.split(' ')[-1].split('.')[0]
@@ -256,12 +257,16 @@ def main():
 
     # Find minimums
     t_min, soc_min = minimums(Finished_curves)
+
+    # Print
     n_n = len(t_min)
+    m_t = n_n
+    soc_brk = Massaged_curves[0][0].soc
+    n_s = len(soc_brk)
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     print("// {:s}:  tune to data".format(date_time))
+
     """
-    const uint8_t M_T_CH = 3;    // Number temperature breakpoints for voc table
-    const uint8_t N_S_CH = 21;   // Number soc breakpoints for voc table
     const float Y_T_CH[M_T_CH] = // Temperature breakpoints for voc table
         {5.1, 5.2, 21.5};
     const float X_SOC_CH[N_S_CH] = // soc breakpoints for voc table
@@ -273,9 +278,16 @@ def main():
     const float X_SOC_MIN_CH[N_N_CH] = {0.000,  11.00,  21.5,  40.000};  // Temperature breakpoints for soc_min table
     const float T_SOC_MIN_CH[N_N_CH] = {0.31,   0.31,   0.1,   0.1};  // soc_min(t)
     """
-    print("const uint8_t N_N_{:s} = {:d};                                        // Number of temperature breakpoints for x_soc_min table".format(CHM, n_n))
+    print("const uint8_t M_T_{:s} = {:d};                                        // Number temperature breakpoints for voc table".format(CHM, m_t))
+    print("const uint8_t N_S_{:s} = {:d};                                       // Number soc breakpoints for voc table".format(CHM, n_s))
+    t_min_str = ''.join(f'{q:.1f}, ' for q in t_min)
+
     t_min_str = ''.join(f'{q:.1f}, ' for q in t_min)
     soc_min_str = ''.join(f'{q:.2f}, ' for q in soc_min)
+    soc_brk_str = ''.join(f'{q:.3f}, ' for q in soc_brk)
+    print("const float Y_T_{:s}[M_T_{:s}] =   // Temperature breakpoints for voc table\n    {{ {:s} }};".format(CHM, CHM, t_min_str))
+    print("const float X_SOC_{:s}[N_S_{:s}] = // soc breakpoints for soc_min table\n    {{ {:s} }}; ".format(CHM, CHM, soc_brk_str))
+    print("const uint8_t N_N_{:s} = {:d};                                        // Number of temperature breakpoints for x_soc_min table".format(CHM, n_n))
     print("const float X_SOC_MIN_CH[N_N_{:s}] = {{ {:s} }};  // Temperature breakpoints for soc_min table".format(CHM, t_min_str))
     print("const float T_SOC_MIN_CH[N_N_{:s}] = {{ {:s} }};  // soc_min(t)".format(CHM, soc_min_str))
 
