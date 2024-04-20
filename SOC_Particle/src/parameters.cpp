@@ -104,7 +104,7 @@ VolatilePars::~VolatilePars(){}
 
 void  VolatilePars::initialize()
 {
-    #define NVOL 37
+    #define NVOL 38
     V_ = new Variable*[NVOL];
     V_[n_++] =(cc_diff_slr_p    = new FloatV("  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_slr,       1));
     V_[n_++] =(cycles_inj_p     = new FloatV("  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
@@ -142,6 +142,7 @@ void  VolatilePars::initialize()
     V_[n_++] =(until_q_p        = new ULongV("  ", "XQ", NULL,"Time until vv0",       "ms",     0UL,  1000000UL,  &until_q,     0UL));
     V_[n_++] =(vb_add_p         = new FloatV("  ", "Dv", NULL,"Bias on vb",           "v",      -15,  15,   &vb_add,            0));
     V_[n_++] =(Vb_noise_amp_p   = new FloatV("  ", "DV", NULL,"Vb noise",             "v pk-pk",0,    10,   &Vb_noise_amp,      VB_NOISE));
+    V_[n_++] =(vc_add_p         = new FloatV("  ", "D3", NULL,"Bias on Vc=3v3/2",     "v",     -1.65, 0.85,  &vc_add,            0));
     V_[n_++] =(wait_inj_p       = new ULongV("  ", "XW", NULL,"Wait start inj",       "ms",     0UL,  120000UL, &wait_inj,      0UL));
 }
 

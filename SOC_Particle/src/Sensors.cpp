@@ -228,12 +228,14 @@ void Shunt::sample(const boolean reset_loc, const float T)
   if ( using_tsc2010_ )
   {
     Vh3v3_raw_ = analogRead(v3_pin_);
-    Vh3v3_ =  float(Vh3v3_raw_)*VH3V3_CONV_GAIN;
+    Vh3v3_ =  float(Vh3v3_raw_)*VH3V3_CONV_GAIN + ap.vc_add;
+    Vc_ = HALF_V3V3;
   }
   else
   {
     Vc_raw_ = analogRead(vc_pin_);
-    Vc_ =  float(Vc_raw_)*VC_CONV_GAIN;
+    Vc_ =  float(Vc_raw_)*VC_CONV_GAIN + ap.vc_add;
+    Vh3v3_ = HALF_V3V3;
   }
   sample_time_ = System.millis();
   Vo_raw_ = analogRead(vo_pin_);

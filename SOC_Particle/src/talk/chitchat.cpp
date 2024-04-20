@@ -63,6 +63,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
   ap.ds_voc_soc = 0;        // Ds 0
   ap.Tb_bias_model = 0;     // D^
   ap.dv_voc_soc = 0;        // Dy
+  ap.vc_add = 0;            // D3
   ap.tb_stale_time_slr = 1; // Xv 1
   ap.fail_tb = false;       // Xu 0
   

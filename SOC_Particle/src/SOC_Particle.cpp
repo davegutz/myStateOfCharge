@@ -3,7 +3,7 @@
 /******************************************************/
 
 #include "Particle.h"
-#line 1 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/src/SOC_Particle.ino"
+#line 1 "/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/src/SOC_Particle.ino"
 /*
  * Project SOC_Photon
   * Description:
@@ -31,11 +31,13 @@
   * 12-Dec-2022   RetainedPars-->SavedPars to support Argon with 47L16 EERAM device
   * 22-Dec-2022   Dual amplifier replaces dual ADS.  Beta release v20221220.  ADS still used on Photon.
   * 01-Dec-2023   g20231111 Photon 2, DS2482
+  * 01-Apr-2024   g20230331 ib_charge = ib_ / sp.nS() while Randles uses ib_.  Tune Tb initialization
+  * 17-Apr-2024   Undo previous ib_/sp.nS() change
   * 
 //
 // MIT License
 //
-// Copyright (C) 2023 - Dave Gutz
+// Copyright (C) 2024 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -60,7 +62,7 @@
 // This works when I'm using three platforms:   PHOTON = 6 and ARGON = 12 and PHOTON2 = (>=20)
 void setup();
 void loop();
-#line 55 "c:/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/src/SOC_Particle.ino"
+#line 57 "/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/src/SOC_Particle.ino"
 #ifndef PLATFORM_ID
   #define PLATFORM_ID 6
 #endif
@@ -191,12 +193,13 @@ void setup()
   // A0 (pin 'D11') - Primary Ib amp (called by old ADS name Amplified, amp)
   // A1 (pin 'D12') - Vb
   // A2 (pin 'D13') - Backup Ib amp (called by old ADS name Non Amplified, noa)
+  // A5 (pin 'D14') - 3v3
   // A4 - not available
   // A5-->D14 - spare
   
   Log.info("setup Pins");
   #ifdef CONFIG_PHOTON2
-    myPins = new Pins(D3, D7, D12, D11, D13);
+    myPins = new Pins(D3, D7, D12, D11, D13, D14);
   #else
     myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
   #endif
@@ -215,6 +218,7 @@ void setup()
       Serial.printf("Wire started\n");
     #endif
     Wire.begin();
+    delay(1000);
   #endif
 
   // Display (after start Wire)
@@ -231,6 +235,10 @@ void setup()
       Serial.printf("DISP ok\n");
     #ifndef CONFIG_BARE
       display->clearDisplay();
+    #endif
+    // Minimize power transients
+    #ifdef CONFIG_PHOTON2
+      delay(1000);
     #endif
   #endif
 
@@ -284,7 +292,7 @@ void setup()
   if ( sp.debug_z==1 || sp.debug_z==2 || sp.debug_z==3 || sp.debug_z==4 )
   {
     sp.print_history_array();
-    sp.print_fault_header();
+    sp.print_fault_header(&pp.pubList);
   }
   sp.nsum(NSUM);  // Store
 
