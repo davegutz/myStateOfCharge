@@ -119,7 +119,8 @@ def normalize_soc(soc_data, nom_unit_cap_data, unit_cap_rated=100.):
     return soc_normal
 
 
-def plot_all(raw_data, mashed_data, finished_data, act_unit_cap, fig_files=None, plot_title=None, fig_list=None, filename='Calibrate_exe'):
+def plot_all(raw_data, mashed_data, finished_data, red_data, act_unit_cap, fig_files=None, plot_title=None,
+             fig_list=None, filename='Calibrate_exe'):
     """Plot the various stages of data reduction"""
     if fig_files is None:
         fig_files = []
@@ -162,11 +163,40 @@ def plot_all(raw_data, mashed_data, finished_data, act_unit_cap, fig_files=None,
     plt.ylabel('voc(soc), v')
     plt.grid()
 
+    fig_list.append(plt.figure())  # finished data 3
+    cap_str = "{:5.1f}".format(act_unit_cap)
+    ax = plt.subplot(111)
+    # place a text box in upper left in axes coords
+    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+    ax.text(0.4, 0.2, 'Set NOM_UNIT_CAP = ' + cap_str, transform=ax.transAxes, fontsize=14,
+            verticalalignment='top', bbox=props)
+    plt.title(plot_title + ' reduced')
+    for (curve, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in red_data:
+        plt.plot(curve.soc, curve.vstat, color=p_color, linestyle=p_style, marker=marker, markersize=marker_size,
+                 label='voc ' + str(temp) + 'C')
+    plt.legend(loc=1)
+    plt.xlabel('soc')
+    plt.ylabel('voc(soc), v')
+    plt.grid()
+
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
     return fig_list, fig_files
+
+
+def reduce(fin_data, breakpoints):
+    """Sample finished curves to minimize breakpoints"""
+    red_data = []
+    for (curve, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in fin_data:
+        val = []
+        lut_voc_soc = myTables.TableInterp1D(curve.soc, curve.vstat)
+        for brk in breakpoints:
+            val.append(lut_voc_soc.interp(brk))
+        New_red_data = DataCP(nom_unit_cap, curve.temp_c, breakpoints, val, curve.data_file)
+        red_data.append((New_red_data, Battery.UNIT_CAP_RATED, temp, p_color, p_style, marker, marker_size))
+    return red_data
 
 
 def main():
@@ -184,6 +214,10 @@ def main():
     #   p_color         matplotlib line color
     #   marker          matplotlib marker
     #   marker_size     matplotlib marker size
+
+    # Hand-select these from figure 3 and re-run this script
+    breakpoints = [-.1136, -.044, 0, .0164, .032, .055, .064, .114, .134, .1545, .183, .2145, .3, .4, .5, .6, .7, .8, .9, .96, .98, 1]
+
     hdr_key = 'vstat'  # key to be found in header for data
 
     # Sort by temperature lowest to highest for consistency throughout
@@ -198,6 +232,7 @@ def main():
     for (data_file, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in data_files:
         (data_file_folder, data_file_txt) = os.path.split(data_file)
         unit_key = data_file_txt.split(' ')[-1].split('.')[0]
+        CHM = unit_key.split('_')[1].upper()
         data_file_clean = write_clean_file(data_file, type_='', hdr_key=hdr_key, unit_key=unit_key)
         if data_file_clean is None:
             print(f"case {data_file=} {temp=} is dirty...skipping")
@@ -211,23 +246,44 @@ def main():
     # Mash all the data to one table and normalize to NOM_UNIT_CAP = 100
     Mashed_data, soc_aggregate_off = mash(Raw_files)
     actual_cap = (1.-soc_aggregate_off) * Battery.UNIT_CAP_RATED
-    print("\nAfter mashing:  capacity = {:5.1f}".format(actual_cap))
+    print("\n#define NOM_UNIT_CAP          {:5.1f}   // Nominal battery unit capacity at RATED_TEMP.  (* 'Sc' or '*BS'/'*BP'), Ah\n".format(actual_cap))
 
     # Shift and scale curves for calculated capacity
     Finished_curves = finish(Mashed_data, soc_aggregate_off, actual_cap)
 
+    # Minimize number of points
+    Massaged_curves = reduce(Finished_curves, breakpoints)
+
     # Find minimums
     t_min, soc_min = minimums(Finished_curves)
-
-    # Print results TODO
-    print('t_min   = ', ', '.join(f'{q:.1f}' for q in t_min))
-    print('soc_min = ', ', '.join(f'{q:.2f}' for q in soc_min))
-
+    n_n = len(t_min)
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+    print("// {:s}:  tune to data".format(date_time))
+    """
+    const uint8_t M_T_CH = 3;    // Number temperature breakpoints for voc table
+    const uint8_t N_S_CH = 21;   // Number soc breakpoints for voc table
+    const float Y_T_CH[M_T_CH] = // Temperature breakpoints for voc table
+        {5.1, 5.2, 21.5};
+    const float X_SOC_CH[N_S_CH] = // soc breakpoints for voc table
+        {-0.035,   0.000,   0.050,   0.100,   0.108,   0.120,   0.140,   0.170,   0.200,   0.250,   0.300,   0.340,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.980,   0.990,   1.000};
+    const float T_VOC_CH[M_T_CH * N_S_CH] = // r(soc, dv) table
+        {4.000,   4.000,  4.000,   4.000,    4.000,  4.000,  4.000,   4.000,   4.000,   4.000,   9.000,  11.770,  12.700,  12.950,  13.050,  13.100,  13.226,  13.259,  13.264,  13.460,  14.270,
+         4.000,   4.000,  4.000,   4.000,    4.000,  4.000,  4.000,   4.000,   4.000,   4.000,   9.000,  11.770,  12.700,  12.950,  13.050,  13.100,  13.226,  13.259,  13.264,  13.460,  14.270,
+         4.000,   4.000,  9.0000,  9.500,   11.260, 11.850, 12.400,  12.650,  12.730,  12.810,  12.920,  12.960,  13.020,  13.060,  13.220,  13.280,  13.284,  13.299,  13.310,  13.486,  14.700};
+    const float X_SOC_MIN_CH[N_N_CH] = {0.000,  11.00,  21.5,  40.000};  // Temperature breakpoints for soc_min table
+    const float T_SOC_MIN_CH[N_N_CH] = {0.31,   0.31,   0.1,   0.1};  // soc_min(t)
+    """
+    print("const uint8_t N_N_{:s} = {:d};                                        // Number of temperature breakpoints for x_soc_min table".format(CHM, n_n))
+    t_min_str = ''.join(f'{q:.1f}, ' for q in t_min)
+    soc_min_str = ''.join(f'{q:.2f}, ' for q in soc_min)
+    print("const float X_SOC_MIN_CH[N_N_{:s}] = {{ {:s} }};  // Temperature breakpoints for soc_min table".format(CHM, t_min_str))
+    print("const float T_SOC_MIN_CH[N_N_{:s}] = {{ {:s} }};  // soc_min(t)".format(CHM, soc_min_str))
+
     data_root = data_file_clean.split('/')[-1].replace('.csv', '_')
     filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
     plot_title = filename + '   ' + date_time
-    plot_all(Raw_files, Mashed_data, Finished_curves, actual_cap, fig_files=fig_files, plot_title=plot_title, fig_list=fig_list,
+    plot_all(Raw_files, Mashed_data, Finished_curves, Massaged_curves, actual_cap, fig_files=fig_files,
+             plot_title=plot_title, fig_list=fig_list,
              filename='Calibrate_exe')
     plt.show()
     cleanup_fig_files(fig_files)
