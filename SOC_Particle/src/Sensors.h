@@ -70,9 +70,7 @@ class Shunt: public Adafruit_ADS1015
 public:
   Shunt();
   Shunt(const String name, const uint8_t port, float *sp_ib_scale, float *sp_Ib_bias, const float v2a_s,
-    const uint8_t vc_pin, const uint8_t vo_pin);
-  Shunt(const String name, const uint8_t port, float *sp_ib_scale, float *sp_Ib_bias, const float v2a_s,
-    const uint8_t vo_pin);
+    const uint8_t vc_pin, const uint8_t vo_pin, const uint8_t vh3v3_pin, const boolean using_tsc2010);
   ~Shunt();
   // operators
   // functions
@@ -92,6 +90,8 @@ public:
   int16_t vshunt_int_0() { return vshunt_int_0_; };
   int16_t vshunt_int_1() { return vshunt_int_1_; };
   float Vc() { return Vc_; };
+  int16_t vh3v3_raw() { return Vh3v3_raw_; };
+  float Vh3v3() { return Vh3v3_; };
   float Vo() { return Vo_; };
   float Vo_Vc() { return Vo_Vc_; };
   float Vo_Vc_f() { return Vo_Vc_f_; };
@@ -113,6 +113,7 @@ protected:
   boolean dscn_cmd_;    // User command to ignore hardware, T=ignore
   uint8_t vc_pin_;      // Common voltage pin, for !CONFIG_ADS1013_OPAMP
   uint8_t vo_pin_;      // Output voltage pin, for !CONFIG_ADS1013_OPAMP
+  uint8_t v3_pin_;      // Half 3v3 voltage pin, for tsc1200
   int Vc_raw_;          // Raw analog read, integer       
   float Vc_;            // Sensed Vc, common op amp voltage ref, V
   int Vo_raw_;          // Raw analog read, integer       
@@ -120,6 +121,8 @@ protected:
   float Vo_Vc_;         // Sensed Vo-Vc, difference in output of op amps, V
   float Vo_Vc_f_;       // Sensed, filtered Vo-Vc, difference in output of op amps, V
   boolean using_tsc2010_; // Using differential hardware amp
+  int Vh3v3_raw_;       // Raw analog read, integer       
+  float Vh3v3_;         // Sensed Vh3v3, half 3v3, V
   General2_Pole *Filt_; // Linear filter to test for direction
 };
 
