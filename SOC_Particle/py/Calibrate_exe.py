@@ -267,29 +267,29 @@ def main():
     print("// {:s}:  tune to data".format(date_time))
 
     """
-    const float Y_T_CH[M_T_CH] = // Temperature breakpoints for voc table
-        {5.1, 5.2, 21.5};
-    const float X_SOC_CH[N_S_CH] = // soc breakpoints for voc table
-        {-0.035,   0.000,   0.050,   0.100,   0.108,   0.120,   0.140,   0.170,   0.200,   0.250,   0.300,   0.340,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.980,   0.990,   1.000};
     const float T_VOC_CH[M_T_CH * N_S_CH] = // r(soc, dv) table
         {4.000,   4.000,  4.000,   4.000,    4.000,  4.000,  4.000,   4.000,   4.000,   4.000,   9.000,  11.770,  12.700,  12.950,  13.050,  13.100,  13.226,  13.259,  13.264,  13.460,  14.270,
          4.000,   4.000,  4.000,   4.000,    4.000,  4.000,  4.000,   4.000,   4.000,   4.000,   9.000,  11.770,  12.700,  12.950,  13.050,  13.100,  13.226,  13.259,  13.264,  13.460,  14.270,
          4.000,   4.000,  9.0000,  9.500,   11.260, 11.850, 12.400,  12.650,  12.730,  12.810,  12.920,  12.960,  13.020,  13.060,  13.220,  13.280,  13.284,  13.299,  13.310,  13.486,  14.700};
-    const float X_SOC_MIN_CH[N_N_CH] = {0.000,  11.00,  21.5,  40.000};  // Temperature breakpoints for soc_min table
-    const float T_SOC_MIN_CH[N_N_CH] = {0.31,   0.31,   0.1,   0.1};  // soc_min(t)
     """
-    print("const uint8_t M_T_{:s} = {:d};                                        // Number temperature breakpoints for voc table".format(CHM, m_t))
-    print("const uint8_t N_S_{:s} = {:d};                                       // Number soc breakpoints for voc table".format(CHM, n_s))
-    t_min_str = ''.join(f'{q:.1f}, ' for q in t_min)
-
     t_min_str = ''.join(f'{q:.1f}, ' for q in t_min)
     soc_min_str = ''.join(f'{q:.2f}, ' for q in soc_min)
     soc_brk_str = ''.join(f'{q:.3f}, ' for q in soc_brk)
-    print("const float Y_T_{:s}[M_T_{:s}] =   // Temperature breakpoints for voc table\n    {{ {:s} }};".format(CHM, CHM, t_min_str))
-    print("const float X_SOC_{:s}[N_S_{:s}] = // soc breakpoints for soc_min table\n    {{ {:s} }}; ".format(CHM, CHM, soc_brk_str))
+    voc_soc_brk_str = []
+    for i in np.arange(m_t):
+        voc_soc_brk = Massaged_curves[i][0].vstat
+        voc_soc_brk_str.append(''.join(f'{q:.3f}, ' for q in voc_soc_brk))
+    print("const uint8_t M_T_{:s} = {:d};    // Number temperature breakpoints for voc table".format(CHM, m_t))
+    print("const uint8_t N_S_{:s} = {:d};   // Number soc breakpoints for voc table".format(CHM, n_s))
+    print("const float Y_T_{:s}[M_T_{:s}] = // Temperature breakpoints for voc table\n    {{{:s}}};".format(CHM, CHM, t_min_str))
+    print("const float X_SOC_{:s}[N_S_{:s}] = // soc breakpoints for voc table\n    {{{:s}}}; ".format(CHM, CHM, soc_brk_str))
+    print("const float T_SOC_{:s}[M_T_{:s} * N_S_{:s}] = // soc breakpoints for soc_min table\n   {{".format(CHM, CHM, CHM))
+    for i in np.arange(m_t):
+        print("    {:s}".format(voc_soc_brk_str[i]))
+    print("   };")
     print("const uint8_t N_N_{:s} = {:d};                                        // Number of temperature breakpoints for x_soc_min table".format(CHM, n_n))
-    print("const float X_SOC_MIN_CH[N_N_{:s}] = {{ {:s} }};  // Temperature breakpoints for soc_min table".format(CHM, t_min_str))
-    print("const float T_SOC_MIN_CH[N_N_{:s}] = {{ {:s} }};  // soc_min(t)".format(CHM, soc_min_str))
+    print("const float X_SOC_MIN_CH[N_N_{:s}] = {{{:s}}};  // Temperature breakpoints for soc_min table".format(CHM, t_min_str))
+    print("const float T_SOC_MIN_CH[N_N_{:s}] = {{{:s}}};  // soc_min(t)".format(CHM, soc_min_str))
 
     data_root = data_file_clean.split('/')[-1].replace('.csv', '_')
     filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
