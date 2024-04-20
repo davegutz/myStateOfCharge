@@ -278,7 +278,7 @@ def main():
     print("const uint8_t N_S_{:s} = {:d};   // Number soc breakpoints for voc table".format(CHM, n_s))
     print("const float Y_T_{:s}[M_T_{:s}] = // Temperature breakpoints for voc table\n    {{{:s}}};".format(CHM, CHM, t_min_str))
     print("const float X_SOC_{:s}[N_S_{:s}] = // soc breakpoints for voc table\n    {{{:s}}}; ".format(CHM, CHM, soc_brk_str))
-    print("const float T_SOC_{:s}[M_T_{:s} * N_S_{:s}] = // soc breakpoints for soc_min table\n    {{".format(CHM, CHM, CHM))
+    print("const float T_VOC_{:s}[M_T_{:s} * N_S_{:s}] = // soc breakpoints for soc_min table\n    {{".format(CHM, CHM, CHM))
     for i in np.arange(m_t):
         print("     {:s}".format(voc_soc_brk_str[i]))
     print("    };")

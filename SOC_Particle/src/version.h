@@ -2,6 +2,8 @@
 #define version_h
 
 #include "application.h"  // for String
+#define xstr(s) str(s)
+#define str(s) #s
 
 const String version = "g20240331";
 // g20240331 is garage modifications and two-stage current sensing

@@ -2,7 +2,7 @@
 #define local_config_h
 
 #include "version.h"
-const String unit = version + "_soc2p2";
+#define CONFIG_SOC2P2
 
 // Hardware config
 #define CONFIG_SBAUD               460800      // Default Serial baud when able

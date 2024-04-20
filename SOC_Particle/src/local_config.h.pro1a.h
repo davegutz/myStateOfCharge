@@ -2,7 +2,7 @@
 #define local_config_h
 
 #include "version.h"
-const String unit = version + "_pro1a";
+#define CONFIG_PRO1A
 
 // Features config
 #define CONFIG_SBAUD               230400      // Default Serial baud
