@@ -274,19 +274,19 @@ def main():
     """
     t_min_str = ''.join(f'{q:.1f}, ' for q in t_min)
     soc_min_str = ''.join(f'{q:.2f}, ' for q in soc_min)
-    soc_brk_str = ''.join(f'{q:.3f}, ' for q in soc_brk)
+    soc_brk_str = ''.join(f'{q:6.3f}, ' for q in soc_brk)
     voc_soc_brk_str = []
     for i in np.arange(m_t):
         voc_soc_brk = Massaged_curves[i][0].vstat
-        voc_soc_brk_str.append(''.join(f'{q:.3f}, ' for q in voc_soc_brk))
+        voc_soc_brk_str.append(''.join(f'{q:6.3f}, ' for q in voc_soc_brk))
     print("const uint8_t M_T_{:s} = {:d};    // Number temperature breakpoints for voc table".format(CHM, m_t))
     print("const uint8_t N_S_{:s} = {:d};   // Number soc breakpoints for voc table".format(CHM, n_s))
     print("const float Y_T_{:s}[M_T_{:s}] = // Temperature breakpoints for voc table\n    {{{:s}}};".format(CHM, CHM, t_min_str))
     print("const float X_SOC_{:s}[N_S_{:s}] = // soc breakpoints for voc table\n    {{{:s}}}; ".format(CHM, CHM, soc_brk_str))
-    print("const float T_SOC_{:s}[M_T_{:s} * N_S_{:s}] = // soc breakpoints for soc_min table\n   {{".format(CHM, CHM, CHM))
+    print("const float T_SOC_{:s}[M_T_{:s} * N_S_{:s}] = // soc breakpoints for soc_min table\n    {{".format(CHM, CHM, CHM))
     for i in np.arange(m_t):
-        print("    {:s}".format(voc_soc_brk_str[i]))
-    print("   };")
+        print("     {:s}".format(voc_soc_brk_str[i]))
+    print("    };")
     print("const uint8_t N_N_{:s} = {:d};                                        // Number of temperature breakpoints for x_soc_min table".format(CHM, n_n))
     print("const float X_SOC_MIN_CH[N_N_{:s}] = {{{:s}}};  // Temperature breakpoints for soc_min table".format(CHM, t_min_str))
     print("const float T_SOC_MIN_CH[N_N_{:s}] = {{{:s}}};  // soc_min(t)".format(CHM, soc_min_str))
