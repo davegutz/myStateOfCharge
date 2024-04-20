@@ -24,6 +24,7 @@ from datetime import datetime
 from pyDAGx import myTables
 import numpy as np
 import sys
+import os
 
 
 class DataC:
@@ -171,12 +172,10 @@ def plot_all(raw_data, mashed_data, finished_data, act_unit_cap, fig_files=None,
 def main():
 
     data_files = [
-        ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 13C soc2p2_ch.csv',
-         100., 13., 'green', '-.', '^', 4),
         ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 21p5C soc2p2_ch.csv',
          100., 21.5, 'orange', '--', 'x', 4),
-        ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C soc2p2_ch.csv',
-         110., 25., 'red', '-', '1', 4),
+        ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C pro3p2_ch.csv',
+         100., 25., 'red', '-', '1', 4),
     ]
     #  data_files[( data_file, nom_unit_cap, temp_c, p_color, marker, marker_size), (...), ...]  List of tuples of data from experiments
     #   data_file       Full path to data file
@@ -185,9 +184,6 @@ def main():
     #   p_color         matplotlib line color
     #   marker          matplotlib marker
     #   marker_size     matplotlib marker size
-    chm = 'ch'  # battery chemistry
-    unit = 'soc2p2'  # Particle unit name
-    unit_key = unit + '_' + chm  # key to be found in each line of data
     hdr_key = 'vstat'  # key to be found in header for data
 
     # Sort by temperature lowest to highest for consistency throughout
@@ -200,6 +196,8 @@ def main():
     fig_files = []
     data_file_clean = None
     for (data_file, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in data_files:
+        (data_file_folder, data_file_txt) = os.path.split(data_file)
+        unit_key = data_file_txt.split(' ')[-1].split('.')[0]
         data_file_clean = write_clean_file(data_file, type_='', hdr_key=hdr_key, unit_key=unit_key)
         if data_file_clean is None:
             print(f"case {data_file=} {temp=} is dirty...skipping")
