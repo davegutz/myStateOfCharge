@@ -22,6 +22,7 @@ from DataOverModel import write_clean_file
 import matplotlib.pyplot as plt
 from datetime import datetime
 from pyDAGx import myTables
+from Colors import *
 import numpy as np
 import sys
 import os
@@ -233,6 +234,7 @@ def main():
     for (data_file, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in data_files:
         (data_file_folder, data_file_txt) = os.path.split(data_file)
         unit_key = data_file_txt.split(' ')[-1].split('.')[0]
+        unit = unit_key.split('_')[0]
         CHM = unit_key.split('_')[1].upper()
         data_file_clean = write_clean_file(data_file, type_='', hdr_key=hdr_key, unit_key=unit_key)
         if data_file_clean is None:
@@ -247,7 +249,6 @@ def main():
     # Mash all the data to one table and normalize to NOM_UNIT_CAP = 100
     Mashed_data, soc_aggregate_off = mash(Raw_files)
     actual_cap = (1.-soc_aggregate_off) * Battery.UNIT_CAP_RATED
-    print("\n#define NOM_UNIT_CAP          {:5.1f}   // Nominal battery unit capacity at RATED_TEMP.  (* 'Sc' or '*BS'/'*BP'), Ah\n".format(actual_cap))
 
     # Shift and scale curves for calculated capacity
     Finished_curves = finish(Mashed_data, soc_aggregate_off, actual_cap)
@@ -264,14 +265,8 @@ def main():
     soc_brk = Massaged_curves[0][0].soc
     n_s = len(soc_brk)
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-    print("// {:s}:  tune to data".format(date_time))
-
-    """
-    const float T_VOC_CH[M_T_CH * N_S_CH] = // r(soc, dv) table
-        {4.000,   4.000,  4.000,   4.000,    4.000,  4.000,  4.000,   4.000,   4.000,   4.000,   9.000,  11.770,  12.700,  12.950,  13.050,  13.100,  13.226,  13.259,  13.264,  13.460,  14.270,
-         4.000,   4.000,  4.000,   4.000,    4.000,  4.000,  4.000,   4.000,   4.000,   4.000,   9.000,  11.770,  12.700,  12.950,  13.050,  13.100,  13.226,  13.259,  13.264,  13.460,  14.270,
-         4.000,   4.000,  9.0000,  9.500,   11.260, 11.850, 12.400,  12.650,  12.730,  12.810,  12.920,  12.960,  13.020,  13.060,  13.220,  13.280,  13.284,  13.299,  13.310,  13.486,  14.700};
-    """
+    print("\nfor Chemistry_BMS.cpp:\n")
+    print(Colors.fg.green, "// {:s}:  tune to data".format(date_time))
     t_min_str = ''.join(f'{q:.1f}, ' for q in t_min)
     soc_min_str = ''.join(f'{q:.2f}, ' for q in soc_min)
     soc_brk_str = ''.join(f'{q:6.3f}, ' for q in soc_brk)
@@ -287,9 +282,12 @@ def main():
     for i in np.arange(m_t):
         print("     {:s}".format(voc_soc_brk_str[i]))
     print("    };")
-    print("const uint8_t N_N_{:s} = {:d};                                        // Number of temperature breakpoints for x_soc_min table".format(CHM, n_n))
+    print("const uint8_t N_N_{:s} = {:d}; // Number of temperature breakpoints for x_soc_min table".format(CHM, n_n))
     print("const float X_SOC_MIN_CH[N_N_{:s}] = {{{:s}}};  // Temperature breakpoints for soc_min table".format(CHM, t_min_str))
     print("const float T_SOC_MIN_CH[N_N_{:s}] = {{{:s}}};  // soc_min(t)".format(CHM, soc_min_str))
+    print(Colors.reset, "\n\nfor local_config.h.{:s}\n".format(unit))
+    print(Colors.fg.green, "#define NOM_UNIT_CAP          {:5.1f}   // Nominal battery unit capacity at RATED_TEMP.  (* 'Sc' or '*BS'/'*BP'), Ah\n".format(actual_cap))
+    print(Colors.reset)
 
     data_root = data_file_clean.split('/')[-1].replace('.csv', '_')
     filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
