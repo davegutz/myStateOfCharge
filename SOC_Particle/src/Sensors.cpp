@@ -392,7 +392,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
   Serial.printf(" fake_faults %d latched_fail %d latched_fail_fake %d preserving %d\n\n", ap.fake_faults, latched_fail_, latched_fail_fake_, *sp_preserving_);
 
-  Serial.printf(" vc      %d  %d 'Fd ^'\n", vc_flt(), vc_fa());
+  Serial.printf(" vc      %d  %d 'FI 1'\n", vc_flt(), vc_fa());
   Serial.printf(" bare det n  %d  x \n", ib_noa_bare());
   Serial.printf(" bare det m  %d  x \n", ib_amp_bare());
   Serial.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
@@ -402,8 +402,8 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" wl      %d  %d 'Fo ^'\n", wrap_lo_flt(), wrap_lo_fa());
   Serial.printf(" wh      %d  %d 'Fi ^'\n", wrap_hi_flt(), wrap_hi_fa());
   Serial.printf(" vc | cc_dif %d  %d 'x Fc ^'\n", vc_fa(), cc_diff_fa());
-  Serial.printf(" ib n    %d  %d 'Fi 1'\n", ib_noa_flt(), ib_noa_fa());
-  Serial.printf(" ib m    %d  %d 'Fi 1'\n", ib_amp_flt(), ib_amp_fa());
+  Serial.printf(" ib n    %d  %d 'FI 1'\n", ib_noa_flt(), ib_noa_fa());
+  Serial.printf(" ib m    %d  %d 'FI 1'\n", ib_amp_flt(), ib_amp_fa());
   Serial.printf(" vb      %d  %d 'Fv 1  *SV, *Dc/*Dv'\n", vb_flt(), vb_fa());
   Serial.printf(" tb      %d  %d 'Ft 1'\n  ", tb_flt(), tb_fa());
   bitMapPrint(pr.buff, fltw_, NUM_FLT);
@@ -438,7 +438,7 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
   Serial1.printf(" fake_faults %d latched_fail %d latched_fail_fake %d preserving %d\n\n", ap.fake_faults, latched_fail_, latched_fail_fake_, *sp_preserving_);
 
-  Serial1.printf(" vc      %d  %d 'Fd ^'\n", vc_flt(), vc_fa());
+  Serial1.printf(" vc      %d  %d 'FI 1'\n", vc_flt(), vc_fa());
   Serial1.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
   Serial1.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare_detected());
   Serial1.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
@@ -448,8 +448,8 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" wl      %d  %d 'Fo ^'\n", wrap_lo_flt(), wrap_lo_fa());
   Serial1.printf(" wh      %d  %d 'Fi ^'\n", wrap_hi_flt(), wrap_hi_fa());
   Serial1.printf(" cc_dif      %d 'Fc ^'\n", cc_diff_fa());
-  Serial1.printf(" ib n    %d  %d 'Fi 1'\n", ib_noa_flt(), ib_noa_fa());
-  Serial1.printf(" ib m    %d  %d 'Fi 1'\n", ib_amp_flt(), ib_amp_fa());
+  Serial1.printf(" ib n    %d  %d 'FI 1'\n", ib_noa_flt(), ib_noa_fa());
+  Serial1.printf(" ib m    %d  %d 'FI 1'\n", ib_amp_flt(), ib_amp_fa());
   Serial1.printf(" vb      %d  %d 'Fv 1, *SV, *Dc/*Dv'\n", vb_flt(), vb_fa());
   Serial1.printf(" tb      %d  %d 'Ft 1'\n  ", tb_flt(), tb_fa());
   bitMapPrint(pr.buff, fltw_, NUM_FLT);
@@ -756,14 +756,14 @@ void Fault::vc_check(Sensors *Sen, BatteryMonitor *Mon, const float _vc_min, con
   {
     failAssign(false, VC_FA);
   }
-  if ( ap.disab_vb_fa || sp.mod_vb() )
+  if ( sp.mod_ib() || ap.disab_ib_fa )
   {
     faultAssign(false, VC_FLT);
     failAssign( false, VC_FA);
   }
   else
   {
-    faultAssign( (Sen->Vc()<=_vc_min) || (Sen->Vc()>=_vc_max), VC_FLT);
+    faultAssign( ( ((Sen->Vc<=_vc_min) || (Sen->Vc>=_vc_max)) && !reset_loc ), VC_FLT);
     failAssign( vc_fa() || VcHardFail->calculate(vc_flt(), VC_HARD_SET, VC_HARD_RESET, Sen->T, reset_loc), VC_FA);
   }
 }
@@ -911,12 +911,14 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   if ( sp.mod_ib() )
   {
     Ib = Ib_hdwe_model;
+    Vc = HALF_V3V3;
     sample_time_ib_ = Sim->sample_time();
     dt_ib_ = Sim->dt();
   }
   else
   {
     Ib = Ib_hdwe;
+    Vc = Vc_hdwe;
     sample_time_ib_ = sample_time_ib_hdwe_;
     dt_ib_ = dt_ib_hdwe_;
   }
@@ -1027,6 +1029,7 @@ void Sensors::shunt_select_initial(const boolean reset)
     Ib_noa_model = Ib_model + Ib_noa_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
     Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);
+    Vc_hdwe = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());
     Ib_noa_hdwe = ShuntNoAmp->Ishunt_cal() + hdwe_add;  // Sense fault injection feeds logic, not model
     Ib_noa_hdwe_f = NoaFilt->calculate(Ib_noa_hdwe, reset, AMP_FILT_TAU, T);
 
