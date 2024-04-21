@@ -201,12 +201,16 @@ def reduce(fin_data, breakpoints):
 
 
 def main():
+    if sys.platform == 'linux':
+        gdrive = '/home/daveg/google-drive'
+    else:
+        gdrive = 'G:/My Drive'
 
     data_files = [
-        ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 21p5C soc2p2_ch.csv',
-         100., 21.5, 'orange', '--', 'x', 4),
-        ('G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C pro3p2_ch.csv',
-         100., 25., 'red', '-', '1', 4),
+        (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 21p5C soc2p2_ch.csv',
+            100., 21.5, 'orange', '--', 'x', 4),
+        (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C pro3p2_ch.csv',
+            100., 25., 'red', '-', '1', 4),
     ]
     #  data_files[( data_file, nom_unit_cap, temp_c, p_color, marker, marker_size), (...), ...]  List of tuples of data from experiments
     #   data_file       Full path to data file
