@@ -107,7 +107,7 @@ void Chemistry::assign_all_chm(const String mod_str)
 
 
 // CHINS Chemistry
-#if( defined(CONFIG_PRO3P2) )
+#if( defined(CONFIG_PRO0P) )
     // CHINS 100 Ah, 12v LiFePO4
     // 2023-02-27:  tune to data.  Add slight slope 0.8-0.98 to make models deterministic
     // 2023-08-29:  tune to data
@@ -127,7 +127,7 @@ void Chemistry::assign_all_chm(const String mod_str)
     const uint8_t N_N = 4;                                        // Number of temperature breakpoints for x_soc_min table
     const float X_SOC_MIN[N_N] = {0.000,  11.00,  21.5,  40.000, };  // Temperature breakpoints for soc_min table
     const float T_SOC_MIN[N_N] = {0.31,   0.31,   0.1,   0.1, };  // soc_min(t)
-#elif ( defined(CONFIG_PRO0P) )
+#elif ( defined(CONFIG_PRO3P2) )
      // 2024-04-20T05-47-20:  tune to data
     const uint8_t M_T = 2;    // Number temperature breakpoints for voc table
     const uint8_t N_S = 22;   // Number soc breakpoints for voc table
