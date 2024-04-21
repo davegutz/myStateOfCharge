@@ -11,5 +11,4 @@
 // //#include "local_config.h.soc3p2.h"   failed. shorted 3v3 to gnd with blob of solder
 // #include "local_config.h.soc2p2.h"
 
-
 #endif
