@@ -763,7 +763,7 @@ void Fault::vc_check(Sensors *Sen, BatteryMonitor *Mon, const float _vc_min, con
   }
   else
   {
-    faultAssign( ( (Sen->Vc<=_vc_min) || (Sen->Vc>=_vc_max) ), VC_FLT);
+    faultAssign( ( ((Sen->Vc<=_vc_min) || (Sen->Vc>=_vc_max)) && !reset_loc ), VC_FLT);
     failAssign( vc_fa() || VcHardFail->calculate(vc_flt(), VC_HARD_SET, VC_HARD_RESET, Sen->T, reset_loc), VC_FA);
   }
 }
