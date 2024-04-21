@@ -55,8 +55,6 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  bR= "); Serial.printf("reset all buffers\n");
 
   Serial.printf("\nB<?> Battery e.g.:\n");
-  sp.Mon_chm_p->print_help();  //* Bm 
-  sp.Sim_chm_p->print_help();  //* Bs
   sp.nP_p->print_help();  //* BP
   sp.nS_p->print_help();  //* BS
 

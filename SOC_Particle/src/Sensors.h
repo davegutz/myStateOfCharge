@@ -90,8 +90,6 @@ public:
   int16_t vshunt_int_0() { return vshunt_int_0_; };
   int16_t vshunt_int_1() { return vshunt_int_1_; };
   float Vc() { return Vc_; };
-  int16_t vh3v3_raw() { return Vh3v3_raw_; };
-  float Vh3v3() { return Vh3v3_; };
   float Vo() { return Vo_; };
   float Vo_Vc() { return Vo_Vc_; };
   float Vo_Vc_f() { return Vo_Vc_f_; };
@@ -121,8 +119,6 @@ protected:
   float Vo_Vc_;         // Sensed Vo-Vc, difference in output of op amps, V
   float Vo_Vc_f_;       // Sensed, filtered Vo-Vc, difference in output of op amps, V
   boolean using_tsc2010_; // Using differential hardware amp
-  int Vh3v3_raw_;       // Raw analog read, integer       
-  float Vh3v3_;         // Sensed Vh3v3, half 3v3, V
   General2_Pole *Filt_; // Linear filter to test for direction
 };
 
@@ -131,7 +127,7 @@ protected:
 #define VB_FLT        1   // Momentary isolation of Vb failure, T=faulted
 #define IB_AMP_FLT    2   // Momentary isolation of Ib amp failure, T=faulted 
 #define IB_NOA_FLT    3   // Momentary isolation of Ib no amp failure, T=faulted 
-//                    4
+//                  4
 #define WRAP_HI_FLT   5   // Wrap isolates to Ib high fault
 #define WRAP_LO_FLT   6   // Wrap isolates to Ib low fault
 #define RED_LOSS      7   // Loss of current knowledge redundancy, T = fault
@@ -140,7 +136,8 @@ protected:
 #define IB_DSCN_FLT   10  // Dual faulted quiet error, T = disconnected shunt
 #define IB_AMP_BARE   11  // Unconnected ib bus, T = bare bus
 #define IB_NOA_BARE   12  // Unconnected ib bus, T = bare bus
-#define NUM_FLT       13  // Number of these
+#define VC_FLT        13  // Momentary isolation of Vc failure, T=faulted
+#define NUM_FLT       14  // Number of these
 
 // Fail word bits.   A couple don't latch because single sensor fail in dual sensor system
 #define TB_FA         0   // Peristed, latched isolation of Tb failure, heals because soft type, T=failed
@@ -154,7 +151,8 @@ protected:
 #define IB_DIFF_HI_FA 8   // Persisted sensor difference error, latches because hard type, T = fail
 #define IB_DIFF_LO_FA 9   // Persisted sensor difference error, latches because hard type, T = fail
 #define IB_DSCN_FA    10  // Dual persisted quiet error, heals functional type, T = disconnected shunt
-#define NUM_FA        11  // Number of these
+#define VC_FA         11  // Peristed, latched isolation of Vc failure, latches because hard type, T=failed
+#define NUM_FA        12  // Number of these
 
 #define faultSet(bit) (bitSet(fltw_, bit) )
 #define failSet(bit) (bitSet(falw_, bit) )
@@ -237,10 +235,14 @@ public:
   int8_t tb_sel_status() { return tb_sel_stat_; };
   void tb_stale(const boolean reset, Sensors *Sen);
   void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, const float _vb_max, const boolean reset);  // Range check Vb
+  void vc_check(Sensors *Sen, BatteryMonitor *Mon, const float _vc_min, const float _vc_max, const boolean reset);  // Range check Vc
   boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
+  boolean vc_fail() { return ( vc_fa() ); };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
   boolean vb_flt() { return faultRead(VB_FLT); };
+  boolean vc_fa() { return failRead(VC_FA); };
+  boolean vc_flt() { return failRead(VC_FLT); };
   boolean wrap_fa() { return ( failRead(WRAP_HI_FA) || failRead(WRAP_LO_FA) ); };
   boolean wrap_hi_fa() { return failRead(WRAP_HI_FA); };
   boolean wrap_hi_flt() { return faultRead(WRAP_HI_FLT); };
@@ -259,6 +261,7 @@ protected:
   RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
   TFDelay *TbStaleFail;     // Persistence stale tb one-wire data
   TFDelay *VbHardFail;      // Persistence vb hard fail amp
+  TFDelay *VcHardFail;      // Persistence vc hard fail amp
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
@@ -301,6 +304,7 @@ public:
   float Vb_hdwe;              // Sensed battery bank voltage, V
   float Vb_hdwe_f;            // Sensed, filtered battery bank voltage, V
   float Vb_model;             // Modeled battery bank voltage, V
+  float Vc_hdwe;              // Sensed 3v3 bank voltage, V
   float Tb;                   // Selected battery bank temp, C
   float Tb_filt;              // Selected filtered battery bank temp, C
   float Tb_hdwe;              // Sensed battery temp, C
@@ -374,6 +378,9 @@ public:
   float Vb_add();
   float Vb_noise();
   void vb_print(void);                  // Print Vb result
+  float Vc() { return Vc_hdwe; };                  // 3v3 select hardware unit voltage, V
+  float vc() { return Vc_hdwe; };                  // 3v3 select hardware unit voltage, V
+  float vc_hdwe() { return Vc_hdwe; };                  // 3v3 select hardware unit voltage, V
   Fault *Flt;
 protected:
   LagExp *AmpFilt;      // Noise filter for calibration

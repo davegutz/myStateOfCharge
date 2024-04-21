@@ -94,7 +94,6 @@ public:
   }
   void assign_BB();   // Battleborn assignment
   void assign_CH();   // CHINS assignment
-  void assign_SP();   // Spare assignment
   void assign_all_chm(const String mod_str);  // Assignment executive
   void assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t, const float *s,
     const float *tx, const float *tn); // Worker bee Hys

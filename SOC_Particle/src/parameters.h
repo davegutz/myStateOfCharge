@@ -258,13 +258,9 @@ public:
     void put_Ihis(const int input) { ihis_p->check_set_put(input); }
     void put_Isum(const int input) { isum_p->check_set_put(input); }
     void put_Inj_bias(const float input) { inj_bias_p->check_set_put(input); }
-    void put_Mon_chm(const uint8_t input) { Mon_chm_p->check_set_put(input); }
-    void put_Mon_chm() {}
     void put_nP(const float input) { nP_p->check_set_put(input); }
     void put_nS(const float input) { nS_p->check_set_put(input); }
     void put_Preserving(const uint8_t input) { preserving_p->check_set_put(input); }
-    void put_Sim_chm(const uint8_t input) { Sim_chm_p->check_set_put(input); }
-    void put_Sim_chm() {}
     void put_s_cap_mon(const float input) { s_cap_mon_p->check_set_put(input); }
     void put_s_cap_sim(const float input) { s_cap_sim_p->check_set_put(input); }
     void put_Tb_bias_hdwe(const float input) { Tb_bias_hdwe_p->check_set_put(input); }
@@ -308,11 +304,9 @@ public:
     FloatV *inj_bias_p;
     Uint16tV *isum_p;
     Uint8tV *modeling_p;
-    Uint8tV *Mon_chm_p;
     FloatV *nP_p;
     FloatV *nS_p;
     Uint8tV *preserving_p;
-    Uint8tV *Sim_chm_p;
     FloatV *s_cap_mon_p;
     FloatV *s_cap_sim_p;
     FloatV *Tb_bias_hdwe_p;

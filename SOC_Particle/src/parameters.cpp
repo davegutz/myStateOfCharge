@@ -245,7 +245,7 @@ SavedPars::~SavedPars() {}
 
 void SavedPars::initialize()
 {
-    #define NSAV 33
+    #define NSAV 31
     V_ = new Variable*[NSAV];
     V_[n_++] =(amp_p            = new FloatV("* ", "Xa", rP_, "Inj amp",              "Amps pk",-1e6, 1e6,  &amp_z,         0));
     V_[n_++] =(cutback_gain_slr_p=new FloatV("* ", "Sk", rP_, "Cutback gain scalar",  "slr",    -1e6, 1e6,  &cutback_gain_slr_z,1));
@@ -266,11 +266,9 @@ void SavedPars::initialize()
     V_[n_++] =(inj_bias_p       = new FloatV("* ", "Xb", rP_, "Injection bias",       "A",      -1e5, 1e5,  &inj_bias_z,    0.));
     V_[n_++] =(isum_p         = new Uint16tV("* ", "is", rP_, "Summ buffer indx",     "uint",   0, NSUM+1,  &isum_z,        NSUM,               false));
     V_[n_++] =(modeling_p      = new Uint8tV("* ", "Xm", rP_, "Modeling bitmap",      "[0x]",   0,    255,  &modeling_z,    MODELING));
-    V_[n_++] =(Mon_chm_p       = new Uint8tV("* ", "Bm", rP_, "Monitor battery",      "0=BB, 1=CH",0,   1,  &Mon_chm_z,     MON_CHEM));
     V_[n_++] =(nP_p             = new FloatV("* ", "BP", rP_, "Number parallel",      "units",  1e-6, 100,  &nP_z,          NP));
     V_[n_++] =(nS_p             = new FloatV("* ", "BS", rP_, "Number series",        "units",  1e-6, 100,  &nS_z,          NS));
     V_[n_++] =(preserving_p    = new Uint8tV("* ", "X?", rP_, "Preserving fault",     "T=Preserve",0,   1,  &preserving_z,  0,                  false));
-    V_[n_++] =(Sim_chm_p       = new Uint8tV("* ", "Bs", rP_, "Sim battery",          "0=BB, 1=CH",0,   1,  &Sim_chm_z,     SIM_CHEM));
     V_[n_++] =(s_cap_mon_p      = new FloatV("* ", "SQ", rP_, "Scalar cap Mon",       "slr",    0,    1000, &s_cap_mon_z,   1.));
     V_[n_++] =(s_cap_sim_p      = new FloatV("* ", "Sq", rP_, "Scalar cap Sim",       "slr",    0,    1000, &s_cap_sim_z,   1.));
     V_[n_++] =(Tb_bias_hdwe_p   = new FloatV("* ", "Dt", rP_, "Bias Tb sensor",       "dg C",   -500, 500,  &Tb_bias_hdwe_z,TEMP_BIAS));
@@ -428,22 +426,14 @@ void SavedPars::put_all_dynamic()
             break;
 
         case ( 2 ):
-            put_Mon_chm();
-            break;
-
-        case ( 3 ):
-            put_Sim_chm();
-            break;
-
-        case ( 4 ):
             put_T_state();
             break;
 
-        case ( 5 ):
+        case ( 3 ):
             put_T_state_model();
             break;
 
-        case ( 6 ):
+        case ( 4 ):
             put_Time_now(max( Time_now_z, (unsigned long)Time.now()));  // If happen to connect to wifi (assume updated automatically), save new time
             blink = 0;
             break;
@@ -489,9 +479,3 @@ void SavedPars::set_nominal()
  }
 
 void app_no() { };
-
-void app_mon_chem()
-{
-    Serial.printf("app_mon_chem here\n");
-    sp.Mon_chm_p->app();
-}

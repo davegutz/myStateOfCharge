@@ -481,7 +481,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
 
   // Select
   //  Inputs:                                       --->   Outputs:
-  //  Ib_model, Ib_hdwe,                            --->   Ib
+  //  Ib_model, Ib_hdwe, Vc_hdwe                    --->   Ib
   //  Vb_model, Vb_hdwe,                            --->   Vb
   //  constant,         Tb_hdwe, Tb_hdwe_filt       --->   Tb, Tb_filt
   Sen->Flt->select_all(Sen, Mon, reset);

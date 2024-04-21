@@ -158,7 +158,6 @@ BatteryMonitor::BatteryMonitor():
     SdVb_ = new SlidingDeadband(HDB_VB);  // Noise filter
     EKF_converged = new TFDelay(false, EKF_T_CONV, EKF_T_RESET, EKF_NOM_DT); // Convergence test debounce.  Initializes false
     ice_ = new Iterator("EKF solver");
-    // sp.Mon_chm_p->app_ = &app_chem;
 }
 BatteryMonitor::~BatteryMonitor() {}
 

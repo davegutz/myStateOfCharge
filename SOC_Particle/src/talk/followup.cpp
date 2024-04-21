@@ -38,59 +38,6 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
     switch ( letter_0 )
     {
 
-        case ( 'B' ):
-            switch ( letter_1 )
-            {
-
-                case ( 'm' ):  //* Bm
-                if ( sp.Mon_chm_p->success() )
-                switch ( sp.Mon_chm_z )
-                {
-                    case ( 0 ):  // Bm0: Mon Battleborn
-                        Mon->assign_all_mod("Battleborn");
-                        Mon->chem_pretty_print();
-                        cp.cmd_reset();
-                        break;
-
-                    case ( 1 ):  // Bm1: Mon CHINS
-                        Mon->assign_all_mod("CHINS");
-                        Mon->chem_pretty_print();
-                        cp.cmd_reset();
-                        break;
-
-                    case ( 2 ):  // Bm2: Mon Spare
-                        Mon->assign_all_mod("Spare");
-                        Mon->chem_pretty_print();
-                        cp.cmd_reset();
-                        break;
-
-                    }
-                    break;
-
-                case ( 's' ):  //* Bs:  Simulation chemistry change
-                    if ( sp.Sim_chm_p->success() )
-                    switch ( sp.Sim_chm_z )
-                    {
-                        case ( 0 ):  // Bs0: Sim Battleborn
-                            Sen->Sim->assign_all_mod("Battleborn");
-                            cp.cmd_reset();
-                            break;
-
-                        case ( 1 ):  // Bs1: Sim CHINS
-                            Sen->Sim->assign_all_mod("CHINS");
-                            cp.cmd_reset();
-                            break;
-
-                        case ( 2 ):  // Bs2: Sim Spare
-                            Sen->Sim->assign_all_mod("Spare");
-                            cp.cmd_reset();
-                            break;
-
-                }
-                break;
-            }
-            break;
-
         case ( 'C' ):  // C:
             switch ( letter_1 )
             {
