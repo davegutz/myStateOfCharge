@@ -237,12 +237,11 @@ public:
   void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, const float _vb_max, const boolean reset);  // Range check Vb
   void vc_check(Sensors *Sen, BatteryMonitor *Mon, const float _vc_min, const float _vc_max, const boolean reset);  // Range check Vc
   boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
-  boolean vc_fail() { return ( vc_fa() ); };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
   boolean vb_flt() { return faultRead(VB_FLT); };
   boolean vc_fa() { return failRead(VC_FA); };
-  boolean vc_flt() { return failRead(VC_FLT); };
+  boolean vc_flt() { return faultRead(VC_FLT); };
   boolean wrap_fa() { return ( failRead(WRAP_HI_FA) || failRead(WRAP_LO_FA) ); };
   boolean wrap_hi_fa() { return failRead(WRAP_HI_FA); };
   boolean wrap_hi_flt() { return faultRead(WRAP_HI_FLT); };
@@ -304,7 +303,8 @@ public:
   float Vb_hdwe;              // Sensed battery bank voltage, V
   float Vb_hdwe_f;            // Sensed, filtered battery bank voltage, V
   float Vb_model;             // Modeled battery bank voltage, V
-  float Vc_hdwe;              // Sensed 3v3 bank voltage, V
+  float Vc;                   // Selected half 3v3 voltage, V
+  float Vc_hdwe;              // Sensed half 3v3 voltage, V
   float Tb;                   // Selected battery bank temp, C
   float Tb_filt;              // Selected filtered battery bank temp, C
   float Tb_hdwe;              // Sensed battery temp, C
@@ -378,7 +378,6 @@ public:
   float Vb_add();
   float Vb_noise();
   void vb_print(void);                  // Print Vb result
-  float Vc() { return Vc_hdwe; };                  // 3v3 select hardware unit voltage, V
   float vc() { return Vc_hdwe; };                  // 3v3 select hardware unit voltage, V
   float vc_hdwe() { return Vc_hdwe; };                  // 3v3 select hardware unit voltage, V
   Fault *Flt;
