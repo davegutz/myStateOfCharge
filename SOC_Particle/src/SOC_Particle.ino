@@ -71,7 +71,7 @@
 #elif defined(CONFIG_ARGON)
   #undef ARDUINO
   #if (PLATFORM_ID != PLATFORM_ARGON)
-    #error "copy local_config.xxxx.h to local_config.h"
+    #error "edit local_config.h to select local_config.xxxx.h to match device"
   #endif
 #elif defined(CONFIG_PHOTON2)
   #undef ARDUINO
