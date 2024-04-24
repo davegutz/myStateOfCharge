@@ -1122,7 +1122,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
                     unit=unit)
     print("\nf:\n", f.dtype.names, f, "\n")
 
-    f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)
+    f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)  # tb_band=100 disables banding
     h_raw = np.unique(h_raw)
     h_raw = remove_nan(h_raw)
     print("\nh raw:\n", h_raw.dtype.names, "\n", h_raw, "\n", h_raw.dtype.names, "\n")
