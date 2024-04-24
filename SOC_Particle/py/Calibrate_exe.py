@@ -72,19 +72,22 @@ def finish(mash_data, soc_rated_off, actual_nom_unit_cap):
     return fin_data        
 
 
-def mash(raw_data, v_off_thresh=Battery.VB_OFF, rated_temp=25.):
+def mash(raw_data, v_off_thresh=None, rated_temp=25.):
     """Mash all data together normalized with same ordinates"""
 
     # Aggregate the normalized soc data
     soc = []
     soc_rated_off = 1.  # initial value only
+    s_rf = None
     for (curve, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in raw_data:
+        soc_norm = 1. - (1. - curve.soc) * nom_unit_cap / Battery.UNIT_CAP_RATED
+        lut_vstat_soc = myTables.TableInterp1D(curve.vstat, soc_norm)
+        if abs(temp - rated_temp) < 3:
+            soc_rated_off = lut_vstat_soc.interp(v_off_thresh)
         for i in np.arange(len(curve.soc)):
             soc_data = curve.soc[i]
             vstat = curve.vstat[i]
             soc_normal = normalize_soc(soc_data, nom_unit_cap, Battery.UNIT_CAP_RATED)
-            if vstat > v_off_thresh-1. and abs(temp - rated_temp) < 3:
-                soc_rated_off = min(soc_rated_off, soc_normal)
             soc.append(soc_normal)
     soc_sort = np.unique(np.array(soc))
 
@@ -102,14 +105,14 @@ def mash(raw_data, v_off_thresh=Battery.VB_OFF, rated_temp=25.):
     return mashed_data, soc_rated_off
 
 
-def minimums(fin_data):
+def minimums(fin_data, vb_off):
     """Find minimum soc schedule"""
     t_min = []
     soc_min = []
     for (curve, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in fin_data:
         t_min.append(temp)
         lut_voc_soc = myTables.TableInterp1D(curve.vstat, curve.soc)
-        soc_min.append(lut_voc_soc.interp(Battery.VB_OFF))
+        soc_min.append(lut_voc_soc.interp(vb_off))
 
     return t_min, soc_min
 
@@ -221,10 +224,19 @@ def main(data_files=None, breaks=None):
     fig_files = []
     data_root = None
     unit = None
+    chm = None
+    vb_off = None
     for (data_file, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in data_files:
         (data_file_folder, data_file_txt) = os.path.split(data_file)
         unit_key = data_file_txt.split(' ')[-1].split('.')[0]
         unit = unit_key.split('_')[0]
+        chm = unit_key.split('_')[1]
+        if chm == 'bb' or chm == 'BB':
+            vb_off = Battery.VB_OFF_BB
+        elif chm == 'ch' or chm == 'CH':
+            vb_off = Battery.VB_OFF_CH
+        else:
+            print("chm", chm, "is not defined")
         data_file_clean = write_clean_file(data_file, type_='', hdr_key=hdr_key, unit_key=unit_key)
         if data_file_clean is None:
             print(f"case {data_file=} {temp=} is dirty...skipping")
@@ -237,7 +249,7 @@ def main(data_files=None, breaks=None):
             Raw_files.append((Raw_data, nom_unit_cap, temp, p_color, p_style, marker, marker_size))
 
     # Mash all the data to one table and normalize to NOM_UNIT_CAP = 100
-    Mashed_data, soc_rated_off = mash(Raw_files)
+    Mashed_data, soc_rated_off = mash(Raw_files, v_off_thresh=vb_off)
     actual_cap = (1.-soc_rated_off) * Battery.UNIT_CAP_RATED
 
     # Shift and scale curves for calculated capacity
@@ -247,7 +259,7 @@ def main(data_files=None, breaks=None):
     Massaged_curves = reduce(Finished_curves, breaks)
 
     # Find minimums
-    t_min, soc_min = minimums(Finished_curves)
+    t_min, soc_min = minimums(Finished_curves, vb_off=vb_off)
 
     # Print
     n_n = len(t_min)

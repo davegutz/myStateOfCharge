@@ -76,7 +76,8 @@ class Battery(Coulombs):
     MAX_WRAP_ERR_FILT = 10.  # Anti-windup wrap error filter, V (10)
     F_MAX_T_WRAP = 2.8  # Maximum update time of Wrap filter for stability at WRAP_ERR_FILT, s (2.8)
     D_SOC_S = 0.  # Bias on soc to voc-soc lookup to simulate error in estimation, esp cold battery near 0 C
-    VB_OFF = 10.  # BMS shutoff lever, v (10)
+    VB_OFF_BB = 10.  # BMS shutoff level, Battleborn, v (10)
+    VB_OFF_CH = 11.  # BMS shutoff level, CHINS, v (11)
     # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
     #                         what gets delivered, e.g. Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
     #                         or 20 - 40 A for a 100 Ah battery"""

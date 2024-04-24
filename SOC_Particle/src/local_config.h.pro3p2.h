@@ -46,7 +46,7 @@
 #define COULOMBIC_EFF_SCALE   1.0     // Scalar on Coulombic efficiency of battery, fraction of charge that gets used (1.0)
 #define MON_CHEM              1       // Chemistry monitor code integer, 0=Battleborn, 1=CHINS
 #define SIM_CHEM              1       // Chemistry simulate code integer, 0=Battleborn, 1=CHINS
-#define NOM_UNIT_CAP          101.6   // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
+#define NOM_UNIT_CAP          102.9   // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define HYS_SCALE             1.0     // Scalar on hysteresis (1.0)
 #define NS                    2.0     // Number of series batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BS')
 #define NP                    2.0     // Number of parallel batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BP')
