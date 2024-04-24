@@ -1027,8 +1027,8 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     scale_in = 1
     cc_dif_tol_in = 0.2
     use_mon_soc_in = True
+    rated_batt_cap_in = 100.
     # Reconstruction of soc using sub-sampled data is poor.  Drive everything with soc from Monitor
-    rated_batt_cap_in = 108.4  # A-hr capacity of test article
     dvoc_mon_in = 0.
     dvoc_sim_in = 0.
 
@@ -1072,6 +1072,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     # Load configuration
     if mon_t is True:
         chm = int(mon_old.chm[0])
+
     else:
         if unit_key.__contains__('bb'):
             chm = 0
@@ -1079,6 +1080,10 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
             chm = 1
         else:
             chm = None
+        if unit_key.__contains__('pro3p2') or unit_key.__contains__('soc2p2'):
+            rated_batt_cap_in = 101.6  # A-hr capacity of test article
+        else:
+            rated_batt_cap_in = 108.4  # A-hr capacity of test article
     batt = BatteryMonitor(mod_code=chm)
 
     # Sort and augment data

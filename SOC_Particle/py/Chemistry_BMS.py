@@ -51,7 +51,7 @@ class BMS:
 
 class Chemistry(BMS):
     """Properties of battery"""
-    def __init__(self, mod_code=0, dvoc=0.):
+    def __init__(self, mod_code=0, dvoc=0., unit=None):
         BMS.__init__(self)
         self.rated_temp = 0.  # Temperature at UNIT_CAP_RATED, deg C
         self.coul_eff = 0.  # Coulombic efficiency - the fraction of charging input that gets\
@@ -82,11 +82,11 @@ class Chemistry(BMS):
         self.lut_s_hys = None
         self.lu_x_hys = None
         self.lu_n_hys = None
-        self.assign_all_mod(mod_code=mod_code)
+        self.assign_all_mod(mod_code=mod_code, unit=unit)
         self.ib_lag_tau = IB_LAG_BB
 
     # Assign chemistry, anytime
-    def assign_all_mod(self, mod_code=0):
+    def assign_all_mod(self, mod_code=0, unit=None):
         if mod_code == 0:
             self.assign_BB()
         if mod_code == 1:
@@ -161,7 +161,7 @@ class Chemistry(BMS):
         self.lu_n_hys = myTables.TableInterp1D(t_soc0, t_dv_min0)
 
     # Assign CHINS chemistry
-    def assign_CH(self):
+    def assign_CH(self, unit=None):
         # Constants
         # self.cap = see below
         self.rated_temp = 25.  # Temperature at UNIT_CAP_RATED, deg C
@@ -190,23 +190,46 @@ class Chemistry(BMS):
         self.dv_min_abs = 0.06  # Absolute value of +/- hysteresis limit, V
         self.ib_lag_tau = IB_LAG_CH  # Lag time to wash out sat effect on dv, s
 
-        # Tables CHINS Bmon=1, Bsim=1, from ReGaugeVocSoc 3/2/2023
-        # VOC_SOC table
-        # Tables CHINS Bmon=1, Bsim=1, from CompareTensorData 8/31/2023
-        t_x_soc1 = [-0.035,   0.000,   0.050,   0.100,  0.108,  0.120,  0.140,   0.170,   0.200,   0.250,   0.300,  0.3400,  0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.980,   0.990,   1.000]
-        t_y_t1 = [0.0,     11.0,  21.5]
-        t_voc1 = [4.000,   4.000,  4.000,   4.000,    4.000,  4.000,  4.000,   4.000,   4.000,   4.000,   9.000,  11.770,  12.700,  12.950,  13.050,  13.100,  13.226,  13.259,  13.264,  13.460,  14.270,
-                  4.000,   4.000,  4.000,   4.000,    4.000,  4.000,  4.000,   4.000,   4.000,   4.000,   9.000,  11.770,  12.700,  12.950,  13.050,  13.100,  13.226,  13.259,  13.264,  13.460,  14.270,
-                  4.000,   4.000,  9.0000,  9.500,   11.260, 11.850, 12.400,  12.650,  12.730,  12.810,  12.920,  12.960,  13.020,  13.060,  13.220,  13.280,  13.284,  13.299,  13.310,  13.486,  14.700]
+        if unit == 'pro3p2' or unit == 'soc2p2':
+            # 2024-04-24T07-53-38:  tune to data
+            t_y_t1 = [21.5, 25.0, 35.0, ]
+            t_x_soc1 = [-0.400, -0.300, -0.230, -0.200, -0.150, -0.130, -0.114, -0.044, 0.000, 0.016, 0.032, 0.055,
+                        0.064, 0.114, 0.134, 0.154, 0.183, 0.214, 0.300, 0.400, 0.500, 0.600, 0.700, 0.800, 0.900,
+                        0.960, 0.980, 1.000, ]
+            t_voc1 = [
+                4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 9.481,
+                11.854, 12.408, 12.649, 12.733, 12.895, 13.010, 13.057, 13.210, 13.277, 13.284, 13.299, 13.307, 13.310,
+                14.700,
+                4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 8.950, 11.880, 12.198, 12.495, 12.700, 12.725, 12.820,
+                12.850, 12.881, 12.925, 12.972, 13.041, 13.084, 13.107, 13.162, 13.237, 13.273, 13.286, 13.300, 13.300,
+                14.760,
+                4.000, 4.000, 7.500, 9.000, 11.812, 12.374, 12.701, 12.819, 12.885, 12.910, 12.933, 12.968, 12.981,
+                13.045, 13.060, 13.076, 13.097, 13.116, 13.150, 13.200, 13.290, 13.320, 13.320, 13.320, 13.320, 13.320,
+                13.320, 14.760,
+            ]
+            t_x_soc_min1 = [21.5, 25.0, 35.0, ]
+            t_soc_min1 = [0.12, -0.03, -0.18, ]
+        else:
+            # Tables CHINS Bmon=1, Bsim=1, from ReGaugeVocSoc 3/2/2023 soc0p
+            # VOC_SOC table
+            # Tables CHINS Bmon=1, Bsim=1, from CompareTensorData 8/31/2023
+            t_x_soc1 = [-0.035, 0.000, 0.050, 0.100, 0.108, 0.120, 0.140, 0.170, 0.200, 0.250, 0.300, 0.3400, 0.400,
+                        0.500, 0.600, 0.700, 0.800, 0.900, 0.980, 0.990, 1.000]
+            t_y_t1 = [0.0, 11.0, 21.5]
+            t_voc1 = [4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 9.000, 11.770, 12.700,
+                      12.950, 13.050, 13.100, 13.226, 13.259, 13.264, 13.460, 14.270,
+                      4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 9.000, 11.770, 12.700,
+                      12.950, 13.050, 13.100, 13.226, 13.259, 13.264, 13.460, 14.270,
+                      4.000, 4.000, 9.0000, 9.500, 11.260, 11.850, 12.400, 12.650, 12.730, 12.810, 12.920, 12.960,
+                      13.020, 13.060, 13.220, 13.280, 13.284, 13.299, 13.310, 13.486, 14.700]
+            t_x_soc_min1 = [0.000, 11.00, 21.5, 40.000]
+            t_soc_min1 = [0.31, 0.31, 0.1, 0.1]
 
+        # Form tables
         x1 = np.array(t_x_soc1)
         y1 = np.array(t_y_t1)
         data_interp1 = np.array(t_voc1)
         self.lut_voc_soc = myTables.TableInterp2D(x1, y1, data_interp1)
-
-        # Min SOC table
-        t_x_soc_min1 = [0.000,  11.00,  21.5,  40.000]
-        t_soc_min1 = [0.31,   0.31,   0.1,   0.1]
         self.lut_min_soc = myTables.TableInterp1D(np.array(t_x_soc_min1), np.array(t_soc_min1))
 
         # Hysteresis tables

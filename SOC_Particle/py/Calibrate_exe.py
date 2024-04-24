@@ -279,6 +279,27 @@ def main(data_files=None, breaks=None):
     print(Colors.fg.green, "#define NOM_UNIT_CAP          {:5.1f}   // Nominal battery unit capacity at RATED_TEMP.  (* 'Sc' or '*BS'/'*BP'), Ah\n".format(actual_cap))
     print(Colors.reset)
 
+    print("\nfor Chemistry_BMS.py:\n")
+    print(Colors.fg.green, "# {:s}:  tune to data".format(date_time))
+    t_min_str = ''.join(f'{q:.1f}, ' for q in t_min)
+    soc_min_str = ''.join(f'{q:.2f}, ' for q in soc_min)
+    soc_brk_str = ''.join(f'{q:6.3f}, ' for q in soc_brk)
+    voc_soc_brk_str = []
+    for i in np.arange(m_t):
+        voc_soc_brk = Massaged_curves[i][0].vstat
+        voc_soc_brk_str.append(''.join(f'{q:6.3f}, ' for q in voc_soc_brk))
+    print("t_y_t1 = [{:s}]".format(t_min_str))
+    print("t_x_soc1 = [{:s}] ".format(soc_brk_str))
+    print("t_voc1 = [".format())
+    for i in np.arange(m_t):
+        print("     {:s}".format(voc_soc_brk_str[i]))
+    print("    ]")
+    print("t_x_soc_min1 = [{:s}]".format(t_min_str))
+    print("t_soc_min1 = [{:s}]".format(soc_min_str))
+    print(Colors.reset, "\n\nfor CompareHistSim.{:s}\n".format(unit))
+    print(Colors.fg.green, "rated_batt_cap_in = {:5.3f}".format(actual_cap/Battery.UNIT_CAP_RATED))
+    print(Colors.reset)
+
     filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
     plot_title = filename + '   ' + date_time
     plot_all(Raw_files, Mashed_data, Finished_curves, Massaged_curves, actual_cap, fig_files=fig_files,

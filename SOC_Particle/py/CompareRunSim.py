@@ -39,7 +39,6 @@ plt.rcParams['axes.grid'] = True
 
 def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to_save_pdf='./figures',
                     rel_path_to_temp='./temp', data_only=False):
-
     print(f"\ncompare_run_sim:\n{data_file=}\n{unit_key=}\n{time_end_in=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}"
           f"\n{data_only=}\n")
 
@@ -71,19 +70,6 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
         else:
             os.rename(path_to_data, data_file)
         unit_key = easygui.enterbox(msg="enter pro0p, pro1a, soc0p, soc1a", title="get unit_key", default="pro1a")
-        # Put configurations unique to this build of logic here
-        if unit_key == 'pro02p2':
-            pass
-        elif unit_key == 'pro3p2':
-            pass
-        elif unit_key == 'pro1a':
-            pass
-        elif unit_key == 'pro0p':
-            pass
-        elif unit_key == 'soc0p':
-            pass
-        elif unit_key == 'soc1a':
-            pass
     elif temp_file is not None:
         rel_path_to_temp = os.path.join(str(rel_path_to_temp), str(temp_file))
         data_file = rel_path_to_temp
