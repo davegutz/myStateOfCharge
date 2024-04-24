@@ -200,7 +200,7 @@ def reduce(fin_data, breakpoints):
     return red_data
 
 
-def main(data_files=None):
+def main(data_files=None, breakpoints=[0., .1, .9, .96, .98, 1]):
     #  data_files[( data_file, nom_unit_cap, temp_c, p_color, marker, marker_size), (...), ...]  List of tuples of data from experiments
     #   data_file       Full path to data file
     #   nom_unit_cap    Nominal applied battery unit (100 Ah unit) capacity, Ah
@@ -208,9 +208,6 @@ def main(data_files=None):
     #   p_color         matplotlib line color
     #   marker          matplotlib marker
     #   marker_size     matplotlib marker size
-
-    # Hand-select these from figure 3 and re-run this script
-    breakpoints = [-.1136, -.044, 0, .0164, .032, .055, .064, .114, .134, .1545, .183, .2145, .3, .4, .5, .6, .7, .8, .9, .96, .98, 1]
 
     hdr_key = 'vstat'  # key to be found in header for data
 
@@ -304,8 +301,11 @@ if __name__ == '__main__':
             100., 21.5, 'blue', '-.', 'x', 4),
         (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C pro3p2_ch.csv',
             100., 25., 'green', '-', 's', 4),
-        # (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 35C pro3p2_ch.csv',
-        #  101.6, 35., 'red', '--', 'o', 4),
+        (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 35C pro3p2_ch.csv',
+         101.6, 35., 'red', '--', 'o', 4),
     ]
+    # Hand-select these from figure 3 and re-run this script
+    breakpoints = [-.4, -.3, -.23, -.2, -.15, -.13, -.1136, -.044, 0, .0164, .032, .055, .064, .114, .134, .1545,
+                   .183, .2145, .3, .4, .5, .6, .7, .8, .9, .96, .98, 1]
 
-    main(data_files=data_files)
+    main(data_files=data_files, breakpoints=breakpoints)
