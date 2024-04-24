@@ -60,31 +60,31 @@ class DataCP(DataC):
             self.vstat = np.array(ydata)
 
 
-def finish(mash_data, soc_aggregate_off, actual_nom_unit_cap):
+def finish(mash_data, soc_rated_off, actual_nom_unit_cap):
     """Reform data into table for application plus the capacity to use in constants"""
     fin_data = []
     for (curve, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in mash_data:
         # The curve that goes to lowest soc is cap since all items start at soc = 1
-        soc_scale = (curve.soc - soc_aggregate_off) / (1. - soc_aggregate_off)
+        soc_scale = (curve.soc - soc_rated_off) / (1. - soc_rated_off)
         New_raw_data = DataCP(actual_nom_unit_cap, curve.temp_c, soc_scale, curve.vstat, curve.data_file)
         fin_data.append((New_raw_data, Battery.UNIT_CAP_RATED, temp, p_color, p_style, marker, marker_size))
 
     return fin_data        
 
 
-def mash(raw_data, v_off_thresh=Battery.VB_OFF):
+def mash(raw_data, v_off_thresh=Battery.VB_OFF, rated_temp=25.):
     """Mash all data together normalized with same ordinates"""
 
     # Aggregate the normalized soc data
     soc = []
-    soc_aggregate_off = 1.  # initial value only
+    soc_rated_off = 1.  # initial value only
     for (curve, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in raw_data:
         for i in np.arange(len(curve.soc)):
             soc_data = curve.soc[i]
             vstat = curve.vstat[i]
             soc_normal = normalize_soc(soc_data, nom_unit_cap, Battery.UNIT_CAP_RATED)
-            if vstat > v_off_thresh-1.:
-                soc_aggregate_off = min(soc_aggregate_off, soc_normal)
+            if vstat > v_off_thresh-1. and abs(temp - rated_temp) < 3:
+                soc_rated_off = min(soc_rated_off, soc_normal)
             soc.append(soc_normal)
     soc_sort = np.unique(np.array(soc))
 
@@ -99,7 +99,7 @@ def mash(raw_data, v_off_thresh=Battery.VB_OFF):
         New_raw_data = DataCP(nom_unit_cap, curve.temp_c, soc_sort, voc_soc_sort, curve.data_file)
         mashed_data.append((New_raw_data, Battery.UNIT_CAP_RATED, temp, p_color, p_style, marker, marker_size))
 
-    return mashed_data, soc_aggregate_off
+    return mashed_data, soc_rated_off
 
 
 def minimums(fin_data):
@@ -200,18 +200,7 @@ def reduce(fin_data, breakpoints):
     return red_data
 
 
-def main():
-    if sys.platform == 'linux':
-        gdrive = '/home/daveg/google-drive'
-    else:
-        gdrive = 'G:/My Drive'
-
-    data_files = [
-        (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 21p5C soc2p2_ch.csv',
-            100., 21.5, 'orange', '--', 'x', 4),
-        (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C pro3p2_ch.csv',
-            100., 25., 'red', '-', '1', 4),
-    ]
+def main(data_files=None):
     #  data_files[( data_file, nom_unit_cap, temp_c, p_color, marker, marker_size), (...), ...]  List of tuples of data from experiments
     #   data_file       Full path to data file
     #   nom_unit_cap    Nominal applied battery unit (100 Ah unit) capacity, Ah
@@ -251,11 +240,11 @@ def main():
             Raw_files.append((Raw_data, nom_unit_cap, temp, p_color, p_style, marker, marker_size))
 
     # Mash all the data to one table and normalize to NOM_UNIT_CAP = 100
-    Mashed_data, soc_aggregate_off = mash(Raw_files)
-    actual_cap = (1.-soc_aggregate_off) * Battery.UNIT_CAP_RATED
+    Mashed_data, soc_rated_off = mash(Raw_files)
+    actual_cap = (1.-soc_rated_off) * Battery.UNIT_CAP_RATED
 
     # Shift and scale curves for calculated capacity
-    Finished_curves = finish(Mashed_data, soc_aggregate_off, actual_cap)
+    Finished_curves = finish(Mashed_data, soc_rated_off, actual_cap)
 
     # Minimize number of points
     Massaged_curves = reduce(Finished_curves, breakpoints)
@@ -304,4 +293,18 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if sys.platform == 'linux':
+        gdrive = '/home/daveg/google-drive'
+    else:
+        gdrive = 'G:/My Drive'
+
+    data_files = [
+        (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 21p5C soc2p2_ch.csv',
+            100., 21.5, 'blue', '-.', 'x', 4),
+        (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C pro3p2_ch.csv',
+            100., 25., 'green', '-', 's', 4),
+        (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 35C pro3p2_ch.csv',
+         101.6, 35., 'red', '--', 'o', 4),
+    ]
+
+    main(data_files=data_files)
