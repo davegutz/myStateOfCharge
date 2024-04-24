@@ -800,7 +800,6 @@ def bandaid(h):
     sim_old = rf.rec_append_fields(sim_old, 'dv_dyn_s', bms_off_s)
     sim_old = rf.rec_append_fields(sim_old, 'dv_hys_s', bms_off_s)
     sim_old = rf.rec_append_fields(sim_old, 'voc_stat_s', bms_off_s)
-    sim_old = rf.rec_append_fields(sim_old, 'nS_s', nS_m)
     return mon_old, sim_old
 
 
@@ -1051,7 +1050,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         mon_old = None
 
     # Load history
-    temp_hist_file_clean = write_clean_file(data_file, type_='_hist', hdr_key='fltb', unit_key='unit_h',
+    temp_hist_file_clean = write_clean_file(data_file, type_='_hist', hdr_key='fltb', unit_key='unit_f',
                                             skip=1, comment_str='---')
     if temp_hist_file_clean:
         h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
@@ -1168,13 +1167,13 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
 def main():
     # User inputs (multiple input_files allowed
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/discharge10C_soc2p2_ch.csv'
-    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
-    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/hist 35C pro3p2_ch.csv'
+    rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
+    rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
     data_only = False
     # mon_t = True
     mon_t = False
-    unit_key = 'g20240331_soc2p2_ch'
+    unit_key = 'g20240331_pro3p2_ch'
     dt_resample = 10
 
     # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
