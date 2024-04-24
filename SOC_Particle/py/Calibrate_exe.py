@@ -222,6 +222,7 @@ def main(data_files=None):
     Raw_files = []
     fig_list = []
     fig_files = []
+    data_root = None
     data_file_clean = None
     CHM = None
     for (data_file, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in data_files:
@@ -234,6 +235,7 @@ def main(data_files=None):
             print(f"case {data_file=} {temp=} is dirty...skipping")
             continue
         else:
+            data_root = data_file_clean.split('/')[-1].replace('.csv', '_').split(' ')[-1]
             raw = np.genfromtxt(data_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
             Raw_data = DataC(nom_unit_cap, temp, raw, data_file_clean)
             raw_files.append((raw, nom_unit_cap, temp))
@@ -282,7 +284,6 @@ def main(data_files=None):
     print(Colors.fg.green, "#define NOM_UNIT_CAP          {:5.1f}   // Nominal battery unit capacity at RATED_TEMP.  (* 'Sc' or '*BS'/'*BP'), Ah\n".format(actual_cap))
     print(Colors.reset)
 
-    data_root = data_file_clean.split('/')[-1].replace('.csv', '_')
     filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
     plot_title = filename + '   ' + date_time
     plot_all(Raw_files, Mashed_data, Finished_curves, Massaged_curves, actual_cap, fig_files=fig_files,
@@ -303,8 +304,8 @@ if __name__ == '__main__':
             100., 21.5, 'blue', '-.', 'x', 4),
         (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C pro3p2_ch.csv',
             100., 25., 'green', '-', 's', 4),
-        (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 35C pro3p2_ch.csv',
-         101.6, 35., 'red', '--', 'o', 4),
+        # (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 35C pro3p2_ch.csv',
+        #  101.6, 35., 'red', '--', 'o', 4),
     ]
 
     main(data_files=data_files)
