@@ -97,7 +97,8 @@ class Battery(Coulombs):
         so equation error when soc<=0 to match data.    See Battery.h
         """
         # Parents
-        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, temp_rlim, tweak_test, mod_code=mod_code, dvoc=dvoc)
+        Coulombs.__init__(self, q_cap_rated,  q_cap_rated, t_rated, temp_rlim, tweak_test, mod_code=mod_code, dvoc=dvoc,
+                          unit=unit)
 
         # Defaults
         self.chem = mod_code
@@ -138,6 +139,7 @@ class Battery(Coulombs):
         self.ib_lag = 0.
         self.IbLag = LagExp(1., 1., -100., 100.)  # Lag to be run on sat to produce ib_lag.  T and tau set at run time
         self.voc_soc_new = 0.
+        self.unit = unit
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -217,11 +219,11 @@ class BatteryMonitor(Battery, EKF1x1):
     def __init__(self, q_cap_rated=Battery.UNIT_CAP_RATED*3600, t_rated=25., temp_rlim=0.017, scale=1.,
                  temp_c=25., tweak_test=False, sres0=1., sresct=1., stauct=1.,
                  scaler_q=None, scaler_r=None, scale_r_ss=1., s_hys=1., dvoc=0., eframe_mult=Battery.cp_eframe_mult,
-                 mod_code=0, s_coul_eff=1.):
+                 mod_code=0, s_coul_eff=1., unit=None):
         q_cap_rated_scaled = q_cap_rated * scale
         Battery.__init__(self, q_cap_rated=q_cap_rated_scaled, t_rated=t_rated, temp_rlim=temp_rlim, temp_c=temp_c,
                          tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
-                         s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff, scale_cap=scale)
+                         s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff, scale_cap=scale, unit=unit)
 
         """ Default values from Taborelli & Onori, 2013, State of Charge Estimation Using Extended Kalman Filters for
         Battery Management System.   Battery equations from LiFePO4 BattleBorn.xlsx and 'Generalized SOC-OCV Model Zhang
@@ -305,7 +307,7 @@ class BatteryMonitor(Battery, EKF1x1):
     def calculate(self, chem, temp_c, vb, ib, dt, reset, update_time_in, q_capacity=None, dc_dc_on=None,
                   rp=None, u_old=None, z_old=None, x_old=None, bms_off_init=None):
         if self.chm != chem:
-            self.chemistry.assign_all_mod(chem)
+            self.chemistry.assign_all_mod(chem, unit=self.unit)
             self.chm = chem
 
         self.temp_c = temp_c
@@ -539,11 +541,11 @@ class BatterySim(Battery):
     def __init__(self, q_cap_rated=Battery.UNIT_CAP_RATED*3600, t_rated=25., temp_rlim=0.017, scale=1., stauct=1.,
                  temp_c=25., hys_scale=1., tweak_test=False, dv_hys=0., sres0=1., sresct=1., scale_r_ss=1.,
                  s_hys=1., dvoc=0., scale_hys_cap=1., mod_code=0, s_cap_chg=1., s_cap_dis=1., s_hys_chg=1.,
-                 s_hys_dis=1., s_coul_eff=1., cutback_gain_sclr=1., ds_voc_soc=0., unit_key=None):
+                 s_hys_dis=1., s_coul_eff=1., cutback_gain_sclr=1., ds_voc_soc=0., unit=None):
         Battery.__init__(self, q_cap_rated=q_cap_rated, t_rated=t_rated, temp_rlim=temp_rlim, temp_c=temp_c,
                          tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
                          s_hys=s_hys, dvoc=dvoc, mod_code=mod_code, s_coul_eff=s_coul_eff, scale_cap=scale,
-                         unit=unit_key)
+                         unit=unit)
         self.lut_voc = None
         self.sat_ib_max = 0.  # Current cutback to be applied to modeled ib output, A
         # self.sat_ib_null = 0.1*Battery.UNIT_CAP_RATED  # Current cutback value for voc=vsat, A
@@ -600,7 +602,7 @@ class BatterySim(Battery):
     def calculate(self, chem, temp_c, soc, curr_in, dt, q_capacity, dc_dc_on, reset, update_time_in,  # BatterySim
                   rp=None, sat_init=None, bms_off_init=None):
         if self.chm != chem:
-            self.chemistry.assign_all_mod(chem)
+            self.chemistry.assign_all_mod(chem, self.unit)
             self.chm = chem
 
         self.temp_c = temp_c
@@ -695,7 +697,7 @@ class BatterySim(Battery):
             soc     State of charge, fraction (0-1.5)
         """
         if self.chm != chem:
-            self.chemistry.assign_all_mod(chem)
+            self.chemistry.assign_all_mod(chem, self.unit)
             self.chm = chem
         self.reset = reset
         self.charge_curr = charge_curr

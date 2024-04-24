@@ -90,7 +90,7 @@ class Chemistry(BMS):
         if mod_code == 0:
             self.assign_BB()
         if mod_code == 1:
-            self.assign_CH()
+            self.assign_CH(unit=unit)
 
     # Assign BattleBorn chemistry
     def assign_BB(self):

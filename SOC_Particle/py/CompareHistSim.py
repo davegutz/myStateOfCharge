@@ -149,7 +149,7 @@ def add_ib_lag(data, mon):
 
 
 # Add schedule lookups and do some rack and stack
-def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., time_sync=None):
+def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., time_sync=None, unit=None):
     voc_soc = []
     soc_min = []
     vsat = []
@@ -178,7 +178,7 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., time_sync=No
         ib_diff.append(ib_diff_)
         C_rate = d_ra.ib[i] / rated_batt_cap
         voc_soc.append(mon.chemistry.lut_voc_soc.interp(d_ra.soc[i], d_ra.Tb[i]) + Dw)
-        BB = BatteryMonitor(0)
+        BB = BatteryMonitor(0, unit=unit)
         cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = \
             fault_thr_bb(Tb, soc, voc_soc[i], voc_stat, C_rate, BB)
         ib_ = d_ra.ib[i]
@@ -1014,8 +1014,28 @@ def add_mod(hist, mon_t_=False, mon=None):
         return rf.rec_append_fields(hist, 'mod_data', np.array(mod_data, dtype=int))
 
 
+def add_qcrs(hist, mon_t_=False, mon=None, qcrs=None):
+    if mon_t_ is False or mon is None:
+        print("add_qcrs:  not executing")
+        if qcrs is not None:
+            qcrs_m = []
+            for i in range(len(hist.time)):
+                qcrs_m.append(qcrs)
+            hist = rf.rec_append_fields(hist, 'qcrs_s', np.array(qcrs_m, dtype=float))
+            hist = rf.rec_append_fields(hist, 'qcrs', np.array(qcrs_m, dtype=float))
+        return hist
+    else:
+        qcrs_m = []
+        for i in range(len(hist.time_ux)):
+            t_sec = float(hist.time_ux[i] - hist.time_ux[0]) + mon.time[0]
+            qcrs_m.append(np.interp(t_sec, mon.time, mon.chm))
+        hist = rf.rec_append_fields(hist, 'chm_s', np.array(qcrs_m, dtype=float))
+        hist = rf.rec_append_fields(hist, 'chm', np.array(qcrs, dtype=float))
+    return hist
+
+
 def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
-                     data_only=False, mon_t=False, unit_key=None, sync_time=None, dt_resample=10):
+                     data_only=False, mon_t=False, unit_key=None, sync_time=None, dt_resample=10, Tb_force=None):
 
     print(f"\ncompare_hist_sim:\n{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n{mon_t=}"
           f"\n{unit_key=}\n{dt_resample=}\n")
@@ -1080,18 +1100,28 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
             chm = 1
         else:
             chm = None
-        if unit_key.__contains__('pro3p2') or unit_key.__contains__('soc2p2'):
+        unit = unit_key.split('_')[-2]
+        if unit == 'pro3p2' or unit == 'soc2p2':
             rated_batt_cap_in = 101.6  # A-hr capacity of test article
         else:
             rated_batt_cap_in = 108.4  # A-hr capacity of test article
-    batt = BatteryMonitor(mod_code=chm)
+    qcrs = rated_batt_cap_in * Battery.UNIT_CAP_RATED * 3600.
+    batt = BatteryMonitor(mod_code=chm, unit=unit)
+
+    # Force Tb.  This is useful for verifying calibration runs where voc(soc) schedule extracted from the run
+    # with slightly varying Tb but assumed constant when making new schedule
+    if Tb_force is not None:
+        f_raw.Tb = Tb_force
+        h_raw.Tb = Tb_force
 
     # Sort and augment data
     f_raw = np.unique(f_raw)
     f_raw = remove_nan(f_raw)
     # noinspection PyTypeChecker
-    f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
+    f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time,
+                    unit=unit)
     print("\nf:\n", f.dtype.names, f, "\n")
+
     f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)
     h_raw = np.unique(h_raw)
     h_raw = remove_nan(h_raw)
@@ -1100,6 +1130,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
     h = add_mod(h, mon_t, mon_old)
     h = add_chm(h, mon_t, mon_old, chm)
+    h = add_qcrs(h, mon_t_=mon_t, mon=mon_old, qcrs=qcrs)
     print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after add_stuff\n")
 
     # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
@@ -1128,7 +1159,8 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     mon_file_save = data_file_clean.replace(".csv", "_rep_hist.csv")
     mon_ver, sim_ver, sim_s_ver, mon_r, sim_r =\
         replicate(mon_old, sim_old=sim_old, init_time=1., verbose=False, t_max=time_end_in, use_vb_sim=False,
-                  scale_in=scale_in, use_mon_soc=use_mon_soc_in, dvoc_mon=dvoc_mon_in, dvoc_sim=dvoc_sim_in)
+                  scale_in=scale_in, use_mon_soc=use_mon_soc_in, dvoc_mon=dvoc_mon_in, dvoc_sim=dvoc_sim_in,
+                  unit=unit)
     save_clean_file(mon_ver, mon_file_save, 'mon_rep_hist' + date_)
 
     # Plots
@@ -1181,10 +1213,14 @@ def main():
     unit_key = 'g20240331_pro3p2_ch'
     dt_resample = 10
 
+    # Do this when running compare_hist_sim on run that schedule extracted assuming constant Tb
+    tb_force = 35
+
     # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
 
     compare_hist_sim(data_file=data_file, mon_t=mon_t, unit_key=unit_key, dt_resample=dt_resample,
-                     rel_path_to_save_pdf=rel_path_to_save_pdf, rel_path_to_temp=rel_path_to_temp, data_only=data_only)
+                     rel_path_to_save_pdf=rel_path_to_save_pdf, rel_path_to_temp=rel_path_to_temp, data_only=data_only,
+                     Tb_force=tb_force)
 
 
 if __name__ == '__main__':
