@@ -174,20 +174,20 @@ void Chemistry::assign_all_chm(const String mod_str)
 void Chemistry::assign_BB()
 {
     // Constants
-    rated_temp = 25.;  // Temperature at NOM_UNIT_CAP, deg C (25)
-    coul_eff = 0.9985; // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9985)
-    dqdt = 0.01;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
-    dv_min_abs = 0.3;  // Absolute value of +/- hysteresis limit, V (0.3)
-    dvoc_dt = 0.004;   // Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
-    hys_cap = 3.6e3;   // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022 (3.6e3)
-                       // tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
-    low_voc = 9.0;  // Voltage threshold for BMS to turn off battery, V (9.)
-    low_t = 0;      // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0)
-    r_0 = 0.0113;   // ChargeTransfer R0, ohms (0.0113)
-    r_ct = 0.001;  // ChargeTransfer diffusion resistance, ohms (0.001)
-    r_sd = 70;      // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms (70.)
-    tau_ct = 83.;   // ChargeTransfer diffusion time constant, s (=1/Rct/Cct) (83.)
-    tau_sd = 2.5e7; // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (2.5e7)
+    rated_temp = 25.;   // Temperature at NOM_UNIT_CAP, deg C (25)
+    coul_eff = 0.9985;  // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9985)
+    dqdt = 0.01;        // Change of charge with temperature, fraction/deg C (0.01 from literature)
+    dv_min_abs = 0.3;   // Absolute value of +/- hysteresis limit, V (0.3)
+    dvoc_dt = 0.004;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
+    hys_cap = 3.6e3;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022 (3.6e3)
+                        // tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
+    low_voc = 9.0;      // Voltage threshold for BMS to turn off battery, V (9.)
+    low_t = 0;          // Minimum temperature for valid saturation check, because BMS shuts off battery low. Heater should keep >4, too. deg C (0)
+    r_0 = 0.0113;       // ChargeTransfer R0, ohms (0.0113)
+    r_ct = 0.001;       // ChargeTransfer diffusion resistance, ohms (0.001)
+    r_sd = 70;          // Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms (70.)
+    tau_ct = 83.;       // ChargeTransfer diffusion time constant, s (=1/Rct/Cct) (83.)
+    tau_sd = 2.5e7;     // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (2.5e7)
     c_sd = tau_sd / r_sd;
     vb_off = 10.;         // Shutoff point in Mon, V (10.)
     vb_down = 9.8;        // Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.8)
@@ -225,12 +225,12 @@ void Chemistry::assign_CH()
     tau_ct = 24.9;        // ChargeTransfer diffusion time constant, s (=1/Rct/Cct) (24.9)
     tau_sd = 2.5e7;       // Equivalent model for EKF reference.	Parasitic discharge time constant, sec (2.5e7)
     c_sd = tau_sd / r_sd;
-    // These following are the same as BattleBorn.   I haven't observed what they really are
-    vb_off = 10.;         // Shutoff point in Mon, V (10.)
-    vb_down = 9.6;        // Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (9.6)
-    vb_down_sim = 9.5;    // Shutoff point in Sim, V (9.5)
-    vb_rising = 10.3;     // Shutoff point when off, V (10.3)
-    vb_rising_sim = 9.75; // Shutoff point in Sim when off, V (9.75)
+    // CHINS has 11. vb shutoff point
+    vb_off = 11.;         // Shutoff point in Mon, V (11.)
+    vb_down = 10.6;       // Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (10.6)
+    vb_down_sim = 10.5;   // Shutoff point in Sim, V (10.5)
+    vb_rising = 11.3;     // Shutoff point when off, V (11.3)
+    vb_rising_sim = 10.75;// Shutoff point in Sim when off, V (10.75)
     v_sat = 13.85;        // Saturation threshold at temperature, deg C (13.85)
 
     // VOC_SOC table
