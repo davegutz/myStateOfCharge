@@ -1090,9 +1090,9 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         return None, None, None, None, None
 
     # Load configuration
+    unit = None
     if mon_t is True:
         chm = int(mon_old.chm[0])
-
     else:
         if unit_key.__contains__('bb'):
             chm = 0
