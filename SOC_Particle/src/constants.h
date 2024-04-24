@@ -110,7 +110,7 @@
     #ifdef DEPLOY_PHOTON
         #define NFLT   7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
         #define NHIS  56  // Number of saved SRAM history data slices. Sized to approx match  Photon2  (56)
-        #define NSUM 175  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg  (175)
+        #define NSUM 206  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg  (206)
     #else
         #ifdef DEBUG_INIT
             #error("Not possible to deploy Photon with DEBUG_INIT")
@@ -131,13 +131,13 @@
 #ifdef CONFIG_ARGON  // dec ~222350  units: pro1a, soc1a
     #define NFLT    7  // Number of saved SRAM/EERAM fault data slices 10 s intervals (7)
     #define NHIS 1000  // Ignored Argon.  Actual nhis_ is dynamically allocated based on EERAM size, holding NFLT constant. 
-    #define NSUM 2000  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error BACKUPSRAM, or GUI FRAG msg (2000)
+    #define NSUM 2192  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error BACKUPSRAM, or GUI FRAG msg (2000)
 #endif
 
 #ifdef CONFIG_PHOTON2  // dec ~ 281700  units: pro2p2, pro3p2, soc2p2, soc3p2(scrapped)
     #define NFLT    7  // Number of saved SRAM fault data slices 10 s intervals (7)
     #define NHIS   61  // Number of saved SRAM history data slices. If NFLT + NHIS too large will get compile error BACKUPSRAM (62)
-    #define NSUM 3171  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg (3171)
+    #define NSUM 3152  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg (3171)
 #endif
 
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)

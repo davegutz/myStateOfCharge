@@ -48,22 +48,11 @@ public:
   double coul_eff;  // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
   float dqdt;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
   uint8_t m_t = 0;  // Number temperature breakpoints for voc table
-  float *y_t;       // Temperature breakpoints for voc table
   uint8_t n_s = 0;  // Number of soc breakpoints voc table
-  float *x_soc;     // soc breakpoints for voc table
-  float *t_voc;     // voc(soc,t)
   uint8_t n_n = 0;  // Number temperature breakpoints for soc_min table
-  float *x_soc_min; // Temperature breakpoints for soc_min table
-  float *t_soc_min; // soc_min table
   float hys_cap;    // Capacitance of hysteresis, Farads
   uint8_t n_h = 0;  // Number of dv breakpoints in r(soc, dv) table t_r, t_s
   uint8_t m_h = 0;  // Number of soc breakpoints in r(soc, dv) table t_r, t_s
-  float *x_dv;      // dv breakpoints for r(soc, dv) table t_r, t_s
-  float *y_soc;     // soc breakpoints for r(soc, dv) tables t_r, t_s, t_x, t_n
-  float *t_r;       // r(soc, dv) table
-  float *t_s;       // s(soc, dv) table
-  float *t_x;       // r_max(soc) table
-  float *t_n;       // r_min(soc) table
   float v_sat;      // Saturation threshold at temperature, deg C
   float dv_min_abs; // Absolute value of +/- hysteresis limit, V
   float dvoc_dt;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C
@@ -95,10 +84,10 @@ public:
   void assign_BB();   // Battleborn assignment
   void assign_CH();   // CHINS assignment
   void assign_all_chm(const String mod_str);  // Assignment executive
-  void assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t, const float *s,
-    const float *tx, const float *tn); // Worker bee Hys
-  void assign_soc_min(const int _n_n, const float *x, const float *t);  // Worker bee SOC_MIN
-  void assign_voc_soc(const int _n_s, const int _m_t, const float *x, const float *y, const float *t); // Worker bee VOC_SOC
+  void assign_hys(const int _n_h, const int _m_h, float *x, float *y, float *t, float *s,
+    float *tx, float *tn); // Worker bee Hys
+  void assign_soc_min(const int _n_n, float *x, float *t);  // Worker bee SOC_MIN
+  void assign_voc_soc(const int _n_s, const int _m_t, float *x, float *y, float *t); // Worker bee VOC_SOC
   String decode(const uint8_t mod);
   uint8_t encode(const String mod_str);
   void pretty_print();

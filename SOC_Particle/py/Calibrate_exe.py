@@ -151,7 +151,7 @@ def plot_all(raw_data, mashed_data, finished_data, red_data, act_unit_cap, fig_f
     fig_list.append(plt.figure())  # finished data 3
     cap_str = "{:5.1f}".format(act_unit_cap)
     ax = plt.subplot(111)
-    # place a text box in upper left in axes coords
+    # place a text box in upper left in axes coordinates
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     ax.text(0.4, 0.2, 'Set NOM_UNIT_CAP = ' + cap_str, transform=ax.transAxes, fontsize=14,
             verticalalignment='top', bbox=props)
@@ -167,7 +167,7 @@ def plot_all(raw_data, mashed_data, finished_data, red_data, act_unit_cap, fig_f
     fig_list.append(plt.figure())  # finished data 3
     cap_str = "{:5.1f}".format(act_unit_cap)
     ax = plt.subplot(111)
-    # place a text box in upper left in axes coords
+    # place a text box in upper left in axes coordinates
     props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
     ax.text(0.4, 0.2, 'Set NOM_UNIT_CAP = ' + cap_str, transform=ax.transAxes, fontsize=14,
             verticalalignment='top', bbox=props)
@@ -187,20 +187,20 @@ def plot_all(raw_data, mashed_data, finished_data, red_data, act_unit_cap, fig_f
     return fig_list, fig_files
 
 
-def reduce(fin_data, breakpoints):
+def reduce(fin_data, breaks):
     """Sample finished curves to minimize breakpoints"""
     red_data = []
     for (curve, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in fin_data:
         val = []
         lut_voc_soc = myTables.TableInterp1D(curve.soc, curve.vstat)
-        for brk in breakpoints:
+        for brk in breaks:
             val.append(lut_voc_soc.interp(brk))
-        New_red_data = DataCP(nom_unit_cap, curve.temp_c, breakpoints, val, curve.data_file)
+        New_red_data = DataCP(nom_unit_cap, curve.temp_c, breaks, val, curve.data_file)
         red_data.append((New_red_data, Battery.UNIT_CAP_RATED, temp, p_color, p_style, marker, marker_size))
     return red_data
 
 
-def main(data_files=None, breakpoints=[0., .1, .9, .96, .98, 1]):
+def main(data_files=None, breaks=None):
     #  data_files[( data_file, nom_unit_cap, temp_c, p_color, marker, marker_size), (...), ...]  List of tuples of data from experiments
     #   data_file       Full path to data file
     #   nom_unit_cap    Nominal applied battery unit (100 Ah unit) capacity, Ah
@@ -220,13 +220,11 @@ def main(data_files=None, breakpoints=[0., .1, .9, .96, .98, 1]):
     fig_list = []
     fig_files = []
     data_root = None
-    data_file_clean = None
-    CHM = None
+    unit = None
     for (data_file, nom_unit_cap, temp, p_color, p_style, marker, marker_size) in data_files:
         (data_file_folder, data_file_txt) = os.path.split(data_file)
         unit_key = data_file_txt.split(' ')[-1].split('.')[0]
         unit = unit_key.split('_')[0]
-        CHM = unit_key.split('_')[1].upper()
         data_file_clean = write_clean_file(data_file, type_='', hdr_key=hdr_key, unit_key=unit_key)
         if data_file_clean is None:
             print(f"case {data_file=} {temp=} is dirty...skipping")
@@ -246,7 +244,7 @@ def main(data_files=None, breakpoints=[0., .1, .9, .96, .98, 1]):
     Finished_curves = finish(Mashed_data, soc_rated_off, actual_cap)
 
     # Minimize number of points
-    Massaged_curves = reduce(Finished_curves, breakpoints)
+    Massaged_curves = reduce(Finished_curves, breaks)
 
     # Find minimums
     t_min, soc_min = minimums(Finished_curves)
@@ -266,17 +264,17 @@ def main(data_files=None, breakpoints=[0., .1, .9, .96, .98, 1]):
     for i in np.arange(m_t):
         voc_soc_brk = Massaged_curves[i][0].vstat
         voc_soc_brk_str.append(''.join(f'{q:6.3f}, ' for q in voc_soc_brk))
-    print("const uint8_t M_T_{:s} = {:d};    // Number temperature breakpoints for voc table".format(CHM, m_t))
-    print("const uint8_t N_S_{:s} = {:d};   // Number soc breakpoints for voc table".format(CHM, n_s))
-    print("const float Y_T_{:s}[M_T_{:s}] = // Temperature breakpoints for voc table\n    {{{:s}}};".format(CHM, CHM, t_min_str))
-    print("const float X_SOC_{:s}[N_S_{:s}] = // soc breakpoints for voc table\n    {{{:s}}}; ".format(CHM, CHM, soc_brk_str))
-    print("const float T_VOC_{:s}[M_T_{:s} * N_S_{:s}] = // soc breakpoints for soc_min table\n    {{".format(CHM, CHM, CHM))
+    print("const uint8_t M_T = {:d};    // Number temperature breakpoints for voc table".format(m_t))
+    print("const uint8_t N_S = {:d};   // Number soc breakpoints for voc table".format(n_s))
+    print("float Y_T[M_T] = // Temperature breakpoints for voc table\n    {{{:s}}};".format(t_min_str))
+    print("float X_SOC[N_S] = // soc breakpoints for voc table\n    {{{:s}}}; ".format(soc_brk_str))
+    print("float T_VOC[M_T * N_S] = // soc breakpoints for soc_min table\n    {{".format())
     for i in np.arange(m_t):
         print("     {:s}".format(voc_soc_brk_str[i]))
     print("    };")
-    print("const uint8_t N_N_{:s} = {:d}; // Number of temperature breakpoints for x_soc_min table".format(CHM, n_n))
-    print("const float X_SOC_MIN_CH[N_N_{:s}] = {{{:s}}};  // Temperature breakpoints for soc_min table".format(CHM, t_min_str))
-    print("const float T_SOC_MIN_CH[N_N_{:s}] = {{{:s}}};  // soc_min(t)".format(CHM, soc_min_str))
+    print("const uint8_t N_N = {:d}; // Number of temperature breakpoints for x_soc_min table".format(n_n))
+    print("float X_SOC_MIN[N_N] = {{{:s}}};  // Temperature breakpoints for soc_min table".format(t_min_str))
+    print("float T_SOC_MIN[N_N] = {{{:s}}};  // soc_min(t)".format(soc_min_str))
     print(Colors.reset, "\n\nfor local_config.h.{:s}\n".format(unit))
     print(Colors.fg.green, "#define NOM_UNIT_CAP          {:5.1f}   // Nominal battery unit capacity at RATED_TEMP.  (* 'Sc' or '*BS'/'*BP'), Ah\n".format(actual_cap))
     print(Colors.reset)
@@ -296,7 +294,7 @@ if __name__ == '__main__':
     else:
         gdrive = 'G:/My Drive'
 
-    data_files = [
+    files = [
         (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 21p5C soc2p2_ch.csv',
             100., 21.5, 'blue', '-.', 'x', 4),
         (gdrive + '/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc_vstat 25C pro3p2_ch.csv',
@@ -308,4 +306,4 @@ if __name__ == '__main__':
     breakpoints = [-.4, -.3, -.23, -.2, -.15, -.13, -.1136, -.044, 0, .0164, .032, .055, .064, .114, .134, .1545,
                    .183, .2145, .3, .4, .5, .6, .7, .8, .9, .96, .98, 1]
 
-    main(data_files=data_files, breakpoints=breakpoints)
+    main(data_files=files, breaks=breakpoints)

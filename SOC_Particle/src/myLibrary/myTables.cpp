@@ -169,7 +169,7 @@ float tab2(float x1, float x2, float *v1, float *v2, float *y, int n1,
 // constructors
 TableInterp::TableInterp()
     : n1_(0) {}
-TableInterp::TableInterp(const unsigned int n, const float x[])
+TableInterp::TableInterp(const unsigned int n, float x[])
     : n1_(n)
 {
   x_ = new float[n1_];
@@ -213,7 +213,7 @@ void TableInterp::pretty_print(void)
 // 1-D Interpolation Table Lookup
 // constructors
 TableInterp1D::TableInterp1D() : TableInterp() {}
-TableInterp1D::TableInterp1D(const unsigned int n, const float x[], const float v[])
+TableInterp1D::TableInterp1D(const unsigned int n, float x[], float v[])
     : TableInterp(n, x)
 {
   v_ = new float[n1_];
@@ -228,7 +228,7 @@ TableInterp1D::~TableInterp1D()
 }
 // operators
 // functions
-float TableInterp1D::interp(const float x)
+float TableInterp1D::interp(float x)
 {
   return (tab1(x, x_, v_, n1_));
 }
@@ -236,7 +236,7 @@ float TableInterp1D::interp(const float x)
 // 1-D Interpolation Table Lookup
 // constructors
 TableInterp1Dclip::TableInterp1Dclip() : TableInterp() {}
-TableInterp1Dclip::TableInterp1Dclip(const unsigned int n, const float x[], const float v[])
+TableInterp1Dclip::TableInterp1Dclip(const unsigned int n, float x[], float v[])
     : TableInterp(n, x)
 {
   v_ = new float[n1_];
@@ -251,7 +251,7 @@ TableInterp1Dclip::~TableInterp1Dclip()
 }
 // operators
 // functions
-float TableInterp1Dclip::interp(const float x)
+float TableInterp1Dclip::interp(float x)
 {
   return (tab1(x, x_, v_, n1_));
 }
@@ -268,8 +268,8 @@ v = {v11, v12, ...v1n, v21, v22, ...v2n, ...............  vm1, vm2, ...vmn}
 */
 // constructors
 TableInterp2D::TableInterp2D() : TableInterp() {}
-TableInterp2D::TableInterp2D(const unsigned int n, const unsigned int m, const float x[],
-                             const float y[], const float v[])
+TableInterp2D::TableInterp2D(const unsigned int n, const unsigned int m, float x[],
+                             float y[], float v[])
     : TableInterp(n, x)
 {
   n2_ = m;

@@ -119,7 +119,8 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *
   name_(name), port_(port), bare_detected_(false), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0), Ishunt_cal_filt_(0),
   sp_ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
-  vc_pin_(vc_pin), vo_pin_(vo_pin), v3_pin_(vh3v3_pin), Vc_raw_(0), Vc_(HALF_V3V3), Vo_Vc_(0.), using_tsc2010_(using_tsc2010)
+  vc_pin_(vc_pin), vo_pin_(vo_pin), v3_pin_(vh3v3_pin), Vc_raw_(HALF_V3V3/VH3V3_CONV_GAIN), Vc_(HALF_V3V3),
+  Vo_Vc_(0.), using_tsc2010_(using_tsc2010)
 {
   #ifdef CONFIG_ADS1013_OPAMP
     if ( name_=="No Amp")

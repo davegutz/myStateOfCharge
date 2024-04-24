@@ -64,44 +64,44 @@ void Chemistry::assign_all_chm(const String mod_str)
     // 20230401:  Hysteresis tuned to soc=0.7 step data
     const uint8_t M_T = 5;    // Number temperature breakpoints for voc table
     const uint8_t N_S = 18;   // Number soc breakpoints for voc table
-    const float Y_T[M_T] = // Temperature breakpoints for voc table
+    float Y_T[M_T] = // Temperature breakpoints for voc table
         {5., 11.1, 20., 30., 40.};
-    const float X_SOC[N_S] = // soc breakpoints for voc table
+    float X_SOC[N_S] = // soc breakpoints for voc table
         {-0.15, 0.00, 0.05, 0.10,  0.14,  0.17,  0.20,  0.25,  0.30,  0.40,  0.50,  0.60,  0.70,  0.80,  0.90,  0.99,  0.995, 1.00};
-    // const float T_VOC[M_T * N_S] = // r(soc, dv) table
+    // float T_VOC[M_T * N_S] = // r(soc, dv) table
     //     {4.00, 4.00, 4.00,  4.00,  10.20, 11.70, 12.45, 12.70, 12.77, 12.90, 12.91, 12.98, 13.05, 13.11, 13.17, 13.22, 13.59, 14.45,
     //      4.00, 4.00, 4.00,  9.50,  12.00, 12.50, 12.70, 12.80, 12.90, 12.96, 13.01, 13.06, 13.11, 13.17, 13.20, 13.23, 13.60, 14.46,
     //      4.00, 4.00, 10.00, 12.60, 12.77, 12.85, 12.89, 12.95, 12.99, 13.03, 13.04, 13.09, 13.14, 13.21, 13.25, 13.27, 13.72, 14.50,
     //      4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26, 13.27, 13.72, 14.50,
     //      4.00, 4.00, 12.00, 12.65, 12.75, 12.80, 12.85, 12.95, 13.00, 13.08, 13.12, 13.16, 13.20, 13.24, 13.26, 13.27, 13.72, 14.50};
-    const float T_VOC[M_T * N_S] = // r(soc, dv) table  dag 20230726 tune by 0.3 nominal because data during slow discharge at -0.3 hysteresis
+    float T_VOC[M_T * N_S] = // r(soc, dv) table  dag 20230726 tune by 0.3 nominal because data during slow discharge at -0.3 hysteresis
         {4.00, 4.00, 4.00,  4.00,  10.50, 12.00, 12.75, 13.00, 13.07, 13.20, 13.21, 13.28, 13.35, 13.41, 13.47, 13.52, 13.69, 14.25,
         4.00, 4.00, 4.00,  9.80,  12.30, 12.80, 13.00, 13.10, 13.20, 13.26, 13.31, 13.36, 13.41, 13.47, 13.50, 13.53, 13.70, 14.26,
         4.00, 4.00, 10.30, 12.90, 13.07, 13.15, 13.19, 13.25, 13.29, 13.33, 13.34, 13.39, 13.44, 13.51, 13.55, 13.57, 13.82, 14.30,
         4.00, 4.00, 12.30, 12.95, 13.05, 13.10, 13.15, 13.25, 13.30, 13.38, 13.42, 13.46, 13.50, 13.54, 13.56, 13.57, 13.82, 14.30,
         4.00, 4.00, 12.30, 12.95, 13.05, 13.10, 13.15, 13.25, 13.30, 13.38, 13.42, 13.46, 13.50, 13.54, 13.56, 13.57, 13.82, 14.30};
     const uint8_t N_N = 5;                                          // Number of temperature breakpoints for x_soc_min table
-    const float X_SOC_MIN[N_N] = {5., 11.1, 20., 30., 40.};      // Temperature breakpoints for soc_min table
-    const float T_SOC_MIN[N_N] = {0.10, 0.07, 0.05, 0.00, 0.20}; // soc_min(t).  At 40C BMS shuts off at 12V
+    float X_SOC_MIN[N_N] = {5., 11.1, 20., 30., 40.};      // Temperature breakpoints for soc_min table
+    float T_SOC_MIN[N_N] = {0.10, 0.07, 0.05, 0.00, 0.20}; // soc_min(t).  At 40C BMS shuts off at 12V
 
     // Battleborn Hysteresis
     const uint8_t M_H = 3;     // Number of soc breakpoints in r(soc, dv) table t_r, t_s
     const uint8_t N_H = 7;     // Number of dv breakpoints in r(dv) table t_r, t_s
-    const float X_DV[N_H] = // dv breakpoints for r(soc, dv) table t_r. // DAG 6/13/2022 tune x10 to match data
+    float X_DV[N_H] = // dv breakpoints for r(soc, dv) table t_r. // DAG 6/13/2022 tune x10 to match data
         {-0.7, -0.5, -0.3, 0.0, 0.15, 0.3, 0.7};
-    const float Y_SOC[M_H] = // soc breakpoints for r(soc, dv) table t_r, t_s
+    float Y_SOC[M_H] = // soc breakpoints for r(soc, dv) table t_r, t_s
         {0.0, 0.5, 0.7};
-    const float T_R[M_H * N_H] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
+    float T_R[M_H * N_H] = // r(soc, dv) table.    // DAG 9/29/2022 tune to match hist data
         {0.019, 0.015, 0.016, 0.009, 0.011, 0.017, 0.030,
         0.014, 0.014, 0.010, 0.008, 0.010, 0.015, 0.015,
         0.016, 0.016, 0.013, 0.005, 0.007, 0.010, 0.010};
-    const float T_S[M_H * N_H] = // r(soc, dv) table. Not used yet for BB
+    float T_S[M_H * N_H] = // r(soc, dv) table. Not used yet for BB
         {1, 1, 1, 1, 1, 1, 1,
         1, 1, 1, 1, 1, 1, 1,
         1, 1, 1, 1, 1, 1, 1};
-    const float T_DV_MAX[M_H] = // dv_max(soc) table.  Pulled values from insp of T_R where flattens
+    float T_DV_MAX[M_H] = // dv_max(soc) table.  Pulled values from insp of T_R where flattens
         {0.7,  0.3,  0.2};
-    const float T_DV_MIN[M_H] = // dv_max(soc) table.  Pulled values from insp of T_R where flattens
+    float T_DV_MIN[M_H] = // dv_max(soc) table.  Pulled values from insp of T_R where flattens
         {-0.7, -0.5, -0.3};
 #endif
 
@@ -114,35 +114,36 @@ void Chemistry::assign_all_chm(const String mod_str)
     // 2024-04-03:  tune to data
     const uint8_t M_T = 3;    // Number temperature breakpoints for voc table
     const uint8_t N_S = 21;   // Number soc breakpoints for voc table
-    const float Y_T[M_T] = // Temperature breakpoints for voc table
+    float Y_T[M_T] = // Temperature breakpoints for voc table
         {5.1, 5.2, 21.5};
-    const float X_SOC[N_S] = // soc breakpoints for voc table
+    float X_SOC[N_S] = // soc breakpoints for voc table
         {-0.035,   0.000,   0.050,   0.100,   0.108,   0.120,   0.140,   0.170,   0.200,   0.250,   0.300,   0.340,   0.400,   0.500,   0.600,   0.700,   0.800,   0.900,   0.980,   0.990,   1.000};
-    const float T_VOC[M_T * N_S] = // r(soc, dv) table
+    float T_VOC[M_T * N_S] = // r(soc, dv) table
         {
         4.000,   4.000,  4.000,   4.000,    4.000,  4.000,  4.000,   4.000,   4.000,   4.000,   9.000,  11.770,  12.700,  12.950,  13.050,  13.100,  13.226,  13.259,  13.264,  13.460,  14.270,
         4.000,   4.000,  4.000,   4.000,    4.000,  4.000,  4.000,   4.000,   4.000,   4.000,   9.000,  11.770,  12.700,  12.950,  13.050,  13.100,  13.226,  13.259,  13.264,  13.460,  14.270,
         4.000,   4.000,  9.0000,  9.500,   11.260, 11.850, 12.400,  12.650,  12.730,  12.810,  12.920,  12.960,  13.020,  13.060,  13.220,  13.280,  13.284,  13.299,  13.310,  13.486,  14.700
         };
     const uint8_t N_N = 4;                                        // Number of temperature breakpoints for x_soc_min table
-    const float X_SOC_MIN[N_N] = {0.000,  11.00,  21.5,  40.000, };  // Temperature breakpoints for soc_min table
-    const float T_SOC_MIN[N_N] = {0.31,   0.31,   0.1,   0.1, };  // soc_min(t)
+    float X_SOC_MIN[N_N] = {0.000,  11.00,  21.5,  40.000, };  // Temperature breakpoints for soc_min table
+    float T_SOC_MIN[N_N] = {0.31,   0.31,   0.1,   0.1, };  // soc_min(t)
 #elif ( defined(CONFIG_PRO3P2) )
-     // 2024-04-20T05-47-20:  tune to data
-    const uint8_t M_T = 2;    // Number temperature breakpoints for voc table
-    const uint8_t N_S = 22;   // Number soc breakpoints for voc table
-    const float Y_T[M_T] = // Temperature breakpoints for voc table
-        {21.5, 25.0, };
-    const float X_SOC[N_S] = // soc breakpoints for voc table
-        {-0.114, -0.044,  0.000,  0.016,  0.032,  0.055,  0.064,  0.114,  0.134,  0.154,  0.183,  0.214,  0.300,  0.400,  0.500,  0.600,  0.700,  0.800,  0.900,  0.960,  0.980,  1.000, }; 
-    const float T_VOC[M_T * N_S] = // soc breakpoints for soc_min table
+    // 2024-04-24T04-25-46:  tune to data
+    const uint8_t M_T = 3;    // Number temperature breakpoints for voc table
+    const uint8_t N_S = 28;   // Number soc breakpoints for voc table
+    float Y_T[M_T] = // Temperature breakpoints for voc table
+        {21.5, 25.0, 35.0, };
+    float X_SOC[N_S] = // soc breakpoints for voc table
+        {-0.400, -0.300, -0.230, -0.200, -0.150, -0.130, -0.114, -0.044,  0.000,  0.016,  0.032,  0.055,  0.064,  0.114,  0.134,  0.154,  0.183,  0.214,  0.300,  0.400,  0.500,  0.600,  0.700,  0.800,  0.900,  0.960,  0.980,  1.000, }; 
+    float T_VOC[M_T * N_S] = // soc breakpoints for soc_min table
         {
-        4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  9.481, 11.854, 12.408, 12.649, 12.733, 12.895, 13.010, 13.057, 13.210, 13.277, 13.284, 13.299, 13.307, 13.310, 14.700, 
-        4.000,  8.950, 11.880, 12.198, 12.495, 12.700, 12.725, 12.820, 12.850, 12.881, 12.925, 12.972, 13.041, 13.084, 13.107, 13.162, 13.237, 13.273, 13.286, 13.300, 13.300, 14.760, 
+        4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  9.481, 11.854, 12.408, 12.649, 12.733, 12.895, 13.010, 13.057, 13.210, 13.277, 13.284, 13.299, 13.307, 13.310, 14.700, 
+        4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  4.000,  8.950, 11.880, 12.198, 12.495, 12.700, 12.725, 12.820, 12.850, 12.881, 12.925, 12.972, 13.041, 13.084, 13.107, 13.162, 13.237, 13.273, 13.286, 13.300, 13.300, 14.760, 
+        4.000,  4.000,  7.500,  9.000, 11.812, 12.374, 12.701, 12.819, 12.885, 12.910, 12.933, 12.968, 12.981, 13.045, 13.060, 13.076, 13.097, 13.116, 13.150, 13.200, 13.290, 13.320, 13.320, 13.320, 13.320, 13.320, 13.320, 14.760, 
         };
-    const uint8_t N_N = 2; // Number of temperature breakpoints for x_soc_min table
-    const float X_SOC_MIN[N_N] = {21.5, 25.0, };  // Temperature breakpoints for soc_min table
-    const float T_SOC_MIN[N_N] = {0.12, -0.03, };  // soc_min(t)
+    const uint8_t N_N = 3; // Number of temperature breakpoints for x_soc_min table
+    float X_SOC_MIN[N_N] = {21.5, 25.0, 35.0, };  // Temperature breakpoints for soc_min table
+    float T_SOC_MIN[N_N] = {0.12, -0.03, -0.18, };  // soc_min(t)
 #endif
 
 
@@ -150,23 +151,23 @@ void Chemistry::assign_all_chm(const String mod_str)
 #if( defined(CONFIG_PRO0P) || defined(CONFIG_PRO3P2) )
     const uint8_t M_H = 4;     // Number of soc breakpoints in r(soc, dv) table t_r, t_s
     const uint8_t N_H = 10;    // Number of dv breakpoints in r(dv) table t_r, t_s
-    const float X_DV[N_H] = // dv breakpoints for r(soc, dv) table t_r, t_s
+    float X_DV[N_H] = // dv breakpoints for r(soc, dv) table t_r, t_s
         {-.10, -.05, -.04, 0.0, .02, .04, .05, .06, .07, .10};
-    const float Y_SOC[M_H] = // soc breakpoints for r(soc, dv) table t_r, t_s
+    float Y_SOC[M_H] = // soc breakpoints for r(soc, dv) table t_r, t_s
         {.47, .75, .80, .86};
-    const float T_R[M_H * N_H] = // r(soc, dv) table
+    float T_R[M_H * N_H] = // r(soc, dv) table
         {0.003, 0.003, 0.4, 0.4, 0.4, 0.4, 0.010, 0.010, 0.010, 0.010,
         0.004, 0.004, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.014, 0.012,
         0.004, 0.004, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.014, 0.012,
         0.004, 0.004, 0.4, 0.4, .2, .09, 0.04, 0.006, 0.006, 0.006};
-    const float T_S[M_H * N_H] = // s(soc, dv) table
+    float T_S[M_H * N_H] = // s(soc, dv) table
         {1., 1., .2, .2, .2, .2, 1., 1., 1., 1.,
         1., 1., .2, .2, .2, 1., 1., 1., 1., 1.,
         1., 1., .2, .2, .2, 1., 1., 1., 1., 1.,
         1., 1., .1, .1, .2, 1., 1., 1., 1., 1.};
-    const float T_DV_MAX[M_H] = // dv_max(soc) table.  Pulled values from insp of T_R where flattens
+    float T_DV_MAX[M_H] = // dv_max(soc) table.  Pulled values from insp of T_R where flattens
         {0.06, 0.1, 0.1, 0.06};
-    const float T_DV_MIN[M_H] = // dv_max(soc) table.  Pulled values from insp of T_R where flattens
+    float T_DV_MIN[M_H] = // dv_max(soc) table.  Pulled values from insp of T_R where flattens
         {-0.06, -0.06, -0.06, -0.06};
 #endif
 
@@ -244,125 +245,24 @@ void Chemistry::assign_CH()
 
 
 // Workhorse assignment function for Hysteresis
-void Chemistry::assign_hys(const int _n_h, const int _m_h, const float *x, const float *y, const float *t, const float *s, const float *tx, const float *tn)
+void Chemistry::assign_hys(const int _n_h, const int _m_h, float *x, float *y, float *t, float *s, float *tx, float *tn)
 {
-    int i;
-
-
-    // Delete old if exists, before assigning anything
-    if (n_h)
-        delete x_dv;
-    if (m_h)
-    {
-        delete y_soc;
-        delete hys_Tn_;
-        delete hys_Tx_;
-    }
-    if (m_h && n_h)
-    {
-        delete t_r;
-        delete hys_T_;
-        delete hys_Ts_;
-    }
-    if (m_h && n_h)
-        delete t_s;
-    if (m_h)
-        delete t_x;
-    if (m_h)
-        delete t_n;
-
-    // Instantiate
-    n_h = _n_h;
-    m_h = _m_h;
-    x_dv = new float[n_h];
-    y_soc = new float[m_h];
-    t_r = new float[m_h * n_h];
-    t_s = new float[m_h * n_h];
-    t_x = new float[m_h];
-    t_n = new float[m_h];
-
-    // Assign
-    for (i = 0; i < n_h; i++)
-        x_dv[i] = x[i];
-    for (i = 0; i < m_h; i++)
-        y_soc[i] = y[i];
-    for (i = 0; i < m_h * n_h; i++)
-        t_r[i] = t[i];
-    for (i = 0; i < m_h * n_h; i++)
-        t_s[i] = s[i];
-    for (i = 0; i < m_h; i++)
-        t_x[i] = tx[i];
-    for (i = 0; i < m_h; i++)
-        t_n[i] = tn[i];
-
-    // Finalize
-    hys_T_ = new TableInterp2D(n_h, m_h, x_dv, y_soc, t_r);
-    hys_Tn_ = new TableInterp1D(m_h, y_soc, t_n);
-    hys_Ts_ = new TableInterp2D(n_h, m_h, x_dv, y_soc, t_s);
-    hys_Tx_ = new TableInterp1D(m_h, y_soc, t_x);
+    hys_T_ = new TableInterp2D(_n_h, _m_h, x, y, t);
+    hys_Tn_ = new TableInterp1D(_m_h, y, tn);
+    hys_Ts_ = new TableInterp2D(_n_h, _m_h, x, y, s);
+    hys_Tx_ = new TableInterp1D(_m_h, y, tx);
 }
 
 // Workhorse assignment function for VOC_SOC
-void Chemistry::assign_voc_soc(const int _n_s, const int _m_t, const float *x, const float *y, const float *t)
+void Chemistry::assign_voc_soc(const int _n_s, const int _m_t, float *x, float *y, float *t)
 {
-    int i;
-
-    // Delete old if exists, before assigning anything
-    if (n_s)
-        delete x_soc;
-    if (m_t)
-        delete y_t;
-    if (m_t && n_s)
-    {
-        delete t_voc;
-        delete voc_T_;
-    }
-
-    // Instantiate
-    n_s = _n_s; // Number of soc breakpoints voc table
-    m_t = _m_t; // Number temperature breakpoints for voc table
-    x_soc = new float[n_s];
-    y_t = new float[m_t];
-    t_voc = new float[m_t * n_s];
-
-    // Assign
-    for (i = 0; i < n_s; i++)
-        x_soc[i] = x[i];
-    for (i = 0; i < m_t; i++)
-        y_t[i] = y[i];
-    for (i = 0; i < m_t * n_s; i++)
-        t_voc[i] = t[i];
-
-    // Finalize
-    voc_T_ = new TableInterp2D(n_s, m_t, x_soc, y_t, t_voc);
+    voc_T_ = new TableInterp2D(_n_s, _m_t, x, y, t);
 }
 
 // Workhorse assignment function for SOC_MIN
-void Chemistry::assign_soc_min(const int _n_n, const float *x, const float *t)
+void Chemistry::assign_soc_min(const int _n_n, float *x, float *t)
 {
-    int i;
-
-    // Delete old if exists, before assigning anything
-    if (n_n)
-    {
-        delete x_soc_min;
-        delete t_soc_min;
-        delete soc_min_T_;
-    }
-
-    // Instantiate
-    n_n = _n_n; // Number of temperature breakpoints for x_soc_min table
-    x_soc_min = new float[n_n];
-    t_soc_min = new float[n_n];
-
-    // Assign
-    for (i = 0; i < n_n; i++)
-        x_soc_min[i] = x[i];
-    for (i = 0; i < n_n; i++)
-        t_soc_min[i] = t[i];
-
-    // Finalize
-    soc_min_T_ = new TableInterp1D(n_n, x_soc_min, t_soc_min);
+    soc_min_T_ = new TableInterp1D(_n_n, x, t);
 }
 
 // Battery type model translate to plain English for display

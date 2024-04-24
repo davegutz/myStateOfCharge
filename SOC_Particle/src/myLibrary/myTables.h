@@ -13,7 +13,7 @@ class TableInterp
 {
 public:
   TableInterp();
-  TableInterp(const unsigned int n, const float x[]);
+  TableInterp(const unsigned int n, float x[]);
   virtual ~TableInterp();
   // operators
   // functions
@@ -30,11 +30,11 @@ class TableInterp1D : public TableInterp
 {
 public:
   TableInterp1D();
-  TableInterp1D(const unsigned int n, const float x[], const float v[]);
+  TableInterp1D(const unsigned int n, float x[], float v[]);
   ~TableInterp1D();
   //operators
   //functions
-  virtual float interp(const float x);
+  virtual float interp(float x);
 
 protected:
 };
@@ -44,11 +44,11 @@ class TableInterp1Dclip : public TableInterp
 {
 public:
   TableInterp1Dclip();
-  TableInterp1Dclip(const unsigned int n, const float x[], const float v[]);
+  TableInterp1Dclip(const unsigned int n, float x[], float v[]);
   ~TableInterp1Dclip();
   //operators
   //functions
-  virtual float interp(const float x);
+  virtual float interp(float x);
 
 protected:
 };
@@ -58,12 +58,12 @@ class TableInterp2D : public TableInterp
 {
 public:
   TableInterp2D();
-  TableInterp2D(const unsigned int n, const unsigned int m, const float x[],
-                const float y[], const float v[]);
+  TableInterp2D(const unsigned int n, const unsigned int m, float x[],
+                float y[], float v[]);
   ~TableInterp2D();
   //operators
   //functions
-  virtual float interp(const float x, const float y);
+  virtual float interp(float x, float y);
   void pretty_print();
 
 protected:
