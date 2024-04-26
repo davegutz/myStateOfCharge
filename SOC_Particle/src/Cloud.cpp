@@ -37,9 +37,9 @@ void assign_publist(Publish* pubList, const unsigned long long now, const String
   Sensors* Sen, const int num_timeouts, BatteryMonitor* Mon)
 {
   String batt;
-  if ( sp.Mon_chm() == 0 )
+  if ( CHEM == 0 )
     batt = "_bb";
-  else if ( sp.Mon_chm() == 1 )
+  else if ( CHEM == 1 )
     batt = "_ch";
   else
     batt = "_un";

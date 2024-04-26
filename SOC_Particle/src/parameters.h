@@ -166,10 +166,8 @@ public:
     double delta_q_model() { return delta_q_model_z;}
     float Dw() { return Dw_z; }
     float freq() { return freq_z; }
-    uint8_t Mon_chm() { return Mon_chm_z; }
     float s_cap_mon() { return s_cap_mon_z; }
     float s_cap_sim() { return s_cap_sim_z; }
-    uint8_t Sim_chm() { return Sim_chm_z; }
     float ib_bias_all() { return ib_bias_all_z; }
     float ib_bias_amp() { return ib_bias_amp_z; }
     float ib_bias_noa() { return ib_bias_noa_z; }
@@ -337,11 +335,9 @@ public:
     float inj_bias_z;
     uint16_t isum_z;
     uint8_t modeling_z;
-    uint8_t Mon_chm_z;
     float nP_z;
     float nS_z;
     uint8_t preserving_z;
-    uint8_t Sim_chm_z;
     float s_cap_mon_z;
     float s_cap_sim_z;
     float Tb_bias_hdwe_z;

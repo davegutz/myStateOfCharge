@@ -69,21 +69,13 @@ public:
   TableInterp2D *hys_T_;      // dv-soc 2-D table, V
   TableInterp2D *voc_T_;      // SOC-VOC 2-D table, V
   TableInterp1D *soc_min_T_;  // SOC-MIN 1-D table, V
-  Chemistry();
-  Chemistry(const String mod_str)
+  Chemistry()
   {
-    sp_mod_code = new uint8_t(-1);
-    assign_all_chm(mod_str);
-  }
-  Chemistry(uint8_t *mod_code)
-  {
-    sp_mod_code = mod_code;
-    String mod_str = decode(*sp_mod_code);
-    assign_all_chm(mod_str);
+    assign_all_chm();
   }
   void assign_BB();   // Battleborn assignment
   void assign_CH();   // CHINS assignment
-  void assign_all_chm(const String mod_str);  // Assignment executive
+  void assign_all_chm();  // Assignment executive
   void assign_hys(const int _n_h, const int _m_h, float *x, float *y, float *t, float *s,
     float *tx, float *tn); // Worker bee Hys
   void assign_soc_min(const int _n_n, float *x, float *t);  // Worker bee SOC_MIN

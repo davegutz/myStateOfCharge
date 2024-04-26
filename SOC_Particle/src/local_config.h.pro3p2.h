@@ -2,7 +2,7 @@
 #define local_config_h
 
 #include "version.h"
-#define CONFIG_PRO3P2
+#define UNIT  "pro3p2"
 
 // Hardware config
 #define CONFIG_SBAUD               460800      // Default Serial baud when able
@@ -44,8 +44,7 @@
 // Four 12 V 200 Ah with two in parallel joined with two more in series
 //   would have  NOM_UNIT_CAP 200, NS 2, and NP 2
 #define COULOMBIC_EFF_SCALE   1.0     // Scalar on Coulombic efficiency of battery, fraction of charge that gets used (1.0)
-#define MON_CHEM              1       // Chemistry monitor code integer, 0=Battleborn, 1=CHINS
-#define SIM_CHEM              1       // Chemistry simulate code integer, 0=Battleborn, 1=CHINS
+#define CHEM                  2       // Chemistry monitor code integer, 0=Battleborn, 1=CHINS-guest room, 2=CHINS-garage
 #define NOM_UNIT_CAP          102.9   // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define HYS_SCALE             1.0     // Scalar on hysteresis (1.0)
 #define NS                    2.0     // Number of series batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BS')

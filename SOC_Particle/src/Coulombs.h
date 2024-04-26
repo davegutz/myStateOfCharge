@@ -39,7 +39,7 @@ class Coulombs
 public:
   Coulombs();
   Coulombs(double *sp_delta_q, float *sp_t_last, const float q_cap_rated, const float t_rlim,
-    uint8_t *sp_mod_code, const double s_coul_eff);
+    const double s_coul_eff);
   ~Coulombs();
   // operators
   // functions
@@ -49,7 +49,7 @@ public:
   void apply_soc(const float soc, const float temp_c);
   void apply_delta_q_t(const boolean reset);
   void apply_delta_q_t(const double delta_q, const float temp_c);
-  void assign_all_mod(const String mod_str) { chem_.assign_all_chm(mod_str); };
+  void assign_all_mod() { chem_.assign_all_chm(); };
   double calculate_capacity(const float temp_c);
   void chem_pretty_print () { chem_.pretty_print(); };
   double coul_eff() { return ( coul_eff_ ); };

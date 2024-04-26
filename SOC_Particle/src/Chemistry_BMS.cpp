@@ -37,27 +37,24 @@ extern PublishPars pp; // For publishing
 // Assign parameters of model
 
 // Chemistry Executive
-void Chemistry::assign_all_chm(const String mod_str)
+void Chemistry::assign_all_chm()
 {
-    uint8_t mod = encode(mod_str);
-    if (mod == 0) // "Battleborn";
+    if (CHEM == 0) // "Battleborn";
     {
-        *sp_mod_code = mod;
         assign_BB();
     }
-    else if (mod == 1) // "CHINS"
+    else if (CHEM == 1) // "CHINS"
     {
-        *sp_mod_code = mod;
         assign_CH();
     }
     else
-        Serial.printf("assign_all_mod:  unknown mod %d.  Type 'h' (Xm)\n", mod);
+        Serial.printf("assign_all_mod:  unknown mod %d.  Type 'h' (Xm)\n", CHEM);
     r_ss = r_0 + r_ct;
 }
 
 
 // BattleBorn Chemistry
-#if( defined(CONFIG_PRO1A) || defined(CONFIG_SOC1A) )
+#if CHEM == 0
     // BattleBorn 100 Ah, 12v LiFePO4
     // See VOC_SOC data.xls.    T=40 values are only a notion.   Need data for it.
     // >13.425 V is reliable approximation for SOC>99.7 observed in my prototype around 15-35 C
@@ -107,7 +104,7 @@ void Chemistry::assign_all_chm(const String mod_str)
 
 
 // CHINS Chemistry
-#if( defined(CONFIG_PRO0P) )
+#if CHEM == 1
     // CHINS 100 Ah, 12v LiFePO4
     // 2023-02-27:  tune to data.  Add slight slope 0.8-0.98 to make models deterministic
     // 2023-08-29:  tune to data
@@ -127,7 +124,7 @@ void Chemistry::assign_all_chm(const String mod_str)
     const uint8_t N_N = 4;                                        // Number of temperature breakpoints for x_soc_min table
     float X_SOC_MIN[N_N] = {0.000,  11.00,  21.5,  40.000, };  // Temperature breakpoints for soc_min table
     float T_SOC_MIN[N_N] = {0.31,   0.31,   0.1,   0.1, };  // soc_min(t)
-#elif ( defined(CONFIG_PRO3P2) )
+#elif CHEM == 2
     // 2024-04-24T14-51-24:  tune to data
     const uint8_t M_T = 3;    // Number temperature breakpoints for voc table
     const uint8_t N_S = 28;   // Number soc breakpoints for voc table
@@ -148,7 +145,7 @@ void Chemistry::assign_all_chm(const String mod_str)
 
 
 // CHINS Hysteresis
-#if( defined(CONFIG_PRO0P) || defined(CONFIG_PRO3P2) )
+#if( CHEM == 1 || CHEM == 2 )
     const uint8_t M_H = 4;     // Number of soc breakpoints in r(soc, dv) table t_r, t_s
     const uint8_t N_H = 10;    // Number of dv breakpoints in r(dv) table t_r, t_s
     float X_DV[N_H] = // dv breakpoints for r(soc, dv) table t_r, t_s

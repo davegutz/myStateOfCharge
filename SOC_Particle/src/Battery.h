@@ -81,7 +81,7 @@ class Battery : public Coulombs
 {
 public:
   Battery();
-  Battery(double *sp_delta_q, float *sp_t_last, uint8_t *sp_mod_code, const float d_voc_soc);
+  Battery(double *sp_delta_q, float *sp_t_last, const float d_voc_soc);
   ~Battery();
   // operators
   // functions
@@ -146,7 +146,6 @@ public:
   // functions
   float amp_hrs_remaining_ekf() { return amp_hrs_remaining_ekf_; };
   float amp_hrs_remaining_soc() { return amp_hrs_remaining_soc_; };
-  void app_chem();
   float calc_charge_time(const double q, const float q_capacity, const float charge_curr, const float soc);
   virtual float calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc);
   float calculate(Sensors *Sen, const boolean reset);

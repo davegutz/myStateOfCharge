@@ -39,10 +39,10 @@ extern PublishPars pp;    // For publishing
 // class Coulombs
 Coulombs::Coulombs() {}
 Coulombs::Coulombs(double *sp_delta_q, float *sp_t_last, const float q_cap_rated, const float t_rlim,
-  uint8_t *sp_mod_code, const double s_coul_eff)
+  const double s_coul_eff)
   : q_(q_cap_rated), q_capacity_(q_cap_rated), q_cap_rated_(q_cap_rated), q_cap_rated_scaled_(q_cap_rated),
     q_min_(0.), sat_(true), soc_(1.), soc_min_(0.), sp_delta_q_(sp_delta_q), sp_t_last_(sp_t_last), t_rlim_(0.017),
-    chem_(sp_mod_code)
+    chem_()
     {
       coul_eff_ = (chem_.coul_eff*s_coul_eff);
     }

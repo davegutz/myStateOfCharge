@@ -107,20 +107,12 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
 
 
 def main():
-    # path_to_data = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\offSitHysBmsNoiseBB_pro1a_bb.csv'
-    # skip = 1
-    # unit_key = 'g20231111b_pro1a_bb'
-    # zero_zero_in = False
-    # time_end_in = None
-    # rated_batt_cap = 108.4
-    # legacy = False
-    # v1_only = False
-    path_to_data = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/Hist_12C_disch_partCharge_soc2p2_ch.csv'
+    path_to_data = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/ampHiFail_pro0p_ch.csv'
     skip = 1
-    unit_key = 'g20240331_soc2p2_ch'
+    unit_key = 'g20240331_pro0p_ch'
     zero_zero_in = False
     time_end_in = None
-    rated_batt_cap = 100.0
+    rated_batt_cap = 108.4
     legacy = False
     v1_only = False
     load_data(path_to_data=path_to_data, skip=skip, unit_key=unit_key, zero_zero_in=zero_zero_in,
