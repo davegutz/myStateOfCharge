@@ -1064,7 +1064,8 @@ if __name__ == '__main__':
     elif platform.system() == 'Darwin':
         putty_test_csv_path = tk.StringVar(master, '~/.local/putty_test.csv')
     else:
-        putty_test_csv_path = tk.StringVar(master, '%localappdata%\\Temp\\putty_test.csv')
+        putty_test_csv_path = tk.StringVar(master, os.path.join(os.getenv('LOCALAPPDATA'), 'Temp', 'putty_test.csv'))
+    print(f"{putty_test_csv_path.get()=}")
     icon_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC_Icon.png')
     master.iconphoto(False, tk.PhotoImage(file=icon_path))
     top_panel = tk.Frame(master)
