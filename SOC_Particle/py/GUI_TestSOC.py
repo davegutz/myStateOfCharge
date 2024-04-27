@@ -83,7 +83,7 @@ satInit = 'Dh;*W;*vv0;*XS;*Ca1;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
 modMidInit = 'Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
 modMidInitNoCc = 'Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
 modLowInitBB = 'Xm247;Ca0.050;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
-modLowInitCH = 'Xm247;Ca0.103;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
+modLowInitCH = 'Xm247;Ca0.11;BZ;Ff0;DP1;HR;Rf;Hd;Pf;XD;'
 noisePackage = 'DT.05;DV0.05;DM.2;DN2;'
 silentPackage = 'DT0;DV0;DM0;DN0;'
 quiet = 'vv0;Dh;'
@@ -880,6 +880,7 @@ def tksleep(t):
 
 
 def save_data():
+    print(f"save_data: {putty_test_csv_path.get()=}")
     if size_of(putty_test_csv_path.get()) > 64:  # bytes
         # For custom option, redefine Test.file_path if requested
         new_file_txt = None
@@ -1058,10 +1059,14 @@ if __name__ == '__main__':
     # master.geometry('%dx%d' % (master.winfo_screenwidth(), master.winfo_screenheight()))
     Ref = Exec(cf, 'ref', path_disp_len_=folder_reveal)
     Test = Exec(cf, 'test', path_disp_len_=folder_reveal)
-    putty_test_csv_path = tk.StringVar(master, os.path.join(ex_root.script_loc, '../dataReduction/putty_test.csv'))
+    if platform.system() == 'Linux':
+        putty_test_csv_path = tk.StringVar(master, '/home/daveg/.local/putty_test.csv')
+    elif platform.system() == 'Darwin':
+        putty_test_csv_path = tk.StringVar(master, '~/.local/putty_test.csv')
+    else:
+        putty_test_csv_path = tk.StringVar(master, '%localappdata%\\Temp\\putty_test.csv')
     icon_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC_Icon.png')
     master.iconphoto(False, tk.PhotoImage(file=icon_path))
-
     top_panel = tk.Frame(master)
     top_panel.pack(expand=True, fill='both')
     top_panel_left = tk.Frame(top_panel)
