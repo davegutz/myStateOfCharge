@@ -198,7 +198,7 @@ putty_connection = {'': 'test',
                     'pro0p': 'testpro0p',
                     'pro1a': 'testpro1a',
                     'pro3p2': 'testpro3p2',
-                    'soc2p2': 'testsoc2p2'}
+                    'soc3p2': 'testsoc3p2'}
 
 
 # Begini - configuration class using .ini files
@@ -1022,8 +1022,8 @@ def start_putty():
         enter_size = putty_size()
     if enter_size < 64:
         kill_putty(platform.system())
+        print(f'restarting putty   putty -load {test_filename.get()=}')
         subprocess.Popen(['putty', '-load', test_filename.get()], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
-        print('restarting putty   putty -load test')
 
 
 def start_timer():
