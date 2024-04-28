@@ -429,7 +429,7 @@ def write_clean_file(path_to_data, type_=None, hdr_key=None, unit_key=None, skip
     with (open(path_to_data, "r", encoding='cp437') as input_file):  # reads all characters even bad ones
         with open(csv_file, "a") as output:
             for line in input_file:
-                if line.__contains__(unit_key):
+                if line.__contains__(unit_key) and not line.__contains__('Config:'):
                     unit_key_found = True
                     if line.count(",") == num_fields and line.count(";") == 0 and \
                             re.search(r'[^a-zA-Z0-9+-_.:, ]', line[:-1]) is None and \
