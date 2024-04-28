@@ -28,7 +28,7 @@ IB_LAG_CH = 180.
 def ib_lag(chm):
     if chm == 0.:
         lag = IB_LAG_BB
-    elif chm == 1.:
+    elif chm == 1. or chm == 2.:
         lag = IB_LAG_CH
     else:
         print('bad chm value=', chm)
