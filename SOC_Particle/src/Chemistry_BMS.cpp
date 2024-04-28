@@ -47,6 +47,10 @@ void Chemistry::assign_all_chm()
     {
         assign_CH();
     }
+    else if (CHEM == 2) // "CHINS Garage"
+    {
+        assign_CH();
+    }
     else
         Serial.printf("assign_all_mod:  unknown mod %d.  Type 'h' (Xm)\n", CHEM);
     r_ss = r_0 + r_ct;

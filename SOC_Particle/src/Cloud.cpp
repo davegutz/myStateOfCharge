@@ -41,6 +41,8 @@ void assign_publist(Publish* pubList, const unsigned long long now, const String
     batt = "_bb";
   else if ( CHEM == 1 )
     batt = "_ch";
+  else if ( CHEM == 2 )
+    batt = "_chg";
   else
     batt = "_un";
   pubList->now = now;
