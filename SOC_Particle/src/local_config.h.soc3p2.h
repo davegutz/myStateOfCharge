@@ -10,7 +10,7 @@
 #define CONFIG_PHOTON2
 #define CONFIG_SSD1306_OLED
 #define CONFIG_TSC2010_DIFFAMP
-// #define CONFIG_DS2482_1WIRE
+#define CONFIG_DS2482_1WIRE
 
 // #define DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
@@ -33,7 +33,7 @@
 #define SHUNT_AMP_R2          100000.   // Amplifed shunt ADS resistance, ohms (100k) 0.075v  = 1.34 v => 3.3/2+1.34 = 2.99 < 3.3
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
 #define VOLT_BIAS             0.0   // Bias on Vb sensor (* 'Dc'), V
-#define TEMP_BIAS            25.0   // Bias on Tb sensor (* 'Dt'), deg C
+#define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI      47000     // Vb high sense resistor, ohm (47000)
 #define VB_SCALE              1.0    // Scale Vb sensor (* 'SV')
