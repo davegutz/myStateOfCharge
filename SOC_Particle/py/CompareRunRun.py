@@ -98,8 +98,7 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('rapidTweakRegressionH0_soc3p2_chg.csv', 'g20240331_soc3p2_chg'),
-            ('rapidTweakRegressionH0_soc3p2_chg.csv', 'g20240331_soc3p2_chg')]
+    keys = [('pulseSS_soc3p2_chg.csv', 'g20240331_soc3p2_chg'), ('pulseSS_pro0p_chg.csv', 'g20240331_pro0p_chg')]
     data_file_folder_ref = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
     data_file_folder_test = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
     rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'

@@ -66,13 +66,17 @@ def_dict = {'test': {"version": "g20230530",
 # Transient string
 unit_list = ['pro0p', 'pro1a', 'pro2p2', 'pro3p2', 'soc0p', 'soc1a', 'soc3p2', 'soc2p2']
 batt_list = ['bb', 'ch', 'chg']
-sel_list = ['custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
-            'allInCHG', 'allProto', 'pulseSS', 'rapidTweakRegressionH0', 'offSitHysBmsBB', 'offSitHysBmsCH',
-            'triTweakDisch', 'ampHiFailFf', 'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C',
-            'slowTweakRegression', 'satSitBB', 'satSitCH', 'satSitCHG', 'flatSitHys', 'offSitHysBmsNoiseBB',
-            'offSitHysBmsNoiseCH', 'ampHiFailSlow', 'vHiFail',  'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod',
-            'tbFailHdwe', 'DvMon', 'DvSim', 'faultParade',
-            ]
+sel_list = [
+    'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
+    'allInCHG', 'allProto', 'pulseSS', 'rapidTweakRegressionH0', 'offSitHysBmsBB', 'offSitHysBmsCH',
+    'triTweakDisch', 'ampHiFailFf', 'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C',
+    'slowTweakRegression', 'satSitBB', 'satSitCH', 'satSitCHG', 'flatSitHys', 'offSitHysBmsNoiseBB',
+    'offSitHysBmsNoiseCH',
+    ]
+sel_list1 = [
+    'ampHiFailSlow', 'vHiFail',  'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod',
+    'tbFailHdwe', 'DvMon', 'DvSim', 'faultParade',
+    ]
 macro_sel_list = [
             'end_early', 'modMidInit', 'modMidInitNoCc', 'modLowInitBB', 'modLowInitCH', 'modLowInitCHG',
             'noisePackage', 'silentPackage', 'quiet', 'cleanup', 'tempCleanup', 'zeroPulse', 'tranPrep',
@@ -142,7 +146,7 @@ lookup = {
         'ampHiFail': (62, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
         'rapidTweakRegression': (200, 'Xp10;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips')),
         'allProto': (552, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + tempCleanup + '  Pf;Xp10;  Pf;Xp13;  ' + modMidInitNoCc + tranPrep + cm50 + 'XQ50000;' + c00 + quiet + cleanup, ('Proto multi', "Must have same 'vv*' throughout", "No 'HR' either")),
-        'pulseSS': (10, "Xp7;vv0;Dh;", ("Should generate a very short <10 sec data burst with a sw pulse.  Look at plots for good overlay. e_wrap will have a delay.", "This is the shortest of all tests.  Useful for quick checks.")),
+        'pulseSS': (10, 'Xp7;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
         'rapidTweakRegressionH0': (200, 'Sh0;Xp10;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!')),
         'offSitHysBmsBB': (590, modLowInitBB + slowTwitchDef + 'Xa-162;' + tranPrep + twitch + 'XQ568000;' + 'Xa0;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),
         'offSitHysBmsCH': (590, modLowInitCH + slowTwitchDef + 'Xa-162;' + tranPrep + twitch + 'XQ568000;' + 'Xa0;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),
@@ -1175,6 +1179,9 @@ if __name__ == '__main__':
     sel = tk.OptionMenu(option_panel_left, option, *sel_list)
     sel.config(width=20, font=butt_font)
     sel.pack(padx=5, pady=5)
+    sel1 = tk.OptionMenu(option_panel_left, option, *sel_list1)
+    sel1.config(width=20, font=butt_font)
+    sel1.pack(padx=5, pady=5)
     option.trace_add('write', handle_option)
     Test.label = tk.Label(option_panel_ctr, text=Test.file_txt)
     Test.label.pack(padx=5, pady=5, anchor=tk.W)
