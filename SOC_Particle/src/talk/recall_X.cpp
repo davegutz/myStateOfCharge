@@ -80,7 +80,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                     // Regression tests 9=tweak, 10=tweak w data, 11=cycle, 12 1/2 cycle
 
                     chit("Xp0;vv0;Xm255;Xts;Ca1;", SOON);
-                    chit("DP1;Rb;", SOON); 
+                    chit("Rb;", SOON); 
 
                     if ( INT_in == 10 )  // Xp10:  rapid tweak
                     {
