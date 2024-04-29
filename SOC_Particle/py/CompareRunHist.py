@@ -27,6 +27,7 @@ from CompareHistSim import compare_hist_sim
 from datetime import datetime
 import os
 import tkinter.messagebox
+from local_paths import *
 
 plt.rcParams['axes.grid'] = True
 
@@ -55,13 +56,11 @@ def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_pat
         fig_files = []
 
         # File path operations
-        (data_file_folder, data_file_txt) = os.path.split(data_file_)
-        save_pdf_path = os.path.join(data_file_folder, rel_path_to_save_pdf_)
-        if not os.path.isdir(save_pdf_path):
-            os.mkdir(save_pdf_path)
-        path_to_temp = os.path.join(data_file_folder, rel_path_to_temp_)
-        if not os.path.isdir(path_to_temp):
-            os.mkdir(path_to_temp)
+        version = version_from_data_file(data_file_)
+        _, save_pdf_path, _ = local_paths(version)
+
+        (data_file_folder, _) = os.path.split(data_file_)
+
         data_root_ref = dfcs.split('/')[-1].replace('.csv', '')
         dir_root_ref = data_file_folder.split('/')[-1].split('\\')[-1]
         filename = data_root_ref + '__hist'
@@ -90,7 +89,7 @@ def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_pat
 
 def main():
     data_file_full = \
-        'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\rapidTweakRegression_pro1a_bb.csv'
+        '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20231111b/rapidTweakRegression_pro1a_bb.csv'
     unit_key_full = 'g20231111b_pro1a_bb'
 
     compare_run_hist(data_file_=data_file_full, unit_key_=unit_key_full)

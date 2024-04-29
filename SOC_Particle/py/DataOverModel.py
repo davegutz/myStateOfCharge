@@ -38,6 +38,7 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 import Chemistry_BMS
 from Colors import *
 import re
+from local_paths import *
 
 plt.rcParams.update({'figure.max_open_warning': 0})
 
@@ -398,9 +399,8 @@ def write_clean_file(path_to_data, type_=None, hdr_key=None, unit_key=None, skip
     """First line with hdr_key defines the number of fields to be imported cleanly"""
     import os
     (path, basename) = os.path.split(path_to_data)
-    path_to_temp = path + '/temp'
-    if not os.path.isdir(path_to_temp):
-        os.mkdir(path_to_temp)
+    version = version_from_data_file(path_to_data)
+    (path_to_temp, save_pdf_path, dum) = local_paths(version)
     csv_file = path_to_temp+'/'+basename.replace('.csv', type_ + '.csv', 1)
     # Header
     have_header_str = None

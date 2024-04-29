@@ -26,6 +26,7 @@ from datetime import datetime
 from PlotKiller import show_killer
 import os
 from load_data import load_data
+from local_paths import *
 
 plt.rcParams['axes.grid'] = True
 
@@ -44,10 +45,6 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
     time_end_in = None
     rated_batt_cap_ref_in = 108.4
     rated_batt_cap_test_in = 108.4
-    if not os.path.isdir(rel_path_to_save_pdf):
-        os.mkdir(rel_path_to_save_pdf)
-    if not os.path.isdir(rel_path_to_temp):
-        os.mkdir(rel_path_to_temp)
 
     # Regression suite
     data_file_txt_ref = keys[0][0]
@@ -56,13 +53,8 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
     unit_key_test = keys[1][1]
 
     # Folder operations
-
-    save_pdf_path = os.path.join(data_file_folder_test, rel_path_to_save_pdf)
-    if not os.path.isdir(rel_path_to_save_pdf):
-        os.mkdir(rel_path_to_save_pdf)
-    path_to_temp = os.path.join(data_file_folder_test, rel_path_to_temp)
-    if not os.path.isdir(path_to_temp):
-        os.mkdir(path_to_temp)
+    version = version_from_data_path(data_file_folder_test)
+    _, save_pdf_path, _ = local_paths(version)
 
     # Load old ref data
     data_file_ref = os.path.join(data_file_folder_ref, data_file_txt_ref)
@@ -106,12 +98,12 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('offSitHysBmsNoiseBB_pro1a_bb.csv', 'g20231111_pro1a_bb'),
-            ('offSitHysBmsNoiseBB_pro1a_bb.csv', 'g20231111b_pro1a_bb')]
-    data_file_folder_ref = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111'
-    data_file_folder_test = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b'
-    rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./figures'
-    rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20231111b\\./temp'
+    keys = [('rapidTweakRegressionH0_soc3p2_chg.csv', 'g20240331_soc3p2_chg'),
+            ('rapidTweakRegressionH0_soc3p2_chg.csv', 'g20240331_soc3p2_chg')]
+    data_file_folder_ref = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
+    data_file_folder_test = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
+    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
+    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
 
     compare_run_run(keys=keys,
                     data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test,

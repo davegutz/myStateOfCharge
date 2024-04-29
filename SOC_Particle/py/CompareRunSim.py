@@ -33,6 +33,7 @@ import easygui
 import os
 from PlotKiller import show_killer
 import tkinter.messagebox
+from local_paths import *
 
 plt.rcParams['axes.grid'] = True
 
@@ -75,13 +76,8 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
         data_file = rel_path_to_temp
 
     # Folder operations
-    (data_file_folder, data_file_txt) = os.path.split(data_file)
-    save_pdf_path = os.path.join(str(data_file_folder), str(rel_path_to_save_pdf))
-    if not os.path.isdir(rel_path_to_save_pdf):
-        os.mkdir(rel_path_to_save_pdf)
-    path_to_temp = os.path.join(str(data_file_folder), str(rel_path_to_temp))
-    if not os.path.isdir(path_to_temp):
-        os.mkdir(path_to_temp)
+    version = version_from_data_file(data_file)
+    _, save_pdf_path, _ = local_paths(version)
 
     # # Load mon v4 (old)
     mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
@@ -150,12 +146,11 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
 
 
 def main():
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109/SrSeries_soc2p2_ch.csv'
-    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109/SrSeries_soc2p2_ch_short.csv'
-    unit_key = 'g20240109_soc2p2_ch'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/rapidTweakRegressionH0_soc3p2_chg.csv'
+    unit_key = 'g20240331_soc3p2_chg'
     time_end_in = None
-    # rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109\\./figures'
-    # rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240109\\./temp'
+    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
+    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
     data_only = False
     compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only, time_end_in=time_end_in)
 

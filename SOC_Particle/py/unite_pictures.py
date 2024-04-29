@@ -50,6 +50,7 @@ def precleanup_fig_files(output_pdf_name='unite_pictures.pdf', path_to_pdfs='.')
 def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', save_pdf_path='.', pathToPictures='.', splitType="picture",
                             numberOfEntitiesInOnePdf=9, listWithImagesExtensions=None,
                             picturesAreInRootFolder=True, nameOfPart="picture"):
+    # print(f"unite_pictures_into_pdf:\n{outputPdfName=}\n{save_pdf_path=}\n{pathToPictures=}\n{splitType=}\n{numberOfEntitiesInOnePdf=}\n{listWithImagesExtensions=}\n{picturesAreInRootFolder=}\n{nameOfPart=}")
 
     if listWithImagesExtensions is None:
         listWithImagesExtensions = ["png", "jpg"]
@@ -62,8 +63,8 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', save_pdf_path='.
         print("listWithImagesExtensions is empty.")
         return
 
-    if not picturesAreInRootFolder:
-        foldersInsideFolderWithPictures = sorted_nicely(glob.glob(pathToPictures + "\\*\\"))
+    if picturesAreInRootFolder is True:
+        foldersInsideFolderWithPictures = sorted_nicely(glob.glob(os.path.join(pathToPictures, '*')))
         if len(foldersInsideFolderWithPictures) != 0:
             picturesPathsForEachFolder = []
             for iFolder in foldersInsideFolderWithPictures:
@@ -210,14 +211,14 @@ def unite_pictures_into_pdf(outputPdfName='unite_pictures.pdf', save_pdf_path='.
 
 
 def main():
-    outputPdfName = "pdf_with_pictures"
-    save_pdf_path = "D:\\pictures"
-    pathToPictures = "D:\\pictures"
-    splitType = "picture"
-    numberOfEntitiesInOnePdf = 1
-    listWithImagesExtensions = ["png", "jpg"]
-    picturesAreInRootFolder = False
-    nameOfPart = "volume"
+    outputPdfName = 'rapidTweakRegressionH0_soc3p2_chg_mon__rapidTweakRegressionH0_soc3p2_chg_mon-2024-04-29T05-08-45.pdf'
+    save_pdf_path = '/home/daveg/.local/SOC_Particle/g20240331/figures'
+    pathToPictures = '.'
+    splitType = 'picture'
+    numberOfEntitiesInOnePdf = 9
+    listWithImagesExtensions = ['png']
+    picturesAreInRootFolder = True
+    nameOfPart = 'picture'
 
     unite_pictures_into_pdf(outputPdfName, save_pdf_path, pathToPictures, splitType, numberOfEntitiesInOnePdf,
                             listWithImagesExtensions, picturesAreInRootFolder, nameOfPart)

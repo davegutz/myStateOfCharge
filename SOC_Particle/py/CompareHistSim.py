@@ -37,6 +37,7 @@ from datetime import datetime
 import os
 from load_data import load_data, remove_nan
 import tkinter.messagebox
+from local_paths import *
 
 plt.rcParams['axes.grid'] = True
 
@@ -1029,8 +1030,6 @@ def add_qcrs(hist, mon_t_=False, mon=None, qcrs=None):
         for i in range(len(hist.time_ux)):
             t_sec = float(hist.time_ux[i] - hist.time_ux[0]) + mon.time[0]
             qcrs_m.append(np.interp(t_sec, mon.time, mon.chm))
-        hist = rf.rec_append_fields(hist, 'chm_s', np.array(qcrs_m, dtype=float))
-        hist = rf.rec_append_fields(hist, 'chm', np.array(qcrs, dtype=float))
     return hist
 
 
@@ -1053,13 +1052,9 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     dvoc_sim_in = 0.
 
     # File path operations
-    (data_file_folder, data_file_txt) = os.path.split(data_file)
-    save_pdf_path = os.path.join(data_file_folder, rel_path_to_save_pdf)
-    if not os.path.isdir(save_pdf_path):
-        os.mkdir(save_pdf_path)
-    path_to_temp = os.path.join(data_file_folder, rel_path_to_temp)
-    if not os.path.isdir(path_to_temp):
-        os.mkdir(path_to_temp)
+    _, data_file_txt = os.path.split(data_file)
+    version = version_from_data_file(data_file)
+    path_to_temp, save_pdf_path, _ = local_paths(version)
 
     # Load mon to extract mod information
     # # Load mon v4 (old)
@@ -1204,8 +1199,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
 def main():
     # User inputs (multiple input_files allowed
-    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/hist 35C pro3p2_ch.csv'
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/hist 20240425 35C pro3p2_ch1.csv'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/hist 20240425 35C pro3p2_ch1.csv'
     rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
     rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
     data_only = False
