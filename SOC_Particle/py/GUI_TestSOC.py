@@ -105,6 +105,8 @@ cm50 = 'Dm-50;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a 
 c00 = 'Dm0;Dn0;Rf;W50;'
 twitch = 'XR;'
 
+# Note:  Photon 2 is throughput limited on the Serial buses.  The *tweak* transients are sensitive to differences
+# caused by over-runs and slip and set Dr400 before Xp* then resets to Dr100 (nominal).
 lookup = {
         'satInit': (22, 'Y;cc;Dh;*W;*vv0;*XS;*Ca1;BZ;Ff0;DP1;<HR;<Rf;<Hd;<Pf;<XD;', ('',)),
         'initMid': (22, 'Y;cc;Dh1800000;*W;*vv0;*XS;*Ca.5;BZ;Ff0;<HR;<Rf;<Hd;<Pf;<XD;', ('',)),

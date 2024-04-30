@@ -848,6 +848,11 @@ Something happened with this unit.  The USB cord does not work with the top USB 
 I found that high Serial traffic competes adversely with DS2482 for 1-wire temperature on the Photon2.  That product does not support 1-Wire without the DS2482.  The reason for the complaints are the buffer in the DS2482 code is too small when competing for resources.  I had to edit DS2482-RK in the lib to increase the buffer size (static const size_t COMMAND_LIST_STACK_SIZE = 12; in DS2482-RK.h).   I added the print statements to alert user if nearing that new limit (was 4).  The changes are in the GitHub repository.  The main change is the COMMAND_LIST_STACK_SiZE = 12.  If you make that to the lib you'll be OK.  The author at Particle didn't see why this change would be any problem.  He never saw 4 exceeded in any of his testing.  This application uses as much Serial as possible.  Also I tried increasing Serial baud rate without improvement.
 
 
+### Photon 2 serial throughput limited causing frame slippage when taking lots of data on serial.
+
+  Dr400 used for verification testing at times, especially the *tweak* transients.
+
+
 ### Particle Workbench complains about STM32_Pin_Info
 
 c:\users\daveg\documents\github\mystateofcharge\soc_particle\src\hardware/OneWire.h:98:5: error: 'STM32_Pin_Info' does not name a type; did you mean 'Hal_Pin_Info'?
