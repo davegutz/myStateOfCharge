@@ -164,7 +164,7 @@ void print_serial_header(void)
   if ( ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 ) )
   {
     Serial.printf ("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,\n");
-    #ifndef CONFIG_PHOTON
+    #ifdef CONFIG_ARGON
       Serial1.printf("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,\n");
     #endif
   }
@@ -196,7 +196,7 @@ void rapid_print(Sensors *Sen, BatteryMonitor *Mon)
 {
   create_rapid_string(&pp.pubList, Sen, Mon);
   Serial.printf("%s\n", pr.buff);
-  #ifndef CONFIG_PHOTON
+  #ifdef CONFIG_ARGON
     Serial1.printf("%s\n", pr.buff);
   #endif
 }
