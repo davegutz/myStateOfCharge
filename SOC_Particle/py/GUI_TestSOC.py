@@ -64,7 +64,7 @@ def_dict = {'test': {"version": "g20230530",
             }
 
 # Transient string
-unit_list = ['pro0p', 'pro1a', 'pro2p2', 'pro3p2', 'soc0p', 'soc1a', 'soc3p2', 'soc2p2']
+unit_list = ['pro0p', 'pro1a', 'pro2p2', 'soc0p', 'soc1a', 'soc3p2', 'soc2p2']
 batt_list = ['bb', 'ch', 'chg']
 sel_list = [
     'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
@@ -203,7 +203,7 @@ putty_connection = {'': 'test',
                     'soc0p': 'testsoc0p',
                     'pro0p': 'testpro0p',
                     'pro1a': 'testpro1a',
-                    'pro3p2': 'testpro3p2',
+                    'pro2p2': 'testpro2p2',
                     'soc3p2': 'testsoc3p2'}
 
 

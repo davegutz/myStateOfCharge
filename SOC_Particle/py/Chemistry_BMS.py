@@ -190,7 +190,7 @@ class Chemistry(BMS):
         self.dv_min_abs = 0.06  # Absolute value of +/- hysteresis limit, V
         self.ib_lag_tau = IB_LAG_CH  # Lag time to wash out sat effect on dv, s
 
-        if unit == 'pro3p2' or unit == 'soc3p2':
+        if unit == 'pro2p2' or unit == 'soc3p2':
             # 2024-04-24T14-51-24:  tune to data
             t_y_t1 = [21.5, 25.0, 35.0, ]
             t_x_soc1 = [-0.400, -0.300, -0.230, -0.200, -0.150, -0.130, -0.114, -0.044, 0.000, 0.016, 0.032, 0.055,

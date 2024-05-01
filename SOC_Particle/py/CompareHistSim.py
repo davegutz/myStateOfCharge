@@ -1096,7 +1096,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         else:
             chm = None
         unit = unit_key.split('_')[-2]
-        if unit == 'pro3p2' or unit == 'soc2p2':
+        if unit == 'pro2p2' or unit == 'soc2p2':
             rated_batt_cap_in = 102.9  # A-hr capacity of test article (output of Calibrate_exe.py)
         else:
             rated_batt_cap_in = 108.4  # A-hr capacity of test article
