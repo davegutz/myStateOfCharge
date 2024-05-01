@@ -68,10 +68,10 @@ unit_list = ['pro0p', 'pro1a', 'pro2p2', 'soc0p', 'soc1a', 'soc3p2', 'soc2p2']
 batt_list = ['bb', 'ch', 'chg']
 sel_list = [
     'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
-    'allInCHG', 'allProto', 'pulseSS', 'rapidTweakRegressionH0', 'offSitHysBmsBB', 'offSitHysBmsCH',
+    'allInCHG', 'allProto', 'pulseSS', 'rapidTweakRegressionH0', 'offSitHysBmsBB', 'offSitHysBmsCH', 'offSitHysBmsCHG',
     'triTweakDisch', 'ampHiFailFf', 'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C',
     'slowTweakRegression', 'satSitBB', 'satSitCH', 'satSitCHG', 'flatSitHys', 'offSitHysBmsNoiseBB',
-    'offSitHysBmsNoiseCH',
+    'offSitHysBmsNoiseCH', 'offSitHysBmsNoiseCHG',
     ]
 sel_list1 = [
     'ampHiFailSlow', 'vHiFail',  'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod',

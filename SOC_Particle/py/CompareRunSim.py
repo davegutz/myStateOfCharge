@@ -146,8 +146,8 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
 
 
 def main():
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/rapidTweakRegressionH0_soc3p2_chg.csv'
-    unit_key = 'g20240331_soc3p2_chg'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/test_pro2p2_chg.csv'
+    unit_key = 'g20240331_pro2p2_chg'
     time_end_in = None
     rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
     rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
