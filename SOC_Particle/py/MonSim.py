@@ -304,13 +304,22 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
         #     print('sim:  ', str(sim))
         #     print(t[i])
         if verbose:
-            print("{:9.3f}".format(t[i]), "{:4.0f}".format(mon_old.chm[i]), "{:4.0f}".format(sim_old.chm_s[i]),
-                  "{:9.3f}".format(sim_old.ib_in_s[i]), "{:9.3f}".format(sim_old.dv_hys_s[i]),
-                  "{:9.3f}".format(mon_old.ib[i]), "{:12.7f}".format(mon_old.soc[i]), "{:9.3f}".format(mon_old.dv_hys[i]),
-                  "{:9.3f}".format(sim.saved_s.ib_in_s[i]), "{:9.3f}".format(sim.hys.ibs), "{:9.3f}".format(sim.hys.ioc),
-                  "{:4.0f}".format(sim.sat), "{:9.3f}".format(sim.hys.disabled), "{:9.3f}".format(sim.hys.dv_dot),
-                  "{:9.3f}".format(sim.saved.dv_hys[i]), "{:9.3f}".format(mon.saved.ib[i]), "{:12.7f}".format(mon.saved.soc[i]),
-                  "{:4.0f}".format(mon.sat), "{:9.3f}".format(mon.saved.dv_hys[i]))
+            if sim_old is not None:
+                print("{:9.3f}".format(t[i]), "{:4.0f}".format(mon_old.chm[i]), "{:4.0f}".format(sim_old.chm_s[i]),
+                      "{:9.3f}".format(sim_old.ib_in_s[i]), "{:9.3f}".format(sim_old.dv_hys_s[i]),
+                      "{:9.3f}".format(mon_old.ib[i]), "{:12.7f}".format(mon_old.soc[i]), "{:9.3f}".format(mon_old.dv_hys[i]),
+                      "{:9.3f}".format(sim.saved_s.ib_in_s[i]), "{:9.3f}".format(sim.hys.ibs), "{:9.3f}".format(sim.hys.ioc),
+                      "{:4.0f}".format(sim.sat), "{:9.3f}".format(sim.hys.disabled), "{:9.3f}".format(sim.hys.dv_dot),
+                      "{:9.3f}".format(sim.saved.dv_hys[i]), "{:9.3f}".format(mon.saved.ib[i]), "{:12.7f}".format(mon.saved.soc[i]),
+                      "{:4.0f}".format(mon.sat), "{:9.3f}".format(mon.saved.dv_hys[i]))
+            else:
+                print("{:9.3f}".format(t[i]), "{:4.0f}".format(mon_old.chm[i]),
+                      "{:9.3f}".format(mon_old.ib[i]), "{:12.7f}".format(mon_old.soc[i]), "{:9.3f}".format(mon_old.dv_hys[i]),
+                      "{:9.3f}".format(sim.saved_s.ib_in_s[i]), "{:9.3f}".format(sim.hys.ibs), "{:9.3f}".format(sim.hys.ioc),
+                      "{:4.0f}".format(sim.sat), "{:9.3f}".format(sim.hys.disabled), "{:9.3f}".format(sim.hys.dv_dot),
+                      "{:9.3f}".format(sim.saved.dv_hys[i]), "{:9.3f}".format(mon.saved.ib[i]), "{:12.7f}".format(mon.saved.soc[i]),
+                      "{:4.0f}".format(mon.sat), "{:9.3f}".format(mon.saved.dv_hys[i]))
+
         # print('mon: t', t[i], 'voc', mon.voc, 'vsat', mon.vsat, 'sat', mon.sat, 'here sat', sat, 'here saturated', saturated)
 
     # Data
