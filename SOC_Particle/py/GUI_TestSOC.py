@@ -115,7 +115,7 @@ lookup = {
         'allIn':   (3100,
                     'cc;' + modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + tempCleanup +      # ampHiFail
                     '  Pf;Dr400;Xp10;Dr100;  ' +                                                # rapidTweakRegression
-                    '  Pf;Xp7;  ' +                                                     # pulseSS
+                    '  Pf;Dr400;D>400;Xp7;Dr100;D>313;  ' +                                                  # pulseSS
                     '  Pf;Dr400;Xp13;Dr100;  ' +                                        # triTweakDisch
                     modMidInit + tranPrep + 'Ff1;' + c50 + 'XQ40000;' + c00 + tempCleanup +  # ampHiFailFf
                     modMidInit + tranPrep + cm50 + 'XQ50000;' + c00 + tempCleanup +     # ampLoFail
@@ -148,7 +148,7 @@ lookup = {
         'ampHiFail': (62, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
         'rapidTweakRegression': (200, 'Dr400;Xp10;Dr100;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips')),
         'allProto': (552, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + tempCleanup + '  Pf;Xp10;  Pf;Xp13;  ' + modMidInitNoCc + tranPrep + cm50 + 'XQ50000;' + c00 + quiet + cleanup, ('Proto multi', "Must have same 'vv*' throughout", "No 'HR' either")),
-        'pulseSS': (10, 'Xp7;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
+        'pulseSS': (20, 'Dr400;D>400;Xp7;Dr100;D>313;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
         'rapidTweakRegressionH0': (200, 'Sh0;Dr400;Xp10;Dr100;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!')),
         'offSitHysBmsBB': (590, modLowInitBB + slowTwitchDef + 'Xa-162;' + tranPrep + twitch + 'XQ568000;' + 'Xa0;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),
         'offSitHysBmsCH': (590, modLowInitCH + slowTwitchDef + 'Xa-162;' + tranPrep + twitch + 'XQ568000;' + 'Xa0;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),
@@ -170,7 +170,7 @@ lookup = {
         'vHiFail': (90, modMidInit + tranPrep + zeroPulse + ';Dv0.82;XQ60000;' + 'Dv0;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION")),
         'vHiFailH': (60, modMidInit + tranPrep + 'SH.3;W10;' + zeroPulse + 'Dv0.82;XQ30000;' + 'Dv0;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION.  Initial BB shift will be limited by hys table")),
         'vHiFailFf': (84, modMidInit + tranPrep + zeroPulse + 'FF1;Dv0.8;XQ60000;' + 'Dv0;' + quiet + cleanup, ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.", "Usually shows SAT.")),
-        'pulseSSH': (10, 'Xp8;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
+        'pulseSSH': (20, 'Dr400;D>400;Xp8;Dr100;D>313;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
         'tbFailMod': (118, modMidInit + tranPrep + 'Xv.002;Xu1;XQ80000;Xu0;Xv1;W50;' + quiet + cleanup, ("Run for 80 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.",)),
         'tbFailHdwe': (118, modMidInit + 'Xm246;' + tranPrep + 'Xv.002;W10;Xu1;XQ80000;Xu0;Xv1;W50;' + quiet + cleanup, ("Run for 80 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.", "")),
         'DvMon': (142, modMidInit + tranPrep + zeroPulse + 'Dw-0.8;Dn0.0001;XQ120000;Dw0;' + quiet + cleanup, ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
@@ -887,7 +887,7 @@ def ref_restore():
 
 
 def tksleep(t):
-    'emulating time.sleep(seconds)'
+    """emulating time.sleep(seconds)"""
     ms = int(t*1000)
     root = tk._get_default_root()
     var = tk.IntVar(root)

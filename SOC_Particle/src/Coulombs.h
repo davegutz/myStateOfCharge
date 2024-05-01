@@ -26,6 +26,7 @@
 
 #include "Battery.h"
 #include "Chemistry_BMS.h"
+// #include "local_config.h"
 
 
 // Functions
@@ -61,7 +62,7 @@ public:
   double delta_q_inf() { return(delta_q_inf_); };
   double delta_q_neg() { return nice_zero(delta_q_neg_, 1e-6); }
   double delta_q_pos() { return nice_zero(delta_q_pos_, 1e-6); }
-  uint8_t mod_code() { return (*(chem_.sp_mod_code)); };
+  uint8_t mod_code() { return chem_.mod_code; };
   virtual void pretty_print();
   double q(){ return (q_); };
   float q_cap_rated(){ return (q_cap_rated_); };

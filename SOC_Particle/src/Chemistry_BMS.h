@@ -43,7 +43,6 @@ public:
 struct Chemistry: public BMS
 {
 public:
-  uint8_t *sp_mod_code;  // Chemistry code integer
   float rated_temp; // Temperature at NOM_UNIT_CAP, deg C
   double coul_eff;  // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs
   float dqdt;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
@@ -56,6 +55,7 @@ public:
   float v_sat;      // Saturation threshold at temperature, deg C
   float dv_min_abs; // Absolute value of +/- hysteresis limit, V
   float dvoc_dt;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C
+  uint8_t mod_code; // Chemistry model
   float r_0;        // ChargeTransfer R0, ohms
   float r_ct;     // ChargeTransfer charge transfer resistance, ohms
   float tau_ct;   // ChargeTransfer charge transfer time constant, s (=1/Rct/Cct)
@@ -81,7 +81,6 @@ public:
   void assign_soc_min(const int _n_n, float *x, float *t);  // Worker bee SOC_MIN
   void assign_voc_soc(const int _n_s, const int _m_t, float *x, float *y, float *t); // Worker bee VOC_SOC
   String decode(const uint8_t mod);
-  uint8_t encode(const String mod_str);
   void pretty_print();
 };
 

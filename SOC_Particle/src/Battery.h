@@ -95,7 +95,6 @@ public:
   float dqdt() { return chem_.dqdt; };
   float dv_dsoc() { return dv_dsoc_; };
   float dv_dyn() { return dv_dyn_; };
-  uint8_t encode(const String mod_str);
   float ib() { return ib_; };            // Battery terminal current, A
   float ibs() { return ibs_; };          // Hysteresis input current, A
   float ioc() { return ioc_; };          // Hysteresis output current, A

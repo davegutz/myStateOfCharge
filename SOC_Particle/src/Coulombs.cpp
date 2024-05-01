@@ -60,8 +60,8 @@ void Coulombs::pretty_print(void)
   Serial.printf(" delta_q_inf/delta_q_abs%9.1f / %9.1f %8.4f C\n", delta_q_inf_, delta_q_abs(), delta_q_inf_/delta_q_abs());
   Serial.printf(" delta_q_neg%9.1f C, time_neg%9.1f s\n", delta_q_neg_, time_neg_);
   Serial.printf(" delta_q_pos%9.1f C, time_pos%9.1f s\n", delta_q_pos_, time_pos_);
-  Serial.printf(" mod %s\n", chem_.decode(mod_code()).c_str());
   Serial.printf(" mod_code %d\n", mod_code());
+  Serial.printf(" mod %s\n", chem_.decode(mod_code()).c_str());
   Serial.printf(" q%9.1f, C\n", q_);
   Serial.printf(" q_cap%9.1f, C\n", q_capacity_);
   Serial.printf(" q_cap_rat%9.1f, C\n", q_cap_rated_);
@@ -75,10 +75,8 @@ void Coulombs::pretty_print(void)
   Serial.printf(" t_last%5.1f dg C\n", *sp_t_last_);
   Serial.printf(" rated_t%5.1f dg C\n", chem_.rated_temp);
   Serial.printf(" t_rlim%7.3f dg C / s\n", t_rlim_);
-  Serial.printf("Coulombs (mod_code=%d) ", *chem_.sp_mod_code);
-  chem_.pretty_print();
-#else
-     Serial.printf("Coulombs: silent DEPLOY\n");
+  Serial.printf("Coulombs (mod_code=%d) ", mod_code());
+  Serial.printf("Coulombs: silent DEPLOY\n");
 #endif
 }
 

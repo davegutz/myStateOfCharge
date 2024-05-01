@@ -41,14 +41,17 @@ void Chemistry::assign_all_chm()
 {
     if (CHEM == 0) // "Battleborn";
     {
+        mod_code = 0;
         assign_BB();
     }
     else if (CHEM == 1) // "CHINS"
     {
+        mod_code = 1;
         assign_CH();
     }
     else if (CHEM == 2) // "CHINS Garage"
     {
+        mod_code = 2;
         assign_CH();
     }
     else
@@ -205,6 +208,8 @@ void Chemistry::assign_BB()
 
     // Hys table
     assign_hys(N_H, M_H, X_DV, Y_SOC, T_R, T_S, T_DV_MAX, T_DV_MIN);
+
+    mod_code = 0;
 }
 
 
@@ -272,28 +277,12 @@ String Chemistry::decode(const uint8_t mod)
     String result;
     if (mod == 0)
         result = "Battleborn";
-    else if (mod == 1)
+    else if (mod == 1 || mod == 2)
         result = "CHINS";
     else
     {
         result = "unknown";
         Serial.printf("C::decode:  unknown mod %d. 'h' (Xm)\n", mod);
-    }
-    return (result);
-}
-
-// Battery type model coding
-uint8_t Chemistry::encode(const String mod_str)
-{
-    uint8_t result;
-    if (mod_str == "Battleborn")
-        result = 0;
-    else if (mod_str == "CHINS")
-        result = 1;
-    else
-    {
-        result = 99;
-        Serial.printf("C::encode:  unknown mod %s 'h' (Xm)\n", mod_str.c_str());
     }
     return (result);
 }
