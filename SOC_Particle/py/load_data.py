@@ -97,7 +97,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         f_raw = np.unique(f_raw)
         f_raw = remove_nan(f_raw)
         f = add_stuff_f(f_raw, batt, ib_band=IB_BAND)
-        print("\nf:\n", f, "\n")
+        print("\nload_data:  f:\n", f, "\n")
         f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap)
     else:
         f = None

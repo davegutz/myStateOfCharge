@@ -34,7 +34,6 @@ import sys
 from DataOverModel import write_clean_file
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 from datetime import datetime
-import os
 from load_data import load_data, remove_nan
 import tkinter.messagebox
 from local_paths import *
@@ -338,6 +337,17 @@ def fault_thr_bb(Tb, soc, voc_soc, voc_stat, C_rate, bb):
     ib_quiet_thr = QUIET_A * ib_quiet_sclr_
 
     return cc_diff_thr, ewhi_thr, ewlo_thr, ib_diff_thr, ib_quiet_thr
+
+
+def hstack2(arrays):
+    if arrays[0] is None and arrays[1] is None:
+        return None
+    elif arrays[1] is None:
+        return arrays[0]
+    elif arrays[0] is None:
+        return arrays[1]
+
+    return arrays[0].__array_wrap__(np.hstack(arrays))
 
 
 def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, subtitle=None, long_term=True,
@@ -1064,22 +1074,36 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     else:
         mon_old = None
 
+    # Load summaries
+    s_raw = None
+    temp_sum_file_clean = write_clean_file(data_file, type_='_hist', hdr_key='fltb', unit_key='unit_u',
+                                           skip=1, comment_str='---')
+    if temp_sum_file_clean:
+        s_raw = np.genfromtxt(temp_sum_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+    else:
+        print("data from", temp_sum_file_clean, "empty after loading")
+        # tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
+        # return None, None, None, None, None
+
     # Load history
-    temp_hist_file_clean = write_clean_file(data_file, type_='_hist', hdr_key='fltb', unit_key='unit_f',
+    h_raw = None
+    temp_hist_file_clean = write_clean_file(data_file, type_='_hist', hdr_key='fltb', unit_key='unit_h',
                                             skip=1, comment_str='---')
     if temp_hist_file_clean:
         h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
     else:
         print("data from", temp_hist_file_clean, "empty after loading")
-        tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
-        return None, None, None, None, None
+        # tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
+        # return None, None, None, None, None
 
     # Load fault
+    f_raw = None
     temp_flt_file_clean = write_clean_file(data_file, type_='_flt', hdr_key='fltb', unit_key='unit_f',
                                            skip=1, comment_str='---')
     if temp_flt_file_clean:
         f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
     else:
+        f_raw = None
         print("data from", temp_flt_file_clean, "empty after loading")
         tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
         return None, None, None, None, None
@@ -1091,6 +1115,8 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     else:
         if unit_key.__contains__('bb'):
             chm = 0
+        elif unit_key.__contains__('chg'):
+            chm = 2
         elif unit_key.__contains__('ch'):
             chm = 1
         else:
@@ -1106,8 +1132,12 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     # Force Tb.  This is useful for verifying calibration runs where voc(soc) schedule extracted from the run
     # with slightly varying Tb but assumed constant when making new schedule
     if Tb_force is not None:
-        f_raw.Tb = Tb_force
-        h_raw.Tb = Tb_force
+        if f_raw is not None:
+            f_raw.Tb = Tb_force
+        if h_raw is not None:
+            h_raw.Tb = Tb_force
+        if s_raw is not None:
+            s_raw.Tb = Tb_force
 
     # Sort and augment data
     f_raw = np.unique(f_raw)
@@ -1115,60 +1145,71 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     # noinspection PyTypeChecker
     f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time,
                     unit=unit)
-    print("\nf:\n", f.dtype.names, f, "\n")
+    print("\nf after add_stuff:\n", f.dtype.names, f, "\n")
 
     f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)  # tb_band=100 disables banding
-    h_raw = np.unique(h_raw)
-    h_raw = remove_nan(h_raw)
-    print("\nh raw:\n", h_raw.dtype.names, "\n", h_raw, "\n", h_raw.dtype.names, "\n")
-    # noinspection PyTypeChecker
-    h = add_stuff_f(h_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
-    h = add_mod(h, mon_t, mon_old)
-    h = add_chm(h, mon_t, mon_old, chm)
-    h = add_qcrs(h, mon_t_=mon_t, mon=mon_old, qcrs=qcrs)
-    print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after add_stuff\n")
 
-    # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
-    h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
+    # sums and history
+    hall_raw = hstack2((h_raw, s_raw))
 
-    # Shift time by detecting when ib changes
-    if sync_time is None:
-        h_20C = shift_time(h_20C)
+    h_20C = None
+    h_20C_resamp = None
+    mon_ver = None
+    sim_ver = None
+    sim_s_ver = None
+    sim_old = None
+    if hall_raw is not None:
+        hall_raw = np.unique(hall_raw)
+        hall_raw = remove_nan(hall_raw)
+        print("\nh raw:\n", hall_raw.dtype.names, "\n", hall_raw, "\n", hall_raw.dtype.names, "\n")
+        # noinspection PyTypeChecker
+        h = add_stuff_f(hall_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
+        h = add_mod(h, mon_t, mon_old)
+        h = add_chm(h, mon_t, mon_old, chm)
+        h = add_qcrs(h, mon_t_=mon_t, mon=mon_old, qcrs=qcrs)
+        print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after add_stuff\n")
 
-    # Covert to fast update rate
-    h_20C_resamp = resample(data=h_20C, dt_resamp=dt_resample, time_var='time',
-                            specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
-                                      ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
-                                      ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
-    for i in range(len(h_20C_resamp.time)):
-        if i == 0:
-            h_20C_resamp.dt[i] = h_20C_resamp.time[1] - h_20C_resamp.time[0]
-        else:
-            h_20C_resamp.dt[i] = h_20C_resamp.time[i] - h_20C_resamp.time[i-1]
-            
-    # Hand fix oddities
-    mon_old, sim_old = bandaid(h_20C_resamp)
+        # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
+        h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
 
-    # Replicate
-    data_file_clean = path_to_temp+'/'+data_file_txt.replace('.csv', '_hist' + '.csv', 1)
-    mon_file_save = data_file_clean.replace(".csv", "_rep_hist.csv")
-    mon_ver, sim_ver, sim_s_ver, mon_r, sim_r =\
-        replicate(mon_old, sim_old=sim_old, init_time=1., verbose=False, t_max=time_end_in, use_vb_sim=False,
-                  scale_in=scale_in, use_mon_soc=use_mon_soc_in, dvoc_mon=dvoc_mon_in, dvoc_sim=dvoc_sim_in,
-                  unit=unit)
-    save_clean_file(mon_ver, mon_file_save, 'mon_rep_hist' + date_)
+        # Shift time by detecting when ib changes
+        if sync_time is None:
+            h_20C = shift_time(h_20C)
+
+        # Covert to fast update rate
+        h_20C_resamp = resample(data=h_20C, dt_resamp=dt_resample, time_var='time',
+                                specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
+                                          ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
+                                          ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
+        for i in range(len(h_20C_resamp.time)):
+            if i == 0:
+                h_20C_resamp.dt[i] = h_20C_resamp.time[1] - h_20C_resamp.time[0]
+            else:
+                h_20C_resamp.dt[i] = h_20C_resamp.time[i] - h_20C_resamp.time[i-1]
+
+        # Hand fix oddities
+        mon_old, sim_old = bandaid(h_20C_resamp)
+
+        # Replicate
+        data_file_clean = path_to_temp+'/'+data_file_txt.replace('.csv', '_hist' + '.csv', 1)
+        mon_file_save = data_file_clean.replace(".csv", "_rep_hist.csv")
+        mon_ver, sim_ver, sim_s_ver, mon_r, sim_r =\
+            replicate(mon_old, sim_old=sim_old, init_time=1., verbose=False, t_max=time_end_in, use_vb_sim=False,
+                      scale_in=scale_in, use_mon_soc=use_mon_soc_in, dvoc_mon=dvoc_mon_in, dvoc_sim=dvoc_sim_in,
+                      unit=unit)
+        save_clean_file(mon_ver, mon_file_save, 'mon_rep_hist' + date_)
 
     # Plots
     if data_only is False:
         fig_list = []
         fig_files = []
-        data_root = temp_hist_file_clean.split('/')[-1].replace('.csv', '_')
+        data_root = temp_flt_file_clean.split('/')[-1].replace('.csv', '_')
         filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
         plot_title = filename + '   ' + date_time
         if len(f.time) > 1:
             fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                              fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
-        if len(h_20C.time) > 1:
+        if h_20C is not None and len(h_20C.time) > 1:
             sim_old = None
             plot_init_in = False
             fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename,
@@ -1199,13 +1240,12 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
 def main():
     # User inputs (multiple input_files allowed
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/hist 20240425 35C pro3p2_ch1.csv'
-    rel_path_to_save_pdf = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
-    rel_path_to_temp = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/ampHiFail_pro2p2_chg.csv'
+    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
+    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
     data_only = False
-    # mon_t = True
-    mon_t = False
-    unit_key = 'g20240331_pro3p2_ch'
+    mon_t = True
+    unit_key = 'g20240331_pro2p2_chg'
     dt_resample = 10
 
     # Do this when running compare_hist_sim on run that schedule extracted assuming constant Tb
