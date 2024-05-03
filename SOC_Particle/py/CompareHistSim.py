@@ -42,7 +42,7 @@ plt.rcParams['axes.grid'] = True
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 IB_BAND = 1.  # Threshold to declare charging or discharging
-TB_BAND = 25.  # Band around temperature to group data and correct
+TB_BAND = 25.  # Band around temperature to group data and correct.  Large value means no banding, effectively
 HYS_SCALE_20220917d = 0.3  # Original hys_remodel scalar inside photon code
 HYS_SCALE_20220926 = 1.0  # Original hys_remodel scalar inside photon code
 
@@ -351,7 +351,7 @@ def hstack2(arrays):
 
 
 def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, subtitle=None, long_term=True,
-               cc_dif_tol=0.2):
+               cc_dif_tol=0.2, time_units='days'):
     if fig_files is None:
         fig_files = []
 
@@ -399,14 +399,14 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
                  label='dv_hys_redesign_chg')
         plt.plot(hi.time, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle=':', color='orangered',
                  label='dv_hys_redesign_dis')
-        plt.xlabel('days')
+        plt.xlabel(time_units)
         plt.legend(loc=1)
         plt.subplot(338)
         plt.plot(hi.time, hi.e_wrap, marker='o', markersize='3', linestyle='-', color='black', label='e_wrap')
         plt.plot(hi.time, hi.wv_fa, marker=0, markersize='4', linestyle=':', color='red', label='wrap_vb_fa')
         plt.plot(hi.time, hi.wl_fa-1, marker=2, markersize='4', linestyle=':', color='orange', label='wrap_lo_fa-1')
         plt.plot(hi.time, hi.wh_fa+1, marker=3, markersize='4', linestyle=':', color='green', label='wrap_hi_fa+1')
-        plt.xlabel('days')
+        plt.xlabel(time_units)
         plt.legend(loc=1)
         plt.subplot(339)
         plt.plot(hi.time, hi.vb, marker='.', markersize='3', linestyle='None', color='red', label='vb')
@@ -415,7 +415,7 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
                  label='voc_stat_chg')
         plt.plot(hi.time, hi.voc_stat_dis, marker='.', markersize='3', linestyle='None', color='red',
                  label='voc_stat_dis')
-        plt.xlabel('days')
+        plt.xlabel(time_units)
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
@@ -434,7 +434,7 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
         plt.plot(hi.time, hi.voc_stat_dis, marker='.', markersize='3', linestyle='-', color='red',
                  label='voc_stat_dis')
         plt.plot(hi.time, hi.voc_soc, marker='2', markersize='3', linestyle=':', color='cyan', label='voc_soc')
-        plt.xlabel('days')
+        plt.xlabel(time_units)
         plt.legend(loc=1)
         plt.subplot(122)
         plt.plot(hi.time, hi.bms_off + 22, marker='h', markersize='3', linestyle='-', color='blue',
@@ -461,11 +461,11 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
         plt.plot(hi.time, hi.tb_fa, marker='2', markersize='3', linestyle='-', color='orange',
                  label='tb_fa')
         plt.ylim(-1, 24)
-        plt.xlabel('days')
+        plt.xlabel(time_units)
         plt.legend(loc=1)
         plt.subplot(223)
         plt.plot(hi.time, hi.ib, marker='.', markersize='3', linestyle='-', color='red', label='ib')
-        plt.xlabel('days')
+        plt.xlabel(time_units)
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
@@ -484,7 +484,7 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
                  label='dv_hys_redesign_chg')
         plt.plot(hi.time, hi.dv_hys_redesign_dis, marker=3, markersize='3', linestyle='-', color='red',
                  label='dv_hys_redesign_dis')
-        plt.xlabel('days')
+        plt.xlabel(time_units)
         plt.legend(loc=4)
         # plt.ylim(-0.7, 0.7)
         plt.ylim(bottom=-0.7)
@@ -493,18 +493,18 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
                  label='res_redesign_chg')
         plt.plot(hi.time, hi.res_redesign_dis, marker='o', markersize='3', linestyle='-', color='red',
                  label='res_redesign_dis')
-        plt.xlabel('days')
+        plt.xlabel(time_units)
         plt.legend(loc=4)
         plt.subplot(223)
         plt.plot(hi.time, hi.ib, color='black', label='ib')
         plt.plot(hi.time, hi.soc*10, color='green', label='soc*10')
         plt.plot(hi.time, hi.ioc_redesign, marker='o', markersize='3', linestyle='-', color='cyan',
                  label='ioc_redesign')
-        plt.xlabel('days')
+        plt.xlabel(time_units)
         plt.legend(loc=4)
         plt.subplot(224)
         plt.plot(hi.time, hi.dv_dot_redesign, linestyle='--', color='black', label='dv_dot_redesign')
-        plt.xlabel('days')
+        plt.xlabel(time_units)
         plt.legend(loc=4)
         fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
@@ -1208,7 +1208,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         plot_title = filename + '   ' + date_time
         if len(f.time) > 1:
             fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
-                                             fig_list=fig_list, cc_dif_tol=cc_dif_tol_in)
+                                             fig_list=fig_list, cc_dif_tol=cc_dif_tol_in, time_units='sec')
         if h_20C is not None and len(h_20C.time) > 1:
             sim_old = None
             plot_init_in = False
