@@ -4,7 +4,7 @@
 #  'python3 GUI_TestSOC.py
 #
 #  2023-Jun-15  Dave Gutz   Create
-# Copyright (C) 2023 Dave Gutz
+# Copyright (C) 2024 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -52,7 +52,7 @@ bg_color = 'lightgray'
 def_dict = {'test': {"version": "g20230530",
                      "unit": "pro1a",
                      "battery": "bb",
-                     'dataReduction_folder': '..dataReduction'},
+                     'dataReduction_folder': '../dataReduction'},
             'ref': {"version": "v20230403",
                     "unit": "pro1a",
                     "battery": "bb",
@@ -64,7 +64,7 @@ def_dict = {'test': {"version": "g20230530",
             }
 
 # Transient string
-unit_list = ['pro0p', 'pro1a', 'pro2p2', 'soc0p', 'soc1a', 'soc3p2', 'soc2p2']
+unit_list = ['pro0p', 'pro1a', 'pro2p2', 'soc0p', 'soc1a', 'soc3p2']
 batt_list = ['bb', 'ch', 'chg']
 sel_list = [
     'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
@@ -871,7 +871,7 @@ def putty_size():
 def ref_remove():
     top_panel_right.pack_forget()
     run_button.config(text='Compare Run Sim')
-    run_hist_button.config(text='Compare Run Hist')
+    run_hist_button.config(text='Compare Run Sim Hist')
     hist_sim_button.config(text='Compare Hist Sim')
     hist_sim_button.pack(side=tk.RIGHT, padx=5, pady=5)
     run_hist_button.pack(side=tk.RIGHT, padx=5, pady=5)

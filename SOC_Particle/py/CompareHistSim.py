@@ -1,5 +1,5 @@
-# MonSim:  Monitor and Simulator replication of Particle Photon Application
-# Copyright (C) 2023 Dave Gutz
+# CompareHistSim.py:  load fault, hist, summ data and compare to simulation.
+# Copyright (C) 2024 Dave Gutz
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -1122,7 +1122,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         else:
             chm = None
         unit = unit_key.split('_')[-2]
-        if unit == 'pro2p2' or unit == 'soc2p2':
+        if unit == 'pro2p2' or unit == 'soc3p2':
             rated_batt_cap_in = 102.9  # A-hr capacity of test article (output of Calibrate_exe.py)
         else:
             rated_batt_cap_in = 108.4  # A-hr capacity of test article
