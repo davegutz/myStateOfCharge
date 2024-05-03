@@ -981,7 +981,7 @@ def shift_time(mo, extra_shift=0.):
     # Shift time
     first_non_zero = 0
     n = len(mo.time)
-    while abs(mo.ib[first_non_zero]) < 0.02 and first_non_zero < n:
+    while abs(mo.ib[first_non_zero]) < 0.02 and first_non_zero < n-1:
         first_non_zero += 1
     if first_non_zero < n:  # success
         if first_non_zero > 0:
@@ -1076,7 +1076,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
     # Load summaries
     s_raw = None
-    temp_sum_file_clean = write_clean_file(data_file, type_='_hist', hdr_key='fltb', unit_key='unit_u',
+    temp_sum_file_clean = write_clean_file(data_file, type_='_summ', hdr_key='fltb', unit_key='unit_u',
                                            skip=1, comment_str='---')
     if temp_sum_file_clean:
         s_raw = np.genfromtxt(temp_sum_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
@@ -1110,7 +1110,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
     # Load configuration
     unit = None
-    if mon_t is True:
+    if mon_t is True and mon_old is not None:
         chm = int(mon_old.chm[0])
     else:
         if unit_key.__contains__('bb'):
@@ -1240,7 +1240,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
 def main():
     # User inputs (multiple input_files allowed
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/ampHiFail_pro2p2_chg.csv'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/all_hist_pro2p2_chg.csv'
     rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
     rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
     data_only = False
