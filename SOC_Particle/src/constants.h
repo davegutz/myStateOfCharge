@@ -121,10 +121,10 @@ const String unit = version + "_" + UNIT;
     #define NSUM 2192  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error BACKUPSRAM, or GUI FRAG msg (2000)
 #endif
 
-#ifdef CONFIG_PHOTON2  // dec ~ 281700  units: pro2p2, pro3p2, soc2p2, soc3p2(scrapped)
+#ifdef CONFIG_PHOTON2  // dec ~ 256268  units: pro2p2, soc3p2
     #define NFLT    7  // Number of saved SRAM fault data slices 10 s intervals (7)
     #define NHIS   61  // Number of saved SRAM history data slices. If NFLT + NHIS too large will get compile error BACKUPSRAM (61)
-    #define NSUM 2500  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg (3171) or SOS 4 Bus Fault
+    #define NSUM 3180  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg (3171) or SOS 4 Bus Fault
 #endif
 
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)

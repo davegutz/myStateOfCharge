@@ -72,8 +72,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                 case ( 8 ):  // Xp8:  Program a hardware pulse for State Space test
                     chit("XS;Di0;Xm255;Ca.5;Pm;DP1;vv2;Rs;", SOON);  // setup
                     chit("W2;DI500;DI-500;DI0;W2;", SOON);  // run
-                    murmur = "D>" + String(TALK_DELAY) + ";W10;Pm;vv0;Dr" + String(READ_DELAY) + ";Dh" + String(SUMMARY_DELAY) + ";";
-                    chit(murmur, SOON);  // finish
+                    chit("W10;Pm;vv0;", SOON);  // finish
                     break;
 
                 case ( 9 ): case( 10 ): case ( 11 ): case( 12 ): case( 13 ): // Xp9: Xp10: Xp11: Xp12: Xp13:  Program regression

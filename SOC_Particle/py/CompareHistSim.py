@@ -1240,13 +1240,13 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
 def main():
     # User inputs (multiple input_files allowed
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/all_hist_pro2p2_chg.csv'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/rapidTweakRegression_pro2p2_chg.csv'
     rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
     rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
     data_only = False
     mon_t = True
     unit_key = 'g20240331_pro2p2_chg'
-    dt_resample = 10
+    dt_resample = 1
 
     # Do this when running compare_hist_sim on run that schedule extracted assuming constant Tb
     tb_force = 35

@@ -76,9 +76,7 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
 
   // Intervals
   ap.eframe_mult = max(min(EKF_EFRAME_MULT, UINT8_MAX), 0); // DE
-  ap.print_mult = max(min(DP_MULT, UINT8_MAX), 0);          // DP
-  Sen->ReadSensors->delay(READ_DELAY);                      // Dr
-
+ 
   // Fault logic
   ap.cc_diff_slr = 1;  // Fc 1
   ap.ib_diff_slr = 1;  // Fd 1
@@ -437,7 +435,7 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
           clear_queues();
           break;
 
-          case ( 'f' ):  // cf:  clear queues
+          case ( 'f' ):  // cf:  freeze queues
           Serial.printf("***FREEZE QUEUES\n");
           cp.freeze = true;
           break;
