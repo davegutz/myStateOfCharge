@@ -74,7 +74,9 @@ boolean recall_R(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             sp.large_reset();
             cp.large_reset();
             cp.cmd_reset();
+            chit("Hd;", SOON);
             chit("HR;", SOON);
+            chit("Pf;", SOON);
             chit("Rf;", SOON);
             chit("Hs;", SOON);
             chit("Pf;", SOON);
