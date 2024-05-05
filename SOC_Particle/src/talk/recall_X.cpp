@@ -60,18 +60,18 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
 
                 case ( 6 ):  // Xp6:  Program a pulse for EKF test
                     chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;DP20;vv4;Rs;", SOON);  // setup
-                    chit("Dn.00001;Dm500;Dm-500;Dm0;", SOON);  // run
+                    chit("Dn.00001;XY;Dm500;Dm-500;Dm0;", SOON);  // run
                     chit("W10;Pm;vv0;", SOON);  // finish
                     break;
 
                 case ( 7 ):  // Xp7:  Program a sensor pulse for State Space test
                     chit("XS;Dm0;Dn0;Xm255;Ca.5;Pm;DP1;vv4;Rs;", SOON);  // setup
-                    chit("Dn.00001;W2;Dm500;Dm-500;Dm0;W2;", SOON);  // run
+                    chit("Dn.00001;W2;XY;Dm500;Dm-500;Dm0;W2;", SOON);  // run
                     break;
 
                 case ( 8 ):  // Xp8:  Program a hardware pulse for State Space test
                     chit("XS;Di0;Xm255;Ca.5;Pm;DP1;vv4;Rs;", SOON);  // setup
-                    chit("W2;DI500;DI-500;DI0;W2;", SOON);  // run
+                    chit("W2;XY;DI500;DI-500;DI0;W2;", SOON);  // run
                     chit("W10;Pm;vv0;", SOON);  // finish
                     break;
 
