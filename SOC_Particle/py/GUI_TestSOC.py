@@ -59,14 +59,14 @@ else:
 def_dict = {
     'test': {
         "version": "g20240331",
-        "unit": "pro1a",
-        "battery": "bb",
+        "unit": "pro2p2",
+        "battery": "chg",
         'dataReduction_folder': default_dr,
     },
     'ref': {
-        "version": "v20230403",
-        "unit": "pro1a",
-        "battery": "bb",
+        "version": "g20240331",
+        "unit": "pro0p",
+        "battery": "chg",
         'dataReduction_folder': default_dr,
     },
     'others': {
