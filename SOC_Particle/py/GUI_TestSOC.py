@@ -48,20 +48,34 @@ bg_color = 'lightgray'
 # sys.stdout = open('logs.txt', 'w')
 # sys.stderr = open('logse.txt', 'w')
 
+if sys.platform == 'linux':
+    default_dr = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction'
+elif sys.platform == 'Darwin':
+    default_dr = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction'
+else:
+    default_dr = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction'
+
 # Configuration for entire folder selection read with filepaths
-def_dict = {'test': {"version": "g20230530",
-                     "unit": "pro1a",
-                     "battery": "bb",
-                     'dataReduction_folder': '../dataReduction'},
-            'ref': {"version": "v20230403",
-                    "unit": "pro1a",
-                    "battery": "bb",
-                    'dataReduction_folder': '../dataReduction'},
-            'others': {"option": "custom",
-                       'macro': 'end_early',
-                       'mod_in_app': "247",
-                       'modeling': True}
-            }
+def_dict = {
+    'test': {
+        "version": "g20240331",
+        "unit": "pro1a",
+        "battery": "bb",
+        'dataReduction_folder': default_dr,
+    },
+    'ref': {
+        "version": "v20230403",
+        "unit": "pro1a",
+        "battery": "bb",
+        'dataReduction_folder': default_dr,
+    },
+    'others': {
+        "option": "custom",
+        'macro': 'end_early',
+        'mod_in_app': "247",
+        'modeling': True,
+    },
+    }
 
 # Transient string
 unit_list = ['pro0p', 'pro1a', 'pro2p2', 'soc0p', 'soc1a', 'soc3p2']
@@ -145,18 +159,10 @@ lookup = {
                     'Xm247;Ca0.9920;' + fastTwitchDef + 'Xa17;' + slowTranPrep + 'XR;XQ600000;' + 'Xa0;' +  # satSitCH
                     quiet + cleanup,
                     ('All the best transients CH', "Must have same 'vv*' throughout", "")),
-        # 'allInCHG': (1200,
-        #              slow + 'Dh4000;' +
-        #              modLowInitCHG + slowTwitchDef + 'Xa-162;' + slowTranPrep + twitch + 'XQ568000;' + 'Xa0;' +  # offSitHysBmsCHG
-        #              'Xm247;Ca0.9920;' + fastTwitchDef + 'Xa17;' + slowTranPrep + 'XR;XQ600000;' + 'Xa0;' +  # satSitCHG
-        #              quiet + cleanup,
-        #              ('All the best transients CHG', "Must have same 'vv*' throughout", "")),
-        'allInCHG': (300,
+        'allInCHG': (1200,
                      slow + 'Dh4000;' +
-                     'cc;' + modMidInit + slowTranPrep + c50 + 'XQ25000;' + c00 + tempCleanup +  # ampHiFail
-                     '  Xp10;  ' +  # rapidTweakRegression
-                     '  Xp7;  ' +  # pulseSS
-                     '  Xp7;  ' +  # pulseSS
+                     modLowInitCHG + slowTwitchDef + 'Xa-162;' + slowTranPrep + twitch + 'XQ568000;' + 'Xa0;' +  # offSitHysBmsCHG
+                     'Xm247;Ca0.9920;' + fastTwitchDef + 'Xa17;' + slowTranPrep + 'XR;XQ600000;' + 'Xa0;' +  # satSitCHG
                      quiet + cleanup,
                      ('All the best transients CHG', "Must have same 'vv*' throughout", "")),
         'ampHiFail': (62, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
@@ -1109,7 +1115,7 @@ if __name__ == '__main__':
     else:
         putty_test_csv_path = tk.StringVar(master, os.path.join(os.getenv('LOCALAPPDATA'), 'Temp', 'putty_test.csv'))
     print(f"{putty_test_csv_path.get()=}")
-    icon_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC_Icon.png')
+    icon_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC.png')
     master.iconphoto(False, tk.PhotoImage(file=icon_path))
     top_panel = tk.Frame(master)
     top_panel.pack(expand=True, fill='both')

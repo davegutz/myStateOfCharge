@@ -103,6 +103,7 @@ Categories=Utility
         print(Colors.fg.red, f"'mv ...' failed code {result}", Colors.reset)
     else:
         print(Colors.fg.green, 'mv success.  Browse apps :: and make it favorites.  Open and set path to dataReduction', Colors.reset)
+        print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
 elif sys.platform == 'Darwin':
     print(f"macOS install not done yet")
 else:
