@@ -532,6 +532,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
       Sen->end_inj += Sen->now - Sen->start_inj;
       Sen->stop_inj += Sen->now - Sen->start_inj;
       Sen->start_inj = Sen->now;
+      Serial.printf("\nSYNC,%7.3f\n", double(Sen->now)/1000.);
     }
 
     Sen->elapsed_inj = Sen->now - Sen->start_inj + 1UL; // Shift by 1 because using ==0 as reset button

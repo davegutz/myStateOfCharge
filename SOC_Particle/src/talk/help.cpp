@@ -236,6 +236,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   ap.tb_stale_time_slr_p->print_help();  // Xv
   // sp.testB_p->print_help();  // XB
   // sp.testD_p->print_help();  // XD
+  // sp.testY_p->print_help();  // XY
   Serial.printf("\nurgency of cmds: -=ASAP,*=SOON, '' or +=QUEUE, <=LAST\n");
   #endif
 }

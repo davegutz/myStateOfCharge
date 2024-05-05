@@ -94,7 +94,7 @@ sel_list1 = [
 macro_sel_list = [
             'end_early', 'modMidInit', 'modMidInitNoCc', 'modLowInitBB', 'modLowInitCH', 'modLowInitCHG',
             'noisePackage', 'silentPackage', 'quiet', 'cleanup', 'tempCleanup', 'zeroPulse', 'tranPrep',
-            'slowTwitchDef', 'fastTwitchDef', 'c06', 'c50', 'cm50', 'c00', 'twitch'
+            'slowTwitchDef', 'fastTwitchDef', 'c06', 'c50', 'cm50', 'c00', 'twitch', 'time_stamp'
 ]
 
 # Macro
@@ -110,16 +110,17 @@ slow = 'Dr400;D>400;DP1;'
 quiet = 'vv0;Dr100;DP4;D>313;Dh;'
 cleanup = 'Hd;Pf;<HR;<Rf;<XD;'
 tempCleanup = 'Rf;XD; '
-zeroPulse = 'Dm-0.1;Dm0.1;Dm0;'  # Fools transient start detection that is based on abs(ib)<0.05
+time_stamp = 'XY;'
+zeroPulse = time_stamp + 'Dm-0.1;Dm0.1;Dm0;'  # Fools transient start detection that is based on abs(ib)<0.05
 tranPrep = 'HR;vv4;Dh1000;W2;Rs;W17;'
 slowTranPrep = 'HR;vv4;W2;Rs;' + slow + 'W5;'
 slowTwitchDef = 'Rb;Rf;Xts;Xf0.004;XW10000;XT10;XC2;'
 fastTwitchDef = 'Rb;Rf;Xts;Xf0.002;XW10000;XT10;XC1;'
-c06 = 'Dm6;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
-c50 = 'Dm50;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
-cm50 = 'Dm-50;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
+c06 = time_stamp + 'Dm6;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
+c50 = time_stamp + 'Dm50;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
+cm50 = time_stamp + 'Dm-50;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
 c00 = 'Dm0;Dn0;Rf;W50;'
-twitch = 'XR;'
+twitch = time_stamp + 'XR;'
 
 # Note:  Photon 2 is throughput limited on the Serial buses.  The *tweak* transients are sensitive to differences
 # caused by over-runs and slip and set Dr400 before Xp* then resets to Dr100 (nominal).
@@ -131,17 +132,17 @@ lookup = {
         'allIn':   (3100,
                     slow + 'Dh4000;' +
                     'cc;' + modMidInit + slowTranPrep + c50 + 'XQ25000;' + c00 + tempCleanup +      # ampHiFail
-                    '  Xp10;  ' +                                                            # rapidTweakRegression
-                    '  Xp7;  ' +                                                             # pulseSS
-                    '  Xp13;  ' +                                                            # triTweakDisch
+                    '  Xp10;  ' +                                                           # rapidTweakRegression
+                    '  Xp7;  ' +                                                            # pulseSS
+                    '  Xp13;  ' +                                                           # triTweakDisch
                     modMidInit + slowTranPrep + 'Ff1;' + c50 + 'XQ40000;' + c00 + tempCleanup +     # ampHiFailFf
-                    modMidInit + slowTranPrep + cm50 + 'XQ50000;' + c00 + tempCleanup +             # ampLoFail
-                    '  D^15;Xp10; ' +                                                           # rapidTweakRegression40C
-                    '  Xp11;  ' +                                                            # slowTweakRegression
+                    modMidInit + slowTranPrep + cm50 + 'XQ50000;' + c00 + tempCleanup +     # ampLoFail
+                    '  D^15;Xp10; ' +                                                       # rapidTweakRegression40C
+                    '  Xp11;  ' +                                                           # slowTweakRegression
                     'Xm247;Ca0.9;Rb;Rf;Xts;Xa-81;Xf0.004;XW10000;XT10;XC2;W1;HR;vv4;W;Rs;XR;XQ580000;' + tempCleanup +  # flatSitHys
-                    modMidInit + slowTranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + tempCleanup +  # ampHiFailSlow
-                    modMidInit + slowTranPrep + zeroPulse + ';Dv0.82;XQ60000;' + 'Dv0;' + tempCleanup +  # vHiFail
-                    modMidInit + slowTranPrep + 'Xv.002;Xu1;XQ80000;Xu0;Xv1;W50;' + tempCleanup +  # tbFailMod
+                    modMidInit + slowTranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + tempCleanup +    # ampHiFailSlow
+                    modMidInit + slowTranPrep + zeroPulse + ';Dv0.82;XQ60000;' + 'Dv0;' + tempCleanup +     # vHiFail
+                    modMidInit + slowTranPrep + 'Xv.002;Xu1;XQ80000;Xu0;Xv1;W50;' + tempCleanup +       # tbFailMod
                     modMidInit + 'Xm246;' + slowTranPrep + 'Xv.002;W10;Xu1;XQ80000;Xu0;Xv1;W50;' + tempCleanup +  # tbFailHdwe
                     modMidInit + slowTranPrep + zeroPulse + 'Dw-0.8;Dn0.0001;XQ120000;Dw0;' + tempCleanup +  # DvMon
                     modMidInit + slowTranPrep + zeroPulse + 'Dy-0.8;Dn0.0001;XQ120000;Dy0;' +  # DvSim
@@ -165,7 +166,7 @@ lookup = {
                      'Xm247;Ca0.9920;' + fastTwitchDef + 'Xa17;' + slowTranPrep + 'XR;XQ600000;' + 'Xa0;' +  # satSitCHG
                      quiet + cleanup,
                      ('All the best transients CHG', "Must have same 'vv*' throughout", "")),
-        'ampHiFail': (62, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
+        'ampHiFail': (70, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
         'rapidTweakRegression': (200, 'Xp10;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips')),
         'allProto': (552, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + tempCleanup + '  Xp10;  Xp13;  ' + modMidInitNoCc + tranPrep + cm50 + 'XQ50000;' + c00 + quiet + cleanup, ('Proto multi', "Must have same 'vv*' throughout", "No 'HR' either")),
         'pulseSS': (20, slow + 'Xp7;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
@@ -210,6 +211,7 @@ macro_lookup = {
         'tempCleanup': (5, tempCleanup, ('', '', '', '')),
         'zeroPulse': (5, zeroPulse, ('', '', '', '')),
         'tranPrep': (5, tranPrep, ('', '', '', '')),
+        'time_stamp': (5, time_stamp, ('', '', '', '')),
         'slowTwitchDef': (5, slowTwitchDef, ('', '', '', '')),
         'fastTwitchDef': (5, fastTwitchDef, ('', '', '', '')),
         'c06': (5, c06, ('', '', '', '')),
