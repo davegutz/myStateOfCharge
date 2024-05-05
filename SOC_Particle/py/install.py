@@ -43,8 +43,6 @@ else:
 # Provide dependencies
 shutil.copyfile(GUI_TestSOC_path, GUI_TestSOC_dest_path)
 shutil.copystat(GUI_TestSOC_path, GUI_TestSOC_dest_path)
-shutil.copyfile(GUI_TestSOC_Icon_path, GUI_TestSOC_Icon_dest_path)
-shutil.copystat(GUI_TestSOC_Icon_path, GUI_TestSOC_Icon_dest_path)
 
 # Install as deeply as possible
 test_cmd_install = None

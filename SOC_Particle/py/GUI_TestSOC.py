@@ -694,13 +694,13 @@ def grab_macro():
     macro_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
     start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    get_time_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
 
 
 def grab_init():
     add_to_clip_board(init.get())
-    macro_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
+    grab_all_nominal()
     init_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
-    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
     clear_data_silent()
     print('cleared putty data file')
     Test.create_file_path_and_key()
@@ -710,14 +710,30 @@ def grab_init():
 
 def grab_start():
     add_to_clip_board(start.get())
+    grab_all_nominal()
     save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                             text='save data')
     save_data_as_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                                text='save data as')
-    macro_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
-    init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    grab_all_nominal()
     start_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black')
     start_timer()
+
+
+def grab_all_nominal():
+    macro_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
+    init_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    start_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='purple')
+    get_time_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black')
+
+
+def grab_time():
+    current_UT = 'UT' + str(int(time.time())) + ';'
+    add_to_clip_board(current_UT)
+    grab_all_nominal()
+    get_time_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black',
+                           text=current_UT)
+    print('UT in paste buffer')
 
 
 def handle_modeling(*_args):
@@ -1256,6 +1272,23 @@ if __name__ == '__main__':
                                 justify=tk.LEFT, font=butt_font)
     start_button.pack(padx=5, pady=5, expand=True, fill='both')
     timer_val = tk.IntVar(master, 0)
+
+    # Time
+    time_sep_panel = tk.Frame(master)
+    time_sep_panel.pack(expand=True, fill='x')
+    tk.Label(time_sep_panel, text=' ', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
+    time_panel = tk.Frame(master)
+    time_panel.pack(expand=True, fill='both')
+    time_panel_left = tk.Frame(time_panel)
+    time_panel_left.pack(side='left', fill='x')
+    time_panel_ctr = tk.Frame(time_panel)
+    time_panel_ctr.pack(side='left', expand=True, fill='both')
+    time_panel_right = tk.Frame(time_panel)
+    time_panel_right.pack(side='left', expand=True, fill='both')
+    tk.Label(time_panel_left, text="Set time", font=label_font).pack(pady=2)
+    get_time_button = myButton(time_panel_ctr, text='automatically put in copy/paste buffer', command=grab_time,
+                               fg="blue", bg=bg_color)
+    get_time_button.pack(pady=2)
 
     # macro panel
     macro_sep_panel = tk.Frame(master)
