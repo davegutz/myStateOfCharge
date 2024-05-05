@@ -145,8 +145,8 @@ void Flt_st::print_flt(const String code)
       float(this->e_wrap_filt)/sp.vb_hist_slr(),
       this->fltw,
       this->falw);
-    Serial1.printf("unit_f, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
-      buffer, this->t_flt,
+    Serial1.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
+      code.c_str(), buffer, this->t_flt,
       float(this->Tb_hdwe)/600.,
       float(this->vb_hdwe)/sp.vb_hist_slr(),
       float(this->ib_amp_hdwe)/sp.ib_hist_slr(),
