@@ -17,6 +17,7 @@
 a monitor object (MON) and a simulation object (SIM).   The monitor is
 the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
 Coulomb Counter built in."""
+import numpy as np
 
 from DataOverModel import dom_plot
 from CompareFault import over_fault
@@ -58,15 +59,36 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
     # Load old ref data
     data_file_ref = os.path.join(data_file_folder_ref, data_file_txt_ref)
-    mon_ref, sim_ref, f_ref, data_file_ref_clean, temp_flt_file_ref_clean = \
+    mon_ref, sim_ref, f_ref, data_file_ref_clean, temp_flt_file_ref_clean, sync_ref = \
         load_data(data_file_ref, 1, unit_key_ref, zero_zero_in, time_end_in,
                   rated_batt_cap=rated_batt_cap_ref_in)
 
     # Load new test data
     data_file_test = os.path.join(data_file_folder_test, data_file_txt_test)
-    mon_test, sim_test, f_test, data_file_test_clean, temp_flt_file_test_clean = \
+    mon_test, sim_test, f_test, data_file_test_clean, temp_flt_file_test_clean, sync_test = \
         load_data(data_file_test, 1, unit_key_test, zero_zero_in, time_end_in,
                   rated_batt_cap=rated_batt_cap_test_in)
+
+    # Synchronize
+    # Time since beginning of data to sync pulses
+    if len(sync_ref) == len(sync_test) and len(sync_ref)>1:
+        sync_rel_ref = sync_ref - mon_ref.cTime[0]
+        sync_rel_test = sync_test - mon_test.cTime[0]
+        sync_del_ref = sync_rel_ref - sync_rel_ref[0]
+        sync_del_test = sync_rel_test - sync_rel_test[0]
+        sync_ideal = [0.]
+        # Make target sync vector
+        print(f"{sync_rel_ref=}\n{sync_rel_test=}")
+        for i in np.arange(len(sync_del_ref))-1:
+            sync_ideal.append(max(sync_del_test[i+1], sync_del_ref[i+1]))
+            delta = abs(sync_del_test[i+1] - sync_del_ref[i+1])
+            for j in np.arange(i+2, len(sync_del_ref)):
+                sync_del_ref[j] += delta
+                sync_del_test[j] += delta
+        print(f"{sync_ideal=}")
+    else:
+        print(f"data sets too small to sync or not equivalent number of sync pulses")
+
 
     # Plots
     fig_list = []
@@ -98,7 +120,7 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('pulseSS_soc3p2_chg.csv', 'g20240331_soc3p2_chg'), ('pulseSS_pro0p_chg.csv', 'g20240331_pro0p_chg')]
+    keys = [('pulseSS_pro0p_chg.csv', 'g20240331_pro0p_chg'), ('pulseSS_pro2p2_chg.csv', 'g20240331_pro2p2_chg')]
     data_file_folder_ref = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
     data_file_folder_test = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
     rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'

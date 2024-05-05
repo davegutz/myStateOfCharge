@@ -21,6 +21,17 @@ from Battery import Battery, BatteryMonitor
 from resample import remove_nan
 
 
+def find_sync(path_to_data):
+    sync = []
+    with open(path_to_data) as in_file:
+        for line in in_file:
+            if line.__contains__('SYNC'):
+                sync.append(float(line.strip().split(',')[-1]))
+
+    sync = np.array(sync)
+    return sync
+
+
 # Load from files
 def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_batt_cap=Battery.UNIT_CAP_RATED,
               legacy=False, v1_only=False, zero_thr_in=0.02):
@@ -36,6 +47,9 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
     hdr_key_sim = "unit_m,"  # Find one instance of title
     unit_key_sim = "unit_sim"
     temp_flt_file = 'flt_compareRunSim.txt'
+
+    sync = find_sync(path_to_data)
+
     data_file_clean = write_clean_file(path_to_data, type_='_mon', hdr_key=hdr_key, unit_key=unit_key, skip=skip)
     if data_file_clean is None:
         return None, None, None, None, None
@@ -103,7 +117,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         f = None
         print(f"load_data: returning f=None")
 
-    return mon, sim, f, data_file_clean, temp_flt_file_clean
+    return mon, sim, f, data_file_clean, temp_flt_file_clean, sync
 
 
 def main():
