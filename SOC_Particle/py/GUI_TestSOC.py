@@ -604,6 +604,9 @@ def compare_run_run_choose():
                 ref_path = filedialog.askopenfilename(title='Choose reference file', filetypes=[('csv', '.csv')])
                 ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(ref_path)
                 keys = [ref_key, test_key]
+                print('GUI_TestSOC compare_run_run_choose:  Ref', Ref.file_path, Ref.key)
+                print('GUI_TestSOC compare_run_run_choose:  Test', Test.file_path, Test.key)
+                keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
                 # master.withdraw()
                 compare_run_run(keys=keys, data_file_folder_ref=ref_folder_path,
                                 data_file_folder_test=test_folder_path,
