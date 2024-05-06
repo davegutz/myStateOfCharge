@@ -120,11 +120,11 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('allInCHG_pro2p2_chg.csv', 'g20240331_pro2p2_chg'), ('allInCHG_pro0p_chg.csv', 'g20240331_pro0p_chg')]
+    keys = [('pulseSS_pro0p_chg.csv', 'g20240331_pro0p_chg'), ('pulseSS_pro2p2_chg.csv', 'g20240331_pro2p2_chg')]
     data_file_folder_ref = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
     data_file_folder_test = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
-    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331./figures'
-    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331./temp'
+    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
+    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
 
     compare_run_run(keys=keys,
                     data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test,

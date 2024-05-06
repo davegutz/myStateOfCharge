@@ -451,7 +451,7 @@ def write_clean_file(path_to_data, type_=None, hdr_key=None, unit_key=None, skip
 
 
 class SavedData:
-    def __init__(self, data=None, sel=None, ekf=None, time_end=None, zero_zero=False, zero_thr=0.02):
+    def __init__(self, data=None, sel=None, ekf=None, time_end=None, zero_zero=False, zero_thr=0.02, sync_cTime=None):
         i_end = 0
         if data is None:
             self.i = 0
@@ -499,6 +499,8 @@ class SavedData:
             # Ignore initial run of non-zero ib because resetting from previous run
             if zero_zero:
                 self.zero_end = 0
+            elif sync_cTime is not None:
+                self.zero_end = np.where(self.cTime < sync_cTime[0])[0][-1] + 2
             else:
                 try:
                     self.zero_end = 0
