@@ -148,7 +148,7 @@ def seek_tensor(save_pdf_path='./figures', path_to_temp='./temp'):
             data_file = path_to_temp
 
     # # Load mon v4 (old)
-    mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
+    mon_old, sim_old, f, data_file_clean, temp_flt_file_clean, _ = \
         load_data(data_file, skip, unit_key, zero_zero_in, time_end_in, legacy=legacy_in, v1_only=v1_only_in)
     mon_old = add_ib_lag(mon_old)
     mon_old = adjust_soc(mon_old, dDA_in)

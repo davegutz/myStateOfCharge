@@ -1069,7 +1069,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     # Load mon to extract mod information
     # # Load mon v4 (old)
     if mon_t is True:
-        mon_old, sim_old, f, mon_t_file_clean, temp_mont_t_file_clean = \
+        mon_old, sim_old, f, mon_t_file_clean, temp_mont_t_file_clean, _ = \
             load_data(data_file, 1, unit_key=unit_key, time_end_in=time_end_in, zero_zero_in=False)
     else:
         mon_old = None

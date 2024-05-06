@@ -80,7 +80,7 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
     _, save_pdf_path, _ = local_paths(version)
 
     # # Load mon v4 (old)
-    mon_old, sim_old, f, data_file_clean, temp_flt_file_clean = \
+    mon_old, sim_old, f, data_file_clean, temp_flt_file_clean, _ = \
         load_data(data_file, 1, unit_key, zero_zero_in, time_end_in, legacy=legacy_in)
 
     # How to initialize
@@ -146,7 +146,7 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
 
 
 def main():
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/test_pro2p2_chg.csv'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/allInCHG_pro2p2_chg.csv'
     unit_key = 'g20240331_pro2p2_chg'
     time_end_in = None
     rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
