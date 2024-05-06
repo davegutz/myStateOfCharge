@@ -71,7 +71,7 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
     # Synchronize
     # Time since beginning of data to sync pulses
-    if len(sync_ref) == len(sync_test) and len(sync_ref)>1:
+    if sync_ref is not None and sync_test is not None and len(sync_ref) == len(sync_test) and len(sync_ref)>1:
         sync_rel_ref = sync_ref - mon_ref.cTime[0]
         sync_rel_test = sync_test - mon_test.cTime[0]
         sync_del_ref = sync_rel_ref - sync_rel_ref[0]
@@ -120,11 +120,11 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('pulseSS_pro0p_chg.csv', 'g20240331_pro0p_chg'), ('pulseSS_pro2p2_chg.csv', 'g20240331_pro2p2_chg')]
+    keys = [('allInCHG_pro2p2_chg.csv', 'g20240331_pro2p2_chg'), ('allInCHG_pro0p_chg.csv', 'g20240331_pro0p_chg')]
     data_file_folder_ref = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
     data_file_folder_test = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
-    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
-    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
+    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331./figures'
+    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331./temp'
 
     compare_run_run(keys=keys,
                     data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test,

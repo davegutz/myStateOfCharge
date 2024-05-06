@@ -444,7 +444,7 @@ def write_clean_file(path_to_data, type_=None, hdr_key=None, unit_key=None, skip
         csv_file = None
         print("I(write_clean_file): no data to write")
         if not unit_key_found:
-            print("W(write_clean_file):  unit_key not found in ", basename, ".  Looking with ", unit_key)
+            print("W(write_clean_file):  unit_key not found in ", basename, ".  Looking with '{:s}'".format(unit_key))
     else:
         print("Wrote(write_clean_file):", csv_file, num_lines, "lines", num_skips, "skips", length, "fields")
     return csv_file

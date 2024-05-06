@@ -28,7 +28,10 @@ def find_sync(path_to_data):
             if line.__contains__('SYNC'):
                 sync.append(float(line.strip().split(',')[-1]))
 
-    sync = np.array(sync)
+    if not sync:
+        sync = None
+    else:
+        sync = np.array(sync)
     return sync
 
 
@@ -121,9 +124,9 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
 
 
 def main():
-    path_to_data = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/ampHiFail_pro0p_ch.csv'
+    path_to_data = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/allInCHG_pro0p_chg.csv'
     skip = 1
-    unit_key = 'g20240331_pro0p_ch'
+    unit_key = 'g20240331_pro0p_chg '
     zero_zero_in = False
     time_end_in = None
     rated_batt_cap = 108.4
