@@ -22,6 +22,7 @@ import numpy as np
 from datetime import datetime
 from pyDAGx import myTables
 from Chemistry_BMS import Chemistry
+import os
 
 
 def pretty_print_vec(vec, prefix='', spacer=''):
@@ -240,7 +241,7 @@ if __name__ == '__main__':
         fig_files = []
         data_root = 'ReGaugeVocSoc.py'
         save_pdf_path = '../dataReduction/figures'
-        filename = data_root + sys.argv[0].split('/')[-1]
+        filename = data_root + os.path.split(__file__)[1].split('.')[0]
         plot_title = filename + '   ' + date_time
         fig_list, fig_files = obs.plot(filename, fig_files=fig_files, plot_title=plot_title, fig_list=fig_list)
         precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)

@@ -447,7 +447,7 @@ if __name__ == '__main__':
         fig_list = []
         fig_files = []
         data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-        filename = data_root + sys.argv[0].split('/')[-1]
+        filename = data_root + os.path.split(__file__)[1].split('.')[0]
         plot_title = filename + '   ' + date_time
         fig_list, fig_files = overall_batt(mon_ver, sim_ver, filename, fig_files, plot_title=plot_title,
                                            fig_list=fig_list, suffix='_ver')  # sim over mon verify

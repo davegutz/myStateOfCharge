@@ -921,12 +921,7 @@ if __name__ == '__main__':
         fig_list = []
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-        data_root = data_file_clean.split('/')[-1].replace('.csv', '-')
-        # if platform == 'linux':
-        #     filename = "Python/Figures/" + data_root + sys.argv[0].split('/')[-1]
-        # else:
-        #     filename = data_root + sys.argv[0].split('/')[-1]
-        filename = data_root + sys.argv[0].split('/')[-1]
+        filename = data_file_clean.split('/')[-1].replace('.csv', '-') + os.path.split(__file__)[1].split('.')[0]
         plot_title = filename + '   ' + date_time
         fig_list, fig_files = overall_batt(mon_ver, sim_ver, filename, fig_files, plot_title=plot_title,
                                            fig_list=fig_list, suffix='_ver')  # Could be confusing because sim over mon

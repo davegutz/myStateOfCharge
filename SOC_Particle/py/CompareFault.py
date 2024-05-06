@@ -1061,8 +1061,7 @@ if __name__ == '__main__':
         # Plots
         fig_list = []
         fig_files = []
-        data_root = temp_hist_file_clean.split('/')[-1].replace('.csv', '_')
-        filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
+        filename = os.path.split(temp_hist_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
         plot_title = filename + '   ' + date_time
         if len(f.time_ux) > 1:
             fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',

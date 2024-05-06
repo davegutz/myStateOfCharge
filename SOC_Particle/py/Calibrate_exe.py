@@ -312,7 +312,7 @@ def main(data_files=None, breaks=None):
     print(Colors.fg.green, "rated_batt_cap_in = {:5.3f}".format(actual_cap/Battery.UNIT_CAP_RATED))
     print(Colors.reset)
 
-    filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
+    filename = data_root + os.path.split(__file__)[1].split('.')[0]
     plot_title = filename + '   ' + date_time
     plot_all(Raw_files, Mashed_data, Finished_curves, Massaged_curves, actual_cap, fig_files=fig_files,
              plot_title=plot_title, fig_list=fig_list,

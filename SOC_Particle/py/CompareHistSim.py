@@ -1203,8 +1203,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     if data_only is False:
         fig_list = []
         fig_files = []
-        data_root = temp_flt_file_clean.split('/')[-1].replace('.csv', '_')
-        filename = data_root + sys.argv[0].split('/')[-1].split('\\')[-1].split('.')[-2]
+        filename = os.path.split(temp_flt_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
         plot_title = filename + '   ' + date_time
         if len(f.time) > 1:
             fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
@@ -1240,13 +1239,13 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
 def main():
     # User inputs (multiple input_files allowed
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/rapidTweakRegression_pro2p2_chg.csv'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/short_hist_soc3p2_chg.csv'
     rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
     rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
     data_only = False
-    mon_t = True
-    unit_key = 'g20240331_pro2p2_chg'
-    dt_resample = 1
+    mon_t = False
+    unit_key = 'g20240331_soc3p2_chg '
+    dt_resample = 10
 
     # Do this when running compare_hist_sim on run that schedule extracted assuming constant Tb
     tb_force = 35

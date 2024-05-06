@@ -18,6 +18,7 @@ __version__ = '$Revision: 1.1 $'
 __date__ = '$Date: 2022/06/02 13:15:02 $'
 
 import numpy as np
+import os
 
 
 class TFDelay:
@@ -211,7 +212,7 @@ if __name__ == '__main__':
         fig_list = []
         fig_files = []
         date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-        filename = sys.argv[0].split('/')[-1]
+        filename = os.path.split(__file__)[1].split('.')[0]
         plot_title = filename + '   ' + date_time
 
         fig_list, fig_files = overall(tfd_long.saved, filename, fig_files, plot_title='long '+plot_title, fig_list=fig_list)
