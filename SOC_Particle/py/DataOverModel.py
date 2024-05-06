@@ -765,7 +765,7 @@ class SavedDataSim:
             self.time_min = None
             self.time_day = None
             self.unit = None  # text title
-            self.c_time = None  # Control time, s
+            self.cTime = None  # Control time, s
             self.chm_s = None
             self.qcrs_s = None  # Unit capacity rated scaled, Coulombs
             self.bms_off_s = None
@@ -788,14 +788,14 @@ class SavedDataSim:
             self.reset_s = None
         else:
             self.i = 0
-            self.c_time = np.array(data.c_time)
+            self.cTime = np.array(data.c_time)
             self.time = np.array(data.c_time) - time_ref
             # Truncate
             if time_end is None:
                 i_end = len(self.time)
             else:
                 i_end = np.where(self.time <= time_end)[0][-1] + 1
-            self.c_time = self.c_time[:i_end]
+            self.cTime = self.cTime[:i_end]
             self.time = self.time[:i_end]
             self.time_min = self.time / 60.
             self.time_day = self.time / 3600. / 24.
@@ -826,7 +826,7 @@ class SavedDataSim:
 
     def __str__(self):
         s = "{},".format(self.unit[self.i])
-        s += "{:13.3f},".format(self.c_time[self.i])
+        s += "{:13.3f},".format(self.cTime[self.i])
         s += "{:5.2f},".format(self.Tb_s[self.i])
         s += "{:5.2f},".format(self.Tbl_s[self.i])
         s += "{:5.2f},".format(self.Tbl_s[self.i])

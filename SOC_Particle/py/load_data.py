@@ -35,6 +35,41 @@ def find_sync(path_to_data):
     return sync
 
 
+def calculate_master_sync(ref, test):
+    print(f"{ref=}\n{test=}")
+    return np.maximum(ref, test)
+
+
+class SyncInfo:
+    def __init__(self, sav_mon, sav_sim=None, sync=None):
+        self.is_empty = False
+        if sync is None or sav_mon is None:
+            self.is_empty = True
+            return
+        self.time_mon = sav_mon.time  # pointer
+        self.time_sim = sav_sim.time  # pointer
+        self.sync_cTime = sync
+        self.cTime = sav_mon.cTime
+        self.time = sav_mon.time
+        self.int_mon = []
+        self.int_sim = []
+        self.length = len(sync)
+        delta = []
+        for i in np.arange(self.length):
+            if i == 0:
+                delta.append(self.sync_cTime[i] - sav_mon.cTime[0])
+                self.int_mon.append([np.where(sav_mon.cTime <= sync[i])])
+                self.int_sim.append([np.where(sav_sim.cTime <= sync[i])])
+            else:
+                delta.append(self.sync_cTime[i] - self.sync_cTime[i-1])
+                self.int_mon.append([np.where((sav_mon.cTime <= sync[i]) & (sav_mon.cTime > sync[i-1]))])
+                self.int_sim.append([np.where((sav_sim.cTime <= sync[i]) & (sav_sim.cTime > sync[i - 1]))])
+        self.delta_mon = np.array(delta)
+        return
+
+    def synchronize(self, sync_master):
+        return
+
 # Load from files
 def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_batt_cap=Battery.UNIT_CAP_RATED,
               legacy=False, v1_only=False, zero_thr_in=0.02):
@@ -102,6 +137,9 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         sim = None
         print(f"load_data: returning sim=None")
 
+    # Calculate sync information
+    sync_info = SyncInfo(sav_mon=mon, sav_sim=sim, sync=sync)
+
     # Load fault
     temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', hdr_key='fltb',
                                            unit_key='unit_f', skip=skip, comment_str='---')
@@ -120,7 +158,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         f = None
         print(f"load_data: returning f=None")
 
-    return mon, sim, f, data_file_clean, temp_flt_file_clean, sync
+    return mon, sim, f, data_file_clean, temp_flt_file_clean, sync_info
 
 
 def main():
