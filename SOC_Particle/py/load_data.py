@@ -81,16 +81,13 @@ class SyncInfo:
 
         # Subsequent sets based on difference to master del
         n = 0
-        for i in np.arange(self.length):
-            if i > 0:
+        for i in np.arange(self.length+1):
+            if 0 < i < self.length:
                 acc_shift -= sync_del[i] - self.del_mon[i]
             self.time_mon[self.int_mon[i]] = (self.time_mon[self.int_mon[i]] - acc_shift).copy()
             self.time_sim[self.int_sim[i]] = (self.time_sim[self.int_sim[i]] - acc_shift).copy()
             n += 1
             print(f"{i=}: {self.time_mon[self.int_mon[i]]=}")
-        print(f"end {n=}")
-        self.time_mon[self.int_mon[self.length]] = (self.time_mon[self.int_mon[self.length]] - acc_shift).copy()
-        self.time_sim[self.int_sim[self.length]] = (self.time_sim[self.int_sim[self.length]] - acc_shift).copy()
 
         print(f"{self.time_mon=}")
         return
