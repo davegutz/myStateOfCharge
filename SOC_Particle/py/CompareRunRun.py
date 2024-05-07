@@ -73,18 +73,8 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
     # Time since beginning of data to sync pulses
     if sync_info_ref.is_empty is False and sync_info_test.is_empty is False and \
             sync_info_ref.length == sync_info_test.length and sync_info_ref.length > 1:
-        sync_rel_ref = sync_info_ref.sync_cTime - mon_ref.cTime[0]
-        sync_rel_test = sync_info_test.sync_cTime - mon_test.cTime[0]
-        sync_del_ref = sync_rel_ref - sync_rel_ref[0]
-        sync_del_test = sync_rel_test - sync_rel_test[0]
         # Make target sync vector
-        print(f"{sync_rel_ref=}\n{sync_rel_test=}")
-        for i in np.arange(len(sync_del_ref))-1:
-            delta = abs(sync_del_test[i+1] - sync_del_ref[i+1])
-            for j in np.arange(i+2, len(sync_del_ref)):
-                sync_del_ref[j] += delta
-                sync_del_test[j] += delta
-        master_sync_del = calculate_master_sync(sync_del_ref, sync_del_test)
+        master_sync_del = calculate_master_sync(sync_info_ref.del_mon, sync_info_test.del_mon)
         print(f"{master_sync_del=}")
     else:
         print(f"data sets too small to sync or not equivalent number of sync pulses")

@@ -36,7 +36,6 @@ def find_sync(path_to_data):
 
 
 def calculate_master_sync(ref, test):
-    print(f"{ref=}\n{test=}")
     return np.maximum(ref, test)
 
 
@@ -54,21 +53,25 @@ class SyncInfo:
         self.int_mon = []
         self.int_sim = []
         self.length = len(sync)
+        rel = []
         delta = []
         for i in np.arange(self.length):
+            rel.append(self.sync_cTime[i] - sav_mon.cTime[0])
             if i == 0:
-                delta.append(self.sync_cTime[i] - sav_mon.cTime[0])
+                delta.append(rel[0])
                 self.int_mon.append([np.where(sav_mon.cTime <= sync[i])])
                 self.int_sim.append([np.where(sav_sim.cTime <= sync[i])])
             else:
-                delta.append(self.sync_cTime[i] - self.sync_cTime[i-1])
+                delta.append(rel[i] - rel[i-1])
                 self.int_mon.append([np.where((sav_mon.cTime <= sync[i]) & (sav_mon.cTime > sync[i-1]))])
                 self.int_sim.append([np.where((sav_sim.cTime <= sync[i]) & (sav_sim.cTime > sync[i - 1]))])
-        self.delta_mon = np.array(delta)
+        self.rel_mon = np.array(rel)
+        self.del_mon = np.array(delta)
         return
 
     def synchronize(self, sync_master):
         return
+
 
 # Load from files
 def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_batt_cap=Battery.UNIT_CAP_RATED,
