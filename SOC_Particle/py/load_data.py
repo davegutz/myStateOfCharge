@@ -36,7 +36,8 @@ def find_sync(path_to_data):
 
 
 def calculate_master_sync(ref, test):
-    return np.maximum(ref, test)
+    delta = np.maximum(ref, test)
+    return delta
 
 
 class SyncInfo:
@@ -69,7 +70,21 @@ class SyncInfo:
         self.del_mon = np.array(delta)
         return
 
-    def synchronize(self, sync_master):
+    def synchronize(self, sync_del):
+        # Init entire time array again.  First sync is always 0
+        orig = self.time_mon.copy()
+        acc_shift = self.sync_cTime[0]
+        self.time_mon = self.cTime.copy()
+        self.time_sim = self.cTime.copy()
+
+        # Subsequent sets based on difference to master del
+        for i in np.arange(self.length):
+            if i > 0:
+                acc_shift -= sync_del[i] - self.del_mon[i]
+            self.time_mon[self.int_mon[i]] = (self.time_mon[self.int_mon[i]] - acc_shift).copy()
+            self.time_sim[self.int_sim[i]] = (self.time_sim[self.int_sim[i]] - acc_shift).copy()
+            print(f"{self.time_mon[self.int_mon[i]]=}")
+        print(f"{self.time_mon=}")
         return
 
 
