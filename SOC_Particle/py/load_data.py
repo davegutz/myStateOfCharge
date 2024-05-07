@@ -41,6 +41,7 @@ def calculate_master_sync(ref, test):
 
 
 class SyncInfo:
+    """Shift time arrays to synchronize two different data sets for CompareRunRun usage"""
     def __init__(self, sav_mon, sav_sim=None, sync=None):
         self.is_empty = False
         if sync is None or sav_mon is None:
@@ -73,6 +74,7 @@ class SyncInfo:
         return
 
     def synchronize(self, sync_del):
+        """Call this after building two class instances and calling calculate_master_sync to make sync_del"""
         # Init entire time array again.  First sync is always 0
         orig = self.time_mon.copy()
         acc_shift = self.sync_cTime[0]
