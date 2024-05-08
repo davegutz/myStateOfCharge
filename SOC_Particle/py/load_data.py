@@ -42,7 +42,7 @@ def calculate_master_sync(ref, test):
 
 class SyncInfo:
     """Shift time arrays to synchronize two different data sets for CompareRunRun usage"""
-    def __init__(self, sav_mon, sav_sim=None, sync=None):
+    def __init__(self, sav_mon, sync=None):
         self.is_empty = False
         if sync is None or sav_mon is None:
             self.is_empty = True
@@ -76,12 +76,10 @@ class SyncInfo:
         self.time_mon = self.cTime.copy()
 
         # Subsequent sets based on difference to master del
-        n = 0
         for i in np.arange(self.length+1):
-            if 0 < i:
+            if 1 < i:
                 acc_shift -= sync_del[i-1] - self.del_mon[i-1]
             self.time_mon[self.int_mon[i]] = (self.time_mon[self.int_mon[i]] - acc_shift).copy()
-            n += 1
 
         return
 
@@ -154,7 +152,7 @@ def load_data(path_to_data, skip, unit_key, zero_zero_in, time_end_in, rated_bat
         print(f"load_data: returning sim=None")
 
     # Calculate sync information
-    sync_info = SyncInfo(sav_mon=mon, sav_sim=sim, sync=sync)
+    sync_info = SyncInfo(sav_mon=mon, sync=sync)
 
     # Load fault
     temp_flt_file_clean = write_clean_file(path_to_data, type_='_flt', hdr_key='fltb',
