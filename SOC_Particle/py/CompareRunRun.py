@@ -77,17 +77,10 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
             sync_info_ref.length == sync_info_test.length and sync_info_ref.length > 1:
         # Make target sync vector
         master_sync_del = calculate_master_sync(sync_info_ref.del_mon, sync_info_test.del_mon)
-        print(f"{master_sync_del=}")
-        print(f"\nref work: ")
         sync_info_ref.synchronize(master_sync_del)
         mon_ref.time = sync_info_ref.time_mon.copy()
-        print(f"\ntest work: ")
         sync_info_test.synchronize(master_sync_del)
         mon_test.time = sync_info_test.time_mon.copy()
-        # print(f"{sync_info_ref.time=}")
-        print(f"\nafter ref {mon_ref.time=}")
-        # print(f"{sync_info_test.time=}")
-        print(f"\nafter test {mon_test.time=}")
     else:
         print(f"data sets too small to sync or not equivalent number of sync pulses")
 

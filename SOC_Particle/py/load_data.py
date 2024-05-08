@@ -47,13 +47,11 @@ class SyncInfo:
         if sync is None or sav_mon is None:
             self.is_empty = True
             return
-        self.time_mon = sav_mon.time  # pointer
-        self.time_sim = sav_sim.time  # pointer
+        self.time_mon = sav_mon.time
         self.sync_cTime = sync
         self.cTime = sav_mon.cTime
         self.time = sav_mon.time
         self.int_mon = []
-        self.int_sim = []
         self.length = len(sync)
         rel = []
         delta = []
@@ -62,13 +60,10 @@ class SyncInfo:
             if i == 0:
                 delta.append(rel[0])
                 self.int_mon.append([np.where(sav_mon.cTime <= sync[i])])
-                self.int_sim.append([np.where(sav_sim.cTime <= sync[i])])
             else:
                 delta.append(rel[i] - rel[i-1])
                 self.int_mon.append([np.where((sav_mon.cTime <= sync[i]) & (sav_mon.cTime > sync[i-1]))])
-                self.int_sim.append([np.where((sav_sim.cTime <= sync[i]) & (sav_sim.cTime > sync[i - 1]))])
         self.int_mon.append([np.where(sav_mon.cTime > sync[self.length-1])])
-        self.int_sim.append([np.where(sav_sim.cTime > sync[self.length-1])])
         self.rel_mon = np.array(rel)
         self.del_mon = np.array(delta)
         return
@@ -79,19 +74,15 @@ class SyncInfo:
         orig = self.time_mon.copy()
         acc_shift = self.sync_cTime[0]
         self.time_mon = self.cTime.copy()
-        self.time_sim = self.cTime.copy()
 
         # Subsequent sets based on difference to master del
         n = 0
         for i in np.arange(self.length+1):
-            if 0 < i < self.length:
-                acc_shift -= sync_del[i] - self.del_mon[i]
+            if 0 < i:
+                acc_shift -= sync_del[i-1] - self.del_mon[i-1]
             self.time_mon[self.int_mon[i]] = (self.time_mon[self.int_mon[i]] - acc_shift).copy()
-            self.time_sim[self.int_sim[i]] = (self.time_sim[self.int_sim[i]] - acc_shift).copy()
             n += 1
-            print(f"{i=}: {self.time_mon[self.int_mon[i]]=}")
 
-        print(f"{self.time_mon=}")
         return
 
 
