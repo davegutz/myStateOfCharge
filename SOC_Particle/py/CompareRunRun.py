@@ -75,11 +75,11 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
             sync_info_ref.length == sync_info_test.length and sync_info_ref.length > 1:
         # Make target sync vector
         master_sync_del = calculate_master_sync(sync_info_ref.del_mon, sync_info_test.del_mon)
-        print(f"{sync_info_ref.del_mon=}\n{sync_info_test.del_mon=}\n{master_sync_del=}")
         sync_info_ref.synchronize(master_sync_del)
         mon_ref.time = sync_info_ref.time_mon.copy()
         sync_info_test.synchronize(master_sync_del)
         mon_test.time = sync_info_test.time_mon.copy()
+        print(f"{sync_info_ref.del_mon=}\n{sync_info_test.del_mon=}\n{master_sync_del=}\n{mon_test.time=}")
     else:
         print(f"data sets too small to sync or not equivalent number of sync pulses")
 
@@ -113,7 +113,7 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('pulseSS_pro0p_chg.csv', 'g20240331_pro0p_chg'), ('pulseSS_pro2p2_chg.csv', 'g20240331_pro2p2_chg')]
+    keys = [('allIn_pro0p_chg.csv', 'g20240331_pro0p_chg'), ('allIn_pro2p2_chg.csv', 'g20240331_pro2p2_chg')]
     data_file_folder_ref = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
     data_file_folder_test = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
     rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'

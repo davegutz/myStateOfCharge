@@ -93,7 +93,7 @@ sel_list1 = [
     ]
 macro_sel_list = [
             'end_early', 'modMidInit', 'modMidInitNoCc', 'modLowInitBB', 'modLowInitCH', 'modLowInitCHG',
-            'noisePackage', 'silentPackage', 'quiet', 'cleanup', 'tempCleanup', 'zeroPulse', 'tranPrep',
+            'noisePackage', 'silentPackage', 'quiet', 'cleanup', 'tempCleanup', 'tranPrep',
             'slowTwitchDef', 'fastTwitchDef', 'c06', 'c50', 'cm50', 'c00', 'twitch', 'time_stamp'
 ]
 
@@ -111,7 +111,6 @@ quiet = 'vv0;Dr100;DP4;D>313;Dh;'
 cleanup = 'Hd;Pf;<HR;<Rf;<XD;'
 tempCleanup = 'Rf;XD; '
 time_stamp = 'XY;'
-zeroPulse = time_stamp + 'Dm-0.1;Dm0.1;Dm0;'  # Fools transient start detection that is based on abs(ib)<0.05
 tranPrep = 'HR;vv4;Dh1000;W2;Rs;W17;'
 slowTranPrep = 'HR;vv4;W2;Rs;' + slow + 'W5;'
 slowTwitchDef = 'Rb;Rf;Xts;Xf0.004;XW10000;XT10;XC2;'
@@ -131,21 +130,21 @@ lookup = {
         'custom': (72, 'XQ60000;', ("For general purpose data collection", "'save data' will present a choice of file name", "")),
         'allIn':   (3100,
                     slow + 'Dh4000;' +
-                    'cc;' + modMidInit + slowTranPrep + c50 + 'XQ25000;' + c00 + tempCleanup +      # ampHiFail
-                    '  Xp10;  ' +                                                           # rapidTweakRegression
-                    '  Xp7;  ' +                                                            # pulseSS
-                    '  Xp13;  ' +                                                           # triTweakDisch
-                    modMidInit + slowTranPrep + 'Ff1;' + c50 + 'XQ40000;' + c00 + tempCleanup +     # ampHiFailFf
-                    modMidInit + slowTranPrep + cm50 + 'XQ50000;' + c00 + tempCleanup +     # ampLoFail
-                    '  D^15;Xp10; ' +                                                       # rapidTweakRegression40C
-                    '  Xp11;  ' +                                                           # slowTweakRegression
-                    'Xm247;Ca0.9;Rb;Rf;Xts;Xa-81;Xf0.004;XW10000;XT10;XC2;W1;HR;vv4;W;Rs;XR;XQ580000;' + tempCleanup +  # flatSitHys
-                    modMidInit + slowTranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + tempCleanup +    # ampHiFailSlow
-                    modMidInit + slowTranPrep + zeroPulse + ';Dv0.82;XQ60000;' + 'Dv0;' + tempCleanup +     # vHiFail
-                    modMidInit + slowTranPrep + 'Xv.002;Xu1;XQ80000;Xu0;Xv1;W50;' + tempCleanup +       # tbFailMod
-                    modMidInit + 'Xm246;' + slowTranPrep + 'Xv.002;W10;Xu1;XQ80000;Xu0;Xv1;W50;' + tempCleanup +  # tbFailHdwe
-                    modMidInit + slowTranPrep + zeroPulse + 'Dw-0.8;Dn0.0001;XQ120000;Dw0;' + tempCleanup +  # DvMon
-                    modMidInit + slowTranPrep + zeroPulse + 'Dy-0.8;Dn0.0001;XQ120000;Dy0;' +  # DvSim
+                    'cc;' + modMidInit + slowTranPrep + c50 + 'XQ25000;' + c00 + tempCleanup +      # 1 ampHiFail 0
+                    '  Xp10;  ' +                                                           # 2 rapidTweakRegression 62
+                    '  Xp7;  ' +                                                            # 3 pulseSS  251
+                    '  Xp13;  ' +                                                           # 4 triTweakDisch  269
+                    modMidInit + slowTranPrep + 'Ff1;' + c50 + 'XQ40000;' + c00 + tempCleanup +     # 5 ampHiFailFf 465
+                    modMidInit + slowTranPrep + cm50 + 'XQ50000;' + c00 + tempCleanup +     # 6 ampLoFail    543
+                    '  D^15;Xp10; ' +                                                       # 7 rapidTweakRegression40C  630
+                    '  Xp11;  ' +                                                           # 8 slowTweakRegression  880
+                    'Xm247;Ca0.9;Rb;Rf;Xts;Xa-81;Xf0.004;XW10000;XT10;XC2;W1;HR;vv4;W;Rs;XR;XQ580000;' + tempCleanup +  # 9 flatSitHys   1466
+                    modMidInit + slowTranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + tempCleanup +    # 10 ampHiFailSlow  2043
+                    modMidInit + slowTranPrep + 'XY;Dv0.82;XQ60000;' + 'Dv0;' + tempCleanup +     # 11 vHiFail  2480
+                    modMidInit + slowTranPrep + 'Xv.002;XY;Xu1;XQ80000;Xu0;Xv1;W50;' + tempCleanup +       # 12 tbFailMod  2560
+                    modMidInit + 'Xm246;' + slowTranPrep + 'Xv.002;W10;XY;Xu1;XQ80000;Xu0;Xv1;W50;' + tempCleanup +  # 13 tbFailHdwe   2684
+                    modMidInit + slowTranPrep + 'XY;Dw-0.8;Dn0.0001;XQ120000;Dw0;' + tempCleanup +  # 14 DvMon  2798
+                    modMidInit + slowTranPrep + 'XY;Dy-0.8;Dn0.0001;XQ120000;Dy0;' +  # 15 DvSim  2936
                     quiet + cleanup,
                     ('All the best transients', "Must have same 'vv*' throughout", "")),
         'allInBB': (1200,
@@ -187,16 +186,16 @@ lookup = {
         'offSitHysBmsNoiseBB': (580, modLowInitBB + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage + quiet + cleanup, ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
         'offSitHysBmsNoiseCH': (580, modLowInitCH + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage + quiet + cleanup, ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
         'offSitHysBmsNoiseCHG': (580, modLowInitCHG + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage + quiet + cleanup, ("Stress test with 2x normal Vb noise DV0.10.  Takes about 10 minutes.", "operate around saturation, starting above, go below, come back up. Tune Ca to start just above vsat. Go low enough to exercise hys reset ", "Make sure comes back on.", "It will show one shutoff only since becomes biased with pure sine input with half of down current ignored on first cycle during the shutoff.")),
-        'ampHiFailSlow': (452, modMidInit + tranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.", "Run for 6  minutes to see cc_diff_fa")),
-        'vHiFail': (90, modMidInit + tranPrep + zeroPulse + ';Dv0.82;XQ60000;' + 'Dv0;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION")),
-        'vHiFailH': (60, modMidInit + tranPrep + 'SH.3;W10;' + zeroPulse + 'Dv0.82;XQ30000;' + 'Dv0;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION.  Initial BB shift will be limited by hys table")),
-        'vHiFailFf': (84, modMidInit + tranPrep + zeroPulse + 'FF1;Dv0.8;XQ60000;' + 'Dv0;' + quiet + cleanup, ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.", "Usually shows SAT.")),
+        'ampHiFailSlow': (470, modMidInit + tranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.", "Run for 6  minutes to see cc_diff_fa")),
+        'vHiFail': (90, modMidInit + tranPrep + 'XY;Dv0.82;XQ60000;' + 'Dv0;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION")),
+        'vHiFailH': (60, modMidInit + tranPrep + 'SH.3;W10;' + 'XY;Dv0.82;XQ30000;' + 'Dv0;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with DOM 1 fig. 2 or 3.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION.  Initial BB shift will be limited by hys table")),
+        'vHiFailFf': (84, modMidInit + tranPrep + 'FF1;XY;Dv0.8;XQ60000;' + 'Dv0;' + quiet + cleanup, ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.", "Usually shows SAT.")),
         'pulseSSH': (20, slow + 'Xp8;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
-        'tbFailMod': (118, modMidInit + tranPrep + 'Xv.002;Xu1;XQ80000;Xu0;Xv1;W50;' + quiet + cleanup, ("Run for 80 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.",)),
-        'tbFailHdwe': (118, modMidInit + 'Xm246;' + tranPrep + 'Xv.002;W10;Xu1;XQ80000;Xu0;Xv1;W50;' + quiet + cleanup, ("Run for 80 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.", "")),
-        'DvMon': (142, modMidInit + tranPrep + zeroPulse + 'Dw-0.8;Dn0.0001;XQ120000;Dw0;' + quiet + cleanup, ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
-        'DvSim': (142, modMidInit + tranPrep + zeroPulse + 'Dy-0.8;Dn0.0001;XQ120000;Dy0;' + quiet + cleanup, ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
-        'faultParade': (320, modMidInit + 'Dh1000;vv4;Dm50;Dn0.0001;W200;Dm0;Dn0;W20;Rf;XQ240000;' + quiet + cleanup, ("Check fault, history, and summary logging", "Should flag faults but take no action", "", "", "")),
+        'tbFailMod': (118, modMidInit + tranPrep + 'Xv.002;XY;Xu1;XQ80000;Xu0;Xv1;W50;' + quiet + cleanup, ("Run for 80 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.",)),
+        'tbFailHdwe': (118, modMidInit + 'Xm246;' + tranPrep + 'Xv.002;W10;XY;Xu1;XQ80000;Xu0;Xv1;W50;' + quiet + cleanup, ("Run for 80 sec.   Plots DOM 1 Fig 2 or 3 should show Tb was detected as fault but not failed.", "")),
+        'DvMon': (142, modMidInit + tranPrep + 'XY;Dw-0.8;Dn0.0001;XQ120000;Dw0;' + quiet + cleanup, ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
+        'DvSim': (142, modMidInit + tranPrep + 'XY;Dy-0.8;Dn0.0001;XQ120000;Dy0;' + quiet + cleanup, ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
+        'faultParade': (320, modMidInit + 'Dh1000;vv4;XY;Dm50;Dn0.0001;W200;Dm0;Dn0;W20;Rf;XQ240000;' + quiet + cleanup, ("Check fault, history, and summary logging", "Should flag faults but take no action", "", "", "")),
         }
 
 macro_lookup = {
@@ -209,7 +208,6 @@ macro_lookup = {
         'quiet': (5, quiet, ('', '', '', '')),
         'cleanup': (5, cleanup, ('', '', '', '')),
         'tempCleanup': (5, tempCleanup, ('', '', '', '')),
-        'zeroPulse': (5, zeroPulse, ('', '', '', '')),
         'tranPrep': (5, tranPrep, ('', '', '', '')),
         'time_stamp': (5, time_stamp, ('', '', '', '')),
         'slowTwitchDef': (5, slowTwitchDef, ('', '', '', '')),
