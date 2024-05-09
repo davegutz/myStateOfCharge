@@ -138,7 +138,7 @@ lookup = {
                     modMidInit + slowTranPrep + cm50 + 'XQ50000;' + c00 + tempCleanup +     # 6 ampLoFail    543
                     '  D^15;Xp10; ' +                                                       # 7 rapidTweakRegression40C  630
                     '  Xp11;  ' +                                                           # 8 slowTweakRegression  880
-                    'Xm247;Ca0.9;Rb;Rf;Xts;Xa-81;Xf0.004;XW10000;XT10;XC2;W1;HR;vv4;W;Rs;XR;XQ580000;Xb0;' + tempCleanup +  # 9 flatSitHys   1466
+                    'Xm247;Ca0.9;Rb;Rf;Xts;Xa-81;Xf0.004;XW10000;XT10;XC2;W1;HR;vv4;W;Rs;XR;XQ580000;Xa0;Xb0;' + tempCleanup +  # 9 flatSitHys   1466
                     modMidInit + slowTranPrep + c06 + 'Fc0.02;Fd0.5;XQ400000;' + c00 + tempCleanup +    # 10 ampHiFailSlow  2043
                     modMidInit + slowTranPrep + 'XY;Dv0.82;XQ60000;' + 'Dv0;' + tempCleanup +     # 11 vHiFail  2480
                     modMidInit + slowTranPrep + 'Xv.002;XY;Xu1;XQ80000;Xu0;Xv1;W50;' + tempCleanup +       # 12 tbFailMod  2560
