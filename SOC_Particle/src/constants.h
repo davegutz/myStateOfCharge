@@ -118,7 +118,7 @@ const String unit = version + "_" + UNIT;
 #ifdef CONFIG_ARGON  // dec ~222350  units: pro1a, soc1a
     #define NFLT    7  // Number of saved SRAM/EERAM fault data slices 10 s intervals (7)
     #define NHIS 1000  // Ignored Argon.  Actual nhis_ is dynamically allocated based on EERAM size, holding NFLT constant. 
-    #define NSUM 2192  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error BACKUPSRAM, or GUI FRAG msg (2000)
+    #define NSUM 2190  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error BACKUPSRAM, or GUI FRAG msg (2000)
 #endif
 
 #ifdef CONFIG_PHOTON2  // dec ~ 256268  units: pro2p2, soc3p2
