@@ -80,7 +80,7 @@ void loop();
 #elif defined(CONFIG_ARGON)
   #undef ARDUINO
   #if (PLATFORM_ID != PLATFORM_ARGON)
-    #error "copy local_config.xxxx.h to local_config.h"
+    #error "edit local_config.h to select local_config.xxxx.h to match device"
   #endif
 #elif defined(CONFIG_PHOTON2)
   #undef ARDUINO
@@ -129,7 +129,7 @@ extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 #ifdef CONFIG_47L16_EERAM
   retained SavedPars sp = SavedPars(&ram);  // Various parameters to be common at system level
 #else
-  retained Flt_st saved_hist[NHIS];    // For displaying faults
+  retained Flt_st saved_hist[NHIS];    // For displaying history
   retained Flt_st saved_faults[NFLT];  // For displaying faults
   retained SavedPars sp = SavedPars(saved_hist, uint16_t(NHIS), saved_faults, uint16_t(NFLT));  // Various parameters to be common at system level
 #endif

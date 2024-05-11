@@ -36,9 +36,9 @@
         "chrono": "cpp",
         "xhash": "cpp"
     },
-    "particle.firmwareVersion": "5.7.0",
-    "particle.targetPlatform": "p2",
+    "particle.firmwareVersion": "5.8.0",
+    "particle.targetPlatform": "argon",
     "C_Cpp.errorSquiggles": "disabled",
-    "particle.targetDevice": "pro3p2",
+    "particle.targetDevice": "pro1a",
     "cmake.configureOnOpen": false
 }
