@@ -89,8 +89,10 @@ class Chemistry(BMS):
     def assign_all_mod(self, mod_code=0, unit=None):
         if mod_code == 0:
             self.assign_BB()
-        if mod_code == 1 or mod_code == 2:
+        elif mod_code == 1:
             self.assign_CH(unit=unit)
+        elif mod_code == 2:
+            self.assign_CHG(unit=unit)
 
     # Assign BattleBorn chemistry
     def assign_BB(self):
@@ -190,40 +192,95 @@ class Chemistry(BMS):
         self.dv_min_abs = 0.06  # Absolute value of +/- hysteresis limit, V
         self.ib_lag_tau = IB_LAG_CH  # Lag time to wash out sat effect on dv, s
 
-        if unit == 'pro2p2' or unit == 'soc3p2':
-            # 2024-04-24T14-51-24:  tune to data
-            t_y_t1 = [21.5, 25.0, 35.0, ]
-            t_x_soc1 = [-0.400, -0.300, -0.230, -0.200, -0.150, -0.130, -0.114, -0.044, 0.000, 0.016, 0.032, 0.055,
-                        0.064, 0.114, 0.134, 0.154, 0.183, 0.214, 0.300, 0.400, 0.500, 0.600, 0.700, 0.800, 0.900,
-                        0.960, 0.980, 1.000, ]
-            t_voc1 = [
-                4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 8.170,
-                11.285, 12.114, 12.558, 12.707, 12.875, 13.002, 13.054, 13.201, 13.275, 13.284, 13.299, 13.307, 13.310,
-                14.700,
-                4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 7.947, 11.000, 11.946, 12.252, 12.588, 12.670, 12.797,
-                12.833, 12.864, 12.908, 12.957, 13.034, 13.081, 13.106, 13.159, 13.234, 13.272, 13.286, 13.300, 13.300,
-                14.760,
-                4.000, 4.000, 6.686, 8.206, 10.739, 12.045, 12.411, 12.799, 12.866, 12.890, 12.914, 12.949, 12.963,
-                13.037, 13.052, 13.067, 13.089, 13.112, 13.146, 13.196, 13.284, 13.318, 13.320, 13.320, 13.320, 13.320,
-                13.320, 14.760,
-            ]
-            t_x_soc_min1 = [21.5, 25.0, 35.0, ]
-            t_soc_min1 = [0.13, 0.00, -0.14, ]
-        else:
-            # Tables CHINS Bmon=1, Bsim=1, from ReGaugeVocSoc 3/2/2023 soc0p
-            # VOC_SOC table
-            # Tables CHINS Bmon=1, Bsim=1, from CompareTensorData 8/31/2023
-            t_x_soc1 = [-0.035, 0.000, 0.050, 0.100, 0.108, 0.120, 0.140, 0.170, 0.200, 0.250, 0.300, 0.3400, 0.400,
-                        0.500, 0.600, 0.700, 0.800, 0.900, 0.980, 0.990, 1.000]
-            t_y_t1 = [0.0, 11.0, 21.5]
-            t_voc1 = [4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 9.000, 11.770, 12.700,
-                      12.950, 13.050, 13.100, 13.226, 13.259, 13.264, 13.460, 14.270,
-                      4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 9.000, 11.770, 12.700,
-                      12.950, 13.050, 13.100, 13.226, 13.259, 13.264, 13.460, 14.270,
-                      4.000, 4.000, 9.0000, 9.500, 11.260, 11.850, 12.400, 12.650, 12.730, 12.810, 12.920, 12.960,
-                      13.020, 13.060, 13.220, 13.280, 13.284, 13.299, 13.310, 13.486, 14.700]
-            t_x_soc_min1 = [0.000, 11.00, 21.5, 40.000]
-            t_soc_min1 = [0.31, 0.31, 0.1, 0.1]
+        # Tables CHINS Bmon=1, Bsim=1, from ReGaugeVocSoc 3/2/2023 soc0p
+        # VOC_SOC table
+        # Tables CHINS Bmon=1, Bsim=1, from CompareTensorData 8/31/2023
+        t_x_soc1 = [-0.035, 0.000, 0.050, 0.100, 0.108, 0.120, 0.140, 0.170, 0.200, 0.250, 0.300, 0.3400, 0.400,
+                    0.500, 0.600, 0.700, 0.800, 0.900, 0.980, 0.990, 1.000]
+        t_y_t1 = [0.0, 11.0, 21.5]
+        t_voc1 = [4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 9.000, 11.770, 12.700,
+                  12.950, 13.050, 13.100, 13.226, 13.259, 13.264, 13.460, 14.270,
+                  4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 9.000, 11.770, 12.700,
+                  12.950, 13.050, 13.100, 13.226, 13.259, 13.264, 13.460, 14.270,
+                  4.000, 4.000, 9.0000, 9.500, 11.260, 11.850, 12.400, 12.650, 12.730, 12.810, 12.920, 12.960,
+                  13.020, 13.060, 13.220, 13.280, 13.284, 13.299, 13.310, 13.486, 14.700]
+        t_x_soc_min1 = [0.000, 11.00, 21.5, 40.000]
+        t_soc_min1 = [0.31, 0.31, 0.1, 0.1]
+
+        # Form tables
+        x1 = np.array(t_x_soc1)
+        y1 = np.array(t_y_t1)
+        data_interp1 = np.array(t_voc1)
+        self.lut_voc_soc = myTables.TableInterp2D(x1, y1, data_interp1)
+        self.lut_min_soc = myTables.TableInterp1D(np.array(t_x_soc_min1), np.array(t_soc_min1))
+
+        # Hysteresis tables
+        self.cap = 1e4  # scaled later
+        t_soc1 = [.47, .75, .80, .86]
+        t_dv1 = [-.10, -.05, -.04, 0.0, .02, .04, .05, .06, .07, .10]
+        schp4 = [0.003, 0.003, 0.4, 0.4, 0.4, 0.4, 0.010, 0.010, 0.010, 0.010]
+        schp8 = [0.004, 0.004, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.014, 0.012]
+        schp9 = [0.004, 0.004, 0.4, 0.4, .2, .09, 0.04, 0.006, 0.006, 0.006]
+        t_r1 = schp4 + schp8 + schp8 + schp9
+        t_dv_min1 = [-0.06, -0.06, -0.06, -0.06]
+        t_dv_max1 = [0.06, 0.1, 0.1, 0.06]
+        SRs1p4 = [1., 1., .2, .2, .2, .2, 1., 1., 1., 1.]
+        SRs1p8 = [1., 1., .2, .2, .2, 1., 1., 1., 1., 1.]
+        SRs1p9 = [1., 1., .1, .1, .2, 1., 1., 1., 1., 1.]
+        t_s1 = SRs1p4 + SRs1p8 + SRs1p8 + SRs1p9
+        self.lut_r_hys = myTables.TableInterp2D(t_dv1, t_soc1, t_r1)
+        self.lut_s_hys = myTables.TableInterp2D(t_dv1, t_soc1, t_s1)
+        self.lu_x_hys = myTables.TableInterp1D(t_soc1, t_dv_max1)
+        self.lu_n_hys = myTables.TableInterp1D(t_soc1, t_dv_min1)
+
+    # Assign CHINS chemistry
+    def assign_CHG(self, unit=None):
+        # Constants
+        # self.cap = see below
+        self.rated_temp = 25.  # Temperature at UNIT_CAP_RATED, deg C
+        self.coul_eff = 0.9976  # Coulombic efficiency - the fraction of charging input that gets turned into\
+        # usable Coulombs (.9976)
+        self.dqdt = 0.01  # Change of charge with temperature, fraction/deg C (0.01 from literature)
+        self.dvoc_dt = -.01  # Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
+        self.dvoc = 0.  # Adjustment for calibration error, V (systematic error; may change in the future, 0)
+        self.hys_cap = 1.e4  # Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s (1e4)
+        self.low_voc = 9.0  # Voltage threshold for BMS to turn off battery (9.0)
+        self.low_t = 0.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.\
+        # Heater should keep >4, too. deg C (0.)
+        self.r_0 = 0.0046*3.  # ChargeTransfer R0, ohms  (3*0.0046)
+        self.r_ct = 0.0077*0.76  # ChargeTransfer diffusion resistance, ohms (0.0077*0.76)
+        self.r_sd = 70  # Equivalent model for EKF reference.	Parasitic discharge equivalent, ohms (70)
+        self.tau_ct = 24.9  # ChargeTransfer diffusion time constant, s (=1/Rct/Cct) (24.9)
+        self.tau_sd = 2.5e7  # Equivalent model for EKF reference.	Parasitic discharge time constant, sec (2.5e7)
+        self.c_sd = self.tau_sd / self.r_sd
+        self.vb_off = 11.  # Shutoff point in Mon, V (11.)
+        self.vb_down = 10.6  # Shutoff point.  Diff to RISING needs to be larger than delta dv_hys expected, V (10.6)
+        self.vb_down_sim = 10.5  # Shutoff point in Sim, V (10.5)
+        self.vb_rising = 11.3  # Shutoff point when off, V (11.3)
+        self.vb_rising_sim = 10.75  # Shutoff point in Sim when off, V (10.75)
+        self.nom_vsat = 13.85 - 0.05  # Saturation threshold at temperature, deg C (13.85 - 0.05 HDB_VB)
+        self.r_ss = self.r_0 + self.r_ct
+        self.dv_min_abs = 0.06  # Absolute value of +/- hysteresis limit, V
+        self.ib_lag_tau = IB_LAG_CH  # Lag time to wash out sat effect on dv, s
+
+        # 2024-04-24T14-51-24:  tune to data
+        t_y_t1 = [21.5, 25.0, 35.0, ]
+        t_x_soc1 = [-0.400, -0.300, -0.230, -0.200, -0.150, -0.130, -0.114, -0.044, 0.000, 0.016, 0.032, 0.055,
+                    0.064, 0.114, 0.134, 0.154, 0.183, 0.214, 0.300, 0.400, 0.500, 0.600, 0.700, 0.800, 0.900,
+                    0.960, 0.980, 1.000, ]
+        t_voc1 = [
+            4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 8.170,
+            11.285, 12.114, 12.558, 12.707, 12.875, 13.002, 13.054, 13.201, 13.275, 13.284, 13.299, 13.307, 13.310,
+            14.700,
+            4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 4.000, 7.947, 11.000, 11.946, 12.252, 12.588, 12.670, 12.797,
+            12.833, 12.864, 12.908, 12.957, 13.034, 13.081, 13.106, 13.159, 13.234, 13.272, 13.286, 13.300, 13.300,
+            14.760,
+            4.000, 4.000, 6.686, 8.206, 10.739, 12.045, 12.411, 12.799, 12.866, 12.890, 12.914, 12.949, 12.963,
+            13.037, 13.052, 13.067, 13.089, 13.112, 13.146, 13.196, 13.284, 13.318, 13.320, 13.320, 13.320, 13.320,
+            13.320, 14.760,
+        ]
+        t_x_soc_min1 = [21.5, 25.0, 35.0, ]
+        t_soc_min1 = [0.13, 0.00, -0.14, ]
 
         # Form tables
         x1 = np.array(t_x_soc1)

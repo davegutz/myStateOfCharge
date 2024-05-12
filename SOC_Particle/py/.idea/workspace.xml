@@ -5,11 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8176cd29-30e0-4234-b41e-da8f934efbc6" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../BT-AT/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../BT-AT/.vscode/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/../.vscode/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GUI_TestSOC_linux.ini" beforeDir="false" afterPath="$PROJECT_DIR$/GUI_TestSOC_linux.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/SOC_Particle.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../src/SOC_Particle.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/local_config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../src/local_config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chemistry_BMS.py" beforeDir="false" afterPath="$PROJECT_DIR$/Chemistry_BMS.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompareRunSim.py" beforeDir="false" afterPath="$PROJECT_DIR$/CompareRunSim.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GUI_TestSOC.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI_TestSOC.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,23 +37,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.Calibrate_exe.executor&quot;: &quot;Run&quot;,
-    &quot;Python.CompareHistSim.executor&quot;: &quot;Run&quot;,
-    &quot;Python.CompareRunHist.executor&quot;: &quot;Run&quot;,
-    &quot;Python.CompareRunRun.executor&quot;: &quot;Run&quot;,
-    &quot;Python.CompareRunSim.executor&quot;: &quot;Run&quot;,
-    &quot;Python.GUI_TestSOC.executor&quot;: &quot;Run&quot;,
-    &quot;Python.install.executor&quot;: &quot;Run&quot;,
-    &quot;Python.load_data.executor&quot;: &quot;Run&quot;,
-    &quot;Python.unite_pictures.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;g20240109&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.spelling&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.Calibrate_exe.executor": "Run",
+    "Python.CompareHistSim.executor": "Run",
+    "Python.CompareRunHist.executor": "Run",
+    "Python.CompareRunRun.executor": "Run",
+    "Python.CompareRunSim.executor": "Debug",
+    "Python.GUI_TestSOC.executor": "Run",
+    "Python.install.executor": "Run",
+    "Python.load_data.executor": "Run",
+    "Python.unite_pictures.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "g20240109",
+    "settings.editor.selected.configurable": "reference.settings.ide.settings.spelling"
   }
-}</component>
-  <component name="RunManager" selected="Python.install">
+}]]></component>
+  <component name="RunManager" selected="Python.CompareRunSim">
     <configuration name="CompareRunRun" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="py" />
       <option name="ENV_FILES" value="" />
@@ -167,11 +166,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.CompareRunSim" />
         <item itemvalue="Python.install" />
         <item itemvalue="Python.GUI_TestSOC" />
         <item itemvalue="Python.CompareRunRun" />
         <item itemvalue="Python.load_data" />
-        <item itemvalue="Python.CompareRunSim" />
       </list>
     </recent_temporary>
   </component>
@@ -220,6 +219,16 @@
           <url>file://$PROJECT_DIR$/DataOverModel.py</url>
           <line>392</line>
           <option name="timeStamp" value="53" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/CompareRunSim.py</url>
+          <line>100</line>
+          <option name="timeStamp" value="54" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/MonSim.py</url>
+          <line>166</line>
+          <option name="timeStamp" value="55" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
