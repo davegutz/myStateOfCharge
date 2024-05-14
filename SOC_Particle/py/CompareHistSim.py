@@ -30,7 +30,6 @@ from PlotGP import tune_r, gp_plot
 from PlotOffOn import off_on_plot
 from Chemistry_BMS import ib_lag
 from myFilters import LagExp
-import sys
 from DataOverModel import write_clean_file
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 from datetime import datetime
@@ -59,75 +58,6 @@ VOC_RESET_40 = 0.  # Attempt to rescale to match voc_soc to all data
 #  Redesign Hysteresis_20220917d.  Make a new Hysteresis_20220926.py with new curve
 HYS_CAP_REDESIGN = 3.6e4  # faster time constant needed
 HYS_SOC_MIN_MARG = 0.15  # add to soc_min to set thr for detecting low endpoint condition for reset of hysteresis
-
-
-# Add schedule lookups and do some rack and stack
-def add_stuff(d_ra, mon, ib_band=0.5):
-    voc_soc = []
-    soc_min = []
-    vsat = []
-    time_sec = []
-    dt = []
-    for i in range(len(d_ra.time_ux)):
-        voc_soc.append(mon.chemistry.lut_voc_soc.interp(d_ra.soc[i], d_ra.Tb[i]))
-        soc_min.append((mon.chemistry.lut_min_soc.interp(d_ra.Tb[i])))
-        vsat.append(mon.chemistry.nom_vsat + (d_ra.Tb[i] - mon.chemistry.rated_temp) * mon.chemistry.dvoc_dt)
-        time_sec.append(float(d_ra.time_ux[i] - d_ra.time_ux[0]))
-        if i > 0:
-            dt.append(float(d_ra.time_ux[i] - d_ra.time_ux[i - 1]))
-        else:
-            dt.append(float(d_ra.time_ux[1] - d_ra.time_ux[0]))
-    time_min = (d_ra.time_ux-d_ra.time_ux[0])/60.
-    time_day = (d_ra.time_ux-d_ra.time_ux[0])/3600./24.
-    d_mod = rf.rec_append_fields(d_ra, 'time_sec', np.array(time_sec, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'time', np.array(time_sec, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'time_min', np.array(time_min, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'time_day', np.array(time_day, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'voc_soc', np.array(voc_soc, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'soc_min', np.array(soc_min, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'vsat', np.array(vsat, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'ib_sel', np.array(d_mod.ib, dtype=float))
-    if hasattr(d_mod, 'voc_dyn'):
-        voc = d_mod.voc_dyn.copy()
-        d_mod = rf.rec_append_fields(d_mod, 'voc', np.array(voc, dtype=float))
-    d_mod = calc_fault(d_ra, d_mod)
-    voc_stat_chg = np.copy(d_mod.voc_stat)
-    voc_stat_dis = np.copy(d_mod.voc_stat)
-    for i in range(len(voc_stat_chg)):
-        if d_mod.ib[i] > -ib_band:
-            voc_stat_dis[i] = None
-        elif d_mod.ib[i] < ib_band:
-            voc_stat_chg[i] = None
-    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_chg', np.array(voc_stat_chg, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_dis', np.array(voc_stat_dis, dtype=float))
-    if hasattr(d_mod, 'voc_dyn'):
-        dv_hys = d_mod.voc_dyn - d_mod.voc_stat
-    else:
-        dv_hys = d_mod.voc - d_mod.voc_stat
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys', np.array(dv_hys, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'dV_hys', np.array(dv_hys, dtype=float))
-    dv_hys_unscaled = d_mod.dv_hys / HYS_SCALE_20220917d
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_unscaled', np.array(dv_hys_unscaled, dtype=float))
-    if hasattr(d_mod, 'voc_dyn'):
-        dv_hys_required = d_mod.voc_dyn - voc_soc + dv_hys
-    else:
-        dv_hys_required = d_mod.voc - voc_soc + dv_hys
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_required', np.array(dv_hys_required, dtype=float))
-    d_mod = rf.rec_append_fields(d_mod, 'dt', np.array(dt, dtype=float))
-
-    dv_hys_rescaled = d_mod.dv_hys_unscaled
-    pos = dv_hys_rescaled >= 0
-    neg = dv_hys_rescaled < 0
-    dv_hys_rescaled[pos] *= HYS_RESCALE_CHG
-    dv_hys_rescaled[neg] *= HYS_RESCALE_DIS
-    d_mod = rf.rec_append_fields(d_mod, 'dv_hys_rescaled', np.array(dv_hys_rescaled, dtype=float))
-    if hasattr(d_mod, 'voc_dyn'):
-        voc_stat_rescaled = d_mod.voc_dyn - d_mod.dv_hys_rescaled
-    else:
-        voc_stat_rescaled = d_mod.voc - d_mod.dv_hys_rescaled
-    d_mod = rf.rec_append_fields(d_mod, 'voc_stat_rescaled', np.array(voc_stat_rescaled, dtype=float))
-
-    return d_mod
 
 
 # Add ib_lag = ib lagged by time constant
@@ -1043,11 +973,10 @@ def add_qcrs(hist, mon_t_=False, mon=None, qcrs=None):
     return hist
 
 
-def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./figures', rel_path_to_temp='./temp',
-                     data_only=False, mon_t=False, unit_key=None, sync_time=None, dt_resample=10, Tb_force=None):
+def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=False, unit_key=None, sync_time=None,
+                     dt_resample=10, Tb_force=None):
 
-    print(f"\ncompare_hist_sim:\n{data_file=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}\n{data_only=}\n{mon_t=}"
-          f"\n{unit_key=}\n{dt_resample=}\n")
+    print(f"\ncompare_hist_sim:\n{data_file=}\n{data_only=}\n{mon_t=}\n{unit_key=}\n{dt_resample=}\n{Tb_force=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
@@ -1097,7 +1026,6 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         # return None, None, None, None, None
 
     # Load fault
-    f_raw = None
     temp_flt_file_clean = write_clean_file(data_file, type_='_flt', hdr_key='fltb', unit_key='unit_f',
                                            skip=1, comment_str='---')
     if temp_flt_file_clean:
@@ -1145,7 +1073,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
     # noinspection PyTypeChecker
     f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time,
                     unit=unit)
-    print("\nf after add_stuff:\n", f.dtype.names, f, "\n")
+    print("\nf after add_stuff_f:\n", f.dtype.names, f, "\n")
 
     f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)  # tb_band=100 disables banding
 
@@ -1167,7 +1095,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         h = add_mod(h, mon_t, mon_old)
         h = add_chm(h, mon_t, mon_old, chm)
         h = add_qcrs(h, mon_t_=mon_t, mon=mon_old, qcrs=qcrs)
-        print("\nh after add_stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after add_stuff\n")
+        print("\nh after adding stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after adding stuff\n")
 
         # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
         h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
@@ -1191,7 +1119,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
         mon_old, sim_old = bandaid(h_20C_resamp)
 
         # Replicate
-        data_file_clean = path_to_temp+'/'+data_file_txt.replace('.csv', '_hist' + '.csv', 1)
+        data_file_clean = path_to_temp + '/' + data_file_txt.replace('.csv', '_hist' + '.csv', 1)
         mon_file_save = data_file_clean.replace(".csv", "_rep_hist.csv")
         mon_ver, sim_ver, sim_s_ver, mon_r, sim_r =\
             replicate(mon_old, sim_old=sim_old, init_time=1., verbose=False, t_max=time_end_in, use_vb_sim=False,
@@ -1239,22 +1167,18 @@ def compare_hist_sim(data_file=None, time_end_in=None, rel_path_to_save_pdf='./f
 
 def main():
     # User inputs (multiple input_files allowed
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/short_hist_soc3p2_chg.csv'
-    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
-    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/hist_2024_0505_0513.csv'
     data_only = False
     mon_t = False
-    unit_key = 'g20240331_soc3p2_chg '
+    unit_key = 'g20240331_soc3p2_chg'
     dt_resample = 10
+    Tb_force = None
 
     # Do this when running compare_hist_sim on run that schedule extracted assuming constant Tb
-    tb_force = 35
-
-    # cat(temp_hist_file, input_files, in_path=path_to_data, out_path=path_to_temp)
+    # Tb_force = 35
 
     compare_hist_sim(data_file=data_file, mon_t=mon_t, unit_key=unit_key, dt_resample=dt_resample,
-                     rel_path_to_save_pdf=rel_path_to_save_pdf, rel_path_to_temp=rel_path_to_temp, data_only=data_only,
-                     Tb_force=tb_force)
+                     data_only=data_only, Tb_force=Tb_force)
 
 
 if __name__ == '__main__':

@@ -527,10 +527,7 @@ def compare_hist_sim_choose():
                 if answer is None:
                     print('enter operation cancelled')
                     return
-                compare_hist_sim(data_file=testpath, unit_key=key,
-                                 rel_path_to_save_pdf=os.path.join(test_folder_path, './figures'),
-                                 rel_path_to_temp=os.path.join(test_folder_path, './temp'),
-                                 dt_resample=answer)
+                compare_hist_sim(data_file=testpath, unit_key=key, dt_resample=answer)
             else:
                 tk.messagebox.showerror(message='key not found in' + testpath)
 
@@ -545,10 +542,7 @@ def compare_hist_to_sim():
         if answer is None:
             print('enter operation cancelled')
             return
-        compare_hist_sim(data_file=Test.file_path, unit_key=Test.key,
-                         rel_path_to_save_pdf=os.path.join(Test.version_path, './figures'),
-                         rel_path_to_temp=os.path.join(Test.version_path, './temp'), mon_t=True,
-                         dt_resample=answer)
+        compare_hist_sim(data_file=Test.file_path, unit_key=Test.key, mon_t=True, dt_resample=answer)
         # master.deiconify()
     else:
         print('not possible')

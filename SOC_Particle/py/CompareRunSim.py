@@ -30,7 +30,6 @@ from PlotEKF import ekf_plot
 from PlotGP import tune_r, gp_plot
 from PlotOffOn import off_on_plot
 import easygui
-import os
 from PlotKiller import show_killer
 import tkinter.messagebox
 from local_paths import *
