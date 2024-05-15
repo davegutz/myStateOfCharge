@@ -27,7 +27,7 @@ from datetime import datetime
 from PlotKiller import show_killer
 import os
 from load_data import load_data, SyncInfo, calculate_master_sync
-from local_paths import *
+from local_paths import version_from_data_path, local_paths
 
 plt.rcParams['axes.grid'] = True
 

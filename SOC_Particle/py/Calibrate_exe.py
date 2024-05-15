@@ -22,7 +22,7 @@ from DataOverModel import write_clean_file
 import matplotlib.pyplot as plt
 from datetime import datetime
 from pyDAGx import myTables
-from Colors import *
+from Colors import Colors
 import numpy as np
 import sys
 import os

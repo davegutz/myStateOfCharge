@@ -36,9 +36,9 @@ from myFilters import LagExp
 #     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
 import Chemistry_BMS
-from Colors import *
+from Colors import Colors
 import re
-from local_paths import *
+from local_paths import version_from_data_file, local_paths
 
 plt.rcParams.update({'figure.max_open_warning': 0})
 

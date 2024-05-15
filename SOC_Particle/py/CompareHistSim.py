@@ -34,7 +34,7 @@ from DataOverModel import write_clean_file
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 from datetime import datetime
 from load_data import load_data, remove_nan
-from local_paths import *
+from local_paths import version_from_data_file, local_paths
 
 plt.rcParams['axes.grid'] = True
 
@@ -1049,7 +1049,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
         else:
             chm = None
         unit = unit_key.split('_')[-2]
-        if unit == 'pro2p2' or unit == 'soc3p2':
+        if chm == 2:
             rated_batt_cap_in = 102.9  # A-hr capacity of test article (output of Calibrate_exe.py)
         else:
             rated_batt_cap_in = 108.4  # A-hr capacity of test article

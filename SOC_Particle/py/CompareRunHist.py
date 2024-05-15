@@ -27,7 +27,7 @@ from CompareHistSim import compare_hist_sim
 from datetime import datetime
 import os
 import tkinter.messagebox
-from local_paths import *
+from local_paths import version_from_data_file, local_paths
 
 plt.rcParams['axes.grid'] = True
 

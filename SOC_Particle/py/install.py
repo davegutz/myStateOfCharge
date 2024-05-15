@@ -30,7 +30,7 @@ GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_
 if sys.platform == 'linux':
     test_cmd_create = "pyinstaller ./GUI_TestSOC.py --hidden-import='PIL._tkinter_finder' --icon='GUI_TestSOC.ico' -y"
 elif sys.platform == 'Darwin':
-    print(f"macOS not done yet")
+    print("macOS not done yet")
 else:
     test_cmd_create = 'pyinstaller .\\GUI_TestSOC.py --i GUI_TestSOC.ico -y'
 result = run_shell_cmd(test_cmd_create, silent=False)
@@ -93,9 +93,9 @@ Categories=Utility
     try:
         result = shutil.move('/home/daveg/Desktop/GUI_TestSOC.desktop', '/usr/share/applications/GUI_TestSOC.desktop')
     except PermissionError:
-        print(Colors.fg.red, f"Stop and establish sudo permissions", Colors.reset)
-        print(Colors.fg.red, f"  or", Colors.reset)
-        print(Colors.fg.red, f"sudo mv /home/daveg/Desktop/GUI_TestSOC.desktop /usr/share/applications/.", Colors.reset)
+        print(Colors.fg.red, "Stop and establish sudo permissions", Colors.reset)
+        print(Colors.fg.red, "  or", Colors.reset)
+        print(Colors.fg.red, "sudo mv /home/daveg/Desktop/GUI_TestSOC.desktop /usr/share/applications/.", Colors.reset)
         exit(1)
     if result != '/usr/share/applications/GUI_TestSOC.desktop':
         print(Colors.fg.red, f"'mv ...' failed code {result}", Colors.reset)
@@ -103,6 +103,6 @@ Categories=Utility
         print(Colors.fg.green, 'mv success.  Browse apps :: and make it favorites.  Open and set path to dataReduction', Colors.reset)
         print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
 elif sys.platform == 'Darwin':
-    print(f"macOS install not done yet")
+    print("macOS install not done yet")
 else:
-    print(f"double-click ")
+    print("double-click ")

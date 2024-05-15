@@ -6,10 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="8176cd29-30e0-4234-b41e-da8f934efbc6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Calibrate_exe.py" beforeDir="false" afterPath="$PROJECT_DIR$/Calibrate_exe.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompareFault.py" beforeDir="false" afterPath="$PROJECT_DIR$/CompareFault.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CompareHistSim.py" beforeDir="false" afterPath="$PROJECT_DIR$/CompareHistSim.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CompareRunHist.py" beforeDir="false" afterPath="$PROJECT_DIR$/CompareRunHist.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CompareRunRun.py" beforeDir="false" afterPath="$PROJECT_DIR$/CompareRunRun.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CompareRunSim.py" beforeDir="false" afterPath="$PROJECT_DIR$/CompareRunSim.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DataOverModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataOverModel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GUI_TestSOC.py" beforeDir="false" afterPath="$PROJECT_DIR$/GUI_TestSOC.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GUI_TestSOC_linux.ini" beforeDir="false" afterPath="$PROJECT_DIR$/GUI_TestSOC_linux.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/install.py" beforeDir="false" afterPath="$PROJECT_DIR$/install.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,25 +44,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Python.Calibrate_exe.executor": "Run",
-    "Python.CompareHistSim.executor": "Debug",
-    "Python.CompareRunHist.executor": "Run",
-    "Python.CompareRunRun.executor": "Run",
-    "Python.CompareRunSim.executor": "Debug",
-    "Python.GUI_TestSOC.executor": "Run",
-    "Python.install.executor": "Run",
-    "Python.load_data.executor": "Run",
-    "Python.unite_pictures.executor": "Debug",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "g20240109",
-    "settings.editor.selected.configurable": "reference.settings.ide.settings.spelling"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Python.Calibrate_exe.executor&quot;: &quot;Run&quot;,
+    &quot;Python.CompareHistSim.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.CompareRunHist.executor&quot;: &quot;Run&quot;,
+    &quot;Python.CompareRunRun.executor&quot;: &quot;Run&quot;,
+    &quot;Python.CompareRunSim.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.GUI_TestSOC.executor&quot;: &quot;Run&quot;,
+    &quot;Python.install.executor&quot;: &quot;Run&quot;,
+    &quot;Python.load_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.unite_pictures.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;g20240109&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.spelling&quot;
   }
-}]]></component>
-  <component name="RunManager" selected="Python.CompareHistSim">
+}</component>
+  <component name="RunManager" selected="Python.GUI_TestSOC">
     <configuration name="CompareHistSim" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="py" />
       <option name="ENV_FILES" value="" />
@@ -169,9 +175,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.CompareHistSim" />
         <item itemvalue="Python.GUI_TestSOC" />
         <item itemvalue="Python.install" />
+        <item itemvalue="Python.CompareHistSim" />
         <item itemvalue="Python.CompareRunSim" />
         <item itemvalue="Python.CompareRunRun" />
       </list>
@@ -180,7 +186,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-5a2391486177-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.13763.11" />
+        <option value="bundled-python-sdk-babbdf50b680-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.15989.155" />
       </set>
     </attachedChunks>
   </component>
@@ -202,18 +208,8 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/GUI_TestSOC.py</url>
-          <line>801</line>
-          <option name="timeStamp" value="30" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/GUI_TestSOC.py</url>
-          <line>657</line>
-          <option name="timeStamp" value="43" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/CompareRunRun.py</url>
-          <line>106</line>
+          <line>105</line>
           <option name="timeStamp" value="52" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -223,13 +219,23 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/CompareRunSim.py</url>
-          <line>95</line>
+          <line>88</line>
           <option name="timeStamp" value="54" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/PlotGP.py</url>
           <line>395</line>
           <option name="timeStamp" value="65" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/GUI_TestSOC.py</url>
+          <line>870</line>
+          <option name="timeStamp" value="66" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/GUI_TestSOC.py</url>
+          <line>537</line>
+          <option name="timeStamp" value="67" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

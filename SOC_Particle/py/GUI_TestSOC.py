@@ -38,7 +38,7 @@ import subprocess
 import pyautogui
 import datetime
 import platform
-from Colors import *
+from Colors import Colors
 from test_soc_util import run_shell_cmd
 if platform.system() == 'Darwin':
     # noinspection PyUnresolvedReferences
@@ -50,9 +50,10 @@ bg_color = 'lightgray'
 # sys.stdout = open('logs.txt', 'w')
 # sys.stderr = open('logse.txt', 'w')
 
-if sys.platform == 'linux':
+plat = sys.platform
+if plat == 'linux':
     default_dr = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction'
-elif sys.platform == 'Darwin':
+elif plat == 'Darwin':
     default_dr = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction'
 else:
     default_dr = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction'
@@ -91,13 +92,13 @@ sel_list = [
     ]
 sel_list1 = [
     'ampHiFailSlow', 'vHiFail',  'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod',
-    'tbFailHdwe', 'DvMon', 'DvSim', 'faultParade', 'allInCHGn'
+    'tbFailHdwe', 'DvMon', 'DvSim', 'faultParade', 'allInBBn', 'allInCHn', 'allInCHGn',
     ]
 macro_sel_list = [
             'end_early', 'modMidInit', 'modMidInitNoCc', 'modLowInitBB', 'modLowInitCH', 'modLowInitCHG',
             'noisePackage', 'silentPackage', 'quiet', 'cleanup', 'tempCleanup', 'tranPrep',
-            'slowTwitchDef', 'fastTwitchDef', 'c06', 'c50', 'cm50', 'c00', 'twitch', 'time_stamp'
-]
+            'slowTwitchDef', 'fastTwitchDef', 'c06', 'c50', 'cm50', 'c00', 'twitch', 'time_stamp',
+    ]
 
 # Macro
 satInit = 'Dh;*W;*vv0;*XS;*Ca1;BZ;Ff0;DP1;HR;Rf;XD;'
@@ -167,6 +168,18 @@ lookup = {
                      'Xm247;Ca0.9920;' + fastTwitchDef + 'Xa17;' + slowTranPrep + 'XR;XQ600000;' + 'Xa0;' +  # satSitCHG
                      quiet + cleanup,
                      ('All the best transients CHG', "Must have same 'vv*' throughout", "")),
+        'allInBBn': (690,
+                     slow + 'Dh4000;' +
+                     modMidInit + slowTranPrep + noisePackage + c50 + 'XQ25000;' + c00 + silentPackage + tempCleanup +  # 1 ampHiFailNoise 0
+                     modLowInitBB + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage +  # 1 offSitHysBmsNoiseCHG 70
+                     quiet + cleanup,
+                     ('All the best transients CHG noise', "Must have same 'vv*' throughout", "")),
+        'allInCHn': (690,
+                     slow + 'Dh4000;' +
+                     modMidInit + slowTranPrep + noisePackage + c50 + 'XQ25000;' + c00 + silentPackage + tempCleanup +  # 1 ampHiFailNoise 0
+                     modLowInitCH + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage +  # 1 offSitHysBmsNoiseCHG 70
+                     quiet + cleanup,
+                     ('All the best transients CHG noise', "Must have same 'vv*' throughout", "")),
         'allInCHGn': (690,
                       slow + 'Dh4000;' +
                       modMidInit + slowTranPrep + noisePackage + c50 + 'XQ25000;' + c00 + silentPackage + tempCleanup +  # 1 ampHiFailNoise 0
@@ -242,9 +255,9 @@ class Begini(ConfigParser):
         ConfigParser.__init__(self)
 
         (config_path, config_basename) = os.path.split(name)
-        if sys.platform == 'linux':
+        if plat == 'linux':
             config_txt = os.path.splitext(config_basename)[0] + '_linux.ini'
-        elif sys.platform == 'Darwin':
+        elif plat == 'Darwin':
             config_txt = os.path.splitext(config_basename)[0] + '_macos.ini'
         else:
             config_txt = os.path.splitext(config_basename)[0] + '.ini'
@@ -855,7 +868,7 @@ def kill_putty(sys_=None, silent=True):
 def look_putty(sys_=None, silent=True):
     command = ''
     if sys_ == 'Linux':
-        command = 'tbd'
+        return subprocess.check_output(['ps']).decode('ascii').__contains__('putty')
     elif sys_ == 'Windows':
         return subprocess.check_output(['tasklist']).decode('ascii').__contains__('putty.exe')
     elif sys_ == 'Darwin':
@@ -1121,7 +1134,7 @@ def start_putty():
         enter_size = putty_size()
     if enter_size < 64:
         kill_putty(platform.system())
-        print(f'restarting putty   putty -load {test_filename.get()=}')
+        print(f'restarting putty   putty -load {test_filename.get()}')
         subprocess.Popen(['putty', '-load', test_filename.get()], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
     thread = Thread(target=stay_awake, kwargs={'up_set_min': putty_timeout.get()})
     thread.start()

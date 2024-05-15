@@ -27,7 +27,7 @@ from Util import cat
 from resample import resample
 from PlotGP import tune_r
 from PlotKiller import show_killer
-from Colors import *
+from Colors import Colors
 from resample import remove_nan
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
