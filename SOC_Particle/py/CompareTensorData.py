@@ -180,8 +180,8 @@ def seek_tensor(save_pdf_path='./figures', path_to_temp='./temp'):
     # Plots
     fig_list = []
     fig_files = []
-    data_root_test = data_file_clean.split('/')[-1].replace('.csv', '')
-    dir_root_test = data_file_clean.split('/')[-3].split('\\')[-1]
+    dir_root_test, data_root_test = os.path.split(data_file_clean)
+    data_root_test = data_root_test.replace('.csv', '')
     filename = data_root_test
     plot_title = dir_root_test + '/' + data_root_test + '   ' + date_time
     if temp_flt_file_clean and len(f.time) > 1:

@@ -32,22 +32,18 @@ from local_paths import *
 plt.rcParams['axes.grid'] = True
 
 
-def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_path_to_save_pdf_='./figures',
-                     rel_path_to_temp_='./temp', data_only_=True):
+def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, data_only_=True):
 
-    print(f"\ncompare_run_hist:\n{data_file_=}\n{rel_path_to_save_pdf_=}\n{rel_path_to_temp_=}\n{data_only_=}\
-    \n{unit_key_=}\n")
+    print(f"\ncompare_run_hist:\n{data_file_=}\n{data_only_=}\n{unit_key_=}\n{time_end_in_=}")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     # date_ = datetime.now().strftime("%y%m%d")
 
     dfcs, mo_r, so_r, mv_r, sv_r, ssv_r =\
-        compare_run_sim(data_file=data_file_, unit_key=unit_key_, time_end_in=time_end_in_,
-                        rel_path_to_save_pdf=rel_path_to_save_pdf_, rel_path_to_temp=rel_path_to_temp_,
-                        data_only=data_only_)
+        compare_run_sim(data_file=data_file_, unit_key=unit_key_, time_end_in=time_end_in_, data_only=data_only_)
     mo_h, so_h, mv_h, sv_h, ssv_h =\
-        compare_hist_sim(data_file=data_file_, unit_key=unit_key_, time_end_in=time_end_in_,
-                         data_only=data_only_, mon_t=True, sync_time=mo_r.time_ref)
+        compare_hist_sim(data_file=data_file_, unit_key=unit_key_, time_end_in=time_end_in_, data_only=data_only_,
+                         mon_t=True, sync_time=mo_r.time_ref)
 
     # Plots
     if mo_r is not None and mo_h is not None:
@@ -72,7 +68,7 @@ def compare_run_hist(data_file_=None, unit_key_=None, time_end_in_=None, rel_pat
                                        ref_str='_run', test_str='_hist')  # all over all
 
         # Copies
-        precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=rel_path_to_save_pdf_)
+        precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
         unite_pictures_into_pdf(outputPdfName=filename+'-'+date_time+'.pdf', save_pdf_path=save_pdf_path,
                                 listWithImagesExtensions=["png"])
         cleanup_fig_files(fig_files)

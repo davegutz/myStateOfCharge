@@ -37,10 +37,8 @@ from local_paths import *
 plt.rcParams['axes.grid'] = True
 
 
-def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to_save_pdf='./figures',
-                    rel_path_to_temp='./temp', data_only=False):
-    print(f"\ncompare_run_sim:\n{data_file=}\n{unit_key=}\n{time_end_in=}\n{rel_path_to_save_pdf=}\n{rel_path_to_temp=}"
-          f"\n{data_only=}\n")
+def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=False):
+    print(f"\ncompare_run_sim:\n{data_file=}\n{unit_key=}\n{time_end_in=}\n{data_only=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     date_ = datetime.now().strftime("%y%m%d")
@@ -107,8 +105,8 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
     if data_only is False:
         fig_list = []
         fig_files = []
-        data_root_test = data_file_clean.split('/')[-1].replace('.csv', '')
-        dir_root_test = data_file_clean.split('/')[-3].split('\\')[-1]
+        dir_root_test, data_root_test = os.path.split(data_file_clean)
+        data_root_test = data_root_test.replace('.csv', '')
         filename = data_root_test
         plot_title = dir_root_test + '/' + data_root_test + '   ' + date_time
         if temp_flt_file_clean and len(f.time_ux) > 1:
@@ -145,12 +143,11 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, rel_path_to
 
 
 def main():
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/offSitHysBmsNoiseCHG_pro2p2_chg.csv'
-    unit_key = 'g20240331_pro2p2_chg'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/discharge_ib_soc_soc3p2_chg.csv'
+    unit_key = 'g20240331_soc3p2_chg'
     time_end_in = None
-    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
-    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
     data_only = False
+
     compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only, time_end_in=time_end_in)
 
 

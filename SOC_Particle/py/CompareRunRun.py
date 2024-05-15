@@ -32,11 +32,9 @@ from local_paths import *
 plt.rcParams['axes.grid'] = True
 
 
-def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=None,
-                    rel_path_to_save_pdf='../dataReduction/figures', rel_path_to_temp='../dataReduction/temp'):
+def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=None):
 
-    print(f"compare_run_run:\n{keys=}\n{data_file_folder_ref=}\n{data_file_folder_test=}\n{rel_path_to_save_pdf=}\
-    \n{rel_path_to_temp=}\n")
+    print(f"compare_run_run:\n{keys=}\n{data_file_folder_ref=}\n{data_file_folder_test=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     # date_ = datetime.now().strftime("%y%m%d")
@@ -86,10 +84,11 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
     # Plots
     fig_list = []
     fig_files = []
-    data_root_ref = data_file_ref_clean.split('/')[-1].replace('.csv', '')
-    data_root_test = data_file_test_clean.split('/')[-1].replace('.csv', '')
-    dir_root_ref = data_file_folder_ref.split('/')[-1].split('\\')[-1]
-    dir_root_test = data_file_folder_test.split('/')[-1].split('\\')[-1]
+    dir_root_ref, data_root_ref = os.path.split(data_file_ref_clean)
+    data_root_ref = data_root_ref.replace('.csv', '')
+    dir_root_test, data_root_test = os.path.split(data_file_test_clean)
+    data_root_test = data_root_test.replace('.csv', '')
+
     filename = data_root_ref + '__' + data_root_test
     plot_title = dir_root_ref + '/' + data_root_ref + '__' + dir_root_test + '/' + data_root_test + '   ' + date_time
 
@@ -101,7 +100,7 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
                                    plot_title=plot_title, fig_list=fig_list)  # all over all
 
     # Copies
-    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=rel_path_to_save_pdf)
+    precleanup_fig_files(output_pdf_name=filename, path_to_pdfs=save_pdf_path)
     unite_pictures_into_pdf(outputPdfName=filename+'-'+date_time+'.pdf', save_pdf_path=save_pdf_path,
                             listWithImagesExtensions=["png"])
     cleanup_fig_files(fig_files)
@@ -116,12 +115,8 @@ def main():
     keys = [('allIn_pro0p_chg.csv', 'g20240331_pro0p_chg'), ('allIn_pro2p2_chg.csv', 'g20240331_pro2p2_chg')]
     data_file_folder_ref = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
     data_file_folder_test = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
-    rel_path_to_save_pdf = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./figures'
-    rel_path_to_temp = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/./temp'
 
-    compare_run_run(keys=keys,
-                    data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test,
-                    rel_path_to_save_pdf=rel_path_to_save_pdf, rel_path_to_temp=rel_path_to_temp)
+    compare_run_run(keys=keys, data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test)
 
 
 if __name__ == '__main__':

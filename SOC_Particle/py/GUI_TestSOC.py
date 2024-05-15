@@ -556,9 +556,7 @@ def compare_run():
     if modeling.get():
         print('compare_run_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
         # master.withdraw()
-        compare_run_sim(data_file=Test.file_path, unit_key=Test.key,
-                        rel_path_to_save_pdf=os.path.join(Test.version_path, './figures'),
-                        rel_path_to_temp=os.path.join(Test.version_path, './temp'))
+        compare_run_sim(data_file=Test.file_path, unit_key=Test.key)
         # master.deiconify()
     else:
         if not Ref.key_exists_in_file:
@@ -568,9 +566,8 @@ def compare_run():
         print('GUI_TestSOC compare_run:  Test', Test.file_path, Test.key)
         keys = [(Ref.file_txt, Ref.key), (Test.file_txt, Test.key)]
         # master.withdraw()
-        compare_run_run(keys=keys, data_file_folder_ref=Ref.version_path, data_file_folder_test=Test.version_path,
-                        rel_path_to_save_pdf=os.path.join(Test.version_path, './figures'),
-                        rel_path_to_temp=os.path.join(Test.version_path, './temp'))
+        compare_run_run(keys=keys, data_file_folder_ref=Ref.version_path, data_file_folder_test=Test.version_path)
+
         # master.deiconify()
 
 
@@ -581,9 +578,7 @@ def compare_run_to_hist():
     update_data_buttons()
     if modeling.get():
         print('compare_hist_to_sim.  save_pdf_path', os.path.join(Test.version_path, './figures'))
-        compare_run_hist(data_file_=Test.file_path, unit_key_=Test.key,
-                         rel_path_to_save_pdf_=os.path.join(Test.version_path, './figures'),
-                         rel_path_to_temp_=os.path.join(Test.version_path, './temp'))
+        compare_run_hist(data_file_=Test.file_path, unit_key_=Test.key)
     else:
         print('not possible')
 
