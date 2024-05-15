@@ -34,7 +34,6 @@ from DataOverModel import write_clean_file
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 from datetime import datetime
 from load_data import load_data, remove_nan
-import tkinter.messagebox
 from local_paths import *
 
 plt.rcParams['axes.grid'] = True
@@ -1033,8 +1032,8 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
     else:
         f_raw = None
         print("data from", temp_flt_file_clean, "empty after loading")
-        tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
-        return None, None, None, None, None
+        # tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
+        # return None, None, None, None, None
 
     # Load configuration
     unit = None
@@ -1068,20 +1067,20 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
             s_raw.Tb = Tb_force
 
     # Sort and augment data
-    f_raw = np.unique(f_raw)
-    f_raw = remove_nan(f_raw)
-    # noinspection PyTypeChecker
-    f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time,
-                    unit=unit)
-    print("\nf after add_stuff_f:\n", f.dtype.names, f, "\n")
-
-    f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)  # tb_band=100 disables banding
+    f = None
+    if f_raw is not None:
+        f_raw = np.unique(f_raw)
+        f_raw = remove_nan(f_raw)
+        # noinspection PyTypeChecker
+        f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time,
+                        unit=unit)
+        print("\nf after add_stuff_f:\n", f.dtype.names, f, "\n")
+        f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)  # tb_band=100 disables banding
 
     # sums and history
     hall_raw = hstack2((h_raw, s_raw))
 
     h_20C = None
-    h_20C_resamp = None
     mon_ver = None
     sim_ver = None
     sim_s_ver = None
@@ -1131,9 +1130,15 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
     if data_only is False:
         fig_list = []
         fig_files = []
-        filename = os.path.split(temp_flt_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
+        filename = None
+        if temp_flt_file_clean is not None:
+            filename = os.path.split(temp_flt_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
+        elif temp_hist_file_clean is not None:
+            filename = os.path.split(temp_hist_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
+        elif temp_sum_file_clean is not None:
+            filename = os.path.split(temp_sum_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
         plot_title = filename + '   ' + date_time
-        if len(f.time) > 1:
+        if f is not None and len(f.time) > 1:
             fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                              fig_list=fig_list, cc_dif_tol=cc_dif_tol_in, time_units='sec')
         if h_20C is not None and len(h_20C.time) > 1:
@@ -1167,7 +1172,7 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
 
 def main():
     # User inputs (multiple input_files allowed
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/hist_2024_0505_0513.csv'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/discharge_ib_soc_soc3p2_chg_hist_bad_cal.csv'
     data_only = False
     mon_t = False
     unit_key = 'g20240331_soc3p2_chg'
