@@ -602,9 +602,7 @@ def compare_run_run_choose():
                 keys = [(ref_basename, ref_key), (test_basename, test_key)]
                 # master.withdraw()
                 compare_run_run(keys=keys, data_file_folder_ref=ref_folder_path,
-                                data_file_folder_test=test_folder_path,
-                                rel_path_to_save_pdf=test_folder_path + './figures',
-                                rel_path_to_temp=test_folder_path + './temp')
+                                data_file_folder_test=test_folder_path)
                 # master.deiconify()
             else:
                 tk.messagebox.showerror(message='key not found in' + testpath)
@@ -622,9 +620,7 @@ def compare_run_sim_choose():
         for testpath in testpaths:
             test_folder_path, test_parent, basename, test_txt, key = contain_all(testpath)
             if key != '':
-                compare_run_sim(data_file=testpath, unit_key=key,
-                                rel_path_to_save_pdf=os.path.join(test_folder_path, './figures'),
-                                rel_path_to_temp=os.path.join(test_folder_path, './temp'))
+                compare_run_sim(data_file=testpath, unit_key=key)
             else:
                 tk.messagebox.showerror(message='key not found in' + testpath)
         update_data_buttons()

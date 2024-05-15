@@ -52,7 +52,6 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=F
     cc_dif_tol_in = 0.2
     legacy_in = False
     ds_voc_soc_in = 0.
-    temp_file = None
     use_vb_raw = False
     dvoc_sim_in = 0.
     dvoc_mon_in = 0.
@@ -60,7 +59,7 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=F
 
     # detect running interactively
     # this is written to run in pwd of call
-    if data_file is None and temp_file is None:
+    if data_file is None:
         path_to_data = easygui.fileopenbox(msg="choose your data file to plot")
         data_file = easygui.filesavebox(msg="pick new file name, cancel to keep", title="get new file name")
         if data_file is None:
@@ -68,9 +67,6 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=F
         else:
             os.rename(path_to_data, data_file)
         unit_key = easygui.enterbox(msg="enter pro0p, pro1a, soc0p, soc1a", title="get unit_key", default="pro1a")
-    elif temp_file is not None:
-        rel_path_to_temp = os.path.join(str(rel_path_to_temp), str(temp_file))
-        data_file = rel_path_to_temp
 
     # Folder operations
     version = version_from_data_file(data_file)
