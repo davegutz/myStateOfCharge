@@ -31,9 +31,11 @@ from CompareRunSim import compare_run_sim
 from CompareRunRun import compare_run_run
 from CompareRunHist import compare_run_hist
 from CountdownTimer import CountdownTimer
+from threading import Thread
 import shutil
 import pyperclip
 import subprocess
+import pyautogui
 import datetime
 import platform
 from Colors import *
@@ -850,6 +852,31 @@ def kill_putty(sys_=None, silent=True):
     return result
 
 
+def look_putty(sys_=None, silent=True):
+    command = ''
+    if sys_ == 'Linux':
+        command = 'tbd'
+    elif sys_ == 'Windows':
+        return subprocess.check_output(['tasklist']).decode('ascii').__contains__('putty.exe')
+    elif sys_ == 'Darwin':
+        command = 'tbd'
+    else:
+        print(f"kill_putty: SYS = {sys_} unknown")
+    if silent is False:
+        print(command + '\n')
+        print(Colors.bg.brightblack, Colors.fg.wheat)
+        result = run_shell_cmd(command, silent=silent)
+        print(Colors.reset)
+        print(command + '\n')
+        if result == -1:
+            print(Colors.fg.blue, 'failed.', Colors.reset)
+            return None, False
+    else:
+        result = run_shell_cmd(command, silent=False, save_stdout=True)
+        print(f"run_shell_cmd {result=}")
+    return result
+
+
 def lookup_macro():
     dum_, macro_val, ev_val = macro_lookup.get(macro_option.get())
     macro.set(macro_val)
@@ -927,6 +954,29 @@ def ref_restore():
     run_hist_button.forget()
     hist_sim_button.forget()
     Ref.label.pack(padx=5, pady=5)
+
+
+def stay_awake(up_set_min=3.):
+    """Keep computer awake using shift key when recording then return to previous state"""
+
+    # Timer starts
+    start_time = float(time.time())
+    up_time_min = 0.0
+    # FAILSAFE to FALSE feature is enabled by default so that you can easily stop execution of
+    # your pyautogui program by manually moving the mouse to the upper left corner of the screen.
+    # Once the mouse is in this location, pyautogui will throw an exception and exit.
+    pyautogui.FAILSAFE = False
+    putty_running = True
+    while putty_running > 0 and (up_time_min < up_set_min):
+        time.sleep(30.)
+        for i in range(0, 3):
+            pyautogui.press('shift')  # Shift key does not disturb fullscreen
+        up_time_min = (time.time() - start_time) / 60.
+        print(f"stay_awake: {up_time_min=} out of {up_set_min}")
+        # Check putty running
+        putty_running = look_putty(platform.system())
+
+    print(f"stay_awake: ending")
 
 
 def tksleep(t):
@@ -1073,6 +1123,8 @@ def start_putty():
         kill_putty(platform.system())
         print(f'restarting putty   putty -load {test_filename.get()=}')
         subprocess.Popen(['putty', '-load', test_filename.get()], stdin=subprocess.PIPE, bufsize=1, universal_newlines=True)
+    thread = Thread(target=stay_awake, kwargs={'up_set_min': putty_timeout.get()})
+    thread.start()
 
 
 def start_timer():
@@ -1217,6 +1269,7 @@ if __name__ == '__main__':
     option_panel_ctr.pack(side='left', expand=True, fill='both')
     option_panel_right = tk.Frame(option_panel)
     option_panel_right.pack(side='left', expand=True, fill='both')
+    putty_timeout = tk.DoubleVar(master, 720.)  # minutes maximum putty run without goind to sleep
 
     # Option row
     option = tk.StringVar(master, str(cf['others']['option']))
