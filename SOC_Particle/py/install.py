@@ -43,6 +43,7 @@ else:
 # Provide dependencies
 shutil.copyfile(GUI_TestSOC_path, GUI_TestSOC_dest_path)
 shutil.copystat(GUI_TestSOC_path, GUI_TestSOC_dest_path)
+print(Colors.fg.green, "copied files", Colors.reset)
 
 # Install as deeply as possible
 test_cmd_install = None
@@ -105,4 +106,5 @@ Categories=Utility
 elif sys.platform == 'Darwin':
     print("macOS install not done yet")
 else:
-    print("double-click ")
+    print(Colors.fg.green, f"browse to executable in 'dist/GUI_sqlite_scrape' and double-click.  Create shortcut first time", Colors.reset)
+    print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
