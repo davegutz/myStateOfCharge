@@ -35,6 +35,7 @@ from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanu
 from datetime import datetime
 from load_data import load_data, remove_nan
 from local_paths import version_from_data_file, local_paths
+import os
 
 plt.rcParams['axes.grid'] = True
 

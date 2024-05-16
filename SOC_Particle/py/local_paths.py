@@ -24,8 +24,7 @@ def local_paths(version_folder='no_name'):
     if platform.system() == 'Linux':
         path_to_local = '/home/daveg/.local/SOC_Particle'
     elif platform.system() == 'Darwin':
-        print("TODO:  define macOS path here")
-        raise NotImplementedError
+        path_to_local = '/Users/daveg/Library/SOC_Particle'
     else:
         path_to_local = os.path.join(os.getenv('LOCALAPPDATA'), 'SOC_Particle')
 
