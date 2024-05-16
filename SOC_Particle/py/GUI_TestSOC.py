@@ -1315,6 +1315,8 @@ if __name__ == '__main__':
                                wraplength=wrap_length, justify=tk.LEFT, font=("Arial", 8))
     if platform.system() == 'Linux':
         paste_label = tk.Label(option_panel_right, text='ctrl-shift-ins to paste', font=label_font_gentle)
+    elif platform.system() == 'Darwin':
+        paste_label = tk.Label(option_panel_right, text='ctrl-shift-V to paste', font=label_font_gentle)
     else:
         paste_label = tk.Label(option_panel_right, text='right-click to paste', font=label_font_gentle)
     init_button.pack(padx=5, pady=5)
