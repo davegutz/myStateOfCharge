@@ -9,7 +9,7 @@
 #define CONFIG_S1BAUD              230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define CONFIG_PHOTON2
 // #define CONFIG_SSD1306_OLED
-#define CONFIG_TSC2010_DIFFAMP
+#define CONFIG_INA181_DIFFAMP_HI_LO
 #define CONFIG_DS2482_1WIRE
 
 // #define DEBUG_QUEUE
@@ -29,8 +29,10 @@
 #define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
 #define CURR_SCALE_DISCH      1.0   // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
 #define SHUNT_GAIN            2666. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (2666 is 200A/0.075V)
-#define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms (5k6)  100/5.6  = 17.86
-#define SHUNT_AMP_R2          100000.   // Amplifed shunt ADS resistance, ohms (100k) 0.075v  = 1.34 v => 3.3/2+1.34 = 2.99 < 3.3
+#define SHUNT_AMP_R1          2500.     // Internal amp resistance INA181A4, ohms (2500)
+#define SHUNT_AMP_R2          500000.   // Internal amp resistance INA181A4, ohms (500000)
+#define SHUNT_NOA_R1          25000.    // Internal amp resistance INA181A1, ohms (25000)
+#define SHUNT_NOA_R2          500000.   // Internal amp resistance INA181A1, ohms (500000)
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
 #define VOLT_BIAS             0.0   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C

@@ -201,12 +201,15 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define HALF_V3V3         (V3V3/2.)     // Theoretical center of differential TSC2010
 
 // Conversion gains
-#ifdef CONFIG_ADS1013_OPAMP
+#if defined(CONFIG_ADS1013_OPAMP)
+    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN;
+#elif defined(CONFIG_TSC2010_OPAMP)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-#else
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+#elif defined(CONFIG_INA181_DIFFAMP_HI_LO)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+    const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
 #endif
 
 
