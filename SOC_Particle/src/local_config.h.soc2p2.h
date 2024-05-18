@@ -9,7 +9,7 @@
 #define CONFIG_S1BAUD              230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define CONFIG_PHOTON2
 // #define CONFIG_SSD1306_OLED
-#define CONFIG_INA181_DIFFAMP_HI_LO
+#define CONFIG_INA181_HI_LO
 #define CONFIG_DS2482_1WIRE
 
 // #define DEBUG_QUEUE

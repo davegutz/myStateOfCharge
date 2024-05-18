@@ -36,6 +36,7 @@
 #undef CONFIG_ADS1013_OPAMP
 #undef DEPLOY_PHOTON
 #undef CONFIG_TSC2010_DIFFAMP
+#undef CONFIG_INA181_HI_LO
 #undef CONFIG_SSD1306_OLED
 #undef CONFIG_DS18B20_SWIRE
 #undef CONFIG_DS2482_1WIRE
@@ -207,7 +208,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #elif defined(CONFIG_TSC2010_OPAMP)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-#elif defined(CONFIG_INA181_DIFFAMP_HI_LO)
+#elif defined(CONFIG_INA181_HI_LO)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
 #endif
