@@ -1,18 +1,17 @@
-#ifndef local_config_h
-#define local_config_h
+#ifndef pro3p2_h
+#define pro3p2_h
 
 #include "version.h"
-#define UNIT  "pro3p2"
 
-// Hardware config
-#define CONFIG_SBAUD               460800      // Default Serial baud when able
-#define CONFIG_S1BAUD              230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
-#define CONFIG_PHOTON2
-#define CONFIG_SSD1306_OLED
-#define CONFIG_TSC2010_DIFFAMP
-#define CONFIG_DS2482_1WIRE
-
-// #define DEBUG_QUEUE
+// Features config
+#define HDWE_UNIT                    "pro3p2"
+#define SOFT_SBAUD              460800      // Default Serial baud when able
+#define SOFT_S1BAUD             230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
+#define HDWE_PHOTON2
+#define HDWE_SSD1306_OLED
+#define HDWE_TSC2010_DUAL
+#define HDWE_DS2482_1WIRE
+// #define SOFT_DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
 // #define LOGHANDLE
 

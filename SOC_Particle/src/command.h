@@ -117,7 +117,7 @@ public:
 
   void pretty_print(void)
   {
-    #ifndef DEPLOY_PHOTON
+    #ifndef SOFT_DEPLOY_PHOTON
       Serial.printf("command parameters(cp):\n");
       Serial.printf(" inf_reset %d\n", inf_reset);
       Serial.printf(" model_cutback %d\n", model_cutback);

@@ -24,7 +24,7 @@
 #include "recall_R.h"
 #include "../subs.h"
 #include "../command.h"
-#include "../local_config.h"
+#include "../constants.h"
 #include "../Summary.h"
 #include "../parameters.h"
 #include <math.h>

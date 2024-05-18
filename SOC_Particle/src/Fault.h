@@ -64,7 +64,7 @@ class Flt_ram : public Flt_st
 public:
   Flt_ram();
   ~Flt_ram();
-  #ifdef CONFIG_47L16_EERAM
+  #ifdef HDWE_47L16_EERAM
     void get_t_flt()        { unsigned long value;  rP_->get(t_flt_eeram_.a16, value);        t_flt = value; };
     void get_Tb_hdwe()      { int16_t value;        rP_->get(Tb_hdwe_eeram_.a16, value);      Tb_hdwe = value; };
     void get_vb_hdwe()      { int16_t value;        rP_->get(vb_hdwe_eeram_.a16, value);      vb_hdwe = value; };
@@ -88,7 +88,7 @@ public:
   void put(const Flt_st input);
   void put_nominal();
 
-  #ifndef CONFIG_47L16_EERAM
+  #ifndef HDWE_47L16_EERAM
     void put_t_flt(const unsigned long value)     { t_flt = value; };
     void put_Tb_hdwe(const int16_t value)         { Tb_hdwe = value; };
     void put_vb_hdwe(const int16_t value)         { vb_hdwe = value; };
@@ -142,7 +142,7 @@ public:
 
 protected:
   SerialRAM *rP_;
-  #ifdef CONFIG_47L16_EERAM
+  #ifdef HDWE_47L16_EERAM
     address16b t_flt_eeram_;
     address16b Tb_hdwe_eeram_;
     address16b vb_hdwe_eeram_;

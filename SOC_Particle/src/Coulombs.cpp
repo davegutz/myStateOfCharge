@@ -53,7 +53,7 @@ Coulombs::~Coulombs() {}
 // Pretty print
 void Coulombs::pretty_print(void)
 {
-#ifndef DEPLOY_PHOTON
+#ifndef SOFT_DEPLOY_PHOTON
   Serial.printf("Coulombs:\n");
   Serial.printf(" coul_eff%9.5f\n", coul_eff_);
   Serial.printf(" delta_q%9.1f, C\n", *sp_delta_q_);

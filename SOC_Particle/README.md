@@ -121,7 +121,7 @@ In the spirit of Software Engineering principles, I document perceived requireme
     27. 'SoC' shall be current charge 'q' at the instant temperature divided by rated capacity at rated temperature.
     28. The monitor logic must detect and be benign that the DC-DC charger has come on setting Vb while the BMS in the battery has shutoff current.  This is to prevent falsely declaring saturation from DC-DC charger on.
     29. Only Battleborn will be implemented at first but structure will support other suppliers. For now, recompilation is needed to run another supplier and #define switches between them.
-    30. The nominal unit of configuration shall be a 12 v battery with a characteristic(soc) and rated Ah capacity. Use with multiple batteries shall include running an arbitrary number of batteries in parallel and then series (nPnS). The configuration shall be in local_config.h and in retained.h.  This is called the 'chemistry' of the configuration.
+    30. The nominal unit of configuration shall be a 12 v battery with a characteristic(soc) and rated Ah capacity. Use with multiple batteries shall include running an arbitrary number of batteries in parallel and then series (nPnS). The configuration shall be in constants.h (.e.g. #include soc0p) and in retained.h.  This is called the 'chemistry' of the configuration.
     31. The configuration shall be fully adjustable on the fly using Talk. If somebody has Battleborn or a LION they will not need to ever recompile and reflash a Particle device.
     32. Maximize system availability in presence of loss of sensor signals. Soft or hard resets cause signal fault detection and selection to reset.  Flash display to communicate signal status: every fourth update of screen indicates a minor fault. Every other update is major fault where action needed.  Print signal faults in the 'Q' talk.  Add ability to mask faults to a retained parameter rp.
     33. No battery cyclic life logic is needed for LiFeP04 applications.
@@ -419,7 +419,7 @@ OLED board carefully off to the side.  Will need a hobby box to contain the fina
 
 ## Boot checklist - after new software load
 1. Synchronize time if necessary. Use hotspot on phone.  Press left button and hold 3 sec to get blink blue. Use particle app to '+' device. Reset using right button to complete the process.  Time is UTC.  Unfortunately for device _soc1a_, the bar code on the Argon is hidden inside the case.   Then you must use the talk('U') feature of the interface programs.   This will work over Bluetooth for Argon.   Use Unix Epoch website and subtract (hours from Zulu)* 3600 and paste onto U.
-2. Update the version in local_config.h for 'unit ='.
+2. Update the version in constants.h for setup:  '#include xxxx.h'.
 3. Start CoolTerm record. Record Hd, Pf, Pa, brief v1 burst for the previous load.
 4. On restart after load, check the retained parameter list (SRAM battery backed up).  The list is displayed on startup for convenience.  Go slowly with this if you've been tuning.
 5. Record Hd, Pf, Pa, brief v1 burst.  Confirm the 'unit =' is for the intended build install.
@@ -621,7 +621,7 @@ See _Calibrate20230513.odt_.
 ## Appendix 3:  Special Testing (e.g. Gorilla Testing)
 
     Scale battery
-    App:  NOM_UNIT_CAP in local_config.h
+    App:  NOM_UNIT_CAP in constants.h (setup #include xxxx.h)
     Python:  scale_in in CompareRunSim.py or CompareRunRun.py (+Battery. NOM_UNIT_CAP)
     Notes:  talk 'Sc' scales the on-board model in BatterySim only, not BatteryMonitor	
 
@@ -667,13 +667,13 @@ Ctrl-Shift-P - Particle:Serial Monitor or CoolTerm(saves data)
 
 Desktop settings
     .json has "particle.targetDevice": "proto"
-    local_config.h has
-        const   String    unit = "proto";
+    constants.h (setup #include xxxxx.h) has
+        const   String    UNIT = "proto";
 
 Laptop settings.json has  "particle.targetDevice": "soc0"
     .json has "particle.targetDevice": "soc0"
-    local_config.h has
-        const   String    unit = "soc0";
+    constants.h (setup #include xxxxx.h) has
+        const   String    UNIT = "soc0";
 
 On laptop (same as desktop)
     pull from GitHub repository changes just made on desktop
@@ -820,7 +820,7 @@ This is caused by using too much memory.  Reduce NSUM.
 ### DS2482SearchBusCommand status=-7 in serial monitor
 
 This is caused by OLED failure.  Such a failure has taken out the entire 
-I2C monitor function including Tb measurement on DS2482.  You may temporarily correct this be recompiling and reflashing with '// #define CONFIG_SSD1306_OLED' in the local_config.h.<> file.  Permanently by replacing OLED.
+I2C monitor function including Tb measurement on DS2482.  You may temporarily correct this be recompiling and reflashing with '// #define CONFIG_SSD1306_OLED' in the constants.h.<> file (setup #include xxxx.h).  Permanently by replacing OLED.
 
 ### FRAG message in Serial
 
@@ -858,7 +858,7 @@ I found that high Serial traffic competes adversely with DS2482 for 1-wire tempe
 c:\users\daveg\documents\github\mystateofcharge\soc_particle\src\hardware/OneWire.h:98:5: error: 'STM32_Pin_Info' does not name a type; did you mean 'Hal_Pin_Info'?
    98 |     STM32_Pin_Info* PIN_MAP = HAL_Pin_Map(); // Pointer required for highest access 
 speed
-The solution is to copy the proper 'local_config.h.<>' into 'local_confi.h'
+The solution is to select the proper config in constants.h
 
 
 ### Particle Workbench throws 'Unknown argument local' error

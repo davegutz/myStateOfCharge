@@ -191,7 +191,7 @@ float TableInterp::interp(void)
 }
 void TableInterp::pretty_print(void)
 {
-#ifndef DEPLOY_PHOTON
+#ifndef SOFT_DEPLOY_PHOTON
   unsigned int i;
   Serial.printf("    x={");
   for ( i = 0; i < n1_; i++ )
@@ -316,7 +316,7 @@ static float  vTbl[24]  =
 
 void TableInterp2D::pretty_print()
 {
-#ifndef DEPLOY_PHOTON
+#ifndef SOFT_DEPLOY_PHOTON
   unsigned int i, j;
   Serial.printf("    y={"); for ( j=0; j<n2_; j++ ) Serial.printf("%7.3f, ", y_[j]); Serial.printf("};\n");
   Serial.printf("    x={"); for ( i=0; i<n1_; i++ ) Serial.printf("%7.3f, ", x_[i]); Serial.printf("};\n");

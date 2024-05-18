@@ -63,20 +63,20 @@
 
 #include "constants.h"
 // Prevent mixing up local_config files (still could sneak soc0p through as pro0p)
-#if defined(CONFIG_PHOTON)
+#if defined(HDWE_PHOTON)
   #undef ARDUINO
   #if (PLATFORM_ID != PLATFORM_PHOTON)
-    #error "copy local_config.xxxx.h to local_config.h"
+    #error "copy local_config.xxxx.h to constants.h"
   #endif
-#elif defined(CONFIG_ARGON)
+#elif defined(HDWE_ARGON)
   #undef ARDUINO
   #if (PLATFORM_ID != PLATFORM_ARGON)
-    #error "edit local_config.h to select local_config.xxxx.h to match device"
+    #error "edit constants.h to select local_config.xxxx.h to match device"
   #endif
-#elif defined(CONFIG_PHOTON2)
+#elif defined(HDWE_PHOTON2)
   #undef ARDUINO
   #if (PLATFORM_ID != PLATFORM_P2)
-    #error "copy local_config.xxxx.h to local_config.h"
+    #error "copy local_config.xxxx.h to constants.h"
   #endif
 #endif
 
@@ -97,14 +97,14 @@ SYSTEM_THREAD(ENABLED);   // Make sure code always run regardless of network sta
   SerialLogHandler logHandler;
 #endif
 
-#ifdef CONFIG_DS2482_1WIRE
+#ifdef HDWE_DS2482_1WIRE
   #include "myDS2482.h"
   MyDs2482_Class Ds2482(0);
   DS2482 ds(Wire, 0);
   DS2482DeviceListStatic<10> deviceList;
 #endif
 
-#ifdef CONFIG_47L16_EERAM
+#ifdef HDWE_47L16_EERAM
   #include "hardware/SerialRAM.h"
   SerialRAM ram;
 #endif
@@ -117,7 +117,7 @@ extern PrinterPars pr;            // Print buffer structure
 extern PublishPars pp;            // For publishing
 extern Flt_st mySum[NSUM];        // Summaries for saving charge history
 
-#ifdef CONFIG_47L16_EERAM
+#ifdef HDWE_47L16_EERAM
   retained SavedPars sp = SavedPars(&ram);  // Various parameters to be common at system level
 #else
   retained Flt_st saved_hist[NHIS];    // For displaying history
@@ -136,7 +136,7 @@ unsigned long long last_sync = System.millis();   // Timekeeping
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
-#ifdef CONFIG_SSD1306_OLED
+#ifdef HDWE_SSD1306_OLED
   Adafruit_SSD1306 *display;      // Main OLED display
 #endif
 
@@ -146,7 +146,7 @@ void setup()
   Log.info("begin setup");
   // Serial
   // Serial.blockOnOverrun(false);  doesn't work
-  Serial.begin(CONFIG_SBAUD);
+  Serial.begin(SOFT_SBAUD);
   Serial.flush();
   delay(1000);          // Ensures a clean display
   Serial.printf("Hi!\n");
@@ -156,11 +156,11 @@ void setup()
   // Compile and flash onto the SOC_Photon target temporarily to set baud rate.  Directions
   // for HC-06 inside SOC_Photon.ino of ../../BT-AT/src.   AT+BAUD8; to set 115200.
   // Serial1.blockOnOverrun(false); doesn't work:  it's a mess; partial lines galore
-  Serial1.begin(CONFIG_S1BAUD);
+  Serial1.begin(SOFT_S1BAUD);
   Serial1.flush();
 
   // EERAM chip card for I2C
-  #ifdef CONFIG_47L16_EERAM
+  #ifdef HDWE_47L16_EERAM
     Log.info("setup EERAM");
     ram.begin(0, 0);
     ram.setAutoStore(true);
@@ -176,7 +176,7 @@ void setup()
   // A1 - Vb
   // A2 - Primary Ib amp (called by old ADS name Amplified, amp)
   // A3 - Backup Ib amp (called by old ADS name Non Amplified, noa)
-  // A4 - Ib amp common
+  // A4 - Vr or Vc
 
   // Peripherals (Photon2)
   // D3 - one-wire temp sensor ******** to be replaced by I2C device
@@ -184,12 +184,12 @@ void setup()
   // A0 (pin 'D11') - Primary Ib amp (called by old ADS name Amplified, amp)
   // A1 (pin 'D12') - Vb
   // A2 (pin 'D13') - Backup Ib amp (called by old ADS name Non Amplified, noa)
-  // A5 (pin 'D14') - 3v3
+  // A5 (pin 'D14') - Vr or Vc
   // A4 - not available
-  // A5-->D14 - spare
+  // A6-->D14 - spare
   
   Log.info("setup Pins");
-  #ifdef CONFIG_PHOTON2
+  #ifdef HDWE_PHOTON2
     myPins = new Pins(D3, D7, D12, D11, D13, D14);
   #else
     myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
@@ -199,9 +199,9 @@ void setup()
 
   // I2C for OLED, ADS, backup EERAM, DS2482
   // Photon2 only accepts 100 and 400 khz
-  #ifndef CONFIG_BARE
+  #ifndef HDWE_BARE
     Log.info("setup I2C Wire");
-    #ifdef CONFIG_ADS1013_OPAMP
+    #ifdef HDWE_ADS1013_AMP_NOA
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
       Serial.printf("Nominal Wire setup for ADS1013\n");
     #else
@@ -213,7 +213,7 @@ void setup()
   #endif
 
   // Display (after start Wire)
-  #ifdef CONFIG_SSD1306_OLED
+  #ifdef HDWE_SSD1306_OLED
     Log.info("setup display");
     display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
     Serial.printf("Init DISP\n");
@@ -224,17 +224,17 @@ void setup()
     }
     else
       Serial.printf("DISP ok\n");
-    #ifndef CONFIG_BARE
+    #ifndef HDWE_BARE
       display->clearDisplay();
     #endif
     // Minimize power transients
-    #ifdef CONFIG_PHOTON2
+    #ifdef HDWE_PHOTON2
       delay(1000);
     #endif
   #endif
 
   // 1-Wire chip card for I2C (after start Wire)
-  #ifdef CONFIG_DS2482_1WIRE
+  #ifdef HDWE_DS2482_1WIRE
     Log.info("setup DS2482 special 1-wire");
     ds.setup();
     Ds2482.setup();
@@ -277,7 +277,7 @@ void setup()
   }
 
   // Enable and print stored history
-  #if defined(CONFIG_PHOTON) || defined(CONFIG_PHOTON2)  // TODO: test that ARGON still works with the #if in place
+  #if defined(HDWE_PHOTON) || defined(HDWE_PHOTON2)  // TODO: test that ARGON still works with the #if in place
     System.enableFeature(FEATURE_RETAINED_MEMORY);
   #endif
   if ( sp.debug_z==1 || sp.debug_z==2 || sp.debug_z==3 || sp.debug_z==4 )
@@ -293,7 +293,7 @@ void setup()
     Log.info("setup renominalize");
     if ( sp.num_diffs() )
     {
-      #ifdef CONFIG_SSD1306_OLED
+      #ifdef HDWE_SSD1306_OLED
         wait_on_user_input(display);
       #else
         wait_on_user_input();
@@ -344,7 +344,7 @@ void loop()
   ///////////////////////////////////////////////////////////// Top of loop////////////////////////////////////////
 
   // Synchronize
-  #ifdef CONFIG_DS2482_1WIRE
+  #ifdef HDWE_DS2482_1WIRE
     Ds2482.loop();
   #endif
   if ( now - last_sync > ONE_DAY_MILLIS || reset )  sync_time(now, &last_sync, &millis_flip); 
@@ -367,7 +367,7 @@ void loop()
   if ( read_temp )
   {
     Log.info("read_temp");
-    #ifdef CONFIG_DS2482_1WIRE
+    #ifdef HDWE_DS2482_1WIRE
         Ds2482.check();
         cp.tb_info.t_c = Ds2482.tempC(0);
         cp.tb_info.ready = Ds2482.ready();
@@ -377,7 +377,7 @@ void loop()
   }
 
   // Sample Ib
-  #ifndef CONFIG_ADS1013_OPAMP
+  #ifndef HDWE_ADS1013_AMP_NOA
     if ( read )
     {
       Log.info("Read shunt");
@@ -431,7 +431,7 @@ void loop()
     if ( sp.modeling_z && reset && Sen->Sim->q()<=0. ) Sen->Ib = 0.;
 
     // Debug for read
-    #ifndef CONFIG_PHOTON
+    #ifndef HDWE_PHOTON
       if ( sp.debug_z==12 ) debug_12(Mon, Sen);
     #endif
     
@@ -457,13 +457,13 @@ void loop()
   if ( display_and_remember )
   {
     Log.info("display and remember");
-    #ifdef CONFIG_SSD1306_OLED
+    #ifdef HDWE_SSD1306_OLED
       oled_display(display, Sen, Mon);
     #else
       oled_display(Sen, Mon);
     #endif
 
-    #ifdef CONFIG_47L16_EERAM
+    #ifdef HDWE_47L16_EERAM
       // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
     #else

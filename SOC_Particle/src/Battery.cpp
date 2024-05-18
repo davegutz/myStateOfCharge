@@ -105,7 +105,7 @@ float_t Battery::calc_vsat(void)
 // Print
 void Battery::pretty_print(void)
 {
-#ifndef DEPLOY_PHOTON
+#ifndef SOFT_DEPLOY_PHOTON
     Serial.printf("Battery:\n");
     Serial.printf("  bms_charging %d\n", bms_charging_);
     Serial.printf("  bms_off %d\n", bms_off_);
@@ -297,7 +297,7 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     //     Serial.printf("bms_off,soc,ib,vb,voc,voc_stat,voc_soc,dv_hys,dv_dyn,%d,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,\n",
     //     bms_off_, soc_, ib_, vb_, voc_, voc_stat_, voc_soc_, dv_hys_, dv_dyn_);
 
-    #ifndef CONFIG_PHOTON
+    #ifndef HDWE_PHOTON
     if ( sp.debug()==34 || sp.debug()==7 )
         Serial.printf("BatteryMonitor:dt,ib,voc_stat_tab,voc_stat,voc,voc_filt,dv_dyn,vb,   u,Fx,Bu,P,   z_,S_,K_,y_,soc_ekf, y_ekf_f, soc, conv,  %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%7.3f,     %7.3f,%7.3f,%7.4f,%7.4f,       %7.3f,%7.4f,%7.4f,%7.4f,%7.4f,%7.4f, %7.4f,  %d,\n",
             dt_, ib_, voc_soc_, voc_stat_, voc_, voc_filt_, dv_dyn_, vb_,     u_, Fx_, Bu_, P_,    z_, S_, K_, y_, soc_ekf_, y_filt_, soc_, converged_ekf());
@@ -443,7 +443,7 @@ boolean BatteryMonitor::is_sat(const boolean reset)
 // Print
 void BatteryMonitor::pretty_print(Sensors *Sen)
 {
-#ifndef DEPLOY_PHOTON
+#ifndef SOFT_DEPLOY_PHOTON
     Serial.printf("BM::");
     this->Battery::pretty_print();
     Serial.printf(" BM::BM:\n");
@@ -676,7 +676,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     model_saturated_ = model_cutback_ && (ib_charge_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
     
-    #ifndef CONFIG_PHOTON
+    #ifndef HDWE_PHOTON
 
         if ( sp.debug()==75 ) Serial.printf("BatterySim::calculate: temp_c_ soc_ voc_stat_ low_voc =  %7.3f %10.6f %9.5f %7.3f\n",
             temp_c_, soc_, voc_stat_, chem_.low_voc);
@@ -868,7 +868,7 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
 // Print
 void BatterySim::pretty_print(void)
 {
-#ifndef DEPLOY_PHOTON
+#ifndef SOFT_DEPLOY_PHOTON
     Serial.printf("BS::");
     this->Battery::pretty_print();
     Serial.printf(" BS::BS:\n");

@@ -1,19 +1,18 @@
-#ifndef local_config_h
-#define local_config_h
+#ifndef pro0p_h
+#define pro0p_h
 
 #include "version.h"
-#define UNIT  "pro0p"
 
 // Features config
-#define CONFIG_SBAUD               230400      // Default Serial baud 
-#define CONFIG_S1BAUD              230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
-#define CONFIG_PHOTON
-#define CONFIG_SSD1306_OLED
-#define CONFIG_ADS1013_OPAMP
-#define CONFIG_DS18B20_SWIRE
-#define DEPLOY_PHOTON
-
-// #define DEBUG_QUEUE
+#define HDWE_UNIT                    "pro0p"
+#define SOFT_SBAUD              230400      // Default Serial baud 
+#define SOFT_S1BAUD             230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
+#define HDWE_PHOTON
+#define HDWE_SSD1306_OLED
+#define HDWE_ADS1013_AMP_NOA
+#define HDWE_DS18B20_SWIRE
+#define SOFT_DEPLOY_PHOTON
+// #define SOFT_DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;' *****Not possible Photon.  Use Argon or Photon2
 // #define LOGHANDLE
 

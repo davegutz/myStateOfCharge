@@ -27,37 +27,34 @@
 #define CONSTANTS_H_
 
 // Hardware configuration
-#undef CONFIG_BARE
-#undef CONFIG_PHOTON
-#undef CONFIG_ARGON
-#undef CONFIG_PHOTON2
-#undef CONFIG_SBAUD
-#undef CONFIG_47L16_EERAM
-#undef CONFIG_ADS1013_OPAMP
-#undef DEPLOY_PHOTON
-#undef CONFIG_TSC2010_DIFFAMP
-#undef CONFIG_INA181_HI_LO
-#undef CONFIG_SSD1306_OLED
-#undef CONFIG_DS18B20_SWIRE
-#undef CONFIG_DS2482_1WIRE
-#undef CONFIG_PRO0P
-#undef CONFIG_PRO1A
-#undef CONFIG_PRO2P2
-#undef CONFIG_PRO3P2
-#undef CONFIG_SOC0P
-#undef CONFIG_SOC1A
-#undef CONFIG_SOC2P2
-#undef CONFIG_SOC3P2
-#undef DEBUG_QUEUE
+#undef HDWE_UNIT
+#undef HDWE_BARE
+#undef HDWE_PHOTON
+#undef HDWE_ARGON
+#undef HDWE_PHOTON2
+#undef SOFT_SBAUD
+#undef SOFT_S1BAUD
+#undef HDWE_47L16_EERAM
+#undef HDWE_ADS1013_AMP_NOA
+#undef HDWE_TSC2010_DUAL
+#undef HDWE_INA181_HI_LO
+#undef HDWE_SSD1306_OLED
+#undef HDWE_DS18B20_SWIRE
+#undef HDWE_DS2482_1WIRE
 
+// Software configuration
+#undef SOFT_DEPLOY_PHOTON
+#undef SOFT_DEBUG_QUEUE
 
-#include "local_config.h"       // this is not in GitHub repository.  Copy appropriate local_config??.h to match configure
-
-#ifndef CONFIG_PHOTON2
-    // #error("Must define CONFIG_PHOTON2")
-#endif
-
-const String unit = version + "_" + UNIT;
+// Setup
+// #include "pro0p.h"
+// #include "pro1a.h"
+// #include "pro2p2.h"
+// #include "soc0p.h"
+// #include "soc1a.h"
+// #include "soc3p2.h"
+#include "soc2p2.h"
+const String unit = version + "_" + HDWE_UNIT;
 
 // Constants always defined
 #define ONE_HOUR_MILLIS       3600000UL // Number of milliseconds in one hour (60*60*1000)
@@ -94,8 +91,8 @@ const String unit = version + "_" + UNIT;
 // If NSUM too large, will get flashing red with auto reboot on 'Hs' or compile error `.data' will not fit in region `APP_FLASH'
 // For all, there are 40 bytes for each unit of NSUM
 
-#ifdef CONFIG_PHOTON  // dec ~134000  units: pro0p, soc0p
-    #ifdef DEPLOY_PHOTON
+#ifdef HDWE_PHOTON  // dec ~134000  units: pro0p, soc0p
+    #ifdef SOFT_DEPLOY_PHOTON
         #define NFLT   7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
         #define NHIS  56  // Number of saved SRAM history data slices. Sized to approx match  Photon2  (56)
         #define NSUM 206  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg  (206)
@@ -103,7 +100,7 @@ const String unit = version + "_" + UNIT;
         #ifdef DEBUG_INIT
             #error("Not possible to deploy Photon with DEBUG_INIT")
         #else
-            #ifdef DEBUG_QUEUE
+            #ifdef SOFT_DEBUG_QUEUE
                 #define NFLT  7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
                 #define NHIS 36  // Number of saved SRAM history data slices. Sized to approx match Photon2 (36)
                 #define NSUM 16  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (16)
@@ -116,13 +113,13 @@ const String unit = version + "_" + UNIT;
     #endif
 #endif
 
-#ifdef CONFIG_ARGON  // dec ~222350  units: pro1a, soc1a
+#ifdef HDWE_ARGON  // dec ~222350  units: pro1a, soc1a
     #define NFLT    7  // Number of saved SRAM/EERAM fault data slices 10 s intervals (7)
     #define NHIS 1000  // Ignored Argon.  Actual nhis_ is dynamically allocated based on EERAM size, holding NFLT constant. 
     #define NSUM 2000  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error BACKUPSRAM, or GUI FRAG msg (2000)
 #endif
 
-#ifdef CONFIG_PHOTON2  // dec ~ 256268  units: pro2p2, soc3p2
+#ifdef HDWE_PHOTON2  // dec ~ 256268  units: pro2p2, soc3p2
     #define NFLT    7  // Number of saved SRAM fault data slices 10 s intervals (7)
     #define NHIS   61  // Number of saved SRAM history data slices. If NFLT + NHIS too large will get compile error BACKUPSRAM (61)
     #define NSUM 3150  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg (3171) or SOS 4 Bus Fault
@@ -202,13 +199,13 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define HALF_V3V3         (V3V3/2.)     // Theoretical center of differential TSC2010
 
 // Conversion gains
-#if defined(CONFIG_ADS1013_OPAMP)
+#if defined(HDWE_ADS1013_AMP_NOA)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN;
 #elif defined(CONFIG_TSC2010_OPAMP)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-#elif defined(CONFIG_INA181_HI_LO)
+#elif defined(HDWE_INA181_HI_LO)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
 #endif

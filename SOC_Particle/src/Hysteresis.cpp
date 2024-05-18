@@ -91,7 +91,7 @@ float Hysteresis::look_slr(const float dv, const float soc)
 // Print
 void Hysteresis::pretty_print()
 {
-#ifndef DEPLOY_PHOTON
+#ifndef SOFT_DEPLOY_PHOTON
     float res = look_hys(0., 0.8);
     Serial.printf("Hysteresis:\n");
     Serial.printf("  cap%10.1f, F\n", chem_->hys_cap);

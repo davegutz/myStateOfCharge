@@ -290,7 +290,7 @@ String Chemistry::decode(const uint8_t mod)
 // Pretty print
 void Chemistry::pretty_print(void)
 {
-#ifndef DEPLOY_PHOTON
+#ifndef SOFT_DEPLOY_PHOTON
     Serial.printf("Chemistry:\n");
     Serial.printf("  dqdt%7.3f, frac/dg C\n", dqdt);
     Serial.printf("  dv_min_abs%7.3f, V\n", dv_min_abs);

@@ -24,7 +24,7 @@
 #ifndef _PARAMETERS_H
 #define _PARAMETERS_H
 
-#include "local_config.h"
+#include "constants.h"
 #include "Battery.h"
 #include "Fault.h"
 #include "PrinterPars.h"
@@ -99,7 +99,7 @@ public:
     unsigned long int until_q;  // Time until set vv0, ms
     float vb_add;               // Fault injection bias, V
     float Vb_noise_amp;         // Vb bank noise amplitude model only, V pk-pk
-    float vc_add;               // Shunt Vc=3v3/2 Fault injection bias, V
+    float vc_add;               // Shunt Vc/Vr Fault injection bias, V
     unsigned long int wait_inj; // Wait before start injection, ms
     FloatV *cc_diff_slr_p;
     FloatV *cycles_inj_p;
@@ -227,7 +227,7 @@ public:
     boolean mod_vb() { return ( 1<<1 & modeling() || mod_vb_dscn() ); }  // Using Sim as source of vb
     boolean mod_vb_dscn() { return ( 1<<5 & modeling() ); }              // Nothing connected to vb on A1
 
-    #ifdef CONFIG_47L16_EERAM
+    #ifdef HDWE_47L16_EERAM
         void get_fault(const uint8_t i) { fault_[i].get(); }
         void get_history(const uint8_t i) { history_[i].get(); }
         uint16_t next() { return next_; }
@@ -268,7 +268,7 @@ public:
     void put_T_state_model(const float input) { T_state_model_p->check_set_put(input); }
     void put_Vb_bias_hdwe(const float input) { Vb_bias_hdwe_p->check_set_put(input); }
     void put_Vb_scale(const float input) { Vb_scale_p->check_set_put(input); }
-    #ifndef CONFIG_47L16_EERAM
+    #ifndef HDWE_47L16_EERAM
         void put_modeling(const uint8_t input) { modeling_p->check_set_put(input); modeling_z = modeling();}
         void put_T_state() {}
         void put_T_state_model() {}
@@ -350,7 +350,7 @@ public:
 
 protected:
     SerialRAM *rP_;
-    #ifndef CONFIG_47L16_EERAM
+    #ifndef HDWE_47L16_EERAM
         Flt_st *fault_;
         Flt_st *history_;
     #else

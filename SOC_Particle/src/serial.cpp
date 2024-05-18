@@ -23,7 +23,7 @@
 
 #include "serial.h"
 #include "command.h"
-#include "local_config.h"
+#include "constants.h"
 #include "debug.h"
 
 extern CommandPars cp;  // Various parameters shared at system level
@@ -78,8 +78,8 @@ String chat_cmd_from(String *source)
 {
   String out_str = "";
 
-  #ifdef DEBUG_QUEUE
-    // debug_queue("chat_cmd_from enter");
+  #ifdef SOFT_DEBUG_QUEUE
+    // SOFT_DEBUG_QUEUE("chat_cmd_from enter");
   #endif
 
   while ( source->length() )
@@ -95,8 +95,8 @@ String chat_cmd_from(String *source)
     }
   }
 
-  #ifdef DEBUG_QUEUE
-    // debug_queue("chat_cmd_from exit");
+  #ifdef SOFT_DEBUG_QUEUE
+    // SOFT_DEBUG_QUEUE("chat_cmd_from exit");
   #endif
 
   return out_str;
@@ -164,7 +164,7 @@ void print_serial_header(void)
   if ( ( sp.debug()==1 || sp.debug()==2 || sp.debug()==3 || sp.debug()==4 ) )
   {
     Serial.printf ("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,\n");
-    #ifdef CONFIG_ARGON
+    #ifdef HDWE_ARGON
       Serial1.printf("unit,               hm,                  cTime,       dt,       chm,qcrs,sat,sel,mod,bmso, Tb,  vb,  ib,   ib_charge, voc_soc,    vsat,dv_dyn,voc_stat,voc_ekf,     y_ekf,    soc_s,soc_ekf,soc,soc_min,\n");
     #endif
   }
@@ -196,7 +196,7 @@ void rapid_print(Sensors *Sen, BatteryMonitor *Mon)
 {
   create_rapid_string(&pp.pubList, Sen, Mon);
   Serial.printf("%s\n", pr.buff);
-  #ifdef CONFIG_ARGON
+  #ifdef HDWE_ARGON
     Serial1.printf("%s\n", pr.buff);
   #endif
 }
@@ -369,7 +369,7 @@ void wait_on_user_input(Adafruit_SSD1306 *display)
     Serial.printf("  Y\n\n"); Serial1.printf("  Y\n\n");
     sp.set_nominal();
     sp.pretty_print( true );
-    #ifdef CONFIG_PHOTON2
+    #ifdef HDWE_PHOTON2
       System.backupRamSync();
     #endif
   }
@@ -433,7 +433,7 @@ void wait_on_user_input()
     Serial.printf("  Y\n\n"); Serial1.printf("  Y\n\n");
     sp.set_nominal();
     sp.pretty_print( true );
-    #ifdef CONFIG_PHOTON2
+    #ifdef HDWE_PHOTON2
       System.backupRamSync();
     #endif
   }

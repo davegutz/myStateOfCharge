@@ -31,7 +31,7 @@ void SerialRAM::begin(const uint8_t a0, const uint8_t a1) {
 	this->CONTROL_REGISTER = 0x18 | mask;
 
 	//Arduino I2C lib
-	#ifndef CONFIG_BARE
+	#ifndef HDWE_BARE
 		Wire.begin();
 	#endif
 }
@@ -48,7 +48,7 @@ void SerialRAM::begin(const uint8_t a0, const uint8_t a1) {
 uint8_t SerialRAM::write(const uint16_t address, const uint8_t value) {
 	address16b a;
 	a.a16 = address;
-	#ifndef CONFIG_BARE
+	#ifndef HDWE_BARE
 		Wire.beginTransmission(this->SRAM_REGISTER);
 		Wire.write(a.a8[1]);
 		Wire.write(a.a8[0]);
@@ -72,7 +72,7 @@ uint8_t SerialRAM::read(const uint16_t address) {
 	a.a16 = address;
 
 	
-	#ifndef CONFIG_BARE
+	#ifndef HDWE_BARE
 		Wire.beginTransmission(this->SRAM_REGISTER);
 		Wire.write(a.a8[1]);
 		Wire.write(a.a8[0]);
@@ -91,7 +91,7 @@ uint8_t SerialRAM::read(const uint16_t address) {
 uint8_t SerialRAM::readControlRegister() {
 	uint8_t buffer = 0x80;
 
-	#ifndef CONFIG_BARE
+	#ifndef HDWE_BARE
 		Wire.beginTransmission(this->CONTROL_REGISTER);
 		Wire.write(0x00); //status register
 		Wire.endTransmission();
@@ -112,7 +112,7 @@ uint8_t SerialRAM::readControlRegister() {
 ///</summary>
 void SerialRAM::setAutoStore(const bool value)
 {
-	#ifndef CONFIG_BARE
+	#ifndef HDWE_BARE
 		uint8_t buffer = this->readControlRegister();
 		buffer = value ? buffer|0x02 : buffer&0xfd;
 		Wire.beginTransmission(this->CONTROL_REGISTER);
@@ -145,7 +145,7 @@ uint8_t SerialRAM::write(const uint16_t address, const uint8_t* values, const ui
 	address16b a;
 	a.a16 = address;
 
-	#ifndef CONFIG_BARE
+	#ifndef HDWE_BARE
 		Wire.beginTransmission(this->SRAM_REGISTER);
 		Wire.write(a.a8[1]);
 		Wire.write(a.a8[0]);
@@ -168,7 +168,7 @@ void SerialRAM::read(const uint16_t address, uint8_t * values, const uint16_t si
 	address16b a;
 	a.a16 = address;
 
-	#ifndef CONFIG_BARE
+	#ifndef HDWE_BARE
 		Wire.beginTransmission(this->SRAM_REGISTER);
 		Wire.write(a.a8[1]);
 		Wire.write(a.a8[0]);

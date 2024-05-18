@@ -43,7 +43,7 @@ void add_verify(String *src, const String addend)
 }
 
 
-#ifndef CONFIG_PHOTON
+#ifndef HDWE_PHOTON
   // sp.debug()==12 EKF
   void debug_12(BatteryMonitor *Mon, Sensors *Sen)
   {
@@ -166,12 +166,11 @@ void debug_98(BatteryMonitor *Mon, Sensors *Sen)
 }
 void debug_99(BatteryMonitor *Mon, Sensors *Sen)
 {
-  float v3 = Sen->ShuntAmp->Vc()*2.;
-  Serial.printf("Tb Vb 3v3 imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *SD| *Dw| *Sr: %6.2fC %7.3fv %6.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3f|%6.3fv|%6.3f,\n",
-  Sen->Tb_hdwe, Sen->Vb_hdwe_f, v3, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.ib_bias_amp(), sp.ib_scale_noa(), sp.ib_bias_noa(), sp.ib_disch_slr(), sp.Dw(), ap.slr_res);
+  Serial.printf("Tb Vb Vr imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *SD| *Dw| *Sr: %6.2fC %7.3fv %6.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3f|%6.3fv|%6.3f,\n",
+  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->ShuntAmp->Vc(), Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.ib_bias_amp(), sp.ib_scale_noa(), sp.ib_bias_noa(), sp.ib_disch_slr(), sp.Dw(), ap.slr_res);
   
-  Serial1.printf("Tb Vb 3v3 imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *SD| *Dw| *Sr: %6.2fC %7.3fv %6.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3f|%6.3fv|%6.3f,\n",
-  Sen->Tb_hdwe, Sen->Vb_hdwe_f, v3, Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.ib_bias_amp(), sp.ib_scale_noa(), sp.ib_bias_noa(), sp.ib_disch_slr(), sp.Dw(), ap.slr_res);
+  Serial1.printf("Tb Vb Vr imh inh voc voc_soc |*SV,*Dc |*SA,*DA|*SB,*DB| *SD| *Dw| *Sr: %6.2fC %7.3fv %6.3fv %6.2fA %6.2fA %6.2fv %6.2fv |%6.3f %6.3fv  |%6.3f %6.3fA | %6.3f %6.3fA |%6.3f|%6.3fv|%6.3f,\n",
+  Sen->Tb_hdwe, Sen->Vb_hdwe_f, Sen->ShuntAmp->Vc(), Sen->Ib_amp_hdwe_f, Sen->Ib_noa_hdwe_f, Mon->voc(), Mon->voc_soc(), sp.Vb_scale(), sp.Vb_bias_hdwe(), sp.ib_scale_amp(), sp.ib_bias_amp(), sp.ib_scale_noa(), sp.ib_bias_noa(), sp.ib_disch_slr(), sp.Dw(), ap.slr_res);
  }
 
 #ifdef DEBUG_INIT
@@ -186,8 +185,8 @@ void debug_99(BatteryMonitor *Mon, Sensors *Sen)
   }
 #endif
 
-#ifdef DEBUG_QUEUE
-void debug_queue(const String who)
+#ifdef SOFT_DEBUG_QUEUE
+void SOFT_DEBUG_QUEUE(const String who)
 {
   if ( cp.inp_str.length() || cp.ctl_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
     Serial.printf("%s:  chitchat %d freeze %d inp_token %d CONTROL[%s] ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s] CMD[%s]\n",

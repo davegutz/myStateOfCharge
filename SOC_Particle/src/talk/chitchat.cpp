@@ -111,8 +111,8 @@ void chatter()
       else if ( cp.last_str.length() ) cp.cmd_str = chat_cmd_from(&cp.last_str);
     }
   }
-  #ifdef DEBUG_QUEUE
-    if ( cp.chitchat || ( cp.freeze && cp.chitchat && cp.asap_str.length() ) || ( !cp.freeze && cp.asap_str.length() ) ) debug_queue("chatter exit");
+  #ifdef SOFT_DEBUG_QUEUE
+    if ( cp.chitchat || ( cp.freeze && cp.chitchat && cp.asap_str.length() ) || ( !cp.freeze && cp.asap_str.length() ) ) SOFT_DEBUG_QUEUE("chatter exit");
   #endif
 
   return;
@@ -122,7 +122,7 @@ void chatter()
 // Parse commands to queue strings
 void chit(const String from, const urgency when)
 {
-  #ifdef DEBUG_QUEUE
+  #ifdef SOFT_DEBUG_QUEUE
     Serial.printf("chit enter: urgency %d adding [%s] \n", when, from.c_str());
   #endif
 
@@ -161,8 +161,8 @@ void chit(const String from, const urgency when)
     add_verify(&cp.queue_str, from);
   }
 
-  #ifdef DEBUG_QUEUE
-    if ( cp.chitchat || cp.ctl_str.length() || cp.asap_str.length() ) debug_queue("chit exit");
+  #ifdef SOFT_DEBUG_QUEUE
+    if ( cp.chitchat || cp.ctl_str.length() || cp.asap_str.length() ) SOFT_DEBUG_QUEUE("chit exit");
   #endif
 
 }
@@ -190,12 +190,12 @@ void chitter(const boolean chitchat, BatteryMonitor *Mon, Sensors *Sen)
       {
         cp.cmd_str = cp.ctl_str;
         cp.ctl_str = "";
-        #ifdef DEBUG_QUEUE
-          debug_queue("chitter control:");
+        #ifdef SOFT_DEBUG_QUEUE
+          SOFT_DEBUG_QUEUE("chitter control:");
         #endif
         describe(Mon, Sen);  // may set cp.freeze
-        #ifdef DEBUG_QUEUE
-          debug_queue("chitter control response:");
+        #ifdef SOFT_DEBUG_QUEUE
+          SOFT_DEBUG_QUEUE("chitter control response:");
         #endif
       }
 
@@ -244,8 +244,8 @@ void chitter(const boolean chitchat, BatteryMonitor *Mon, Sensors *Sen)
       }
       cp.inp_token = false;
 
-      #ifdef DEBUG_QUEUE
-        if ( cp.chitchat || cp.asap_str.length() ) debug_queue("chitter exit");
+      #ifdef SOFT_DEBUG_QUEUE
+        if ( cp.chitchat || cp.asap_str.length() ) SOFT_DEBUG_QUEUE("chitter exit");
       #endif
     }
   }
@@ -469,7 +469,7 @@ void describe(BatteryMonitor *Mon, Sensors *Sen)
 
       // Photon 2 O/S waits 10 seconds between backup SRAM saves.  To save time, you can get in the habit of pressing 'w;'
       // This was not done for all passes just to save only when an adjustment change verified by user (* parameters), to avoid SRAM life impact.
-      #ifdef CONFIG_PHOTON2
+      #ifdef HDWE_PHOTON2
       case ( 'w' ):  // w:  confirm write * adjustments to to SRAM
         System.backupRamSync();
         Serial.printf("SAVED *\n"); Serial1.printf("SAVED *\n");

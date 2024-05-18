@@ -69,7 +69,7 @@ void EKF_1x1::init_ekf(double soc, double Pinit)
 // Pretty Print
  void EKF_1x1::pretty_print(void)
  {
-#ifndef DEPLOY_PHOTON
+#ifndef SOFT_DEPLOY_PHOTON
   Serial.printf("EKF_1x1:\n");
   Serial.printf("In:\n");
   Serial.printf("  z  %8.4f, V\n", z_);

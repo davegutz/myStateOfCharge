@@ -187,7 +187,7 @@ Flt_ram::Flt_ram()
 Flt_ram::~Flt_ram(){}
 
 // Load all
-#ifdef CONFIG_47L16_EERAM
+#ifdef HDWE_47L16_EERAM
   void Flt_ram::get()
   {
     get_t_flt();
@@ -235,7 +235,7 @@ Flt_ram::~Flt_ram(){}
 void Flt_ram::put(const Flt_st value)
 {
   copy_to_Flt_ram_from(value);
-  #ifdef CONFIG_47L16_EERAM
+  #ifdef HDWE_47L16_EERAM
     put_t_flt();
     put_Tb_hdwe();
     put_vb_hdwe();

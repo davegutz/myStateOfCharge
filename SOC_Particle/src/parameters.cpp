@@ -142,14 +142,14 @@ void  VolatilePars::initialize()
     V_[n_++] =(until_q_p        = new ULongV("  ", "XQ", NULL,"Time until vv0",       "ms",     0UL,  1000000UL,  &until_q,     0UL));
     V_[n_++] =(vb_add_p         = new FloatV("  ", "Dv", NULL,"Bias on vb",           "v",      -15,  15,   &vb_add,            0));
     V_[n_++] =(Vb_noise_amp_p   = new FloatV("  ", "DV", NULL,"Vb noise",             "v pk-pk",0,    10,   &Vb_noise_amp,      VB_NOISE));
-    V_[n_++] =(vc_add_p         = new FloatV("  ", "D3", NULL,"Bias on Vc=3v3/2",     "v",     -1.65, 0.85,  &vc_add,            0));
+    V_[n_++] =(vc_add_p         = new FloatV("  ", "D3", NULL,"Bias on Vc/Vr",        "v",     -1.65, 0.85,  &vc_add,            0));
     V_[n_++] =(wait_inj_p       = new ULongV("  ", "XW", NULL,"Wait start inj",       "ms",     0UL,  120000UL, &wait_inj,      0UL));
 }
 
 // Print only the volatile paramters (non-eeram)
 void VolatilePars::pretty_print(const boolean all)
 {
-    #ifndef DEPLOY_PHOTON
+    #ifndef SOFT_DEPLOY_PHOTON
         if ( all )
         {
             Serial.printf("volatile all:\n");
@@ -200,7 +200,7 @@ SavedPars::SavedPars(Flt_st *hist, const uint16_t nhis, Flt_st *faults, const ui
     nflt_ = nflt;
     nhis_ = nhis;
     nsum_ = 0;
-    #ifndef CONFIG_47L16_EERAM
+    #ifndef HDWE_47L16_EERAM
         history_ = hist;
         fault_ = faults;
     #endif
@@ -217,7 +217,7 @@ SavedPars::SavedPars(SerialRAM *ram): Parameters()
     // Don't nominalize SavedPars on load.  Defeats the whole purpose of EERAM
     // for ( uint8_t i=0; i<n_; i++ ) if ( !V_[i]->is_eeram() ) V_[i]->set_nominal();  no!!
 
-    #ifdef CONFIG_47L16_EERAM
+    #ifdef HDWE_47L16_EERAM
         for ( int i=0; i<n_; i++ )
         {
             next_ = V_[i]->assign_addr(next_);
@@ -281,7 +281,7 @@ void SavedPars::initialize()
 }
 
 // Assign all save EERAM to RAM
-#ifdef CONFIG_47L16_EERAM
+#ifdef HDWE_47L16_EERAM
     void SavedPars::load_all()
     {
         for (int i=0; i<n_; i++ ) V_[i]->get();
@@ -304,7 +304,7 @@ int SavedPars::num_diffs()
 // Print memory map
 void SavedPars::mem_print()
 {
-    #ifdef CONFIG_47L16_EERAM
+    #ifdef HDWE_47L16_EERAM
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         Serial.printf("Temp mem map print\n");
         for ( uint16_t i=0x0000; i<MAX_EERAM; i++ ) Serial.printf("0x%X ", rP_->read(i));
@@ -327,7 +327,7 @@ void SavedPars::pretty_print(const boolean all)
         // Serial.printf("fault array (%d):\n", nflt_);
         // print_fault_array();
         // print_fault_header();
-        #ifndef DEPLOY_PHOTON
+        #ifndef SOFT_DEPLOY_PHOTON
             Serial.printf("Xm:\n");
             pretty_print_modeling();
         #endif
@@ -350,7 +350,7 @@ void SavedPars::pretty_print(const boolean all)
         while ( n_ != NSAV ) { delay(5000); Serial.printf("set NSAV=%d\n", n_); }
     }
 
-    #ifdef CONFIG_47L16_EERAM
+    #ifdef HDWE_47L16_EERAM
         Serial.printf("SavedPars::SavedPars - MEMORY MAP 0x%X < 0x%X\n", next_, MAX_EERAM);
         Serial.printf("SavedPars::SavedPars - nflt_ %d nhis_ %d nsum_ %d \n", nflt_, nhis_, nsum_);
         // Serial.printf("Temp mem map print\n");

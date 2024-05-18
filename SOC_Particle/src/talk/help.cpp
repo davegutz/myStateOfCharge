@@ -24,7 +24,7 @@
 #include "help.h"
 #include "../subs.h"
 #include "../command.h"
-#include "../local_config.h"
+#include "../constants.h"
 #include "../Summary.h"
 #include "../parameters.h"
 #include <math.h>
@@ -35,7 +35,7 @@ extern VolatilePars ap; // Various adjustment parameters shared at system level
 extern CommandPars cp;  // Various parameters shared at system level
 extern Flt_st mySum[NSUM];  // Summaries for saving charge history
 
-#if defined(CONFIG_PHOTON)
+#if defined(HDWE_PHOTON)
   #define HELPLESS
 #else
   #undef HELPLESS
@@ -175,14 +175,14 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  vv3: EKF\n");
   Serial.printf("  vv4: GP, Sim, Sel, & EKF\n");
   Serial.printf("  vv5: OLED display\n");
-  #ifndef CONFIG_PHOTON
+  #ifndef HDWE_PHOTON
     Serial.printf(" vv12: EKF\n");
     Serial.printf("vv-13: ib_dscn\n");
   #endif
   Serial.printf(" vv14: vshunt and Ib raw\n");
   Serial.printf(" vv15: vb raw\n");
   Serial.printf(" vv16: Tb\n");
-  #ifndef CONFIG_PHOTON
+  #ifndef HDWE_PHOTON
     Serial.printf("vv-23: Vb_hdwe_ac\n");
     Serial.printf("vv-24: Vb_hdwe_ac, Ib_hdwe\n");
     Serial.printf(" vv34: EKF detail\n");
@@ -198,7 +198,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("\nW<?> - iters to wait\n");
 
-  #ifdef CONFIG_PHOTON2
+  #ifdef HDWE_PHOTON2
     Serial.printf("\nw - save * confirm adjustments to SRAM\n");
   #endif
 

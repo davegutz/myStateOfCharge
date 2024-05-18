@@ -109,9 +109,9 @@ protected:
   unsigned long long sample_time_;   // Exact moment of hardware sample
   unsigned long long sample_time_z_; // Exact moment of past hardware sample
   boolean dscn_cmd_;    // User command to ignore hardware, T=ignore
-  uint8_t vc_pin_;      // Common voltage pin, for !CONFIG_ADS1013_OPAMP
-  uint8_t vo_pin_;      // Output voltage pin, for !CONFIG_ADS1013_OPAMP
-  uint8_t v3_pin_;      // Half 3v3 voltage pin, for tsc1200
+  uint8_t vc_pin_;      // Common voltage pin, for !HDWE_ADS1013_AMP_NOA
+  uint8_t vo_pin_;      // Output voltage pin, for !HDWE_ADS1013_AMP_NOA
+  uint8_t vr_pin_;      // Reference voltage pin, for TSC1200 or INA181
   int Vc_raw_;          // Raw analog read, integer       
   float Vc_;            // Sensed Vc, common op amp voltage ref, V
   int Vo_raw_;          // Raw analog read, integer       
@@ -303,8 +303,8 @@ public:
   float Vb_hdwe;              // Sensed battery bank voltage, V
   float Vb_hdwe_f;            // Sensed, filtered battery bank voltage, V
   float Vb_model;             // Modeled battery bank voltage, V
-  float Vc;                   // Selected half 3v3 voltage, V
-  float Vc_hdwe;              // Sensed half 3v3 voltage, V
+  float Vc;                   // Selected common reference voltage, V
+  float Vc_hdwe;              // Sensed common reference voltage, V
   float Tb;                   // Selected battery bank temp, C
   float Tb_filt;              // Selected filtered battery bank temp, C
   float Tb_hdwe;              // Sensed battery temp, C
@@ -378,8 +378,8 @@ public:
   float Vb_add();
   float Vb_noise();
   void vb_print(void);                  // Print Vb result
-  float vc() { return Vc_hdwe; };                  // 3v3 select hardware unit voltage, V
-  float vc_hdwe() { return Vc_hdwe; };                  // 3v3 select hardware unit voltage, V
+  float vc() { return Vc_hdwe; };       // Common select hardware unit voltage, V
+  float vc_hdwe() { return Vc_hdwe; };  // Common select hardware unit voltage, V
   Fault *Flt;
 protected:
   LagExp *AmpFilt;      // Noise filter for calibration
