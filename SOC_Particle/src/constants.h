@@ -49,11 +49,11 @@
 // Setup
 // #include "pro0p.h"
 // #include "pro1a.h"
-// #include "pro2p2.h"
+#include "pro2p2.h"
 // #include "soc0p.h"
 // #include "soc1a.h"
 // #include "soc3p2.h"
-#include "soc2p2.h"
+// #include "soc2p2.h"
 const String unit = version + "_" + HDWE_UNIT;
 
 // Constants always defined
@@ -202,12 +202,15 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #if defined(HDWE_ADS1013_AMP_NOA)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN;
-#elif defined(CONFIG_TSC2010_OPAMP)
+#elif defined(HDWE_TSC2010_DUAL)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
 #elif defined(HDWE_INA181_HI_LO)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
+#else
+    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+    const float SHUNT_NOA_GAIN = SHUNT_GAIN;
 #endif
 
 
