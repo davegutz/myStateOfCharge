@@ -40,6 +40,10 @@ from Colors import Colors
 import re
 from local_paths import version_from_data_file, local_paths
 
+import sys
+if sys.platform == 'darwin':
+    import matplotlib
+    matplotlib.use('tkagg')
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
@@ -849,6 +853,9 @@ if __name__ == '__main__':
     import doctest
 
     doctest.testmod(sys.modules['__main__'])
+    if sys.platform == 'darwin':
+        import matplotlib
+        matplotlib.use('tkagg')
     plt.rcParams['axes.grid'] = True
 
     def compare_print(mo, mv):

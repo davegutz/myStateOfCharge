@@ -30,6 +30,11 @@ from myFilters import InlineExpLag
 # from kivy.utils import platform  # failed experiment to run BLE data plotting realtime on android
 # if platform != 'linux':
 #     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
+import sys
+if sys.platform == 'darwin':
+    import matplotlib
+    matplotlib.use('tkagg')
+
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 

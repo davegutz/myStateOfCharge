@@ -337,6 +337,9 @@ if __name__ == '__main__':
     from DataOverModel import SavedData, SavedDataSim, write_clean_file
     from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files
     import matplotlib.pyplot as plt
+    if sys.platform == 'darwin':
+        import matplotlib
+        matplotlib.use('tkagg')
     plt.rcParams['axes.grid'] = True
 
     def main():

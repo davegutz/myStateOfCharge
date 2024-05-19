@@ -42,6 +42,8 @@ elif sys.platform == 'darwin':
         "-y",
     ])
     result = 0
+    # Run from terminal command line:
+    # /Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC.app/Contents/MacOS/GUI_TestSOC
 else:
     GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC.png')
     GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC_Icon.png')
@@ -118,8 +120,8 @@ Categories=Utility
         print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
 
 elif sys.platform == 'darwin':
-    print(Colors.fg.green, f"browse to executable in 'dist/GUI_sqlite_scrape' and double-click.  Create shortcut first time", Colors.reset)
-    print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
+    print(Colors.fg.green, f"Drag dist/GUI_TestSOC.app to Launchpad.  Pin to taskbar first time", Colors.reset)
+    print(Colors.fg.green, "you shouldn't have to remake Launchers on re-run", Colors.reset)
 
 else:
     print(Colors.fg.green, f"browse to executable in 'dist/GUI_sqlite_scrape' and double-click.  Create shortcut first time", Colors.reset)

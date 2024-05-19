@@ -17,6 +17,7 @@
 a monitor object (MON) and a simulation object (SIM).   The monitor is
 the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
 Coulomb Counter built in."""
+import sys
 
 from MonSim import replicate, save_clean_file
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
@@ -35,6 +36,12 @@ import tkinter.messagebox
 from local_paths import version_from_data_file, local_paths
 import os
 
+if sys.platform == 'darwin':
+    import matplotlib
+    matplotlib.use('tkagg')
+if sys.platform == 'darwin':
+    import matplotlib
+    matplotlib.use('tkagg')
 plt.rcParams['axes.grid'] = True
 
 

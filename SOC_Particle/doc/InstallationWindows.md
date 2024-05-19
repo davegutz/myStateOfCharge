@@ -37,3 +37,6 @@ GitHub is tightly integrated with browser sessions.   Sign in to your GitHub fir
 - Enter _v0;_ to turn it back off.
 - You should be ready to go.
 
+## Installing GUI
+
+The 'install.py' script run from py creates an .app in myStateOfCharge/SOC_Particle/py/dist. 

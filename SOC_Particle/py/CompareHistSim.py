@@ -37,6 +37,10 @@ from load_data import load_data, remove_nan
 from local_paths import version_from_data_file, local_paths
 import os
 
+import sys
+if sys.platform == 'darwin':
+    import matplotlib
+    matplotlib.use('tkagg')
 plt.rcParams['axes.grid'] = True
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity

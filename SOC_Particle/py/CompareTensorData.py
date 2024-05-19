@@ -31,6 +31,10 @@ import os
 from myFilters import LagExp
 import numpy.lib.recfunctions as rf
 from Chemistry_BMS import ib_lag, Chemistry
+import sys
+if sys.platform == 'darwin':
+    import matplotlib
+    matplotlib.use('tkagg')
 plt.rcParams['axes.grid'] = True
 
 

@@ -23,6 +23,10 @@ Dependencies:
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+if sys.platform == 'darwin':
+    import matplotlib
+    matplotlib.use('tkagg')
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 

@@ -55,3 +55,12 @@ XQuartz - X11 Preference
         - Update Primary
 ```
 Then use 'Option key - click' to paste from mouse buffer.
+
+## Installing GUI
+
+The 'install.py' script run from py creates an .app in myStateOfCharge/SOC_Particle/py/dist.  The python scripts have embedded print statments to stdout that won't be visible unless you start the .app with a terminal.  TODO:  use python logger instead so the Console.app utility will show stdout.
+
+```
+    # Run from terminal command line:
+    # /Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC.app/Contents/MacOS/GUI_TestSOC
+```

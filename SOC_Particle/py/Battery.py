@@ -24,6 +24,10 @@ from TFDelay import TFDelay
 from myFilters import LagTustin, LagExp, General2Pole, RateLimit, SlidingDeadband
 from Scale import Scale
 
+import sys
+if sys.platform == 'darwin':
+    import matplotlib
+    matplotlib.use('tkagg')
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 

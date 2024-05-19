@@ -170,6 +170,10 @@ if __name__ == '__main__':
     def main():
 
         import matplotlib.pyplot as plt
+        if sys.platform == 'darwin':
+            import matplotlib
+            matplotlib.use('tkagg')
+
         plt.rcParams['axes.grid'] = True
 
         ss = StateSpace(2, 2, 1)

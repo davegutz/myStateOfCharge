@@ -29,6 +29,10 @@ import os
 import tkinter.messagebox
 from local_paths import version_from_data_file, local_paths
 
+import sys
+if sys.platform == 'darwin':
+    import matplotlib
+    matplotlib.use('tkagg')
 plt.rcParams['axes.grid'] = True
 
 
