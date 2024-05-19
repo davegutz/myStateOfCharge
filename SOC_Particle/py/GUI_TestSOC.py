@@ -53,7 +53,7 @@ bg_color = 'lightgray'
 plat = sys.platform
 if plat == 'linux':
     default_dr = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction'
-elif plat == 'Darwin':
+elif plat == 'darwin':
     default_dr = '/Users/daveg/Library/CloudStorage/GoogleDrive-davegutz2006@gmail.com/My Drive/GitHubArchive/SOC_Particle/dataReduction'
 else:
     default_dr = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction'

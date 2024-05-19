@@ -13,30 +13,40 @@
 # Lesser General Public License for more details.
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
-import sys
 from test_soc_util import run_shell_cmd
+import PyInstaller.__main__
 from Colors import Colors
-import os
 import shutil
+import sys
+import os
 
 test_cmd_create = None
 test_cmd_copy = None
-GUI_TestSOC_path = os.path.join(os.getcwd(), 'GUI_TestSOC.png')
-GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC.png')
-GUI_TestSOC_Icon_path = os.path.join(os.getcwd(), 'GUI_TestSOC_Icon.png')
-GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC_Icon.png')
 
 # Create executable
+GUI_TestSOC_path = os.path.join(os.getcwd(), 'GUI_TestSOC.png')
+GUI_TestSOC_Icon_path = os.path.join(os.getcwd(), 'GUI_TestSOC_Icon.png')
 if sys.platform == 'linux':
+    GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC.png')
+    GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC_Icon.png')
     test_cmd_create = "pyinstaller ./GUI_TestSOC.py --hidden-import='PIL._tkinter_finder' --icon='GUI_TestSOC.ico' -y"
+    result = run_shell_cmd(test_cmd_create, silent=False)
 elif sys.platform == 'darwin':
-    # macOS run command line pip3 install of pyinstaller
-    # pip3 install -U pyinstaller
-    # pip3 install Pillow  # for ico handling
-    test_cmd_create = "pyinstaller ./GUI_TestSOC.py --hidden-import='PIL._tkinter_finder' --icon='GUI_TestSOC.ico' -y --windowed"
+    GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC.app', 'Contents', 'Frameworks', 'GUI_TestSOC.png')
+    GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC.app', 'Contents', 'Frameworks',  'GUI_TestSOC_Icon.png')
+    PyInstaller.__main__.run([
+        "./GUI_TestSOC.py",
+        "--windowed",
+        "--hidden-import='PIL._tkinter_finder'",
+        "--icon=GUI_TestSOC.ico",
+        "-y",
+    ])
+    result = 0
 else:
+    GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC.png')
+    GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC_Icon.png')
     test_cmd_create = 'pyinstaller .\\GUI_TestSOC.py --i GUI_TestSOC.ico -y'
-result = run_shell_cmd(test_cmd_create, silent=False)
+    result = run_shell_cmd(test_cmd_create, silent=False)
 if result == -1:
     print(Colors.fg.red, 'failed', Colors.reset)
     exit(1)
