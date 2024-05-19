@@ -83,7 +83,7 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
         mon_test.time = sync_info_test.time_mon.copy()
         print(f"{sync_info_ref.del_mon=}\n{sync_info_test.del_mon=}\n{master_sync_del=}\n{mon_test.time=}")
     else:
-        print(f"data sets too small to sync or not equivalent number of sync pulses")
+        print(f"Using simplified sync with |Ib|>0.  Data sets too small to sync or not equivalent number of sync pulses")
 
     # Plots
     fig_list = []
