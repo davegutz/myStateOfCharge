@@ -122,6 +122,8 @@ Categories=Utility
 elif sys.platform == 'darwin':
     print(Colors.fg.green, f"Drag dist/GUI_TestSOC.app to Launchpad.  Pin to taskbar first time", Colors.reset)
     print(Colors.fg.green, "you shouldn't have to remake Launchers on re-run", Colors.reset)
+    print(Colors.fg.green, "Open a terminal and run:", Colors.reset)
+    print(Colors.fg.green, "/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC.app/Contents/MacOS/GUI_TestSOC", Colors.reset)
 
 else:
     print(Colors.fg.green, f"browse to executable in 'dist/GUI_sqlite_scrape' and double-click.  Create shortcut first time", Colors.reset)
