@@ -29,8 +29,11 @@ GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_
 # Create executable
 if sys.platform == 'linux':
     test_cmd_create = "pyinstaller ./GUI_TestSOC.py --hidden-import='PIL._tkinter_finder' --icon='GUI_TestSOC.ico' -y"
-elif sys.platform == 'Darwin':
-    print("macOS not done yet")
+elif sys.platform == 'darwin':
+    # macOS run command line pip3 install of pyinstaller
+    # pip3 install -U pyinstaller
+    # pip3 install Pillow  # for ico handling
+    test_cmd_create = "pyinstaller ./GUI_TestSOC.py --hidden-import='PIL._tkinter_finder' --icon='GUI_TestSOC.ico' -y --windowed"
 else:
     test_cmd_create = 'pyinstaller .\\GUI_TestSOC.py --i GUI_TestSOC.ico -y'
 result = run_shell_cmd(test_cmd_create, silent=False)
@@ -103,8 +106,11 @@ Categories=Utility
     else:
         print(Colors.fg.green, 'mv success.  Browse apps :: and make it favorites.  Open and set path to dataReduction', Colors.reset)
         print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
-elif sys.platform == 'Darwin':
-    print("macOS install not done yet")
+
+elif sys.platform == 'darwin':
+    print(Colors.fg.green, f"browse to executable in 'dist/GUI_sqlite_scrape' and double-click.  Create shortcut first time", Colors.reset)
+    print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
+
 else:
     print(Colors.fg.green, f"browse to executable in 'dist/GUI_sqlite_scrape' and double-click.  Create shortcut first time", Colors.reset)
     print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
