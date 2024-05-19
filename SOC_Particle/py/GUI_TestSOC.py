@@ -54,7 +54,7 @@ plat = sys.platform
 if plat == 'linux':
     default_dr = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction'
 elif plat == 'Darwin':
-    default_dr = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction'
+    default_dr = '/Users/daveg/Library/CloudStorage/GoogleDrive-davegutz2006@gmail.com/My Drive/GitHubArchive/SOC_Particle/dataReduction'
 else:
     default_dr = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction'
 
@@ -1187,7 +1187,7 @@ if __name__ == '__main__':
     if platform.system() == 'Linux':
         putty_test_csv_path = tk.StringVar(master, '/home/daveg/.local/putty_test.csv')
     elif platform.system() == 'Darwin':
-        putty_test_csv_path = tk.StringVar(master, '~/.local/putty_test.csv')
+        putty_test_csv_path = tk.StringVar(master, '/Users/daveg/.local/putty_test.csv')
     else:
         putty_test_csv_path = tk.StringVar(master, os.path.join(os.getenv('LOCALAPPDATA'), 'Temp', 'putty_test.csv'))
     print(f"{putty_test_csv_path.get()=}")
