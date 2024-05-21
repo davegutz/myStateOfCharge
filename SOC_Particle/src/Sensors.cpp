@@ -486,11 +486,15 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Reset
   if ( reset_all_faults_ )
   {
-    if ( sp.ib_select() < 0 )
+    if ( sp.ib_select() == 2 )
+    {
+      ib_sel_stat_ = 2;
+    }
+    else if ( sp.ib_select() == -1 )
     {
       ib_sel_stat_ = -1;
     }
-    if ( sp.ib_select() >=0 )
+    if ( sp.ib_select() == 1 )
     {
       ib_sel_stat_ = 1;
     }
@@ -502,7 +506,11 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Ib truth table
   if ( ap.fake_faults )
   {
-    ib_sel_stat_ = 1;
+    #ifdef HDWE_INA181_HI_LO  
+      ib_sel_stat_ = 2;
+    #else
+      ib_sel_stat_ = 1;
+    #endif
     latched_fail_ = false;
   }
   else if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() )  // these separate inputs don't latch
@@ -695,10 +703,10 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     faultAssign( Sen->ShuntAmp->bare_detected(), IB_AMP_BARE);
     faultAssign( Sen->ShuntNoAmp->bare_detected(), IB_NOA_BARE);
     #ifndef HDWE_BARE
-      faultAssign( ( ib_amp_bare() || Sen->ShuntAmp->Ishunt_cal() >= current_max ) && !ap.disab_ib_fa, IB_AMP_FLT );
+      faultAssign( ( ib_amp_bare() || abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max ) && !ap.disab_ib_fa, IB_AMP_FLT );
       faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max ) && !ap.disab_ib_fa, IB_NOA_FLT );
     #else
-      faultAssign( Sen->ShuntAmp->Ishunt_cal() >= current_max && !ap.disab_ib_fa, IB_AMP_FLT );
+      faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_AMP_FLT );
       faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_NOA_FLT );
     #endif
     if ( ap.disab_ib_fa )
@@ -806,6 +814,11 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   AmpFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
   NoaFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
   VbFilt = new LagExp(T, AMP_FILT_TAU, 0., NOMINAL_VB*2.5);
+  #ifdef HDWE_INA181_HI_LO
+    sel_brk_hdwe_ = new ScaleBrk(HDWE_INA181_NOA_LO, HDWE_INA181_AMP_LO, HDWE_INA181_AMP_HI, HDWE_INA181_NOA_HI);
+  #else
+    sel_brk_hdwe_ = new ScaleBrk(0., 0., 0., 0.);
+  #endif
 }
 
 // Deliberate choice based on results and inputs
@@ -813,7 +826,15 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
 // Outputs:  Ib_hdwe_model, Ib_hdwe, Vshunt
 void Sensors::choose_()
 {
-  if ( Flt->ib_sel_stat()>0 )
+  if ( Flt->ib_sel_stat()==2 )
+  {
+    Ib_hdwe = scale_select(Ib_noa_hdwe, sel_brk_hdwe_, Ib_noa_hdwe, Ib_amp_hdwe);
+    Vshunt = scale_select(Ib_noa_hdwe, sel_brk_hdwe_, ShuntNoAmp->vshunt(), ShuntAmp->vshunt());
+    Ib_hdwe_model = Ib_hdwe;
+    sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
+    dt_ib_hdwe_ = ShuntNoAmp->dt();
+  }
+  else if ( Flt->ib_sel_stat()==1 )
   {
     Vshunt = ShuntAmp->vshunt();
     Ib_hdwe = Ib_amp_hdwe;
@@ -821,7 +842,7 @@ void Sensors::choose_()
     sample_time_ib_hdwe_ = ShuntAmp->sample_time();
     dt_ib_hdwe_ = ShuntAmp->dt();
   }
-  else if ( Flt->ib_sel_stat()<0 )
+  else if ( Flt->ib_sel_stat()==-1 )
   {
     Vshunt = ShuntNoAmp->vshunt();
     Ib_hdwe = Ib_noa_hdwe;
@@ -1100,4 +1121,21 @@ void Sensors::vb_print()
 {
   Serial.printf("reset, T, vb_dscn, Vb_raw, sp.Vb_bias_hdwe(), Vb_hdwe, vb_flt(), vb_fa(), wv_fa=, %d, %7.3f, %d, %d, %7.3f,  %7.3f, %d, %d, %d,\n",
     reset, T, sp.mod_vb_dscn(), Vb_raw, sp.Vb_bias_hdwe(), Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
+}
+
+// Scale select between a high and low set of inputs.  Low might be a precise, amplified sensor and high might be the high range equivalent
+float scale_select(const float in, const ScaleBrk *brk, const float lo, const float hi)
+{
+  if ( brk->n_hi <= in && in <= brk->p_lo )
+    return ( lo );
+
+  else if ( in <= brk->n_lo || in >= brk->p_hi )
+    return ( hi );
+
+  else if ( in < brk->n_hi )
+    return ( (in-brk->n_lo) / brk->n_d * (hi-lo) + hi );
+
+  else
+    return ( (in-brk->p_lo) / brk->p_d * (hi-lo) + hi );
+
 }

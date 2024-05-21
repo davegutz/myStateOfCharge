@@ -46,6 +46,21 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
 extern VolatilePars ap; // Various adjustment parameters shared at system level
 struct Pins;
 
+struct ScaleBrk
+{
+  float n_lo;
+  float n_hi;
+  float n_d;
+  float p_lo;
+  float p_hi;
+  float p_d;
+  ScaleBrk(const float n_l, const float n_h, const float p_l, const float p_h) : n_lo(n_l), n_hi(n_h), p_lo(p_l), p_hi(p_h)
+  {
+    n_d = n_hi - n_lo;
+    p_d = p_hi - p_lo;
+  }
+};
+
 // DS18-based temp sensor
 class TempSensor: public DS18B20
 {
@@ -399,7 +414,11 @@ protected:
   unsigned long long dt_ib_;                // Delta update of selected Ib sample, ms
   unsigned long long inst_time_;            // UTC Zulu at instantiation, s
   unsigned long long inst_millis_;          // millis offset to account for setup() time, ms
+  ScaleBrk *sel_brk_hdwe_;                  // Active/active scale break
 };
 
+// Misc
+
+float scale_select(const float in, const ScaleBrk *brk, const float lo, const float hi);
 
 #endif

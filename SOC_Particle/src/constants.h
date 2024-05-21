@@ -37,23 +37,21 @@
 #undef HDWE_47L16_EERAM
 #undef HDWE_ADS1013_AMP_NOA
 #undef HDWE_TSC2010_DUAL
-#undef HDWE_INA181_HI_LO
 #undef HDWE_SSD1306_OLED
 #undef HDWE_DS18B20_SWIRE
 #undef HDWE_DS2482_1WIRE
+#undef HDWE_INA181_HI_LO
+#undef HDWE_INA181_NOA_LO
+#undef HDWE_INA181_AMP_LO
+#undef HDWE_INA181_AMP_HI
+#undef HDWE_INA181_NOA_HI
 
 // Software configuration
 #undef SOFT_DEPLOY_PHOTON
 #undef SOFT_DEBUG_QUEUE
 
 // Setup
-// #include "pro0p.h"
-// #include "pro1a.h"
-#include "pro2p2.h"
-// #include "soc0p.h"
-// #include "soc1a.h"
-// #include "soc3p2.h"
-// #include "soc2p2.h"
+#include "local_config.h"
 const String unit = version + "_" + HDWE_UNIT;
 
 // Constants always defined

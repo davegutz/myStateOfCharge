@@ -32,6 +32,10 @@
 #define SHUNT_AMP_R2          500000.   // Internal amp resistance INA181A4 200x, ohms (500000)
 #define SHUNT_NOA_R1          25000.    // Internal amp resistance INA181A1 20x, ohms (25000)
 #define SHUNT_NOA_R2          500000.   // Internal amp resistance INA181A1 20x, ohms (500000)
+#define HDWE_INA181_NOA_LO  -20.3       // Full NOA discharge transition, A (-20)
+#define HDWE_INA181_AMP_LO  -18.3       // Full AMP discharge transition, A (-18)  
+#define HDWE_INA181_AMP_HI   17.0       // Full AMP charge transition, A (17)
+#define HDWE_INA181_NOA_HI   19.0       // Full NOA charge transition, A (19)
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
 #define VOLT_BIAS             0.0   // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
