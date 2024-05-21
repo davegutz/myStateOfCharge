@@ -813,6 +813,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   Serial.printf("Vb sense ADC pin started\n");
   AmpFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
   NoaFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
+  SelFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
   VbFilt = new LagExp(T, AMP_FILT_TAU, 0., NOMINAL_VB*2.5);
   #ifdef HDWE_INA181_HI_LO
     sel_brk_hdwe_ = new ScaleBrk(HDWE_INA181_NOA_LO, HDWE_INA181_AMP_LO, HDWE_INA181_AMP_HI, HDWE_INA181_NOA_HI);
@@ -823,20 +824,19 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
 
 // Deliberate choice based on results and inputs
 // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model
-// Outputs:  Ib_hdwe_model, Ib_hdwe, Vshunt
+// Outputs:  Ib_hdwe_model, Ib_hdwe
 void Sensors::choose_()
 {
   if ( Flt->ib_sel_stat()==2 )
   {
-    Ib_hdwe = scale_select(Ib_noa_hdwe, sel_brk_hdwe_, Ib_noa_hdwe, Ib_amp_hdwe);
-    Vshunt = scale_select(Ib_noa_hdwe, sel_brk_hdwe_, ShuntNoAmp->vshunt(), ShuntAmp->vshunt());
+    Ib_hdwe = scale_select(Ib_noa_hdwe, sel_brk_hdwe_, Ib_amp_hdwe, Ib_noa_hdwe);
+    // if ( sp.debug()==99 ) Serial.printf("choose: Ib_noa_hdwe=%7.3f, Ib_amp_hdwe=%7.3f, Ib_hdwe=%7.3f\n", Ib_noa_hdwe, Ib_amp_hdwe, Ib_hdwe);
     Ib_hdwe_model = Ib_hdwe;
     sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
     dt_ib_hdwe_ = ShuntNoAmp->dt();
   }
   else if ( Flt->ib_sel_stat()==1 )
   {
-    Vshunt = ShuntAmp->vshunt();
     Ib_hdwe = Ib_amp_hdwe;
     Ib_hdwe_model = Ib_amp_model;
     sample_time_ib_hdwe_ = ShuntAmp->sample_time();
@@ -844,7 +844,6 @@ void Sensors::choose_()
   }
   else if ( Flt->ib_sel_stat()==-1 )
   {
-    Vshunt = ShuntNoAmp->vshunt();
     Ib_hdwe = Ib_noa_hdwe;
     Ib_hdwe_model = Ib_noa_model;
     sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
@@ -852,7 +851,6 @@ void Sensors::choose_()
   }
   else
   {
-    Vshunt = 0.;
     Ib_hdwe = 0.;
     Ib_hdwe_model = 0.;
     sample_time_ib_hdwe_ = 0ULL;
@@ -1054,11 +1052,11 @@ void Sensors::shunt_select_initial(const boolean reset)
     Vc_hdwe = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());
     Ib_noa_hdwe = ShuntNoAmp->Ishunt_cal() + hdwe_add;  // Sense fault injection feeds logic, not model
     Ib_noa_hdwe_f = NoaFilt->calculate(Ib_noa_hdwe, reset, AMP_FILT_TAU, T);
-    Ib_hdwe_f = NoaFilt->calculate(Ib_hdwe, reset, AMP_FILT_TAU, T);
+    Ib_hdwe_f = SelFilt->calculate(Ib_hdwe, reset, AMP_FILT_TAU, T);
 
     // Initial choice
     // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model(past), Ib_noa_model(past)
-    // Outputs:  Ib_hdwe_model, Ib_hdwe, Vshunt
+    // Outputs:  Ib_hdwe_model, Ib_hdwe
     choose_();
 
     // When running normally the model tracks hdwe to synthesize reference information
@@ -1127,16 +1125,29 @@ void Sensors::vb_print()
 // Scale select between a high and low set of inputs.  Low might be a precise, amplified sensor and high might be the high range equivalent
 float scale_select(const float in, const ScaleBrk *brk, const float lo, const float hi)
 {
+  
   if ( brk->n_hi <= in && in <= brk->p_lo )
+  {
+    // if ( sp.debug()==99 ) Serial.printf("scale_select lo: in=%7.3f, brk->n_hi=%7.3f, brk->p_lo=%7.3f, lo=%7.3f, hi=%7.3f, sel=%7.3f\n", in, brk->n_hi, brk->p_lo, lo, hi, lo);
     return ( lo );
+  }
 
   else if ( in <= brk->n_lo || in >= brk->p_hi )
+  {
+    // if ( sp.debug()==99 ) Serial.printf("scale_select hi: in=%7.3f, brk->n_lo=%7.3f, brk->p_hi=%7.3f, lo=%7.3f, hi=%7.3f, sel=%7.3f\n", in, brk->n_lo, brk->p_hi, lo, hi, hi);
     return ( hi );
+  }
 
   else if ( in < brk->n_hi )
+  {
+    // if ( sp.debug()==99 ) Serial.printf("scale_select n t: in=%7.3f, brk->n_hi=%7.3f, brk->p_lo=%7.3f, lo=%7.3f, hi=%7.3f\n", in, brk->n_hi, brk->p_lo, lo, hi);
     return ( (in - brk->n_lo) / brk->n_d * (hi - lo) + hi );
+  }
 
   else
+  {
+    // if ( sp.debug()==99 ) Serial.printf("scale_select p t: in=%7.3f, brk->n_hi=%7.3f, brk->p_lo=%7.3f, lo=%7.3f, hi=%7.3f\n", in, brk->n_hi, brk->p_lo, lo, hi);
     return ( (in - brk->p_lo) / brk->p_d * (hi - lo) + hi );
+  }
 
 }

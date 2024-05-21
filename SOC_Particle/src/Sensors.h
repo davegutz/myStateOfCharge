@@ -326,7 +326,6 @@ public:
   float Tb_hdwe_filt;         // Filtered, sensed battery temp, C
   float Tb_model;             // Temperature used for battery bank temp in model, C
   float Tb_model_filt;        // Filtered, modeled battery bank temp, C
-  float Vshunt;               // Sensed shunt voltage, V
   float Ib;                   // Selected battery bank current, A
   float Ib_amp_hdwe;          // Sensed amp battery bank current, A
   float Ib_amp_hdwe_f;        // Sensed, filtered amp battery bank current, A
