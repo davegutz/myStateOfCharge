@@ -1054,6 +1054,7 @@ void Sensors::shunt_select_initial(const boolean reset)
     Vc_hdwe = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());
     Ib_noa_hdwe = ShuntNoAmp->Ishunt_cal() + hdwe_add;  // Sense fault injection feeds logic, not model
     Ib_noa_hdwe_f = NoaFilt->calculate(Ib_noa_hdwe, reset, AMP_FILT_TAU, T);
+    Ib_hdwe_f = NoaFilt->calculate(Ib_hdwe, reset, AMP_FILT_TAU, T);
 
     // Initial choice
     // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model(past), Ib_noa_model(past)
@@ -1133,9 +1134,9 @@ float scale_select(const float in, const ScaleBrk *brk, const float lo, const fl
     return ( hi );
 
   else if ( in < brk->n_hi )
-    return ( (in-brk->n_lo) / brk->n_d * (hi-lo) + hi );
+    return ( (in - brk->n_lo) / brk->n_d * (hi - lo) + hi );
 
   else
-    return ( (in-brk->p_lo) / brk->p_d * (hi-lo) + hi );
+    return ( (in - brk->p_lo) / brk->p_d * (hi - lo) + hi );
 
 }

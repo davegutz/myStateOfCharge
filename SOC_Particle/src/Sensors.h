@@ -331,6 +331,7 @@ public:
   float Ib_amp_hdwe;          // Sensed amp battery bank current, A
   float Ib_amp_hdwe_f;        // Sensed, filtered amp battery bank current, A
   float Ib_amp_model;         // Modeled amp battery bank current, A
+  float Ib_hdwe_f;            // Sensed, filtered selected battery bank current, A
   float Ib_noa_hdwe;          // Sensed noa battery bank current, A
   float Ib_noa_hdwe_f;        // Sensed, filtered noa battery bank current, A
   float Ib_noa_model;         // Modeled noa battery bank current, A
@@ -399,6 +400,7 @@ public:
 protected:
   LagExp *AmpFilt;      // Noise filter for calibration
   LagExp *NoaFilt;      // Noise filter for calibration
+  LagExp *SelFilt;      // Noise filter for calibration
   LagExp *VbFilt;       // Noise filter for calibration
   void choose_(void);   // Deliberate choice based on inputs and results
   PRBS_7 *Prbn_Tb_;     // Tb noise generator model only
