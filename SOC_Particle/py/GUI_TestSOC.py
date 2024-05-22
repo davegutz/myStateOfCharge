@@ -249,6 +249,7 @@ putty_connection = {'': 'test',
                     'soc2p2': 'testsoc2p2',
                     }
 
+
 # Begini - configuration class using .ini files
 class Begini(ConfigParser):
 
@@ -612,7 +613,6 @@ def compare_run_run_choose():
             if test_key != '':
                 ref_path = filedialog.askopenfilename(title='Choose reference file', filetypes=[('csv', '.csv')])
                 ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(ref_path)
-                keys = [ref_key, test_key]
                 print('GUI_TestSOC compare_run_run_choose:  Ref', ref_basename, ref_key)
                 print('GUI_TestSOC compare_run_run_choose:  Test', test_basename, test_key)
                 keys = [(ref_basename, ref_key), (test_basename, test_key)]

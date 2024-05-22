@@ -152,6 +152,7 @@ def stay_awake(up_set_min=3.):
         pyautogui.FAILSAFE = False
     while True and (up_time_min < up_set_min):
         time.sleep(30.)
+        keyboard = None
         if sys.version_info > (3, 11):
             keyboard = Controller()
         for i in range(0, 3):

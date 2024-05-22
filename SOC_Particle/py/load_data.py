@@ -71,7 +71,6 @@ class SyncInfo:
     def synchronize(self, sync_del):
         """Call this after building two class instances and calling calculate_master_sync to make sync_del"""
         # Init entire time array again.  First sync is always 0
-        orig = self.time_mon.copy()
         acc_shift = self.sync_cTime[0]
         self.time_mon = self.cTime.copy()
 
