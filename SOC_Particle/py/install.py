@@ -14,7 +14,7 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 from test_soc_util import run_shell_cmd
-import PyInstaller.__main__
+# import PyInstaller.__main__
 from Colors import Colors
 import shutil
 import sys
@@ -22,6 +22,8 @@ import os
 
 test_cmd_create = None
 test_cmd_copy = None
+result = None
+GUI_TestSOC_dest_path = None
 
 # Create executable
 GUI_TestSOC_path = os.path.join(os.getcwd(), 'GUI_TestSOC.png')
