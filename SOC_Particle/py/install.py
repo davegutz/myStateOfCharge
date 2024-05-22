@@ -32,18 +32,19 @@ if sys.platform == 'linux':
     test_cmd_create = "pyinstaller ./GUI_TestSOC.py --hidden-import='PIL._tkinter_finder' --icon='GUI_TestSOC.ico' -y"
     result = run_shell_cmd(test_cmd_create, silent=False)
 elif sys.platform == 'darwin':
-    GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC.app', 'Contents', 'Frameworks', 'GUI_TestSOC.png')
-    GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC.app', 'Contents', 'Frameworks',  'GUI_TestSOC_Icon.png')
-    PyInstaller.__main__.run([
-        "./GUI_TestSOC.py",
-        "--windowed",
-        "--hidden-import='PIL._tkinter_finder'",
-        "--icon=GUI_TestSOC.ico",
-        "-y",
-    ])
-    result = 0
-    # Run from terminal command line:
-    # /Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC.app/Contents/MacOS/GUI_TestSOC
+    # GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC.app', 'Contents', 'Frameworks', 'GUI_TestSOC.png')
+    # GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC.app', 'Contents', 'Frameworks',  'GUI_TestSOC_Icon.png')
+    # PyInstaller.__main__.run([
+    #     "./GUI_TestSOC.py",
+    #     "--windowed",
+    #     "--hidden-import='PIL._tkinter_finder'",
+    #     "--icon=GUI_TestSOC.ico",
+    #     "-y",
+    # ])
+    # result = 0
+    # # Run from terminal command line:
+    # # /Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC.app/Contents/MacOS/GUI_TestSOC
+    pass
 else:
     GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC.png')
     GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC_Icon.png')
@@ -120,11 +121,13 @@ Categories=Utility
         print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
 
 elif sys.platform == 'darwin':
-    print(Colors.fg.green, f"Drag dist/GUI_TestSOC.app to Launchpad.  Pin to taskbar first time", Colors.reset)
-    print(Colors.fg.green, "you shouldn't have to remake Launchers on re-run", Colors.reset)
-    print(Colors.fg.green, "Open a terminal and run:", Colors.reset)
-    print(Colors.fg.green, "/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC.app/Contents/MacOS/GUI_TestSOC", Colors.reset)
-
+    # print(Colors.fg.green, f"Drag dist/GUI_TestSOC.app to Launchpad.  Pin to taskbar first time", Colors.reset)
+    # print(Colors.fg.green, "you shouldn't have to remake Launchers on re-run", Colors.reset)
+    # print(Colors.fg.green, "Open a terminal and run:", Colors.reset)
+    # print(Colors.fg.green, "/Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC.app/Contents/MacOS/GUI_TestSOC", Colors.reset)
+    print(f"macOS: in Finder ctrl-click on 'GUI_TestSOC.py' select 'duplicate.'"
+          f" Open and copy icon into paste buffer."
+          f" Then 'Get Info' on the duplicate, click on 2nd icon, paste.   Drag duplicate item to taskbar.")
 else:
     print(Colors.fg.green, f"browse to executable in 'dist/GUI_sqlite_scrape' and double-click.  Create shortcut first time", Colors.reset)
     print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
