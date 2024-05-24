@@ -17,12 +17,12 @@ Type AT+NAME=Hackster and press Send. It will return a OK message.
 // https://mcuoneclipse.com/2013/06/19/using-the-hc-06-bluetooth-module/
 
 #define SBAUD 230400
-// #define STEP 1
-#define STEP 2
+#define STEP 1
+// #define STEP 2
 
 // Step-by-step
-// 1.  Uncomment line 'STEP1'.  Compile and flash.
-// 2.  Run following:
+// 1.  Uncomment line 'STEP1' and comment line 'STEP2.'  Compile and flash.
+// 2.  Run following using serial that is running at SBAUD (be sure to include ';' below):
 //    >AT;    // answers 'OK'
 //    >AT+NAMEpro3p2;  // answers 'OKsetname'
 //    >AT+BAUD9; // use BAUD<n> from table below that matches SBAUD answers 'OK230400'
