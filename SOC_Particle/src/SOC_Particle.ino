@@ -71,7 +71,7 @@
 #elif defined(HDWE_ARGON)
   #undef ARDUINO
   #if (PLATFORM_ID != PLATFORM_ARGON)
-    #error "edit constants.h to select local_config.xxxx.h to match device"
+    // #error "edit constants.h to select local_config.xxxx.h to match device"
   #endif
 #elif defined(HDWE_PHOTON2)
   #undef ARDUINO

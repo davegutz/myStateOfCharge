@@ -242,6 +242,7 @@ macro_lookup = {
 
 putty_connection = {'': 'test',
                     'soc0p': 'testsoc0p',
+                    'soc1a': 'testsoc1a',
                     'pro0p': 'testpro0p',
                     'pro1a': 'testpro1a',
                     'pro2p2': 'testpro2p2',
