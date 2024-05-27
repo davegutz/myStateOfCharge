@@ -68,18 +68,19 @@ test_cmd_install = None
 if sys.platform == 'linux':
 
     # Install
-    desktop_entry = """[Desktop Entry]
+    login = os.getlogin()
+    desktop_entry = f"""[Desktop Entry]
 Name=GUI_TestSOC
-Exec=/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC/GUI_TestSOC
-Path=/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC
-Icon=/home/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/GUI_TestSOC.ico
+Exec=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC/GUI_TestSOC
+Path=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC
+Icon=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/GUI_TestSOC.ico
 comment=app
 Type=Application
 Terminal=true
 Encoding=UTF-8
 Categories=Utility
 """
-    with open("/home/daveg/Desktop/GUI_TestSOC.desktop", "w") as text_file:
+    with open(f"/home/{login}/Desktop/GUI_TestSOC.desktop", "w") as text_file:
         result = text_file.write("%s" % desktop_entry)
     if result == -1:
         print(Colors.fg.red, 'failed', Colors.reset)
@@ -87,7 +88,7 @@ Categories=Utility
         print(Colors.fg.green, 'success', Colors.reset)
 
     #  Launch permission
-    test_cmd_launch = 'gio set /home/daveg/Desktop/GUI_TestSOC.desktop metadata::trusted true'
+    test_cmd_launch = f'gio set /home/{login}/Desktop/GUI_TestSOC.desktop metadata::trusted true'
     result = run_shell_cmd(test_cmd_launch, silent=False)
     if result == -1:
         print(Colors.fg.red, 'gio set failed', Colors.reset)
@@ -110,11 +111,11 @@ Categories=Utility
 
     # Move file
     try:
-        result = shutil.move('/home/daveg/Desktop/GUI_TestSOC.desktop', '/usr/share/applications/GUI_TestSOC.desktop')
+        result = shutil.move(f'/home/{login}/Desktop/GUI_TestSOC.desktop', '/usr/share/applications/GUI_TestSOC.desktop')
     except PermissionError:
         print(Colors.fg.red, "Stop and establish sudo permissions", Colors.reset)
         print(Colors.fg.red, "  or", Colors.reset)
-        print(Colors.fg.red, "sudo mv /home/daveg/Desktop/GUI_TestSOC.desktop /usr/share/applications/.", Colors.reset)
+        print(Colors.fg.red, f"sudo mv /home/{login}//Desktop/GUI_TestSOC.desktop /usr/share/applications/.", Colors.reset)
         exit(1)
     if result != '/usr/share/applications/GUI_TestSOC.desktop':
         print(Colors.fg.red, f"'mv ...' failed code {result}", Colors.reset)
