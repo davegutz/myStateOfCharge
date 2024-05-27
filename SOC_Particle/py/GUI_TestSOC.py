@@ -1284,7 +1284,7 @@ if __name__ == '__main__':
     option_panel_ctr.pack(side='left', expand=True, fill='both')
     option_panel_right = tk.Frame(option_panel)
     option_panel_right.pack(side='left', expand=True, fill='both')
-    putty_timeout = tk.DoubleVar(master, 720.)  # minutes maximum putty run without goind to sleep
+    putty_timeout = tk.DoubleVar(master, 720.)  # minutes maximum putty run without going to sleep
 
     # Option row
     option = tk.StringVar(master, str(cf['others']['option']))
@@ -1337,23 +1337,6 @@ if __name__ == '__main__':
     start_button.pack(padx=5, pady=5, expand=True, fill='both')
     timer_val = tk.IntVar(master, 0)
 
-    # Time
-    time_sep_panel = tk.Frame(master)
-    time_sep_panel.pack(expand=True, fill='x')
-    tk.Label(time_sep_panel, text=' ', font=("Courier", 2), bg='darkgray').pack(expand=True, fill='x')
-    time_panel = tk.Frame(master)
-    time_panel.pack(expand=True, fill='both')
-    time_panel_left = tk.Frame(time_panel)
-    time_panel_left.pack(side='left', fill='x')
-    time_panel_ctr = tk.Frame(time_panel)
-    time_panel_ctr.pack(side='left', expand=True, fill='both')
-    time_panel_right = tk.Frame(time_panel)
-    time_panel_right.pack(side='left', expand=True, fill='both')
-    tk.Label(time_panel_left, text="Set time", font=label_font).pack(pady=2)
-    get_time_button = myButton(time_panel_ctr, text='automatically put in copy/paste buffer', command=grab_time,
-                               fg="blue", bg=bg_color)
-    get_time_button.pack(pady=2)
-
     # macro panel
     macro_sep_panel = tk.Frame(master)
     macro_sep_panel.pack(expand=True, fill='x')
@@ -1367,24 +1350,24 @@ if __name__ == '__main__':
     macro_panel_right = tk.Frame(macro_panel)
     macro_panel_right.pack(side='left', expand=True, fill='both')
 
-    macro_label = tk.Label(macro_panel_left, text='macros:', font=label_font_gentle)
-    macro_label.pack(padx=5, pady=5, expand=True, fill='x')
-
     macro_option = tk.StringVar(master, str(cf['others']['macro']))
     macro_option_show = tk.StringVar(master, str(cf['others']['macro']))
 
-    macro_sel = tk.OptionMenu(macro_panel_ctr, macro_option, *macro_sel_list)
+    macro_sel = tk.OptionMenu(macro_panel_left, macro_option, *macro_sel_list)
     macro_sel.config(width=20, font=butt_font)
     macro_sel.pack(padx=5, pady=5)
     macro_option.trace_add('write', handle_macro)
     macro = tk.StringVar(master, '')
     if platform.system() == 'Darwin':
-        macro_button = myButton(macro_panel_right, text=macro.get(), command=grab_macro, fg="purple", bg=bg_color,
+        macro_button = myButton(macro_panel_ctr, text=macro.get(), command=grab_macro, fg="purple", bg=bg_color,
                                 justify=tk.LEFT, font=butt_font)
     else:
-        macro_button = myButton(macro_panel_right, text=macro.get(), command=grab_macro, fg="purple", bg=bg_color, wraplength=wrap_length,
+        macro_button = myButton(macro_panel_ctr, text=macro.get(), command=grab_macro, fg="purple", bg=bg_color, wraplength=wrap_length,
                                 justify=tk.LEFT, font=butt_font)
     macro_button.pack(padx=5, pady=5)
+    get_time_button = myButton(macro_panel_right, text='grab time copy/paste buffer', command=grab_time,
+                               fg="blue", bg=bg_color)
+    get_time_button.pack(pady=2)
 
     # Note panel
     note_sep_panel = tk.Frame(master)
