@@ -533,7 +533,8 @@ def clear_data(silent=False, nowait=False):
 def compare_hist_sim_choose():
     # Select file
     print('compare_hist_sim_choose')
-    testpaths = filedialog.askopenfilenames(title='Please select files', filetypes=[('csv', '.csv')])
+    testpaths = filedialog.askopenfilenames(title='Please select files', filetypes=[('csv', '.csv')],
+                                            initialdir=Test.dataReduction_folder)
     if testpaths is None or testpaths == '':
         print("No file chosen")
     else:
@@ -607,14 +608,16 @@ def compare_run_to_hist():
 def compare_run_run_choose():
     # Select file
     print('compare_run_run_choose')
-    testpaths = filedialog.askopenfilenames(title='Choose test file(s)', filetypes=[('csv', '.csv')])
+    testpaths = filedialog.askopenfilenames(title='Choose test file(s)', filetypes=[('csv', '.csv')],
+                                            initialdir=Test.dataReduction_folder)
     if testpaths is None or testpaths == '':
         print("No file chosen")
     else:
         for testpath in testpaths:
             test_folder_path, test_parent, test_basename, test_txt, test_key = contain_all(testpath)
             if test_key != '':
-                ref_path = filedialog.askopenfilename(title='Choose reference file', filetypes=[('csv', '.csv')])
+                ref_path = filedialog.askopenfilename(title='Choose reference file', filetypes=[('csv', '.csv')],
+                                                      initialdir=Ref.dataReduction_folder)
                 ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(ref_path)
                 print('GUI_TestSOC compare_run_run_choose:  Ref', ref_basename, ref_key)
                 print('GUI_TestSOC compare_run_run_choose:  Test', test_basename, test_key)
@@ -632,7 +635,8 @@ def compare_run_run_choose():
 def compare_run_sim_choose():
     # Select file
     print('compare_run_sim_choose')
-    testpaths = filedialog.askopenfilenames(title='Please select files', filetypes=[('csv', '.csv')])
+    testpaths = filedialog.askopenfilenames(title='Please select files', filetypes=[('csv', '.csv')],
+                                            initialdir=Test.dataReduction_folder)
     if testpaths is None or testpaths == '':
         print("No file chosen")
     else:
