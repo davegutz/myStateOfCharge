@@ -22,9 +22,9 @@
 #define MODELING              0 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
 
 // Sensor biases
-#define CURR_BIAS_AMP         0.0   // Calibration of amplified shunt sensor (* 'DA'), A
+#define CURR_BIAS_AMP         0.02  // Calibration of amplified shunt sensor (* 'DA'), A
 #define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SA')
-#define CURR_BIAS_NOA         0.0 // Calibration of non-amplified shunt sensor (* 'DB'), A
+#define CURR_BIAS_NOA        -0.1 // Calibration of non-amplified shunt sensor (* 'DB'), A
 #define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
 #define CURR_SCALE_DISCH      1.0   // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
 #define SHUNT_GAIN            2666. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (2666 is 200A/0.075V)
@@ -37,7 +37,7 @@
 #define HDWE_INA181_AMP_HI   17.0       // Full AMP charge transition, A (17)
 #define HDWE_INA181_NOA_HI   19.0       // Full NOA charge transition, A (19)
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
-#define VOLT_BIAS             0.0   // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS            -0.05  // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI      47000     // Vb high sense resistor, ohm (47000)
