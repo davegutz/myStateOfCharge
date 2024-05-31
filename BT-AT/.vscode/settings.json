@@ -4,7 +4,8 @@
     "files.associations": {
         "*.ino": "cpp"
     },
-    "particle.targetDevice": "soc3p2",
+    "particle.targetDevice": "soc2p2",
     "particle.firmwareVersion": "5.8.0",
-    "particle.targetPlatform": "p2"
+    "particle.targetPlatform": "p2",
+    "cmake.configureOnOpen": false
 }
