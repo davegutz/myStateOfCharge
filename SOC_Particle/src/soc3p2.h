@@ -4,12 +4,12 @@
 #include "version.h"
 
 // Features config
-#define HDWE_UNIT                    "soc3p2"
+#define HDWE_UNIT               "soc3p2"
 #define SOFT_SBAUD              460800      // Default Serial baud when able
 #define SOFT_S1BAUD             230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define HDWE_PHOTON2
 #define HDWE_SSD1306_OLED
-#define HDWE_TSC2010_DUAL
+#define HDWE_INA181_HI_LO
 #define HDWE_DS2482_1WIRE
 // #define SOFT_DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
@@ -22,19 +22,25 @@
 #define MODELING              0 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
 
 // Sensor biases
-#define CURR_BIAS_AMP         0.0   // Calibration of amplified shunt sensor (* 'DA'), A
+#define CURR_BIAS_AMP         0.0  // Calibration of amplified shunt sensor (* 'DA'), A
 #define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SA')
-#define CURR_BIAS_NOA         0.0 // Calibration of non-amplified shunt sensor (* 'DB'), A
+#define CURR_BIAS_NOA         0.2   // Calibration of non-amplified shunt sensor (* 'DB'), A
 #define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
 #define CURR_SCALE_DISCH      1.0   // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
-#define SHUNT_GAIN            2666. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (2666 is 200A/0.075V)
-#define SHUNT_AMP_R1          10000.    // Internal amp resistance TSC2010, ohms (10k)
-#define SHUNT_AMP_R2          200000.   // Internal amp resistance TSC2010, ohms (200k)
+#define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (2666 is 100A/0.075V)
+#define SHUNT_AMP_R1          2500.     // Internal amp resistance INA181A4 200x, ohms (2500)
+#define SHUNT_AMP_R2          500000.   // Internal amp resistance INA181A4 200x, ohms (500000)
+#define SHUNT_NOA_R1          25000.    // Internal amp resistance INA181A1 20x, ohms (25000)
+#define SHUNT_NOA_R2          500000.   // Internal amp resistance INA181A1 20x, ohms (500000)
+#define HDWE_INA181_NOA_LO  -20.3       // Full NOA discharge transition, A (-20)
+#define HDWE_INA181_AMP_LO  -18.3       // Full AMP discharge transition, A (-18)  
+#define HDWE_INA181_AMP_HI   17.0       // Full AMP charge transition, A (17)
+#define HDWE_INA181_NOA_HI   19.0       // Full NOA charge transition, A (19)
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
-#define VOLT_BIAS             0.0   // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS             0.00  // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
-#define VB_SENSE_R_HI      47000     // Vb high sense resistor, ohm (47000)
+#define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
 #define VB_SCALE              1.0    // Scale Vb sensor (* 'SV')
 #define VTAB_BIAS            -0.1    // Bias on voc_soc table (* 'Dw'), V
 
@@ -43,7 +49,7 @@
 // Four 12 V 200 Ah with two in parallel joined with two more in series
 //   would have  NOM_UNIT_CAP 200, NS 2, and NP 2
 #define COULOMBIC_EFF_SCALE   1.0     // Scalar on Coulombic efficiency of battery, fraction of charge that gets used (1.0)
-#define CHEM                  2       // Chemistry monitor code integer, 0=Battleborn, 1=CHINS-guest room, 2=CHINS-garage-guest room, 2=CHINS-garage
+#define CHEM                  1       // Chemistry monitor code integer, 0=Battleborn, 1=CHINS-guest room, 2=CHINS-garage
 #define NOM_UNIT_CAP          102.9   // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define HYS_SCALE             1.0     // Scalar on hysteresis (1.0)
 #define NS                    2.0     // Number of series batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BS')
