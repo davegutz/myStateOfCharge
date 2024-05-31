@@ -266,7 +266,7 @@ class Begini(ConfigParser):
             self.config_file_path = os.path.join('/Users/daveg/.local/', config_txt)
         else:
             config_txt = os.path.splitext(config_basename)[0] + '.ini'
-            self.config_file_path = os.path.join('/home/daveg/.local/', config_txt)
+            self.config_file_path = os.path.join(os.getenv('LOCALAPPDATA'), config_txt)
         print('config file', self.config_file_path)
         if os.path.isfile(self.config_file_path):
             self.read(self.config_file_path)
