@@ -29,10 +29,11 @@ GUI_TestSOC_dest_path = None
 GUI_TestSOC_path = os.path.join(os.getcwd(), 'GUI_TestSOC.png')
 GUI_TestSOC_Icon_path = os.path.join(os.getcwd(), 'GUI_TestSOC_Icon.png')
 if sys.platform == 'linux':
-    GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC.png')
-    GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC_Icon.png')
-    test_cmd_create = "pyinstaller ./GUI_TestSOC.py --hidden-import='PIL._tkinter_finder' --icon='GUI_TestSOC.ico' -y"
-    result = run_shell_cmd(test_cmd_create, silent=False)
+    # GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC.png')
+    # GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC_Icon.png')
+    # test_cmd_create = "pyinstaller ./GUI_TestSOC.py --hidden-import='PIL._tkinter_finder' --icon='GUI_TestSOC.ico' -y"
+    # result = run_shell_cmd(test_cmd_create, silent=False)
+    pass
 elif sys.platform == 'darwin':
     # GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC.app', 'Contents', 'Frameworks', 'GUI_TestSOC.png')
     # GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC.app', 'Contents', 'Frameworks',  'GUI_TestSOC_Icon.png')
@@ -59,7 +60,7 @@ else:
     print(Colors.fg.green, 'success', Colors.reset)
 
 # Provide dependencies
-if sys.platform != 'darwin':
+if sys.platform == 'win32':
     shutil.copyfile(GUI_TestSOC_path, GUI_TestSOC_dest_path)
     shutil.copystat(GUI_TestSOC_path, GUI_TestSOC_dest_path)
     print(Colors.fg.green, "copied files", Colors.reset)
