@@ -1,3 +1,4 @@
+#! /Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/venv/bin/python
 #  Graphical interface to Test State of Charge application
 #  Run in PyCharm
 #     or
