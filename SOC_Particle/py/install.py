@@ -59,9 +59,10 @@ else:
     print(Colors.fg.green, 'success', Colors.reset)
 
 # Provide dependencies
-shutil.copyfile(GUI_TestSOC_path, GUI_TestSOC_dest_path)
-shutil.copystat(GUI_TestSOC_path, GUI_TestSOC_dest_path)
-print(Colors.fg.green, "copied files", Colors.reset)
+if sys.platform != 'darwin':
+    shutil.copyfile(GUI_TestSOC_path, GUI_TestSOC_dest_path)
+    shutil.copystat(GUI_TestSOC_path, GUI_TestSOC_dest_path)
+    print(Colors.fg.green, "copied files", Colors.reset)
 
 # Install as deeply as possible
 test_cmd_install = None
