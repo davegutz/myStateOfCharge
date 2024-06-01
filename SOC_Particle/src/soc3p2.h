@@ -40,7 +40,7 @@
 #define VOLT_BIAS             0.00  // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
-#define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
+#define VB_SENSE_R_HI     22000      // Vb high sense resistor, ohm (22000)
 #define VB_SCALE              1.0    // Scale Vb sensor (* 'SV')
 #define VTAB_BIAS            -0.1    // Bias on voc_soc table (* 'Dw'), V
 
