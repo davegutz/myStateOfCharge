@@ -14,7 +14,6 @@
 #
 # See http://www.fsf.org/licensing/licenses/lgpl.txt for full license text.
 from test_soc_util import run_shell_cmd
-# import PyInstaller.__main__
 from Colors import Colors
 import shutil
 import sys
@@ -28,27 +27,7 @@ GUI_TestSOC_dest_path = None
 # Create executable
 GUI_TestSOC_path = os.path.join(os.getcwd(), 'GUI_TestSOC.png')
 GUI_TestSOC_Icon_path = os.path.join(os.getcwd(), 'GUI_TestSOC_Icon.png')
-if sys.platform == 'linux':
-    # GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC.png')
-    # GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC_Icon.png')
-    # test_cmd_create = "pyinstaller ./GUI_TestSOC.py --hidden-import='PIL._tkinter_finder' --icon='GUI_TestSOC.ico' -y"
-    # result = run_shell_cmd(test_cmd_create, silent=False)
-    pass
-elif sys.platform == 'darwin':
-    # GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC.app', 'Contents', 'Frameworks', 'GUI_TestSOC.png')
-    # GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC.app', 'Contents', 'Frameworks',  'GUI_TestSOC_Icon.png')
-    # PyInstaller.__main__.run([
-    #     "./GUI_TestSOC.py",
-    #     "--windowed",
-    #     "--hidden-import='PIL._tkinter_finder'",
-    #     "--icon=GUI_TestSOC.ico",
-    #     "-y",
-    # ])
-    # result = 0
-    # # Run from terminal command line:
-    # # /Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC.app/Contents/MacOS/GUI_TestSOC
-    pass
-else:
+if sys.platform == 'win32':
     GUI_TestSOC_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC.png')
     GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC_Icon.png')
     test_cmd_create = 'pyinstaller .\\GUI_TestSOC.py --i GUI_TestSOC.ico -y'
@@ -68,7 +47,6 @@ if sys.platform == 'win32':
 # Install as deeply as possible
 test_cmd_install = None
 if sys.platform == 'linux':
-
     # Install
     login = os.getlogin()
     desktop_entry = f"""[Desktop Entry]
@@ -114,7 +92,8 @@ Categories=Utility
     # Move file
     try:
         # pass
-        result = shutil.move(f'/home/{login}/Desktop/GUI_TestSOC.desktop', '/usr/share/applications/GUI_TestSOC.desktop')
+        result = shutil.move(f'/home/{login}/Desktop/GUI_TestSOC.desktop',
+                             '/usr/share/applications/GUI_TestSOC.desktop')
     except PermissionError:
         print(Colors.fg.red, "Stop and establish sudo permissions", Colors.reset)
         print(Colors.fg.red, "  or", Colors.reset)
@@ -125,15 +104,13 @@ Categories=Utility
     else:
         print(Colors.fg.green, 'mv success.  Browse apps :: and make it favorites.  Open and set path to dataReduction', Colors.reset)
         print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
-
 elif sys.platform == 'darwin':
     print(Colors.fg.green, f"macOS: modify #! at top of 'GUI_TestSOC.py' to be the same as what PyCharm calls\n"
                            f"  - see first line of PyCharm execution at the top of the screen your looking at.  Copy/past that whole line.\n"
                            f"Make sure 'Python Launcher' (Python Script Preferences) option for 'Allow override with #! in script' is checked.\n"
                            f"in Finder ctrl-click on 'GUI_TestSOC.py' select 'duplicate.'\n"
                            f"   - Open and copy icon into paste buffer.\n"
-                           f"   - Then 'Get Info' on the duplicate, click on 2nd icon, paste.   Drag duplicate item to taskbar.",
-          Colors.reset)
-else:
-    print(Colors.fg.green, f"browse to executable in 'dist/GUI_sqlite_scrape' and double-click.  Create shortcut first time", Colors.reset)
+                           f"   - Then 'Get Info' on the duplicate, click on 2nd icon, paste.   Drag duplicate item to taskbar.", Colors.reset)
+elif sys.platform == 'win32':
+    print(Colors.fg.green, f"browse to executable in 'dist/GUI_TestSOC' and double-click.  Create shortcut first time", Colors.reset)
     print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
