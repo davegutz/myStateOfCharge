@@ -73,8 +73,8 @@ if sys.platform == 'linux':
     login = os.getlogin()
     desktop_entry = f"""[Desktop Entry]
 Name=GUI_TestSOC
-Exec=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC/GUI_TestSOC
-Path=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/dist/GUI_TestSOC
+Exec=/home/{login}/Documents/py/bin/python3.12 /home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/GUI_TestSOC.py
+Path=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py
 Icon=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/GUI_TestSOC.ico
 comment=app
 Type=Application
@@ -113,6 +113,7 @@ Categories=Utility
 
     # Move file
     try:
+        # pass
         result = shutil.move(f'/home/{login}/Desktop/GUI_TestSOC.desktop', '/usr/share/applications/GUI_TestSOC.desktop')
     except PermissionError:
         print(Colors.fg.red, "Stop and establish sudo permissions", Colors.reset)
