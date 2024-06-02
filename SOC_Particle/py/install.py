@@ -51,7 +51,7 @@ if sys.platform == 'linux':
     login = os.getlogin()
     desktop_entry = f"""[Desktop Entry]
 Name=GUI_TestSOC
-Exec=/home/{login}/Documents/py/bin/python3.12 /home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/GUI_TestSOC.py
+Exec=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/venv/bin/python3 /home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/GUI_TestSOC.py
 Path=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py
 Icon=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/py/GUI_TestSOC.ico
 comment=app
