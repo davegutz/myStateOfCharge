@@ -105,12 +105,12 @@ Categories=Utility
         print(Colors.fg.green, 'mv success.  Browse apps :: and make it favorites.  Open and set path to dataReduction', Colors.reset)
         print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
 elif sys.platform == 'darwin':
-    print(Colors.fg.green, f"macOS: modify #! at top of 'GUI_TestSOC.py' to be the same as what PyCharm calls\n"
-                           f"  - see first line of PyCharm execution at the top of the screen your looking at.  Copy/past that whole line.\n"
-                           f"Make sure 'Python Launcher' (Python Script Preferences) option for 'Allow override with #! in script' is checked.\n"
-                           f"in Finder ctrl-click on 'GUI_TestSOC.py' select 'duplicate.'\n"
-                           f"   - Open and copy icon into paste buffer.\n"
-                           f"   - Then 'Get Info' on the duplicate, click on 2nd icon, paste.   Drag duplicate item to taskbar.", Colors.reset)
+    print(Colors.fg.green,
+          f"Make sure 'Python Launcher' (Python Script Preferences) option for 'Allow override with #! in script' is checked.\n"
+          f"in Finder ctrl-click on 'GUI_TestSOC.py'\n"
+          f"   - Open and copy icon into paste buffer.\n"
+          f"   - Then 'Get Info' on the duplicate, click on 2nd icon, paste.   Drag item to taskbar.",
+          Colors.reset)
 elif sys.platform == 'win32':
     print(Colors.fg.green, f"browse to executable in 'dist/GUI_TestSOC' and double-click.  Create shortcut first time", Colors.reset)
     print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)

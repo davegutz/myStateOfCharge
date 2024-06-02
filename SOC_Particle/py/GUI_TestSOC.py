@@ -1,4 +1,6 @@
-#! /Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/venv/bin/python
+#! /bin/sh
+"exec" "`dirname $0`/venv/bin/python3" "$0" "$@"
+##! /Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/venv/bin/python
 #  Graphical interface to Test State of Charge application
 #  Run in PyCharm
 #     or
