@@ -32,14 +32,13 @@ if sys.platform == 'win32':
     GUI_TestSOC_Icon_dest_path = os.path.join(os.getcwd(), 'dist', 'GUI_TestSOC', '_internal', 'GUI_TestSOC_Icon.png')
     test_cmd_create = 'pyinstaller .\\GUI_TestSOC.py --i GUI_TestSOC.ico -y'
     result = run_shell_cmd(test_cmd_create, silent=False)
-if result == -1:
-    print(Colors.fg.red, 'failed', Colors.reset)
-    exit(1)
-else:
-    print(Colors.fg.green, 'success', Colors.reset)
+    if result == -1:
+        print(Colors.fg.red, 'failed', Colors.reset)
+        exit(1)
+    else:
+        print(Colors.fg.green, 'success', Colors.reset)
 
-# Provide dependencies
-if sys.platform == 'win32':
+    # Provide dependencies
     shutil.copyfile(GUI_TestSOC_path, GUI_TestSOC_dest_path)
     shutil.copystat(GUI_TestSOC_path, GUI_TestSOC_dest_path)
     print(Colors.fg.green, "copied files", Colors.reset)
@@ -47,7 +46,6 @@ if sys.platform == 'win32':
 # Install as deeply as possible
 test_cmd_install = None
 if sys.platform == 'linux':
-    # Install
     login = os.getlogin()
     desktop_entry = f"""[Desktop Entry]
 Name=GUI_TestSOC
