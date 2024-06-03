@@ -5,13 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8176cd29-30e0-4234-b41e-da8f934efbc6" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../BT-AT/.vscode/launch.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../BT-AT/.vscode/launch.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../BT-AT/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../BT-AT/.vscode/settings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../BT-AT/project.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../../BT-AT/project.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/../.vscode/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/py.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/py.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/parameters.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../src/parameters.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../src/soc2p2.h" beforeDir="false" afterPath="$PROJECT_DIR$/../src/soc2p2.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,6 +51,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "g20240109",
+    "last_opened_file_path": "/home/daveg/Documents/GitHub/movie_Scraper",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
@@ -182,7 +179,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-babbdf50b680-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.15989.155" />
+        <option value="bundled-python-sdk-48aec45f0201-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.17011.127" />
       </set>
     </attachedChunks>
   </component>
