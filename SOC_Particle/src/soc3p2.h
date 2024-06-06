@@ -22,7 +22,7 @@
 #define MODELING              0 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
 
 // Sensor biases
-#define CURR_BIAS_AMP         0.0  // Calibration of amplified shunt sensor (* 'DA'), A
+#define CURR_BIAS_AMP         0.0   // Calibration of amplified shunt sensor (* 'DA'), A
 #define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SA')
 #define CURR_BIAS_NOA         0.2   // Calibration of non-amplified shunt sensor (* 'DB'), A
 #define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
@@ -37,7 +37,7 @@
 #define HDWE_INA181_AMP_HI   17.0       // Full AMP charge transition, A (17)
 #define HDWE_INA181_NOA_HI   19.0       // Full NOA charge transition, A (19)
 #define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
-#define VOLT_BIAS             0.00  // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS             0.05  // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI     22000      // Vb high sense resistor, ohm (22000)
@@ -53,7 +53,7 @@
 #define NOM_UNIT_CAP          102.9   // Nominal battery unit capacity.  (* 'Sc' or '*BS'/'*BP'), Ah
 #define HYS_SCALE             1.0     // Scalar on hysteresis (1.0)
 #define NS                    1.0     // Number of series batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BS')
-#define NP                    1.0     // Number of parallel batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BP')
+#define NP                    2.0     // Number of parallel batteries in bank.  Fractions scale and remember NOM_UNIT_CAP (* 'BP')
 
 // Faults
 #define FAKE_FAULTS           true    // What to do with faults, T=detect and display them but don't change signals
