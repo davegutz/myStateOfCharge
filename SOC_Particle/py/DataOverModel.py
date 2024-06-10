@@ -345,16 +345,20 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plt.savefig(fig_file_name, format="png")
 
     fig_list.append(plt.figure())  # DOM 4a
-    plt.subplot(211)
+    plt.subplot(311)
     plt.title(plot_title + ' DOM 4a')
     plt.plot(mo.time, mo.ib, color='orange', linestyle='-', label='ib'+ref_str)
     plt.plot(mv.time, mv.ib, color='green', linestyle='--', label='ib'+test_str)
     plt.legend(loc=1)
-    plt.subplot(212)
+    plt.subplot(312)
     if hasattr(smv, 'time'):
         plt.plot(smv.time, smv.soc_s, color='black', linestyle='-.', label='soc_s'+test_str)
     plt.plot(mo.time, mo.soc, color='red', linestyle=':', label='soc'+ref_str)
     plt.plot(mv.time, mv.soc, color='cyan', linestyle=':', label='soc'+test_str)
+    plt.legend(loc=1)
+    plt.subplot(313)
+    plt.plot(mo.time, mo.Tb, color='red', linestyle=':', label='Tb'+ref_str)
+    plt.plot(mv.time, mv.Tb, color='cyan', linestyle=':', label='Tb'+test_str)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)

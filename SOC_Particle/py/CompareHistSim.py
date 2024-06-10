@@ -1176,13 +1176,21 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
 
 
 def main():
+
     # User inputs (multiple input_files allowed
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/discharge_ib_soc_soc3p2_chg_hist_bad_cal.csv'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc0p_gr_fanMed_halfTime_20240609.csv'
     data_only = False
     mon_t = False
-    unit_key = 'g20240331_soc3p2_chg'
+    unit_key = 'g20240331_soc0p_ch'
     dt_resample = 10
     Tb_force = None
+
+    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc3p2_gr_fanMed_halfTime_20240609.csv'
+    # data_only = False
+    # mon_t = False
+    # unit_key = 'g20240331_soc3p2_ch'
+    # dt_resample = 10
+    # Tb_force = None
 
     # Do this when running compare_hist_sim on run that schedule extracted assuming constant Tb
     # Tb_force = 35
