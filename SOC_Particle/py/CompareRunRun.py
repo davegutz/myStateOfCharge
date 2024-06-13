@@ -36,9 +36,9 @@ if sys.platform == 'darwin':
 plt.rcParams['axes.grid'] = True
 
 
-def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=None):
+def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=None, sync_to_ctime=False):
 
-    print(f"compare_run_run:\n{keys=}\n{data_file_folder_ref=}\n{data_file_folder_test=}\n")
+    print(f"compare_run_run:\n{keys=}\n{data_file_folder_ref=}\n{data_file_folder_test=}\n{sync_to_ctime=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     # date_ = datetime.now().strftime("%y%m%d")
@@ -74,14 +74,20 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
     # Synchronize
     # Time since beginning of data to sync pulses
     if sync_info_ref.is_empty is False and sync_info_test.is_empty is False and \
-            sync_info_ref.length == sync_info_test.length and sync_info_ref.length > 1:
+            sync_info_ref.length == sync_info_test.length and sync_info_ref.length > 0:
         # Make target sync vector
         master_sync_del = calculate_master_sync(sync_info_ref.del_mon, sync_info_test.del_mon)
         sync_info_ref.synchronize(master_sync_del)
         mon_ref.time = sync_info_ref.time_mon.copy()
         sync_info_test.synchronize(master_sync_del)
         mon_test.time = sync_info_test.time_mon.copy()
-        print(f"{sync_info_ref.del_mon=}\n{sync_info_test.del_mon=}\n{master_sync_del=}\n{mon_test.time=}")
+        print(f"{sync_to_ctime=}\n{sync_info_ref.del_mon=}\n{sync_info_test.del_mon=}\n{master_sync_del=}\n{mon_test.time=}")
+    elif sync_to_ctime is True:
+        cTime_0_ref = mon_ref.cTime[0]
+        cTime_0_test = mon_test.cTime[0]
+        cTime_sync = cTime_0_ref
+        mon_ref.time = mon_ref.cTime - cTime_sync
+        mon_test.time = mon_test.cTime - cTime_sync
     else:
         print(f"Using simplified sync with |Ib|>0.  Data sets too small to sync or not equivalent number of sync pulses")
 
@@ -116,11 +122,13 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('allIn_pro0p_chg.csv', 'g20240331_pro0p_chg'), ('allIn_pro2p2_chg.csv', 'g20240331_pro2p2_chg')]
-    data_file_folder_ref = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
-    data_file_folder_test = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
+    keys = [('calib_soc3p2_ch.csv', 'g20240331_soc3p2_ch'), ('calib_soc0p_ch.csv', 'g20240331_soc0p_ch')]
+    data_file_folder_ref = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
+    data_file_folder_test = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
+    sync_to_ctime = True
 
-    compare_run_run(keys=keys, data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test)
+    compare_run_run(keys=keys, data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test,
+                    sync_to_ctime=sync_to_ctime)
 
 
 if __name__ == '__main__':
