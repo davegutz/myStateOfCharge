@@ -18,7 +18,7 @@
 import tkinter as tk
 from threading import Thread
 import sys
-if sys.version_info < (3, 12):
+if sys.version_info.minor < 12:
     import pyautogui
 else:
     from pynput.keyboard import Key, Controller
@@ -148,15 +148,15 @@ def stay_awake(up_set_min=3.):
     # FAILSAFE to FALSE feature is enabled by default so that you can easily stop execution of
     # your pyautogui program by manually moving the mouse to the upper left corner of the screen.
     # Once the mouse is in this location, pyautogui will throw an exception and exit.
-    if sys.version_info < (3, 12):
+    if sys.version_info.minor < 12:
         pyautogui.FAILSAFE = False
     while True and (up_time_min < up_set_min):
         time.sleep(30.)
         keyboard = None
-        if sys.version_info > (3, 11):
+        if sys.version_info.minor > 11:
             keyboard = Controller()
         for i in range(0, 3):
-            if sys.version_info > (3, 11):
+            if sys.version_info.minor > 11:
                 keyboard.press(Key.shift)  # Shift key does not disturb fullscreen
             else:
                 pyautogui.press('shift')  # Shift key does not disturb fullscreen

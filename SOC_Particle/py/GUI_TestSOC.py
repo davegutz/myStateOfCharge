@@ -627,8 +627,8 @@ def compare_run_run_choose():
                 print('GUI_TestSOC compare_run_run_choose:  Test', test_basename, test_key)
                 keys = [(ref_basename, ref_key), (test_basename, test_key)]
                 # master.withdraw()
-                compare_run_run(keys=keys, data_file_folder_ref=ref_folder_path,
-                                data_file_folder_test=test_folder_path)
+                compare_run_run(keys=keys, data_file_folder_ref=ref_folder_path, data_file_folder_test=test_folder_path,
+                                sync_to_ctime=True)
                 # master.deiconify()
             else:
                 tk.messagebox.showerror(message='key not found in' + testpath)

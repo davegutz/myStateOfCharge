@@ -52,12 +52,13 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     if fig_files is None:
         fig_files = []
 
-    if plot_init_in:
+    if plot_init_in and hasattr(smv, 'time') and hasattr(so, 'time'):
         fig_list.append(plt.figure())  # init 1
         plt.subplot(221)
         plt.title(plot_title + ' init 1')
         plt.plot(so.time, so.reset_s, color='black', linestyle='-', label='reset_s'+ref_str)
-        plt.plot(smv.time, smv.reset_s, color='red', linestyle='--', label='reset_s'+test_str)
+        if hasattr(smv, 'time'):
+            plt.plot(smv.time, smv.reset_s, color='red', linestyle='--', label='reset_s'+test_str)
         plt.plot(mo.time, mo.reset, color='magenta', linestyle='-', label='reset'+ref_str)
         plt.plot(mv.time, mv.reset, color='cyan', linestyle='--', label='reset'+test_str)
         plt.legend(loc=1)
@@ -318,7 +319,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plt.title(plot_title + ' DOM 4')
     plt.plot(mo.time, mo.soc, color='orange', linestyle='-', label='soc'+ref_str)
     plt.plot(mv.time, mv.soc, color='green', linestyle='--', label='soc'+test_str)
-    plt.plot(smv.time, smv.soc_s, color='black', linestyle='-.', label='soc_s'+test_str)
+    if hasattr(smv, 'time'):
+        plt.plot(smv.time, smv.soc_s, color='black', linestyle='-.', label='soc_s'+test_str)
     plt.plot(mo.time, mo.soc_ekf, color='red', linestyle=':', label='soc'+ref_str)
     plt.plot(mv.time, mv.soc_ekf, color='cyan', linestyle=':', label='soc_ekf'+test_str)
     plt.legend(loc=1)
@@ -327,20 +329,42 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     if mo.vb_h is not None:
         plt.plot(mo.time, mo.vb_h, color='cyan', linestyle='--', label='vb_hdwe'+ref_str)
     plt.plot(mv.time, mv.vb, color='green', linestyle='-.', label='vb'+test_str)
-    plt.plot(smv.time, smv.vb_s, color='black', linestyle='-.', label='vb_s'+test_str)
+    if hasattr(smv, 'time'):
+        plt.plot(smv.time, smv.vb_s, color='black', linestyle='-.', label='vb_s'+test_str)
     plt.legend(loc=1)
     plt.subplot(133)
     plt.plot(mo.soc, mo.vb, color='orange', linestyle='-', label='vb'+ref_str)
     if mo.vb_h is not None:
         plt.plot(mo.soc, mo.vb_h, color='cyan', linestyle='--', label='vb_hdwe'+ref_str)
     plt.plot(mv.soc, mv.vb, color='green', linestyle='-.', label='vb'+test_str)
-    plt.plot(smv.soc_s, smv.vb_s, color='black', linestyle='-.', label='vb_s'+test_str)
+    if hasattr(smv, 'time'):
+        plt.plot(smv.soc_s, smv.vb_s, color='black', linestyle='-.', label='vb_s'+test_str)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
 
-    if hasattr(mv, 'ib_diff_flt') is True:
+    fig_list.append(plt.figure())  # DOM 4a
+    plt.subplot(311)
+    plt.title(plot_title + ' DOM 4a')
+    plt.plot(mo.time, mo.ib, color='orange', linestyle='-', label='ib'+ref_str)
+    plt.plot(mv.time, mv.ib, color='green', linestyle='--', label='ib'+test_str)
+    plt.legend(loc=1)
+    plt.subplot(312)
+    if hasattr(smv, 'time'):
+        plt.plot(smv.time, smv.soc_s, color='black', linestyle='-.', label='soc_s'+test_str)
+    plt.plot(mo.time, mo.soc, color='red', linestyle=':', label='soc'+ref_str)
+    plt.plot(mv.time, mv.soc, color='cyan', linestyle=':', label='soc'+test_str)
+    plt.legend(loc=1)
+    plt.subplot(313)
+    plt.plot(mo.time, mo.Tb, color='red', linestyle=':', label='Tb'+ref_str)
+    plt.plot(mv.time, mv.Tb, color='cyan', linestyle=':', label='Tb'+test_str)
+    plt.legend(loc=1)
+    fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
+    fig_files.append(fig_file_name)
+    plt.savefig(fig_file_name, format="png")
+
+    if hasattr(mv, 'ib_diff_flt') is True and mv.ib_diff_flt is not None:
         fig_list.append(plt.figure())  # DOM 5
         plt.subplot(221)
         plt.title(plot_title + ' DOM 5')
