@@ -74,14 +74,14 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
     # Synchronize
     # Time since beginning of data to sync pulses
     if sync_info_ref.is_empty is False and sync_info_test.is_empty is False and \
-            sync_info_ref.length == sync_info_test.length and sync_info_ref.length > 0:
+            sync_info_ref.length == sync_info_test.length and (sync_info_ref.length > 1 or sync_to_ctime is True):
         # Make target sync vector
         master_sync_del = calculate_master_sync(sync_info_ref.del_mon, sync_info_test.del_mon)
         sync_info_ref.synchronize(master_sync_del)
         mon_ref.time = sync_info_ref.time_mon.copy()
         sync_info_test.synchronize(master_sync_del)
         mon_test.time = sync_info_test.time_mon.copy()
-        print(f"{sync_to_ctime=}\n{sync_info_ref.del_mon=}\n{sync_info_test.del_mon=}\n{master_sync_del=}\n{mon_test.time=}")
+        # print(f"{sync_to_ctime=}\n{sync_info_ref.del_mon=}\n{sync_info_test.del_mon=}\n{master_sync_del=}\n{mon_test.time=}")
     elif sync_to_ctime is True:
         cTime_0_ref = mon_ref.cTime[0]
         cTime_0_test = mon_test.cTime[0]
