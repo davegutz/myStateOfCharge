@@ -111,6 +111,7 @@ float TempSensor::sample(Sensors *Sen)
   #else
     float volt = float(analogRead(VTb_pin_))*VTB_CONV_GAIN;
     Tb_hdwe = float(HDWE_M_2WIRE) * log10( volt * float(HDWE_RS_2WIRE) / (V3V3 - volt) ) + float(HDWE_B_2WIRE);
+    tb_stale_flt_ = false;
     if ( sp.debug()==16 ) Serial.printf("I 2wire:  volt=%7.3f Tb_hdwe=%7.3f,\n", volt, Tb_hdwe);
   #endif
   return ( Tb_hdwe );
