@@ -40,6 +40,7 @@
 #undef HDWE_SSD1306_OLED
 #undef HDWE_DS18B20_SWIRE
 #undef HDWE_DS2482_1WIRE
+#undef HDWE_2WIRE
 #undef HDWE_INA181_HI_LO
 #undef HDWE_INA181_NOA_LO
 #undef HDWE_INA181_AMP_LO
@@ -191,10 +192,14 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define WRAP_SOC_MOD_OFF    0.85        // Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
 #define VC_S                1.0         // Vc sense scalar (1.0)
 #define VO_S                1.0         // Vo sense scalar (1.0)
+#define VTB_S               1.0         // VTb sense scalar (1.0)
 #define AMP_FILT_TAU        4.0         // Ib filters time constant for calibration only, s (4.0)
 #define VC_BARE_DETECTED    0.16        // Level of common voltage to declare circuit unconnected, V (0.16)
 #define V3V3                3.3         // Theoretical nominal V3v3, V (3.3)
 #define HALF_V3V3         (V3V3/2.)     // Theoretical center of differential TSC2010
+#define HDWE_M_2WIRE    -58.96          //
+#define HDWE_RS_2WIRE   15000.          //
+#define HDWE_B_2WIRE    262.79          //
 
 // Conversion gains
 #if defined(HDWE_ADS1013_AMP_NOA)
@@ -218,5 +223,6 @@ const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SEN
 const float VC_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VC_S);
 const float VO_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VO_S);
 const float VH3V3_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT);
+const float VTB_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VTB_S);
 
 #endif // CONSTANTS_H_

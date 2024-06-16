@@ -54,6 +54,12 @@ TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t 
    SdTb = new SlidingDeadband(HDB_TBATT);
    Serial.printf("DS18 1-wire Tb started\n");
 }
+TempSensor::TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay, const uint16_t VTb_pin)
+: DS18B20(pin, true, conversion_delay), tb_stale_flt_(true), VTb_pin_(VTb_pin)
+{
+   SdTb = new SlidingDeadband(HDB_TBATT);
+   Serial.printf("DS18 1-wire Tb started\n");
+}
 TempSensor::~TempSensor() {}
 // operators
 // functions
@@ -103,7 +109,9 @@ float TempSensor::sample(Sensors *Sen)
       // Using last-good-value:  no assignment
     }
   #else
-    Tb_hdwe = 0.;
+    float volt = float(analogRead(VTb_pin_))*VTB_CONV_GAIN;
+    Tb_hdwe = float(HDWE_M_2WIRE) * log10( volt * float(HDWE_RS_2WIRE) / (V3V3 - volt) ) + float(HDWE_B_2WIRE);
+    if ( sp.debug()==16 ) Serial.printf("I 2wire:  volt=%7.3f Tb_hdwe=%7.3f,\n", volt, Tb_hdwe);
   #endif
   return ( Tb_hdwe );
 }
@@ -793,7 +801,11 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
     this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_z, &sp.ib_bias_amp_z, SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, false);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_z, &sp.ib_bias_noa_z, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin, false);
   #endif
-  this->SensorTb = new TempSensor(pins->pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
+  #ifndef HDWE_2WIRE
+    this->SensorTb = new TempSensor(pins->pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
+  #else
+    this->SensorTb = new TempSensor(pins->pin_1_wire, TEMP_PARASITIC, TEMP_DELAY, pins->VTb_pin);
+  #endif
   this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
   this->Sim = new BatterySim();
   this->elapsed_inj = 0ULL;

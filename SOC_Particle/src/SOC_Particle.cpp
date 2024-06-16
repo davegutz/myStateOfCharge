@@ -145,7 +145,7 @@ unsigned long long last_sync = System.millis();   // Timekeeping
 int num_timeouts = 0;           // Number of Particle.connect() needed to unfreeze
 String hm_string = "00:00";     // time, hh:mm
 Pins *myPins;                   // Photon hardware pin mapping used
-#ifdef HDWE_SSD1306_OLED
+#if defined(HDWE_SSD1306_OLED) && !defined(HDWE_2WIRE)
   Adafruit_SSD1306 *display;      // Main OLED display
 #endif
 
@@ -169,7 +169,7 @@ void setup()
   Serial1.flush();
 
   // EERAM chip card for I2C
-  #ifdef HDWE_47L16_EERAM
+  #if defined(HDWE_47L16_EERAM) && !defined(HDWE_2WIRE)
     Log.info("setup EERAM");
     ram.begin(0, 0);
     ram.setAutoStore(true);
@@ -193,13 +193,19 @@ void setup()
   // A0 (pin 'D11') - Primary Ib amp (called by old ADS name Amplified, amp)
   // A1 (pin 'D12') - Vb
   // A2 (pin 'D13') - Backup Ib amp (called by old ADS name Non Amplified, noa)
+  // A3 (pin 'D0') - alternate to SDA.  Sometimes used for 2wire temperature
+  // A4 (pin 'D1') - alternate to SCL.  
   // A5 (pin 'D14') - Vr or Vc
-  // A4 - not available
-  // A6-->D14 - spare
   
   Log.info("setup Pins");
   #ifdef HDWE_PHOTON2
-    myPins = new Pins(D3, D7, D12, D11, D13, D14);
+    #ifdef HDWE_DS2482_1WIRE
+      myPins = new Pins(D3, D7, D12, D11, D13, D14);
+    #elif defined(HDWE_2WIRE)
+      myPins = new Pins(D3, D7, D12, D11, D13, D14, D0, true);
+    #else
+      #error "Temperature sensor undefined"
+    #endif
   #else
     myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
   #endif
@@ -208,7 +214,7 @@ void setup()
 
   // I2C for OLED, ADS, backup EERAM, DS2482
   // Photon2 only accepts 100 and 400 khz
-  #ifndef HDWE_BARE
+  #if !defined(HDWE_BARE) && !defined(HDWE_2WIRE)
     Log.info("setup I2C Wire");
     #ifdef HDWE_ADS1013_AMP_NOA
       Wire.setSpeed(CLOCK_SPEED_100KHZ);
@@ -222,7 +228,7 @@ void setup()
   #endif
 
   // Display (after start Wire)
-  #ifdef HDWE_SSD1306_OLED
+  #if defined(HDWE_SSD1306_OLED) && !defined(HDWE_2WIRE)
     Log.info("setup display");
     display = new Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
     Serial.printf("Init DISP\n");
@@ -248,6 +254,10 @@ void setup()
     ds.setup();
     Ds2482.setup();
     Serial.printf("DS2482 multi-drop setup complete\n");
+  #elif defined(HDWE_2WIRE)
+    Serial.printf("Using 2Wire Temperature sensor\n");
+  #else
+    #error "Temperature sensor undefined"
   #endif
 
   // Synchronize clock
@@ -302,7 +312,7 @@ void setup()
     Log.info("setup renominalize");
     if ( sp.num_diffs() )
     {
-      #ifdef HDWE_SSD1306_OLED
+      #if defined(HDWE_SSD1306_OLED) && !defined(HDWE_2WIRE)
         wait_on_user_input(display);
       #else
         wait_on_user_input();
@@ -466,13 +476,13 @@ void loop()
   if ( display_and_remember )
   {
     Log.info("display and remember");
-    #ifdef HDWE_SSD1306_OLED
+    #if defined(HDWE_SSD1306_OLED) && !defined(HDWE_2WIRE)
       oled_display(display, Sen, Mon);
     #else
       oled_display(Sen, Mon);
     #endif
 
-    #ifdef HDWE_47L16_EERAM
+    #if defined(HDWE_47L16_EERAM) && !defined(HDWE_2WIRE)
       // Save EERAM dynamic parameters.  Saves critical few state parameters
       sp.put_all_dynamic();
     #else

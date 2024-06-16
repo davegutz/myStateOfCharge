@@ -67,6 +67,7 @@ class TempSensor: public DS18B20
 public:
   TempSensor();
   TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay);
+  TempSensor(const uint16_t pin, const bool parasitic, const uint16_t conversion_delay, const uint16_t VTb_pin);
   ~TempSensor();
   // operators
   // functions
@@ -76,6 +77,7 @@ public:
 protected:
   SlidingDeadband *SdTb;
   boolean tb_stale_flt_;   // One-wire did not update last pass
+  uint16_t VTb_pin_;      // Using 2wire
 };
 
 
