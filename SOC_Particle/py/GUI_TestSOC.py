@@ -85,7 +85,7 @@ def_dict = {
     }
 
 # Transient string
-unit_list = ['pro0p', 'pro1a', 'pro2p2', 'soc0p', 'soc1a', 'soc3p2', 'soc2p2']
+unit_list = ['pro0p', 'pro1a', 'pro2p2', 'soc0p', 'soc1a', 'soc2p2', 'soc3p2', 'soc4p2']
 batt_list = ['bb', 'ch', 'chg']
 sel_list = [
     'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
@@ -250,8 +250,9 @@ putty_connection = {'': 'test',
                     'pro0p': 'testpro0p',
                     'pro1a': 'testpro1a',
                     'pro2p2': 'testpro2p2',
-                    'soc3p2': 'testsoc3p2',
                     'soc2p2': 'testsoc2p2',
+                    'soc3p2': 'testsoc3p2',
+                    'soc4p2': 'testsoc4p2',
                     }
 
 
@@ -403,7 +404,8 @@ class Exec:
 
     def enter_unit(self):
         answer = tk.simpledialog.askstring(title=self.level, initialvalue=self.unit,
-                                           prompt="Enter unit e.g. 'pro0p', 'pro1a', pro3p2', 'soc0p', 'soc1a', 'soc3p2', 'soc2p2':")
+                                           prompt="Enter unit e.g. 'pro0p', 'pro1a',"
+                                                  " pro3p2', 'soc0p', 'soc1a', 'soc2p2', 'soc3p2', 'soc4p2':")
         if answer is None or answer == ():
             print('enter operation cancelled')
             return
