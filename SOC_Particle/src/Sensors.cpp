@@ -708,12 +708,11 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
       failAssign(false, IB_AMP_FA);
       failAssign(false, IB_NOA_FA);
     }
-    float current_max = NOM_UNIT_CAP * sp.nP();
     faultAssign( Sen->ShuntAmp->bare_detected(), IB_AMP_BARE);
     faultAssign( Sen->ShuntNoAmp->bare_detected(), IB_NOA_BARE);
     #ifndef HDWE_BARE
-      faultAssign( ( ib_amp_bare() || abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max ) && !ap.disab_ib_fa, IB_AMP_FLT );
-      faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max ) && !ap.disab_ib_fa, IB_NOA_FLT );
+      faultAssign( ( ib_amp_bare() || abs(Sen->ShuntAmp->Ishunt_cal()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa, IB_AMP_FLT );
+      faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa, IB_NOA_FLT );
     #else
       faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_AMP_FLT );
       faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_NOA_FLT );

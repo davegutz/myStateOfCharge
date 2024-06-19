@@ -200,6 +200,13 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define HDWE_M_2WIRE    -58.96          //
 #define HDWE_RS_2WIRE   15000.          //
 #define HDWE_B_2WIRE    262.79          //
+#if !defined(IB_ABS_MAX_AMP)
+    #define IB_ABS_MAX_AMP (float(NOM_UNIT_CAP)*float(NP))
+#endif
+#if !defined(IB_ABS_MAX_NOA)
+    #define IB_ABS_MAX_NOA (float(NOM_UNIT_CAP)*float(NP))
+#endif
+
 
 // Conversion gains
 #if defined(HDWE_ADS1013_AMP_NOA)
