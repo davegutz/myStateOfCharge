@@ -41,11 +41,11 @@
 #undef HDWE_DS18B20_SWIRE
 #undef HDWE_DS2482_1WIRE
 #undef HDWE_2WIRE
-#undef HDWE_INA181_HI_LO
-#undef HDWE_INA181_NOA_LO
-#undef HDWE_INA181_AMP_LO
-#undef HDWE_INA181_AMP_HI
-#undef HDWE_INA181_NOA_HI
+#undef HDWE_IB_HI_LO
+#undef HDWE_IB_HI_LO_NOA_LO
+#undef HDWE_IB_HI_LO_AMP_LO
+#undef HDWE_IB_HI_LO_AMP_HI
+#undef HDWE_IB_HI_LO_NOA_HI
 
 // Software configuration
 #undef SOFT_DEPLOY_PHOTON
@@ -208,7 +208,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #elif defined(HDWE_TSC2010_DUAL)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-#elif defined(HDWE_INA181_HI_LO)
+#elif defined(HDWE_IB_HI_LO)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
 #else

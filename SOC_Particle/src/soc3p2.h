@@ -9,7 +9,7 @@
 #define SOFT_S1BAUD             230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9 (don't think this does anything)
 #define HDWE_PHOTON2
 // #define HDWE_SSD1306_OLED
-#define HDWE_INA181_HI_LO
+#define HDWE_IB_HI_LO
 #define HDWE_DS2482_1WIRE
 // #define HDWE_2WIRE
 // #define SOFT_DEBUG_QUEUE
@@ -23,27 +23,27 @@
 #define MODELING              0 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
 
 // Sensor biases
-#define CURR_BIAS_AMP       -0.08   // Calibration of amplified shunt sensor (* 'DA'), A
-#define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SA')
-#define CURR_BIAS_NOA        0.03   // Calibration of non-amplified shunt sensor (* 'DB'), A
-#define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
-#define CURR_SCALE_DISCH      1.0   // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
+#define CURR_BIAS_AMP        -0.08  // Calibration of amplified shunt sensor (* 'DA'), A
+#define CURR_SCALE_AMP         1.0  // Hardware to match data (* 'SA')
+#define CURR_BIAS_NOA         0.03  // Calibration of non-amplified shunt sensor (* 'DB'), A
+#define CURR_SCALE_NOA         1.0  // Hardware to match data (* 'SB')
+#define CURR_SCALE_DISCH       1.0  // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
 #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (1333 is 100A/0.075V)
-#define SHUNT_AMP_R1          25000.     // Internal amp resistance INA181A4 200x, ohms (2500)
-#define SHUNT_AMP_R2          500000.   // Internal amp resistance INA181A4 200x, ohms (500000)
-#define SHUNT_NOA_R1          25000.    // Internal amp resistance INA181A1 20x, ohms (25000)
-#define SHUNT_NOA_R2          500000.   // Internal amp resistance INA181A1 20x, ohms (500000)
-#define HDWE_INA181_NOA_LO  -20.0       // Full NOA discharge transition, A (-20)
-#define HDWE_INA181_AMP_LO  -18.0       // Full AMP discharge transition, A (-18)  
-#define HDWE_INA181_AMP_HI   17.0       // Full AMP charge transition, A (17)
-#define HDWE_INA181_NOA_HI   19.0       // Full NOA charge transition, A (19)
-#define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
-#define VOLT_BIAS             0.05  // Bias on Vb sensor (* 'Dc'), V
-#define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
-#define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
-#define VB_SENSE_R_HI     22000      // Vb high sense resistor, ohm (22000)
-#define VB_SCALE              1.0    // Scale Vb sensor (* 'SV')
-#define VTAB_BIAS             0.0    // Bias on voc_soc table (* 'Dw'), V
+#define SHUNT_AMP_R1         25000. // Internal amp resistance INA181A4 200x, ohms (2500)
+#define SHUNT_AMP_R2        500000. // Internal amp resistance INA181A4 200x, ohms (500000)
+#define SHUNT_NOA_R1         25000. // Internal amp resistance INA181A1 20x, ohms (25000)
+#define SHUNT_NOA_R2        500000. // Internal amp resistance INA181A1 20x, ohms (500000)
+#define HDWE_IB_HI_LO_NOA_LO  -20.0 // Full NOA discharge transition, A (-20)
+#define HDWE_IB_HI_LO_AMP_LO  -18.0 // Full AMP discharge transition, A (-18)  
+#define HDWE_IB_HI_LO_AMP_HI   17.0 // Full AMP charge transition, A (17)
+#define HDWE_IB_HI_LO_NOA_HI   19.0 // Full NOA charge transition, A (19)
+#define CURR_BIAS_ALL           0.0 // Bias on all shunt sensors (* 'DI'), A
+#define VOLT_BIAS              0.05 // Bias on Vb sensor (* 'Dc'), V
+#define TEMP_BIAS               0.0 // Bias on Tb sensor (* 'Dt'), deg C
+#define VB_SENSE_R_LO          4700 // Vb low sense resistor, ohm (4700)
+#define VB_SENSE_R_HI         22000 // Vb high sense resistor, ohm (22000)
+#define VB_SCALE                1.0 // Scale Vb sensor (* 'SV')
+#define VTAB_BIAS               0.0 // Bias on voc_soc table (* 'Dw'), V
 
 // Battery.  One 12 V 100 Ah battery bank would have NOM_UNIT_CAP 100, NS 1, and NP 1
 // Two 12 V 100 Ah series battery bank would have NOM_UNIT_CAP 100, NS 2, and NP 1

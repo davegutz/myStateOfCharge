@@ -9,7 +9,7 @@
 #define SOFT_S1BAUD             230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define HDWE_PHOTON2
 // #define HDWE_SSD1306_OLED
-#define HDWE_INA181_HI_LO
+#define HDWE_IB_HI_LO
 #define HDWE_DS2482_1WIRE
 // #define SOFT_DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
@@ -23,26 +23,26 @@
 
 // Sensor biases
 #define CURR_BIAS_AMP         0.02  // Calibration of amplified shunt sensor (* 'DA'), A
-#define CURR_SCALE_AMP        1.0   // Hardware to match data (* 'SA')
-#define CURR_BIAS_NOA        -0.1 // Calibration of non-amplified shunt sensor (* 'DB'), A
-#define CURR_SCALE_NOA        1.0   // Hardware to match data (* 'SB')
-#define CURR_SCALE_DISCH      1.0   // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
+#define CURR_SCALE_AMP         1.0  // Hardware to match data (* 'SA')
+#define CURR_BIAS_NOA        -0.1   // Calibration of non-amplified shunt sensor (* 'DB'), A
+#define CURR_SCALE_NOA         1.0  // Hardware to match data (* 'SB')
+#define CURR_SCALE_DISCH       1.0  // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
 #define SHUNT_GAIN            2666. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (2666 is 200A/0.075V)
-#define SHUNT_AMP_R1          2500.     // Internal amp resistance INA181A4 200x, ohms (2500)
-#define SHUNT_AMP_R2          500000.   // Internal amp resistance INA181A4 200x, ohms (500000)
-#define SHUNT_NOA_R1          25000.    // Internal amp resistance INA181A1 20x, ohms (25000)
-#define SHUNT_NOA_R2          500000.   // Internal amp resistance INA181A1 20x, ohms (500000)
-#define HDWE_INA181_NOA_LO  -20.3       // Full NOA discharge transition, A (-20)
-#define HDWE_INA181_AMP_LO  -18.3       // Full AMP discharge transition, A (-18)  
-#define HDWE_INA181_AMP_HI   17.0       // Full AMP charge transition, A (17)
-#define HDWE_INA181_NOA_HI   19.0       // Full NOA charge transition, A (19)
-#define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
-#define VOLT_BIAS            -0.05  // Bias on Vb sensor (* 'Dc'), V
-#define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
-#define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
-#define VB_SENSE_R_HI      47000     // Vb high sense resistor, ohm (47000)
-#define VB_SCALE              1.0    // Scale Vb sensor (* 'SV')
-#define VTAB_BIAS            -0.1    // Bias on voc_soc table (* 'Dw'), V
+#define SHUNT_AMP_R1          2500. // Internal amp resistance INA181A4 200x, ohms (2500)
+#define SHUNT_AMP_R2        500000. // Internal amp resistance INA181A4 200x, ohms (500000)
+#define SHUNT_NOA_R1         25000. // Internal amp resistance INA181A1 20x, ohms (25000)
+#define SHUNT_NOA_R2        500000. // Internal amp resistance INA181A1 20x, ohms (500000)
+#define HDWE_IB_HI_LO_NOA_LO  -20.3 // Full NOA discharge transition, A (-20)
+#define HDWE_IB_HI_LO_AMP_LO  -18.3 // Full AMP discharge transition, A (-18)  
+#define HDWE_IB_HI_LO_AMP_HI   17.0 // Full AMP charge transition, A (17)
+#define HDWE_IB_HI_LO_NOA_HI   19.0 // Full NOA charge transition, A (19)
+#define CURR_BIAS_ALL           0.0 // Bias on all shunt sensors (* 'DI'), A
+#define VOLT_BIAS             -0.05 // Bias on Vb sensor (* 'Dc'), V
+#define TEMP_BIAS               0.0 // Bias on Tb sensor (* 'Dt'), deg C
+#define VB_SENSE_R_LO          4700 // Vb low sense resistor, ohm (4700)
+#define VB_SENSE_R_HI         47000 // Vb high sense resistor, ohm (47000)
+#define VB_SCALE                1.0 // Scale Vb sensor (* 'SV')
+#define VTAB_BIAS              -0.1 // Bias on voc_soc table (* 'Dw'), V
 
 // Battery.  One 12 V 100 Ah battery bank would have NOM_UNIT_CAP 100, NS 1, and NP 1
 // Two 12 V 100 Ah series battery bank would have NOM_UNIT_CAP 100, NS 2, and NP 1

@@ -515,7 +515,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Ib truth table
   if ( ap.fake_faults )
   {
-    #ifdef HDWE_INA181_HI_LO  
+    #ifdef HDWE_IB_HI_LO  
       ib_sel_stat_ = 2;
     #else
       ib_sel_stat_ = 1;
@@ -795,7 +795,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   this->T = T;
   this->T_filt = T;
   this->T_temp = T_temp;
-  #if defined(HDWE_TSC2010_DUAL) || defined(HDWE_INA181_HI_LO)
+  #if defined(HDWE_TSC2010_DUAL) || defined(HDWE_IB_HI_LO)
     this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_z, &sp.ib_bias_amp_z, SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, true);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_z, &sp.ib_bias_noa_z, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin, true);
   #else
@@ -828,8 +828,8 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   NoaFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
   SelFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
   VbFilt = new LagExp(T, AMP_FILT_TAU, 0., NOMINAL_VB*2.5);
-  #ifdef HDWE_INA181_HI_LO
-    sel_brk_hdwe_ = new ScaleBrk(HDWE_INA181_NOA_LO, HDWE_INA181_AMP_LO, HDWE_INA181_AMP_HI, HDWE_INA181_NOA_HI);
+  #ifdef HDWE_IB_HI_LO
+    sel_brk_hdwe_ = new ScaleBrk(HDWE_IB_HI_LO_NOA_LO, HDWE_IB_HI_LO_AMP_LO, HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_NOA_HI);
   #else
     sel_brk_hdwe_ = new ScaleBrk(0., 0., 0., 0.);
   #endif
