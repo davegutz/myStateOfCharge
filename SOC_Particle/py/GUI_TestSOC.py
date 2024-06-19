@@ -1194,6 +1194,7 @@ if __name__ == '__main__':
     master = tk.Tk()
     master.title('State of Charge')
     master.wm_minsize(width=min_width, height=main_height)
+    master.iconphoto(False, tk.PhotoImage(file='./GUI_TestSOC.png'))
     # master.geometry('%dx%d' % (master.winfo_screenwidth(), master.winfo_screenheight()))
     Ref = Exec(cf, 'ref', path_disp_len_=folder_reveal)
     Test = Exec(cf, 'test', path_disp_len_=folder_reveal)
