@@ -36,3 +36,5 @@ SOC_Particle/dataReduction/g20240109/.~lock.curve_20240115_soc0p_ch.csv\#
 SOC_Particle/py/build/*
 SOC_Particle/py/dist/*
 SOC_Particle/py/GUI_TestSOC copy.py
+SOC_Particle/py/.idea/*
+
