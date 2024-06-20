@@ -105,10 +105,9 @@ Categories=Utility
 elif sys.platform == 'darwin':
     print(Colors.fg.green,
           f"Make sure 'Python Launcher' (Python Script Preferences) option for 'Allow override with #! in script' is checked.\n"
+          f"in Finder double-click on 'GUI_TestSOC.png'.  Edit-copy the image"
           f"in Finder ctrl-click on 'GUI_TestSOC.py'\n"
-          f"   - Open and copy icon into paste buffer.\n"
-          f"   - Then 'Get Info' on the duplicate, click on 2nd icon, paste.   Drag item to taskbar.",
-          Colors.reset)
+          f"   - 'Get Info', click on 2nd icon, paste.   Drag item to taskbar.", Colors.reset)
 elif sys.platform == 'win32':
     print(Colors.fg.green, f"browse to executable in 'dist/GUI_TestSOC' and double-click.  Create shortcut first time", Colors.reset)
     print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
