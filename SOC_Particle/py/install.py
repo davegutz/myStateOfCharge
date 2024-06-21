@@ -93,21 +93,30 @@ Categories=Utility
         result = shutil.move(f'/home/{login}/Desktop/GUI_TestSOC.desktop',
                              '/usr/share/applications/GUI_TestSOC.desktop')
     except PermissionError:
-        print(Colors.fg.red, "Stop and establish sudo permissions", Colors.reset)
-        print(Colors.fg.red, "  or", Colors.reset)
-        print(Colors.fg.red, f"sudo mv /home/{login}//Desktop/GUI_TestSOC.desktop /usr/share/applications/.", Colors.reset)
+        print(Colors.fg.red,
+              "Stop and establish sudo permissions"
+              "  or"
+              f"sudo mv /home/{login}//Desktop/GUI_TestSOC.desktop /usr/share/applications/.",
+              Colors.reset)
         exit(1)
     if result != '/usr/share/applications/GUI_TestSOC.desktop':
         print(Colors.fg.red, f"'mv ...' failed code {result}", Colors.reset)
     else:
-        print(Colors.fg.green, 'mv success.  Browse apps :: and make it favorites.  Open and set path to dataReduction', Colors.reset)
-        print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
+        print(Colors.fg.green,
+              'mv success.  Browse apps :: and make it favorites.  Open and set path to dataReduction'
+              "you shouldn't have to remake shortcuts",
+              Colors.reset)
 elif sys.platform == 'darwin':
     print(Colors.fg.green,
           f"Make sure 'Python Launcher' (Python Script Preferences) option for 'Allow override with #! in script' is checked.\n"
-          f"in Finder double-click on 'GUI_TestSOC.png'.  Edit-copy the image"
+          f"in Finder double-click on 'GUI_TestSOC.png'.  Edit-copy the image\n"
           f"in Finder ctrl-click on 'GUI_TestSOC.py'\n"
-          f"   - 'Get Info', click on 2nd icon, paste.   Drag item to taskbar.", Colors.reset)
+          f"   - 'Get Info', click on 2nd icon, paste.   Drag item to taskbar",
+          Colors.reset)
 elif sys.platform == 'win32':
-    print(Colors.fg.green, f"browse to executable in 'dist/GUI_TestSOC' and double-click.  Create shortcut first time", Colors.reset)
-    print(Colors.fg.green, "you shouldn't have to remake shortcuts", Colors.reset)
+    print(Colors.fg.green,
+          f"browse to executable in 'dist/GUI_TestSOC' and double-click.  Create shortcut first time and move Desktop\n"
+          f"double-click on  'GUI_TestSOC.exe - Shortcut', set paths on buttons, pin to taskbar\n"
+          f"in shortcut properties, make sure 'Start in:' is this folder where this script resides\n"
+          "you shouldn't have to remake shortcuts",
+          Colors.reset)
