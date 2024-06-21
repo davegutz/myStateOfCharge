@@ -247,6 +247,8 @@ void setup()
     Serial.printf("DS2482 multi-drop setup complete\n");
   #elif defined(HDWE_2WIRE)
     Serial.printf("Using 2Wire Temperature sensor\n");
+  #elif defined(HDWE_DS18B20_SWIRE)
+    Serial.printf("Using 1Wire Temperature sensor\n");
   #else
     #error "Temperature sensor undefined"
   #endif
