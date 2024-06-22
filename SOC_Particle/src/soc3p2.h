@@ -29,16 +29,16 @@
 #define CURR_SCALE_NOA         1.0  // Hardware to match data (* 'SB')
 #define CURR_SCALE_DISCH       1.0  // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
 #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (1333 is 100A/0.075V)
-#define SHUNT_AMP_R1         25000. // Internal amp resistance INA181A4 200x, ohms (2500)
-#define SHUNT_AMP_R2        500000. // Internal amp resistance INA181A4 200x, ohms (500000)
-#define IB_ABS_MAX_AMP         100.  // Hard range limit of sensor electrically impossible (=1.65 * SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2 *0.9)
-#define SHUNT_NOA_R1         25000. // Internal amp resistance INA181A1 20x, ohms (25000)
-#define SHUNT_NOA_R2        500000. // Internal amp resistance INA181A1 20x, ohms (500000)
-#define IB_ABS_MAX_NOA         100. // Hard range limit of sensor electrically impossible (=1.65 * SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2 *0.9)
-#define HDWE_IB_HI_LO_NOA_LO  -20.0 // Full NOA discharge transition, A (-20)
-#define HDWE_IB_HI_LO_AMP_LO  -18.0 // Full AMP discharge transition, A (-18)  
-#define HDWE_IB_HI_LO_AMP_HI   17.0 // Full AMP charge transition, A (17)
-#define HDWE_IB_HI_LO_NOA_HI   19.0 // Full NOA charge transition, A (19)
+#define SHUNT_AMP_R1          5100. // Internal amp resistance 196x, ohms (5100)
+#define SHUNT_AMP_R2       1000000. // Internal amp resistance 196x, ohms (1000000)
+#define IB_ABS_MAX_AMP        11.6  // Hard range limit of sensor electrically impossible (=1.65 * SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2 *1.05)
+#define SHUNT_NOA_R1          5100. // Internal amp resistance 29.4x, ohms (5100)
+#define SHUNT_NOA_R2        150000. // Internal amp resistance 29.4x, ohms (150000)
+#define IB_ABS_MAX_NOA        78.5  // Hard range limit of sensor electrically impossible (=1.65 * SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2 *1.05)
+#define HDWE_IB_HI_LO_NOA_LO   -11. // Full NOA discharge transition, A (-11)
+#define HDWE_IB_HI_LO_AMP_LO   -10. // Full AMP discharge transition, A (-10)  
+#define HDWE_IB_HI_LO_AMP_HI    10. // Full AMP charge transition, A (10)
+#define HDWE_IB_HI_LO_NOA_HI    11. // Full NOA charge transition, A (11)
 #define CURR_BIAS_ALL           0.0 // Bias on all shunt sensors (* 'DI'), A
 #define VOLT_BIAS              0.05 // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS               0.0 // Bias on Tb sensor (* 'Dt'), deg C
