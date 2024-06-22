@@ -17,8 +17,8 @@ Type AT+NAME=Hackster and press Send. It will return a OK message.
 // https://mcuoneclipse.com/2013/06/19/using-the-hc-06-bluetooth-module/
 
 #define SBAUD 230400
-#define STEP 1
-// #define STEP 2
+// #define STEP 1
+#define STEP 2
 
 // Step-by-step
 // 1.  Uncomment line 'STEP1' and comment line 'STEP2.'  Compile and flash.
@@ -43,12 +43,13 @@ Type AT+NAME=Hackster and press Send. It will return a OK message.
 //  
 //  >AT;
 //     <<answers 'OK'
-//  >AT+BAUD8;
+//  >AT+BAUD9;
+//     <<answers 'OK230400
 //  >AT+NAMEsoc1a;
 
 // >AT+BAUD4;    OK9600
 // >AT+BAUD8;    OK115200
-// >AT+VERSION;  OKlinvorV1.8
+// >AT+VERSION;  OKlinvorV1
 // >AT; 	OK 	Used to verify communication
 
 
@@ -115,17 +116,17 @@ void loop()
   if (string_complete)
   {
     Serial1.write(input_string.c_str());
-    Serial.printf("wrote '%s' to Serial1\n", input_string.c_str());
+    Serial.printf("\nwrote '%s' to Serial1; waiting response...\n", input_string.c_str());
     input_string = "";
     string_complete = false;
   }
-  delay_no_block(100);
+  // delay_no_block(100);
   if (Serial1.available())
   {
-    Serial1.printf("from Serial1:");
     Serial.write(Serial1.read());
+
   }
-  delay_no_block(100);
+  // delay_no_block(100);
 }
 
 
