@@ -8,10 +8,8 @@
 #define SOFT_SBAUD              460800      // Default Serial baud when able (don't think this does anything)
 #define SOFT_S1BAUD             230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9 (don't think this does anything)
 #define HDWE_PHOTON2
-// #define HDWE_SSD1306_OLED
 #define HDWE_IB_HI_LO
 #define HDWE_DS2482_1WIRE
-// #define HDWE_2WIRE
 // #define SOFT_DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'
 // #define LOGHANDLE
