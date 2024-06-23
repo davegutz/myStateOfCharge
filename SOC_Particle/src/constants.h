@@ -36,12 +36,12 @@
 #undef SOFT_S1BAUD
 #undef HDWE_47L16_EERAM
 #undef HDWE_ADS1013_AMP_NOA
-#undef HDWE_TSC2010_DUAL
+#undef HDWE_IB_DUAL
+#undef HDWE_IB_HI_LO
 #undef HDWE_SSD1306_OLED
 #undef HDWE_DS18B20_SWIRE
 #undef HDWE_DS2482_1WIRE
 #undef HDWE_2WIRE
-#undef HDWE_IB_HI_LO
 #undef HDWE_IB_HI_LO_NOA_LO
 #undef HDWE_IB_HI_LO_AMP_LO
 #undef HDWE_IB_HI_LO_AMP_HI
@@ -212,7 +212,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #if defined(HDWE_ADS1013_AMP_NOA)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN;
-#elif defined(HDWE_TSC2010_DUAL)
+#elif defined(HDWE_IB_DUAL)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
 #elif defined(HDWE_IB_HI_LO)

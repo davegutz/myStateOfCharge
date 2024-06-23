@@ -9,7 +9,7 @@
 #define SOFT_S1BAUD             230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define HDWE_PHOTON2
 #define HDWE_SSD1306_OLED
-#define HDWE_TSC2010_DUAL
+#define HDWE_IB_DUAL
 #define HDWE_DS2482_1WIRE
 // #define SOFT_DEBUG_QUEUE
 // #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;'

@@ -123,13 +123,13 @@ float TempSensor::sample(Sensors *Sen)
 Shunt::Shunt()
 : Adafruit_ADS1015(), name_("None"), port_(0x00), bare_detected_(false){}
 Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *sp_Ib_bias, const float v2a_s,
-  const uint8_t vc_pin, const uint8_t vo_pin, const uint8_t vh3v3_pin, const boolean using_tsc2010)
+  const uint8_t vc_pin, const uint8_t vo_pin, const uint8_t vh3v3_pin, const boolean using_opAmp)
 : Adafruit_ADS1015(),
   name_(name), port_(port), bare_detected_(false), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0), Ishunt_cal_filt_(0),
   sp_ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
   vc_pin_(vc_pin), vo_pin_(vo_pin), vr_pin_(vh3v3_pin), Vc_raw_(HALF_V3V3/VH3V3_CONV_GAIN), Vc_(HALF_V3V3),
-  Vo_Vc_(0.), using_tsc2010_(using_tsc2010)
+  Vo_Vc_(0.), using_opamp_(using_opAmp)
 {
   #ifdef HDWE_ADS1013_AMP_NOA
     if ( name_=="No Amp")
@@ -148,7 +148,7 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *
     }
     else Serial.printf("SHUNT MON %s started\n", name_.c_str());
   #else
-    if ( using_tsc2010_ ) Serial.printf("Ib %s sense ADC pin %d started using TSC2010 and 3V3 pin %d\n", name_.c_str(), vo_pin_, vr_pin_);
+    if ( using_opamp_ ) Serial.printf("Ib %s sense ADC pin %d started using OpAmp and 3V3 pin %d\n", name_.c_str(), vo_pin_, vr_pin_);
     else Serial.printf("Ib %s sense ADC pins %d and %d started\n", name_.c_str(), vo_pin_, vc_pin_);
   #endif
   Filt_ = new General2_Pole(0.1, F_W_I, F_Z_I, -NOM_UNIT_CAP*sp.nP(), NOM_UNIT_CAP*sp.nP());  // actual update time provided run time
@@ -232,7 +232,7 @@ void Shunt::convert(const boolean disconnect, const boolean reset, Sensors *Sen)
 void Shunt::sample(const boolean reset_loc, const float T)
 {
   sample_time_z_ = sample_time_;
-  if ( using_tsc2010_ )
+  if ( using_opamp_ )
   {
     Vc_raw_ = analogRead(vr_pin_);
     Vc_ =  float(Vc_raw_)*VH3V3_CONV_GAIN + ap.vc_add;
@@ -794,7 +794,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   this->T = T;
   this->T_filt = T;
   this->T_temp = T_temp;
-  #if defined(HDWE_TSC2010_DUAL) || defined(HDWE_IB_HI_LO)
+  #if defined(HDWE_IB_DUAL) || defined(HDWE_IB_HI_LO)
     this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_z, &sp.ib_bias_amp_z, SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, true);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_z, &sp.ib_bias_noa_z, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin, true);
   #else
