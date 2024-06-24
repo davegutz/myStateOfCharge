@@ -190,18 +190,21 @@ void setup()
   
   Log.info("setup Pins");
   #ifdef HDWE_PHOTON2
-    #ifdef HDWE_DS2482_1WIRE
+    #if defined(HDWE_DS2482_1WIRE) | defined(HDWE_BARE)
       myPins = new Pins(D3, D7, D12, D11, D13, D14);
     #elif defined(HDWE_2WIRE)
       myPins = new Pins(D3, D7, D12, D11, D13, D14, D0, true);
     #else
-      #error "Temperature sensor undefined"
+      #if !defined(HDWE_BARE)
+        #error "Temperature sensor undefined"
+      #endif
     #endif
   #else
     myPins = new Pins(D6, D7, A1, A2, A3, A4, A5);
   #endif
   pinMode(myPins->status_led, OUTPUT);
   digitalWrite(myPins->status_led, LOW);
+
 
   // I2C for OLED, ADS, backup EERAM, DS2482
   // Photon2 only accepts 100 and 400 khz
@@ -250,14 +253,14 @@ void setup()
   #elif defined(HDWE_DS18B20_SWIRE)
     Serial.printf("Using 1Wire Temperature sensor\n");
   #else
-    #error "Temperature sensor undefined"
+    #if !defined(HDWE_BARE)
+      #error "Temperature sensor undefined"
+    #endif
   #endif
 
   // Synchronize clock
   // Device needs to be configured for wifi (hold setup 3 sec run Particle app) and in range of wifi
-  // Phone hotspot is very convenient
-  Log.info("setup WiFi or lack of");
-  WiFi.disconnect();
+  // Phone hotspot is very convenientwait_on_user_input
   delay(2000);
   WiFi.off();
   delay(1000);

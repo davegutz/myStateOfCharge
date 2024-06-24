@@ -46,6 +46,22 @@
 #undef HDWE_IB_HI_LO_AMP_LO
 #undef HDWE_IB_HI_LO_AMP_HI
 #undef HDWE_IB_HI_LO_NOA_HI
+#undef CURR_BIAS_AMP
+#undef CURR_SCALE_AMP
+#undef CURR_BIAS_NOA
+#undef CURR_SCALE_NOA
+#undef CURR_SCALE_DISCH
+#undef SHUNT_GAIN
+#undef SHUNT_AMP_R1
+#undef SHUNT_AMP_R2
+#undef VB_SENSE_R_LO
+#undef VB_SENSE_R_HI
+#undef VB_SCALE
+#undef VTAB_BIAS
+#undef VOLT_BIAS
+#undef CURR_BIAS_ALL
+#undef TEMP_BIAS
+
 
 // Software configuration
 #undef SOFT_DEPLOY_PHOTON
@@ -207,6 +223,20 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
     #define IB_ABS_MAX_NOA (float(NOM_UNIT_CAP)*float(NP))
 #endif
 
+// Default values 
+#ifdef HDWE_BARE
+    #define CURR_BIAS_AMP 0.
+    #define CURR_BIAS_NOA 0.
+    #define CURR_SCALE_AMP 1.
+    #define CURR_SCALE_NOA 1.
+    #define CURR_SCALE_DISCH 1.
+    #define VB_SCALE 1.
+    #define VOLT_BIAS 0.
+    #define TEMP_BIAS 0.
+    #define CURR_BIAS_ALL 0.
+    #define SHUNT_AMP_GAIN 1.
+    #define SHUNT_NOA_GAIN 1.
+#endif
 
 // Conversion gains
 #if defined(HDWE_ADS1013_AMP_NOA)
@@ -218,15 +248,17 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #elif defined(HDWE_IB_HI_LO)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
-#else
+#elif !defined(HDWE_BARE)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN;
 #endif
 
 
 // Voltage measurement gains
-const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SENSE_R_LO) /
-                              float(VB_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VB_S);
+#if !defined(HDWE_BARE)
+    const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SENSE_R_LO) /
+                                  float(VB_SENSE_R_LO) / float(PHOTON_ADC_COUNT) * float(VB_S);
+#endif
 const float VC_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VC_S);
 const float VO_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VO_S);
 const float VH3V3_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT);

@@ -108,7 +108,7 @@ float TempSensor::sample(Sensors *Sen)
       tb_stale_flt_ = true;
       // Using last-good-value:  no assignment
     }
-  #else
+  #elif defined(HDWE_2WIRE)
     float volt = float(analogRead(VTb_pin_))*VTB_CONV_GAIN;
     Tb_hdwe = float(HDWE_M_2WIRE) * log10( volt * float(HDWE_RS_2WIRE) / (V3V3 - volt) ) + float(HDWE_B_2WIRE);
     tb_stale_flt_ = false;
@@ -702,31 +702,32 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 // Checks analog current.  Latches
 void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 {
-    boolean reset_loc = reset | reset_all_faults_;
-    if ( reset_loc )
-    {
-      failAssign(false, IB_AMP_FA);
-      failAssign(false, IB_NOA_FA);
-    }
-    faultAssign( Sen->ShuntAmp->bare_detected(), IB_AMP_BARE);
-    faultAssign( Sen->ShuntNoAmp->bare_detected(), IB_NOA_BARE);
-    #ifndef HDWE_BARE
-      faultAssign( ( ib_amp_bare() || abs(Sen->ShuntAmp->Ishunt_cal()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa, IB_AMP_FLT );
-      faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa, IB_NOA_FLT );
-    #else
-      faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_AMP_FLT );
-      faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_NOA_FLT );
-    #endif
-    if ( ap.disab_ib_fa )
-    {
-      failAssign( false, IB_AMP_FA );
-      failAssign( false, IB_NOA_FA);
-    }
-    else
-    {
-      failAssign( vc_fa() || ib_amp_fa() || IbAmpHardFail->calculate(ib_amp_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_AMP_FA );
-      failAssign( vc_fa() || ib_noa_fa() || IbNoAmpHardFail->calculate(ib_noa_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_NOA_FA);
-    }
+  boolean reset_loc = reset | reset_all_faults_;
+  if ( reset_loc )
+  {
+    failAssign(false, IB_AMP_FA);
+    failAssign(false, IB_NOA_FA);
+  }
+  faultAssign( Sen->ShuntAmp->bare_detected(), IB_AMP_BARE);
+  faultAssign( Sen->ShuntNoAmp->bare_detected(), IB_NOA_BARE);
+  #ifndef HDWE_BARE
+    faultAssign( ( ib_amp_bare() || abs(Sen->ShuntAmp->Ishunt_cal()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa, IB_AMP_FLT );
+    faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa, IB_NOA_FLT );
+  #else
+    float current_max = NOM_UNIT_CAP * sp.nP();
+    faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_AMP_FLT );
+    faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_NOA_FLT );
+  #endif
+  if ( ap.disab_ib_fa )
+  {
+    failAssign( false, IB_AMP_FA );
+    failAssign( false, IB_NOA_FA);
+  }
+  else
+  {
+    failAssign( vc_fa() || ib_amp_fa() || IbAmpHardFail->calculate(ib_amp_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_AMP_FA );
+    failAssign( vc_fa() || ib_noa_fa() || IbNoAmpHardFail->calculate(ib_noa_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_NOA_FA);
+  }
 }
 
 // Temp stale check
@@ -794,16 +795,16 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   this->T = T;
   this->T_filt = T;
   this->T_temp = T_temp;
-  #if defined(HDWE_IB_DUAL) || defined(HDWE_IB_HI_LO)
+  #if defined(HDWE_IB_DUAL) || defined(HDWE_IB_HI_LO) || defined(HDWE_BARE)
     this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_z, &sp.ib_bias_amp_z, SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, true);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_z, &sp.ib_bias_noa_z, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin, true);
   #else
     this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_z, &sp.ib_bias_amp_z, SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, false);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_z, &sp.ib_bias_noa_z, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin, false);
   #endif
-  #ifndef HDWE_2WIRE
+  #if !defined(HDWE_2WIRE) & !defined(HDWE_BARE)
     this->SensorTb = new TempSensor(pins->pin_1_wire, TEMP_PARASITIC, TEMP_DELAY);
-  #else
+  #elif !defined(HDWE_BARE)
     this->SensorTb = new TempSensor(pins->pin_1_wire, TEMP_PARASITIC, TEMP_DELAY, pins->VTb_pin);
   #endif
   this->TbSenseFilt = new General2_Pole(double(READ_DELAY)/1000., F_W_T, F_Z_T, -20.0, 150.);
@@ -1115,8 +1116,10 @@ void Sensors::vb_load(const uint16_t vb_pin, const boolean reset)
 {
   if ( !sp.mod_vb_dscn() )
   {
-    Vb_raw = analogRead(vb_pin);
-    Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*sp.Vb_scale() + float(VB_A) + sp.Vb_bias_hdwe();
+    #if !defined(HDWE_BARE)
+      Vb_raw = analogRead(vb_pin);
+      Vb_hdwe =  float(Vb_raw)*VB_CONV_GAIN*sp.Vb_scale() + float(VB_A) + sp.Vb_bias_hdwe();
+    #endif
     Vb_hdwe_f = VbFilt->calculate(Vb_hdwe, reset, AMP_FILT_TAU, T);
   }
   else
