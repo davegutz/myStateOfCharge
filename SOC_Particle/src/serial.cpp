@@ -34,7 +34,7 @@ void create_rapid_string(Publish *pubList, Sensors *Sen, BatteryMonitor *Mon)
 {
   double cTime = double(Sen->now)/1000;
   
-  sprintf(pr.buff, "%s, %s,%13.3f,%6.3f, %d,%7.0f,%d, %d, %d, %d, %6.3f,%6.3f,%9.3f,%9.3f,%7.5f,  %7.5f,%7.5f,%7.5f,%7.5f,  %9.6f, %7.5f,%7.5f,%7.5f,%5.3f,", \
+  sprintf(pr.buff, "%s, %s,%13.3f,%6.3f, %d,%7.0f,%d, %d, %d, %d, %6.3f,%6.3f,%9.3f,%9.3f,%8.5f,  %7.5f,%8.5f,%8.5f,%8.5f,  %9.6f, %8.5f,%8.5f,%8.5f,%5.3f,", \
     pubList->unit.c_str(), pubList->hm_string.c_str(), cTime, Sen->T,
     CHEM, Mon->q_cap_rated_scaled(), pubList->sat, sp.ib_select(), sp.modeling(), Mon->bms_off(),
     Mon->Tb(), Mon->vb(), Mon->ib(), Mon->ib_charge(), Mon->voc_soc(), 

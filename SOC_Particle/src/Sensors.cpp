@@ -962,14 +962,14 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   {
       double cTime = double(now)/1000.;
 
-      sprintf(pr.buff, "unit_sel,%13.3f, %d, %d,  %10.7f,  %7.5f,%7.5f,%7.5f,%7.5f,%7.5f,  %7.5f,%7.5f, ",
+      sprintf(pr.buff, "unit_sel,%13.3f, %d, %d,  %10.7f, %8.5f,%8.5f,%8.5f,%8.5f,%8.5f, %8.5f,%8.5f, ",
           cTime, reset, sp.ib_select(),
           Flt->cc_diff(),
           ib_amp_hdwe(), ib_noa_hdwe(), ib_amp_model(), ib_noa_model(), ib_model(), 
           Flt->ib_diff(), Flt->ib_diff_f());
       Serial.printf("%s", pr.buff);
 
-      sprintf(pr.buff, "  %7.5f,%7.5f,%7.5f,  %d, %7.5f,%7.5f,%7.5f, %d, %7.5f,  %d, %7.5f,%7.5f, %d, %7.5f,  %5.2f,%5.2f, %d, %5.2f, ",
+      sprintf(pr.buff, "  %7.5f,%8.5f,%8.5f,  %d,%8.5f,%8.5f,%8.5f, %d,%8.5f,  %d,%8.5f,%8.5f, %d,%8.5f,  %5.2f,%5.2f, %d, %5.2f, ",
           Mon->voc_soc(), Flt->e_wrap(), Flt->e_wrap_filt(),
           Flt->ib_sel_stat(), vc_hdwe(), ib_hdwe(), ib_hdwe_model(), sp.mod_ib(), ib(),
           Flt->vb_sel_stat(), vb_hdwe(), vb_model(), sp.mod_vb(), vb(),
