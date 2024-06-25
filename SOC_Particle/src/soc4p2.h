@@ -1,6 +1,7 @@
 #ifndef soc4p2_h
 #define soc4p2_h
-
+// 0a10aced202194944a04c040  old device
+// 0a10aced202194944a04c094 new one
 #include "version.h"
 
 // Features config
@@ -17,7 +18,7 @@
 // * = SRAM EEPROM adjustments, retained on power reset
 
 // Miscellaneous
-#define ASK_DURING_BOOT       0   // Flag to ask for application of this file to * retained adjustements
+#define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
 #define MODELING              0   // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
 
 // Sensor biases

@@ -85,7 +85,7 @@ def_dict = {
     }
 
 # Transient string
-unit_list = ['pro0p', 'pro1a', 'pro2p2', 'soc0p', 'soc1a', 'soc2p2', 'soc3p2', 'soc4p2']
+unit_list = ['pro0p', 'pro1a', 'pro2p2', 'pro3p2', 'pro4p2', 'soc0p', 'soc1a', 'soc2p2', 'soc3p2', 'soc4p2']
 batt_list = ['bb', 'ch', 'chg']
 sel_list = [
     'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
@@ -250,6 +250,8 @@ putty_connection = {'': 'test',
                     'pro0p': 'testpro0p',
                     'pro1a': 'testpro1a',
                     'pro2p2': 'testpro2p2',
+                    'pro3p2': 'testpro3p2',
+                    'pro4p2': 'testpro4p2',
                     'soc2p2': 'testsoc2p2',
                     'soc3p2': 'testsoc3p2',
                     'soc4p2': 'testsoc4p2',
@@ -341,7 +343,10 @@ class Exec:
         if self.version is None:
             self.version = 'undefined'
         self.version_path = str(os.path.join(self.dataReduction_folder, self.version))
-        os.makedirs(self.version_path, exist_ok=True)
+        try:
+            os.makedirs(self.version_path, exist_ok=True)
+        except OSError:
+            tk.messagebox.showerror(title="Error", message="check google-drive available")
         self.battery = self.cf[self.ind]['battery']
         self.battery_button = None
         self.level = level
@@ -405,7 +410,8 @@ class Exec:
     def enter_unit(self):
         answer = tk.simpledialog.askstring(title=self.level, initialvalue=self.unit,
                                            prompt="Enter unit e.g. 'pro0p', 'pro1a',"
-                                                  " pro3p2', 'soc0p', 'soc1a', 'soc2p2', 'soc3p2', 'soc4p2':")
+                                                  " pro3p2', 'pro4p2', 'soc0p', 'soc1a',"
+                                                  "'soc2p2', 'soc3p2', 'soc4p2':")
         if answer is None or answer == ():
             print('enter operation cancelled')
             return
