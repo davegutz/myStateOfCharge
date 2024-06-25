@@ -38,7 +38,7 @@
 #define HDWE_IB_HI_LO_AMP_HI    10. // Full AMP charge transition, A (10)
 #define HDWE_IB_HI_LO_NOA_HI    11. // Full NOA charge transition, A (11)
 #define CURR_BIAS_ALL           0.0 // Bias on all shunt sensors (* 'DI'), A
-#define VOLT_BIAS              0.05 // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS              0.18 // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS               0.0 // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO          4700 // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI         22000 // Vb high sense resistor, ohm (22000)
