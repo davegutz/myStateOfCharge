@@ -977,6 +977,141 @@ def add_qcrs(hist, mon_t_=False, mon=None, qcrs=None):
     return hist
 
 
+def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=False, unit_key=None, sync_time=None,
+                       dt_resample=10, Tb_force=None):
+
+    print(f"\nload_hist_and_prep:\n{data_file=}\n{data_only=}\n{mon_t=}\n{unit_key=}\n{dt_resample=}\n{Tb_force=}\n")
+
+    # Save these
+    rated_batt_cap_in = 100.
+    # Reconstruction of soc using sub-sampled data is poor.  Drive everything with soc from Monitor
+    dvoc_mon_in = 0.
+
+    # File path operations
+    _, data_file_txt = os.path.split(data_file)
+    version = version_from_data_file(data_file)
+    path_to_temp, save_pdf_path, _ = local_paths(version)
+
+    # Load mon to extract mod information
+    # # Load mon v4 (old)
+    if mon_t is True:
+        mon_old, sim_old, f, mon_t_file_clean, temp_mont_t_file_clean, _ = \
+            load_data(data_file, 1, unit_key=unit_key, time_end_in=time_end_in, zero_zero_in=False)
+    else:
+        mon_old = None
+
+    # Load summaries
+    s_raw = None
+    temp_sum_file_clean = write_clean_file(data_file, type_='_summ', hdr_key='fltb', unit_key='unit_u',
+                                           skip=1, comment_str='---')
+    if temp_sum_file_clean:
+        s_raw = np.genfromtxt(temp_sum_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+    else:
+        print("data from", temp_sum_file_clean, "empty after loading")
+        # tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
+        # return None, None, None, None, None
+
+    # Load history
+    h_raw = None
+    temp_hist_file_clean = write_clean_file(data_file, type_='_hist', hdr_key='fltb', unit_key='unit_h',
+                                            skip=1, comment_str='---')
+    if temp_hist_file_clean:
+        h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+    else:
+        print("data from", temp_hist_file_clean, "empty after loading")
+        # tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
+        # return None, None, None, None, None
+
+    # Load fault
+    temp_flt_file_clean = write_clean_file(data_file, type_='_flt', hdr_key='fltb', unit_key='unit_f',
+                                           skip=1, comment_str='---')
+    if temp_flt_file_clean:
+        f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
+    else:
+        f_raw = None
+        print("data from", temp_flt_file_clean, "empty after loading")
+        # tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
+        # return None, None, None, None, None
+
+    # Load configuration
+    unit = None
+    if mon_t is True and mon_old is not None:
+        chm = int(mon_old.chm[0])
+    else:
+        if unit_key.__contains__('bb'):
+            chm = 0
+        elif unit_key.__contains__('chg'):
+            chm = 2
+        elif unit_key.__contains__('ch'):
+            chm = 1
+        else:
+            chm = None
+        unit = unit_key.split('_')[-2]
+        if chm == 2:
+            rated_batt_cap_in = 102.9  # A-hr capacity of test article (output of Calibrate_exe.py)
+        else:
+            rated_batt_cap_in = 108.4  # A-hr capacity of test article
+    qcrs = rated_batt_cap_in * Battery.UNIT_CAP_RATED * 3600.
+    batt = BatteryMonitor(mod_code=chm, unit=unit)
+
+    # Force Tb.  This is useful for verifying calibration runs where voc(soc) schedule extracted from the run
+    # with slightly varying Tb but assumed constant when making new schedule
+    if Tb_force is not None:
+        if f_raw is not None:
+            f_raw.Tb = Tb_force
+        if h_raw is not None:
+            h_raw.Tb = Tb_force
+        if s_raw is not None:
+            s_raw.Tb = Tb_force
+
+    # Sort and augment data
+    f = None
+    if f_raw is not None:
+        f_raw = np.unique(f_raw)
+        f_raw = remove_nan(f_raw)
+        # noinspection PyTypeChecker
+        f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time,
+                        unit=unit)
+        print("\nf after add_stuff_f:\n", f.dtype.names, f, "\n")
+        f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)  # tb_band=100 disables banding
+
+    # sums and history
+    hall_raw = hstack2((h_raw, s_raw))
+
+    if hall_raw is not None:
+        hall_raw = np.unique(hall_raw)
+        hall_raw = remove_nan(hall_raw)
+        print("\nh raw:\n", hall_raw.dtype.names, "\n", hall_raw, "\n", hall_raw.dtype.names, "\n")
+        # noinspection PyTypeChecker
+        h = add_stuff_f(hall_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
+        h = add_mod(h, mon_t, mon_old)
+        h = add_chm(h, mon_t, mon_old, chm)
+        h = add_qcrs(h, mon_t_=mon_t, mon=mon_old, qcrs=qcrs)
+        print("\nh after adding stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after adding stuff\n")
+
+        # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
+        h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
+
+        # Shift time by detecting when ib changes
+        if sync_time is None:
+            h_20C = shift_time(h_20C)
+
+        # Covert to fast update rate
+        h_20C_resamp = resample(data=h_20C, dt_resamp=dt_resample, time_var='time',
+                                specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
+                                          ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
+                                          ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
+        for i in range(len(h_20C_resamp.time)):
+            if i == 0:
+                h_20C_resamp.dt[i] = h_20C_resamp.time[1] - h_20C_resamp.time[0]
+            else:
+                h_20C_resamp.dt[i] = h_20C_resamp.time[i] - h_20C_resamp.time[i-1]
+
+        # Hand fix oddities
+        mon_old, sim_old = bandaid(h_20C_resamp)
+        return mon_old, sim_old
+
+
 def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=False, unit_key=None, sync_time=None,
                      dt_resample=10, Tb_force=None):
 
@@ -1178,19 +1313,12 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
 def main():
 
     # User inputs (multiple input_files allowed
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc0p_gr_fanMed_halfTime_20240609.csv'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc0p hist 2024_06_25.csv'
     data_only = False
     mon_t = False
     unit_key = 'g20240331_soc0p_ch'
     dt_resample = 10
     Tb_force = None
-
-    # data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc3p2_gr_fanMed_halfTime_20240609.csv'
-    # data_only = False
-    # mon_t = False
-    # unit_key = 'g20240331_soc3p2_ch'
-    # dt_resample = 10
-    # Tb_force = None
 
     # Do this when running compare_hist_sim on run that schedule extracted assuming constant Tb
     # Tb_force = 35
