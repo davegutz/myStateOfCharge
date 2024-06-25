@@ -255,12 +255,13 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         voc_req = np.zeros((n, 1))
         dv_hys_req = np.zeros((n, 1))
         voc_stat_req = np.zeros((n, 1))
-        for i in range(n):
-            voc_req[i] = lut_vb.interp(sv.time[i]) - smv.dv_dyn_s[i]
-            voc_stat_req[i] = smv.voc_stat_s[i]
-            dv_hys_req[i] = voc_req[i] - smv.voc_stat_s[i]
-        plt.plot(smv.time, np.array(smv.dv_hys_s)+0.1, color='red', linestyle='-', label='dv_hys_s'+test_str+'+0.1')
-        plt.plot(sv.time, np.array(dv_hys_req)+0.1, color='black', linestyle='--', label='dv_hys_req_s'+test_str+'+0.1')
+        if hasattr(smv, 'dv_dyn_s'):
+            for i in range(n):
+                voc_req[i] = lut_vb.interp(sv.time[i]) - smv.dv_dyn_s[i]
+                voc_stat_req[i] = smv.voc_stat_s[i]
+                dv_hys_req[i] = voc_req[i] - smv.voc_stat_s[i]
+            plt.plot(smv.time, np.array(smv.dv_hys_s)+0.1, color='red', linestyle='-', label='dv_hys_s'+test_str+'+0.1')
+            plt.plot(sv.time, np.array(dv_hys_req)+0.1, color='black', linestyle='--', label='dv_hys_req_s'+test_str+'+0.1')
 
     if so is not None:
         from pyDAGx import myTables
@@ -394,7 +395,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.subplot(223)
         plt.plot(mo.time, mo.e_wrap, color='green', linestyle='-', label='e_wrap' + ref_str)
         plt.plot(mv.time, mv.e_wrap, color='red', linestyle='--', label='e_wrap' + test_str)
-        plt.plot(mo.time, mo.e_wrap_filt, color='magenta', linestyle='-.', label='e_wrap_filt' + ref_str)
+        if hasattr(mo, 'e_wrap_filt'):
+            plt.plot(mo.time, mo.e_wrap_filt, color='magenta', linestyle='-.', label='e_wrap_filt' + ref_str)
         if hasattr(mv, 'e_wrap_filt'):
             plt.plot(mv.time, mv.e_wrap_filt, color='cyan', linestyle=':', label='e_wrap_filt' + test_str)
         plt.plot(mo.time, mo.ewh_thr, color='black', linestyle='-.', label='ewh_thr' + ref_str)
@@ -404,7 +406,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.ylim(-1, 1)
         plt.legend(loc=1)
         plt.subplot(224)
-        plt.plot(mo.time, mo.ib_sel_stat - 2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')
+        if hasattr(mo, 'ib_sel_stat'):
+            plt.plot(mo.time, mo.ib_sel_stat - 2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')
         if hasattr(mv, 'ib_sel_stat'):
             plt.plot(mv.time, mv.ib_sel_stat - 2, color='blue', linestyle='--', label='ib_sel_stat' + test_str + '-2')
         plt.plot(mo.time, mo.tb_flt, color='green', linestyle='-', label='tb_flt' + ref_str)
