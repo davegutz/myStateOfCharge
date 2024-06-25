@@ -50,6 +50,13 @@ def compare_hist_hist(data_file_ref=None, unit_key_ref=None, data_file_tst=None,
     mon_tst, sim_tst, unit_tst, fault_tst, hist_20C_tst, filename_tst = \
         load_hist_and_prep(data_file=data_file_tst, unit_key=unit_key_tst, dt_resample=dt_resample)
 
+    # Synchronize
+    d_time = mon_tst.time_ux[0] - mon_ref.time_ux[0]
+    if d_time > 0:
+        mon_tst.time += d_time
+    else:
+        mon_ref.time += d_time
+
     # File path operations
     _, data_file_txt = os.path.split(data_file_ref)
     version = version_from_data_file(data_file_ref)
@@ -73,18 +80,18 @@ def compare_hist_hist(data_file_ref=None, unit_key_ref=None, data_file_tst=None,
             plot_init_in = False
             fig_list, fig_files = dom_plot(mon_ref, mon_tst, sim_ref, sim_tst, sim_s_tst, filename_ref,
                                            fig_files, plot_title=plot_title, fig_list=fig_list,
-                                           plot_init_in=plot_init_in, ref_str='', test_str='_tst')
+                                           plot_init_in=plot_init_in, ref_str='_'+unit_ref, test_str='_'+unit_tst)
             fig_list, fig_files = gp_plot(mon_ref, mon_tst, sim_ref, sim_tst, sim_s_tst, filename_ref,
                                           fig_files, plot_title=plot_title, fig_list=fig_list,
-                                          ref_str='', test_str='_tst')
+                                          ref_str='_'+unit_ref, test_str='_'+unit_tst)
             fig_list, fig_files = off_on_plot(mon_ref, mon_tst, sim_ref, sim_tst, sim_s_tst, filename_ref,
                                               fig_files, plot_title=plot_title, fig_list=fig_list,
-                                              ref_str='', test_str='_tst')
+                                              ref_str='_'+unit_ref, test_str='_'+unit_tst)
             fig_list, fig_files = overall_fault(mon_ref, mon_tst, sim_tst, sim_s_tst, filename_ref,
                                                 fig_files, plot_title=plot_title, fig_list=fig_list)
             fig_list, fig_files = tune_r(mon_ref, mon_tst, sim_s_tst, filename_ref,
                                          fig_files, plot_title=plot_title, fig_list=fig_list,
-                                         ref_str='', test_str='_tst')
+                                         ref_str='_'+unit_ref, test_str='_'+unit_tst)
 
         precleanup_fig_files(output_pdf_name=filename_ref, path_to_pdfs=save_pdf_path)
         unite_pictures_into_pdf(outputPdfName=filename_ref+'_'+date_time+'.pdf', save_pdf_path=save_pdf_path)
