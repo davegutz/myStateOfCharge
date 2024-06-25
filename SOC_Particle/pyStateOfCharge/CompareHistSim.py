@@ -979,6 +979,7 @@ def add_qcrs(hist, mon_t_=False, mon=None, qcrs=None):
 
 def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=False, unit_key=None, sync_time=None,
                        dt_resample=10, Tb_force=None):
+    """Load history, reconstruct samples by linear interpolation and normalize all soc and Tb to 20C"""
 
     print(f"\nload_hist_and_prep:\n{data_file=}\n{data_only=}\n{mon_t=}\n{unit_key=}\n{dt_resample=}\n{Tb_force=}\n")
 
@@ -990,10 +991,10 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
     # Load mon to extract mod information
     # # Load mon v4 (old)
     if mon_t is True:
-        mon_old, sim_old, f, mon_t_file_clean, temp_mont_t_file_clean, _ = \
+        mon, sim, f, mon_t_file_clean, temp_mont_t_file_clean, _ = \
             load_data(data_file, 1, unit_key=unit_key, time_end_in=time_end_in, zero_zero_in=False)
     else:
-        mon_old = None
+        mon = None
 
     # Load summaries
     s_raw = None
@@ -1029,12 +1030,12 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
         # return None, None, None, None, None
 
     # Save files
-    files_old = (temp_sum_file_clean, temp_hist_file_clean, temp_flt_file_clean)
+    files = (temp_sum_file_clean, temp_hist_file_clean, temp_flt_file_clean)
 
     # Load configuration
     unit = None
-    if mon_t is True and mon_old is not None:
-        chm = int(mon_old.chm[0])
+    if mon_t is True and mon is not None:
+        chm = int(mon.chm[0])
     else:
         if unit_key.__contains__('bb'):
             chm = 0
@@ -1076,15 +1077,17 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
     # sums and history
     hall_raw = hstack2((h_raw, s_raw))
 
-    if hall_raw is not None:
+    if hall_raw is None:
+        return None, None, unit, None, None, files
+    else:
         hall_raw = np.unique(hall_raw)
         hall_raw = remove_nan(hall_raw)
         print("\nh raw:\n", hall_raw.dtype.names, "\n", hall_raw, "\n", hall_raw.dtype.names, "\n")
         # noinspection PyTypeChecker
         h = add_stuff_f(hall_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
-        h = add_mod(h, mon_t, mon_old)
-        h = add_chm(h, mon_t, mon_old, chm)
-        h = add_qcrs(h, mon_t_=mon_t, mon=mon_old, qcrs=qcrs)
+        h = add_mod(h, mon_t, mon)
+        h = add_chm(h, mon_t, mon, chm)
+        h = add_qcrs(h, mon_t_=mon_t, mon=mon, qcrs=qcrs)
         print("\nh after adding stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after adding stuff\n")
 
         # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
@@ -1106,10 +1109,9 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
                 h_20C_resamp.dt[i] = h_20C_resamp.time[i] - h_20C_resamp.time[i-1]
 
         # Hand fix oddities
-        mon_old, sim_old = bandaid(h_20C_resamp)
-        return mon_old, sim_old, unit, f, h_20C, files_old
-    else:
-        return None, None, unit, None, None, files_old
+        mon, sim = bandaid(h_20C_resamp)
+
+        return mon, sim, unit, f, h_20C, files
 
 
 def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=False, unit_key=None, sync_time=None,
@@ -1129,8 +1131,9 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
     dvoc_sim_in = 0.
     mon_ver = None
     sim_ver = None
+    sim_s_ver = None
 
-    # Load history
+    # Load history, normalizing all soc and Tb to 20C
     mon_old, sim_old, unit, f, h_20C, files_old = \
         load_hist_and_prep(data_file=data_file, time_end_in=time_end_in, data_only=data_only, mon_t=mon_t,
                            unit_key=unit_key, sync_time=sync_time, dt_resample=dt_resample, Tb_force=Tb_force)
