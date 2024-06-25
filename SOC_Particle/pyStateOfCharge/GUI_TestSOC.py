@@ -30,6 +30,7 @@ import re
 from tkinter import ttk, filedialog
 import tkinter.simpledialog
 import tkinter.messagebox
+from CompareHistHist import compare_hist_hist
 from CompareHistSim import compare_hist_sim
 from CompareRunSim import compare_run_sim
 from CompareRunRun import compare_run_run
@@ -539,6 +540,34 @@ def clear_data(silent=False, nowait=False):
         if silent is False:
             print('putty test file non-existent or too small (<64 bytes) probably already done')
             tkinter.messagebox.showwarning(message="Nothing to clear")
+
+
+# Choose file to perform compare_hist_hist on
+def compare_hist_hist_choose():
+    # Select file
+    print('compare_hist_hist_choose')
+    testpaths = filedialog.askopenfilenames(title='Choose test file(s)', filetypes=[('csv', '.csv')],
+                                            initialdir=Test.dataReduction_folder)
+    if testpaths is None or testpaths == '':
+        print("No file chosen")
+    else:
+        for testpath in testpaths:
+            test_folder_path, test_parent, test_basename, test_txt, test_key = contain_all(testpath)
+            if test_key != '':
+                ref_path = filedialog.askopenfilename(title='Choose reference file', filetypes=[('csv', '.csv')],
+                                                      initialdir=Ref.dataReduction_folder)
+                ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(ref_path)
+                print('GUI_TestSOC compare_hist_hist_choose:  Ref', ref_basename, ref_key)
+                print('GUI_TestSOC compare_hist_hist_choose:  Test', test_basename, test_key)
+                keys = [(ref_basename, ref_key), (test_basename, test_key)]
+                # master.withdraw()
+                compare_hist_hist(data_file_ref=ref_path, unit_key_ref=ref_key,
+                                  data_file_tst=testpath, unit_key_tst=test_key,
+                                  dt_resample=30.)
+                # master.deiconify()
+            else:
+                tk.messagebox.showerror(message='key not found in' + testpath)
+        update_data_buttons()
 
 
 # Choose file to perform compare_run_sim on
@@ -1477,6 +1506,9 @@ if __name__ == '__main__':
     run_sim_choose_button = myButton(compare_panel, text='Compare Hist Sim Choose', command=compare_hist_sim_choose,
                                      fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT, font=butt_font)
     run_sim_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
+    hist_hist_choose_button = myButton(compare_panel, text='Compare Hist Hist Choose', command=compare_hist_hist_choose,
+                                       fg="blue", bg=bg_color, wraplength=wrap_length, justify=tk.LEFT, font=butt_font)
+    hist_hist_choose_button.pack(side=tk.LEFT, padx=5, pady=5)
 
     # Begin
     handle_test_unit()
