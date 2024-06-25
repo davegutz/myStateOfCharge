@@ -55,7 +55,7 @@ def compare_hist_hist(data_file_ref=None, unit_key_ref=None, data_file_tst=None,
     if d_time > 0:
         mon_tst.time += d_time
     else:
-        mon_ref.time += d_time
+        mon_ref.time -= d_time
 
     # File path operations
     _, data_file_txt = os.path.split(data_file_ref)
