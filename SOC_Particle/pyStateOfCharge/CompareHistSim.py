@@ -991,7 +991,7 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
     # Load mon to extract mod information
     # # Load mon v4 (old)
     if mon_t is True:
-        mon, sim, f, mon_t_file_clean, temp_mont_t_file_clean, _ = \
+        mon, sim, fault, mon_t_file_clean, temp_mont_t_file_clean, _ = \
             load_data(data_file, 1, unit_key=unit_key, time_end_in=time_end_in, zero_zero_in=False)
     else:
         mon = None
@@ -1030,7 +1030,14 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
         # return None, None, None, None, None
 
     # Save files
-    files = (temp_sum_file_clean, temp_hist_file_clean, temp_flt_file_clean)
+    filename = None
+    if temp_flt_file_clean is not None:
+        filename = os.path.split(temp_flt_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
+    elif temp_hist_file_clean is not None:
+        filename = os.path.split(temp_hist_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[
+            0]
+    elif temp_sum_file_clean is not None:
+        filename = os.path.split(temp_sum_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
 
     # Load configuration
     unit = None
@@ -1064,41 +1071,41 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
             s_raw.Tb = Tb_force
 
     # Sort and augment data
-    f = None
+    fault = None
     if f_raw is not None:
         f_raw = np.unique(f_raw)
         f_raw = remove_nan(f_raw)
         # noinspection PyTypeChecker
-        f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time,
-                        unit=unit)
-        print("\nf after add_stuff_f:\n", f.dtype.names, f, "\n")
-        f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)  # tb_band=100 disables banding
+        fault = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in,
+                            time_sync=sync_time, unit=unit)
+        print("\nfault after add_stuff_f:\n", fault.dtype.names, fault, "\n")
+        fault = filter_Tb(fault, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)  # tb_band=100 disables banding
 
     # sums and history
-    hall_raw = hstack2((h_raw, s_raw))
+    h_combo_raw = hstack2((h_raw, s_raw))
 
-    if hall_raw is None:
-        return None, None, unit, None, None, files
+    if h_combo_raw is None:
+        return None, None, unit, None, None, filename
     else:
-        hall_raw = np.unique(hall_raw)
-        hall_raw = remove_nan(hall_raw)
-        print("\nh raw:\n", hall_raw.dtype.names, "\n", hall_raw, "\n", hall_raw.dtype.names, "\n")
+        h_combo_raw = np.unique(h_combo_raw)
+        h_combo_raw = remove_nan(h_combo_raw)
+        print("\nhist raw:\n", h_combo_raw.dtype.names, "\n", h_combo_raw, "\n", h_combo_raw.dtype.names, "\n")
         # noinspection PyTypeChecker
-        h = add_stuff_f(hall_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
-        h = add_mod(h, mon_t, mon)
-        h = add_chm(h, mon_t, mon, chm)
-        h = add_qcrs(h, mon_t_=mon_t, mon=mon, qcrs=qcrs)
-        print("\nh after adding stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after adding stuff\n")
+        hist = add_stuff_f(h_combo_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
+        hist = add_mod(hist, mon_t, mon)
+        hist = add_chm(hist, mon_t, mon, chm)
+        hist = add_qcrs(hist, mon_t_=mon_t, mon=mon, qcrs=qcrs)
+        print("\nhist after adding stuff:\n", hist.dtype.names, "\n", hist, "\n", hist.dtype.names, "\n :hist after adding stuff\n")
 
         # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
-        h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
+        hist_20C = filter_Tb(hist, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
 
         # Shift time by detecting when ib changes
         if sync_time is None:
-            h_20C = shift_time(h_20C)
+            hist_20C = shift_time(hist_20C)
 
         # Covert to fast update rate
-        h_20C_resamp = resample(data=h_20C, dt_resamp=dt_resample, time_var='time',
+        h_20C_resamp = resample(data=hist_20C, dt_resamp=dt_resample, time_var='time',
                                 specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
                                           ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
                                           ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
@@ -1111,7 +1118,7 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
         # Hand fix oddities
         mon, sim = bandaid(h_20C_resamp)
 
-        return mon, sim, unit, f, h_20C, files
+        return mon, sim, unit, fault, hist_20C, filename
 
 
 def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=False, unit_key=None, sync_time=None,
@@ -1134,14 +1141,11 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
     sim_s_ver = None
 
     # Load history, normalizing all soc and Tb to 20C
-    mon_old, sim_old, unit, f, h_20C, files_old = \
+    mon_old, sim_old, unit, fault, hist_20C, filename = \
         load_hist_and_prep(data_file=data_file, time_end_in=time_end_in, data_only=data_only, mon_t=mon_t,
                            unit_key=unit_key, sync_time=sync_time, dt_resample=dt_resample, Tb_force=Tb_force)
 
     # File path operations
-    temp_sum_file_clean = files_old[0]
-    temp_hist_file_clean = files_old[1]
-    temp_flt_file_clean = files_old[2]
     _, data_file_txt = os.path.split(data_file)
     version = version_from_data_file(data_file)
     path_to_temp, save_pdf_path, _ = local_paths(version)
@@ -1161,18 +1165,11 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
     if data_only is False:
         fig_list = []
         fig_files = []
-        filename = None
-        if temp_flt_file_clean is not None:
-            filename = os.path.split(temp_flt_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
-        elif temp_hist_file_clean is not None:
-            filename = os.path.split(temp_hist_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
-        elif temp_sum_file_clean is not None:
-            filename = os.path.split(temp_sum_file_clean)[1].replace('.csv', '_') + os.path.split(__file__)[1].split('.')[0]
         plot_title = filename + '   ' + date_time
-        if f is not None and len(f.time) > 1:
-            fig_list, fig_files = over_fault(f, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
+        if fault is not None and len(fault.time) > 1:
+            fig_list, fig_files = over_fault(fault, filename, fig_files=fig_files, plot_title=plot_title, subtitle='faults',
                                              fig_list=fig_list, cc_dif_tol=cc_dif_tol_in, time_units='sec')
-        if h_20C is not None and len(h_20C.time) > 1:
+        if hist_20C is not None and len(hist_20C.time) > 1:
             sim_old = None
             plot_init_in = False
             fig_list, fig_files = dom_plot(mon_old, mon_ver, sim_old, sim_ver, sim_s_ver, filename,
