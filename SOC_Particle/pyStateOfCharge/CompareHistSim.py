@@ -987,11 +987,6 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
     # Reconstruction of soc using sub-sampled data is poor.  Drive everything with soc from Monitor
     dvoc_mon_in = 0.
 
-    # File path operations
-    _, data_file_txt = os.path.split(data_file)
-    version = version_from_data_file(data_file)
-    path_to_temp, save_pdf_path, _ = local_paths(version)
-
     # Load mon to extract mod information
     # # Load mon v4 (old)
     if mon_t is True:
@@ -1032,6 +1027,9 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
         print("data from", temp_flt_file_clean, "empty after loading")
         # tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
         # return None, None, None, None, None
+
+    # Save files
+    files_old = (temp_sum_file_clean, temp_hist_file_clean, temp_flt_file_clean)
 
     # Load configuration
     unit = None
@@ -1109,7 +1107,9 @@ def load_hist_and_prep(data_file=None, time_end_in=None, data_only=False, mon_t=
 
         # Hand fix oddities
         mon_old, sim_old = bandaid(h_20C_resamp)
-        return mon_old, sim_old
+        return mon_old, sim_old, unit, f, h_20C, files_old
+    else:
+        return None, None, unit, None, None, files_old
 
 
 def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=False, unit_key=None, sync_time=None,
@@ -1124,138 +1124,26 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
     scale_in = 1
     cc_dif_tol_in = 0.2
     use_mon_soc_in = True
-    rated_batt_cap_in = 100.
     # Reconstruction of soc using sub-sampled data is poor.  Drive everything with soc from Monitor
     dvoc_mon_in = 0.
     dvoc_sim_in = 0.
+    mon_ver = None
+    sim_ver = None
+
+    # Load history
+    mon_old, sim_old, unit, f, h_20C, files_old = \
+        load_hist_and_prep(data_file=data_file, time_end_in=time_end_in, data_only=data_only, mon_t=mon_t,
+                           unit_key=unit_key, sync_time=sync_time, dt_resample=dt_resample, Tb_force=Tb_force)
 
     # File path operations
+    temp_sum_file_clean = files_old[0]
+    temp_hist_file_clean = files_old[1]
+    temp_flt_file_clean = files_old[2]
     _, data_file_txt = os.path.split(data_file)
     version = version_from_data_file(data_file)
     path_to_temp, save_pdf_path, _ = local_paths(version)
 
-    # Load mon to extract mod information
-    # # Load mon v4 (old)
-    if mon_t is True:
-        mon_old, sim_old, f, mon_t_file_clean, temp_mont_t_file_clean, _ = \
-            load_data(data_file, 1, unit_key=unit_key, time_end_in=time_end_in, zero_zero_in=False)
-    else:
-        mon_old = None
-
-    # Load summaries
-    s_raw = None
-    temp_sum_file_clean = write_clean_file(data_file, type_='_summ', hdr_key='fltb', unit_key='unit_u',
-                                           skip=1, comment_str='---')
-    if temp_sum_file_clean:
-        s_raw = np.genfromtxt(temp_sum_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
-    else:
-        print("data from", temp_sum_file_clean, "empty after loading")
-        # tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
-        # return None, None, None, None, None
-
-    # Load history
-    h_raw = None
-    temp_hist_file_clean = write_clean_file(data_file, type_='_hist', hdr_key='fltb', unit_key='unit_h',
-                                            skip=1, comment_str='---')
-    if temp_hist_file_clean:
-        h_raw = np.genfromtxt(temp_hist_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
-    else:
-        print("data from", temp_hist_file_clean, "empty after loading")
-        # tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
-        # return None, None, None, None, None
-
-    # Load fault
-    temp_flt_file_clean = write_clean_file(data_file, type_='_flt', hdr_key='fltb', unit_key='unit_f',
-                                           skip=1, comment_str='---')
-    if temp_flt_file_clean:
-        f_raw = np.genfromtxt(temp_flt_file_clean, delimiter=',', names=True, dtype=float).view(np.recarray)
-    else:
-        f_raw = None
-        print("data from", temp_flt_file_clean, "empty after loading")
-        # tkinter.messagebox.showwarning(message="CompareHistSim:  Data missing.  See monitor window for info.")
-        # return None, None, None, None, None
-
-    # Load configuration
-    unit = None
-    if mon_t is True and mon_old is not None:
-        chm = int(mon_old.chm[0])
-    else:
-        if unit_key.__contains__('bb'):
-            chm = 0
-        elif unit_key.__contains__('chg'):
-            chm = 2
-        elif unit_key.__contains__('ch'):
-            chm = 1
-        else:
-            chm = None
-        unit = unit_key.split('_')[-2]
-        if chm == 2:
-            rated_batt_cap_in = 102.9  # A-hr capacity of test article (output of Calibrate_exe.py)
-        else:
-            rated_batt_cap_in = 108.4  # A-hr capacity of test article
-    qcrs = rated_batt_cap_in * Battery.UNIT_CAP_RATED * 3600.
-    batt = BatteryMonitor(mod_code=chm, unit=unit)
-
-    # Force Tb.  This is useful for verifying calibration runs where voc(soc) schedule extracted from the run
-    # with slightly varying Tb but assumed constant when making new schedule
-    if Tb_force is not None:
-        if f_raw is not None:
-            f_raw.Tb = Tb_force
-        if h_raw is not None:
-            h_raw.Tb = Tb_force
-        if s_raw is not None:
-            s_raw.Tb = Tb_force
-
-    # Sort and augment data
-    f = None
-    if f_raw is not None:
-        f_raw = np.unique(f_raw)
-        f_raw = remove_nan(f_raw)
-        # noinspection PyTypeChecker
-        f = add_stuff_f(f_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time,
-                        unit=unit)
-        print("\nf after add_stuff_f:\n", f.dtype.names, f, "\n")
-        f = filter_Tb(f, 20., batt, tb_band=100., rated_batt_cap=rated_batt_cap_in)  # tb_band=100 disables banding
-
-    # sums and history
-    hall_raw = hstack2((h_raw, s_raw))
-
-    h_20C = None
-    mon_ver = None
-    sim_ver = None
-    sim_s_ver = None
-    sim_old = None
-    if hall_raw is not None:
-        hall_raw = np.unique(hall_raw)
-        hall_raw = remove_nan(hall_raw)
-        print("\nh raw:\n", hall_raw.dtype.names, "\n", hall_raw, "\n", hall_raw.dtype.names, "\n")
-        # noinspection PyTypeChecker
-        h = add_stuff_f(hall_raw, batt, ib_band=IB_BAND, rated_batt_cap=rated_batt_cap_in, Dw=dvoc_mon_in, time_sync=sync_time)
-        h = add_mod(h, mon_t, mon_old)
-        h = add_chm(h, mon_t, mon_old, chm)
-        h = add_qcrs(h, mon_t_=mon_t, mon=mon_old, qcrs=qcrs)
-        print("\nh after adding stuff:\n", h.dtype.names, "\n", h, "\n", h.dtype.names, "\n :h after adding stuff\n")
-
-        # Convert all the long time readings (history) to same arbitrary (20 deg C) temperature
-        h_20C = filter_Tb(h, 20., batt, tb_band=TB_BAND, rated_batt_cap=rated_batt_cap_in)
-
-        # Shift time by detecting when ib changes
-        if sync_time is None:
-            h_20C = shift_time(h_20C)
-
-        # Covert to fast update rate
-        h_20C_resamp = resample(data=h_20C, dt_resamp=dt_resample, time_var='time',
-                                specials=[('falw', 0), ('dscn_fa', 0), ('ib_diff_fa', 0), ('wv_fa', 0),
-                                          ('wl_fa', 0), ('wh_fa', 0), ('ccd_fa', 0), ('ib_noa_fa', 0),
-                                          ('ib_amp_fa', 0), ('vb_fa', 0), ('tb_fa', 0)])
-        for i in range(len(h_20C_resamp.time)):
-            if i == 0:
-                h_20C_resamp.dt[i] = h_20C_resamp.time[1] - h_20C_resamp.time[0]
-            else:
-                h_20C_resamp.dt[i] = h_20C_resamp.time[i] - h_20C_resamp.time[i-1]
-
-        # Hand fix oddities
-        mon_old, sim_old = bandaid(h_20C_resamp)
+    if mon_old is not None and sim_old is not None:
 
         # Replicate
         data_file_clean = path_to_temp + '/' + data_file_txt.replace('.csv', '_hist' + '.csv', 1)
