@@ -323,7 +323,7 @@ Third current signal constructed using voltage feedback, and EKF and voc(soc).  
 
 The shunt device and wiring are prime reliable.   This is a declaration that the system cannot detect or replace them.    However, failure is tested and the failure modes are graceful.   For example, there is 'quiet' logic that detects disconnected wiring and/or shunt failure and displays a 'conn' status on the OLED.
 
-Note that an important feature of this scheme is annunciation and user intervention.  Once the triplex logic isolates a failure it is in a mode where further isolation is not much better than a coin toss.   How do you choose between two different wristwatches telling different time?  If the user repairs a failure soon after annunciation then exposure to multiple failure scenario is negligible.
+Note that an important feature of this scheme is annunciation and user intervention.  Once the triplex logic isolates a failure it is in a mode where further isolation is not much better than a coin toss.   How do you choose between two different wristwatches telling different time?  If the user physically repairs a failure soon after annunciation then exposure to multiple failure scenario is negligible.
 
 Power loss is a normal event.   They are caused by user action and by the BMS.   To protect LiFeP04 chemistry, the BMS shuts off charging below 0 C and shuts off usage below 10v.   Features are added to Count Coulombs and monitor faults in presence of normal power loss occurrence.
 
@@ -396,7 +396,7 @@ OLED board carefully off to the side.  Will need a hobby box to contain the fina
    1. Gain - component calibration at install 
    2. Bias - component calibration at install 
    3. Drift - Tweak test (not implemented)
-   4. Amplifiers.  There is a chip (TSC2010-IDT, https://www.digikey.com/en/products/detail/stmicroelectronics/TSC2011IYDT/13244059, 20x for 3.3v and 0.075 shunt) that creates one voltage signal for differential action.  That will reduce complexity, use fewer A/D, and be more accurate.
+   4. Amplifiers.  There is a chip (TSC2010-IDT, https://www.digikey.com/en/products/detail/stmicroelectronics/TSC2011IYDT/13244059, 20x for 3.3v and 0.075 shunt) that creates one voltage signal for differential action.  That will reduce complexity, use fewer A/D, and be more accurate.  EDIT:  inverter noise killed this idea, because internal states in the op amp were saturate and need to be filtered on the fly, internally to the op amp circuit.
 2. Voltage Sensor
 3. Temperature Sensor
 4. Hysteresis Model

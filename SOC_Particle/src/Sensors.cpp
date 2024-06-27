@@ -264,6 +264,7 @@ Fault::Fault(const double T, uint8_t *preserving):
   IbdLoPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   IbAmpHardFail  = new TFDelay(false, IB_HARD_SET, IB_HARD_RESET, T);
   IbNoAmpHardFail  = new TFDelay(false, IB_HARD_SET, IB_HARD_RESET, T);
+  TbHardFail  = new TFDelay(false, TB_HARD_SET, TB_HARD_RESET, T);
   TbStaleFail  = new TFDelay(false, TB_STALE_SET, TB_STALE_RESET, T);
   VbHardFail  = new TFDelay(false, VB_HARD_SET, VB_HARD_RESET, T);
   VcHardFail  = new TFDelay(false, VC_HARD_SET, VC_HARD_RESET, T);
@@ -730,6 +731,26 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   }
 }
 
+// Check Tb 2-wire analog voltage.  Latches
+void Fault::tb_check(Sensors *Sen, const float _tb_min, const float _tb_max, const boolean reset)
+{
+  boolean reset_loc = reset | reset_all_faults_;
+  if ( reset_loc )
+  {
+    failAssign(false, VB_FA);
+  }
+  if ( ap.disab_tb_fa || sp.mod_tb() )
+  {
+    faultAssign(false, TB_FLT);
+    failAssign( false, TB_FA);
+  }
+  else
+  {
+    faultAssign( (Sen->Tb_hdwe<=_tb_min) || (Sen->Tb_hdwe>=_tb_max), TB_FLT);
+    failAssign( tb_fa() || TbHardFail->calculate(tb_flt(), TB_HARD_SET, TB_HARD_RESET, Sen->T, reset_loc), TB_FA);
+  }
+}
+
 // Temp stale check
 void Fault::tb_stale(const boolean reset, Sensors *Sen)
 {
@@ -785,7 +806,6 @@ void Fault::vc_check(Sensors *Sen, BatteryMonitor *Mon, const float _vc_min, con
     failAssign( vc_fa() || VcHardFail->calculate(vc_flt(), VC_HARD_SET, VC_HARD_RESET, Sen->T, reset_loc), VC_FA);
   }
 }
-
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now,
@@ -1108,7 +1128,11 @@ void Sensors::temp_load_and_filter(Sensors *Sen, const boolean reset_temp)
   if ( sp.debug()==16 || (sp.debug()==-1 && reset_temp_) ) Serial.printf("reset_temp_,Tb_bias_hdwe_loc, RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, ready %d %7.3f %7.3f %7.3f %7.3f %d\n",
     reset_temp_, sp.Tb_bias_hdwe(), RATED_TEMP, Tb_hdwe, Tb_hdwe_filt, cp.tb_info.ready);
 
-  Flt->tb_stale(reset_temp_, Sen);
+  #ifdef HDWE_2WIRE
+    Flt->tb_check(Sen, TB_MIN, TB_MAX,  reset_temp_);
+  #else
+    Flt->tb_stale(reset_temp_, Sen);
+  #endif
 }
 
 // Load analog voltage

@@ -61,7 +61,8 @@
 #undef VOLT_BIAS
 #undef CURR_BIAS_ALL
 #undef TEMP_BIAS
-
+#undef TB_MAX
+#undef TB_MIN
 
 // Software configuration
 #undef SOFT_DEPLOY_PHOTON
@@ -158,6 +159,12 @@ const float T_DESAT =         20;       // De-saturation time, sec
 #define VC_MAX                1.85      // Signal selection hard fault threshold, V (3.9/2 +20%)
 #define VC_MIN                1.4       // Signal selection hard fault threshold, V (2.8/2 -20%)
 #define IB_MIN_UP             0.2       // Min up charge current for come alive, BMS logic, and fault
+#ifdef HDWE_2WIRE
+    #define TB_MAX                60.       // Signal selection hard fault threshold 2wire only, C (60.)
+    #define TB_MIN               -40.       // Signal selection hard fault threshold 2wire only, C (-40.)
+#endif
+#define TB_HARD_SET           1.        // Signal selection Tb 2-wire range fail persistence, s (1.)
+#define TB_HARD_RESET         1.        // Signal selection Tb 2-wire range fail reset persistence, s (1.)
 #define VB_HARD_SET           1.        // Signal selection volt range fail persistence, s (1.)
 #define VB_HARD_RESET         1.        // Signal selection volt range fail reset persistence, s (1.)
 #define VC_HARD_SET           1.        // Signal selection volt range fail persistence, s (1.)

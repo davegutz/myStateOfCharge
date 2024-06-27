@@ -247,6 +247,7 @@ public:
   void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
   void shunt_select_initial(const boolean reset);   // Choose between shunts for model
+  void tb_check(Sensors *Sen, const float _tb_min, const float _tb_max, const boolean reset);  // Range check Tb
   boolean tb_fa() { return failRead(TB_FA); };
   boolean tb_flt() { return faultRead(TB_FLT); };
   int8_t tb_sel_status() { return tb_sel_stat_; };
@@ -276,8 +277,9 @@ protected:
   TFDelay *QuietPer;        // Persistence ib quiet disconnect detection
   RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
   TFDelay *TbStaleFail;     // Persistence stale tb one-wire data
-  TFDelay *VbHardFail;      // Persistence vb hard fail amp
-  TFDelay *VcHardFail;      // Persistence vc hard fail amp
+  TFDelay *TbHardFail;      // Persistence Tb hard fail
+  TFDelay *VbHardFail;      // Persistence vb hard fail
+  TFDelay *VcHardFail;      // Persistence vc hard fail
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
