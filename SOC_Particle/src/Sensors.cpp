@@ -845,8 +845,8 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   Flt = new Fault(T, &sp.preserving_z);
   Serial.printf("Vb sense ADC pin started\n");
   AmpFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
-  NoaFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
-  SelFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
+  NoaFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP*sp.nS()*sp.nP(), NOM_UNIT_CAP*sp.nS()*sp.nP());
+  SelFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP*sp.nS()*sp.nP(), NOM_UNIT_CAP*sp.nS()*sp.nP());
   VbFilt = new LagExp(T, AMP_FILT_TAU, 0., NOMINAL_VB*2.5);
   #ifdef HDWE_IB_HI_LO
     sel_brk_hdwe_ = new ScaleBrk(HDWE_IB_HI_LO_NOA_LO, HDWE_IB_HI_LO_AMP_LO, HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_NOA_HI);
