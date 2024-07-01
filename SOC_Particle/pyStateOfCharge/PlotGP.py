@@ -108,6 +108,7 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_
     if so is not None:
         plt.plot(so.time, so.ib_in_s, linestyle='--', color='cyan', label='ib_in_s' + ref_str)
     plt.plot(mv.time, mv.ib_charge, linestyle='-.', color='orange', label='ib_charge' + test_str)
+    plt.plot(mo.time, mo.ib_diff, linestyle=':', color='red', label='ib_diff' + ref_str)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
