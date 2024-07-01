@@ -33,9 +33,9 @@ void Flt_st::assign(const unsigned long now, BatteryMonitor *Mon, Sensors *Sen)
 {
   this->t_flt = now;
   this->Tb_hdwe = int16_t(Sen->Tb_hdwe*600.);
-  this->vb_hdwe = int16_t(Sen->Vb/sp.nS()*sp.vb_hist_slr());
-  this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe/sp.nP()*sp.ib_hist_slr());
-  this->ib_noa_hdwe = int16_t(Sen->Ib_noa_hdwe/sp.nP()*sp.ib_hist_slr());
+  this->vb_hdwe = int16_t(Sen->Vb_hdwe_f/sp.nS()*sp.vb_hist_slr());
+  this->ib_amp_hdwe = int16_t(Sen->Ib_amp_hdwe_f/sp.nP()*sp.ib_hist_slr());
+  this->ib_noa_hdwe = int16_t(Sen->Ib_noa_hdwe_f/sp.nP()*sp.ib_hist_slr());
   this->Tb = int16_t(Sen->Tb*600.);
   this->vb = int16_t(Sen->Vb/sp.nS()*sp.vb_hist_slr());
   this->ib = int16_t(Sen->Ib/sp.nP()*sp.ib_hist_slr());
