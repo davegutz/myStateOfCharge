@@ -252,10 +252,10 @@ void setup()
     Serial.printf("Using 2Wire Temperature sensor\n");
   #elif defined(HDWE_DS18B20_SWIRE)
     Serial.printf("Using 1Wire Temperature sensor\n");
+  #elif defined(HDWE_BARE)
+    Serial.printf("Going naked\n");
   #else
-    #if !defined(HDWE_BARE)
-      #error "Temperature sensor undefined"
-    #endif
+    #error "Temperature sensor undefined"
   #endif
 
   // Synchronize clock

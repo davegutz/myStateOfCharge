@@ -46,7 +46,10 @@ if sys.platform == 'win32':
 # Install as deeply as possible
 test_cmd_install = None
 if sys.platform == 'linux':
-    login = os.getlogin()
+    try:
+        login = os.getlogin()
+    except OSError:
+        login = os.environ['LOGNAME']
     desktop_entry = f"""[Desktop Entry]
 Name=GUI_TestSOC
 Exec=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/pyStateOfCharge/venv/bin/python3 /home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/pyStateOfCharge/GUI_TestSOC.py
