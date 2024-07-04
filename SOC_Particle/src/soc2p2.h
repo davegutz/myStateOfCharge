@@ -34,10 +34,10 @@
 #define SHUNT_NOA_R1          1500. // Internal amp resistance 29.4x, ohms (5100)
 #define SHUNT_NOA_R2         33000. // Internal amp resistance 29.4x, ohms (150000)
 #define IB_ABS_MAX_NOA         210. // Hard range limit of sensor electrically impossible (=1.65 * SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2 *1.05)
-#define HDWE_IB_HI_LO_NOA_LO   -20. // Full NOA discharge transition, A (-20)
-#define HDWE_IB_HI_LO_AMP_LO   -19. // Full AMP discharge transition, A (-19)  
-#define HDWE_IB_HI_LO_AMP_HI    19. // Full AMP charge transition, A (19)
-#define HDWE_IB_HI_LO_NOA_HI    20. // Full NOA charge transition, A (20)
+#define HDWE_IB_HI_LO_NOA_LO   -20. // Fully NOA bank discharge transition, A (-20)
+#define HDWE_IB_HI_LO_AMP_LO   -19. // Fully AMP bank discharge transition, A (-19)  
+#define HDWE_IB_HI_LO_AMP_HI    19. // Fully AMP bank charge transition, A (19)
+#define HDWE_IB_HI_LO_NOA_HI    20. // Fully NOA bank charge transition, A (20)
 #define CURR_BIAS_ALL           0.0 // Bias on all shunt sensors (* 'DI'), A
 #define VOLT_BIAS             -0.47 // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS               0.0 // Bias on Tb sensor (* 'Dt'), deg C

@@ -260,11 +260,7 @@ void SavedPars::initialize()
     V_[n_++] =(ib_scale_amp_p   = new FloatV("* ", "SA", rP_, "Slr amp",              "A",      -1e5, 1e5,  &ib_scale_amp_z,CURR_SCALE_AMP));
     V_[n_++] =(ib_scale_noa_p   = new FloatV("* ", "SB", rP_, "Slr noa",              "A",      -1e5, 1e5,  &ib_scale_noa_z,CURR_SCALE_NOA));
     V_[n_++] =(ib_disch_slr_p   = new FloatV("* ", "SD", rP_, "Slr disch",            "slr",    -1e5, 1e5,  &ib_disch_slr_z,CURR_SCALE_DISCH));
-#ifdef HDWE_IB_HI_LO
-    V_[n_++] =(ib_select_p      = new Int8tV("* ", "si", rP_, "curr sel mode",        "(-1, 0, 2)", -1, 2,  &ib_select_z, 2*int8_t(FAKE_FAULTS)));
-#else
-    V_[n_++] =(ib_select_p      = new Int8tV("* ", "si", rP_, "curr sel mode",        "(-1, 0, 2)", -1, 1,  &ib_select_z, int8_t(FAKE_FAULTS)));
-#endif
+    V_[n_++] =(ib_select_p      = new Int8tV("* ", "si", rP_, "curr sel mode",        "(-1, 0, 1)", -1, 1,  &ib_select_z, int8_t(FAKE_FAULTS)));
     V_[n_++] =(iflt_p         = new Uint16tV("* ", "if", rP_, "Fault buffer indx",    "uint",   0,nflt_+1,  &iflt_z,        nflt_,              false));
     V_[n_++] =(ihis_p         = new Uint16tV("* ", "ih", rP_, "Hist buffer indx",     "uint",   0,nhis_+1,  &ihis_z,        nhis_,              false));
     V_[n_++] =(inj_bias_p       = new FloatV("* ", "Xb", rP_, "Injection bias",       "A",      -1e5, 1e5,  &inj_bias_z,    0.));

@@ -33,18 +33,18 @@ String time_long_2_str(const time_t current_time, char *tempStr);
 struct Flt_st
 {
   unsigned long t_flt = 1UL; // Timestamp seconds since start of epoch
-  int16_t Tb_hdwe = 0;  // Battery temperature, hardware, C
-  int16_t vb_hdwe = 0;  // Battery measured potential, hardware, V
-  int16_t ib_amp_hdwe = 0;  // Battery measured input current, amp, A
-  int16_t ib_noa_hdwe = 0;  // Battery measured input current, no amp, A
-  int16_t Tb = 0;       // Battery temperature, filtered, C
-  int16_t vb = 0;       // Battery measured potential, filtered, V
-  int16_t ib = 0;       // Battery measured input current, filtered, A
-  int16_t soc = 0;      // Battery state of charge, free Coulomb counting algorithm, frac
-  int16_t soc_min = 0;  // Battery min state of charge, frac
-  int16_t soc_ekf = 0;  // Battery state of charge, ekf, frac
-  int16_t voc = 0;      // Battery open circuit voltage measured vb-ib*Z, V
-  int16_t voc_stat = 0; // Stored charge voltage from measurement, V
+  int16_t Tb_hdwe = 0;  // Battery bank temperature, hardware, C
+  int16_t vb_hdwe = 0;  // Battery single unit measured potential, hardware, V
+  int16_t ib_amp_hdwe = 0;  // Battery single unit measured input current, amp, A
+  int16_t ib_noa_hdwe = 0;  // Battery single unit measured input current, no amp, A
+  int16_t Tb = 0;       // Battery bank temperature, filtered, C
+  int16_t vb = 0;       // Battery single unit measured potential, filtered, V
+  int16_t ib = 0;       // Battery single unit measured input current, filtered, A
+  int16_t soc = 0;      // Battery bank state of charge, free Coulomb counting algorithm, frac
+  int16_t soc_min = 0;  // Battery bank min state of charge, frac
+  int16_t soc_ekf = 0;  // Battery bank state of charge, ekf, frac
+  int16_t voc = 0;      // Battery single unit open circuit voltage measured vb-ib*Z, V
+  int16_t voc_stat = 0; // Stored single unit charge voltage from measurement, V
   int16_t e_wrap_filt = 0; // Wrap model error, filtered, V
   uint16_t fltw = 0;    // Fault word
   uint16_t falw = 0;    // Fail word

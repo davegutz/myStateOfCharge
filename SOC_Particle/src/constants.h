@@ -154,6 +154,8 @@ const float T_DESAT =         20;       // De-saturation time, sec
 #define MAX_ERR_T             10.       // Maximum update time allowed to avoid instability, s (10.)
 #define IB_HARD_SET           1.        // Signal selection volt range fail persistence, s (1.)
 #define IB_HARD_RESET         1.        // Signal selection volt range fail reset persistence, s (1.)
+#define IB_LO_ACTIVE_SET      0.2       // Ib low range sensor is in-range persistence, s (0.2)
+#define IB_LO_ACTIVE_RESET    0.4       // Ib low range sensor is in-range reset persistence, s (0.4)
 #define VB_MAX                17.       // Signal selection hard fault threshold, V (17. < VB_CONV_GAIN*4095)
 #define VB_MIN                2.        // Signal selection hard fault threshold, V (0.  < 2. < 10 bms shutoff, reads ~3 without power when off)
 #define VC_MAX                1.85      // Signal selection hard fault threshold, V (3.9/2 +20%)

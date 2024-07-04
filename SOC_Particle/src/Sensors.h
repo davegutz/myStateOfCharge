@@ -203,6 +203,8 @@ public:
   float e_wrap_filt() { return e_wrap_filt_; };
   uint16_t fltw() { return fltw_; };
   uint16_t falw() { return falw_; };
+  TFDelay *IbLoActive;    // Persistence low amp active status
+  boolean ib_lo_active;   // Battery low amp is in active range, T=active
   boolean ib_amp_bare() { return faultRead(IB_AMP_BARE);  };
   boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };

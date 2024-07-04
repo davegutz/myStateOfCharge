@@ -255,7 +255,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving):
   cc_diff_(0.), cc_diff_empty_slr_(1), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0),
-  ib_diff_(0), ib_diff_f_(0), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
+  ib_diff_(0), ib_diff_f_(0), ib_lo_active_(true), ib_diff_hi_flt_(0), ib_diff_lo_flt_(0), ib_rate_(0), latched_fail_(false), 
   latched_fail_fake_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   tb_sel_stat_last_(1), vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL), sp_preserving_(preserving)
 {
@@ -263,6 +263,7 @@ Fault::Fault(const double T, uint8_t *preserving):
   IbdHiPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   IbdLoPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   IbAmpHardFail  = new TFDelay(false, IB_HARD_SET, IB_HARD_RESET, T);
+  IbLoActive  = new TFDelay(true, IB_LO_ACTIVE_SET, IB_LO_ACTIVE_RESET, T);
   IbNoAmpHardFail  = new TFDelay(false, IB_HARD_SET, IB_HARD_RESET, T);
   TbHardFail  = new TFDelay(false, TB_HARD_SET, TB_HARD_RESET, T);
   TbStaleFail  = new TFDelay(false, TB_STALE_SET, TB_STALE_RESET, T);
@@ -298,6 +299,8 @@ void Fault::cc_diff(Sensors *Sen, BatteryMonitor *Mon)
 void Fault::ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   boolean reset_loc = reset || reset_all_faults_;
+
+  if ( !ib_lo_active_ && !reset_loc ) return;  // Logic freezes when ib_lo_active_ is false
 
   // Difference error, filter, check, persist, doesn't latch
   if ( sp.mod_ib() )
@@ -729,6 +732,10 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     failAssign( vc_fa() || ib_amp_fa() || IbAmpHardFail->calculate(ib_amp_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_AMP_FA );
     failAssign( vc_fa() || ib_noa_fa() || IbNoAmpHardFail->calculate(ib_noa_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_NOA_FA);
   }
+  #ifdef HDWE_HI_LO_AMP
+    ib_lo_active_ = IbLoActive->calculate(HDWE_IB_HI_LO_AMP_LO < Sen->Ib_noa_hdwe && Sen->Ib_noa_hdwe < HDWE_IB_HI_LO_AMP_HI,
+                                         IB_LO_ACTIVE_SET, IB_LO_ACTIVE_RESET, Sen->T , reset_loc);
+  #endif
 }
 
 // Check Tb 2-wire analog voltage.  Latches
