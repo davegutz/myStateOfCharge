@@ -23,16 +23,10 @@ SOC_Particle/dataReduction/putty_test.csv
 SOC_Particle/dataReduction/putty/.DS_Store
 SOC_Particle/nul
 SOC_Particle/pyStateOfCharge/.DS_Store
-SOC_Photon/.vscode/settings.json
-SOC_Photon/dataReduction/temp/*
-SOC_Photon/pyStateOfCharge/.idea/misc.xml
-SOC_Photon/pyStateOfCharge/.idea/py.iml
-SOC_Photon/target/3.0.0-beta.1/photon/obj/src/user_export.o.d
-SOC_Photon/target/3.0.0-beta.1/photon/SOC_Photon.bin.crc_block
 SOC_Particle/src/SOC_Particle.cpp
 SOC_Particle/dataReduction/g20240109/.~lock.curve_20240115_soc0p_ch.csv\#
 *.spec
-.idea/workspace.xml
+.idea/*
 SOC_Particle/pyStateOfCharge/build/*
 SOC_Particle/pyStateOfCharge/dist/*
 SOC_Particle/pyStateOfCharge/GUI_TestSOC copy.py
