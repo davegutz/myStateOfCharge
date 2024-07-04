@@ -243,26 +243,16 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
     #define VOLT_BIAS 0.
     #define TEMP_BIAS 0.
     #define CURR_BIAS_ALL 0.
-    #define SHUNT_AMP_GAIN 1.
-    #define SHUNT_NOA_GAIN 1.
+    #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (1333 is 100A/0.075V)
+    #define HDWE_IB_HI_LO_NOA_LO -10.
+    #define HDWE_IB_HI_LO_AMP_LO  -9.
+    #define HDWE_IB_HI_LO_AMP_HI   9.
+    #define HDWE_IB_HI_LO_NOA_HI  10.
+    #define VC_CONV_GAIN 1.
+    #define VO_CONV_GAIN 1.
 #endif
 
 // Conversion gains
-#if defined(HDWE_ADS1013_AMP_NOA)
-    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-    const float SHUNT_NOA_GAIN = SHUNT_GAIN;
-#elif defined(HDWE_IB_DUAL)
-    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-    const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-#elif defined(HDWE_IB_HI_LO)
-    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-    const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
-#elif !defined(HDWE_BARE)
-    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-    const float SHUNT_NOA_GAIN = SHUNT_GAIN;
-#endif
-
-
 // Voltage measurement gains
 #if !defined(HDWE_BARE)
     const float VB_CONV_GAIN = float(PHOTON_ADC_VOLT) * float(VB_SENSE_R_HI + VB_SENSE_R_LO) /
@@ -270,6 +260,23 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #endif
 const float VC_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VC_S);
 const float VO_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VO_S);
+#if defined(HDWE_ADS1013_AMP_NOA)
+    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+    const float SHUNT_NOA_GAIN = SHUNT_GAIN;
+#elif defined(HDWE_IB_DUAL)
+    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+    const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+#elif defined(HDWE_IB_HI_LO) & !defined(HDWE_BARE)
+    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+    const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;
+#elif !defined(HDWE_BARE)
+    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
+    const float SHUNT_NOA_GAIN = SHUNT_GAIN;
+#else
+    const float SHUNT_AMP_GAIN = SHUNT_GAIN * 220;
+    const float SHUNT_NOA_GAIN = SHUNT_GAIN * 22;
+#endif
+
 const float VH3V3_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT);
 const float VTB_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * float(VTB_S);
 
