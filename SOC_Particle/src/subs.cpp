@@ -334,7 +334,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
     debug_99(Mon, Sen);
   else if ( sp.debug()==98 ) // Calibration mode
     debug_98(Mon, Sen);
-  else if ( sp.debug()!=4 && sp.debug()!=-2 )  // Normal display
+  else if ( sp.debug()!=-2 )  // Normal display
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
 
@@ -422,7 +422,7 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
     debug_99(Mon, Sen);
   else if ( sp.debug()==98 ) // Calibration mode
     debug_98(Mon, Sen);
-  else if ( sp.debug()!=4 && sp.debug()!=-2 )  // Normal display
+  else if ( sp.debug()!=-2 )  // Normal display
     Serial1.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
       disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
 

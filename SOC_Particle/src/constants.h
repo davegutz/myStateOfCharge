@@ -190,7 +190,11 @@ const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('u
 #define WRAP_LO_A       -40.            // Wrap high voltage threshold, A (-40, -20 too small on truck -16=-0.2v, -32 marginal)
 #define WRAP_HI_SAT_MARG  0.2           // Wrap voltage margin to saturation, V (0.2)
 #define WRAP_HI_SAT_SLR   2.0           // Wrap voltage margin scalar when saturated (2.0)
-#define IBATT_DISAGREE_THRESH 10.       // Signal selection threshold for current disagree test, A (10.)
+#ifdef HDWE_IB_HI_LO
+    #define IBATT_DISAGREE_THRESH 3.       // Signal selection threshold for current disagree test, A (3.)
+#else
+    #define IBATT_DISAGREE_THRESH 10.       // Signal selection threshold for current disagree test, A (10.)
+#endif
 const float IBATT_DISAGREE_SET = (WRAP_LO_S-1.); // Signal selection current disagree fail persistence, s (WRAP_LO_S-1) // must be quicker than wrap lo
 #define IBATT_DISAGREE_RESET  1.        // Signal selection current disagree reset persistence, s (1.)
 #define TAU_Q_FILT      0.5             // Quiet rate time constant, sec (0.5)

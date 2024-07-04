@@ -255,7 +255,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving):
   cc_diff_(0.), cc_diff_empty_slr_(1), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0),
-  ib_diff_(0), ib_diff_f_(0), ib_lo_active_(true), ib_diff_hi_flt_(0), ib_diff_lo_flt_(0), ib_rate_(0), latched_fail_(false), 
+  ib_diff_(0), ib_diff_f_(0), ib_lo_active_(true), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
   latched_fail_fake_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
   tb_sel_stat_last_(1), vb_sel_stat_last_(1), ib_sel_stat_last_(1), fltw_(0UL), falw_(0UL), sp_preserving_(preserving)
 {
@@ -499,17 +499,13 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Reset
   if ( reset_all_faults_ )
   {
-    if ( sp.ib_select() == 2 )
-    {
-      ib_sel_stat_ = 2;
-    }
-    else if ( sp.ib_select() == -1 )
-    {
-      ib_sel_stat_ = -1;
-    }
-    if ( sp.ib_select() == 1 )
+    if ( sp.ib_select() >= 0 )
     {
       ib_sel_stat_ = 1;
+    }
+    else
+    {
+      ib_sel_stat_ = -1;
     }
     ib_sel_stat_last_ =  ib_sel_stat_;
 
@@ -520,7 +516,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   if ( ap.fake_faults )
   {
     #ifdef HDWE_IB_HI_LO  
-      ib_sel_stat_ = 2;
+      ib_sel_stat_ = 0;
     #else
       ib_sel_stat_ = 1;
     #endif

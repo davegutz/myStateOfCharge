@@ -39,6 +39,6 @@
     "particle.firmwareVersion": "5.6.0",
     "particle.targetPlatform": "p2",
     "C_Cpp.errorSquiggles": "disabled",
-    "particle.targetDevice": "soc2p2",
+    "particle.targetDevice": "pro3p2",
     "cmake.configureOnOpen": false
 }
