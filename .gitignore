@@ -32,3 +32,4 @@ SOC_Particle/pyStateOfCharge/dist/*
 SOC_Particle/pyStateOfCharge/GUI_TestSOC copy.py
 SOC_Particle/pyStateOfCharge/.idea/*
 
+SOC_Particle/src/SOC_Particle.cpp
