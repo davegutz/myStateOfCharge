@@ -5,7 +5,8 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-const String version = "g20240331";
+const String version = "g20240704";
+// g20240704 is HI_LO sensor configuration
 // g20240331 is garage modifications and two-stage current sensing
 // g20240109 is full testing, e.g. allIn
 // g20231111b is Talk function streamline

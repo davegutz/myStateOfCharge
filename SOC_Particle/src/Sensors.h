@@ -204,7 +204,6 @@ public:
   uint16_t fltw() { return fltw_; };
   uint16_t falw() { return falw_; };
   TFDelay *IbLoActive;    // Persistence low amp active status
-  boolean ib_lo_active;   // Battery low amp is in active range, T=active
   boolean ib_amp_bare() { return faultRead(IB_AMP_BARE);  };
   boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
@@ -292,6 +291,7 @@ protected:
   float e_wrap_filt_;       // Wrap error, V
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
+  boolean ib_lo_active_;   // Battery low amp is in active range, T=active
   float ib_quiet_;          // ib hardware noise, A/s
   float ib_rate_;           // ib rate, A/s
   boolean latched_fail_;    // There is a latched fail, T=latched fail

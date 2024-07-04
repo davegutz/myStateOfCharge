@@ -196,7 +196,7 @@ boolean recall_X(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
             break;
 
         case ( 'Y' ): // XY  display a time sYnch message
-            Serial.printf("\nSYNC,%7.3f\n", double(Sen->now)/1000.);
+            Serial.printf("SYNC,%7.3f\n", double(Sen->now)/1000.);
             break;
 
         default:
