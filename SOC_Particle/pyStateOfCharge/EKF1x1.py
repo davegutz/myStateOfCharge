@@ -38,6 +38,7 @@ class EKF1x1:
         self.u_ekf = 0.  # Control input
         self.x_ekf = 0.  # Kalman state variable
         self.y_ekf = 0.  # Residual z-hx
+        self.y_ekf_f = 0.  # Residual filtered z-hx
         self.z_ekf = 0.  # Observation of state x
         self.x_prior = self.x_ekf
         self.P_prior = self.P

@@ -999,9 +999,10 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
           Tb_hdwe, Tb, sp.mod_tb(), Tb_filt);
       Serial.printf("%s", pr.buff);
 
-      sprintf(pr.buff, "%d, %d, %7.3f, %7.3f, %d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%d,",
+      sprintf(pr.buff, "%d, %d, %7.3f, %7.3f, %d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%d,%7.3f,",
           Flt->fltw(), Flt->falw(), Flt->ib_rate(), Flt->ib_quiet(), Flt->tb_sel_status(),
-          Flt->cc_diff_thr(), Flt->ewhi_thr(), Flt->ewlo_thr(), Flt->ib_diff_thr(), Flt->ib_quiet_thr(), Flt->preserving(), ap.fake_faults);
+          Flt->cc_diff_thr(), Flt->ewhi_thr(), Flt->ewlo_thr(), Flt->ib_diff_thr(), Flt->ib_quiet_thr(), Flt->preserving(), ap.fake_faults,
+          Mon->y_ekf_filt());
       Serial.printf("%s\n", pr.buff);
   }
 }

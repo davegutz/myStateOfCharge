@@ -171,7 +171,7 @@ public:
   double y_ekf_filt() { return y_filt_; };
   double delta_q_ekf_;         // Charge deficit represented by charge calculated by ekf, C
 protected:
-  General2_Pole *y_filt = new General2_Pole(2.0, WN_Y_FILT, ZETA_Y_FILT, MIN_Y_FILT, MAX_Y_FILT);  // actual update time provided run time
+  LagTustin *y_filt = new LagTustin(2., WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);  // actual update time provided run time
   SlidingDeadband *SdVb_;  // Sliding deadband filter for Vb
   TFDelay *EKF_converged;  // Time persistence
   RateLimit *T_RLim = new RateLimit();

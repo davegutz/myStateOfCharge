@@ -117,6 +117,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.subplot(325)
         plt.plot(mo.time, mo.e_wrap, color='magenta', linestyle='-', label='e_wrap'+ref_str)
         plt.plot(mo.time, mo.e_wrap_filt, color='black', linestyle='--', label='e_wrap_filt'+ref_str)
+        plt.plot(mo.time, -mo.y_ekf, color='green', linestyle='-.', label='-y_ekf'+ref_str)
+        plt.plot(mo.time, -mo.y_ekf_f, color='orange', linestyle=':', label='-y_ekf_f'+ref_str)
         plt.legend(loc=1)
         plt.subplot(326)
         plt.plot(mo.time, mo.cc_dif, color='black', linestyle='-', label='cc_diff'+ref_str)
@@ -515,6 +517,7 @@ class SavedData:
             self.voc = None  # Bank VOC estimated from vb and RC model, V
             self.voc_ekf = None  # Monitor bank solved static open circuit voltage, V
             self.y_ekf = None  # Monitor single battery solver error, V
+            self.y_ekf_f = None  # Monitor single battery solver filtered error, V
             self.soc_s = None  # Simulated state of charge, fraction
             self.soc_ekf = None  # Solved state of charge, fraction
             self.soc = None  # Coulomb Counter fraction of saturation charge (q_capacity_) available (0-1)
@@ -675,6 +678,7 @@ class SavedData:
             self.ibd_thr = None
             self.ibq_thr = None
             self.preserving = None
+            self.y_ekf_f = None
         else:
             falw = np.array(sel.falw[:i_end], dtype=np.uint16)
             fltw = np.array(sel.fltw[:i_end], dtype=np.uint16)
@@ -730,6 +734,7 @@ class SavedData:
             self.ibd_thr = np.array(sel.ibd_thr[:i_end])
             self.ibq_thr = np.array(sel.ibq_thr[:i_end])
             self.preserving = np.array(sel.preserving[:i_end])
+            self.y_ekf_f = np.array(sel.y_ekf_f[:i_end])
         if ekf is None:
             self.c_time_e = None
             self.Fx = None

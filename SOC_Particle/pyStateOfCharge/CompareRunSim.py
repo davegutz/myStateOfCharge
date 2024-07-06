@@ -147,8 +147,8 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=F
 
 
 def main():
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/discharge_ib_soc_soc3p2_chg.csv'
-    unit_key = 'g20240331_soc3p2_chg'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240704/AMP jumper_pro3p2_ch.csv'
+    unit_key = 'g20240704_pro3p2_ch'
     time_end_in = None
     data_only = False
 
