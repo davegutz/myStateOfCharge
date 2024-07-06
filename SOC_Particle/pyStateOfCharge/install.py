@@ -19,6 +19,9 @@ import shutil
 import sys
 import os
 
+# If shortcut disappears run debug = True to troubleshoot
+debug = False
+
 test_cmd_create = None
 test_cmd_copy = None
 result = None
@@ -92,9 +95,11 @@ Categories=Utility
 
     # Move file
     try:
-        # pass
-        result = shutil.move(f'/home/{login}/Desktop/GUI_TestSOC.desktop',
-                             '/usr/share/applications/GUI_TestSOC.desktop')
+        if debug is True:  # Leaves shortcut on desktop for troubleshooting
+            pass
+        else:
+            result = shutil.move(f'/home/{login}/Desktop/GUI_TestSOC.desktop',
+                                 '/usr/share/applications/GUI_TestSOC.desktop')
     except PermissionError:
         print(Colors.fg.red,
               "Stop and establish sudo permissions"
