@@ -154,7 +154,11 @@ protected:
 #define IB_AMP_BARE   11  // Unconnected ib bus, T = bare bus
 #define IB_NOA_BARE   12  // Unconnected ib bus, T = bare bus
 #define VC_FLT        13  // Momentary isolation of Vc failure, T=faulted
-#define NUM_FLT       14  // Number of these
+#define WRAP_HI_M_FLT 14  // Wrap isolates to Ib amp high fault
+#define WRAP_LO_M_FLT 15  // Wrap isolates to Ib amp low fault
+#define WRAP_HI_N_FLT 16  // Wrap isolates to Ib noa high fault
+#define WRAP_LO_N_FLT 17  // Wrap isolates to Ib noa low fault
+#define NUM_FLT       18  // Number of these
 
 // Fail word bits.   A couple don't latch because single sensor fail in dual sensor system
 #define TB_FA         0   // Peristed, latched isolation of Tb failure, heals because soft type, T=failed
@@ -169,7 +173,11 @@ protected:
 #define IB_DIFF_LO_FA 9   // Persisted sensor difference error, latches because hard type, T = fail
 #define IB_DSCN_FA    10  // Dual persisted quiet error, heals functional type, T = disconnected shunt
 #define VC_FA         11  // Peristed, latched isolation of Vc failure, latches because hard type, T=failed
-#define NUM_FA        12  // Number of these
+#define WRAP_HI_M_FA  14  // Wrap isolates to Ib amp high fail, heals because dual sensor (no latch)
+#define WRAP_LO_M_FA  15  // Wrap isolates to Ib amp low fail, heals because dual sensor (no latch)
+#define WRAP_HI_N_FA  16  // Wrap isolates to Ib amp high fail, heals because dual sensor (no latch)
+#define WRAP_LO_N_FA  17  // Wrap isolates to Ib amp low fail, heals because dual sensor (no latch)
+#define NUM_FA        18  // Number of these
 
 #define faultSet(bit) (bitSet(fltw_, bit) )
 #define failSet(bit) (bitSet(falw_, bit) )
@@ -201,8 +209,8 @@ public:
   float ewlo_thr() { return ewlo_thr_; };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
-  uint16_t fltw() { return fltw_; };
-  uint16_t falw() { return falw_; };
+  uint32_t fltw() { return fltw_; };
+  uint32_t falw() { return falw_; };
   TFDelay *IbLoActive;    // Persistence low amp active status
   boolean ib_amp_bare() { return faultRead(IB_AMP_BARE);  };
   boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
@@ -264,8 +272,16 @@ public:
   boolean wrap_fa() { return ( failRead(WRAP_HI_FA) || failRead(WRAP_LO_FA) ); };
   boolean wrap_hi_fa() { return failRead(WRAP_HI_FA); };
   boolean wrap_hi_flt() { return faultRead(WRAP_HI_FLT); };
+  boolean wrap_hi_m_fa() { return failRead(WRAP_HI_M_FA); };
+  boolean wrap_hi_m_flt() { return faultRead(WRAP_HI_M_FLT); };
+  boolean wrap_hi_n_fa() { return failRead(WRAP_HI_N_FA); };
+  boolean wrap_hi_n_flt() { return faultRead(WRAP_HI_N_FLT); };
   boolean wrap_lo_fa() { return failRead(WRAP_LO_FA); };
   boolean wrap_lo_flt() { return faultRead(WRAP_LO_FLT);  };
+  boolean wrap_lo_m_fa() { return failRead(WRAP_LO_M_FA); };
+  boolean wrap_lo_m_flt() { return faultRead(WRAP_LO_M_FLT); };
+  boolean wrap_lo_n_fa() { return failRead(WRAP_LO_N_FA); };
+  boolean wrap_lo_n_flt() { return faultRead(WRAP_LO_N_FLT); };
   boolean wrap_vb_fa() { return failRead(WRAP_VB_FA); };
   void wrap_err_filt_state(const float in) { WrapErrFilt->state(in); }
 protected:
@@ -303,8 +319,8 @@ protected:
   int8_t tb_sel_stat_last_; // past value
   int8_t vb_sel_stat_last_; // past value
   int8_t ib_sel_stat_last_; // past value
-  uint16_t fltw_;           // Bitmapped faults
-  uint16_t falw_;           // Bitmapped fails
+  uint32_t fltw_;           // Bitmapped faults
+  uint32_t falw_;           // Bitmapped fails
   TFDelay *WrapHi;          // Time high wrap fail persistence
   TFDelay *WrapLo;          // Time low wrap fail persistence
   uint8_t *sp_preserving_;  // Saving fault buffer.   Stopped recording.  T=preserve

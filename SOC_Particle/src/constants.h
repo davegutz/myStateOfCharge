@@ -137,8 +137,8 @@ const String unit = version + "_" + HDWE_UNIT;
 
 #ifdef HDWE_PHOTON2  // dec ~ 256268  units: pro2p2, soc3p2
     #define NFLT    7  // Number of saved SRAM fault data slices 10 s intervals (7)
-    #define NHIS   61  // Number of saved SRAM history data slices. If NFLT + NHIS too large will get compile error BACKUPSRAM (61)
-    #define NSUM 3150  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg (3171) or SOS 4 Bus Fault
+    #define NHIS   55  // Number of saved SRAM history data slices. If NFLT + NHIS too large will get compile error BACKUPSRAM (55)
+    #define NSUM 2894  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM, or GUI FRAG msg (2845) or SOS 4 Bus Fault
 #endif
 
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
@@ -252,8 +252,6 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
     #define HDWE_IB_HI_LO_AMP_LO  -9.
     #define HDWE_IB_HI_LO_AMP_HI   9.
     #define HDWE_IB_HI_LO_NOA_HI  10.
-    #define VC_CONV_GAIN 1.
-    #define VO_CONV_GAIN 1.
 #endif
 
 // Conversion gains

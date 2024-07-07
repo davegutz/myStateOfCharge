@@ -46,8 +46,8 @@ struct Flt_st
   int16_t voc = 0;      // Battery single unit open circuit voltage measured vb-ib*Z, V
   int16_t voc_stat = 0; // Stored single unit charge voltage from measurement, V
   int16_t e_wrap_filt = 0; // Wrap model error, filtered, V
-  uint16_t fltw = 0;    // Fault word
-  uint16_t falw = 0;    // Fail word
+  uint32_t fltw = 0;    // Fault word
+  uint32_t falw = 0;    // Fail word
   unsigned long dummy = 0;  // padding to absorb Wire.write corruption
   void assign(const unsigned long now, BatteryMonitor *Mon, Sensors *Sen);
   void copy_to_Flt_ram_from(Flt_st input);
@@ -79,8 +79,8 @@ public:
     void get_voc()          { int16_t value;        rP_->get(voc_eeram_.a16, value);          voc = value; };
     void get_voc_stat()     { int16_t value;        rP_->get(voc_stat_eeram_.a16, value);     voc_stat = value; };
     void get_e_wrap_filt()  { int16_t value;        rP_->get(e_wrap_filt_eeram_.a16, value);  e_wrap_filt = value; };
-    void get_fltw()         { uint16_t value;       rP_->get(fltw_eeram_.a16, value);         fltw = value; };
-    void get_falw()         { uint16_t value;       rP_->get(falw_eeram_.a16, value);         falw = value; };
+    void get_fltw()         { uint32_t value;       rP_->get(fltw_eeram_.a16, value);         fltw = value; };
+    void get_falw()         { uint32_t value;       rP_->get(falw_eeram_.a16, value);         falw = value; };
     void instantiate(SerialRAM *ram, uint16_t *next);
   #endif
 
@@ -103,8 +103,8 @@ public:
     void put_voc(const int16_t value)             { voc = value; };
     void put_voc_stat(const int16_t value)        { voc_stat = value; };
     void put_e_wrap_filt(const int16_t value)     { e_wrap_filt = value; };
-    void put_fltw(const uint16_t value)           { fltw = value; };
-    void put_falw(const uint16_t value)           { falw = value; };
+    void put_fltw(const uint32_t value)           { fltw = value; };
+    void put_falw(const uint32_t value)           { falw = value; };
 #else
     void put_t_flt()        { rP_->put(t_flt_eeram_.a16, t_flt); };
     void put_Tb_hdwe()      { rP_->put(Tb_hdwe_eeram_.a16, Tb_hdwe); };
@@ -136,8 +136,8 @@ public:
     void put_voc(const int16_t value)             { rP_->put(voc_eeram_.a16, value);          voc = value; };
     void put_voc_stat(const int16_t value)        { rP_->put(voc_stat_eeram_.a16, value);     voc_stat = value; };
     void put_e_wrap_filt(const int16_t value)     { rP_->put(e_wrap_filt_eeram_.a16, value);  e_wrap_filt = value; };
-    void put_fltw(const uint16_t value)           { rP_->put(fltw_eeram_.a16, value);         fltw = value; };
-    void put_falw(const uint16_t value)           { rP_->put(falw_eeram_.a16, value);         falw = value; };
+    void put_fltw(const uint32_t value)           { rP_->put(fltw_eeram_.a16, value);         fltw = value; };
+    void put_falw(const uint32_t value)           { rP_->put(falw_eeram_.a16, value);         falw = value; };
   #endif
 
 protected:

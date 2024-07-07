@@ -87,8 +87,8 @@ void Flt_st::nominal()
   this->voc = int16_t(0);
   this->voc_stat = int16_t(0);
   this->e_wrap_filt = int16_t(0);
-  this->fltw = uint16_t(0);
-  this->falw = uint16_t(0);
+  this->fltw = uint32_t(0);
+  this->falw = uint32_t(0);
   this->dummy = 0UL;
 }
 
@@ -116,7 +116,7 @@ void Flt_st::pretty_print(const String code)
     Serial.printf("voc %7.3f\n", float(this->voc)/sp.vb_hist_slr());
     Serial.printf("voc_stat %7.3f\n", float(this->voc_stat)/sp.vb_hist_slr());
     Serial.printf("e_wrap_filt %7.3f\n", float(this->e_wrap_filt)/sp.vb_hist_slr());
-    Serial.printf("fltw %d falw %d\n", this->fltw, this->falw);
+    Serial.printf("fltw %ld falw %ld\n", this->fltw, this->falw);
   }
 }
 
@@ -128,7 +128,7 @@ void Flt_st::print_flt(const String code)
   if ( this->t_flt > 1UL )
   {
     time_long_2_str(this->t_flt, buffer);
-    Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
+    Serial.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %ld, %ld,\n",
       code.c_str(), buffer, this->t_flt,
       float(this->Tb_hdwe)/600.,
       float(this->vb_hdwe)/sp.vb_hist_slr(),
@@ -145,7 +145,7 @@ void Flt_st::print_flt(const String code)
       float(this->e_wrap_filt)/sp.vb_hist_slr(),
       this->fltw,
       this->falw);
-    Serial1.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %d, %d,\n",
+    Serial1.printf("%s, %s, %ld, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.4f, %7.4f, %7.4f, %7.3f, %7.3f, %7.3f, %ld, %ld,\n",
       code.c_str(), buffer, this->t_flt,
       float(this->Tb_hdwe)/600.,
       float(this->vb_hdwe)/sp.vb_hist_slr(),
