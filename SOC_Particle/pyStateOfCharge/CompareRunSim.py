@@ -147,8 +147,8 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=F
 
 
 def main():
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240704/AMP jumper_pro3p2_ch.csv'
-    unit_key = 'g20240704_pro3p2_ch'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/rapidTweakRegression_pro0p_chg.csv'
+    unit_key = 'g20240331_pro0p_chg'
     time_end_in = None
     data_only = False
 

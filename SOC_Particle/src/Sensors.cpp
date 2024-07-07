@@ -348,7 +348,8 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
 void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   boolean reset_loc = reset | reset_all_faults_;
-  e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
+  // e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
+  e_wrap_ = Mon->y_ekf();
   if ( Mon->soc()>=WRAP_SOC_HI_OFF )
   {
     ewsat_slr_ = WRAP_SOC_HI_SLR;

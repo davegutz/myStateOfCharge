@@ -50,7 +50,7 @@ protected:
   double K_;  // Kalman gain
   double u_;  // Control input
   double x_;  // Kalman state variable
-  double y_;  // Residual z- hx
+  double y_;  // Residual z - hx
   double z_;  // Observation of state x
   double x_prior_;  
   double P_prior_;
