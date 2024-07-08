@@ -252,6 +252,35 @@ void Shunt::sample(const boolean reset_loc, const float T)
 }
 
 
+// Class Looparound
+Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen):
+ chem_(Mon->chem()), Mon_(Mon), Sen_(Sen)
+{
+  ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_->tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);     // actual update time provided run time
+  IbErrFilt_ = new LagTustin(2., TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);                // actual update time provided run time
+  WrapErrFilt_ = new LagTustin(2., WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);   // actual update time provided run time
+  WrapHi_ = new TFDelay(false, WRAP_HI_S, WRAP_HI_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
+  WrapLo_ = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
+}
+
+void Looparound::calculate(const boolean reset, const float ib)
+{
+  boolean reset_loc = reset | Sen_->Flt->reset_all_faults();
+  ib_ = ib;
+  voc_ = Mon_->vb() - (ChargeTransfer_->calculate(ib_, reset, chem_->tau_ct, Sen_->T)*chem_->r_ct*ap.slr_res + ib_*chem_->r_0*ap.slr_res);
+  e_wrap_ = Mon_->voc_soc() - voc_;
+  e_wrap_filt_ = WrapErrFilt_->calculate(e_wrap_, reset_loc, min(Sen_->T, F_MAX_T_WRAP));
+  // sat logic screens out voc jumps when ib>0 when saturated
+  // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
+  // wrap_vb latches because vb is single sensor  faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
+
+  hi_fault_ = e_wrap_filt_ >= Sen_->Flt->ewhi_thr();
+  hi_fail_ = WrapHi_->calculate(hi_fault_, WRAP_HI_S, WRAP_HI_R, Sen_->T, reset_loc) && !Sen_->Flt->vb_fa();  // non-latching
+  lo_fault_ = e_wrap_filt_ <= Sen_->Flt->ewlo_thr();
+  lo_fail_ = WrapLo_->calculate(lo_fault_, WRAP_LO_S, WRAP_LO_R, Sen_->T, reset_loc) && !Sen_->Flt->vb_fa();  // non-latching
+}
+
+
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving):
   cc_diff_(0.), cc_diff_empty_slr_(1), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0),
@@ -350,34 +379,12 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   boolean reset_loc = reset | reset_all_faults_;
   // e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
   e_wrap_ = Mon->y_ekf();
-  if ( Mon->soc()>=WRAP_SOC_HI_OFF )
-  {
-    ewsat_slr_ = WRAP_SOC_HI_SLR;
-    ewmin_slr_ = 1.;
-  }
-  else if ( Mon->soc() <= max(Mon->soc_min()+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS)  )
-  {
-    ewsat_slr_ = 1.;
-    ewmin_slr_ = WRAP_SOC_LO_SLR;
-  }
-  else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SAT_MARG) ||
-          ( Mon->voc_stat()>(Mon->vsat()-WRAP_HI_SAT_MARG) && Mon->C_rate()>WRAP_MOD_C_RATE && Mon->soc()>WRAP_SOC_MOD_OFF) ) // Use voc_stat to get some anticipation
-  {
-    ewsat_slr_ = WRAP_HI_SAT_SLR;
-    ewmin_slr_ = 1.;
-  }
-  else
-  {
-    ewsat_slr_ = 1.;
-    ewmin_slr_ = 1.;
-  }
   e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
   // sat logic screens out voc jumps when ib>0 when saturated
   // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
   // wrap_vb latches because vb is single sensor
-  ewhi_thr_ = Mon->r_ss() * WRAP_HI_A * ap.ewhi_slr * ewsat_slr_ * ewmin_slr_;
+  // Thresholds calculated by wrap_scalars()
   faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
-  ewlo_thr_ = Mon->r_ss() * WRAP_LO_A * ap.ewlo_slr * ewsat_slr_ * ewmin_slr_;
   faultAssign( (e_wrap_filt_ <= ewlo_thr_), WRAP_LO_FLT);
   failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // non-latching
   failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // non-latching
@@ -490,6 +497,34 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 // Redundancy loss.   Here in cpp because sp circular reference in .h files due to sp.ib_select()
 boolean Fault::red_loss_calc() { return (ib_sel_stat_!=1 || (sp.ib_select()!=0 && !ap.fake_faults)
   || ib_diff_fa() || vb_fail()); };
+
+// Wrap scalars
+void Fault::wrap_scalars(BatteryMonitor *Mon)
+{
+  if ( Mon->soc()>=WRAP_SOC_HI_OFF )
+  {
+    ewsat_slr_ = WRAP_SOC_HI_SLR;
+    ewmin_slr_ = 1.;
+  }
+  else if ( Mon->soc() <= max(Mon->soc_min()+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS)  )
+  {
+    ewsat_slr_ = 1.;
+    ewmin_slr_ = WRAP_SOC_LO_SLR;
+  }
+  else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SAT_MARG) ||
+          ( Mon->voc_stat()>(Mon->vsat()-WRAP_HI_SAT_MARG) && Mon->C_rate()>WRAP_MOD_C_RATE && Mon->soc()>WRAP_SOC_MOD_OFF) ) // Use voc_stat to get some anticipation
+  {
+    ewsat_slr_ = WRAP_HI_SAT_SLR;
+    ewmin_slr_ = 1.;
+  }
+  else
+  {
+    ewsat_slr_ = 1.;
+    ewmin_slr_ = 1.;
+  }
+  ewhi_thr_ = Mon->r_ss() * WRAP_HI_A * ap.ewhi_slr * ewsat_slr_ * ewmin_slr_;
+  ewlo_thr_ = Mon->r_ss() * WRAP_LO_A * ap.ewlo_slr * ewsat_slr_ * ewmin_slr_;
+}
 
 // Calculate selection for choice
 // Use model instead of sensors when running tests as user
@@ -1107,11 +1142,19 @@ void Sensors::shunt_select_initial(const boolean reset)
 
     // When running normally the model tracks hdwe to synthesize reference information
     if ( !sp.mod_ib() )
-        Ib_model_in = Ib_hdwe;
+    {
+      Ib_model_in = Ib_hdwe;
+      Ib_amp = Ib_amp_hdwe;
+      Ib_noa = Ib_noa_hdwe;
+    }
     // Otherwise it generates signals for feedback into monitor
     else
-        Ib_model_in = mod_add;
-    // if ( sp.debug()==-24 ) Serial.printf("ib_bias_all%7.3f mod_add%7.3f Ib_model_in%7.3f\n", sp.ib_bias_all(), mod_add, Ib_model_in);
+    {
+      Ib_model_in = mod_add;
+      Ib_amp = Ib_amp_model;
+      Ib_noa = Ib_noa_model;
+      // if ( sp.debug()==-24 ) Serial.printf("ib_bias_all%7.3f mod_add%7.3f Ib_model_in%7.3f\n", sp.ib_bias_all(), mod_add, Ib_model_in);
+    }
 }
 
 // Load and filter Tb

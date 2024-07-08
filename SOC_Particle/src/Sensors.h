@@ -1,7 +1,7 @@
 //
 // MIT License
 //
-// Copyright (C) 2023 - Dave Gutz
+// Copyright (C) 2024 - Dave Gutz
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -189,6 +189,41 @@ protected:
 void bitMapPrint(char *buf, const int16_t fw, const uint8_t num);
 
 
+// Model-based fault detector
+// The trim integrator path is under threat for underflows and needs double resolution
+// and possibly infrequent calls
+class Looparound
+{
+public:
+  Looparound();
+  Looparound(BatteryMonitor *Mon, Sensors *Sen);
+  ~Looparound();
+  void calculate(const boolean reset, const float ib);
+  uint8_t hi_fail() { return hi_fail_; };
+  uint8_t hi_fault() { return hi_fault_; };
+  uint8_t lo_fail() { return lo_fail_; };
+  uint8_t lo_fault() { return lo_fault_; };
+  void pretty_print();
+protected:
+  Chemistry *chem_;         // Chemistry
+  LagExp *ChargeTransfer_;  // ChargeTransfer model {ib, vb} --> {voc}, ioc=ib for Battery version
+  float e_wrap_;            // Wrap error, V
+  float e_wrap_filt_;       // Wrap error, V
+  uint8_t hi_fault_;        // Fault bit
+  uint8_t hi_fail_;         // Fail bit
+  uint8_t lo_fault_;        // Fault bit
+  uint8_t lo_fail_;         // Fail bit
+  LagTustin *IbErrFilt_;    // Noise filter for signal selection
+  float ib_;                // Sensed unit shunt current, A
+  BatteryMonitor *Mon_;     // Monitor ptr
+  Sensors *Sen_;            // Sensors ptr
+  float voc_;               // Open circuit unit voltage, V 
+  LagTustin *WrapErrFilt_;  // Noise filter for voltage wrap
+  TFDelay *WrapHi_;         // Wrap test persistence
+  TFDelay *WrapLo_;         // Wrap test persistence
+};
+
+
 // Detect faults and manage selection
 class Fault
 {
@@ -282,6 +317,7 @@ public:
   boolean wrap_lo_m_flt() { return faultRead(WRAP_LO_M_FLT); };
   boolean wrap_lo_n_fa() { return failRead(WRAP_LO_N_FA); };
   boolean wrap_lo_n_flt() { return faultRead(WRAP_LO_N_FLT); };
+  void wrap_scalars(BatteryMonitor *Mon);
   boolean wrap_vb_fa() { return failRead(WRAP_VB_FA); };
   void wrap_err_filt_state(const float in) { WrapErrFilt->state(in); }
 protected:
@@ -349,10 +385,12 @@ public:
   float Tb_model;             // Temperature used for battery bank temp in model, C
   float Tb_model_filt;        // Filtered, modeled battery bank temp, C
   float Ib;                   // Selected battery bank current, A
+  float Ib_amp;               // Initial selected amp battery bank current, A
   float Ib_amp_hdwe;          // Sensed amp battery bank current, A
   float Ib_amp_hdwe_f;        // Sensed, filtered amp battery bank current, A
   float Ib_amp_model;         // Modeled amp battery bank current, A
   float Ib_hdwe_f;            // Sensed, filtered selected battery bank current, A
+  float Ib_noa;               // Initial selected noa battery bank current, A
   float Ib_noa_hdwe;          // Sensed noa battery bank current, A
   float Ib_noa_hdwe_f;        // Sensed, filtered noa battery bank current, A
   float Ib_noa_model;         // Modeled noa battery bank current, A
@@ -387,12 +425,14 @@ public:
   unsigned long long dt_ib(void) { return dt_ib_; };
   void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
   float ib() { return Ib / sp.nP(); };                            // Battery unit current, A
+  float ib_amp() { return Ib_amp / sp.nP(); };          // Battery amp unit current, A
   float ib_amp_hdwe() { return Ib_amp_hdwe / sp.nP(); };          // Battery amp unit current, A
   float ib_amp_model() { return Ib_amp_model / sp.nP(); };        // Battery amp model unit current, A
   float ib_hdwe() { return Ib_hdwe / sp.nP(); };                  // Battery select hardware unit current, A
   float ib_hdwe_model() { return Ib_hdwe_model / sp.nP(); };      // Battery select hardware model unit current, A
   float ib_model() { return Ib_model / sp.nP(); };                // Battery select model unit current, A
   float ib_model_in() { return Ib_model_in / sp.nP(); };          // Battery select model input unit current, A
+  float ib_noa() { return Ib_noa / sp.nP(); };                    // Battery noa unit current, A
   float ib_noa_hdwe() { return Ib_noa_hdwe / sp.nP(); };          // Battery no amp unit current, A
   float ib_noa_model() { return Ib_noa_model / sp.nP(); };        // Battery no amp model unit current, A
   float Ib_amp_add();

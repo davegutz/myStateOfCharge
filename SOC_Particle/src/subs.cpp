@@ -451,6 +451,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Load Ib and Vb
   // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb
   load_ib_vb(reset, reset_temp, Sen, myPins, Mon);
+  Sen->Flt->wrap_scalars(Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
   Sen->Flt->ib_quiet(reset, Sen);
   Sen->Flt->cc_diff(Sen, Mon);

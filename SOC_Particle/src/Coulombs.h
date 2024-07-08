@@ -52,6 +52,7 @@ public:
   void apply_delta_q_t(const double delta_q, const float temp_c);
   void assign_all_mod() { chem_.assign_all_chm(); };
   double calculate_capacity(const float temp_c);
+  Chemistry *chem() { return &chem_; };
   void chem_pretty_print () { chem_.pretty_print(); };
   double coul_eff() { return ( coul_eff_ ); };
   void coul_eff(const double coul_eff) { coul_eff_ = coul_eff; };
