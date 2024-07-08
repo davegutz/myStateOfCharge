@@ -200,6 +200,8 @@ public:
   Looparound(BatteryMonitor *Mon, Sensors *Sen);
   ~Looparound();
   void calculate(const boolean reset, const float ib);
+  float e_wrap() { return e_wrap_; };
+  float e_wrap_filt() { return e_wrap_filt_; };
   uint8_t hi_fail() { return hi_fail_; };
   uint8_t hi_fault() { return hi_fault_; };
   uint8_t lo_fail() { return lo_fail_; };
@@ -245,10 +247,10 @@ public:
   float ewlo_thr() { return ewlo_thr_; };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
-  float e_wrap_m() { return e_wrap_m_; };
-  float e_wrap_m_filt() { return e_wrap_m_filt_; };
-  float e_wrap_n() { return e_wrap_n_; };
-  float e_wrap_n_filt() { return e_wrap_n_filt_; };
+  float e_wrap_m() { return LoopIbAmp->e_wrap(); };
+  float e_wrap_m_filt() { return LoopIbAmp->e_wrap_filt(); };
+  float e_wrap_n() { return LoopIbNoa->e_wrap(); };
+  float e_wrap_n_filt() { return LoopIbNoa->e_wrap_filt(); };
   uint32_t fltw() { return fltw_; };
   uint32_t falw() { return falw_; };
   TFDelay *IbLoActive;    // Persistence low amp active status
@@ -348,10 +350,6 @@ protected:
   float ewsat_slr_;         // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
-  float e_wrap_m_;          // Wrap amp error, V
-  float e_wrap_m_filt_;     // Wrap amp error, V
-  float e_wrap_n_;          // Wrap noa error, V
-  float e_wrap_n_filt_;     // Wrap noa error, V
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
   boolean ib_lo_active_;   // Battery low amp is in active range, T=active

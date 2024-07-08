@@ -453,8 +453,8 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   load_ib_vb(reset, reset_temp, Sen, myPins, Mon);
   Sen->Flt->wrap_scalars(Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
-  Sen->Flt->LoopIbNoa->calculate(reset, Sen->ShuntNoAmp->ishunt_cal());
-  Sen->Flt->LoopIbAmp->calculate(reset, Sen->ShuntAmp->ishunt_cal());
+  Sen->Flt->LoopIbNoa->calculate(reset, Sen->ib_noa());
+  Sen->Flt->LoopIbAmp->calculate(reset, Sen->ib_amp());
   Sen->Flt->ib_quiet(reset, Sen);
   Sen->Flt->cc_diff(Sen, Mon);
   Sen->Flt->ib_diff(reset, Sen, Mon);

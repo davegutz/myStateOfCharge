@@ -405,9 +405,9 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
 {
-  Serial.printf("Looparound Amp:\n");
+  Serial.printf("\nLooparound Amp:\n");
   LoopIbAmp->pretty_print();
-  Serial.printf("Looparound Noa:\n");
+  Serial.printf("\nLooparound Noa:\n");
   LoopIbNoa->pretty_print();
 
   Serial.printf("\nFault:\n");
@@ -1028,6 +1028,8 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   if ( sp.mod_ib() )
   {
     Ib = Ib_hdwe_model;
+    Ib_amp = Ib_amp_model;
+    Ib_noa = Ib_noa_model;
     Vc = HALF_V3V3;
     sample_time_ib_ = Sim->sample_time();
     dt_ib_ = Sim->dt();
@@ -1035,6 +1037,8 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
   else
   {
     Ib = Ib_hdwe;
+    Ib_amp = Ib_amp_hdwe;
+    Ib_noa = Ib_noa_hdwe;
     Vc = Vc_hdwe;
     sample_time_ib_ = sample_time_ib_hdwe_;
     dt_ib_ = dt_ib_hdwe_;
@@ -1164,15 +1168,11 @@ void Sensors::shunt_select_initial(const boolean reset)
     if ( !sp.mod_ib() )
     {
       Ib_model_in = Ib_hdwe;
-      Ib_amp = Ib_amp_hdwe;
-      Ib_noa = Ib_noa_hdwe;
     }
     // Otherwise it generates signals for feedback into monitor
     else
     {
       Ib_model_in = mod_add;
-      Ib_amp = Ib_amp_model;
-      Ib_noa = Ib_noa_model;
       // if ( sp.debug()==-24 ) Serial.printf("ib_bias_all%7.3f mod_add%7.3f Ib_model_in%7.3f\n", sp.ib_bias_all(), mod_add, Ib_model_in);
     }
 }
