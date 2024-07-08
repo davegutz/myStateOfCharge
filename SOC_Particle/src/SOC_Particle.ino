@@ -346,12 +346,12 @@ void loop()
   static boolean reset_publish = true;
   static unsigned long long start = System.millis();
 
-  // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
-  unsigned long long time_now = (unsigned long long) Time.now();
-  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize, time_now, start);
-
    // Monitor to count Coulombs and run EKF
   static BatteryMonitor *Mon = new BatteryMonitor();
+
+  // Sensor conversions.  The embedded model 'Sim' is contained in Sensors
+  unsigned long long time_now = (unsigned long long) Time.now();
+  static Sensors *Sen = new Sensors(EKF_NOM_DT, 0, myPins, ReadSensors, Talk, Summarize, time_now, start, Mon);
 
   // Battery saturation debounce
   static TFDelay *Is_sat_delay = new TFDelay(false, T_SAT, T_DESAT, EKF_NOM_DT);

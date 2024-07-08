@@ -280,9 +280,19 @@ void Looparound::calculate(const boolean reset, const float ib)
   lo_fail_ = WrapLo_->calculate(lo_fault_, WRAP_LO_S, WRAP_LO_R, Sen_->T, reset_loc) && !Sen_->Flt->vb_fa();  // non-latching
 }
 
+void Looparound::pretty_print()
+{
+  Serial.printf(" ib%7.3f A\n", ib_);
+  Serial.printf(" voc%7.3f, V\n", voc_);
+  Serial.printf(" e_wrap%7.3f, V\n", e_wrap_);
+  Serial.printf(" e_wrap_f%7.3f, V\n", e_wrap_filt_);
+  Serial.printf(" hi_fault/fail %d/%d,\n", hi_fault_, hi_fail_);
+  Serial.printf(" lo_fault/fail %d/%d,\n", lo_fault_, lo_fail_);
+}
+
 
 // Class Fault
-Fault::Fault(const double T, uint8_t *preserving):
+Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *Sen):
   cc_diff_(0.), cc_diff_empty_slr_(1), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0),
   ib_diff_(0), ib_diff_f_(0), ib_lo_active_(true), ib_quiet_(0), ib_rate_(0), latched_fail_(false), 
   latched_fail_fake_(false), tb_sel_stat_(1), vb_sel_stat_(1), ib_sel_stat_(1), reset_all_faults_(false),
@@ -304,6 +314,8 @@ Fault::Fault(const double T, uint8_t *preserving):
   WrapLo = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   QuietFilt = new General2_Pole(T, WN_Q_FILT, ZETA_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);  // actual update time provided run time
   QuietRate = new RateLagExp(T, TAU_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);
+  LoopIbAmp = new Looparound(Mon, Sen);
+  LoopIbNoa = new Looparound(Mon, Sen);
 }
 
 // Coulomb Counter difference test - failure conditions track poorly
@@ -393,7 +405,12 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
 {
-  Serial.printf("Fault:\n");
+  Serial.printf("Looparound Amp:\n");
+  LoopIbAmp->pretty_print();
+  Serial.printf("Looparound Noa:\n");
+  LoopIbNoa->pretty_print();
+
+  Serial.printf("\nFault:\n");
   Serial.printf(" cc_diff  %7.3f  thr=%7.3f Fc^\n", cc_diff_, cc_diff_thr_);
   Serial.printf(" ib_diff  %7.3f  thr=%7.3f Fd^\n", ib_diff_f_, ib_diff_thr_);
   Serial.printf(" e_wrap   %7.3f  thr=%7.3f Fo^%7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
@@ -856,8 +873,8 @@ void Fault::vc_check(Sensors *Sen, BatteryMonitor *Mon, const float _vc_min, con
 
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now,
-  unsigned long long millis):   reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL), sample_time_ib_hdwe_(0UL),
-  sample_time_vb_hdwe_(0UL), inst_time_(time_now), inst_millis_(millis)
+  unsigned long long millis, BatteryMonitor *Mon):   reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),
+  sample_time_ib_hdwe_(0UL), sample_time_vb_hdwe_(0UL), inst_time_(time_now), inst_millis_(millis)
 {
   this->T = T;
   this->T_filt = T;
@@ -889,7 +906,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   Prbn_Vb_ = new PRBS_7(VB_NOISE_SEED);
   Prbn_Ib_amp_ = new PRBS_7(IB_AMP_NOISE_SEED);
   Prbn_Ib_noa_ = new PRBS_7(IB_NOA_NOISE_SEED);
-  Flt = new Fault(T, &sp.preserving_z);
+  Flt = new Fault(T, &sp.preserving_z, Mon, this);
   Serial.printf("Vb sense ADC pin started\n");
   AmpFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP, NOM_UNIT_CAP);
   NoaFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP*sp.nS()*sp.nP(), NOM_UNIT_CAP*sp.nS()*sp.nP());
@@ -1036,8 +1053,11 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
           Flt->ib_diff(), Flt->ib_diff_f());
       Serial.printf("%s", pr.buff);
 
-      sprintf(pr.buff, "  %7.5f,%8.5f,%8.5f,  %d,%8.5f,%8.5f,%8.5f, %d,%8.5f,  %d,%8.5f,%8.5f, %d,%8.5f,  %5.2f,%5.2f, %d, %5.2f, ",
-          Mon->voc_soc(), Flt->e_wrap(), Flt->e_wrap_filt(),
+      sprintf(pr.buff, "  %7.5f,%8.5f,%8.5f,%8.5f,%8.5f,%8.5f,%8.5f,  ",
+          Mon->voc_soc(), Flt->e_wrap(), Flt->e_wrap_filt(), Flt->e_wrap_m(), Flt->e_wrap_m_filt(), Flt->e_wrap_n(), Flt->e_wrap_n_filt());
+      Serial.printf("%s", pr.buff);
+
+      sprintf(pr.buff, "  %d,%8.5f,%8.5f,%8.5f, %d,%8.5f,  %d,%8.5f,%8.5f, %d,%8.5f,  %5.2f,%5.2f, %d, %5.2f, ",
           Flt->ib_sel_stat(), vc_hdwe(), ib_hdwe(), ib_hdwe_model(), sp.mod_ib(), ib(),
           Flt->vb_sel_stat(), vb_hdwe(), vb_model(), sp.mod_vb(), vb(),
           Tb_hdwe, Tb, sp.mod_tb(), Tb_filt);

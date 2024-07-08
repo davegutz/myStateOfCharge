@@ -224,6 +224,8 @@ Flt_ram::~Flt_ram(){}
     voc_eeram_.a16 = *next; *next += sizeof(voc);
     voc_stat_eeram_.a16 = *next; *next += sizeof(voc_stat);
     e_wrap_filt_eeram_.a16 = *next; *next += sizeof(e_wrap_filt);
+    e_wrap_m_filt_eeram_.a16 = *next; *next += sizeof(e_wrap_m_filt);
+    e_wrap_n_filt_eeram_.a16 = *next; *next += sizeof(e_wrap_n_filt);
     fltw_eeram_.a16 = *next; *next += sizeof(fltw);
     falw_eeram_.a16 = *next; *next += sizeof(falw);
     rP_ = ram;

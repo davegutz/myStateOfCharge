@@ -180,7 +180,7 @@ void print_signal_sel_header(void)
 {
   if ( sp.debug()==2 || sp.debug()==4 ) // print_signal_sel_header
     Serial.printf("unit_s,c_time,res,user_sel,   cc_dif,  ibmh,ibnh,ibmm,ibnm,ibm,   ib_diff, ib_diff_f,");
-    Serial.printf("    voc_soc,e_w,e_w_f,  ib_sel_stat,vc_h,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f, ");
+    Serial.printf("    voc_soc,e_w,e_w_f,e_wm,e_wm_f,e_wn,e_wn_f,  ib_sel_stat,vc_h,ib_h,ib_s,mib,ib, vb_sel,vb_h,vb_s,mvb,vb,  Tb_h,Tb_s,mtb,Tb_f, ");
     Serial.printf("  fltw, falw, ib_rate, ib_quiet, tb_sel, ccd_thr, ewh_thr, ewl_thr, ibd_thr, ibq_thr, preserving,ff,y_ekf_f,\n");
 }
 

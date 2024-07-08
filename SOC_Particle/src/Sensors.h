@@ -96,6 +96,7 @@ public:
   unsigned long long dt() { return sample_time_ - sample_time_z_; };
   void convert(const boolean disconnect, const boolean reset, Sensors *Sen);
   float Ishunt_cal() { return Ishunt_cal_; };
+  float ishunt_cal() { return Ishunt_cal_ / sp.nP(); };
   float Ishunt_cal_filt() { return Ishunt_cal_filt_; };
   void pretty_print();
   void sample(const boolean reset_loc, const float T);
@@ -229,7 +230,7 @@ class Fault
 {
 public:
   Fault();
-  Fault(const double T, uint8_t *sp_preserving);
+  Fault(const double T, uint8_t *sp_preserving, BatteryMonitor *Mon, Sensors *Sen);
   ~Fault();
   float cc_diff() { return cc_diff_; };
   void cc_diff(Sensors *Sen, BatteryMonitor *Mon);
@@ -244,6 +245,10 @@ public:
   float ewlo_thr() { return ewlo_thr_; };
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
+  float e_wrap_m() { return e_wrap_m_; };
+  float e_wrap_m_filt() { return e_wrap_m_filt_; };
+  float e_wrap_n() { return e_wrap_n_; };
+  float e_wrap_n_filt() { return e_wrap_n_filt_; };
   uint32_t fltw() { return fltw_; };
   uint32_t falw() { return falw_; };
   TFDelay *IbLoActive;    // Persistence low amp active status
@@ -277,6 +282,8 @@ public:
   void latched_fail(const boolean cmd) { latched_fail_ = cmd; };
   int8_t latched_fail_fake() { return latched_fail_fake_; };
   void latched_fail_fake(const boolean cmd) { latched_fail_fake_ = cmd; };
+  Looparound *LoopIbAmp;    // Looparound for Ib amp
+  Looparound *LoopIbNoa;    // Looparound for Ib noa
   boolean no_fails() { return !latched_fail_; };
   boolean no_fails_fake() { return !latched_fail_fake_; };
   void preserving(const boolean cmd) {  sp.put_Preserving(cmd); }; // TODO:  Parameter class with = operator --> put. Then *sp_preserving = cmd
@@ -336,11 +343,15 @@ protected:
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
   boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_;           // EKF tracking error, C
-  float cc_diff_empty_slr_;  // Scale cc_diff when soc low, scalar
-  float ewmin_slr_;        // Scale wrap detection thresh when voc(soc) less than min, scalar
-  float ewsat_slr_;        // Scale wrap detection thresh when voc(soc) saturated, scalar
+  float cc_diff_empty_slr_; // Scale cc_diff when soc low, scalar
+  float ewmin_slr_;         // Scale wrap detection thresh when voc(soc) less than min, scalar
+  float ewsat_slr_;         // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
+  float e_wrap_m_;          // Wrap amp error, V
+  float e_wrap_m_filt_;     // Wrap amp error, V
+  float e_wrap_n_;          // Wrap noa error, V
+  float e_wrap_n_filt_;     // Wrap noa error, V
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
   boolean ib_lo_active_;   // Battery low amp is in active range, T=active
@@ -369,7 +380,7 @@ class Sensors
 public:
   Sensors();
   Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now,
-    unsigned long long millis);
+    unsigned long long millis, BatteryMonitor *Mon);
   ~Sensors();
   int Vb_raw;                 // Raw analog read, integer
   float Vb;                   // Selected battery bank voltage, V

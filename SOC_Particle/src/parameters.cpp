@@ -394,8 +394,8 @@ void SavedPars::print_fault_header(Publish *pubList)
 {
     Serial.printf("Config:  %s \n", pubList->unit.c_str());
     Serial1.printf("Config:  %s \n", pubList->unit.c_str());
-    Serial.printf ("fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
-    Serial1.printf ("fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, fltw, falw,\n");
+    Serial.printf ("fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, e_wm_f, e_wn_f, fltw, falw,\n");
+    Serial1.printf ("fltb,  date,             time_ux,    Tb_h, vb_h, ibmh, ibnh, Tb, vb, ib, soc, soc_min, soc_ekf, voc, voc_stat, e_w_f, e_wm_f, e_wn_f, fltw, falw,\n");
 }
 
 // Print history
