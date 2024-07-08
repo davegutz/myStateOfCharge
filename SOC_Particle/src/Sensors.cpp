@@ -377,8 +377,8 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
 void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   boolean reset_loc = reset | reset_all_faults_;
-  // e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
-  e_wrap_ = Mon->y_ekf();
+  e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
+  // e_wrap_ = Mon->y_ekf();
   e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
   // sat logic screens out voc jumps when ib>0 when saturated
   // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
