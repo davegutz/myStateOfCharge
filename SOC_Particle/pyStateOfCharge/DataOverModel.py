@@ -399,19 +399,23 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.legend(loc=1)
         plt.subplot(223)
         plt.plot(mo.time, mo.e_wrap, color='green', linestyle='-', label='e_wrap' + ref_str)
-        plt.plot(mv.time, mv.e_wrap, color='red', linestyle='--', label='e_wrap' + test_str)
+        if hasattr(mo, 'e_wrap_filt'):
+            plt.plot(mo.time, mo.e_wrap_filt, color='yellow', linestyle='--', label='e_wrap_filt' + ref_str)
+        plt.plot(mv.time, mv.e_wrap, color='red', linestyle='-', label='e_wrap' + test_str)
+        if hasattr(mv, 'e_wrap_filt'):
+            plt.plot(mv.time, mv.e_wrap_filt, color='pink', linestyle='--', label='e_wrap_filt' + test_str)
         if hasattr(mo, 'e_wrap_filt'):
             plt.plot(mo.time, mo.e_wrap_filt, color='green', linestyle='-', label='e_wrap_filt' + ref_str)
         if hasattr(mv, 'e_wrap_filt'):
             plt.plot(mv.time, mv.e_wrap_filt, color='red', linestyle='--', label='e_wrap_filt' + test_str)
         if hasattr(mo, 'e_wrap_m_filt'):
-            plt.plot(mo.time, mo.e_wrap_m_filt, color='green', linestyle='-', label='e_wrap_m_filt' + ref_str)
+            plt.plot(mo.time, mo.e_wrap_m_filt, color='blue', linestyle='-', label='e_wrap_m_filt' + ref_str)
         if hasattr(mv, 'e_wrap_m_filt'):
-            plt.plot(mv.time, mv.e_wrap_m_filt, color='red', linestyle='--', label='e_wrap_m_filt' + test_str)
+            plt.plot(mv.time, mv.e_wrap_m_filt, color='cyan', linestyle='--', label='e_wrap_m_filt' + test_str)
         if hasattr(mo, 'e_wrap_n_filt'):
-            plt.plot(mo.time, mo.e_wrap_n_filt, color='red', linestyle='-', label='e_wrap_n_filt' + ref_str)
+            plt.plot(mo.time, mo.e_wrap_n_filt, color='black', linestyle='-', label='e_wrap_n_filt' + ref_str)
         if hasattr(mv, 'e_wrap_n_filt'):
-            plt.plot(mv.time, mv.e_wrap_n_filt, color='green', linestyle='--', label='e_wrap_n_filt' + test_str)
+            plt.plot(mv.time, mv.e_wrap_n_filt, color='orange', linestyle='--', label='e_wrap_n_filt' + test_str)
         plt.plot(mo.time, mo.ewh_thr, color='black', linestyle='-.', label='ewh_thr' + ref_str)
         plt.plot(mo.time, mo.ewl_thr, color='black', linestyle='-.', label='ewl_thr' + ref_str)
         plt.plot(mo.time, mo.cc_dif, color='green', linestyle='-', label='cc_diff'+ref_str)
@@ -713,6 +717,7 @@ class SavedData:
             self.ib_diff_fa = np.bool_((np.array(falw) & 2**8) | (np.array(falw) & 2**9))
             self.voc_soc_sel = np.array(sel.voc_soc[:i_end])
             self.e_wrap = np.array(sel.e_w[:i_end])
+            self.e_wrap_filt = np.array(sel.e_w_f[:i_end])
             if hasattr(sel, 'e_wm'):
                 self.e_wrap_m = np.array(sel.e_wm[:i_end])
             if hasattr(sel, 'e_wm_f'):
