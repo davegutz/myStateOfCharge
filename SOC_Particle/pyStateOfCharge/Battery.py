@@ -536,10 +536,11 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.reset.append(self.reset)
         self.saved.e_wrap.append(self.e_wrap)
         self.saved.e_wrap_filt.append(self.e_wrap_filt)
-        self.saved.e_wrap_m.append(self.e_wrap_m)
-        self.saved.e_wrap_m_filt.append(self.e_wrap_m_filt)
-        self.saved.e_wrap_n.append(self.e_wrap_n)
-        self.saved.e_wrap_n_filt.append(self.e_wrap_n_filt)
+        if hasattr(self, 'e_wrap_m'):
+            self.saved.e_wrap_m.append(self.e_wrap_m)
+            self.saved.e_wrap_m_filt.append(self.e_wrap_m_filt)
+            self.saved.e_wrap_n.append(self.e_wrap_n)
+            self.saved.e_wrap_n_filt.append(self.e_wrap_n_filt)
         self.saved.ib_lag.append(self.ib_lag)
         self.saved.voc_soc_new.append(self.voc_soc_new)
 
