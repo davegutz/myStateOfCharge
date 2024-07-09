@@ -263,31 +263,35 @@ Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen):
   WrapLo_ = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
 }
 
-void Looparound::calculate(const boolean reset, const float ib)
+void Looparound::calculate(const boolean reset, const float ib, const float ib_leader, const bool follow)
 {
-  boolean reset_loc = reset | Sen_->Flt->reset_all_faults();
-  ib_ = ib;
-  voc_ = Mon_->vb() - (ChargeTransfer_->calculate(ib_, reset, chem_->tau_ct, Sen_->T)*chem_->r_ct*ap.slr_res + ib_*chem_->r_0*ap.slr_res);
+  following_ = follow;
+  reset_ = reset | Sen_->Flt->reset_all_faults() | following_;
+  if (following_) ib_ = ib_leader;
+  else ib_ = ib;
+  voc_ = Mon_->vb() - (ChargeTransfer_->calculate(ib_, reset_, chem_->tau_ct, Sen_->T)*chem_->r_ct*ap.slr_res + ib_*chem_->r_0*ap.slr_res);
   e_wrap_ = Mon_->voc_soc() - voc_;
-  e_wrap_filt_ = WrapErrFilt_->calculate(e_wrap_, reset_loc, min(Sen_->T, F_MAX_T_WRAP));
+  e_wrap_filt_ = WrapErrFilt_->calculate(e_wrap_, reset_, min(Sen_->T, F_MAX_T_WRAP));
   // sat logic screens out voc jumps when ib>0 when saturated
   // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
   // wrap_vb latches because vb is single sensor  faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
 
   hi_fault_ = e_wrap_filt_ >= Sen_->Flt->ewhi_thr();
-  hi_fail_ = WrapHi_->calculate(hi_fault_, WRAP_HI_S, WRAP_HI_R, Sen_->T, reset_loc) && !Sen_->Flt->vb_fa();  // non-latching
+  hi_fail_ = WrapHi_->calculate(hi_fault_, WRAP_HI_S, WRAP_HI_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // non-latching
   lo_fault_ = e_wrap_filt_ <= Sen_->Flt->ewlo_thr();
-  lo_fail_ = WrapLo_->calculate(lo_fault_, WRAP_LO_S, WRAP_LO_R, Sen_->T, reset_loc) && !Sen_->Flt->vb_fa();  // non-latching
+  lo_fail_ = WrapLo_->calculate(lo_fault_, WRAP_LO_S, WRAP_LO_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // non-latching
 }
 
 void Looparound::pretty_print()
 {
+  Serial.printf(" following %d\n", following_);
+  Serial.printf(" reset %d\n", reset_);
   Serial.printf(" ib%7.3f A\n", ib_);
-  Serial.printf(" voc%7.3f, V\n", voc_);
-  Serial.printf(" e_wrap%7.3f, V\n", e_wrap_);
-  Serial.printf(" e_wrap_f%7.3f, V\n", e_wrap_filt_);
-  Serial.printf(" hi_fault/fail %d/%d,\n", hi_fault_, hi_fail_);
-  Serial.printf(" lo_fault/fail %d/%d,\n", lo_fault_, lo_fail_);
+  Serial.printf(" voc%7.3f V\n", voc_);
+  Serial.printf(" e_wrap%7.3f V\n", e_wrap_);
+  Serial.printf(" e_wrap_f%7.3f V\n", e_wrap_filt_);
+  Serial.printf(" hi_fault/fail %d/%d\n", hi_fault_, hi_fail_);
+  Serial.printf(" lo_fault/fail %d/%d\n", lo_fault_, lo_fail_);
 }
 
 
