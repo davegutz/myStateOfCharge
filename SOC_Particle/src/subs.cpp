@@ -453,8 +453,9 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   load_ib_vb(reset, reset_temp, Sen, myPins, Mon);
   Sen->Flt->wrap_scalars(Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
-  Sen->Flt->LoopIbNoa->calculate(reset, Sen->ib_noa());
-  Sen->Flt->LoopIbAmp->calculate(reset, Sen->ib_amp());
+  Sen->Flt->LoopIbNoa->calculate(reset, Sen->ib_noa(), Sen->ib_noa(), false);
+  boolean ib_noa_range = Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO;
+  Sen->Flt->LoopIbAmp->calculate(reset, Sen->ib_amp(), Sen->ib_noa(), ib_noa_range);
   Sen->Flt->ib_quiet(reset, Sen);
   Sen->Flt->cc_diff(Sen, Mon);
   Sen->Flt->ib_diff(reset, Sen, Mon);
