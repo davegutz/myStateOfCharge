@@ -633,7 +633,6 @@ void LagExp::rateState(double in)
   rstate_ = in;
   lstate_ = fmax(fmin(lstate_ + T_ * rate_, max_), min_);
 }
-double LagExp::state(void) { return (lstate_); };
 
 
 // ***************************** Integrators ******************************************

@@ -104,7 +104,7 @@ VolatilePars::~VolatilePars(){}
 
 void  VolatilePars::initialize()
 {
-    #define NVOL 38
+    #define NVOL 42
     V_ = new Variable*[NVOL];
     V_[n_++] =(cc_diff_slr_p    = new FloatV("  ", "Fc", NULL,"Slr cc_diff thr",      "slr",    0,    1000, &cc_diff_slr,       1));
     V_[n_++] =(cycles_inj_p     = new FloatV("  ", "XC", NULL,"Number prog cycle",    "float",  0,    1000, &cycles_inj,        0));
@@ -121,11 +121,15 @@ void  VolatilePars::initialize()
     V_[n_++] =(fake_faults_p  = new BooleanV("  ", "Ff", NULL,"Faults ignored",       "T=ign",  0,    1,    &fake_faults,       FAKE_FAULTS));
     V_[n_++] =(hys_scale_p      = new FloatV("  ", "Sh", NULL,"Sim hys scale",        "slr",    0,    100,  &hys_scale,         HYS_SCALE));
     V_[n_++] =(hys_state_p      = new FloatV("  ", "SH", NULL,"Sim hys state",        "v",      -10,  10,   &hys_state,         0));
-    V_[n_++] =(ib_amp_add_p     = new FloatV("  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
-    V_[n_++] =(ib_diff_slr_p    = new FloatV("  ", "Fd", NULL,"Slr ib_diff thr",      "A",      0,    1000, &ib_diff_slr,       1));
-    V_[n_++] =(ib_noa_add_p     = new FloatV("  ", "Dn", NULL,"No amp signal add",    "A",      -1000,1000, &ib_noa_add,        0));
     V_[n_++] =(Ib_amp_noise_amp_p= new FloatV("  ","DM", NULL,"Amp amp noise",        "A",      0,    1000, &Ib_amp_noise_amp,  IB_AMP_NOISE));
+    V_[n_++] =(ib_amp_add_p     = new FloatV("  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
+    V_[n_++] =(ib_max_amp_p     = new FloatV("  ", "Mm", NULL,"Amp hdwe signal max",  "A",      0,   (HDWE_IB_HI_LO_AMP_HI/NP), &ib_amp_max, (HDWE_IB_HI_LO_AMP_HI/NP)));
+    V_[n_++] =(ib_min_amp_p     = new FloatV("  ", "Nm", NULL,"Amp hdwe signal min",  "A",    (HDWE_IB_HI_LO_AMP_LO/NP),  0,    &ib_amp_min, (HDWE_IB_HI_LO_AMP_LO/NP)));
+    V_[n_++] =(ib_diff_slr_p    = new FloatV("  ", "Fd", NULL,"Slr ib_diff thr",      "A",      0,    1000, &ib_diff_slr,       1));
     V_[n_++] =(Ib_noa_noise_amp_p= new FloatV("  ","DN", NULL,"Amp noa noise",        "A",      0,    1000, &Ib_noa_noise_amp,  IB_NOA_NOISE));
+    V_[n_++] =(ib_noa_add_p     = new FloatV("  ", "Dn", NULL,"No amp signal add",    "A",      -1000,1000, &ib_noa_add,        0));
+    V_[n_++] =(ib_max_noa_p     = new FloatV("  ", "Nn", NULL,"Noa hdwe signal max",  "A",      0,    (HDWE_IB_HI_LO_NOA_HI/NP), &ib_noa_max,        (HDWE_IB_HI_LO_NOA_HI/NP)));
+    V_[n_++] =(ib_min_noa_p     = new FloatV("  ", "Nn", NULL,"Noa hdwe signal min",  "A",    (HDWE_IB_HI_LO_NOA_LO/NP),  0,    &ib_noa_min,         (HDWE_IB_HI_LO_NOA_LO/NP)));
     V_[n_++] =(ib_quiet_slr_p   = new FloatV("  ", "Fq", NULL,"Ib quiet det slr",     "slr",    0,    1000, &ib_quiet_slr,      1));
     V_[n_++] =(init_all_soc_p   = new FloatV("  ", "Ca", NULL,"Init all to this",     "soc",    -0.5, 1.1,  &init_all_soc,      1));
     V_[n_++] =(init_sim_soc_p   = new FloatV("  ", "Cm", NULL,"Init sim to this",     "soc",    -0.5, 1.1,  &init_sim_soc,      1));

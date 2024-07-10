@@ -453,9 +453,9 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   load_ib_vb(reset, reset_temp, Sen, myPins, Mon);
   Sen->Flt->wrap_scalars(Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
-  Sen->Flt->LoopIbNoa->calculate(reset, Sen->ib_noa(), Sen->ib_noa(), false);
+  Sen->Flt->LoopIbNoa->calculate(reset, Sen->ib_noa(), Sen->Flt->LoopIbNoa, false);
   boolean ib_noa_range = Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO;
-  Sen->Flt->LoopIbAmp->calculate(reset, Sen->ib_amp(), Sen->ib_noa(), ib_noa_range);
+  Sen->Flt->LoopIbAmp->calculate(reset, Sen->ib_amp(), Sen->Flt->LoopIbNoa, ib_noa_range);
   Sen->Flt->ib_quiet(reset, Sen);
   Sen->Flt->cc_diff(Sen, Mon);
   Sen->Flt->ib_diff(reset, Sen, Mon);
@@ -481,8 +481,8 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   cp.model_saturated = Sen->Sim->saturated();
 
   // Inputs:  Sim->Ib
-  Sen->Ib_amp_model = Sen->Ib_model + Sen->Ib_amp_add() + Sen->Ib_amp_noise();  // Sm/Dm
-  Sen->Ib_noa_model = Sen->Ib_model + Sen->Ib_noa_add() + Sen->Ib_noa_noise();  // Sn/Dn
+  Sen->Ib_amp_model = Sen->Ib_model + Sen->Ib_amp_add() + Sen->Ib_amp_noise();  // Dm
+  Sen->Ib_noa_model = Sen->Ib_model + Sen->Ib_noa_add() + Sen->Ib_noa_noise();  // Dn
 
   // Select
   //  Inputs:                                       --->   Outputs:

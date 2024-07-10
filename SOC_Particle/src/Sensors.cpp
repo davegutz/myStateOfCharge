@@ -257,18 +257,27 @@ Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen):
  chem_(Mon->chem()), Mon_(Mon), Sen_(Sen)
 {
   ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_->tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);     // actual update time provided run time
-  IbErrFilt_ = new LagTustin(2., TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);                // actual update time provided run time
   WrapErrFilt_ = new LagTustin(2., WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);   // actual update time provided run time
   WrapHi_ = new TFDelay(false, WRAP_HI_S, WRAP_HI_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   WrapLo_ = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
 }
 
-void Looparound::calculate(const boolean reset, const float ib, const float ib_leader, const bool follow)
+// Absorb states from leader
+void Looparound::absorb_states(Looparound *Leader)
+{
+  ib_ = Leader->ib_;
+  ChargeTransfer_->absorb(Leader->ChargeTransfer_);
+}
+
+// Update the loop
+void Looparound::calculate(const boolean reset, const float ib, Looparound *Leader, const bool follow)
 {
   following_ = follow;
   reset_ = reset | Sen_->Flt->reset_all_faults() | following_;
-  if (following_) ib_ = ib_leader;
-  else ib_ = ib;
+  if (following_)
+    absorb_states(Leader);
+  else
+    ib_ = ib;
   voc_ = Mon_->vb() - (ChargeTransfer_->calculate(ib_, reset_, chem_->tau_ct, Sen_->T)*chem_->r_ct*ap.slr_res + ib_*chem_->r_0*ap.slr_res);
   e_wrap_ = Mon_->voc_soc() - voc_;
   e_wrap_filt_ = WrapErrFilt_->calculate(e_wrap_, reset_, min(Sen_->T, F_MAX_T_WRAP));
@@ -1090,7 +1099,11 @@ float Sensors::Tb_noise()
 
 // Conversion.   Here to avoid circular reference to sp in headers.
 float Sensors::Ib_amp_add() { return ( ap.ib_amp_add * sp.nP() ); };
+float Sensors::Ib_amp_max() { return ( ap.ib_amp_max * sp.nP() ); };
+float Sensors::Ib_amp_min() { return ( ap.ib_amp_min * sp.nP() ); };
 float Sensors::Ib_noa_add() { return ( ap.ib_noa_add * sp.nP() ); };
+float Sensors::Ib_noa_max() { return ( ap.ib_noa_max * sp.nP() ); };
+float Sensors::Ib_noa_min() { return ( ap.ib_noa_min * sp.nP() ); };
 float Sensors::Vb_add() { return ( ap.vb_add * sp.nS() ); };
 
 // Vb noise
@@ -1154,8 +1167,8 @@ void Sensors::shunt_select_initial(const boolean reset)
       else
         hdwe_add = 0.;
     }
-    Ib_amp_model = Ib_model + Ib_amp_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm
-    Ib_noa_model = Ib_model + Ib_noa_add(); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn
+    Ib_amp_model = max(min(Ib_model + Ib_amp_add(), Ib_amp_max()), Ib_amp_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm/Mm/Nm
+    Ib_noa_model = max(min(Ib_model + Ib_noa_add(), Ib_noa_max()), Ib_noa_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Mn/Nn
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
     Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);
     Vc_hdwe = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());

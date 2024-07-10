@@ -199,7 +199,7 @@ public:
   Looparound();
   Looparound(BatteryMonitor *Mon, Sensors *Sen);
   ~Looparound();
-  void calculate(const boolean reset, const float ib, const float ib_leader, const bool follow);
+  void calculate(const boolean reset, const float ib, Looparound *Leader, const bool follow);
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
   uint8_t hi_fail() { return hi_fail_; };
@@ -207,6 +207,7 @@ public:
   uint8_t lo_fail() { return lo_fail_; };
   uint8_t lo_fault() { return lo_fault_; };
   void pretty_print();
+  void absorb_states(Looparound *in);
 protected:
   Chemistry *chem_;         // Chemistry
   LagExp *ChargeTransfer_;  // ChargeTransfer model {ib, vb} --> {voc}, ioc=ib for Battery version
@@ -217,7 +218,6 @@ protected:
   uint8_t hi_fail_;         // Fail bit
   uint8_t lo_fault_;        // Fault bit
   uint8_t lo_fail_;         // Fail bit
-  LagTustin *IbErrFilt_;    // Noise filter for signal selection
   float ib_;                // Sensed unit shunt current, A
   BatteryMonitor *Mon_;     // Monitor ptr
   boolean reset_;           // If resetting or not
@@ -447,7 +447,11 @@ public:
   float ib_noa_hdwe() { return Ib_noa_hdwe / sp.nP(); };          // Battery no amp unit current, A
   float ib_noa_model() { return Ib_noa_model / sp.nP(); };        // Battery no amp model unit current, A
   float Ib_amp_add();
+  float Ib_amp_max();
+  float Ib_amp_min();
   float Ib_noa_add();
+  float Ib_noa_max();
+  float Ib_noa_min();
   float Ib_amp_noise();
   float Ib_noa_noise();
   float Ib_noise();

@@ -305,7 +305,7 @@ public:
   virtual void calcState(double in);
   virtual void calcState(double in, const double T);
   virtual double state(void);
-  void state(double in) { state_ = in; }  // For severity testing - sudden offset
+  virtual void state(const double in) { state_ = in; }  // For severity testing - sudden offset
   double a() { return (a_); };
   double b() { return (b_); };
   double rate() { return (rate_); };
@@ -326,17 +326,19 @@ public:
   ~LagExp();
   //operators
   //functions
+  void absorb(LagExp *LE) { lstate_ = LE->lstate_; rstate_ = LE->rstate_; };
   virtual double calculate(double in, int RESET);
   virtual double calculate(double in, int RESET, const double tau, const double T);
   virtual void assignCoeff(double tau, double T);
   virtual void rateState(double in);
-  virtual double state(void);
   double a() { return (a_); };
   double b() { return (b_); };
   double c() { return (c_); };
   double rate() { return (rate_); };
   double lstate() { return (lstate_); };
+  void lstate(const double in) { lstate_ = in; };
   double rstate() { return (rstate_); };
+  void rstate(const double in) { rstate_ = in; };
 protected:
   double a_;
   double b_;

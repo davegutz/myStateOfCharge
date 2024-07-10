@@ -79,8 +79,12 @@ public:
     float hys_scale;            // Sim hysteresis scalar
     float hys_state;            // Sim hysteresis state
     float ib_amp_add;           // Fault injection bias on amp, A
+    float ib_amp_max;           // ib amp unit hardware model max, A
+    float ib_amp_min;           // ib amp unit hardware model min, A
     float ib_diff_slr;          // Scale ib_diff detection thresh, scalar
     float ib_noa_add;           // Fault injection bias on non amp, A
+    float ib_noa_max;           // ib noa unit hardware model max, A
+    float ib_noa_min;           // ib noa unit hardware model min, A
     float Ib_amp_noise_amp;     // Ib bank noise on amplified sensor, amplitude model only, A pk-pk
     float Ib_noa_noise_amp;     // Ib bank noise on non-amplified sensor, amplitude model only, A pk-pk
     float ib_quiet_slr;         // Scale ib_quiet detection thresh, scalar
@@ -139,6 +143,10 @@ public:
     FloatV *Vb_noise_amp_p;
     FloatV *vc_add_p;
     ULongV *wait_inj_p;
+    FloatV *ib_max_amp_p;
+    FloatV *ib_min_amp_p;
+    FloatV *ib_max_noa_p;
+    FloatV *ib_min_noa_p;
 
 protected:
 };
