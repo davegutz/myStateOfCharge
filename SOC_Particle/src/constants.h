@@ -247,23 +247,35 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #if !defined(HDWE_IB_HI_LO_NOA_HI)
     #define HDWE_IB_HI_LO_NOA_HI (HDWE_IB_HI_LO_AMP_HI + 1.)
 #endif
-
-// Default values 
-#ifdef HDWE_BARE
+#if !defined(CURR_BIAS_AMP)
     #define CURR_BIAS_AMP 0.
+#endif
+#if !defined(CURR_BIAS_NOA)
     #define CURR_BIAS_NOA 0.
+#endif
+#if !defined(CURR_SCALE_AMP)
     #define CURR_SCALE_AMP 1.
+#endif
+#if !defined(CURR_SCALE_NOA)
     #define CURR_SCALE_NOA 1.
+#endif
+#if !defined(CURR_SCALE_DISCH)
     #define CURR_SCALE_DISCH 1.
+#endif
+#if !defined(VB_SCALE)
     #define VB_SCALE 1.
+#endif
+#if !defined(VOLT_BIAS)
     #define VOLT_BIAS 0.
+#endif
+#if !defined(TEMP_BIAS)
     #define TEMP_BIAS 0.
+#endif
+#if !defined(CURR_BIAS_ALL)
     #define CURR_BIAS_ALL 0.
+#endif
+#if !defined(CURR_BIASSHUNT_GAIN_AMP)
     #define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (1333 is 100A/0.075V)
-    #define HDWE_IB_HI_LO_NOA_LO -10.
-    #define HDWE_IB_HI_LO_AMP_LO  -9.
-    #define HDWE_IB_HI_LO_AMP_HI   9.
-    #define HDWE_IB_HI_LO_NOA_HI  10.
 #endif
 
 // Conversion gains
