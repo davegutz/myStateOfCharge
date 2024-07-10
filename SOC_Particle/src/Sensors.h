@@ -213,7 +213,8 @@ protected:
   LagExp *ChargeTransfer_;  // ChargeTransfer model {ib, vb} --> {voc}, ioc=ib for Battery version
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
-  float e_wrap_trimmed_;    // Trimmer, V
+  float e_wrap_trim_;       // Trimmer, V
+  float e_wrap_trimmed_;    // Trimmer applied to e_wrap_, V
   boolean following_;       // Commanded to follow the leader.  ib_ = leader, T=following
   uint8_t hi_fault_;        // Fault bit
   uint8_t hi_fail_;         // Fail bit
