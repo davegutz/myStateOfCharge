@@ -199,7 +199,7 @@ public:
   Looparound();
   Looparound(BatteryMonitor *Mon, Sensors *Sen);
   ~Looparound();
-  void calculate(const boolean reset, const float ib, Looparound *Leader, const bool follow);
+  void calculate(const boolean reset, const float ib, Looparound *Leader, const bool follow, const double loop_gain);
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
   uint8_t hi_fail() { return hi_fail_; };
@@ -213,6 +213,7 @@ protected:
   LagExp *ChargeTransfer_;  // ChargeTransfer model {ib, vb} --> {voc}, ioc=ib for Battery version
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
+  float e_wrap_trimmed_;    // Trimmer, V
   boolean following_;       // Commanded to follow the leader.  ib_ = leader, T=following
   uint8_t hi_fault_;        // Fault bit
   uint8_t hi_fail_;         // Fail bit
@@ -222,6 +223,7 @@ protected:
   BatteryMonitor *Mon_;     // Monitor ptr
   boolean reset_;           // If resetting or not
   Sensors *Sen_;            // Sensors ptr
+  TustinIntegrator *Trim_;  // Trim integrator
   float voc_;               // Open circuit unit voltage, V 
   LagTustin *WrapErrFilt_;  // Noise filter for voltage wrap
   TFDelay *WrapHi_;         // Wrap test persistence

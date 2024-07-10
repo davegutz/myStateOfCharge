@@ -219,6 +219,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define WRAP_SOC_LO_SLR     60.         // Large to disable e_wrap (60. for startup)
 #define WRAP_MOD_C_RATE     .02         // Moderate charge rate threshold to engage wrap threshold (0.02 to prevent trip near saturation .05 too large)
 #define WRAP_SOC_MOD_OFF    0.85        // Disable e_wrap_lo when nearing saturated and moderate C_rate (0.85)
+#define AMP_WRAP_TRIM_GAIN  0.015       // Amp looparound trim gain r/s (0.015)
 #define VC_S                1.0         // Vc sense scalar (1.0)
 #define VO_S                1.0         // Vo sense scalar (1.0)
 #define VTB_S               1.0         // VTb sense scalar (1.0)

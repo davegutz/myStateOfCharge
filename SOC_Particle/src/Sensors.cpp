@@ -254,9 +254,10 @@ void Shunt::sample(const boolean reset_loc, const float T)
 
 // Class Looparound
 Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen):
- chem_(Mon->chem()), Mon_(Mon), Sen_(Sen)
+  chem_(Mon->chem()), e_wrap_(0.), e_wrap_filt_(0.), e_wrap_trimmed_(0.), ib_(0.), Mon_(Mon), Sen_(Sen), voc_(0.)
 {
   ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_->tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);     // actual update time provided run time
+  Trim_ = new TustinIntegrator(EKF_NOM_DT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);          // actual update time provided run time
   WrapErrFilt_ = new LagTustin(2., WRAP_ERR_FILT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);   // actual update time provided run time
   WrapHi_ = new TFDelay(false, WRAP_HI_S, WRAP_HI_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   WrapLo_ = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
@@ -270,7 +271,7 @@ void Looparound::absorb_states(Looparound *Leader)
 }
 
 // Update the loop
-void Looparound::calculate(const boolean reset, const float ib, Looparound *Leader, const bool follow)
+void Looparound::calculate(const boolean reset, const float ib, Looparound *Leader, const bool follow, const double loop_gain)
 {
   following_ = follow;
   reset_ = reset | Sen_->Flt->reset_all_faults() | following_;
@@ -280,7 +281,8 @@ void Looparound::calculate(const boolean reset, const float ib, Looparound *Lead
     ib_ = ib;
   voc_ = Mon_->vb() - (ChargeTransfer_->calculate(ib_, reset_, chem_->tau_ct, Sen_->T)*chem_->r_ct*ap.slr_res + ib_*chem_->r_0*ap.slr_res);
   e_wrap_ = Mon_->voc_soc() - voc_;
-  e_wrap_filt_ = WrapErrFilt_->calculate(e_wrap_, reset_, min(Sen_->T, F_MAX_T_WRAP));
+  e_wrap_trimmed_ = e_wrap_ - Trim_->calculate(e_wrap_filt_*float(AMP_WRAP_TRIM_GAIN), reset_, e_wrap_);
+  e_wrap_filt_ = WrapErrFilt_->calculate(e_wrap_trimmed_, reset_, min(Sen_->T, F_MAX_T_WRAP));
   // sat logic screens out voc jumps when ib>0 when saturated
   // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
   // wrap_vb latches because vb is single sensor  faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
