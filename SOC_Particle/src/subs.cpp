@@ -481,8 +481,8 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   cp.model_saturated = Sen->Sim->saturated();
 
   // Inputs:  Sim->Ib
-  Sen->Ib_amp_model = Sen->Ib_model + Sen->Ib_amp_add() + Sen->Ib_amp_noise();  // Dm
-  Sen->Ib_noa_model = Sen->Ib_model + Sen->Ib_noa_add() + Sen->Ib_noa_noise();  // Dn
+  Sen->Ib_amp_model = max(min(Sen->Ib_model + Sen->Ib_amp_add() + Sen->Ib_amp_noise(), Sen->Ib_amp_max()), Sen->Ib_amp_min());  // Dm
+  Sen->Ib_noa_model = max(min(Sen->Ib_model + Sen->Ib_noa_add() + Sen->Ib_noa_noise(), Sen->Ib_noa_max()), Sen->Ib_noa_min());  // Dn
 
   // Select
   //  Inputs:                                       --->   Outputs:

@@ -436,8 +436,9 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" Tbh=%7.3f  Tbm=%7.3f sel %7.3f\n", Sen->Tb_hdwe, Sen->Tb_model, Sen->Tb);
   Serial.printf(" Vbh %7.3f  Vbm %7.3f sel %7.3f\n", Sen->Vb_hdwe, Sen->Vb_model, Sen->Vb);
   Serial.printf(" V3v3%7.3f \n", Sen->ShuntAmp->Vc()*2.);
-  Serial.printf(" imh %7.3f  imm %7.3f sel %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model, Sen->Ib);
-  Serial.printf(" inh %7.3f  inm %7.3f sel %7.3f\n\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model, Sen->Ib);
+  Serial.printf(" Imh %7.3f  Imm %7.3f Ib %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model, Sen->Ib);
+  Serial.printf(" Inh %7.3f  Inm %7.3f Ib %7.3f\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model, Sen->Ib);
+  Serial.printf(" Ibh %7.3f  Ibh %7.3f Ib %7.3f\n\n", Sen->Ib_hdwe, Sen->Ib_hdwe_model, Sen->Ib);
 
   Serial.printf(" mod_tb %d mod_vb %d mod_ib  %d\n", sp.mod_tb(), sp.mod_vb(), sp.mod_ib());
   Serial.printf(" mod_tb_dscn %d mod_vb_dscn %d mod_ib_amp_dscn %d mod_ib_noa_dscn %d\n", sp.mod_tb_dscn(), sp.mod_vb_dscn(), sp.mod_ib_amp_dscn(), sp.mod_ib_noa_dscn());
@@ -487,8 +488,9 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" Tbh=%7.3f  Tbm=%7.3f\n", Sen->Tb_hdwe, Sen->Tb_model);
   Serial1.printf(" Vbh %7.3f  Vbm %7.3f\n", Sen->Vb_hdwe, Sen->Vb_model);
   Serial1.printf(" V3v3 %7.3f \n", Sen->ShuntAmp->Vc()*2.);
-  Serial1.printf(" imh %7.3f  imm %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model);
-  Serial1.printf(" inh %7.3f  inm %7.3f\n\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model);
+  Serial1.printf(" Imh %7.3f  Imm %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model);
+  Serial1.printf(" Inh %7.3f  Inm %7.3f\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model);
+  Serial1.printf(" Ibh %7.3f  Ibm %7.3f Ib %7.3f\n\n", Sen->Ib_hdwe, Sen->Ib_hdwe_model, Sen->Ib);
 
   Serial1.printf(" mod_tb  %d  mod_vb  %d  mod_ib  %d\n", sp.mod_tb(), sp.mod_vb(), sp.mod_ib());
   Serial1.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_);
@@ -1168,6 +1170,7 @@ void Sensors::shunt_select_initial(const boolean reset)
         hdwe_add = 0.;
     }
     Ib_amp_model = max(min(Ib_model + Ib_amp_add(), Ib_amp_max()), Ib_amp_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm/Mm/Nm
+    if(sp.debug()==71) Serial.printf("Ib_model Ib_amp_add Ib_amp_max Ib_amp_min = Ib_amp_model %7.3f %7.3f %7.3f %7.3f ->%7.3f\n", Ib_model, Ib_amp_add(), Ib_amp_max(), Ib_amp_min(), Ib_amp_model);
     Ib_noa_model = max(min(Ib_model + Ib_noa_add(), Ib_noa_max()), Ib_noa_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Mn/Nn
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
     Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);

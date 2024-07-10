@@ -110,8 +110,8 @@ const String unit = version + "_" + HDWE_UNIT;
 #ifdef HDWE_PHOTON  // dec ~134000  units: pro0p, soc0p
     #ifdef SOFT_DEPLOY_PHOTON
         #define NFLT   7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  (7)
-        #define NHIS  55  // Number of saved SRAM history data slices. Sized to approx match  Photon2, If too large, will get compile error BACKUPSRAM   (55)
-        #define NSUM 190  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error APP_FLASH, or GUI FRAG msg  (190)
+        #define NHIS  49  // Number of saved SRAM history data slices. Sized to approx match  Photon2, If too large, will get compile error BACKUPSRAM   (49)
+        #define NSUM 108  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error APP_FLASH, or GUI FRAG msg  (110)
     #else
         #ifdef DEBUG_INIT
             #error("Not possible to deploy Photon with DEBUG_INIT")
@@ -132,7 +132,7 @@ const String unit = version + "_" + HDWE_UNIT;
 #ifdef HDWE_ARGON  // dec ~222350  units: pro1a, soc1a
     #define NFLT    7  // Number of saved SRAM/EERAM fault data slices 10 s intervals (7)
     #define NHIS 1000  // Ignored Argon.  Actual nhis_ is dynamically allocated based on EERAM size, holding NFLT constant. 
-    #define NSUM 1700  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error SRAM, BACKUPSRAM, or GUI FRAG msg (1990)
+    #define NSUM 1700  // Number of saved summaries. If NFLT + NSUM ttoo large, will get compile error SRAM, BACKUPSRAM, or GUI FRAG msg (170)
 #endif
 
 #ifdef HDWE_PHOTON2  // dec ~ 256268  units: pro2p2, soc3p2
@@ -234,6 +234,18 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #endif
 #if !defined(IB_ABS_MAX_NOA)
     #define IB_ABS_MAX_NOA (float(NOM_UNIT_CAP)*float(NP))
+#endif
+#if !defined(HDWE_IB_HI_LO_AMP_LO)
+    #define HDWE_IB_HI_LO_AMP_LO (-float(NOM_UNIT_CAP)*float(NP))
+#endif
+#if !defined(HDWE_IB_HI_LO_AMP_HI)
+    #define HDWE_IB_HI_LO_AMP_HI (float(NOM_UNIT_CAP)*float(NP))
+#endif
+#if !defined(HDWE_IB_HI_LO_NOA_LO)
+    #define HDWE_IB_HI_LO_NOA_LO (HDWE_IB_HI_LO_AMP_LO - 1.)
+#endif
+#if !defined(HDWE_IB_HI_LO_NOA_HI)
+    #define HDWE_IB_HI_LO_NOA_HI (HDWE_IB_HI_LO_AMP_HI + 1.)
 #endif
 
 // Default values 
