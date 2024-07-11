@@ -47,6 +47,11 @@ if sys.platform == 'darwin':
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
+def plq(plt_, x, sy, yt, add=0., color='black', linestyle='-', label='label_needed'):
+    if hasattr(sy, yt):
+        plt_.plot(x, getattr(sy, yt) + add, color=color, linestyle=linestyle, label=label)
+
+
 def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
              ref_str='_ref', test_str='_test'):
     if fig_files is None:
@@ -187,11 +192,18 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.ylim(-1, 1)
         plt.legend(loc=1)
         plt.subplot(336)
-        plt.plot(mo.time, mo.wh_flt+4, color='black', linestyle='-', label='wrap_hi_flt'+ref_str+'+4')
-        plt.plot(mo.time, mo.wl_flt+4, color='magenta', linestyle='--', label='wrap_lo_flt'+ref_str+'+4')
-        plt.plot(mo.time, mo.wh_fa+2, color='cyan', linestyle='-', label='wrap_hi_fa'+ref_str+'+2')
-        plt.plot(mo.time, mo.wl_fa+2, color='red', linestyle='--', label='wrap_lo_fa'+ref_str+'+2')
-        plt.plot(mo.time, mo.wv_fa+2, color='orange', linestyle='-.', label='wrap_vb_fa'+ref_str+'+2')
+        plt.plot(mo.time, mo.wh_flt+8, color='blue', linestyle='-', label='wrap_hi_flt'+ref_str+'+8')
+        plq(plt, mo.time, mo, 'wh_m_flt', +8, color='red', linestyle='--', label='wrap_hi_m_flt'+ref_str+'+8')
+        plq(plt, mo.time, mo, 'wh_n_flt', 8, color='orange', linestyle='-.', label='wrap_hi_n_flt'+ref_str+'+8')
+        plt.plot(mo.time, mo.wl_flt+6, color='blue', linestyle='-', label='wrap_lo_flt'+ref_str+'+6')
+        plq(plt, mo.time, mo, 'wl_m_flt', +6, color='red', linestyle='--', label='wrap_lo_m_flt'+ref_str+'+6')
+        plq(plt, mo.time, mo, 'wl_n_flt', +6, color='orange', linestyle='-.', label='wrap_lo_n_flt'+ref_str+'+6')
+        plt.plot(mo.time, mo.wh_fa+4, color='blue', linestyle='-', label='wrap_hi_fa'+ref_str+'+2')
+        plq(plt, mo.time, mo, 'wh_m_fa', 4, color='red', linestyle='--', label='wrap_hi_m_fa'+ref_str+'+2')
+        plq(plt, mo.time, mo, 'wh_m_fa', +4, color='red', linestyle='--', label='wrap_hi_m_fa'+ref_str+'+2')
+        plq(plt, mo.time, mo, 'wh_n_fa', +4, color='orange', linestyle='-.', label='wrap_hi_n_fa'+ref_str+'+2')
+        plq(plt, mo.time, mo, 'wl_fa', +2, color='red', linestyle='--', label='wrap_lo_fa'+ref_str+'+2')
+        plq(plt, mo.time, mo, 'wv_fa', +2, color='orange', linestyle='-.', label='wrap_vb_fa'+ref_str+'+2')
         plt.plot(mo.time, mo.ccd_fa, color='green', linestyle='-', label='cc_diff_fa'+ref_str)
         plt.plot(mo.time, mo.red_loss, color='blue', linestyle='--', label='red_loss'+ref_str)
         plt.legend(loc=1)
@@ -343,7 +355,7 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     if mo.vb_h is not None:
         plt.plot(mo.soc, mo.vb_h, color='cyan', linestyle='--', label='vb_hdwe'+ref_str)
     plt.plot(mv.soc, mv.vb, color='green', linestyle='-.', label='vb'+test_str)
-    if hasattr(smv, 'time'):
+    if hasattr(smv, 'soc_s'):
         plt.plot(smv.soc_s, smv.vb_s, color='black', linestyle='-.', label='vb_s'+test_str)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
@@ -383,14 +395,30 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.plot(mv.time, mv.ib_diff_fa + 2, color='cyan', linestyle='--', label='ib_diff_fa' + test_str + '+2')
         plt.legend(loc=1)
         plt.subplot(222)
-        plt.plot(mo.time, mo.wh_flt + 8, color='green', linestyle='-', label='wrap_hi_flt' + ref_str + '+8')
-        plt.plot(mv.time, mv.wh_flt + 8, color='red', linestyle='--', label='wrap_hi_flt' + test_str + '+8')
-        plt.plot(mo.time, mo.wl_flt + 6, color='green', linestyle='-', label='wrap_lo_flt' + ref_str + '+6')
-        plt.plot(mv.time, mv.wl_flt + 6, color='red', linestyle='--', label='wrap_lo_flt' + test_str + '+6')
-        plt.plot(mo.time, mo.wh_fa + 4, color='green', linestyle='-', label='wrap_hi_fa' + ref_str + '+4')
-        plt.plot(mv.time, mv.wh_fa + 4, color='red', linestyle='--', label='wrap_hi_fa' + test_str + '+4')
-        plt.plot(mo.time, mo.wl_fa + 2, color='green', linestyle='-', label='wrap_lo_fa' + ref_str + '+2')
-        plt.plot(mv.time, mv.wl_fa + 2, color='red', linestyle='--', label='wrap_lo_fa' + test_str + '+2')
+        plt.plot(mo.time, mo.wh_flt + 24, color='green', linestyle='-', label='wrap_hi_flt' + ref_str + '+24')
+        plt.plot(mv.time, mv.wh_flt + 24, color='red', linestyle='--', label='wrap_hi_flt' + test_str + '+24')
+        plq(plt, mo.time, mo, 'wh_m_flt', +22, color='green', linestyle='-', label='wrap_hi_m_flt' + ref_str + '+22')
+        plq(plt, mv.time, mv, 'wh_m_flt', +22, color='red', linestyle='--', label='wrap_hi_m_flt' + test_str + '+22')
+        plq(plt, mo.time, mo, 'wh_n_flt', +20, color='green', linestyle='-', label='wrap_hi_n_flt' + ref_str + '+20')
+        plq(plt, mv.time, mv, 'wh_n_flt', +20, color='red', linestyle='--', label='wrap_hi_n_flt' + test_str + '+20')
+        plt.plot(mo.time, mo.wl_flt + 18, color='green', linestyle='-', label='wrap_lo_flt' + ref_str + '+18')
+        plt.plot(mv.time, mv.wl_flt + 18, color='red', linestyle='--', label='wrap_lo_flt' + test_str + '+18')
+        plq(plt, mo.time, mo, 'wl_m_flt', +16, color='green', linestyle='-', label='wrap_lo_m_flt' + ref_str + '+16')
+        plq(plt, mv.time, mv, 'wl_m_flt', +16, color='red', linestyle='--', label='wrap_lo_m_flt' + test_str + '+16')
+        plq(plt, mo.time, mo, 'wl_n_flt', +14, color='green', linestyle='-', label='wrap_lo_n_flt' + ref_str + '+14')
+        plq(plt, mv.time, mv, 'wl_n_flt', +14, color='red', linestyle='--', label='wrap_lo_n_flt' + test_str + '+14')
+        plt.plot(mo.time, mo.wh_fa + 12, color='green', linestyle='-', label='wrap_hi_fa' + ref_str + '+12')
+        plt.plot(mv.time, mv.wh_fa + 12, color='red', linestyle='--', label='wrap_hi_fa' + test_str + '+12')
+        plq(plt, mo.time, mo, 'wh_m_fa', +10, color='green', linestyle='-', label='wrap_hi_m_fa' + ref_str + '+10')
+        plq(plt, mv.time, mv, 'wh_m_fa', +10, color='red', linestyle='--', label='wrap_hi_m_fa' + test_str + '+10')
+        plq(plt, mo.time, mo, 'wh_n_fa', +8, color='green', linestyle='-', label='wrap_hi_n_fa' + ref_str + '+8')
+        plq(plt, mv.time, mv, 'wh_n_fa', +8, color='red', linestyle='--', label='wrap_hi_n_fa' + test_str + '+8')
+        plt.plot(mo.time, mo.wl_fa+6, color='green', linestyle='-', label='wrap_lo_fa' + ref_str + '+6')
+        plt.plot(mv.time, mv.wl_fa+6, color='red', linestyle='-', label='wrap_lo_fa' + test_str + '+6')
+        plq(plt, mo.time, mo, 'wl_m_fa', +4, color='green', linestyle='-', label='wrap_lo_fa' + ref_str + '+4')
+        plq(plt, mv.time, mv, 'wl_m_fa', +4, color='red', linestyle='--', label='wrap_lo_m_fa' + test_str + '+4')
+        plq(plt, mv.time, mo, 'wl_n_fa', +2, color='orange', linestyle='-.', label='wrap_lo_fa' + ref_str + '+2')
+        plq(plt, mv.time, mv, 'wl_n_fa', +2, color='yellow', linestyle='-.', label='wrap_lo_n_fa' + test_str + '+2')
         plt.plot(mo.time, mo.red_loss, color='green', linestyle='-', label='red_loss' + ref_str)
         plt.plot(mv.time, mv.red_loss, color='red', linestyle='--', label='red_loss' + test_str)
         plt.plot(mo.time, mo.wv_fa - 2, color='green', linestyle='-', label='wrap_vb_fa' + ref_str + '-2')
@@ -400,23 +428,15 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.legend(loc=1)
         plt.subplot(223)
         plt.plot(mo.time, mo.e_wrap, color='magenta', linestyle='--', label='e_wrap' + ref_str)
-        if hasattr(mo, 'e_wrap_filt'):
-            plt.plot(mo.time, mo.e_wrap_filt, color='black', linestyle='-', label='e_wrap_filt' + ref_str)
+        plq(plt, mo.time, mo, 'e_wrap_filt', color='black', linestyle='-', label='e_wrap_filt' + ref_str)
         plt.plot(mv.time, mv.e_wrap, color='magenta', linestyle='--', label='e_wrap' + test_str)
-        if hasattr(mv, 'e_wrap_filt'):
-            plt.plot(mv.time, mv.e_wrap_filt, color='black', linestyle='-.', label='e_wrap_filt' + test_str)
-        if hasattr(mo, 'e_wrap_filt'):
-            plt.plot(mo.time, mo.e_wrap_filt, color='blue', linestyle='-', label='e_wrap_filt' + ref_str)
-        if hasattr(mv, 'e_wrap_filt'):
-            plt.plot(mv.time, mv.e_wrap_filt, color='cyan', linestyle='-', label='e_wrap_filt' + test_str)
-        if hasattr(mo, 'e_wrap_m_filt'):
-            plt.plot(mo.time, mo.e_wrap_m_filt, color='black', linestyle=':', label='e_wrap_m_filt' + ref_str)
-        if hasattr(mv, 'e_wrap_m_filt'):
-            plt.plot(mv.time, mv.e_wrap_m_filt, color='blue', linestyle='-.', label='e_wrap_m_filt' + test_str)
-        if hasattr(mo, 'e_wrap_n_filt'):
-            plt.plot(mo.time, mo.e_wrap_n_filt, color='black', linestyle=':', label='e_wrap_n_filt' + ref_str)
-        if hasattr(mv, 'e_wrap_n_filt'):
-            plt.plot(mv.time, mv.e_wrap_n_filt, color='blue', linestyle='--', label='e_wrap_n_filt' + test_str)
+        plq(plt, mv.time, mv, 'e_wrap_filt', color='black', linestyle='-.', label='e_wrap_filt' + test_str)
+        plq(plt, mo.time, mo, 'e_wrap_filt', color='blue', linestyle='-', label='e_wrap_filt' + ref_str)
+        plq(plt, mv.time, mv, 'e_wrap_filt', color='cyan', linestyle='-', label='e_wrap_filt' + test_str)
+        plq(plt, mo.time, mo, 'e_wrap_m_filt', color='black', linestyle=':', label='e_wrap_m_filt' + ref_str)
+        plq(plt, mv.time, mv, 'e_wrap_m_filt', color='blue', linestyle='-.', label='e_wrap_m_filt' + test_str)
+        plq(plt, mo.time, mo, 'e_wrap_n_filt', color='black', linestyle=':', label='e_wrap_n_filt' + ref_str)
+        plq(plt, mv.time, mv, 'e_wrap_n_filt', color='blue', linestyle='--', label='e_wrap_n_filt' + test_str)
         plt.plot(mo.time, mo.ewh_thr, color='black', linestyle='-.', label='ewh_thr' + ref_str)
         plt.plot(mo.time, mo.ewl_thr, color='black', linestyle='-.', label='ewl_thr' + ref_str)
         plt.plot(mo.time, mo.cc_dif, color='green', linestyle='-', label='cc_diff'+ref_str)
@@ -424,10 +444,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.ylim(-1, 1)
         plt.legend(loc=1)
         plt.subplot(224)
-        if hasattr(mo, 'ib_sel_stat'):
-            plt.plot(mo.time, mo.ib_sel_stat - 2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')
-        if hasattr(mv, 'ib_sel_stat'):
-            plt.plot(mv.time, mv.ib_sel_stat - 2, color='blue', linestyle='--', label='ib_sel_stat' + test_str + '-2')
+        plq(plt, mo.time, mo, 'ib_sel_stat', -2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')
+        plq(plt, mv.time, mv, 'ib_sel_stat', -2, color='blue', linestyle='--', label='ib_sel_stat' + test_str + '-2')
         plt.plot(mo.time, mo.tb_flt, color='green', linestyle='-', label='tb_flt' + ref_str)
         plt.plot(mv.time, mv.tb_flt, color='red', linestyle='--', label='tb_flt' + test_str)
         plt.plot(mo.time, mo.tb_fa, color='magenta', linestyle='-.', label='tb_fa' + ref_str)
@@ -660,10 +678,18 @@ class SavedData:
             self.e_wrap_n = None
             self.e_wrap_n_filt = None
             self.wh_flt = None
+            self.wh_m_flt = None
+            self.wh_n_flt = None
             self.wl_flt = None
+            self.wl_m_flt = None
+            self.wl_n_flt = None
             self.red_loss = None
             self.wh_fa = None
+            self.wh_m_fa = None
+            self.wh_n_fa = None
             self.wl_fa = None
+            self.wl_m_fa = None
+            self.wl_n_fa = None
             self.wv_fa = None
             self.ib_sel_stat = None
             self.ib_h = None
@@ -700,8 +726,8 @@ class SavedData:
             self.preserving = None
             self.y_ekf_f = None
         else:
-            falw = np.array(sel.falw[:i_end], dtype=np.uint16)
-            fltw = np.array(sel.fltw[:i_end], dtype=np.uint16)
+            falw = np.array(sel.falw[:i_end], dtype=np.uint32)
+            fltw = np.array(sel.fltw[:i_end], dtype=np.uint32)
             self.c_time_s = np.array(sel.c_time[:i_end])
             self.res = np.array(sel.res[:i_end])
             self.user_sel = np.array(sel.user_sel[:i_end])
@@ -729,10 +755,18 @@ class SavedData:
                 self.e_wrap_n_filt = np.array(sel.e_wn_f[:i_end])
             self.wh_flt = np.bool_(np.array(fltw) & 2**5)
             self.wl_flt = np.bool_(np.array(fltw) & 2**6)
+            self.wh_m_flt = np.bool_(np.array(fltw) & 2**14)
+            self.wl_m_flt = np.bool_(np.array(fltw) & 2**15)
+            self.wh_n_flt = np.bool_(np.array(fltw) & 2**16)
+            self.wl_n_flt = np.bool_(np.array(fltw) & 2**17)
             self.red_loss = np.bool_(np.array(fltw) & 2**7)
             self.wh_fa = np.bool_(np.array(falw) & 2**5)
             self.wl_fa = np.bool_(np.array(falw) & 2**6)
             self.wv_fa = np.bool_(np.array(falw) & 2**7)
+            self.wh_m_flt = np.bool_(np.array(falw) & 2**14)
+            self.wl_m_flt = np.bool_(np.array(falw) & 2**15)
+            self.wh_n_flt = np.bool_(np.array(falw) & 2**16)
+            self.wl_n_flt = np.bool_(np.array(falw) & 2**17)
             self.ib_sel_stat = np.array(sel.ib_sel_stat[:i_end])
             self.ib_h = np.array(sel.ib_h[:i_end])
             self.ib_s = np.array(sel.ib_s[:i_end])

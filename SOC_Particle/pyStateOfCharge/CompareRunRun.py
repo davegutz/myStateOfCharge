@@ -38,7 +38,7 @@ plt.rcParams['axes.grid'] = True
 
 def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=None, sync_to_ctime=False):
 
-    print(f"compare_run_run:\n{keys=}\n{data_file_folder_ref=}\n{data_file_folder_test=}\n{sync_to_ctime=}\n")
+    print(f"\ncompare_run_run:\n{keys=}\n{data_file_folder_ref=}\n{data_file_folder_test=}\n{sync_to_ctime=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     # date_ = datetime.now().strftime("%y%m%d")
@@ -122,9 +122,9 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('ampHiFail_pro0p_ch.csv', 'g20240331_pro0p_ch'), ('ampHiFail_pro2p2_ch.csv', 'g20240704_pro2p2_ch')]
-    data_file_folder_ref = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240331'
-    data_file_folder_test = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240704'
+    keys = [('ampHiFail_pro1a_bb.csv', 'g20240331_pro1a_bb'), ('ampHiFail_pro2p2_ch.csv', 'g20240704_pro2p2_ch')]
+    data_file_folder_ref = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20240331'
+    data_file_folder_test = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20240704'
     sync_to_ctime = False
     compare_run_run(keys=keys, data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test,
                     sync_to_ctime=sync_to_ctime)
