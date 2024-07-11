@@ -414,6 +414,7 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
 // Avoid using hysteresis data for this test and accept more generous thresholds
 void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
+  wrap_scalars(Mon);
   boolean reset_loc = reset | reset_all_faults_;
   e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
   // e_wrap_ = Mon->y_ekf();
@@ -427,6 +428,9 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // non-latching
   failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // non-latching
   failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_fa()), WRAP_VB_FA);    // latches
+  LoopIbNoa->calculate(reset, Sen->ib_noa(), Sen->Flt->LoopIbNoa, false, 0.);
+  boolean ib_noa_range = Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO;
+  LoopIbAmp->calculate(reset, Sen->ib_amp(), Sen->Flt->LoopIbNoa, ib_noa_range, AMP_WRAP_TRIM_GAIN);
   faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
   failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // non-latching
   faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);
