@@ -111,7 +111,7 @@ const String unit = version + "_" + HDWE_UNIT;
     #ifdef SOFT_DEPLOY_PHOTON
         #define NFLT   7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  (7)
         #define NHIS  49  // Number of saved SRAM history data slices. Sized to approx match  Photon2, If too large, will get compile error BACKUPSRAM   (49)
-        #define NSUM 108  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error APP_FLASH, or GUI FRAG msg  (110)
+        #define NSUM 106  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error APP_FLASH, or GUI FRAG msg  (110)
     #else
         #ifdef DEBUG_INIT
             #error("Not possible to deploy Photon with DEBUG_INIT")
@@ -188,6 +188,10 @@ const float WRAP_HI_S = WRAP_LO_S;      // Wrap high failure set time, sec (WRAP
 const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('up 1, down 2')
 #define WRAP_HI_A       32.             // Wrap high voltage threshold, A (32 after testing; 16=0.2v)
 #define WRAP_LO_A       -40.            // Wrap high voltage threshold, A (-40, -20 too small on truck -16=-0.2v, -32 marginal)
+#define WRAP_HI_AMP     3.2             // Wrap high voltage threshold amplified, A (3.2)
+#define WRAP_LO_AMP     -4.             // Wrap high voltage threshold amplified, A (-4)
+#define WRAP_HI_NOA     32.             // Wrap high voltage threshold non-amplified, A (32 after testing; 16=0.2v)
+#define WRAP_LO_NOA     -40.            // Wrap high voltage threshold non-amplified, A (-40, -20 too small on truck -16=-0.2v, -32 marginal)
 #define WRAP_HI_SAT_MARG  0.2           // Wrap voltage margin to saturation, V (0.2)
 #define WRAP_HI_SAT_SLR   2.0           // Wrap voltage margin scalar when saturated (2.0)
 #ifdef HDWE_IB_HI_LO

@@ -253,8 +253,9 @@ void Shunt::sample(const boolean reset_loc, const float T)
 
 
 // Class Looparound
-Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen):
-  chem_(Mon->chem()), e_wrap_(0.), e_wrap_filt_(0.), e_wrap_trim_(0.), e_wrap_trimmed_(0.), ib_(0.), Mon_(Mon), Sen_(Sen), voc_(0.)
+Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp):
+  chem_(Mon->chem()), e_wrap_(0.), e_wrap_filt_(0.), e_wrap_trim_(0.), e_wrap_trimmed_(0.), hi_fail_(false), hi_fault_(false), ib_(0.), 
+  lo_fail_(false), lo_fault_(false), Mon_(Mon), Sen_(Sen), voc_(0.), wrap_hi_amp_(wrap_hi_amp), wrap_lo_amp_(wrap_lo_amp)
 {
   ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_->tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);     // actual update time provided run time
   Trim_ = new TustinIntegrator(EKF_NOM_DT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);          // actual update time provided run time
@@ -284,6 +285,11 @@ void Looparound::calculate(const boolean reset, const float ib, Looparound *Lead
   e_wrap_trim_ = -Trim_->calculate(e_wrap_filt_*float(AMP_WRAP_TRIM_GAIN), reset_, e_wrap_);
   e_wrap_trimmed_ = e_wrap_ + e_wrap_trim_;
   e_wrap_filt_ = WrapErrFilt_->calculate(e_wrap_trimmed_, reset_, min(Sen_->T, F_MAX_T_WRAP));
+
+  // Thresholds. Scalars are calculated by Flt->wrap_scalars()
+  ewhi_thr_ = Mon_->r_ss() * wrap_hi_amp_ * ap.ewhi_slr * Sen_->Flt->ewsat_slr() * Sen_->Flt->ewmin_slr();
+  ewlo_thr_ = Mon_->r_ss() * wrap_lo_amp_ * ap.ewlo_slr * Sen_->Flt->ewsat_slr() * Sen_->Flt->ewmin_slr();
+
   // sat logic screens out voc jumps when ib>0 when saturated
   // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
   // wrap_vb latches because vb is single sensor  faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
@@ -306,6 +312,7 @@ void Looparound::pretty_print()
   Serial.printf(" e_wrap_trimmed%7.3f V\n", e_wrap_trimmed_);
   Serial.printf(" hi_fault/fail %d/%d\n", hi_fault_, hi_fail_);
   Serial.printf(" lo_fault/fail %d/%d\n", lo_fault_, lo_fail_);
+  Serial.printf(" ewlo_thr/ewhi_thr%7.3f/%7.3f V\n", ewlo_thr_, ewhi_thr_);
 }
 
 
@@ -332,8 +339,8 @@ Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *
   WrapLo = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   QuietFilt = new General2_Pole(T, WN_Q_FILT, ZETA_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);  // actual update time provided run time
   QuietRate = new RateLagExp(T, TAU_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);
-  LoopIbAmp = new Looparound(Mon, Sen);
-  LoopIbNoa = new Looparound(Mon, Sen);
+  LoopIbAmp = new Looparound(Mon, Sen, WRAP_HI_AMP, WRAP_LO_AMP);
+  LoopIbNoa = new Looparound(Mon, Sen, WRAP_HI_NOA, WRAP_LO_NOA);
 }
 
 // Coulomb Counter difference test - failure conditions track poorly
@@ -1175,7 +1182,6 @@ void Sensors::shunt_select_initial(const boolean reset)
         hdwe_add = 0.;
     }
     Ib_amp_model = max(min(Ib_model + Ib_amp_add(), Ib_amp_max()), Ib_amp_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm/Mm/Nm
-    if(sp.debug()==71) Serial.printf("Ib_model Ib_amp_add Ib_amp_max Ib_amp_min = Ib_amp_model %7.3f %7.3f %7.3f %7.3f ->%7.3f\n", Ib_model, Ib_amp_add(), Ib_amp_max(), Ib_amp_min(), Ib_amp_model);
     Ib_noa_model = max(min(Ib_model + Ib_noa_add(), Ib_noa_max()), Ib_noa_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Mn/Nn
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
     Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);

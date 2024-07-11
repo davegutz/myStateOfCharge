@@ -197,7 +197,7 @@ class Looparound
 {
 public:
   Looparound();
-  Looparound(BatteryMonitor *Mon, Sensors *Sen);
+  Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp);
   ~Looparound();
   void calculate(const boolean reset, const float ib, Looparound *Leader, const bool follow, const double loop_gain);
   float e_wrap() { return e_wrap_; };
@@ -215,12 +215,14 @@ protected:
   float e_wrap_filt_;       // Wrap error, V
   float e_wrap_trim_;       // Trimmer, V
   float e_wrap_trimmed_;    // Trimmer applied to e_wrap_, V
+  float ewhi_thr_;          // Threshold e_wrap failed high, V
+  float ewlo_thr_;          // Threshold e_wrap failed low, V
   boolean following_;       // Commanded to follow the leader.  ib_ = leader, T=following
-  uint8_t hi_fault_;        // Fault bit
   uint8_t hi_fail_;         // Fail bit
-  uint8_t lo_fault_;        // Fault bit
-  uint8_t lo_fail_;         // Fail bit
+  uint8_t hi_fault_;        // Fault bit
   float ib_;                // Sensed unit shunt current, A
+  uint8_t lo_fail_;         // Fail bit
+  uint8_t lo_fault_;        // Fault bit
   BatteryMonitor *Mon_;     // Monitor ptr
   boolean reset_;           // If resetting or not
   Sensors *Sen_;            // Sensors ptr
@@ -229,6 +231,8 @@ protected:
   LagTustin *WrapErrFilt_;  // Noise filter for voltage wrap
   TFDelay *WrapHi_;         // Wrap test persistence
   TFDelay *WrapLo_;         // Wrap test persistence
+  float wrap_hi_amp_;       // Wrap high amplitude, V
+  float wrap_lo_amp_;       // Wrap low amplitude, V
 };
 
 
@@ -256,6 +260,8 @@ public:
   float e_wrap_m_filt() { return LoopIbAmp->e_wrap_filt(); };
   float e_wrap_n() { return LoopIbNoa->e_wrap(); };
   float e_wrap_n_filt() { return LoopIbNoa->e_wrap_filt(); };
+  float ewmin_slr() { return ewmin_slr_; };
+  float ewsat_slr() { return ewsat_slr_; };
   uint32_t fltw() { return fltw_; };
   uint32_t falw() { return falw_; };
   TFDelay *IbLoActive;    // Persistence low amp active status
