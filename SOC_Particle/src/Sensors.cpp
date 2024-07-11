@@ -294,10 +294,11 @@ void Looparound::calculate(const boolean reset, const float ib, Looparound *Lead
   // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
   // wrap_vb latches because vb is single sensor  faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
 
-  hi_fault_ = e_wrap_filt_ >= Sen_->Flt->ewhi_thr();
+  hi_fault_ = e_wrap_filt_ >= ewhi_thr_;
   hi_fail_ = WrapHi_->calculate(hi_fault_, WRAP_HI_S, WRAP_HI_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // non-latching
-  lo_fault_ = e_wrap_filt_ <= Sen_->Flt->ewlo_thr();
+  lo_fault_ = e_wrap_filt_ <= ewlo_thr_;
   lo_fail_ = WrapLo_->calculate(lo_fault_, WRAP_LO_S, WRAP_LO_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // non-latching
+  if ( sp.debug()==71 ) Serial.printf("ib%7.3f reset%d ewlo_thr/e_wrap_filt/ewhi_thr%7.3f/%7.3f/%7.3f V vb_fa %d lo_fault/fail %d/%d hi_fault/fail %d/%d\n", ib_, reset_, ewlo_thr_, e_wrap_filt_, ewhi_thr_, Sen_->Flt->vb_fa(), lo_fault_, lo_fail_, hi_fault_, hi_fail_);
 }
 
 void Looparound::pretty_print()
@@ -426,6 +427,14 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // non-latching
   failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // non-latching
   failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_fa()), WRAP_VB_FA);    // latches
+  faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
+  failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // non-latching
+  faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);
+  failAssign( LoopIbAmp->lo_fail(), WRAP_LO_M_FA);  // non-latching
+  faultAssign( LoopIbNoa->hi_fault(), WRAP_HI_N_FLT);
+  failAssign( LoopIbNoa->hi_fail(), WRAP_HI_N_FA);  // non-latching
+  faultAssign( LoopIbNoa->lo_fault(), WRAP_LO_N_FLT);
+  failAssign( LoopIbNoa->lo_fail(), WRAP_LO_N_FA);  // non-latching
 }
 
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
