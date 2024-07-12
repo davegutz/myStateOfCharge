@@ -964,20 +964,20 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
 // Outputs:  Ib_hdwe_model, Ib_hdwe
 void Sensors::choose_()
 {
-  if ( Flt->ib_sel_stat()==2 )
+  if ( Flt->ib_sel_stat()==1 )
   {
-    Ib_hdwe = scale_select(Ib_noa_hdwe, sel_brk_hdwe_, Ib_amp_hdwe, Ib_noa_hdwe);
-    // if ( sp.debug()==99 ) Serial.printf("choose: Ib_noa_hdwe=%7.3f, Ib_amp_hdwe=%7.3f, Ib_hdwe=%7.3f\n", Ib_noa_hdwe, Ib_amp_hdwe, Ib_hdwe);
-    Ib_hdwe_model = Ib_hdwe;
-    sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
-    dt_ib_hdwe_ = ShuntNoAmp->dt();
-  }
-  else if ( Flt->ib_sel_stat()==1 )
-  {
-    Ib_hdwe = Ib_amp_hdwe;
-    Ib_hdwe_model = Ib_amp_model;
-    sample_time_ib_hdwe_ = ShuntAmp->sample_time();
-    dt_ib_hdwe_ = ShuntAmp->dt();
+    #ifdef HDWE_IB_HI_LO
+      Ib_hdwe = scale_select(Ib_noa_hdwe, sel_brk_hdwe_, Ib_amp_hdwe, Ib_noa_hdwe);
+      // if ( sp.debug()==99 ) Serial.printf("choose: Ib_noa_hdwe=%7.3f, Ib_amp_hdwe=%7.3f, Ib_hdwe=%7.3f\n", Ib_noa_hdwe, Ib_amp_hdwe, Ib_hdwe);
+      Ib_hdwe_model = Ib_hdwe;
+      sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
+      dt_ib_hdwe_ = ShuntNoAmp->dt();
+    #else
+      Ib_hdwe = Ib_amp_hdwe;
+      Ib_hdwe_model = Ib_amp_model;
+      sample_time_ib_hdwe_ = ShuntAmp->sample_time();
+      dt_ib_hdwe_ = ShuntAmp->dt();
+    #endif
   }
   else if ( Flt->ib_sel_stat()==-1 )
   {
