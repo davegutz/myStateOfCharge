@@ -102,10 +102,10 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(mv.time, mv.chm, color='red', linestyle='--', label='chm'+test_str)
         plt.plot(so.time, so.chm_s, color='green', linestyle='-.', label='chem_s'+ref_str)
         plt.plot(smv.time, smv.chm_s, color='orange', linestyle=':', label='smv.chm_s'+test_str)
-        if hasattr(sv, 'chm'):
-            plt.plot(sv.time, np.array(sv.chm)+4, color='red', linestyle='-', label='sv.chm'+test_str+'+4')
-        elif hasattr(sv, 'chm_s'):
-            plt.plot(sv.time, np.array(sv.chm_s)+4, color='red', linestyle='-', label='sv.chm'+test_str+'+4')
+        sv.chm = np.array(sv.chm)
+        sv.chm_s = np.array(sv.chm_s)
+        plq(plt, sv, 'time', sv, 'chm', add=+4, color='red', linestyle='-', label='sv.chm'+test_str+'+4')
+        plq(plt, sv, 'time', sv, 'chm_s', add=+4, color='red', linestyle='-', label='sv.chm'+test_str+'+4')
         plt.plot(smv.time, np.array(smv.chm_s)+4, color='black', linestyle='--', label='smv.chm_s'+test_str+'+4')
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
@@ -118,9 +118,8 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(mo.time, mo.vb, color='red', linestyle='-', label='vb'+ref_str)
         plt.plot(mo.time, mo.voc, color='black',  linestyle='--', label='voc'+ref_str)
         plt.plot(mo.time, mo.voc_stat, color='blue', linestyle='-.', label='voc_stat'+ref_str)
-        if mo.vb_h is not None:
-            plt.plot(mo.time, mo.voc_soc, color='orange', linestyle=':', label='voc_soc'+ref_str)
-            plt.plot(mo.time, mo.vb_h, color='cyan', linestyle=':', label='vb_hdwe'+ref_str)
+        plq(plt, mo, 'time', mo, 'voc_soc', color='orange', linestyle=':', label='voc_soc'+ref_str)
+        plq(plt, mo, 'time', mo, 'vb_h', color='cyan', linestyle=':', label='vb_hdwe'+ref_str)
         plt.legend(loc=1)
         plt.subplot(332)
         plt.plot(so.time, so.vb_s, color='red', linestyle='-', label='vb_s'+ref_str)
@@ -198,30 +197,25 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc'+ref_str)
         plt.plot(mv.time, mv.soc, color='red', linestyle='--', label='soc'+test_str)
         plt.plot(so.time, so.soc_s, color='green', linestyle='-.', label='soc_s'+ref_str)
-        if hasattr(sv, 'soc'):
-            plt.plot(sv.time, sv.soc, color='orange', linestyle=':', label='sv.soc_s'+test_str)
-        elif hasattr(sv, 'soc_s'):
-            plt.plot(sv.time, sv.soc_s, color='orange', linestyle=':', label='sv.soc_s'+test_str)
+        plq(plt, sv, 'time', sv, 'soc', color='orange', linestyle=':', label='sv.soc_s'+test_str)
+        plq(plt, sv, 'time', sv, 'soc_s', color='orange', linestyle=':', label='sv.soc_s'+test_str)
         plt.plot(mo.time, mo.soc_ekf, color='cyan', linestyle='-', label='soc_ekf'+ref_str)
         plt.plot(mv.time, mv.soc_ekf, color='magenta', linestyle='--', label='soc_ekf'+test_str)
-        if hasattr(sv, 'soc'):
-            plt.plot(sv.time, np.array(sv.soc)-.2, color='orange', linestyle='-', label='sv.soc_s'+test_str+'-0.2')
-        elif hasattr(sv, 'soc_s'):
-            plt.plot(sv.time, np.array(sv.soc_s)-.2, color='orange', linestyle='-', label='sv.soc_s'+test_str+'-0.2')
+        sv.soc = np.array(sv.soc)
+        sv.soc_s = np.array(sv.soc_s)
+        plq(plt, sv, 'time', sv, 'soc', add=-.2, color='orange', linestyle='-', label='sv.soc_s'+test_str+'-0.2')
+        plq(plt, sv, 'time', sv, 'soc_s', add=-.2, color='orange', linestyle='-', label='sv.soc_s'+test_str+'-0.2')
         plt.plot(smv.time, np.array(smv.soc_s)-.2, color='black', linestyle='--', label='smv.soc_s'+test_str+'-0.2')
         plt.legend(loc=1)
         plt.subplot(322)
         if mo.vb_h is not None and max(mo.vb_h) > 1.:
             plt.plot(mo.soc, mo.vb_h, color='magenta', linestyle=':', label='vb_hdwe'+ref_str)
         plt.plot(mo.soc, mo.voc_stat, color='cyan', linestyle=':', label='voc_stat'+ref_str)
-        if mo.voc_soc is not None:
-            plt.plot(mo.soc, mo.voc_soc, color='blue', linestyle='-', label='voc_soc'+ref_str)
+        plq(plt, mo, 'soc', mo, 'voc_soc', color='blue', linestyle='-', label='voc_soc'+ref_str)
         plt.plot(mv.soc, mv.voc_soc, color='red', linestyle='--', label='voc_soc'+test_str)
         plt.plot(so.soc_s, so.voc_stat_s, color='green', linestyle='-.', label='voc_stat_s'+ref_str)
-        if hasattr(sv, 'voc_stat'):
-            plt.plot(sv.soc, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s'+test_str)
-        elif hasattr(sv, 'voc_stat_s'):
-            plt.plot(sv.soc_s, sv.voc_stat_s, color='orange', linestyle=':', label='voc_stat_s'+test_str)
+        plq(plt, sv, 'soc', sv, 'voc_stat', color='orange', linestyle=':', label='voc_stat_s'+test_str)
+        plq(plt, sv, 'soc_s', sv, 'voc_stat_s', color='orange', linestyle=':', label='voc_stat_s'+test_str)
         plt.plot(mo.soc, mo.vsat, color='red', linestyle='-', label='vsat'+ref_str)
         plt.plot(mv.soc, mv.vsat, color='black', linestyle='--', label='vsat'+test_str)
         plt.plot(mv.soc, mv.voc_stat, color='orange', linestyle='--', label='voc_stat'+test_str)
@@ -232,9 +226,8 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(mv.time, np.array(mv.voc_soc)-np.array(mv.voc_stat), color='red', linestyle='--', label='e_wrap = voc_soc - voc_stat' + test_str)
         plt.legend(loc=1)
         plt.subplot(324)
-        if mo.voc_soc is not None:
-            plt.plot(mo.time, mo.voc_soc, color='blue', linestyle='-', label='voc_soc'+ref_str)
-            plt.plot(mo.time, mo.voc_stat, color='red', linestyle='--', label='voc_stat' + ref_str)
+        plq(plt, mo, 'time', mo, 'voc_soc', color='blue', linestyle='-', label='voc_soc'+ref_str)
+        plq(plt, mo, 'time', mo, 'voc_stat', color='red', linestyle='--', label='voc_stat' + ref_str)
         plt.plot(so.time, so.voc_stat_s, color='magenta', linestyle='-.', label='voc_stat_s' + ref_str)
         plt.plot(mv.time, mv.voc_soc, color='green', linestyle='--', label='voc_soc' + test_str)
         plt.plot(mv.time, mv.voc_stat, color='cyan', linestyle='-.', label='voc_stat' + test_str)
@@ -244,22 +237,18 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         if mo.vb_h is not None and max(mo.vb_h) > 1.:
             plt.plot(mo.time, mo.vb_h, color='magenta', linestyle=':', label='vb_hdwe'+ref_str)
         plt.plot(mo.time, mo.voc_stat, color='cyan', linestyle=':', label='voc_stat'+ref_str)
-        if mo.voc_soc is not None:
-            plt.plot(mo.time, mo.voc_soc, color='blue', linestyle='-', label='voc_soc'+ref_str)
+        plq(plt, mo, 'time', mo, 'voc_soc', color='blue', linestyle='-', label='voc_soc'+ref_str)
         plt.plot(mv.time, mv.voc_soc, color='red', linestyle='--', label='voc_soc'+test_str)
         plt.plot(so.time, so.voc_stat_s, color='green', linestyle='-.', label='voc_stat_s'+ref_str)
-        if hasattr(sv, 'voc_stat'):
-            plt.plot(sv.time, sv.voc_stat, color='orange', linestyle=':', label='voc_stat_s'+test_str)
-        elif hasattr(sv, 'voc_stat_s'):
-            plt.plot(sv.time, sv.voc_stat_s, color='orange', linestyle=':', label='voc_stat_s'+test_str)
+        plq(plt, sv, 'time', sv, 'voc_stat', color='orange', linestyle=':', label='voc_stat_s'+test_str)
+        plq(plt, sv, 'time', sv, 'voc_stat_s', color='orange', linestyle=':', label='voc_stat_s'+test_str)
         plt.plot(mo.time, mo.vsat, color='red', linestyle='-', label='vsat'+ref_str)
         plt.plot(mv.time, mv.vsat, color='black', linestyle='--', label='vsat'+test_str)
         plt.plot(mv.time, mv.voc_stat, color='orange', linestyle='-.', label='voc_stat'+test_str)
         plt.legend(loc=1)
         plt.subplot(326)
-        if mo.voc_soc is not None:
-            plt.plot(mo.soc, mo.voc_soc, color='blue', linestyle='-', label='voc_soc'+ref_str)
-            plt.plot(mo.soc, mo.voc_stat, color='red', linestyle='-', label='voc_stat' + ref_str)
+        plq(plt, mo, 'soc', mo, 'voc_soc', color='blue', linestyle='-', label='voc_soc'+ref_str)
+        plq(plt, mo, 'soc', mo, 'voc_stat', color='red', linestyle='-', label='voc_stat' + ref_str)
         plt.legend(loc=1)
 
         fig_list.append(plt.figure())  # sim_s  4
@@ -268,10 +257,8 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(mo.time, mo.soc, color='blue', linestyle='-', label='soc'+ref_str)
         plt.plot(mv.time, mv.soc, color='red', linestyle='--', label='soc'+test_str)
         plt.plot(so.time, so.soc_s, color='green', linestyle='-.', label='soc_s'+ref_str)
-        if hasattr(sv, 'soc'):
-            plt.plot(sv.time, sv.soc, color='orange', linestyle=':', label='sv.soc_s'+test_str)
-        elif hasattr(sv, 'soc_s'):
-            plt.plot(sv.time, sv.soc_s, color='orange', linestyle=':', label='sv.soc_s'+test_str)
+        plq(plt, sv, 'time', sv, 'soc', color='orange', linestyle=':', label='sv.soc_s'+test_str)
+        plq(plt, sv, 'time', sv, 'soc_s', color='orange', linestyle=':', label='sv.soc_s'+test_str)
         plt.plot(mo.time, mo.soc_ekf, color='cyan', linestyle='-', label='soc_ekf'+ref_str)
         plt.plot(mv.time, mv.soc_ekf, color='magenta', linestyle='--', label='soc_ekf'+test_str)
         plt.legend(loc=1)
@@ -279,43 +266,32 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(mo.soc, mo.voc_stat, color='blue', linestyle='-', label='voc_stat(soc) = z '+ref_str)
         plt.plot(mv.soc, mv.voc_stat, color='red', linestyle='--', label='voc_stat(soc) = z '+test_str)
         plt.plot(mo.soc, mo.voc_ekf, color='green', linestyle='-.', label='voc_ekf(soc) = Hx '+ref_str)
-        if mo.voc_soc is not None:
-            plt.plot(mo.soc, mo.voc_soc, color='green', linestyle=':', label='voc_soc'+ref_str)
+        plq(plt, mo, 'soc', mo, 'voc_soc', color='green', linestyle=':', label='voc_soc'+ref_str)
         plt.plot(mv.soc, mv.voc_soc, color='orange', linestyle='-', label='voc_soc'+test_str)
-        if mo.vb_h is not None:
-            plt.plot(mo.soc, mo.vb_h, color='blue', linestyle='-', label='vb'+ref_str)
-        if hasattr(sv, 'voc_stat'):
-            plt.plot(sv.soc, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s'+test_str)
-        elif hasattr(sv, 'voc_stat_s'):
-            plt.plot(sv.soc_s, sv.voc_stat_s, color='red', linestyle=':', label='voc_stat_s'+test_str)
+        plq(plt, mo, 'soc', mo, 'vb_h', color='blue', linestyle='-', label='vb'+ref_str)
+        plq(plt, sv, 'soc', sv, 'voc_stat', color='red', linestyle=':', label='voc_stat_s'+test_str)
+        plq(plt, sv, 'soc_s', sv, 'voc_stat_s', color='red', linestyle=':', label='voc_stat_s'+test_str)
         plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
         plt.subplot(223)
         plt.plot(mo.soc, mo.voc_stat, color='magenta', linestyle='-', label='voc_stat(soc) = z'+ref_str)
         plt.plot(mv.soc, mv.voc_stat, color='black', linestyle='--', label='voc_stat(soc) = z'+test_str)
         plt.plot(mv.soc, mv.voc_ekf, color='cyan', linestyle=':', label='voc_ekf(soc) = Hx'+test_str)
-        if mo.vb_h is not None:
-            plt.plot(mo.soc, mo.vb_h, color='blue', linestyle='-', label='vb'+ref_str)
-        if hasattr(sv, 'voc_stat'):
-            plt.plot(sv.soc, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s'+test_str)
-        elif hasattr(sv, 'voc_stat_s'):
-            plt.plot(sv.soc_s, sv.voc_stat_s, color='red', linestyle=':', label='voc_stat_s'+test_str)
+        plq(plt, mo, 'soc', mo, 'vb_h', color='blue', linestyle='-', label='vb'+ref_str)
+        plq(plt, sv, 'soc', sv, 'voc_stat', color='red', linestyle=':', label='voc_stat_s'+test_str)
+        plq(plt, sv, 'soc_s', sv, 'voc_stat_s', color='red', linestyle=':', label='voc_stat_s'+test_str)
         plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
         plt.subplot(224)
         plt.plot(mo.time, mo.voc_stat, color='magenta', linestyle='-', label='voc_stat(soc) = z'+ref_str)
         plt.plot(mo.time, mo.voc_ekf, color='cyan', linestyle='--', label='voc_ekf(soc) = Hx'+ref_str)
-        if mo.voc_soc is not None:
-            plt.plot(mo.time, mo.voc_soc, color='green', linestyle='-.', label='voc_soc'+ref_str)
+        plq(plt, mo, 'time', mo, 'voc_soc', color='green', linestyle='-.', label='voc_soc'+ref_str)
         plt.plot(mv.time, mv.voc_soc, color='orange', linestyle=':', label='voc_soc'+test_str)
-        if mo.vb_h is not None:
-            plt.plot(mo.time, mo.vb_h, color='blue', linestyle='-', label='vb'+ref_str)
+        plq(plt, mo, 'time', mo, 'vb_h', color='blue', linestyle='-', label='vb'+ref_str)
         plt.plot(mv.time, mv.voc_stat, color='black', linestyle=':', label='voc_stat(soc) = z '+test_str)
         plt.plot(mv.time, mv.voc_ekf, color='cyan', linestyle=':', label='voc_ekf(soc) = Hx '+test_str)
-        if hasattr(sv, 'voc_stat'):
-            plt.plot(sv.time, sv.voc_stat, color='red', linestyle=':', label='voc_stat_s'+test_str)
-        elif hasattr(sv, 'voc_stat_s'):
-            plt.plot(sv.time, sv.voc_stat_s, color='red', linestyle=':', label='voc_stat_s'+test_str)
+        plq(plt, sv, 'time', sv, 'voc_stat', color='red', linestyle=':', label='voc_stat_s'+test_str)
+        plq(plt, sv, 'time', sv, 'voc_stat_s', color='red', linestyle=':', label='voc_stat_s'+test_str)
         plt.ylim(12.5, 14.5)
         plt.legend(loc=1)
     return fig_list, fig_files
