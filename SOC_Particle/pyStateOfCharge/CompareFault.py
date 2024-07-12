@@ -29,6 +29,7 @@ from PlotGP import tune_r
 from PlotKiller import show_killer
 from Colors import Colors
 from resample import remove_nan
+from DataOverModel import plq
 
 #  For this battery Battleborn 100 Ah with 1.084 x capacity
 IB_BAND = 1.  # Threshold to declare charging or discharging
@@ -389,15 +390,15 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
                  label='wrap_vb_fa+14')
         plt.plot(hi.time_ux, hi.wl_fa + 12, marker='p', markersize='3', linestyle='-', color='blue',
                  label='wrap_lo_fa+12')
-        plt.plot(hi.time_ux, hi.wl_m_fa + 12, marker='p', markersize='3', linestyle='-', color='red',
+        plt.plot(hi.time_ux, hi.wl_m_fa + 12, marker='p', markersize='3', linestyle='--', color='red',
                  label='wrap_lo_m_fa+12')
-        plt.plot(hi.time_ux, hi.wl_n_fa + 12, marker='p', markersize='3', linestyle='-', color='orange',
+        plt.plot(hi.time_ux, hi.wl_n_fa + 12, marker='p', markersize='3', linestyle='-.', color='orange',
                  label='wrap_lo_n_fa+12')
         plt.plot(hi.time_ux, hi.wh_fa + 10, marker='h', markersize='3', linestyle='-', color='blue',
                  label='wrap_hi_fa+10')
-        plt.plot(hi.time_ux, hi.wh_m_fa + 10, marker='h', markersize='3', linestyle='-', color='red',
+        plt.plot(hi.time_ux, hi.wh_m_fa + 10, marker='h', markersize='3', linestyle='--', color='red',
                  label='wrap_hi_m_fa+10')
-        plt.plot(hi.time_ux, hi.wh_n_fa + 10, marker='h', markersize='3', linestyle='-', color='orange',
+        plt.plot(hi.time_ux, hi.wh_n_fa + 10, marker='h', markersize='3', linestyle='-.', color='orange',
                  label='wrap_hi_n_fa+10')
         plt.plot(hi.time_ux, hi.ccd_fa + 8, marker='H', markersize='3', linestyle='-', color='blue',
                  label='cc_diff_fa+8')
@@ -481,27 +482,27 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
     plt.plot(hi.time_ux, hi.voc + 0.1, color='green', linestyle=':', label='voc+0.1')
     plt.legend(loc=1)
     plt.subplot(335)
-    if hasattr(hi, 'e_wrap_filt'):
-        plt.plot(hi.time_ux, hi.e_wrap_filt, color='black', linestyle='--', label='e_wrap_filt')
-    else:
-        plt.plot(hi.time_ux, hi.e_w_f, color='black', linestyle='--', label='e_wrap_filt')
+    plq(plt, hi, 'time_ux', hi, 'e_wrap_filt', color='black', linestyle='--', label='e_wrap_filt')
+    plq(plt, hi, 'time_ux', hi, 'e_w_f', color='black', linestyle='--', label='e_wrap_filt')
     plt.plot(hi.time_ux, hi.ewhi_thr, color='red', linestyle='-.', label='ewhi_thr')
     plt.plot(hi.time_ux, hi.ewlo_thr, color='red', linestyle='-.', label='ewlo_thr')
     plt.ylim(-1, 1)
     plt.legend(loc=1)
     plt.subplot(336)
-    plt.plot(hi.time_ux, hi.wh_flt + 10, color='blue', linestyle='-', label='wrap_hi_flt+10')
-    plt.plot(hi.time_ux, hi.wh_m_flt + 10, color='red', linestyle='--', label='wrap_hi_m_flt+10')
-    plt.plot(hi.time_ux, hi.wh_n_flt + 10, color='orange', linestyle='-.', label='wrap_hi_n_flt+10')
-    plt.plot(hi.time_ux, hi.wl_flt + 8, color='blue', linestyle='-', label='wrap_lo_flt+8')
-    plt.plot(hi.time_ux, hi.wl_m_flt + 8, color='red', linestyle='--', label='wrap_lo_m_flt+8')
-    plt.plot(hi.time_ux, hi.wl_n_flt + 8, color='orange', linestyle='-.', label='wrap_lo_n_flt+8')
+    plt.plot(hi.time_ux, hi.wh_flt + 6, color='blue', linestyle='-', label='wrap_hi_flt+6')
+    plt.plot(hi.time_ux, hi.wh_m_flt + 6, color='red', linestyle='--', label='wrap_hi_m_flt+6')
+    plt.plot(hi.time_ux, hi.wh_n_flt + 6, color='orange', linestyle='-.', label='wrap_hi_n_flt+6')
+    plt.plot(hi.time_ux, hi.wl_flt + 4, color='blue', linestyle='-', label='wrap_lo_flt+4')
+    plt.plot(hi.time_ux, hi.wl_m_flt + 4, color='red', linestyle='--', label='wrap_lo_m_flt+4')
+    plt.plot(hi.time_ux, hi.wl_n_flt + 4, color='orange', linestyle='-.', label='wrap_lo_n_flt+4')
+    plt.legend(loc=1)
+    plt.subplot(339)
     plt.plot(hi.time_ux, hi.wh_fa + 6, color='blue', linestyle='-', label='wrap_hi_fa+6')
-    plt.plot(hi.time_ux, hi.wh_m_fa + 6, color='red', linestyle='-', label='wrap_hi_m_fa+6')
-    plt.plot(hi.time_ux, hi.wh_n_fa + 6, color='orange', linestyle='-', label='wrap_hi_n_fa+6')
-    plt.plot(hi.time_ux, hi.wl_fa + 4, color='blue', linestyle='--', label='wrap_lo_fa+4')
+    plt.plot(hi.time_ux, hi.wh_m_fa + 6, color='red', linestyle='--', label='wrap_hi_m_fa+6')
+    plt.plot(hi.time_ux, hi.wh_n_fa + 6, color='orange', linestyle='-.', label='wrap_hi_n_fa+6')
+    plt.plot(hi.time_ux, hi.wl_fa + 4, color='blue', linestyle='-', label='wrap_lo_fa+4')
     plt.plot(hi.time_ux, hi.wl_m_fa + 4, color='red', linestyle='--', label='wrap_lo_m_fa+4')
-    plt.plot(hi.time_ux, hi.wl_n_fa + 4, color='orange', linestyle='--', label='wrap_lo_n_fa+4')
+    plt.plot(hi.time_ux, hi.wl_n_fa + 4, color='orange', linestyle='-.', label='wrap_lo_n_fa+4')
     plt.plot(hi.time_ux, hi.wv_fa + 2, color='orange', linestyle='-.', label='wrap_vb_fa+2')
     plt.plot(hi.time_ux, hi.ccd_fa, color='green', linestyle='-', label='cc_diff_fa')
     plt.plot(hi.time_ux, hi.red_loss, color='blue', linestyle='--', label='red_loss')
@@ -512,7 +513,7 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
     plt.plot(hi.time_ux, -hi.cc_diff_thr, color='red', linestyle='--')
     # plt.ylim(-.01, .01)
     plt.legend(loc=1)
-    plt.subplot(339)
+    plt.subplot(338)
     plt.plot(hi.time_ux, hi.ib_diff_flt + 2, color='cyan', linestyle='-', label='ib_diff_flt+2')
     plt.plot(hi.time_ux, hi.ib_diff_fa + 2, color='magenta', linestyle='--', label='ib_diff_fa+2')
     plt.plot(hi.time_ux, hi.vb_flt, color='blue', linestyle='-.', label='vb_flt')
@@ -542,8 +543,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fi
     plt.plot(smv.time_ux, mv.Tb, color='green', linestyle='-.', label='temp_c_s_ver')
     plt.legend(loc=1)
     plt.subplot(332)
-    if hasattr(mo, 'ioc'):
-        plt.plot(mo.time_ux, mo.ioc, color='black', linestyle='-', label='ioc')
+    plq(plt, mo, 'time_ux', mo, 'ioc', color='black', linestyle='-', label='ioc')
     plt.plot(mv.time_ux, mv.ioc, color='cyan', linestyle='--', label='ioc_ver')
     plt.plot(sv.time_ux, sv.ioc, color='orange', linestyle=':', label='ioc_s_ver')
     plt.legend(loc=1)
@@ -586,15 +586,12 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fi
     plt.plot(mo.time_ux, -mo.cc_diff_thr, color='cyan', linestyle='--')
     # plt.plot(smv.time_ux, np.array(smv.voc_soc_s) - np.array(smv.voc_stat_s), color='orange', linestyle='-.',
     # label='e_wrap_filt_s_ver')
-    if hasattr(mo, 'ewhi_thr'):
-        plt.plot(mo.time_ux, mo.ewhi_thr, color='red', linestyle='-.', label='ewhi_thr')
-    if hasattr(mo, 'ewlo_thr'):
-        plt.plot(mo.time_ux, mo.ewlo_thr, color='red', linestyle='-.', label='ewlo_thr')
+    plq(plt, mo, 'time_ux', mo, 'ewhi_thr', color='red', linestyle='-.', label='ewhi_thr')
+    plq(plt, mo, 'time_ux', mo, 'ewlo_thr', color='red', linestyle='-.', label='ewlo_thr')
     plt.ylim(-.5, .5)
     plt.legend(loc=1)
     plt.subplot(339)
-    if hasattr(mo, 'dv_dyn'):
-        plt.plot(mo.time_ux, mo.dv_dyn, color='black', linestyle='-', label='dv_dyn')
+    plq(plt, mo, 'time_ux', mo, 'dv_dyn', color='black', linestyle='-', label='dv_dyn')
     plt.plot(mv.time_ux, mv.dv_dyn, color='cyan', linestyle='--', label='dv_dyn_ver')
     plt.plot(smv.time_ux, smv.dv_dyn_s, color='orange', linestyle='-.', label='dv_dyn_s_ver')
     plt.legend(loc=1)

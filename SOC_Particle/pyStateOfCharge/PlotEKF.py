@@ -23,6 +23,7 @@ Dependencies:
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from DataOverModel import plq
 import sys
 if sys.platform == 'darwin':
     import matplotlib
@@ -172,11 +173,9 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
                  label='dv_hys' + test_str)
         if so is not None:
             plt.plot(so.time, so.dv_hys_s, linestyle=':', color='cyan', label='dv_hys_s' + ref_str)
-        if hasattr(sv, 'dv_hys'):
-            plt.plot(sv.time, sv.dv_hys, marker='.', markersize='1', markevery=64, linestyle='None', color='black',
+        plq(plt, sv, 'time', svm, 'dv_hys', marker='.', markersize='1', markevery=64, linestyle='None', color='black',
                      label='dv_hys_s' + test_str)
-        elif hasattr(sv, 'dv_hys_s'):
-            plt.plot(sv.time, sv.dv_hys_s, marker='.', markersize='1', markevery=64, linestyle='None', color='black',
+        plq(plt, sv, 'time', sv, 'dv_hys_s', marker='.', markersize='1', markevery=64, linestyle='None', color='black',
                      label='dv_hys_s' + test_str)
         plt.xlabel('sec')
         plt.legend(loc=4)
@@ -189,11 +188,9 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
                  label='dv_hys' + test_str)
         if so is not None:
             plt.plot(so.soc_s, so.dv_hys_s, linestyle=':', color='cyan', label='dv_hys_s' + ref_str)
-        if hasattr(sv, 'dv_hys'):
-            plt.plot(sv.soc, sv.dv_hys, marker='.', markersize='1', markevery=5, linestyle='None', color='black',
+        plq(plt, sv, 'soc', sv, 'dv_hys', marker='.', markersize='1', markevery=5, linestyle='None', color='black',
                      label='dv_hys_s' + test_str)
-        elif hasattr(sv, 'dv_hys_s'):
-            plt.plot(sv.soc_s, sv.dv_hys_s, marker='.', markersize='1', markevery=5, linestyle='None', color='black',
+        plq(plt, sv, 'soc_s', sv, 'dv_hys_s', marker='.', markersize='1', markevery=5, linestyle='None', color='black',
                      label='dv_hys_s' + test_str)
         plt.xlabel('soc')
         plt.legend(loc=4)
@@ -202,10 +199,8 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         if so is not None:
             plt.plot(so.time, so.soc_s, linestyle='--', color='blue', label='soc_s' + ref_str)
         plt.plot(mv.time, mv.soc, linestyle='-.', color='red', label='soc' + test_str)
-        if hasattr(sv, 'soc'):
-            plt.plot(sv.time, sv.soc, linestyle=':', color='cyan', label='soc_s' + test_str)
-        elif hasattr(sv, 'soc_s'):
-            plt.plot(sv.time, sv.soc_s, linestyle=':', color='cyan', label='soc_s' + test_str)
+        plq(plt, sv, 'time', sv, 'soc', linestyle=':', color='cyan', label='soc_s' + test_str)
+        plq(plt, sv, 'time', sv, 'soc_s', linestyle=':', color='cyan', label='soc_s' + test_str)
         plt.xlabel('sec')
         plt.legend(loc=4)
         plt.subplot(334)

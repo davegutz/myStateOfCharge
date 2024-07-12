@@ -24,6 +24,7 @@ Dependencies:
 import numpy as np
 import matplotlib.pyplot as plt
 from myFilters import InlineExpLag
+from DataOverModel import plq
 # below suppresses runtime error display******************
 # import os
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
@@ -77,8 +78,7 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_
             plt.plot(so.time, so.ib_in_s, linestyle='-', color='blue', label='ib_in_s' + ref_str)
         if smv is not None:
             plt.plot(smv.time, smv.ib_in_s, linestyle='--', color='red', label='ib_in_s' + test_str)
-        if hasattr(smv, 'ib_fut_s'):
-            plt.plot(smv.time, smv.ib_fut_s, linestyle='-.', color='orange', label='ib_fut_s' + test_str)
+        plq(plt, smv, 'time', smv, 'ib_fut_s', linestyle='-.', color='orange', label='ib_fut_s' + test_str)
         plt.legend(loc=1)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)

@@ -23,6 +23,7 @@ Dependencies:
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from DataOverModel import plq
 # below suppresses runtime error display******************
 # import os
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
@@ -43,8 +44,7 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.subplot(331)
         plt.title(plot_title + ' sim_s 1')
         plt.plot(mo.time, mo.ib_sel, color='blue',  linestyle='-', label='ib_sel=ib_in'+ref_str)
-        if hasattr(mv, 'ib_in'):
-            plt.plot(mv.time, mv.ib_in, color='cyan', linestyle='--', label='ib_in'+test_str)
+        plq(plt, mv, 'time', mv, 'ib_in', color='cyan', linestyle='--', label='ib_in'+test_str)
         plt.plot(so.time, so.ib_in_s, color='green', linestyle='-.', label='ib_in_s'+ref_str)
         plt.plot(smv.time, smv.ib_in_s, color='orange', linestyle=':', label='ib_in_s'+test_str)
         plt.plot(mo.time, np.array(mo.ib_charge)-1, color='black',  linestyle='-', label='ib_charge'+ref_str+'-1')
@@ -84,10 +84,8 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(mo.time, mo.ioc, color='cyan', linestyle='-', label='ioc'+ref_str)
         plt.plot(mv.time, mv.ioc, color='magenta', linestyle='--', label='ioc'+test_str)
         plt.plot(so.time, so.ioc_s, color='green', linestyle='-.', label='ioc_s'+ref_str)
-        if hasattr(sv, 'ioc'):
-            plt.plot(sv.time, sv.ioc, color='black', linestyle=':', label='ioc_s'+test_str)
-        elif hasattr(sv, 'ioc_s'):
-            plt.plot(sv.time, sv.ioc_s, color='black', linestyle=':', label='ioc_s'+test_str)
+        plq(plt, sv, 'time', sv, 'ioc', color='black', linestyle=':', label='ioc_s'+test_str)
+        plq(plt, sv, 'time', sv, 'ioc_s', color='black', linestyle=':', label='ioc_s'+test_str)
         plt.legend(loc=1)
         plt.subplot(337)
         plt.plot(so.time, so.dq_s, color='magenta', linestyle='-', label='dq_s'+ref_str)

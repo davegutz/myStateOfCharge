@@ -30,7 +30,7 @@ from PlotGP import tune_r, gp_plot
 from PlotOffOn import off_on_plot
 from Chemistry_BMS import ib_lag
 from myFilters import LagExp
-from DataOverModel import write_clean_file
+from DataOverModel import write_clean_file, plq
 from unite_pictures import unite_pictures_into_pdf, cleanup_fig_files, precleanup_fig_files
 from datetime import datetime
 from load_data import load_data, remove_nan
@@ -473,10 +473,8 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
     plt.plot(hi.time, hi.voc + 0.1, color='green', linestyle=':', label='voc+0.1')
     plt.legend(loc=1)
     plt.subplot(335)
-    if hasattr(hi, 'e_wrap_filt'):
-        plt.plot(hi.time, hi.e_wrap_filt, color='black', linestyle='--', label='e_wrap_filt')
-    else:
-        plt.plot(hi.time, hi.e_w_f, color='black', linestyle='--', label='e_wrap_filt')
+    plq(plt, hi, 'time', hi, 'e_wrap_filt', color='black', linestyle='--', label='e_wrap_filt')
+    plq(plt, hi, 'time', hi, 'e_w_f', color='black', linestyle='--', label='e_wrap_filt')
     plt.plot(hi.time, hi.ewhi_thr, color='red', linestyle='-.', label='ewhi_thr')
     plt.plot(hi.time, hi.ewlo_thr, color='red', linestyle='-.', label='ewlo_thr')
     plt.ylim(-1, 1)
@@ -523,8 +521,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fi
     plt.subplot(331)
     plt.title(plot_title + ' O_F 1')
     plt.plot(mo.time, mo.ib_sel, color='black', linestyle='-', label='ib_sel=ib_in')
-    if hasattr(mv, 'ib_in'):
-        plt.plot(mv.time, mv.ib_in, color='cyan', linestyle='--', label='ib_in_ver')
+    plq(plt, mv, 'time', mv, 'ib_in', color='cyan', linestyle='--', label='ib_in_ver')
     if smv is not None:
         plt.plot(smv.time, smv.ib_in_s, color='orange', linestyle='-.', label='ib_in_s_ver')
     plt.plot(mo.time, mo.Tb, color='red', linestyle='-', label='temp_c')
@@ -532,20 +529,16 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fi
     if smv is not None:
         plt.plot(smv.time, mv.Tb, color='green', linestyle='-.', label='temp_c_s_ver')
     plt.legend(loc=1)
-    if hasattr(mo, 'ioc') or hasattr(mv, 'ioc') or hasattr(sv, 'ioc'):
-        plt.subplot(332)
-        if hasattr(mo, 'ioc'):
-            plt.plot(mo.time, mo.ioc, color='black', linestyle='-', label='ioc')
-        if hasattr(mv, 'ioc'):
-            plt.plot(mv.time, mv.ioc, color='cyan', linestyle='--', label='ioc_ver')
-        if hasattr(sv, 'ioc'):
-            plt.plot(sv.time, sv.ioc, color='orange', linestyle=':', label='ioc_s_ver')
-        plt.legend(loc=1)
+    plt.subplot(332)
+    plq(plt, mo, 'time', mo, 'ioc', color='black', linestyle='-', label='ioc')
+    plq(plt, mv, 'time', mv, 'ioc', color='cyan', linestyle='--', label='ioc_ver')
+    plq(plt, sv, 'time', sv, 'ioc', color='orange', linestyle=':', label='ioc_s_ver')
+    plt.legend(loc=1)
     plt.subplot(333)
     plt.plot(mo.time, mo.dV_hys, color='black', linestyle='-', label='dV_hys')
     plt.plot(mv.time, mv.dv_hys, color='cyan', linestyle='--', label='dv_hys_ver')
-    if sv is not None and hasattr(sv, 'dv_hys'):
-        plt.plot(sv.time, sv.dv_hys, color='orange', linestyle='-.', label='dv_hys_s_ver')
+    if sv is not None:
+        plq(plt, sv, 'time', sv, 'dv_hys', color='orange', linestyle='-.', label='dv_hys_s_ver')
     plt.legend(loc=1)
     plt.subplot(334)
     plt.plot(mo.time, mo.vb, color='black', linestyle='-', label='vb')
@@ -581,17 +574,13 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fi
     plt.plot(mv.time, np.array(mv.soc_ekf) - np.array(mv.soc), color='red', linestyle='--', label='cc_dif_ver')
     plt.plot(mo.time, mo.cc_diff_thr, color='cyan', linestyle='--', label='cc_diff_thr')
     plt.plot(mo.time, -mo.cc_diff_thr, color='cyan', linestyle='--')
-    if hasattr(mo, 'ewhi_thr'):
-        plt.plot(mo.time, mo.ewhi_thr, color='red', linestyle='-.', label='ewhi_thr')
-    if hasattr(mo, 'ewlo_thr'):
-        plt.plot(mo.time, mo.ewlo_thr, color='red', linestyle='-.', label='ewlo_thr')
+    plq(plt, mo, 'time', mo, 'ewhi_thr', color='red', linestyle='-.', label='ewhi_thr')
+    plq(plt, mo, 'time', mo, 'ewlo_thr', color='red', linestyle='-.', label='ewlo_thr')
     plt.ylim(-.5, .5)
     plt.legend(loc=1)
     plt.subplot(339)
-    if hasattr(mo, 'dv_dyn'):
-        plt.plot(mo.time, mo.dv_dyn, color='black', linestyle='-', label='dv_dyn')
-    if hasattr(mv, 'dv_dyn'):
-        plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle='--', label='dv_dyn_ver')
+    plq(plt, mo, 'time', mo, 'dv_dyn', color='black', linestyle='-', label='dv_dyn')
+    plq(plt, mv, 'time', mv, 'dv_dyn', color='cyan', linestyle='--', label='dv_dyn_ver')
     if smv is not None:
         plt.plot(smv.time, smv.dv_dyn_s, color='orange', linestyle='-.', label='dv_dyn_s_ver')
     plt.legend(loc=1)
@@ -626,8 +615,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fi
     plt.legend(loc=4)
     plt.subplot(333)
     plt.plot(mo.time, mo.ib_sel, linestyle='-', color='blue', label='ib_sel'+ref_str)
-    if hasattr(mv, 'ib_in'):
-        plt.plot(mv.time, mv.ib_in, linestyle='-', color='cyan', label='ib_in'+test_str)
+    plq(plt, mv, 'time', mv, 'ib_in', linestyle='-', color='cyan', label='ib_in'+test_str)
     if smv is not None:
         plt.plot(smv.time, smv.ib_in_s, linestyle=':', color='red', label='ib_in_s'+test_str)
     plt.xlabel('sec')
@@ -670,8 +658,7 @@ def overall_fault(mo, mv, sv, smv, filename, fig_files=None, plot_title=None, fi
     plt.legend(loc=3)
     plt.subplot(339)
     plt.plot(mo.time, mo.Tb, color='blue', linestyle='-', label='Tb'+ref_str)
-    if hasattr(mv, 'tau_hys'):
-        plt.plot(mv.time, mv.tau_hys, color='cyan', linestyle='--', label='tau_hys' + test_str)
+    plq(plt, mv, 'time', mv, 'tau_hys', color='cyan', linestyle='--', label='tau_hys' + test_str)
     plt.legend(loc=3)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)

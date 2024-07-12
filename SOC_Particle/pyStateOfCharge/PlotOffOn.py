@@ -22,6 +22,7 @@ Dependencies:
     - reportlab  (figures, pdf)
 """
 import matplotlib.pyplot as plt
+from DataOverModel import plq
 # below suppresses runtime error display******************
 # import os
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
@@ -43,41 +44,29 @@ def off_on_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, 
         plt.subplot(221)
         plt.title(plot_title + ' off/on sim 1')
         plt.plot(so.time, so.vb_s, color='black', linestyle='-', label='vb_s' + ref_str)
-        if hasattr(sv, 'vb'):
-            plt.plot(sv.time, sv.vb, color='orange', linestyle=':', label='vb_s' + test_str)
-        if hasattr(sv, 'vb_s'):
-            plt.plot(sv.time, sv.vb_s, color='orange', linestyle=':', label='vb_s' + test_str)
+        plq(plt, sv, 'time', sv, 'vb', color='orange', linestyle=':', label='vb_s' + test_str)
+        plq(plt, sv, 'time', sv, 'vb_s', color='orange', linestyle=':', label='vb_s' + test_str)
         plt.plot(so.time, so.voc_s, color='blue', linestyle='--', label='voc_s' + ref_str)
-        if hasattr(sv, 'voc'):
-            plt.plot(sv.time, sv.voc, color='red', linestyle='--', label='voc_s' + test_str)
-        elif hasattr(sv, 'voc_s'):
-            plt.plot(sv.time, sv.voc_s, color='red', linestyle='--', label='voc_s' + test_str)
-            plt.plot(so.time, so.voc_stat_s, color='magenta', linestyle='-.', label='voc_stat_s' + ref_str)
-        if hasattr(sv, 'voc_stat'):
-            plt.plot(sv.time, sv.voc_stat, color='green', linestyle=':', label='voc_stat_s' + test_str)
-        elif hasattr(sv, 'voc_stat_s'):
-            plt.plot(sv.time, sv.voc_stat_s, color='green', linestyle=':', label='voc_stat_s' + test_str)
+        plq(plt, sv, 'time', sv, 'voc', color='red', linestyle='--', label='voc_s' + test_str)
+        plq(plt, sv, 'time', sv, 'voc_s', color='red', linestyle='--', label='voc_s' + test_str)
+        plq(plt, so, 'time', so, 'voc_stat_s', color='magenta', linestyle='-.', label='voc_stat_s' + ref_str)
+        plq(plt, sv, 'time', sv, 'voc_stat', color='green', linestyle=':', label='voc_stat_s' + test_str)
+        plq(plt, sv, 'time', sv, 'voc_stat_s', color='green', linestyle=':', label='voc_stat_s' + test_str)
         plt.legend(loc=1)
         plt.subplot(222)
         plt.plot(so.time, so.dv_hys_s, linestyle='-', color='black', label='dv_hys_s' + ref_str)
-        if hasattr(sv, 'dv_hys'):
-            plt.plot(sv.time, sv.dv_hys, linestyle='--', color='orange', label='dv_hys_s' + test_str)
-        elif hasattr(sv, 'dv_hys_s'):
-            plt.plot(sv.time, sv.dv_hys_s, linestyle='--', color='orange', label='dv_hys_s' + test_str)
+        plq(plt, sv, 'time', sv, 'dv_hys', linestyle='--', color='orange', label='dv_hys_s' + test_str)
+        plq(plt, sv, 'time', sv, 'dv_hys_s', linestyle='--', color='orange', label='dv_hys_s' + test_str)
         plt.legend(loc=1)
         plt.subplot(223)
         plt.plot(so.time, so.soc_s, linestyle='-', color='black', label='soc_s' + ref_str)
-        if hasattr(sv, 'soc'):
-            plt.plot(sv.time, sv.soc, linestyle='--', color='orange', label='soc_s' + test_str)
-        elif hasattr(sv, 'soc_s'):
-            plt.plot(sv.time, sv.soc_s, linestyle='--', color='orange', label='soc_s' + test_str)
+        plq(plt, sv, 'time', sv, 'soc', linestyle='--', color='orange', label='soc_s' + test_str)
+        plq(plt, sv, 'time', sv, 'soc_s', linestyle='--', color='orange', label='soc_s' + test_str)
         plt.legend(loc=1)
         plt.subplot(224)
         plt.plot(so.time, so.ib_s, linestyle='-', color='black', label='ib_s' + ref_str)
-        if hasattr(sv, 'ib'):
-            plt.plot(sv.time, sv.ib, linestyle='--', color='orange', label='ib_s' + test_str)
-        if hasattr(sv, 'ib_s'):
-            plt.plot(sv.time, sv.ib_s, linestyle='--', color='orange', label='ib_s' + test_str)
+        plq(plt, sv, 'time', sv, 'ib', linestyle='--', color='orange', label='ib_s' + test_str)
+        plq(plt, sv, 'time', sv, 'ib_s', linestyle='--', color='orange', label='ib_s' + test_str)
         plt.legend(loc=1)
         fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
         fig_files.append(fig_file_name)
