@@ -28,11 +28,11 @@
 #define CURR_SCALE_NOA         1.0  // Hardware to match data (* 'SB')
 #define CURR_SCALE_DISCH       1.0  // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
 #define SHUNT_GAIN            2666. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (2666 is 200A/0.075V)
-#define SHUNT_AMP_R1          1500. // Internal amp resistance 196x, ohms (5100)
-#define SHUNT_AMP_R2        330000. // Internal amp resistance 196x, ohms (1000000)
+#define SHUNT_AMP_R1          1500. // Internal amp resistance 196x, ohms (1500)
+#define SHUNT_AMP_R2        330000. // Internal amp resistance 196x, ohms (330000)
 #define IB_ABS_MAX_AMP        21.5  // Hard range limit of sensor electrically impossible (=1.65 * SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2 *1.05) but saw -11.48 A
-#define SHUNT_NOA_R1          1500. // Internal amp resistance 29.4x, ohms (5100)
-#define SHUNT_NOA_R2         33000. // Internal amp resistance 29.4x, ohms (150000)
+#define SHUNT_NOA_R1          1500. // Internal amp resistance 29.4x, ohms (1500)
+#define SHUNT_NOA_R2         33000. // Internal amp resistance 29.4x, ohms (33000)
 #define IB_ABS_MAX_NOA         210. // Hard range limit of sensor electrically impossible (=1.65 * SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2 *1.05)
 #define HDWE_IB_HI_LO_NOA_LO   -20. // Fully NOA bank discharge transition, A (-20)
 #define HDWE_IB_HI_LO_AMP_LO   -19. // Fully AMP bank discharge transition, A (-19)  
