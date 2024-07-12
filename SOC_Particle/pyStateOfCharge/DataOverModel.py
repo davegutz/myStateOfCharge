@@ -48,7 +48,7 @@ plt.rcParams.update({'figure.max_open_warning': 0})
 
 
 def plq(plt_, sx, st, sy, yt, slr=1., add=0., color='black', linestyle='-', label='label_needed'):
-    if hasattr(sx, st) and hasattr(sy, yt):
+    if sx is not None and sy is not None and hasattr(sx, st) and hasattr(sy, yt):
         plt_.plot(getattr(sx, st), getattr(sy, yt)*slr + add, color=color, linestyle=linestyle, label=label)
 
 
@@ -291,8 +291,7 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plt.plot(mo.time, mo.Tb, color='green', linestyle='-', label='temp_c'+ref_str)
     plt.plot(mv.time, mv.Tb, color='orange', linestyle='--', label='temp_c'+test_str)
     plt.plot(mo.time, mo.chm, color='black', linestyle='-', label='mon_mod'+ref_str)
-    if so is not None:
-        plt.plot(so.time, so.chm_s, color='cyan', linestyle='--', label='sim_mod'+ref_str)
+    plq(plt, so, 'time', so, 'chm_s', color='cyan', linestyle='--', label='sim_mod'+ref_str)
     plt.ylim(0., 50.)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"

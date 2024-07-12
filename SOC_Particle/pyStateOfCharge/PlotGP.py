@@ -42,44 +42,28 @@ plt.rcParams.update({'figure.max_open_warning': 0})
 def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None,
             ref_str='_ref', test_str='_test'):
     fig_list.append(plt.figure())  # GP 1
-    if so is not None or smv is not None or so is not None:
-        plt.subplot(221)
-        plt.title(plot_title + ' GP 1')
-        if so is not None:
-            plt.plot(so.time, so.vb_s, color='black', linestyle='-', label='vb_s' + ref_str)
-        if smv is not None:
-            plt.plot(smv.time, smv.vb_s, color='orange', linestyle='--', label='vb_s' + test_str)
-        if so is not None:
-            plt.plot(so.time, so.voc_s, color='blue', linestyle='-.', label='voc_s' + ref_str)
-        if smv is not None:
-            plt.plot(smv.time, smv.voc_s, color='red', linestyle=':', label='voc_s' + test_str)
-        if so is not None:
-            plt.plot(so.time, so.voc_stat_s, color='magenta', linestyle='-.', label='voc_stat_s' + ref_str)
-        if smv is not None:
-            plt.plot(smv.time, smv.voc_stat_s, color='green', linestyle=':', label='voc_stat_s' + test_str)
-        plt.legend(loc=1)
-    if so is not None or smv is not None or so is not None:
-        plt.subplot(222)
-        if so is not None:
-            plt.plot(so.time, so.dv_hys_s, linestyle='-', color='black', label='dv_hys_s' + ref_str)
-        if smv is not None:
-            plt.plot(smv.time, smv.dv_hys_s, linestyle='--', color='orange', label='dv_hys_s' + test_str)
-        plt.legend(loc=1)
-    if so is not None or smv is not None or so is not None:
-        plt.subplot(223)
-        if so is not None:
-            plt.plot(so.time, so.soc_s, linestyle='-', color='black', label='soc_s' + ref_str)
-        if smv is not None:
-            plt.plot(smv.time, smv.soc_s, linestyle='--', color='orange', label='soc_s' + test_str)
-        plt.legend(loc=1)
-    if so is not None or smv is not None or so is not None:
-        plt.subplot(224)
-        if so is not None:
-            plt.plot(so.time, so.ib_in_s, linestyle='-', color='blue', label='ib_in_s' + ref_str)
-        if smv is not None:
-            plt.plot(smv.time, smv.ib_in_s, linestyle='--', color='red', label='ib_in_s' + test_str)
-        plq(plt, smv, 'time', smv, 'ib_fut_s', linestyle='-.', color='orange', label='ib_fut_s' + test_str)
-        plt.legend(loc=1)
+    plt.subplot(221)
+    plt.title(plot_title + ' GP 1')
+    plq(plt, so, 'time', so, 'vb_s', color='black', linestyle='-', label='vb_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'vb_s', color='orange', linestyle='--', label='vb_s' + test_str)
+    plq(plt, so, 'time', so, 'voc_s', color='blue', linestyle='-.', label='voc_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'voc_s', color='red', linestyle=':', label='voc_s' + test_str)
+    plq(plt, so, 'time', so, 'voc_stat_s', color='magenta', linestyle='-.', label='voc_stat_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'voc_stat_s', color='green', linestyle=':', label='voc_stat_s' + test_str)
+    plt.legend(loc=1)
+    plt.subplot(222)
+    plq(plt, so, 'time', so, 'dv_hys_s', linestyle='-', color='black', label='dv_hys_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'dv_hys_s', linestyle='--', color='orange', label='dv_hys_s' + test_str)
+    plt.legend(loc=1)
+    plt.subplot(223)
+    plq(plt, so, 'time', so, 'soc_s', linestyle='-', color='black', label='soc_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'soc_s', linestyle='--', color='orange', label='soc_s' + test_str)
+    plt.legend(loc=1)
+    plt.subplot(224)
+    plq(plt, so, 'time', so, 'ib_in_s', linestyle='-', color='blue', label='ib_in_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'ib_in_s', linestyle='--', color='red', label='ib_in_s' + test_str)
+    plq(plt, smv, 'time', smv, 'ib_fut_s', linestyle='-.', color='orange', label='ib_fut_s' + test_str)
+    plt.legend(loc=1)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
@@ -103,10 +87,8 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_
     plt.plot(mv.time, mv.soc, linestyle='--', color='orange', label='soc' + test_str)
     plt.legend(loc=1)
     plt.subplot(224)
-    if mo.ib_sel is not None:
-        plt.plot(mo.time, mo.ib_sel, linestyle='-', color='black', label='ib_sel' + ref_str)
-    if so is not None:
-        plt.plot(so.time, so.ib_in_s, linestyle='--', color='cyan', label='ib_in_s' + ref_str)
+    plq(plt, mo, 'time', mo, 'ib_sel', linestyle='-', color='black', label='ib_sel' + ref_str)
+    plq(plt, so, 'time', so, 'ib_in_s', linestyle='--', color='cyan', label='ib_in_s' + ref_str)
     plt.plot(mv.time, mv.ib_charge, linestyle='-.', color='orange', label='ib_charge' + test_str)
     plt.plot(mo.time, mo.ib_diff, linestyle=':', color='red', label='ib_diff' + ref_str)
     plt.legend(loc=1)
@@ -167,93 +149,70 @@ def gp_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_
     plt.title(plot_title + ' GP 3 Tune')
     plt.plot(mo.time, mo.dv_dyn, color='blue', linestyle='-', label='dv_dyn' + ref_str)
     plt.plot(mv.time, mv.dv_dyn, color='cyan', linestyle='--', label='dv_dyn' + test_str)
-    if so is not None:
-        plt.plot(so.time, so.dv_dyn_s, color='black', linestyle='-.', label='dv_dyn_s' + ref_str)
-    if smv is not None:
-        plt.plot(smv.time, smv.dv_dyn_s, color='magenta', linestyle=':', label='dv_dyn_s' + test_str)
+    plq(plt, so, 'time', so, 'dv_dyn_s', color='black', linestyle='-.', label='dv_dyn_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'dv_dyn_s', color='magenta', linestyle=':', label='dv_dyn_s' + test_str)
     plt.plot(mo.time, mo.dv_hys, color='pink', linestyle='-', label='dv_hys' + ref_str)
     plt.xlabel('sec')
     plt.legend(loc=3)
     plt.subplot(332)
     plt.plot(mo.time, mo.soc, linestyle='-', color='blue', label='soc' + ref_str)
     plt.plot(mv.time, mv.soc, linestyle='--', color='cyan', label='soc' + test_str)
-    if so is not None:
-        plt.plot(so.time, so.soc_s, linestyle='-.', color='black', label='soc_s' + ref_str)
-    if smv is not None:
-        plt.plot(smv.time, smv.soc_s, linestyle=':', color='magenta', label='soc_s' + test_str)
+    plq(plt, so, 'time', so, 'soc_s', linestyle='-.', color='black', label='soc_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'soc_s', linestyle=':', color='magenta', label='soc_s' + test_str)
     plt.plot(mo.time, mo.soc_ekf, linestyle='-', color='green', label='soc_ekf' + ref_str)
     plt.plot(mv.time, mv.soc_ekf, linestyle='--', color='red', label='soc_ekf' + test_str)
     plt.xlabel('sec')
     plt.legend(loc=4)
     plt.subplot(333)
-    if mo.ib_sel is not None:
-        plt.plot(mo.time, mo.ib_sel, linestyle='-', color='blue', label='ib_sel' + ref_str)
+    plq(plt, mo, 'time', mo, 'ib_sel', linestyle='-', color='blue', label='ib_sel' + ref_str)
     # plt.plot(mv.time, mv.ib_in, linestyle='-', color='cyan', label='ib_in'+test_str)
-    if so is not None:
-        plt.plot(so.time, so.ib_in_s, linestyle='--', color='black', label='ib_in_s' + ref_str)
-    if smv is not None:
-        plt.plot(smv.time, smv.ib_in_s, linestyle=':', color='red', label='ib_in_s' + test_str)
+    plq(plt, so, 'time', so, 'ib_in_s', linestyle='--', color='black', label='ib_in_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'ib_in_s', linestyle=':', color='red', label='ib_in_s' + test_str)
     plt.xlabel('sec')
     plt.legend(loc=3)
     plt.subplot(334)
     plt.plot(mo.time, mo.voc, linestyle='-', color='blue', label='voc' + ref_str)
     plt.plot(mv.time, mv.voc, linestyle='--', color='cyan', label='voc' + test_str)
-    # if so is not None:
-    #   plt.plot(so.time, so.voc_s, linestyle='-', color='blue', label='voc_s'+ref_str)
-    # plt.plot(smv.time, smv.voc_s, linestyle='--', color='cyan', label='voc_s'+test_str)
     plt.plot(mo.time, mo.voc_stat, color='orange', linestyle='-', label='voc_stat' + ref_str)
-    if so is not None:
-        plt.plot(so.time, so.voc_stat_s, linestyle='-.', color='blue', label='voc_stat_s' + ref_str)
-    if smv is not None:
-        plt.plot(smv.time, smv.voc_stat_s, linestyle=':', color='red', label='voc_stat_s' + test_str)
-    if so is not None:
-        plt.plot(so.time, so.vb_s, linestyle='-', color='black', label='vb_s' + ref_str)
-    if smv is not None:
-        plt.plot(sv.time, smv.vb_s, linestyle='--', color='pink', label='vb_s' + test_str)
+    plq(plt, so, 'time', so, 'voc_stat_s', linestyle='-.', color='blue', label='voc_stat_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'voc_stat_s', linestyle=':', color='red', label='voc_stat_s' + test_str)
+    plq(plt, so, 'time', so, 'vb_s', linestyle='-', color='black', label='vb_s' + ref_str)
+    plq(plt, sv, 'time', smv, 'vb_s', linestyle='--', color='pink', label='vb_s' + test_str)
     plt.xlabel('sec')
     plt.legend(loc=2)
     plt.subplot(335)
-    if mo.e_wrap is not None:
-        plt.plot(mo.time, mo.e_wrap, color='black', linestyle='-', label='e_wrap' + ref_str)
+    plq(plt, mo, 'time', mo, 'e_wrap', color='black', linestyle='-', label='e_wrap' + ref_str)
     plt.plot(mv.time, mv.e_wrap, color='orange', linestyle='--', label='e_wrap' + test_str)
     plt.xlabel('sec')
     plt.legend(loc=2)
     plt.subplot(336)
     plt.plot(mo.soc, mo.vb, color='blue', linestyle='-', label='vb' + ref_str)
-    if smv is not None:
-        plt.plot(smv.soc_s, smv.vb_s, color='cyan', linestyle='--', label='vb_s' + test_str)
+    plq(plt, smv, 'soc_s', smv, 'vb_s', color='cyan', linestyle='--', label='vb_s' + test_str)
     plt.plot(mo.soc, mo.voc_stat, color='orange', linestyle='-.', label='voc_stat' + ref_str)
-    if smv is not None:
-        plt.plot(smv.soc_s, smv.voc_stat_s, color='red', linestyle=':', label='voc_stat_s' + test_str)
+    plq(plt, smv, 'soc_s', smv, 'voc_stat_s', color='red', linestyle=':', label='voc_stat_s' + test_str)
     plt.xlabel('state-of-charge')
     plt.legend(loc=2)
     plt.subplot(337)
     plt.plot(mo.time, mo.vb, color='blue', linestyle='-', label='vb' + ref_str)
     plt.plot(mv.time, mv.vb, color='cyan', linestyle='--', label='vb' + test_str)
-    if so is not None:
-        plt.plot(so.time, so.vb_s, color='black', linestyle='-.', label='vb_s' + ref_str)
-    if smv is not None:
-        plt.plot(smv.time, smv.vb_s, color='magenta', linestyle=':', label='vb_s' + test_str)
+    plq(plt, so, 'time', so, 'vb_s', color='black', linestyle='-.', label='vb_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'vb_s', color='magenta', linestyle=':', label='vb_s' + test_str)
     plt.xlabel('sec')
     plt.legend(loc=2)
     plt.subplot(338)
     plt.plot(mo.time, mo.dv_hys, color='blue', linestyle='-', label='dv_hys' + ref_str)
     plt.plot(mv.time, mv.dv_hys, color='cyan', linestyle='--', label='dv_hys' + test_str)
-    if so is not None:
-        plt.plot(so.time, so.dv_hys_s, color='black', linestyle='-.', label='dv_hys_s' + ref_str)
-    if smv is not None:
-        plt.plot(smv.time, smv.dv_hys_s, color='magenta', linestyle=':', label='dv_hys_s' + test_str)
+    plq(plt, so, 'time', so, 'dv_hys_s', color='black', linestyle='-.', label='dv_hys_s' + ref_str)
+    plq(plt, smv, 'time', smv, 'dv_hys_s', color='magenta', linestyle=':', label='dv_hys_s' + test_str)
     plt.plot(mo.time, mo.sat - 0.5, color='black', linestyle='-', label='sat' + ref_str + '-0.5')
     plt.plot(mv.time, np.array(mv.sat) - 0.5, color='green', linestyle='--', label='sat' + test_str + '-0.5')
-    if so is not None:
-        plt.plot(so.time, so.sat_s - 0.5, color='red', linestyle='-.', label='sat_s' + ref_str + '-0.5')
+    plq(plt, so, 'time', so, 'sat_s', add=-0.5, color='red', linestyle='-.', label='sat_s' + ref_str + '-0.5')
     if hasattr(sv, 'sat'):
         plt.plot(sv.time, np.array(sv.sat) - 0.5, color='cyan', linestyle=':', label='sat_s' + test_str + '-0.5')
     plt.xlabel('sec')
     plt.legend(loc=3)
     plt.subplot(339)
     plt.plot(mo.time, mo.Tb, color='blue', linestyle='-', label='Tb' + ref_str)
-    # plt.plot(mv.time, mv.tau_hys, color='cyan', linestyle='--', label='tau_hys' + test_str)
     plt.legend(loc=3)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
@@ -414,18 +373,16 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, fig_list=None
     plt.subplot(221)
     plt.title(plot_title + ' GP 3 Tune Summ')
     plt.plot(mo.time, mo.vb, color='blue', linestyle='-', label='vb' + ref_str)
-    if smv is not None:
-        plt.plot(smv.time, smv.vb_s, color='magenta', linestyle=':', label='vb_s' + test_str)
-        plt.plot(smv.time, smv.voc_stat_s, linestyle='-.', color='black', label='voc_stat_s' + test_str)
+    plq(plt, smv, 'time', smv, 'vb_s', color='magenta', linestyle=':', label='vb_s' + test_str)
+    plq(plt, smv, 'time', smv, 'voc_stat_s', linestyle='-.', color='black', label='voc_stat_s' + test_str)
     plt.plot(mv.time, voc_stat_chg, linestyle=':', color='green', label='voc_stat_chg' + test_str)
     plt.plot(mv.time, voc_stat_dis, linestyle=':', color='red', label='voc_stat_dis' + test_str)
     plt.xlabel('sec')
     plt.legend(loc=2)
     plt.subplot(222)
     plt.plot(mo.soc, mo.vb, color='blue', linestyle='-', label='vb' + ref_str)
-    if smv is not None:
-        plt.plot(smv.soc_s, smv.vb_s, color='magenta', linestyle=':', label='vb_s' + test_str)
-        plt.plot(smv.soc_s, smv.voc_stat_s, linestyle='-.', color='black', label='voc_stat_s' + test_str)
+    plq(plt, smv, 'soc_s', smv, 'vb_s', color='magenta', linestyle=':', label='vb_s' + test_str)
+    plq(plt, smv, 'soc_s', smv, 'voc_stat_s', linestyle='-.', color='black', label='voc_stat_s' + test_str)
     plt.plot(mv.soc, voc_stat_chg, linestyle=':', color='green', label='voc_stat_chg' + test_str)
     plt.plot(mv.soc, voc_stat_dis, linestyle=':', color='red', label='voc_stat_dis' + test_str)
     plt.plot(mo.soc, mo.voc_soc, color='cyan', linestyle='--', label='voc_soc' + ref_str)
@@ -434,16 +391,14 @@ def tune_r(mo, mv, smv, filename, fig_files=None, plot_title=None, fig_list=None
     plt.subplot(223)
     plt.plot(mo.time, mo.Tb, color='red', linestyle='-', label='Tb' + ref_str)
     plt.plot(mo.time, mo.ib_sel, linestyle='--', color='blue', label='ib_sel' + ref_str)
-    if smv is not None:
-        plt.plot(smv.time, smv.ib_in_s, linestyle='-.', color='magenta', label='ib_in_s' + test_str)
+    plq(plt, smv, 'time', smv, 'ib_in_s', linestyle='-.', color='magenta', label='ib_in_s' + test_str)
     plt.xlabel('sec')
     plt.legend(loc=3)
-    if smv is not None:
-        plt.subplot(224)
-        plt.plot(smv.time, smv.dv_dyn_s, color='black', linestyle=':', label='dv_dyn_s' + test_str)
-        plt.plot(smv.time, smv.dv_hys_s, color='magenta', linestyle=':', label='dv_hys_s' + test_str)
-        plt.xlabel('sec')
-        plt.legend(loc=3)
+    plt.subplot(224)
+    plq(plt, smv, 'time', smv, 'dv_dyn_s', color='black', linestyle=':', label='dv_dyn_s' + test_str)
+    plq(plt, smv, 'time', smv, 'dv_hys_s', color='magenta', linestyle=':', label='dv_hys_s' + test_str)
+    plt.xlabel('sec')
+    plt.legend(loc=3)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
     fig_files.append(fig_file_name)
     plt.savefig(fig_file_name, format="png")
