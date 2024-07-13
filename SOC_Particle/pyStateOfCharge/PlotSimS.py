@@ -102,8 +102,6 @@ def sim_s_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, f
         plt.plot(mv.time, mv.chm, color='red', linestyle='--', label='chm'+test_str)
         plt.plot(so.time, so.chm_s, color='green', linestyle='-.', label='chem_s'+ref_str)
         plt.plot(smv.time, smv.chm_s, color='orange', linestyle=':', label='smv.chm_s'+test_str)
-        sv.chm = np.array(sv.chm)
-        sv.chm_s = np.array(sv.chm_s)
         plq(plt, sv, 'time', sv, 'chm', add=+4, color='red', linestyle='-', label='sv.chm'+test_str+'+4')
         plq(plt, sv, 'time', sv, 'chm_s', add=+4, color='red', linestyle='-', label='sv.chm'+test_str+'+4')
         plt.plot(smv.time, np.array(smv.chm_s)+4, color='black', linestyle='--', label='smv.chm_s'+test_str+'+4')

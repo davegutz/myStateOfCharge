@@ -47,13 +47,18 @@ if sys.platform == 'darwin':
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 
-def plq(plt_, sx, st, sy, yt, slr=1., add=0., color='black', linestyle='-', label='label_needed'):
+def plq(plt_, sx, st, sy, yt, slr=1., add=0., color='black', linestyle='-', label='label_needed', marker=None,
+        markersize=None, markevery=None):
     if sx is not None and sy is not None and hasattr(sx, st) and hasattr(sy, yt):
         try:
             yscld = getattr(sy, yt) * slr + add
         except TypeError:
             yscld = np.array(getattr(sy, yt)) * slr + add
-        plt_.plot(getattr(sx, st), yscld, color=color, linestyle=linestyle, label=label)
+        try:
+            plt_.plot(getattr(sx, st), yscld, color=color, linestyle=linestyle, label=label, marker=marker,
+                      markersize=markersize, markevery=markevery)
+        except ValueError:
+            pass
 
 def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig_list=None, plot_init_in=False,
              ref_str='_ref', test_str='_test'):

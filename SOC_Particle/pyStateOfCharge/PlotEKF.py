@@ -171,7 +171,7 @@ def ekf_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         plt.plot(mv.time, mv.dv_hys, marker='.', markersize='1', markevery=48, linestyle='None', color='magenta',
                  label='dv_hys' + test_str)
         plq(plt, so, 'time', so, 'dv_hys_s', linestyle=':', color='cyan', label='dv_hys_s' + ref_str)
-        plq(plt, sv, 'time', svm, 'dv_hys', marker='.', markersize='1', markevery=64, linestyle='None', color='black',
+        plq(plt, sv, 'time', smv, 'dv_hys', marker='.', markersize='1', markevery=64, linestyle='None', color='black',
                      label='dv_hys_s' + test_str)
         plq(plt, sv, 'time', sv, 'dv_hys_s', marker='.', markersize='1', markevery=64, linestyle='None', color='black',
                      label='dv_hys_s' + test_str)
