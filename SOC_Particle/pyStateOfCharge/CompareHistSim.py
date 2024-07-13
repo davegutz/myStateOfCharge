@@ -382,9 +382,9 @@ def over_fault(hi, filename, fig_files=None, plot_title=None, fig_list=None, sub
                  label='wrap_vb_fa+14')
         plt.plot(hi.time, hi.wl_fa + 12, marker='p', markersize='3', linestyle='-', color='blue',
                  label='wrap_lo_fa+12')
-        plt.plot(hi.time, hi.wl_m_flt + 12, marker='q', markersize='3', linestyle='--', color='red',
+        plt.plot(hi.time, hi.wl_m_flt + 12, marker='p', markersize='3', linestyle='--', color='red',
                  label='wrap_lo_m_fa+12')
-        plt.plot(hi.time, hi.wl_n_flt + 12, marker='r', markersize='3', linestyle='-.', color='orange',
+        plt.plot(hi.time, hi.wl_n_flt + 12, marker='p', markersize='3', linestyle='-.', color='orange',
                  label='wrap_lo_n_fa+12')
         plt.plot(hi.time, hi.wh_fa + 10, marker='h', markersize='3', linestyle='-', color='blue',
                  label='wrap_hi_fa+10')
@@ -741,8 +741,8 @@ def bandaid(h):
     mon_old = rf.rec_append_fields(mon_old, 'vb_sel', vb_sel)
     mon_old = rf.rec_append_fields(mon_old, 'soc_s', soc_s)
     mon_old = rf.rec_append_fields(mon_old, 'sel', sel)
-    mon_old = rf.rec_append_fields(mon_old, 'ewh_thr', sel)
-    mon_old = rf.rec_append_fields(mon_old, 'ewl_thr', sel)
+    # mon_old = rf.rec_append_fields(mon_old, 'ewh_thr', sel)
+    # mon_old = rf.rec_append_fields(mon_old, 'ewl_thr', sel)
     mon_old = rf.rec_append_fields(mon_old, 'ccd_thr', sel)
     mon_old = rf.rec_append_fields(mon_old, 'voc_ekf', sel)
     mon_old = rf.rec_append_fields(mon_old, 'y_ekf', sel)
@@ -1213,13 +1213,12 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
 def main():
 
     # User inputs (multiple input_files allowed
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331/soc0p hist 2024_06_25.csv'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240704/overnight wrap 20240713.csv'
     data_only = False
     mon_t = False
-    unit_key = 'g20240331_soc0p_ch'
+    unit_key = 'g20240704_soc2p2_chg'
     dt_resample = 10
     Tb_force = None
-
     # Do this when running compare_hist_sim on run that schedule extracted assuming constant Tb
     # Tb_force = 35
 
