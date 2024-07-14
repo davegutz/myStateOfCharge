@@ -83,6 +83,7 @@ class Battery(Coulombs):
     VB_OFF_BB = 10.  # BMS shutoff level, Battleborn, v (10)
     VB_OFF_CH = 11.  # BMS shutoff level, CHINS, v (11)
     AMP_WRAP_TRIM_GAIN = 0.015  # Amp looparound trim gain r/s (0.015)
+    NOA_WRAP_TRIM_GAIN = 0.0  # Noa looparound trim gain r/s (0.0)
     WRAP_LO_S = 9.  # Wrap low failure set time, sec (9) // 9 is legacy must be quicker than SAT test
     WRAP_LO_R = (WRAP_LO_S/2.)  # Wrap low failure reset time, sec ('up 1, down 2')
     WRAP_HI_S = WRAP_LO_S  # Wrap high failure set time, sec (WRAP_LO_S)
@@ -98,7 +99,6 @@ class Battery(Coulombs):
     WRAP_SOC_LO_OFF_ABS = 0.35  # Disable e_wrap when near empty (soc lo any Tb, 0.35)
     WRAP_HI_SAT_MARG = 0.2  # Wrap voltage margin to saturation, V (0.2)
     WRAP_MOD_C_RATE = 0.02  # Moderate charge rate threshold to engage wrap threshold (0.02 to prevent trip near saturation .05 too large)
-    VTAB_BIAS = -0.1  # Bias on voc_soc table (* 'Dw'), V'
 
     # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
     #                         what gets delivered, e.g. Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
@@ -613,7 +613,8 @@ class BatteryMonitor(Battery, EKF1x1):
             ewmin_slr = 1.
         # Individual wrap logic
         if self.ib_noa is not None:
-            self.LoopIbNoa.calculate(reset=reset, ib=ib_noa, dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr,
+            self.LoopIbNoa.calculate(reset=reset, ib=ib_noa, loop_gain=Battery.NOA_WRAP_TRIM_GAIN,
+            dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr,
                                      ewsat_slr=ewsat_slr, e_w_0=e_w_noa_0, e_w_filt_0=e_w_noa_filt_0)
             self.e_wrap_n = self.LoopIbNoa.e_wrap
             self.e_wrap_n_filt = self.LoopIbNoa.e_wrap_filt
@@ -953,8 +954,8 @@ class Looparound:
         self.ib = ib
         self.zero = zero
         if self.zero:
-            self.Trim.calculate(in_=0., dt=self.dt, reset=True, init_value=0.)
-            self.WrapErrFilt.calculate(in_=0., reset=True, dt=min(self.dt, Battery.F_MAX_T_WRAP))
+            self.e_wrap_trim = -self.Trim.calculate(in_=0., dt=self.dt, reset=True, init_value=0.)
+            self.e_wrap_filt = self.WrapErrFilt.calculate(in_=0., reset=True, dt=min(self.dt, Battery.F_MAX_T_WRAP))
         self.voc = self.Mon.vb - (self.ChargeTransfer.calculate(self.ib, self.reset, dt) * self.chem.r_ct +
                                   self.ib * self.chem.r_0)
         self.e_wrap = self.Mon.voc_soc - self.voc
@@ -968,14 +969,17 @@ class Looparound:
             else:
                 self.e_wrap_filt = 0.
         if not self.zero:
-            self.e_wrap_trim = -self.Trim.calculate(in_=self.e_wrap_filt*loop_gain, dt=self.dt,
-                                                    reset=self.reset, init_value=self.e_wrap-self.e_wrap_filt)
+            if loop_gain != 0.:
+                self.e_wrap_trim = -self.Trim.calculate(in_=self.e_wrap_filt*loop_gain, dt=self.dt,
+                                                        reset=self.reset, init_value=self.e_wrap-self.e_wrap_filt)
+            else:
+                self.e_wrap_trim = -self.Trim.calculate(in_=self.e_wrap_filt*loop_gain, dt=self.dt,
+                                                        reset=self.reset, init_value=0.)
             self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
             self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap_trimmed, reset=self.reset,
                                                           dt=min(self.dt, Battery.F_MAX_T_WRAP) )
         else:
             self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
-            self.e_wrap_filt = self.WrapErrFilt.state
 
 
         # Thresholds. Scalars are calculated by Flt->wrap_scalars()
