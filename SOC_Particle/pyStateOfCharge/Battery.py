@@ -305,8 +305,10 @@ class BatteryMonitor(Battery, EKF1x1):
         self.ib_noa = None
         self.e_wrap_m = None
         self.e_wrap_m_filt = None
+        self.e_wrap_m_trim = None
         self.e_wrap_n = None
         self.e_wrap_n_filt = None
+        self.e_wrap_n_trim = None
         self.LoopIbAmp = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_AMP,
                                     wrap_lo_amp=Battery.WRAP_LO_AMP)
         self.LoopIbNoa = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_AMP,
@@ -336,7 +338,8 @@ class BatteryMonitor(Battery, EKF1x1):
 
     # BatteryMonitor::calculate()
     def calculate(self, chem, temp_c, vb, ib, dt, reset, update_time_in, q_capacity=None, dc_dc_on=None,
-                  rp=None, u_old=None, z_old=None, x_old=None, bms_off_init=None, ib_amp=None, ib_noa=None):
+                  rp=None, u_old=None, z_old=None, x_old=None, bms_off_init=None, ib_amp=None, ib_noa=None,
+                  e_w_amp_0=None, e_w_amp_filt_0=None, e_w_noa_0=None, e_w_noa_filt_0=None):
         self.ib_amp = ib_amp
         self.ib_noa = ib_noa
         if self.chm != chem:
@@ -393,7 +396,8 @@ class BatteryMonitor(Battery, EKF1x1):
         self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.ib
 
-        self.wrap(reset=reset, ib_amp=ib_amp, ib_noa=ib_noa)
+        self.wrap(reset=reset, ib_amp=ib_amp, ib_noa=ib_noa, e_w_amp_0=e_w_amp_0, e_w_amp_filt_0=e_w_amp_filt_0,
+                  e_w_noa_0=e_w_noa_0, e_w_noa_filt_0=e_w_noa_filt_0)
 
         # Reversionary model
         self.vb_model_rev = self.voc_soc + self.dv_dyn + self.dv_hys
@@ -566,13 +570,16 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.ib_amp.append(self.ib_amp)
         self.saved.e_wrap_m.append(self.e_wrap_m)
         self.saved.e_wrap_m_filt.append(self.e_wrap_m_filt)
+        self.saved.e_wrap_m_trim.append(self.e_wrap_m_trim)
         self.saved.ib_noa.append(self.ib_noa)
         self.saved.e_wrap_n.append(self.e_wrap_n)
         self.saved.e_wrap_n_filt.append(self.e_wrap_n_filt)
+        self.saved.e_wrap_n_trim.append(self.e_wrap_n_trim)
         self.saved.ib_lag.append(self.ib_lag)
         self.saved.voc_soc_new.append(self.voc_soc_new)
 
-    def wrap(self, reset=True, ib_noa=0., ib_amp=0.):
+    def wrap(self, reset=True, ib_noa=0., ib_amp=0.,
+             e_w_amp_0=None, e_w_amp_filt_0=None, e_w_noa_0=None, e_w_noa_filt_0=None):
         # Wrap logic
         self.e_wrap = self.voc_soc - self.voc_stat
         self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, Battery.F_MAX_T_WRAP),
@@ -596,16 +603,19 @@ class BatteryMonitor(Battery, EKF1x1):
         # Individual wrap logic
         if self.ib_noa is not None:
             self.LoopIbNoa.calculate(reset=reset, ib=ib_noa, dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr,
-                                     ewsat_slr=ewsat_slr)
+                                     ewsat_slr=ewsat_slr, e_w_0=e_w_noa_0, e_w_filt_0=e_w_noa_filt_0)
             self.e_wrap_n = self.LoopIbNoa.e_wrap
             self.e_wrap_n_filt = self.LoopIbNoa.e_wrap_filt
+            self.e_wrap_n_trim = self.LoopIbNoa.e_wrap_trim
         if self.ib_amp is not None:
             ib_noa_range = ib_noa > Battery.HDWE_IB_HI_LO_NOA_HI or ib_noa < Battery.HDWE_IB_HI_LO_NOA_LO
             self.LoopIbAmp.calculate(reset=reset, ib=ib_amp, Leader=self.LoopIbNoa, follow=ib_noa_range,
                                      loop_gain=Battery.AMP_WRAP_TRIM_GAIN, dt=min(self.dt, Battery.F_MAX_T_WRAP),
-                                     ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr)
+                                     ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr,
+                                     e_w_0=e_w_amp_0, e_w_filt_0=e_w_amp_filt_0)
             self.e_wrap_m = self.LoopIbAmp.e_wrap
             self.e_wrap_m_filt = self.LoopIbAmp.e_wrap_filt
+            self.e_wrap_m_trim = self.LoopIbAmp.e_wrap_trim
 
 
 class BatterySim(Battery):
@@ -922,7 +932,7 @@ class Looparound:
 
     # Update the loop
     def calculate(self, reset=True, ib=0., Leader=None, follow=False, loop_gain=0., dt=None, ewsat_slr=1.,
-                  ewmin_slr=1.):
+                  ewmin_slr=1., e_w_0=None, e_w_filt_0=None):
         self.dt = dt
         self.following = follow
         self.reset = reset or self.following
@@ -933,8 +943,17 @@ class Looparound:
         self.voc = self.Mon.vb - (self.ChargeTransfer.calculate(self.ib, self.reset, dt) * self.chem.r_ct +
                                   self.ib * self.chem.r_0)
         self.e_wrap = self.Mon.voc_soc - self.voc
+        if self.reset is True:
+            if e_w_0 is not None:
+                self.e_wrap = e_w_0
+            else:
+                self.e_wrap = 0.
+            if e_w_filt_0 is not None:
+                self.e_wrap_filt = e_w_filt_0
+            else:
+                self.e_wrap_filt = 0.
         self.e_wrap_trim = -self.Trim.calculate(in_=self.e_wrap_filt*loop_gain, dt=self.dt,
-                                                reset=self.reset, init_value=self.e_wrap)
+                                                reset=self.reset, init_value=self.e_wrap-self.e_wrap_filt)
         self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
         self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap_trimmed, reset=self.reset,
                                                       dt=min(self.dt, Battery.F_MAX_T_WRAP) )
@@ -1035,6 +1054,8 @@ class Saved:
         self.e_wrap_n = []
         self.e_wrap_m_filt = []
         self.e_wrap_n_filt = []
+        self.e_wrap_m_trim = []
+        self.e_wrap_n_trim = []
 
 
 def overall_batt(mv, sv, filename,
