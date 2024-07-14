@@ -89,6 +89,8 @@ class Battery(Coulombs):
     WRAP_HI_R = (WRAP_HI_S/2.)  # Wrap high failure reset time, sec ('up 1, down 2')
     WRAP_HI_AMP = 3.2  # Wrap high voltage threshold amplified, A(3.2)
     WRAP_LO_AMP = -4.  # Wrap high voltage threshold amplified, A (-4)
+    WRAP_HI_NOA = 32  # Wrap high voltage threshold non-amplified, A(32)
+    WRAP_LO_NOA = -40.  # Wrap high voltage threshold non-amplified, A (-40)
     HDWE_IB_HI_LO_NOA_HI = 10.  # Fully NOA unit charge transition, A (11)
     HDWE_IB_HI_LO_NOA_LO = -10. # Fully NOA unit discharge transition, A (-11)
     WRAP_SOC_HI_OFF = 0.97  # Disable e_wrap_hi when saturated (0.97)
@@ -312,8 +314,12 @@ class BatteryMonitor(Battery, EKF1x1):
         self.e_wrap_n_trim = None
         self.LoopIbAmp = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_AMP,
                                     wrap_lo_amp=Battery.WRAP_LO_AMP)
-        self.LoopIbNoa = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_AMP,
-                                    wrap_lo_amp=Battery.WRAP_LO_AMP)
+        self.LoopIbNoa = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_NOA,
+                                    wrap_lo_amp=Battery.WRAP_LO_NOA)
+        self.ewnhi_thr = None
+        self.ewnlo_thr = None
+        self.ewmhi_thr = None
+        self.ewmlo_thr = None
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -578,6 +584,10 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.e_wrap_n_trim.append(self.e_wrap_n_trim)
         self.saved.ib_lag.append(self.ib_lag)
         self.saved.voc_soc_new.append(self.voc_soc_new)
+        self.saved.ewmhi_thr.append(self.ewmhi_thr)
+        self.saved.ewmlo_thr.append(self.ewmlo_thr)
+        self.saved.ewnhi_thr.append(self.ewnhi_thr)
+        self.saved.ewnlo_thr.append(self.ewnlo_thr)
 
     def wrap(self, reset=True, ib_noa=0., ib_amp=0.,
              e_w_amp_0=None, e_w_amp_filt_0=None, e_w_noa_0=None, e_w_noa_filt_0=None):
@@ -608,12 +618,16 @@ class BatteryMonitor(Battery, EKF1x1):
             self.e_wrap_n = self.LoopIbNoa.e_wrap
             self.e_wrap_n_filt = self.LoopIbNoa.e_wrap_filt
             self.e_wrap_n_trim = self.LoopIbNoa.e_wrap_trim
+            self.ewnhi_thr = self.LoopIbNoa.ewhi_thr
+            self.ewnlo_thr = self.LoopIbNoa.ewlo_thr
         if self.ib_amp is not None:
             ib_noa_range = ib_noa > Battery.HDWE_IB_HI_LO_NOA_HI or ib_noa < Battery.HDWE_IB_HI_LO_NOA_LO
             zero_cmd = ib_noa_range is np.True_ or reset is np.True_ or reset is True
             self.LoopIbAmp.calculate(reset=reset, ib=ib_amp, loop_gain=Battery.AMP_WRAP_TRIM_GAIN,
                                      dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr,
                                      e_w_0=e_w_amp_0, e_w_filt_0=e_w_amp_filt_0, zero=zero_cmd)
+            self.ewmhi_thr = self.LoopIbAmp.ewhi_thr
+            self.ewmlo_thr = self.LoopIbAmp.ewlo_thr
             self.e_wrap_m = self.LoopIbAmp.e_wrap
             self.e_wrap_m_filt = self.LoopIbAmp.e_wrap_filt
             self.e_wrap_m_trim = self.LoopIbAmp.e_wrap_trim
@@ -1062,6 +1076,10 @@ class Saved:
         self.e_wrap_n_filt = []
         self.e_wrap_m_trim = []
         self.e_wrap_n_trim = []
+        self.ewmhi_thr = []
+        self.ewmlo_thr = []
+        self.ewnhi_thr = []
+        self.ewnlo_thr = []
 
 
 def overall_batt(mv, sv, filename,
