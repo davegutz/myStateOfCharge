@@ -258,7 +258,7 @@ class InlineExpLag:
 
 
 class TustinIntegrator(DiscreteIntegrator):
-    """AB2 Integrator"""
+    """Tustin Integrator"""
 
     def __init__(self, dt, min_, max_):
         DiscreteIntegrator.__init__(self, dt, min_, max_, 1., 1., 2.)
@@ -268,6 +268,11 @@ class TustinIntegrator(DiscreteIntegrator):
         s += "\n  "
         s += DiscreteIntegrator.__str__(self, prefix + 'TustinIntegrator:')
         return s
+
+    def set(self, value=None):
+        if value is not None:
+            self.state = value
+            self.rate_state = 0.
 
 
 class General2Pole(DiscreteFilter2):

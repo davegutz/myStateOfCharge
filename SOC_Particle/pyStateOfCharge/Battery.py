@@ -610,10 +610,10 @@ class BatteryMonitor(Battery, EKF1x1):
             self.e_wrap_n_trim = self.LoopIbNoa.e_wrap_trim
         if self.ib_amp is not None:
             ib_noa_range = ib_noa > Battery.HDWE_IB_HI_LO_NOA_HI or ib_noa < Battery.HDWE_IB_HI_LO_NOA_LO
-            self.LoopIbAmp.calculate(reset=reset, ib=ib_amp, Leader=self.LoopIbNoa, follow=ib_noa_range,
-                                     loop_gain=Battery.AMP_WRAP_TRIM_GAIN, dt=min(self.dt, Battery.F_MAX_T_WRAP),
-                                     ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr,
-                                     e_w_0=e_w_amp_0, e_w_filt_0=e_w_amp_filt_0)
+            zero_cmd = ib_noa_range is np.True_ or reset is np.True_ or reset is True
+            self.LoopIbAmp.calculate(reset=reset, ib=ib_amp, loop_gain=Battery.AMP_WRAP_TRIM_GAIN,
+                                     dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr,
+                                     e_w_0=e_w_amp_0, e_w_filt_0=e_w_amp_filt_0, zero=zero_cmd)
             self.e_wrap_m = self.LoopIbAmp.e_wrap
             self.e_wrap_m_filt = self.LoopIbAmp.e_wrap_filt
             self.e_wrap_m_trim = self.LoopIbAmp.e_wrap_trim
@@ -902,6 +902,7 @@ class Looparound:
     def __init__(self, Mon_, Sen_, wrap_hi_amp=0., wrap_lo_amp=0.):
         self.Mon = Mon_
         self.reset = True
+        self.zero = False
         self.dt = 0.
         self.e_wrap = 0.
         self.e_wrap_filt = 0.
@@ -918,7 +919,6 @@ class Looparound:
                                      min_=-Battery.UNIT_CAP_RATED*self.Mon.scale_cap, tau=self.chem.tau_ct)
         self.ewhi_thr = 0.
         self.ewlo_thr = 0.
-        self.following = False
         self.ib = 0.
         self.Trim = TustinIntegrator(dt=2., min_=-Battery.MAX_WRAP_ERR_FILT, max_=Battery.MAX_WRAP_ERR_FILT)
         self.voc = 0.
@@ -932,15 +932,15 @@ class Looparound:
         self.ChargeTransfer.absorb(other.ChargeTransfer)
 
     # Update the loop
-    def calculate(self, reset=True, ib=0., Leader=None, follow=False, loop_gain=0., dt=None, ewsat_slr=1.,
-                  ewmin_slr=1., e_w_0=None, e_w_filt_0=None):
+    def calculate(self, reset=True, ib=0., loop_gain=0., dt=None, ewsat_slr=1., ewmin_slr=1.,
+                  e_w_0=None, e_w_filt_0=None, zero=None):
         self.dt = dt
-        self.following = follow
-        self.reset = reset or self.following
-        if self.following is True:
-            self.absorb_states(Leader)
-        else:
-            self.ib = ib
+        self.reset = reset
+        self.ib = ib
+        self.zero = zero
+        if self.zero:
+            self.Trim.calculate(in_=0., dt=self.dt, reset=True, init_value=0.)
+            self.WrapErrFilt.calculate(in_=0., reset=True, dt=min(self.dt, Battery.F_MAX_T_WRAP))
         self.voc = self.Mon.vb - (self.ChargeTransfer.calculate(self.ib, self.reset, dt) * self.chem.r_ct +
                                   self.ib * self.chem.r_0)
         self.e_wrap = self.Mon.voc_soc - self.voc
@@ -953,11 +953,16 @@ class Looparound:
                 self.e_wrap_filt = e_w_filt_0
             else:
                 self.e_wrap_filt = 0.
-        self.e_wrap_trim = -self.Trim.calculate(in_=self.e_wrap_filt*loop_gain, dt=self.dt,
-                                                reset=self.reset, init_value=self.e_wrap-self.e_wrap_filt)
-        self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
-        self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap_trimmed, reset=self.reset,
-                                                      dt=min(self.dt, Battery.F_MAX_T_WRAP) )
+        if not self.zero:
+            self.e_wrap_trim = -self.Trim.calculate(in_=self.e_wrap_filt*loop_gain, dt=self.dt,
+                                                    reset=self.reset, init_value=self.e_wrap-self.e_wrap_filt)
+            self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
+            self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap_trimmed, reset=self.reset,
+                                                          dt=min(self.dt, Battery.F_MAX_T_WRAP) )
+        else:
+            self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
+            self.e_wrap_filt = self.WrapErrFilt.state
+
 
         # Thresholds. Scalars are calculated by Flt->wrap_scalars()
         self.ewhi_thr = self.Mon.chemistry.r_ss * self.wrap_hi_amp * ewsat_slr * ewmin_slr
