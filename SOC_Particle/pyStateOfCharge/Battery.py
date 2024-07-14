@@ -285,6 +285,12 @@ class BatteryMonitor(Battery, EKF1x1):
         self.e_wrap_filt = 0.
         self.reset_past = True
         self.ib_past = 0.
+        self.ib_amp = None
+        self.ib_noa = None
+        self.e_wrap_m = None
+        self.e_wrap_m_filt = None
+        self.e_wrap_n = None
+        self.e_wrap_n_filt = None
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -310,7 +316,9 @@ class BatteryMonitor(Battery, EKF1x1):
 
     # BatteryMonitor::calculate()
     def calculate(self, chem, temp_c, vb, ib, dt, reset, update_time_in, q_capacity=None, dc_dc_on=None,
-                  rp=None, u_old=None, z_old=None, x_old=None, bms_off_init=None):
+                  rp=None, u_old=None, z_old=None, x_old=None, bms_off_init=None, ib_amp=None, ib_noa=None):
+        self.ib_amp = ib_amp
+        self.ib_noa = ib_noa
         if self.chm != chem:
             self.chemistry.assign_all_mod(chem, unit=self.unit)
             self.chm = chem
@@ -367,6 +375,12 @@ class BatteryMonitor(Battery, EKF1x1):
         self.ioc = self.ib
         self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, Battery.F_MAX_T_WRAP),
                                                       reset=reset)
+        if self.ib_amp is not None:
+            self.e_wrap_m = .9
+            self.e_wrap_m_filt = .9
+        if self.ib_noa is not None:
+            self.e_wrap_n = .8
+            self.e_wrap_n_filt = .8
 
         # Reversionary model
         self.vb_model_rev = self.voc_soc + self.dv_dyn + self.dv_hys
@@ -536,11 +550,12 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.reset.append(self.reset)
         self.saved.e_wrap.append(self.e_wrap)
         self.saved.e_wrap_filt.append(self.e_wrap_filt)
-        if hasattr(self, 'e_wrap_m'):
-            self.saved.e_wrap_m.append(self.e_wrap_m)
-            self.saved.e_wrap_m_filt.append(self.e_wrap_m_filt)
-            self.saved.e_wrap_n.append(self.e_wrap_n)
-            self.saved.e_wrap_n_filt.append(self.e_wrap_n_filt)
+        self.saved.ib_amp.append(self.ib_amp)
+        self.saved.e_wrap_m.append(self.e_wrap_m)
+        self.saved.e_wrap_m_filt.append(self.e_wrap_m_filt)
+        self.saved.ib_noa.append(self.ib_noa)
+        self.saved.e_wrap_n.append(self.e_wrap_n)
+        self.saved.e_wrap_n_filt.append(self.e_wrap_n_filt)
         self.saved.ib_lag.append(self.ib_lag)
         self.saved.voc_soc_new.append(self.voc_soc_new)
 
@@ -896,6 +911,12 @@ class Saved:
         self.e_wrap_filt = []  # Verification of filtered wrap calculation, V
         self.ib_lag = []  # Lagged ib, A
         self.voc_soc_new = []  # New schedule values
+        self.ib_amp = []
+        self.ib_noa = []
+        self.e_wrap_m = []
+        self.e_wrap_n = []
+        self.e_wrap_m_filt = []
+        self.e_wrap_n_filt = []
 
 
 def overall_batt(mv, sv, filename,

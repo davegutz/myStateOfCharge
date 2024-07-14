@@ -253,7 +253,21 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
                 ib_ = mon_old.ib_sel[i]
             else:
                 ib_ = mon_old.ib[i]
-                # ib_ = sim.ib
+
+        # Raw current handling
+        ibmm = None
+        ibnm = None
+        ibmh = None
+        ibnh = None
+        if hasattr(mon_old, 'ibmm'):
+            ibmm = mon_old.ibmm[i]
+        if hasattr(mon_old, 'ibnm'):
+            ibnm = mon_old.ibnm[i]
+        if hasattr(mon_old, 'ibmh'):
+            ibmh = mon_old.ibmh[i]
+        if hasattr(mon_old, 'ibnm'):
+            ibnh = mon_old.ibnh[i]
+
         if use_vb_sim:
             vb_ = sim.vb
         elif t_vb_fail and t[i] >= t_vb_fail:
@@ -270,11 +284,11 @@ def replicate(mon_old, sim_old=None, init_time=-4., t_vb_fail=None, vb_fail=13.2
             x_old = None
         if rp.modeling == 0:
             mon.calculate(_chm_m, Tb_, vb_, ib_, T, rp=rp, reset=reset, update_time_in=update_time_in, u_old=u_old,
-                          z_old=z_old, x_old=x_old, bms_off_init=bms_off_init)
+                          z_old=z_old, x_old=x_old, bms_off_init=bms_off_init, ib_amp=ibmh, ib_noa=ibnh)
         else:
             mon.calculate(_chm_m, Tb_, vb_ + randn() * v_std + dv_sense, ib_ + randn() * i_std + di_sense, T, rp=rp,
                           reset=reset, update_time_in=update_time_in, u_old=u_old, z_old=z_old, x_old=x_old,
-                          bms_off_init=bms_off_init)
+                          bms_off_init=bms_off_init, ib_amp=ibmm, ib_noa=ibnm)
         ib_charge = mon.ib_charge
         sat = is_sat(Tb_, mon.voc_filt, mon.soc, mon.chemistry.nom_vsat, mon.chemistry.dvoc_dt, mon.chemistry.low_t)
         saturated = Is_sat_delay.calculate(sat, T_SAT, T_DESAT, min(T, T_SAT / 2.), reset)
