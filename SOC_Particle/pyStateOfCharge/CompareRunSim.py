@@ -147,15 +147,10 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=F
 
 
 def main():
-    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240704/disch 20240713_soc2p2_chg.csv'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240704/disch1_20240713_soc2p2_chg.csv'
     unit_key = 'g20240704_soc2p2_chg'
     time_end_in = None
     data_only = False
-
-    # data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240704/disch1_20240713_soc2p2_chg.csv'
-    # unit_key = 'g20240704_soc2p2_chg'
-    # time_end_in = None
-    # data_only = False
 
     compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only, time_end_in=time_end_in)
 
