@@ -361,6 +361,10 @@ class LagExp(DiscreteFilter):
         s += "  out_     =    {:7.3f}  // Output\n".format(self.out_)
         return s
 
+    def absorb(self, other):
+        self.state = other.state
+        self.rstate = other.rstate
+
     def assign_coeff(self, _tau):
         self.tau = _tau
         if self.dt > 0:

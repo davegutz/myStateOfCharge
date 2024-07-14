@@ -21,7 +21,7 @@ from Coulombs import Coulombs
 from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
-from myFilters import LagTustin, LagExp, General2Pole, RateLimit, SlidingDeadband
+from myFilters import LagTustin, LagExp, General2Pole, RateLimit, SlidingDeadband, TustinIntegrator
 from Scale import Scale
 
 import sys
@@ -82,6 +82,21 @@ class Battery(Coulombs):
     D_SOC_S = 0.  # Bias on soc to voc-soc lookup to simulate error in estimation, esp cold battery near 0 C
     VB_OFF_BB = 10.  # BMS shutoff level, Battleborn, v (10)
     VB_OFF_CH = 11.  # BMS shutoff level, CHINS, v (11)
+    AMP_WRAP_TRIM_GAIN = 0.015  # Amp looparound trim gain r/s (0.015)
+    WRAP_LO_S = 9.  # Wrap low failure set time, sec (9) // 9 is legacy must be quicker than SAT test
+    WRAP_LO_R = (WRAP_LO_S/2.)  # Wrap low failure reset time, sec ('up 1, down 2')
+    WRAP_HI_S = WRAP_LO_S  # Wrap high failure set time, sec (WRAP_LO_S)
+    WRAP_HI_R = (WRAP_HI_S/2.)  # Wrap high failure reset time, sec ('up 1, down 2')
+    WRAP_HI_AMP = 3.2  # Wrap high voltage threshold amplified, A(3.2)
+    WRAP_LO_AMP = -4.  # Wrap high voltage threshold amplified, A (-4)
+    HDWE_IB_HI_LO_NOA_HI = 10.  # Fully NOA unit charge transition, A (11)
+    HDWE_IB_HI_LO_NOA_LO = -10. # Fully NOA unit discharge transition, A (-11)
+    WRAP_SOC_HI_OFF = 0.97  # Disable e_wrap_hi when saturated (0.97)
+    WRAP_SOC_LO_OFF_REL = 0.2  # Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback, 0.2)
+    WRAP_SOC_LO_OFF_ABS = 0.35  # Disable e_wrap when near empty (soc lo any Tb, 0.35)
+    WRAP_HI_SAT_MARG = 0.2  # Wrap voltage margin to saturation, V (0.2)
+    WRAP_MOD_C_RATE = 0.02  # Moderate charge rate threshold to engage wrap threshold (0.02 to prevent trip near saturation .05 too large)
+
     # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
     #                         what gets delivered, e.g. Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
     #                         or 20 - 40 A for a 100 Ah battery"""
@@ -145,6 +160,7 @@ class Battery(Coulombs):
         self.IbLag = LagExp(1., 1., -100., 100.)  # Lag to be run on sat to produce ib_lag.  T and tau set at run time
         self.voc_soc_new = 0.
         self.unit = unit
+        self.scale_cap = scale_cap
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -224,7 +240,7 @@ class BatteryMonitor(Battery, EKF1x1):
     def __init__(self, q_cap_rated=Battery.UNIT_CAP_RATED*3600, t_rated=25., temp_rlim=0.017, scale=1.,
                  temp_c=25., tweak_test=False, sres0=1., sresct=1., stauct=1.,
                  scaler_q=None, scaler_r=None, scale_r_ss=1., s_hys=1., dvoc=0., eframe_mult=Battery.cp_eframe_mult,
-                 mod_code=0, s_coul_eff=1., unit=None):
+                 mod_code=0, s_coul_eff=1., unit=None, Sen=None):
         q_cap_rated_scaled = q_cap_rated * scale
         Battery.__init__(self, q_cap_rated=q_cap_rated_scaled, t_rated=t_rated, temp_rlim=temp_rlim, temp_c=temp_c,
                          tweak_test=tweak_test, sres0=sres0, sresct=sresct, stauct=stauct, scale_r_ss=scale_r_ss,
@@ -291,6 +307,10 @@ class BatteryMonitor(Battery, EKF1x1):
         self.e_wrap_m_filt = None
         self.e_wrap_n = None
         self.e_wrap_n_filt = None
+        self.LoopIbAmp = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_AMP,
+                                    wrap_lo_amp=Battery.WRAP_LO_AMP)
+        self.LoopIbNoa = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_AMP,
+                                    wrap_lo_amp=Battery.WRAP_LO_AMP)
 
     def __str__(self, prefix=''):
         """Returns representation of the object"""
@@ -371,16 +391,9 @@ class BatteryMonitor(Battery, EKF1x1):
         # Hysteresis model
         self.dv_hys = 0.
         self.voc_stat = self.voc - self.dv_hys
-        self.e_wrap = self.voc_soc - self.voc_stat
         self.ioc = self.ib
-        self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, Battery.F_MAX_T_WRAP),
-                                                      reset=reset)
-        if self.ib_amp is not None:
-            self.e_wrap_m = .9
-            self.e_wrap_m_filt = .9
-        if self.ib_noa is not None:
-            self.e_wrap_n = .8
-            self.e_wrap_n_filt = .8
+
+        self.wrap(reset=reset, ib_amp=ib_amp, ib_noa=ib_noa)
 
         # Reversionary model
         self.vb_model_rev = self.voc_soc + self.dv_dyn + self.dv_hys
@@ -558,6 +571,41 @@ class BatteryMonitor(Battery, EKF1x1):
         self.saved.e_wrap_n_filt.append(self.e_wrap_n_filt)
         self.saved.ib_lag.append(self.ib_lag)
         self.saved.voc_soc_new.append(self.voc_soc_new)
+
+    def wrap(self, reset=True, ib_noa=0., ib_amp=0.):
+        # Wrap logic
+        self.e_wrap = self.voc_soc - self.voc_stat
+        self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, Battery.F_MAX_T_WRAP),
+                                                      reset=reset)
+        # e_wrap scalars normally calculated in Sensors
+        if self.soc >= Battery.WRAP_SOC_HI_OFF:
+            ewsat_slr = Battery.WRAP_SOC_HI_SLR
+            ewmin_slr = 1.
+        elif self.soc <= max(self.soc_min+Battery.WRAP_SOC_LO_OFF_REL, Battery.WRAP_SOC_LO_OFF_ABS):
+            ewsat_slr = 1.
+            ewmin_slr = Battery.WRAP_SOC_LO_SLR
+        elif (self.voc_soc > (self.vsat - Battery.WRAP_HI_SAT_MARG) or
+            (self.voc_stat > (self.vsat-Battery.WRAP_HI_SAT_MARG) and
+             self.ib / Battery.UNIT_CAP_RATED > Battery.WRAP_MOD_C_RATE and
+             self.soc > Battery.WRAP_SOC_MOD_OFF)):
+            ewsat_slr = Battery.WRAP_SOC_HI_SlR
+            ewmin_slr = 1.
+        else:
+            ewsat_slr = 1.
+            ewmin_slr = 1.
+        # Individual wrap logic
+        if self.ib_noa is not None:
+            self.LoopIbNoa.calculate(reset=reset, ib=ib_noa, dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr,
+                                     ewsat_slr=ewsat_slr)
+            self.e_wrap_n = self.LoopIbNoa.e_wrap
+            self.e_wrap_n_filt = self.LoopIbNoa.e_wrap_filt
+        if self.ib_amp is not None:
+            ib_noa_range = ib_noa > Battery.HDWE_IB_HI_LO_NOA_HI or ib_noa < Battery.HDWE_IB_HI_LO_NOA_LO
+            self.LoopIbAmp.calculate(reset=reset, ib=ib_amp, Leader=self.LoopIbNoa, follow=ib_noa_range,
+                                     loop_gain=Battery.AMP_WRAP_TRIM_GAIN, dt=min(self.dt, Battery.F_MAX_T_WRAP),
+                                     ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr)
+            self.e_wrap_m = self.LoopIbAmp.e_wrap
+            self.e_wrap_m_filt = self.LoopIbAmp.e_wrap_filt
 
 
 class BatterySim(Battery):
@@ -835,6 +883,76 @@ def calc_vsat(temp_c, vsat, dvoc_dt):
 
 def sat_voc(temp_c, vsat, dvoc_dt):
     return vsat + (temp_c-25.)*dvoc_dt
+
+
+class Looparound:
+    """Compare predicted voltage to actual and track toward zero to eliminate biases """
+
+    def __init__(self, Mon_, Sen_, wrap_hi_amp=0., wrap_lo_amp=0.):
+        self.Mon = Mon_
+        self.reset = True
+        self.dt = 0.
+        self.e_wrap = 0.
+        self.e_wrap_filt = 0.
+        self.wrap_hi_amp = wrap_hi_amp
+        self.wrap_lo_amp = wrap_lo_amp
+        self.e_wrap_trim = 0.
+        self.e_wrap_trimmed = 0.
+        self.hi_fail = False
+        self.hi_fault = False
+        self.lo_fail = False
+        self.lo_fault = False
+        self.chem = Mon_.chemistry
+        self.ChargeTransfer = LagExp(dt=Battery.EKF_NOM_DT, max_=Battery.UNIT_CAP_RATED*self.Mon.scale_cap,
+                                     min_=-Battery.UNIT_CAP_RATED*self.Mon.scale_cap, tau=self.chem.tau_ct)
+        self.ewhi_thr = 0.
+        self.ewlo_thr = 0.
+        self.following = False
+        self.ib = 0.
+        self.Trim = TustinIntegrator(dt=2., min_=-Battery.MAX_WRAP_ERR_FILT, max_=Battery.MAX_WRAP_ERR_FILT)
+        self.voc = 0.
+        self.WrapErrFilt = LagTustin(dt=2., min_=-Battery.MAX_WRAP_ERR_FILT, max_=Battery.MAX_WRAP_ERR_FILT,
+                                     tau=Battery.WRAP_ERR_FILT)
+        self.WrapHi = TFDelay(dt=2., in_=False, t_true=Battery.WRAP_HI_S, t_false=Battery.WRAP_HI_R)
+        self.WrapLo = TFDelay(dt=2., in_=False, t_true=Battery.WRAP_LO_S, t_false=Battery.WRAP_LO_R)
+
+    def absorb_states(self, other):
+        self.ib = other.ib
+        self.ChargeTransfer.absorb(other.ChargeTransfer)
+
+    # Update the loop
+    def calculate(self, reset=True, ib=0., Leader=None, follow=False, loop_gain=0., dt=None, ewsat_slr=1.,
+                  ewmin_slr=1.):
+        self.dt = dt
+        self.following = follow
+        self.reset = reset or self.following
+        if self.following is True:
+            self.absorb_states(Leader)
+        else:
+            self.ib = ib
+        self.voc = self.Mon.vb - (self.ChargeTransfer.calculate(self.ib, self.reset, dt) * self.chem.r_ct +
+                                  self.ib * self.chem.r_0)
+        self.e_wrap = self.Mon.voc_soc - self.voc
+        self.e_wrap_trim = -self.Trim.calculate(in_=self.e_wrap_filt*loop_gain, dt=self.dt,
+                                                reset=self.reset, init_value=self.e_wrap)
+        self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
+        self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap_trimmed, reset=self.reset,
+                                                      dt=min(self.dt, Battery.F_MAX_T_WRAP) )
+
+        # Thresholds. Scalars are calculated by Flt->wrap_scalars()
+        self.ewhi_thr = self.Mon.chemistry.r_ss * self.wrap_hi_amp * ewsat_slr * ewmin_slr
+        self.ewlo_thr = self.Mon.chemistry.r_ss * self.wrap_lo_amp * ewsat_slr * ewmin_slr
+
+        # sat logic screens out voc jumps when ib>0 when saturated
+        # wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
+        # wrap_vb latches because vb is single sensor  faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
+
+        self.hi_fault = self.e_wrap_filt >= self.ewhi_thr
+        self.hi_fail = self.WrapHi.calculate(in_=self.hi_fault, t_true=Battery.WRAP_HI_S, t_false=Battery.WRAP_HI_R,
+                                             dt=self.dt, reset=self.reset)  # non-latching
+        self.lo_fault = self.e_wrap_filt <= self.ewlo_thr
+        self.lo_fail = self.WrapLo.calculate(in_=self.lo_fault, t_true=Battery.WRAP_LO_S, t_false=Battery.WRAP_LO_R,
+                                             dt=self.dt, reset=self.reset)  # non-latching
 
 
 class Saved:
