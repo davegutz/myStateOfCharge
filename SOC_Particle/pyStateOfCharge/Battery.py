@@ -96,6 +96,7 @@ class Battery(Coulombs):
     WRAP_SOC_LO_OFF_ABS = 0.35  # Disable e_wrap when near empty (soc lo any Tb, 0.35)
     WRAP_HI_SAT_MARG = 0.2  # Wrap voltage margin to saturation, V (0.2)
     WRAP_MOD_C_RATE = 0.02  # Moderate charge rate threshold to engage wrap threshold (0.02 to prevent trip near saturation .05 too large)
+    VTAB_BIAS = -0.1  # Bias on voc_soc table (* 'Dw'), V'
 
     # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
     #                         what gets delivered, e.g. Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
@@ -221,7 +222,7 @@ class Battery(Coulombs):
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, etal """
         dv_dsoc = self.calc_h_jacobian(soc, temp_c)
-        voc = self.chemistry.lut_voc_soc.interp(soc, temp_c) + self.dvoc
+        voc = self.chemistry.lut_voc_soc.interp(soc, temp_c) + self.dvoc + self.chemistry.dvoc
         # print("soc=", soc, "temp_c=", temp_c, "dvoc=", self.dvoc, "voc=", voc)
         return voc, dv_dsoc
 
@@ -943,7 +944,7 @@ class Looparound:
         self.voc = self.Mon.vb - (self.ChargeTransfer.calculate(self.ib, self.reset, dt) * self.chem.r_ct +
                                   self.ib * self.chem.r_0)
         self.e_wrap = self.Mon.voc_soc - self.voc
-        if self.reset is True:
+        if self.reset:
             if e_w_0 is not None:
                 self.e_wrap = e_w_0
             else:
