@@ -62,7 +62,7 @@ def add_voc_soc_new(data):
     n = len(data.cTime)
     data.voc_soc_new = np.zeros(n)
     for i in range(n):
-        data.voc_soc_new[i] = chem.lut_voc_soc.interp(data.soc[i], data.Tb[i])
+        data.voc_soc_new[i] = chem.lookup_voc(data.soc[i], data.Tb[i])
     return data
 
 

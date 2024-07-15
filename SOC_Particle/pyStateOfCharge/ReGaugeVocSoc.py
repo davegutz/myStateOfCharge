@@ -159,8 +159,8 @@ class LocalChem(Chemistry):
         for temp_c in self.t_y_t:
             for soc in self.t_x_soc:
                 soc_scale = 1. - (1. - soc)*scale
-                v_old = self.lut_voc_soc.interp(soc, temp_c)
-                v_new = self.lut_voc_soc.interp(soc_scale, temp_c)
+                v_old = self.lookup_voc(soc, temp_c)
+                v_new = self.lookup_voc(soc_scale, temp_c)
                 t_voc_new.append(v_new)
                 print("{:6.3f}".format(soc), "{:6.3f}".format(soc_scale), "{:6.2f}".format(v_old), "{:6.2f}".format(v_new))
         self.t_voc_new = np.array(t_voc_new)

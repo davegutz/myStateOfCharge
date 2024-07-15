@@ -67,7 +67,7 @@ float Battery::calc_soc_voc(const float soc, const float temp_c, float *dv_dsoc)
 {
     float voc;  // return value
     *dv_dsoc = calc_soc_voc_slope(soc, temp_c);
-    voc = chem_.voc_T_->interp(soc, temp_c);
+    voc = chem_.lookup_voc(soc, temp_c);
     return voc;
 }
 
@@ -369,7 +369,7 @@ float BatteryMonitor::calc_soc_voc(const float soc, const float temp_c, float *d
 {
     float voc;  // return value
     *dv_dsoc = calc_soc_voc_slope(soc, temp_c);
-    voc = chem_.voc_T_->interp(soc, temp_c);
+    voc = chem_.lookup_voc(soc, temp_c);
     return voc;
 }
 
@@ -461,6 +461,7 @@ void BatteryMonitor::pretty_print(Sensors *Sen)
     Serial.printf("  y_filt%7.3f Res EKF, V\n", y_filt_);
     Serial.printf(" *sp_s_cap_mon%7.3f Slr\n", sp.s_cap_mon());
     Serial.printf("  vb_model_rev%7.3f V\n", vb_model_rev_);
+    this->Battery::Coulombs::pretty_print();
 #else
      Serial.printf("BatteryMonitor: silent DEPLOY\n");
 #endif
@@ -523,13 +524,13 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
     // Solver
     static float soc_solved = 1.;
     float dv_dsoc;
-    float voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc) + sp.Dw();
+    float voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc) + sp.Dw();  // Dw
     ice_->init(1., soc_min_, 2*SOLV_ERR);
     while ( abs(ice_->e())>SOLV_ERR && ice_->count()<SOLV_MAX_COUNTS && abs(ice_->dx())>0. )
     {
         ice_->increment();
         soc_solved = ice_->x();
-        voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc) + sp.Dw();
+        voc_solved = calc_soc_voc(soc_solved, Tb_avg, &dv_dsoc) + sp.Dw();  // Dw
         ice_->e(voc_solved - voc_stat_);
         ice_->iterate(sp.debug()==-1 && reset_temp, SOLV_SUCC_COUNTS, false);
     }
@@ -707,7 +708,7 @@ float BatterySim::calc_soc_voc(const float soc, const float temp_c, float *dv_ds
 {
     float voc;  // return value
     *dv_dsoc = calc_soc_voc_slope(soc + ap.ds_voc_soc, temp_c);  // Ds
-    voc = chem_.voc_T_->interp(soc + ap.ds_voc_soc, temp_c);  // Ds
+    voc = chem_.lookup_voc(soc + ap.ds_voc_soc, temp_c);  // Ds
     return voc;
 }
 

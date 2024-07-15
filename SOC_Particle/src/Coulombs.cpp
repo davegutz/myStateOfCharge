@@ -77,6 +77,8 @@ void Coulombs::pretty_print(void)
   Serial.printf(" t_rlim%7.3f dg C / s\n", t_rlim_);
   Serial.printf("Coulombs (mod_code=%d) ", mod_code());
   Serial.printf("Coulombs: silent DEPLOY\n");
+  Serial.printf(" Chemistry::\n");
+  chem_pretty_print();
 #endif
 }
 

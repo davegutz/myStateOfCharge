@@ -54,6 +54,7 @@ public:
   uint8_t m_h = 0;  // Number of soc breakpoints in r(soc, dv) table t_r, t_s
   float v_sat;      // Saturation threshold at temperature, deg C
   float dv_min_abs; // Absolute value of +/- hysteresis limit, V
+  float dvoc = 0;   // Baked-in table bias, V
   float dvoc_dt;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C
   uint8_t mod_code; // Chemistry model
   float r_0;        // ChargeTransfer R0, ohms
@@ -81,6 +82,7 @@ public:
   void assign_soc_min(const int _n_n, float *x, float *t);  // Worker bee SOC_MIN
   void assign_voc_soc(const int _n_s, const int _m_t, float *x, float *y, float *t); // Worker bee VOC_SOC
   String decode(const uint8_t mod);
+  float lookup_voc(const float soc, const float temp_c);
   void pretty_print();
 };
 

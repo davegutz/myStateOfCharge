@@ -182,6 +182,7 @@ void Chemistry::assign_BB()
     coul_eff = 0.9985;  // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9985)
     dqdt = 0.01;        // Change of charge with temperature, fraction/deg C (0.01 from literature)
     dv_min_abs = 0.3;   // Absolute value of +/- hysteresis limit, V (0.3)
+    dvoc = 0.11;        // Baked-in table bias
     dvoc_dt = 0.004;    // Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
     hys_cap = 3.6e3;    // Capacitance of hysteresis, Farads.  // div 10 6/13/2022 to match data. // div 10 again 9/29/2022 // div 10 again 11/30/2022 (3.6e3)
                         // tau_null = 1 / 0.005 / 3.6e3 = 0.056 s
@@ -220,6 +221,7 @@ void Chemistry::assign_CH()
     coul_eff = 0.9976; // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9976 for sres=1.6)
     dqdt = 0.01;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
     dv_min_abs = 0.06; // Absolute value of +/- hysteresis limit, V (0.06)
+    dvoc = -0.1;       // Baked-in table bias
     dvoc_dt = -0.01;   // Change of VOC with operating temperature in range 0 - 50 C V/deg C (-0.01)
     hys_cap = 1.e4;    // Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s (1e4)
     Serial.printf("CH dv_min_abs=%7.3f, cap=%7.1f\n", dv_min_abs, hys_cap);
@@ -287,6 +289,12 @@ String Chemistry::decode(const uint8_t mod)
     return (result);
 }
 
+// lookup_voc
+float Chemistry::lookup_voc(const float soc, const float temp_c)
+{
+    return voc_T_->interp(soc, temp_c) + dvoc;
+}
+
 // Pretty print
 void Chemistry::pretty_print(void)
 {
@@ -294,6 +302,7 @@ void Chemistry::pretty_print(void)
     Serial.printf("Chemistry:\n");
     Serial.printf("  dqdt%7.3f, frac/dg C\n", dqdt);
     Serial.printf("  dv_min_abs%7.3f, V\n", dv_min_abs);
+    Serial.printf("  dvoc%7.3f, V\n", dvoc);
     Serial.printf("  dvoc_dt%7.3f, V/dg C\n", dvoc_dt);
     Serial.printf("  hys_cap%7.0f, F\n", hys_cap);
     Serial.printf("  low_t%7.3f, V\n", low_t);

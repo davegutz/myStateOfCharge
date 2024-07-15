@@ -304,7 +304,7 @@ void Looparound::pretty_print()
   Serial.printf(" e_wrap_f%7.3f V\n", e_wrap_filt_);
   Serial.printf(" e_wrap_trim%7.3f V\n", e_wrap_trim_);
   Serial.printf(" e_wrap_trimmed%7.3f V\n", e_wrap_trimmed_);
-  Serial.printf(" wrap_trim_gain%7.3f V\n", wrap_trim_gain_);
+  Serial.printf(" wrap_trim_gain%7.3f r/s\n", wrap_trim_gain_);
   Serial.printf(" hi_fault/fail %d/%d\n", hi_fault_, hi_fail_);
   Serial.printf(" lo_fault/fail %d/%d\n", lo_fault_, lo_fail_);
   Serial.printf(" ewlo_thr/ewhi_thr%7.3f/%7.3f V\n", ewlo_thr_, ewhi_thr_);

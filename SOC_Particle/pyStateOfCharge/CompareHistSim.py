@@ -111,7 +111,7 @@ def add_stuff_f(d_ra, mon, ib_band=0.5, rated_batt_cap=100., Dw=0., time_sync=No
         cc_dif_ = d_ra.soc[i] - d_ra.soc_ekf[i]
         ib_diff.append(ib_diff_)
         C_rate = d_ra.ib[i] / rated_batt_cap
-        voc_soc.append(mon.chemistry.lut_voc_soc.interp(d_ra.soc[i], d_ra.Tb[i]) + Dw)
+        voc_soc.append(mon.chemistry.lookup_voc(d_ra.soc[i], d_ra.Tb[i]) + Dw)
         BB = BatteryMonitor(0, unit=unit)
         cc_diff_thr_, ewhi_thr_, ewlo_thr_, ib_diff_thr_, ib_quiet_thr_ = \
             fault_thr_bb(Tb, soc, voc_soc[i], voc_stat, C_rate, BB)

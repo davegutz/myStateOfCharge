@@ -214,17 +214,17 @@ class Battery(Coulombs):
 
     def calc_h_jacobian(self, soc_lim, temp_c):
         if soc_lim > 0.5:
-            dv_dsoc = (self.chemistry.lut_voc_soc.interp(soc_lim, temp_c) -
-                       self.chemistry.lut_voc_soc.interp(soc_lim-0.01, temp_c)) / 0.01
+            dv_dsoc = (self.chemistry.lookup_voc(soc_lim, temp_c) -
+                       self.chemistry.lookup_voc(soc_lim-0.01, temp_c)) / 0.01
         else:
-            dv_dsoc = (self.chemistry.lut_voc_soc.interp(soc_lim+0.01, temp_c) -
-                       self.chemistry.lut_voc_soc.interp(soc_lim, temp_c)) / 0.01
+            dv_dsoc = (self.chemistry.lookup_voc(soc_lim+0.01, temp_c) -
+                       self.chemistry.lookup_voc(soc_lim, temp_c)) / 0.01
         return dv_dsoc
 
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, etal """
         dv_dsoc = self.calc_h_jacobian(soc, temp_c)
-        voc = self.chemistry.lut_voc_soc.interp(soc, temp_c) + self.dvoc + self.chemistry.dvoc
+        voc = self.chemistry.lookup_voc(soc, temp_c) + self.dvoc
         # print("soc=", soc, "temp_c=", temp_c, "dvoc=", self.dvoc, "voc=", voc)
         return voc, dv_dsoc
 

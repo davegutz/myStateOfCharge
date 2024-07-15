@@ -308,6 +308,9 @@ class Chemistry(BMS):
         self.lu_x_hys = myTables.TableInterp1D(t_soc1, t_dv_max1)
         self.lu_n_hys = myTables.TableInterp1D(t_soc1, t_dv_min1)
 
+    def lookup_voc(self, soc_, temp_c_):
+        return self.lut_voc_soc.interp(soc_, temp_c_) + self.dvoc
+
     def __str__(self, prefix=''):
         s = prefix + "Chemistry:\n"
         s += "  mod_code =     {:2.0f}      // Chemistry code integer\n".format(self.mod_code)
@@ -331,7 +334,6 @@ class Chemistry(BMS):
         s += "  hys_cap =      {:7.0f}      // Capacitance of hysteresis, Farads\n".format(self.hys_cap)
         s += "  nom_vsat =      {:7.3f}  // Saturation threshold at temperature, deg C\n".format(self.nom_vsat)
         s += "  dvoc_dt =       {:7.3f}  // Change of VOC with operating temperature in range 0 - 50 C V/deg C\n".format(self.dvoc_dt)
-        s += "  dvoc =          {:7.3f}  // Adjustment for calibration error, V\n".format(self.dvoc)
         s += "  dvoc =          {:7.3f}  // Adjustment for calibration error, V\n".format(self.dvoc)
         s += "  c_sd =        {:9.3f}  // Equivalent model for EKF reference.  Parasitic discharge equivalent, Farads\n".format(self.c_sd)
         s += "  r_0 =         {:9.3f}  // ChargeTransfer R0, ohms\n".format(self.r_0)

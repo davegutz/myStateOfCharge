@@ -67,7 +67,6 @@ boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
 
         case ( 'm' ):  // Pm:  Print mon
             Serial.printf ("\nM:"); Mon->pretty_print(Sen);
-            Serial.printf ("M::"); Mon->Coulombs::pretty_print();
             Serial.printf ("M::"); Mon->EKF_1x1::pretty_print();
             Serial.printf ("\nmodeling %d\n", sp.modeling());
             break;
