@@ -122,10 +122,11 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('ampHiFail_pro1a_bb.csv', 'g20240331_pro1a_bb'), ('ampHiFail_pro2p2_chg.csv', 'g20240704_pro2p2_chg')]
-    data_file_folder_ref = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20240331'
-    data_file_folder_test = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20240704'
-    sync_to_ctime = False
+    keys = [('ampHiFail_pro2p2_chg.csv', 'g20240331_last_g20240331_pro2p2_chg'),
+            ('noaHiFail_pro2p2_chg.csv', 'g20240704_pro2p2_chg')]
+    data_file_folder_ref = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240331_last_g20240331'
+    data_file_folder_test = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240704'
+    sync_to_ctime = True
     compare_run_run(keys=keys, data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test,
                     sync_to_ctime=sync_to_ctime)
 
