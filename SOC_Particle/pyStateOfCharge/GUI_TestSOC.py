@@ -89,15 +89,14 @@ def_dict = {
 unit_list = ['pro0p', 'pro1a', 'pro2p2', 'pro3p2', 'pro4p2', 'soc0p', 'soc1a', 'soc2p2', 'soc3p2', 'soc4p2']
 batt_list = ['bb', 'ch', 'chg']
 sel_list = [
-    'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
+    'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'noaHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
     'allInCHG', 'allProto', 'pulseSS', 'rapidTweakRegressionH0', 'offSitHysBmsBB', 'offSitHysBmsCH', 'offSitHysBmsCHG',
     'triTweakDisch', 'ampHiFailFf', 'ampLoFail', 'ampHiFailNoise', 'rapidTweakRegression40C',
-    'slowTweakRegression', 'satSitBB', 'satSitCH', 'satSitCHG', 'flatSitHys', 'offSitHysBmsNoiseBB',
-    'offSitHysBmsNoiseCH', 'offSitHysBmsNoiseCHG',
+    'slowTweakRegression', 'satSitBB', 'satSitCH', 'satSitCHG', 'flatSitHys',
     ]
 sel_list1 = [
-    'ampHiFailSlow', 'vHiFail',  'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod',
-    'tbFailHdwe', 'DvMon', 'DvSim', 'faultParade', 'allInBBn', 'allInCHn', 'allInCHGn',
+    'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'offSitHysBmsNoiseCHG','ampHiFailSlow', 'vHiFail',  'vHiFailH',
+    'vHiFailFf', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim', 'faultParade', 'allInBBn', 'allInCHn', 'allInCHGn',
     ]
 macro_sel_list = [
             'end_early', 'modMidInit', 'modMidInitNoCc', 'modLowInitBB', 'modLowInitCH', 'modLowInitCHG',
@@ -125,6 +124,7 @@ slowTwitchDef = 'Rb;Rf;Xts;Xf0.004;XW10000;XT10;XC2;'
 fastTwitchDef = 'Rb;Rf;Xts;Xf0.002;XW10000;XT10;XC1;'
 c06 = time_stamp + 'Dm6;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
 c50 = time_stamp + 'Dm50;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
+d50 = time_stamp + 'Dn50;Dm0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
 cm50 = time_stamp + 'Dm-50;Dn0.0001;'  # 0.0001 helps saturation logic behave correctly in a quiet simulation
 c00 = 'Dm0;Dn0;Rf;W50;'
 twitch = time_stamp + 'XR;'
@@ -192,6 +192,7 @@ lookup = {
                       quiet + cleanup,
                       ('All the best transients CHG noise', "Must have same 'vv*' throughout", "")),
         'ampHiFail': (70, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
+        'noaHiFail': (70, modMidInit + tranPrep + d50 + 'XQ25000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
         'rapidTweakRegression': (200, 'Xp10;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'Best test for seeing time skews and checking fault logic for false trips')),
         'allProto': (552, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + tempCleanup + '  Xp10;  Xp13;  ' + modMidInitNoCc + tranPrep + cm50 + 'XQ50000;' + c00 + quiet + cleanup, ('Proto multi', "Must have same 'vv*' throughout", "No 'HR' either")),
         'pulseSS': (20, slow + 'Xp7;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.")),
