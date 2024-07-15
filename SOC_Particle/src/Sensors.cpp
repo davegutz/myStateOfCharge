@@ -253,9 +253,10 @@ void Shunt::sample(const boolean reset_loc, const float T)
 
 
 // Class Looparound
-Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp):
+Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp, const double wrap_trim_gain):
   chem_(Mon->chem()), e_wrap_(0.), e_wrap_filt_(0.), e_wrap_trim_(0.), e_wrap_trimmed_(0.), hi_fail_(false), hi_fault_(false), ib_(0.), 
-  lo_fail_(false), lo_fault_(false), Mon_(Mon), Sen_(Sen), voc_(0.), wrap_hi_amp_(wrap_hi_amp), wrap_lo_amp_(wrap_lo_amp)
+  lo_fail_(false), lo_fault_(false), Mon_(Mon), Sen_(Sen), voc_(0.), wrap_hi_amp_(wrap_hi_amp), wrap_lo_amp_(wrap_lo_amp),
+  wrap_trim_gain_(wrap_trim_gain)
 {
   ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_->tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);     // actual update time provided run time
   Trim_ = new TustinIntegrator(EKF_NOM_DT, -MAX_WRAP_ERR_FILT, MAX_WRAP_ERR_FILT);          // actual update time provided run time
@@ -264,26 +265,18 @@ Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_am
   WrapLo_ = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
 }
 
-// Absorb states from leader
-void Looparound::absorb_states(Looparound *Leader)
-{
-  ib_ = Leader->ib_;
-  ChargeTransfer_->absorb(Leader->ChargeTransfer_);
-}
-
 // Update the loop
-void Looparound::calculate(const boolean reset, const float ib, Looparound *Leader, const bool follow, const double loop_gain)
+void Looparound::calculate(const boolean reset, const float ib)
 {
-  following_ = follow;
-  reset_ = reset | Sen_->Flt->reset_all_faults() | following_;
-  if (following_)
-    absorb_states(Leader);
-  else
-    ib_ = ib;
+  reset_ = reset | Sen_->Flt->reset_all_faults();
+  ib_ = ib;
   voc_ = Mon_->vb() - (ChargeTransfer_->calculate(ib_, reset_, chem_->tau_ct, Sen_->T)*chem_->r_ct*ap.slr_res + ib_*chem_->r_0*ap.slr_res);
   e_wrap_ = Mon_->voc_soc() - voc_;
-  e_wrap_trim_ = -Trim_->calculate(e_wrap_filt_*float(AMP_WRAP_TRIM_GAIN), reset_, e_wrap_);
-  e_wrap_trimmed_ = e_wrap_ + e_wrap_trim_;
+  e_wrap_trim_ = -Trim_->calculate(e_wrap_filt_*wrap_trim_gain_, reset_, 0.);  // Always initialize to zero
+  if (reset_)
+    e_wrap_trimmed_ = 0.;  // Always initialize to zero
+  else
+    e_wrap_trimmed_ = e_wrap_ + e_wrap_trim_;
   e_wrap_filt_ = WrapErrFilt_->calculate(e_wrap_trimmed_, reset_, min(Sen_->T, F_MAX_T_WRAP));
 
   // Thresholds. Scalars are calculated by Flt->wrap_scalars()
@@ -298,12 +291,12 @@ void Looparound::calculate(const boolean reset, const float ib, Looparound *Lead
   hi_fail_ = WrapHi_->calculate(hi_fault_, WRAP_HI_S, WRAP_HI_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // non-latching
   lo_fault_ = e_wrap_filt_ <= ewlo_thr_;
   lo_fail_ = WrapLo_->calculate(lo_fault_, WRAP_LO_S, WRAP_LO_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // non-latching
-  if ( sp.debug()==71 ) Serial.printf("ib%7.3f reset%d ewlo_thr/e_wrap_filt/ewhi_thr%7.3f/%7.3f/%7.3f V vb_fa %d lo_fault/fail %d/%d hi_fault/fail %d/%d\n", ib_, reset_, ewlo_thr_, e_wrap_filt_, ewhi_thr_, Sen_->Flt->vb_fa(), lo_fault_, lo_fail_, hi_fault_, hi_fail_);
+  if ( sp.debug()==71 ) Serial.printf("ib%7.3f reset%d ewlo_thr/e_wrap_filt/ewhi_thr  %7.3f/%7.3f/%7.3f trim%7.3f vb_fa %d lo_fault/fail %d/%d hi_fault/fail %d/%d\n",
+   ib_, reset_, ewlo_thr_, e_wrap_filt_, ewhi_thr_, e_wrap_trim_, Sen_->Flt->vb_fa(), lo_fault_, lo_fail_, hi_fault_, hi_fail_);
 }
 
 void Looparound::pretty_print()
 {
-  Serial.printf(" following %d\n", following_);
   Serial.printf(" reset %d\n", reset_);
   Serial.printf(" ib%7.3f A\n", ib_);
   Serial.printf(" voc%7.3f V\n", voc_);
@@ -311,6 +304,7 @@ void Looparound::pretty_print()
   Serial.printf(" e_wrap_f%7.3f V\n", e_wrap_filt_);
   Serial.printf(" e_wrap_trim%7.3f V\n", e_wrap_trim_);
   Serial.printf(" e_wrap_trimmed%7.3f V\n", e_wrap_trimmed_);
+  Serial.printf(" wrap_trim_gain%7.3f V\n", wrap_trim_gain_);
   Serial.printf(" hi_fault/fail %d/%d\n", hi_fault_, hi_fail_);
   Serial.printf(" lo_fault/fail %d/%d\n", lo_fault_, lo_fail_);
   Serial.printf(" ewlo_thr/ewhi_thr%7.3f/%7.3f V\n", ewlo_thr_, ewhi_thr_);
@@ -340,8 +334,8 @@ Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *
   WrapLo = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   QuietFilt = new General2_Pole(T, WN_Q_FILT, ZETA_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);  // actual update time provided run time
   QuietRate = new RateLagExp(T, TAU_Q_FILT, MIN_Q_FILT, MAX_Q_FILT);
-  LoopIbAmp = new Looparound(Mon, Sen, WRAP_HI_AMP, WRAP_LO_AMP);
-  LoopIbNoa = new Looparound(Mon, Sen, WRAP_HI_NOA, WRAP_LO_NOA);
+  LoopIbAmp = new Looparound(Mon, Sen, WRAP_HI_AMP, WRAP_LO_AMP, AMP_WRAP_TRIM_GAIN);
+  LoopIbNoa = new Looparound(Mon, Sen, WRAP_HI_NOA, WRAP_LO_NOA, NOA_WRAP_TRIM_GAIN);
 }
 
 // Coulomb Counter difference test - failure conditions track poorly
@@ -428,9 +422,8 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // non-latching
   failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // non-latching
   failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_fa()), WRAP_VB_FA);    // latches
-  LoopIbNoa->calculate(reset, Sen->ib_noa(), Sen->Flt->LoopIbNoa, false, 0.);
-  boolean ib_noa_range = Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO;
-  LoopIbAmp->calculate(reset, Sen->ib_amp(), Sen->Flt->LoopIbNoa, ib_noa_range, AMP_WRAP_TRIM_GAIN);
+  LoopIbNoa->calculate(reset, Sen->ib_noa());
+  LoopIbAmp->calculate(reset || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO, Sen->ib_amp());
   faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
   failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // non-latching
   faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);

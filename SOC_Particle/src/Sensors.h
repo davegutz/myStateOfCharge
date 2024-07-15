@@ -197,9 +197,9 @@ class Looparound
 {
 public:
   Looparound();
-  Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp);
+  Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp, const double wrap_trim_gain);
   ~Looparound();
-  void calculate(const boolean reset, const float ib, Looparound *Leader, const bool follow, const double loop_gain);
+  void calculate(const boolean reset, const float ib);
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
   uint8_t hi_fail() { return hi_fail_; };
@@ -207,7 +207,6 @@ public:
   uint8_t lo_fail() { return lo_fail_; };
   uint8_t lo_fault() { return lo_fault_; };
   void pretty_print();
-  void absorb_states(Looparound *in);
 protected:
   Chemistry *chem_;         // Chemistry
   LagExp *ChargeTransfer_;  // ChargeTransfer model {ib, vb} --> {voc}, ioc=ib for Battery version
@@ -217,7 +216,6 @@ protected:
   float e_wrap_trimmed_;    // Trimmer applied to e_wrap_, V
   float ewhi_thr_;          // Threshold e_wrap failed high, V
   float ewlo_thr_;          // Threshold e_wrap failed low, V
-  boolean following_;       // Commanded to follow the leader.  ib_ = leader, T=following
   uint8_t hi_fail_;         // Fail bit
   uint8_t hi_fault_;        // Fault bit
   float ib_;                // Sensed unit shunt current, A
@@ -233,6 +231,7 @@ protected:
   TFDelay *WrapLo_;         // Wrap test persistence
   float wrap_hi_amp_;       // Wrap high amplitude, V
   float wrap_lo_amp_;       // Wrap low amplitude, V
+  double wrap_trim_gain_;   // Trim gain, r/s
 };
 
 

@@ -403,6 +403,7 @@ class BatteryMonitor(Battery, EKF1x1):
         self.voc_stat = self.voc - self.dv_hys
         self.ioc = self.ib
 
+        # Wrap logic
         self.wrap(reset=reset, ib_amp=ib_amp, ib_noa=ib_noa, e_w_amp_0=e_w_amp_0, e_w_amp_filt_0=e_w_amp_filt_0,
                   e_w_noa_0=e_w_noa_0, e_w_noa_filt_0=e_w_noa_filt_0)
 
@@ -591,7 +592,7 @@ class BatteryMonitor(Battery, EKF1x1):
 
     def wrap(self, reset=True, ib_noa=0., ib_amp=0.,
              e_w_amp_0=None, e_w_amp_filt_0=None, e_w_noa_0=None, e_w_noa_filt_0=None):
-        # Wrap logic
+        """Wrap logic"""
         self.e_wrap = self.voc_soc - self.voc_stat
         self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap, dt=min(self.dt, Battery.F_MAX_T_WRAP),
                                                       reset=reset)
@@ -614,7 +615,7 @@ class BatteryMonitor(Battery, EKF1x1):
         # Individual wrap logic
         if self.ib_noa is not None:
             self.LoopIbNoa.calculate(reset=reset, ib=ib_noa, loop_gain=Battery.NOA_WRAP_TRIM_GAIN,
-            dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr,
+                                     dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr,
                                      ewsat_slr=ewsat_slr, e_w_0=e_w_noa_0, e_w_filt_0=e_w_noa_filt_0)
             self.e_wrap_n = self.LoopIbNoa.e_wrap
             self.e_wrap_n_filt = self.LoopIbNoa.e_wrap_filt
