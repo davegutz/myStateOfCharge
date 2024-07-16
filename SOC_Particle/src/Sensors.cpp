@@ -422,8 +422,8 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // non-latching
   failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // non-latching
   failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_fa()), WRAP_VB_FA);    // latches
-  LoopIbNoa->calculate(reset, Sen->ib_noa());
-  LoopIbAmp->calculate(reset || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO, Sen->ib_amp());
+  LoopIbNoa->calculate(reset_loc, Sen->ib_noa());
+  LoopIbAmp->calculate(reset_loc || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO, Sen->ib_amp());
   faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
   failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // non-latching
   faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);
@@ -442,7 +442,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   LoopIbNoa->pretty_print();
 
   Serial.printf("\nFault:\n");
-  Serial.printf(" cc_diff  %7.3f  thr=%7.3f Fc^\n", cc_diff_, cc_diff_thr_);
+  Serial.printf(" cc_diff  %9.6f  thr=%9.6f Fc^\n", cc_diff_, cc_diff_thr_);
   Serial.printf(" ib_diff  %7.3f  thr=%7.3f Fd^\n", ib_diff_f_, ib_diff_thr_);
   Serial.printf(" e_wrap   %7.3f  thr=%7.3f Fo^%7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
   Serial.printf(" ib_quiet %7.3f  thr=%7.3f Fq v\n\n", ib_quiet_, ib_quiet_thr_);
@@ -494,7 +494,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
 void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
 {
   Serial1.printf("Fault:\n");
-  Serial1.printf(" cc_diff  %7.3f  thr=%7.3f Fc^\n", cc_diff_, cc_diff_thr_);
+  Serial1.printf(" cc_diff  %9.6f  thr=%9.6f Fc^\n", cc_diff_, cc_diff_thr_);
   Serial1.printf(" ib_diff  %7.3f  thr=%7.3f Fd^\n", ib_diff_f_, ib_diff_thr_);
   Serial1.printf(" e_wrap   %7.3f  thr=%7.3f Fo^%7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
   Serial1.printf(" ib_quiet %7.3f  thr=%7.3f Fq v\n\n", ib_quiet_, ib_quiet_thr_);
@@ -626,12 +626,12 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     ib_sel_stat_ = 1;
     latched_fail_ = true;
   }
-  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_detected() )  // latches - use reset
+  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_detected() && !sp.mod_vb() )  // latches - use hard reset
   {
     ib_sel_stat_ = -1;
     latched_fail_ = true;
   }
-  else if ( sp.ib_select()<0 && !Sen->ShuntNoAmp->bare_detected() )  // latches - use reset
+  else if ( sp.ib_select()<0 && !Sen->ShuntNoAmp->bare_detected() )  // latches - use hard reset
   {
     ib_sel_stat_ = -1;
     latched_fail_ = true;
@@ -674,11 +674,11 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     {
       latched_fail_fake_ = true;
     }
-    else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_detected() )  // latches
+    else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )  // latches use hard reset
     {
       latched_fail_fake_ = true;
     }
-    else if ( sp.ib_select()<0 && !Sen->ShuntNoAmp->bare_detected() )  // latches
+    else if ( sp.ib_select()<0 && !Sen->ShuntNoAmp->bare_detected() )  // latches use hard reset
     {
       latched_fail_fake_ = true;
     }
@@ -717,7 +717,7 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   }
   if ( !ap.fake_faults )
   {
-    if ( !vb_sel_stat_last_ )
+    if ( !vb_sel_stat_last_ && !sp.mod_vb() )
     {
       vb_sel_stat_ = 0;   // Latches
       latched_fail_ = true;
@@ -1100,7 +1100,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
           Tb_hdwe, Tb, sp.mod_tb(), Tb_filt);
       Serial.printf("%s", pr.buff);
 
-      sprintf(pr.buff, "%ld, %ld, %7.3f, %7.3f, %d, %7.3f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%d,%7.3f,",
+      sprintf(pr.buff, "%ld, %ld, %7.3f, %7.3f, %d, %9.6f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%d,%7.3f,",
           Flt->fltw(), Flt->falw(), Flt->ib_rate(), Flt->ib_quiet(), Flt->tb_sel_status(),
           Flt->cc_diff_thr(), Flt->ewhi_thr(), Flt->ewlo_thr(), Flt->ib_diff_thr(), Flt->ib_quiet_thr(), Flt->preserving(), ap.fake_faults,
           Mon->y_ekf_filt());
