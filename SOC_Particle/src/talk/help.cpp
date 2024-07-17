@@ -163,7 +163,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
   Serial.printf("  RS= "); Serial.printf("SavedPars: Renominalize saved\n");
   Serial.printf("  RV= "); Serial.printf("Renominalize volatile\n");
 
-  sp.ib_select_p->print_help();  //* si
+  sp.ib_force_p->print_help();  //* si
   sp.Time_now_p->print_help();  //* UT
   sp.Time_now_p->print1_help();  //* UT
   sp.debug_p->print_help();  // v

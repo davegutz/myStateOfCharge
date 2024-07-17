@@ -268,7 +268,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   disp_2 = pr.buff;
   if ( blink==2 )
   {
-    if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
+    if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() )
       disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
       disp_2 = " conn ";
@@ -279,7 +279,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   }
   else if ( blink==3 )
   {
-    if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
+    if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() )
       disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
       disp_2 = " conn ";
@@ -368,7 +368,7 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
   disp_2 = pr.buff;
   if ( blink==2 )
   {
-    if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
+    if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() )
       disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
       disp_2 = " conn ";
@@ -379,7 +379,7 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
   }
   else if ( blink==3 )
   {
-    if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )
+    if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() )
       disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
       disp_2 = " conn ";
@@ -485,8 +485,8 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   //  Ib_model, Ib_hdwe, Vc_hdwe                    --->   Ib
   //  Vb_model, Vb_hdwe,                            --->   Vb
   //  constant,         Tb_hdwe, Tb_hdwe_filt       --->   Tb, Tb_filt
-  Sen->Flt->select_all(Sen, Mon, reset);
-  Sen->final_assignments(Mon);
+  Sen->Flt->select_all_logic(Sen, Mon, reset);
+  Sen->select_all_hdwe_or_model(Mon);
 
   // Fault snap buffer management
   static uint8_t fails_repeated = 0;

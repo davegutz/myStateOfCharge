@@ -121,11 +121,11 @@ float TempSensor::sample(Sensors *Sen)
 // class Shunt
 // constructors
 Shunt::Shunt()
-: Adafruit_ADS1015(), name_("None"), port_(0x00), bare_detected_(false){}
+: Adafruit_ADS1015(), name_("None"), port_(0x00), bare_shunt_(false){}
 Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *sp_Ib_bias, const float v2a_s,
   const uint8_t vc_pin, const uint8_t vo_pin, const uint8_t vh3v3_pin, const boolean using_opAmp)
 : Adafruit_ADS1015(),
-  name_(name), port_(port), bare_detected_(false), v2a_s_(v2a_s),
+  name_(name), port_(port), bare_shunt_(false), v2a_s_(v2a_s),
   vshunt_int_(0), vshunt_int_0_(0), vshunt_int_1_(0), vshunt_(0), Ishunt_cal_(0), Ishunt_cal_filt_(0),
   sp_ib_bias_(sp_Ib_bias), sp_ib_scale_(sp_ib_scale), sample_time_(0UL), sample_time_z_(0UL), dscn_cmd_(false),
   vc_pin_(vc_pin), vo_pin_(vo_pin), vr_pin_(vh3v3_pin), Vc_raw_(HALF_V3V3/VH3V3_CONV_GAIN), Vc_(HALF_V3V3),
@@ -141,9 +141,9 @@ Shunt::Shunt(const String name, const uint8_t port, float *sp_ib_scale,  float *
     if (!begin(port_)) {
       Serial.printf("FAILED init ADS SHUNT MON %s\n", name_.c_str());
       #ifndef HDWE_BARE
-        bare_detected_ = true;
+        bare_shunt_ = true;
       #else
-        bare_detected_ = false;
+        bare_shunt_ = false;
       #endif
     }
     else Serial.printf("SHUNT MON %s started\n", name_.c_str());
@@ -162,7 +162,7 @@ void Shunt::pretty_print()
 #ifndef SOFT_DEPLOY_PHOTON
   Serial.printf(" *sp_Ib_bias%7.3f; A\n", *sp_ib_bias_);
   Serial.printf(" *sp_ib_scale%7.3f; A\n", *sp_ib_scale_);
-  Serial.printf(" bare_det %d dscn_cmd %d\n", bare_detected_, dscn_cmd_);
+  Serial.printf(" bare_shunt %d dscn_cmd %d\n", bare_shunt_, dscn_cmd_);
   Serial.printf(" Ishunt_cal%7.3f; A\n", Ishunt_cal_);
   Serial.printf(" Ishunt_cal_filt%7.3f; A\n", Ishunt_cal_filt_);
   Serial.printf(" port 0x%X;\n", port_);
@@ -184,7 +184,7 @@ void Shunt::pretty_print()
 void Shunt::convert(const boolean disconnect, const boolean reset, Sensors *Sen)
 {
   #ifdef HDWE_ADS1013_AMP_NOA
-    if ( !bare_detected_ && !dscn_cmd_ )
+    if ( !bare_shunt_ && !dscn_cmd_ )
     {
       #ifndef HDWE_BARE
         vshunt_int_ = readADC_Differential_0_1(name_);
@@ -201,11 +201,11 @@ void Shunt::convert(const boolean disconnect, const boolean reset, Sensors *Sen)
     vshunt_ = computeVolts(vshunt_int_);
   #else
     #ifndef HDWE_BARE
-      bare_detected_ = Vc_ < VC_BARE_DETECTED;
+      bare_shunt_ = Vc_ < VC_BARE_DETECTED;
     #else
-      bare_detected_ = false;
+      bare_shunt_ = false;
     #endif
-    if ( !bare_detected_ && !dscn_cmd_ )
+    if ( !bare_shunt_ && !dscn_cmd_ )
     {
       vshunt_ = Vo_Vc_;
       vshunt_int_0_ = 0; vshunt_int_1_ = 0; vshunt_int_ = 0;
@@ -288,9 +288,9 @@ void Looparound::calculate(const boolean reset, const float ib)
   // wrap_vb latches because vb is single sensor  faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
 
   hi_fault_ = e_wrap_filt_ >= ewhi_thr_;
-  hi_fail_ = WrapHi_->calculate(hi_fault_, WRAP_HI_S, WRAP_HI_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // non-latching
+  hi_fail_ = WrapHi_->calculate(hi_fault_, WRAP_HI_S, WRAP_HI_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // not latched
   lo_fault_ = e_wrap_filt_ <= ewlo_thr_;
-  lo_fail_ = WrapLo_->calculate(lo_fault_, WRAP_LO_S, WRAP_LO_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // non-latching
+  lo_fail_ = WrapLo_->calculate(lo_fault_, WRAP_LO_S, WRAP_LO_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // not latched
   if ( sp.debug()==71 ) Serial.printf("ib%7.3f reset%d ewlo_thr/e_wrap_filt/ewhi_thr  %7.3f/%7.3f/%7.3f trim%7.3f vb_fa %d lo_fault/fail %d/%d hi_fault/fail %d/%d\n",
    ib_, reset_, ewlo_thr_, e_wrap_filt_, ewhi_thr_, e_wrap_trim_, Sen_->Flt->vb_fa(), lo_fault_, lo_fail_, hi_fault_, hi_fail_);
 }
@@ -353,7 +353,7 @@ void Fault::cc_diff(Sensors *Sen, BatteryMonitor *Mon)
   }
   // ewsat_slr_ used here because voc_soc map inaccurate on cold days
   cc_diff_thr_ = CC_DIFF_SOC_DIS_THRESH*ap.cc_diff_slr*cc_diff_empty_slr_*ewsat_slr_;
-  failAssign( abs(cc_diff_)>=cc_diff_thr_ , CC_DIFF_FA );  // Not latched
+  failAssign( abs(cc_diff_)>=cc_diff_thr_ , CC_DIFF_FA );  // CC_DIFF_FA not latched
 }
 
 // Compare current sensors - failure conditions large difference
@@ -408,10 +408,11 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
 // Avoid using hysteresis data for this test and accept more generous thresholds
 void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
-  wrap_scalars(Mon);
   boolean reset_loc = reset | reset_all_faults_;
+
+  wrap_scalars(Mon);
+
   e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
-  // e_wrap_ = Mon->y_ekf();
   e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
   // sat logic screens out voc jumps when ib>0 when saturated
   // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
@@ -419,19 +420,20 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   // Thresholds calculated by wrap_scalars()
   faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
   faultAssign( (e_wrap_filt_ <= ewlo_thr_), WRAP_LO_FLT);
-  failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // non-latching
-  failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // non-latching
-  failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_fa()), WRAP_VB_FA);    // latches
+  failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // not latched
+  failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // not latched
+  failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_hi_or_lo_fa()), WRAP_VB_FA);    // WRAP_VB_FA latches
+
   LoopIbNoa->calculate(reset_loc, Sen->ib_noa());
   LoopIbAmp->calculate(reset_loc || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO, Sen->ib_amp());
   faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
-  failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // non-latching
+  failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // WRAP_HI_M_FA not latched
   faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);
-  failAssign( LoopIbAmp->lo_fail(), WRAP_LO_M_FA);  // non-latching
+  failAssign( LoopIbAmp->lo_fail(), WRAP_LO_M_FA);  // WRAP_LO_M_FA not latched
   faultAssign( LoopIbNoa->hi_fault(), WRAP_HI_N_FLT);
-  failAssign( LoopIbNoa->hi_fail(), WRAP_HI_N_FA);  // non-latching
+  failAssign( LoopIbNoa->hi_fail(), WRAP_HI_N_FA);  // WRAP_HI_N_FA not latched
   faultAssign( LoopIbNoa->lo_fault(), WRAP_LO_N_FLT);
-  failAssign( LoopIbNoa->lo_fail(), WRAP_LO_N_FA);  // non-latching
+  failAssign( LoopIbNoa->lo_fail(), WRAP_LO_N_FA);  // WRAP_LO_N_FA not latched
 }
 
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
@@ -519,8 +521,8 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf(" wnl     %d  %d 'Fo ^'\n", wrap_lo_n_flt(), wrap_lo_n_fa());
   Serial1.printf(" wnh     %d  %d 'Fi ^'\n", wrap_hi_n_flt(), wrap_hi_n_fa());
   Serial1.printf(" vc      %d  %d 'FI 1'\n", vc_flt(), vc_fa());
-  Serial1.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare_detected());
-  Serial1.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare_detected());
+  Serial1.printf(" bare n  %d  x \n", Sen->ShuntNoAmp->bare_shunt());
+  Serial1.printf(" bare m  %d  x \n", Sen->ShuntAmp->bare_shunt());
   Serial1.printf(" ib_dsc  %d  %d 'Fq v'\n", ib_dscn_flt(), ib_dscn_fa());
   Serial1.printf(" ibd_lo  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_lo_flt(), ib_diff_lo_fa());
   Serial1.printf(" ibd_hi  %d  %d 'Fd ^  *SA/*SB'\n", ib_diff_hi_flt(), ib_diff_hi_fa());
@@ -544,38 +546,6 @@ void Fault::pretty_print1(Sensors *Sen, BatteryMonitor *Mon)
   Serial1.printf("vv0; to return\n");
 }
 
-// Redundancy loss.   Here in cpp because sp circular reference in .h files due to sp.ib_select()
-boolean Fault::red_loss_calc() { return (ib_sel_stat_!=1 || (sp.ib_select()!=0 && !ap.fake_faults)
-  || ib_diff_fa() || vb_fail()); };
-
-// Wrap scalars
-void Fault::wrap_scalars(BatteryMonitor *Mon)
-{
-  if ( Mon->soc()>=WRAP_SOC_HI_OFF )
-  {
-    ewsat_slr_ = WRAP_SOC_HI_SLR;
-    ewmin_slr_ = 1.;
-  }
-  else if ( Mon->soc() <= max(Mon->soc_min()+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS)  )
-  {
-    ewsat_slr_ = 1.;
-    ewmin_slr_ = WRAP_SOC_LO_SLR;
-  }
-  else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SAT_MARG) ||
-          ( Mon->voc_stat()>(Mon->vsat()-WRAP_HI_SAT_MARG) && Mon->C_rate()>WRAP_MOD_C_RATE && Mon->soc()>WRAP_SOC_MOD_OFF) ) // Use voc_stat to get some anticipation
-  {
-    ewsat_slr_ = WRAP_HI_SAT_SLR;
-    ewmin_slr_ = 1.;
-  }
-  else
-  {
-    ewsat_slr_ = 1.;
-    ewmin_slr_ = 1.;
-  }
-  ewhi_thr_ = Mon->r_ss() * WRAP_HI_A * ap.ewhi_slr * ewsat_slr_ * ewmin_slr_;
-  ewlo_thr_ = Mon->r_ss() * WRAP_LO_A * ap.ewlo_slr * ewsat_slr_ * ewmin_slr_;
-}
-
 // Calculate selection for choice
 // Use model instead of sensors when running tests as user
 // Equivalent to using voc(soc) as voter between two hardware currrents
@@ -588,133 +558,32 @@ void Fault::wrap_scalars(BatteryMonitor *Mon)
 
 //          Tb, Tb_filt
 //          latched_fail_
-void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
+void Fault::select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 {
   // Reset
   if ( reset_all_faults_ )
   {
-    if ( sp.ib_select() >= 0 )
-    {
-      ib_sel_stat_ = 1;
-    }
-    else
-    {
-      ib_sel_stat_ = -1;
-    }
-    ib_sel_stat_last_ =  ib_sel_stat_;
-
+    select_reset();
     Serial.printf("reset ib flt\n");
+    Serial.printf("reset vb flt\n");
   }
 
-  // Ib truth table
+  // Ib truth tables
+  if ( !ap.fake_faults )
+  {
+    select_ib_truth(Sen);
+  }
+  else  // fake_faults
+  {
+    select_ib_truth_fake(Sen);
+  }
+  faultAssign(ib_sel_stat_!=1 || (sp.ib_force()!=0 && !ap.fake_faults)  || ib_diff_fa() || vb_fail(), RED_LOSS); // redundancy loss anytime ib_sel_stat<0
   if ( ap.fake_faults )
   {
-    #ifdef HDWE_IB_HI_LO  
-      ib_sel_stat_ = 0;
-    #else
-      ib_sel_stat_ = 1;
-    #endif
-    latched_fail_ = false;
-  }
-  else if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() )  // these separate inputs don't latch
-  {
-    ib_sel_stat_ = 0;    // takes two non-latching inputs to set and latch
-    latched_fail_ = true;
-  }
-  else if ( sp.ib_select()>0 && !Sen->ShuntAmp->bare_detected() )
-  {
-    ib_sel_stat_ = 1;
-    latched_fail_ = true;
-  }
-  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_detected() && !sp.mod_vb() )  // latches - use hard reset
-  {
-    ib_sel_stat_ = -1;
-    latched_fail_ = true;
-  }
-  else if ( sp.ib_select()<0 && !Sen->ShuntNoAmp->bare_detected() )  // latches - use hard reset
-  {
-    ib_sel_stat_ = -1;
-    latched_fail_ = true;
-  }
-  else if ( sp.ib_select()==0 )  // auto
-  {
-    if ( Sen->ShuntAmp->bare_detected() && !Sen->ShuntNoAmp->bare_detected() )  // these inputs don't latch
-    {
-      ib_sel_stat_ = -1;
-      latched_fail_ = true;
-    }
-    else if ( ib_diff_fa() )  // this input doesn't latch
-    {
-      if ( vb_sel_stat_ && wrap_fa() )    // wrap_fa is non-latching
-      {
-        ib_sel_stat_ = -1;      // two non-latching fails
-        latched_fail_ = true;
-      }
-      else if ( cc_diff_fa() )  // this input doesn't latch but result of 'and' with ib_diff_fa is latched
-      {
-        ib_sel_stat_ = -1;      // takes two non-latching inputs to isolate ib failure and to set and latch ib_sel
-        latched_fail_ = true;
-      }
-    }
-  }
-  else if ( ( (sp.ib_select() <  0) && ib_sel_stat_last_>-1 ) ||
-            ( (sp.ib_select() >= 0) && ib_sel_stat_last_< 1 )   )  // Latches.  Must reset to move out of no amp selection
-  {
-    latched_fail_ = true;
-  }
-  else
-  {
-    latched_fail_ = false;
-  }
-
-  // Fake faults.  Objective is to provide same recording behavior as normal operation so can see debug faults without shutdown of anything
-  if ( ap.fake_faults )
-  {
-    if ( Sen->ShuntAmp->bare_detected() && Sen->ShuntNoAmp->bare_detected() )  // these separate inputs don't latch
-    {
-      latched_fail_fake_ = true;
-    }
-    else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_detected() && !sp.mod_ib() )  // latches use hard reset
-    {
-      latched_fail_fake_ = true;
-    }
-    else if ( sp.ib_select()<0 && !Sen->ShuntNoAmp->bare_detected() )  // latches use hard reset
-    {
-      latched_fail_fake_ = true;
-    }
-    else if ( Sen->ShuntAmp->bare_detected() && !Sen->ShuntNoAmp->bare_detected() )  // these inputs don't latch
-    {
-      latched_fail_fake_ = true;
-    }
-    else if ( ib_diff_fa() )  // this input doesn't latch
-    {
-      if ( vb_sel_stat_ && wrap_fa() )    // wrap_fa is non-latching
-      {
-        latched_fail_fake_ = true;
-      }
-      else if ( cc_diff_fa() )  // this input doesn't latch but result is latched
-      {
-        latched_fail_fake_ = true;
-      }
-    }
-    else
-      latched_fail_fake_ = false;
-  }
-
-  // Redundancy loss
-  faultAssign(red_loss_calc(), RED_LOSS); // redundancy loss anytime ib_sel_stat<0
-  if ( ap.fake_faults )
-  {
-    ib_sel_stat_ = sp.ib_select();  // Can manually select ib amp or noa using talk when ap.fake_faults is set
+    ib_sel_stat_ = sp.ib_force();  // Can manually select ib amp or noa using talk when ap.fake_faults is set
   }
 
   // vb failure from wrap result
-  if ( reset_all_faults_ )
-  {
-    vb_sel_stat_last_ = 1;
-    vb_sel_stat_ = 1;
-    Serial.printf("reset vb flts\n");
-  }
   if ( !ap.fake_faults )
   {
     if ( !vb_sel_stat_last_ && !sp.mod_vb() )
@@ -758,8 +627,8 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   // Print
   if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ || tb_sel_stat_ != tb_sel_stat_last_ )
   {
-    Serial.printf("Sel chg:  Amp->bare %d NoAmp->bare %d ib_diff_fa %d wh_fa %d wl_fa %d wv_fa %d cc_diff_fa_ %d\n sp.ib_select() %d ib_sel_stat %d vb_sel_stat %d tb_sel_stat %d vb_fail %d Tb_fail %d\n",
-      Sen->ShuntAmp->bare_detected(), Sen->ShuntNoAmp->bare_detected(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa_, sp.ib_select(), ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
+    Serial.printf("Sel chg:  Amp->bare %d NoAmp->bare %d ib_diff_fa %d wh_fa %d wl_fa %d wv_fa %d cc_diff_fa_ %d\n sp.ib_force() %d ib_sel_stat %d vb_sel_stat %d tb_sel_stat %d vb_fail %d Tb_fail %d\n",
+      Sen->ShuntAmp->bare_shunt(), Sen->ShuntNoAmp->bare_shunt(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa_, sp.ib_force(), ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
     Serial.printf("  fake %d ibss %d ibssl %d vbss %d vbssl %d tbss %d  tbssl %d latched_fail %d latched_fail_fake %d\n",
       ap.fake_faults, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, tb_sel_stat_, tb_sel_stat_last_, latched_fail_, latched_fail_fake_);
     Serial.printf("  preserving %d\n", *sp_preserving_);
@@ -769,11 +638,13 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     Serial.printf("Small reset\n");
     cp.cmd_reset();   
   }
+
+  // Latch memory
   ib_sel_stat_last_ = ib_sel_stat_;
   vb_sel_stat_last_ = vb_sel_stat_;
   tb_sel_stat_last_ = tb_sel_stat_;
 
-  // Make sure asynk Rf command gets executed at least once all fault logic
+  // Make sure Rf command gets executed at least once all fault logic.  Asynchronous hence counter
   static uint8_t count = 0;
   if ( reset_all_faults_ )
   {
@@ -793,6 +664,123 @@ void Fault::select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   }
 }
 
+// Select ib truth table
+void Fault::select_ib_truth(Sensors *Sen)
+{
+  if ( ap.fake_faults )
+  {
+    #ifdef HDWE_IB_HI_LO  
+      ib_sel_stat_ = 0;
+    #else
+      ib_sel_stat_ = 1;
+    #endif
+    latched_fail_ = false;
+  }
+  else if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() )  // these separate inputs don't latch
+  {
+    ib_sel_stat_ = 0;    // takes two not latched inputs to set and latch
+    latched_fail_ = true;
+  }
+  else if ( sp.ib_force()>0 && !Sen->ShuntAmp->bare_shunt() )
+  {
+    ib_sel_stat_ = 1;
+    latched_fail_ = true;
+  }
+  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_shunt() && !sp.mod_vb() )  // latches - use hard reset
+  {
+    ib_sel_stat_ = -1;
+    latched_fail_ = true;
+  }
+  else if ( sp.ib_force()<0 && !Sen->ShuntNoAmp->bare_shunt() )  // latches - use hard reset
+  {
+    ib_sel_stat_ = -1;
+    latched_fail_ = true;
+  }
+  else if ( sp.ib_force()==0 )  // auto
+  {
+    if ( Sen->ShuntAmp->bare_shunt() && !Sen->ShuntNoAmp->bare_shunt() )  // these inputs don't latch
+    {
+      ib_sel_stat_ = -1;
+      latched_fail_ = true;
+    }
+    else if ( ib_diff_fa() )  // this input doesn't latch
+    {
+      if ( vb_sel_stat_ && wrap_hi_or_lo_fa() )    // wrap_hi_or_lo_fa is not latched
+      {
+        ib_sel_stat_ = -1;      // two not latched fails but result of 'and' with ib_diff_fa latches latched_fail
+        latched_fail_ = true;
+      }
+      else if ( cc_diff_fa() )  // this input doesn't latch but result of 'and' with ib_diff_fa latches latched_fail
+      {
+        ib_sel_stat_ = -1;      // takes two not latched inputs to isolate ib failure and to set and latch ib_sel
+        latched_fail_ = true;
+      }
+    }
+  }
+  else if ( ( (sp.ib_force() <  0) && ib_sel_stat_last_>-1 ) ||
+            ( (sp.ib_force() >= 0) && ib_sel_stat_last_< 1 )   )  // Latches.  Must reset to move out of no amp selection
+  {
+    latched_fail_ = true;
+  }
+  else
+  {
+    latched_fail_ = false;
+  }
+}
+
+// select ib truth fake.  Provide same recording behavior as normal operation so can see debug faults without shutdown of anything
+void Fault::select_ib_truth_fake(Sensors *Sen)
+{
+    if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() )  // these separate inputs don't latch
+    {
+      latched_fail_fake_ = true;
+    }
+    else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() )  // latches use hard reset
+    {
+      latched_fail_fake_ = true;
+    }
+    else if ( sp.ib_force()<0 && !Sen->ShuntNoAmp->bare_shunt() )  // latches use hard reset
+    {
+      latched_fail_fake_ = true;
+    }
+    else if ( Sen->ShuntAmp->bare_shunt() && !Sen->ShuntNoAmp->bare_shunt() )  // these inputs don't latch
+    {
+      latched_fail_fake_ = true;
+    }
+    else if ( ib_diff_fa() )  // this input doesn't latch
+    {
+      if ( vb_sel_stat_ && wrap_hi_or_lo_fa() )    // wrap_hi_or_lo_fa is not latched but result is latched
+      {
+        latched_fail_fake_ = true;
+      }
+      else if ( cc_diff_fa() )  // cc_diff_fa is not latched but result is latched
+      {
+        latched_fail_fake_ = true;
+      }
+    }
+    else
+      latched_fail_fake_ = false;
+}
+
+// Select reset
+void Fault::select_reset()
+{
+  // ib
+  if ( sp.ib_force() >= 0 )
+  {
+    ib_sel_stat_ = 1;
+  }
+  else
+  {
+    ib_sel_stat_ = -1;
+  }
+
+  // Reset latch memory
+  ib_sel_stat_last_ =  ib_sel_stat_;
+  vb_sel_stat_last_ = 1;
+  vb_sel_stat_ = 1;
+}
+
 // Checks analog current.  Latches
 void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
 {
@@ -802,8 +790,8 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     failAssign(false, IB_AMP_FA);
     failAssign(false, IB_NOA_FA);
   }
-  faultAssign( Sen->ShuntAmp->bare_detected(), IB_AMP_BARE);
-  faultAssign( Sen->ShuntNoAmp->bare_detected(), IB_NOA_BARE);
+  faultAssign( Sen->ShuntAmp->bare_shunt(), IB_AMP_BARE);
+  faultAssign( Sen->ShuntNoAmp->bare_shunt(), IB_NOA_BARE);
   #ifndef HDWE_BARE
     faultAssign( ( ib_amp_bare() || abs(Sen->ShuntAmp->Ishunt_cal()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa, IB_AMP_FLT );
     faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa, IB_NOA_FLT );
@@ -904,6 +892,35 @@ void Fault::vc_check(Sensors *Sen, BatteryMonitor *Mon, const float _vc_min, con
   }
 }
 
+// Wrap scalars
+void Fault::wrap_scalars(BatteryMonitor *Mon)
+{
+  if ( Mon->soc()>=WRAP_SOC_HI_OFF )
+  {
+    ewsat_slr_ = WRAP_SOC_HI_SLR;
+    ewmin_slr_ = 1.;
+  }
+  else if ( Mon->soc() <= max(Mon->soc_min()+WRAP_SOC_LO_OFF_REL, WRAP_SOC_LO_OFF_ABS)  )
+  {
+    ewsat_slr_ = 1.;
+    ewmin_slr_ = WRAP_SOC_LO_SLR;
+  }
+  else if ( Mon->voc_soc()>(Mon->vsat()-WRAP_HI_SAT_MARG) ||
+          ( Mon->voc_stat()>(Mon->vsat()-WRAP_HI_SAT_MARG) && Mon->C_rate()>WRAP_MOD_C_RATE && Mon->soc()>WRAP_SOC_MOD_OFF) ) // Use voc_stat to get some anticipation
+  {
+    ewsat_slr_ = WRAP_HI_SAT_SLR;
+    ewmin_slr_ = 1.;
+  }
+  else
+  {
+    ewsat_slr_ = 1.;
+    ewmin_slr_ = 1.;
+  }
+  ewhi_thr_ = Mon->r_ss() * WRAP_HI_A * ap.ewhi_slr * ewsat_slr_ * ewmin_slr_;
+  ewlo_thr_ = Mon->r_ss() * WRAP_LO_A * ap.ewlo_slr * ewsat_slr_ * ewmin_slr_;
+}
+
+
 // Class Sensors
 Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *Talk, Sync *Summarize, unsigned long long time_now,
   unsigned long long millis, BatteryMonitor *Mon):   reset_temp_(false), sample_time_ib_(0UL), sample_time_vb_(0UL),
@@ -955,7 +972,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
 // Deliberate choice based on results and inputs
 // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model, Ib_noa_model
 // Outputs:  Ib_hdwe_model, Ib_hdwe
-void Sensors::choose_()
+void Sensors::ib_choose()
 {
   if ( Flt->ib_sel_stat()==1 )
   {
@@ -989,12 +1006,13 @@ void Sensors::choose_()
 }
 
 // Make final assignemnts
-void Sensors::final_assignments(BatteryMonitor *Mon)
+void Sensors::select_all_hdwe_or_model(BatteryMonitor *Mon)
 {
-  // Reselect since may be changed
-  // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_hdwe_model
-  // Outputs:  Tb, Tb_filt, Vb, Ib, sample_time_ib
-  choose_();
+
+  // Reselect ib since may be changed
+  // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model(past), Ib_noa_model(past)
+  // Outputs:  Ib_hdwe_model, Ib_hdwe
+  ib_choose();
 
   // Final assignments
   // tb
@@ -1084,7 +1102,7 @@ void Sensors::final_assignments(BatteryMonitor *Mon)
       double cTime = double(now)/1000.;
 
       sprintf(pr.buff, "unit_sel,%13.3f, %d, %d,  %10.7f, %8.5f,%8.5f,%8.5f,%8.5f,%8.5f, %8.5f,%8.5f, ",
-          cTime, reset, sp.ib_select(),
+          cTime, reset, sp.ib_force(),
           Flt->cc_diff(),
           ib_amp_hdwe(), ib_noa_hdwe(), ib_amp_model(), ib_noa_model(), ib_model(), 
           Flt->ib_diff(), Flt->ib_diff_f());
@@ -1155,7 +1173,7 @@ float Sensors::Ib_noa_noise()
 void Sensors::shunt_print()
 {
     Serial.printf("reset,T,select,inj_bias,  vim,Vsm,Vcm,Vom,Ibhm,  vin,Vsn,Vcn,Von,Ibhn,  vi3,vh3, Ib_hdwe,T,Ib_amp_fault,Ib_amp_fail,Ib_noa_fault,Ib_noa_fail,=,    %d,%7.3f,%d,%7.3f,    %d,%7.3f,%7.3f,%7.3f,%7.3f,    %d,%7.3f,%7.3f,%7.3f,%7.3f,    %7.3f,%7.3f, %d,%d,  %d,%d,\n",
-        reset, T, sp.ib_select(), sp.inj_bias(),
+        reset, T, sp.ib_force(), sp.inj_bias(),
         ShuntAmp->vshunt_int(), ShuntAmp->vshunt(), ShuntAmp->Vc(), ShuntAmp->Vo(), ShuntAmp->Ishunt_cal(),
         ShuntNoAmp->vshunt_int(), ShuntNoAmp->vshunt(), ShuntNoAmp->Vc(), ShuntNoAmp->Vo(), ShuntNoAmp->Ishunt_cal(),
         Ib_hdwe, T,
@@ -1164,13 +1182,13 @@ void Sensors::shunt_print()
 
 // Shunt selection.  Use Coulomb counter and EKF to sort three signals:  amp current, non-amp current, voltage
 // Initial selection to charge the Sim for modeling currents on BMS cutback
-// Inputs: sp.ib_select (user override), Mon (EKF status)
+// Inputs: sp.ib_force (user override), Mon (EKF status)
 // States:  Ib_fail_noa_
 // Outputs:  Ib_hdwe, Ib_model_in, Vb_sel_status_
 void Sensors::shunt_select_initial(const boolean reset)
 {
     // Current signal selection, based on if there or not.
-    // Over-ride 'permanent' with Talk(sp.ib_select) = Talk('s')
+    // Over-ride 'permanent' with Talk(sp.ib_force) = Talk('s')
 
     // Hardware and model current assignments
     float hdwe_add, mod_add;
@@ -1199,7 +1217,7 @@ void Sensors::shunt_select_initial(const boolean reset)
     // Initial choice
     // Inputs:  ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model(past), Ib_noa_model(past)
     // Outputs:  Ib_hdwe_model, Ib_hdwe
-    choose_();
+    ib_choose();
 
     // When running normally the model tracks hdwe to synthesize reference information
     if ( !sp.mod_ib() )

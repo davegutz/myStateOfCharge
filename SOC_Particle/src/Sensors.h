@@ -91,7 +91,7 @@ public:
   ~Shunt();
   // operators
   // functions
-  boolean bare_detected() { return ( bare_detected_ ); };
+  boolean bare_shunt() { return ( bare_shunt_ ); };
   void dscn_cmd(const boolean cmd) { dscn_cmd_ = cmd; };
   unsigned long long dt() { return sample_time_ - sample_time_z_; };
   void convert(const boolean disconnect, const boolean reset, Sensors *Sen);
@@ -114,7 +114,7 @@ public:
 protected:
   String name_;         // For print statements, multiple instances
   uint8_t port_;        // Octal I2C port used by Acafruit_ADS1015
-  boolean bare_detected_;        // If ADS to be ignored
+  boolean bare_shunt_;  // If ADS to be ignored
   float v2a_s_;         // Selected shunt conversion gain, A/V
   int16_t vshunt_int_;  // Sensed shunt voltage, count
   int16_t vshunt_int_0_;// Interim conversion, count
@@ -304,10 +304,12 @@ public:
   void pretty_print1(Sensors *Sen, BatteryMonitor *Mon);
   boolean record() { if ( ap.fake_faults ) return no_fails_fake(); else return no_fails(); };
   boolean red_loss() { return faultRead(RED_LOSS); };
-  boolean red_loss_calc();
   void reset_all_faults(const boolean cmd) { reset_all_faults_ = cmd; };
   boolean reset_all_faults() { return reset_all_faults_; };
-  void select_all(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
+  void select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
+  void select_ib_truth(Sensors *Sen);
+  void select_ib_truth_fake(Sensors *Sen);
+  void select_reset();
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
   void shunt_select_initial(const boolean reset);   // Choose between shunts for model
   void tb_check(Sensors *Sen, const float _tb_min, const float _tb_max, const boolean reset);  // Range check Tb
@@ -323,7 +325,7 @@ public:
   boolean vb_flt() { return faultRead(VB_FLT); };
   boolean vc_fa() { return failRead(VC_FA); };
   boolean vc_flt() { return faultRead(VC_FLT); };
-  boolean wrap_fa() { return ( failRead(WRAP_HI_FA) || failRead(WRAP_LO_FA) ); };
+  boolean wrap_hi_or_lo_fa() { return ( failRead(WRAP_HI_FA) || failRead(WRAP_LO_FA) ); };
   boolean wrap_hi_fa() { return failRead(WRAP_HI_FA); };
   boolean wrap_hi_flt() { return faultRead(WRAP_HI_FLT); };
   boolean wrap_hi_m_fa() { return failRead(WRAP_HI_M_FA); };
@@ -442,7 +444,7 @@ public:
   boolean bms_off;            // Calculated by BatteryMonitor, battery off, low voltage, switched by battery management system?
   unsigned long long inst_time() { return inst_time_; }
   unsigned long long dt_ib(void) { return dt_ib_; };
-  void final_assignments(BatteryMonitor *Mon);  // Make final signal selection
+  void select_all_hdwe_or_model(BatteryMonitor *Mon);  // Make final signal selection
   float ib() { return Ib / sp.nP(); };                            // Battery unit current, A
   float ib_amp() { return Ib_amp / sp.nP(); };          // Battery amp unit current, A
   float ib_amp_hdwe() { return Ib_amp_hdwe / sp.nP(); };          // Battery amp unit current, A
@@ -486,7 +488,7 @@ protected:
   LagExp *NoaFilt;      // Noise filter for calibration
   LagExp *SelFilt;      // Noise filter for calibration
   LagExp *VbFilt;       // Noise filter for calibration
-  void choose_(void);   // Deliberate choice based on inputs and results
+  void ib_choose(void);   // Deliberate choice based on inputs and results
   PRBS_7 *Prbn_Tb_;     // Tb noise generator model only
   PRBS_7 *Prbn_Vb_;     // Vb noise generator model only
   PRBS_7 *Prbn_Ib_amp_; // Ib amplified sensor noise generator model only

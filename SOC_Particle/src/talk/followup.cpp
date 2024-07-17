@@ -154,7 +154,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                 if ( ap.fake_faults_p->success() )
                 {
                     Sen->Flt->reset_all_faults();
-                    sp.put_ib_select(cp.cmd_str.substring(2).toInt());
+                    sp.put_ib_force(cp.cmd_str.substring(2).toInt());
                 }
                 break;
             }
