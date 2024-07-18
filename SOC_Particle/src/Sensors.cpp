@@ -568,14 +568,14 @@ void Fault::select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean re
     Serial.printf("reset vb flt\n");
   }
 
-  // Ib truth tables
+  // Ib decision tables
   if ( !ap.fake_faults )
   {
-    select_ib_truth(Sen);
+    ib_select_decision(Sen);
   }
   else  // fake_faults
   {
-    select_ib_truth_fake(Sen);
+    ib_select_decision_fake(Sen);
   }
   faultAssign(ib_sel_stat_!=1 || (sp.ib_force()!=0 && !ap.fake_faults)  || ib_diff_fa() || vb_fail(), RED_LOSS); // redundancy loss anytime ib_sel_stat<0
   if ( ap.fake_faults )
@@ -664,8 +664,8 @@ void Fault::select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean re
   }
 }
 
-// Select ib truth table
-void Fault::select_ib_truth(Sensors *Sen)
+// Select ib decision table
+void Fault::ib_select_decision(Sensors *Sen)
 {
   if ( ap.fake_faults )
   {
@@ -686,7 +686,7 @@ void Fault::select_ib_truth(Sensors *Sen)
     ib_sel_stat_ = 1;
     latched_fail_ = true;
   }
-  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_shunt() && !sp.mod_vb() )  // latches - use hard reset
+  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_shunt() && !(sp.mod_ib() && reset_all_faults_) )  // latches - use hard reset
   {
     ib_sel_stat_ = -1;
     latched_fail_ = true;
@@ -728,8 +728,8 @@ void Fault::select_ib_truth(Sensors *Sen)
   }
 }
 
-// select ib truth fake.  Provide same recording behavior as normal operation so can see debug faults without shutdown of anything
-void Fault::select_ib_truth_fake(Sensors *Sen)
+// select ib decision fake.  Provide same recording behavior as normal operation so can see debug faults without shutdown of anything
+void Fault::ib_select_decision_fake(Sensors *Sen)
 {
     if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() )  // these separate inputs don't latch
     {

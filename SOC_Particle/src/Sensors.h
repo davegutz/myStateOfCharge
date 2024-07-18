@@ -307,8 +307,8 @@ public:
   void reset_all_faults(const boolean cmd) { reset_all_faults_ = cmd; };
   boolean reset_all_faults() { return reset_all_faults_; };
   void select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
-  void select_ib_truth(Sensors *Sen);
-  void select_ib_truth_fake(Sensors *Sen);
+  void ib_select_decision(Sensors *Sen);
+  void ib_select_decision_fake(Sensors *Sen);
   void select_reset();
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
   void shunt_select_initial(const boolean reset);   // Choose between shunts for model
