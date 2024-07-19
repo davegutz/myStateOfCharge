@@ -36,7 +36,6 @@
 #undef SOFT_S1BAUD
 #undef HDWE_47L16_EERAM
 #undef HDWE_ADS1013_AMP_NOA
-#undef HDWE_IB_DUAL
 #undef HDWE_IB_HI_LO
 #undef HDWE_SSD1306_OLED
 #undef HDWE_DS18B20_SWIRE
@@ -232,9 +231,11 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define VC_BARE_DETECTED    0.16        // Level of common voltage to declare circuit unconnected, V (0.16)
 #define V3V3                3.3         // Theoretical nominal V3v3, V (3.3)
 #define HALF_V3V3         (V3V3/2.)     // Theoretical center of differential TSC2010
-#define HDWE_M_2WIRE    -58.96          //
-#define HDWE_RS_2WIRE   15000.          //
-#define HDWE_B_2WIRE    262.79          //
+#define HDWE_M_2WIRE    -58.96          // 2-wire thermistor characteristic   TODO: switch over to industry accepted exponential equation Steinhart-Hart (see '2-wireRTD.ods')
+#define HDWE_RS_2WIRE   15000.          // 2-wire thermistor characteristic   TODO: switch over to industry accepted exponential equation Steinhart-Hart (see '2-wireRTD.ods')
+#define HDWE_B_2WIRE    262.79          // 2-wire thermistor characteristic   TODO: switch over to industry accepted exponential equation Steinhart-Hart (see '2-wireRTD.ods')
+#define SIZE_MARG         1.05          // Threshold margin, scalar (1.05)
+
 #if !defined(IB_ABS_MAX_AMP)
     #define IB_ABS_MAX_AMP (float(NOM_UNIT_CAP)*float(NP))
 #endif
@@ -295,9 +296,6 @@ const float VO_CONV_GAIN = float(PHOTON_ADC_VOLT) / float(PHOTON_ADC_COUNT) * fl
 #if defined(HDWE_ADS1013_AMP_NOA)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN;
-#elif defined(HDWE_IB_DUAL)
-    const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
-    const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
 #elif defined(HDWE_IB_HI_LO) & !defined(HDWE_BARE)
     const float SHUNT_AMP_GAIN = SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2;
     const float SHUNT_NOA_GAIN = SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2;

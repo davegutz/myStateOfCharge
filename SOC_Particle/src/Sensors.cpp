@@ -577,7 +577,7 @@ void Fault::select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean re
   {
     ib_select_decision_fake(Sen);
   }
-  faultAssign(ib_sel_stat_!=1 || (sp.ib_force()!=0 && !ap.fake_faults)  || ib_diff_fa() || vb_fail(), RED_LOSS); // redundancy loss anytime ib_sel_stat<0
+  faultAssign(ib_sel_stat_!=1 || (sp.ib_force()!=0 && !ap.fake_faults)  || ib_diff_fa() || ib_amp_fa() || ib_noa_fa() || vb_fail(), RED_LOSS); // redundancy loss anytime ib_sel_stat<0
   if ( ap.fake_faults )
   {
     ib_sel_stat_ = sp.ib_force();  // Can manually select ib amp or noa using talk when ap.fake_faults is set
@@ -822,7 +822,7 @@ void Fault::tb_check(Sensors *Sen, const float _tb_min, const float _tb_max, con
   boolean reset_loc = reset | reset_all_faults_;
   if ( reset_loc )
   {
-    failAssign(false, VB_FA);
+    failAssign(false, TB_FA);
   }
   if ( ap.disab_tb_fa || sp.mod_tb() )
   {
@@ -929,7 +929,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   this->T = T;
   this->T_filt = T;
   this->T_temp = T_temp;
-  #if defined(HDWE_IB_DUAL) || defined(HDWE_IB_HI_LO) || defined(HDWE_BARE)
+  #if defined(defined(HDWE_IB_HI_LO) || defined(HDWE_BARE)
     this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_z, &sp.ib_bias_amp_z, SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, true);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_z, &sp.ib_bias_noa_z, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin, true);
   #else
