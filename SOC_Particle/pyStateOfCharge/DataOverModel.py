@@ -49,7 +49,7 @@ plt.rcParams.update({'figure.max_open_warning': 0})
 
 def plq(plt_, sx, st, sy, yt, slr=1., add=0., color='black', linestyle='-', label=None, marker=None,
         markersize=None, markevery=None):
-    if sx is not None and sy is not None and hasattr(sx, st) and hasattr(sy, yt):
+    if sx is not None and sy is not None and hasattr(sx, st) and hasattr(sy, yt) and getattr(sy, yt)[0] is not None:
         try:
             yscld = getattr(sy, yt) * slr + add
         except TypeError:
@@ -605,9 +605,12 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plq(plt, mv, 'time', mv, 'ccd_fa', add=-4, color='red', linestyle='--', label='cc_diff_fa' + test_str + '-4')
     plt.legend(loc=1)
     plt.subplot(335)
-    mod_min = min(min(mo.mod_data), min(mv.mod_data))
-    plt.plot(mo.time, mo.mod_data - mod_min, color='blue', linestyle='-', label='mod' + ref_str + '-' + str(mod_min))
-    plt.plot(mv.time, mv.mod_data - mod_min, color='red', linestyle='--', label='mod' + test_str + '-' + str(mod_min))
+    if hasattr(mo, 'mod_data'):
+        mod_min = min(min(mo.mod_data), min(mv.mod_data))
+    else:
+        mod_min = min(mv.mod_data)
+    plq(plt, mo, 'time', mo, 'mod_data', add=-mod_min, color='blue', linestyle='-', label='mod' + ref_str + '-' + str(mod_min))
+    plq(plt, mv, 'time', mv, 'mod_data', add=-mod_min, color='red', linestyle='--', label='mod' + test_str + '-' + str(mod_min))
     plt.plot(mo.time, mo.sat + 2, color='black', linestyle='-', label='sat' + ref_str + '+2')
     plt.plot(mv.time, np.array(mv.sat) + 2, color='green', linestyle='--', label='sat' + test_str + '+2')
     plt.plot(mo.time, np.array(mo.bms_off) + 4, color='red', linestyle='-', label='bms_off' + ref_str + '+4')
@@ -623,9 +626,9 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
                      label='bms_off_s' + test_str + '+4')
     plt.plot(mo.time, mo.sel, color='red', linestyle='-.', label='sel' + ref_str)
     plt.plot(mv.time, mv.sel, color='blue', linestyle=':', label='sel' + test_str)
-    plt.plot(mo.time, mo.ib_sel_stat - 2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')
-    plt.plot(mo.time, mo.vb_sel - 2, color='green', linestyle='--', label='vb_sel_stat' + ref_str + '-2')
-    plt.plot(mo.time, mo.preserving - 2, color='cyan', linestyle='-.', label='preserving' + ref_str + '-2')
+    plq(plt, mo, 'time', mo, 'ib_sel_stat', add=-2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')
+    plq(plt, mo, 'time', mo, 'vb_sel', add=-2, color='green', linestyle='--', label='vb_sel_stat' + ref_str + '-2')
+    plq(plt, mo, 'time', mo, 'preserving', add=-2, color='cyan', linestyle='-.', label='preserving' + ref_str + '-2')
     plt.legend(loc=1)
 
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"

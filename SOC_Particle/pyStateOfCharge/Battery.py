@@ -99,6 +99,9 @@ class Battery(Coulombs):
     WRAP_SOC_LO_OFF_ABS = 0.35  # Disable e_wrap when near empty (soc lo any Tb, 0.35)
     WRAP_HI_SAT_MARG = 0.2  # Wrap voltage margin to saturation, V (0.2)
     WRAP_MOD_C_RATE = 0.02  # Moderate charge rate threshold to engage wrap threshold (0.02 to prevent trip near saturation .05 too large)
+    WRAP_SOC_MOD_OFF = 0.85  # Disable e_wrap_lo when nearing saturated and moderate C_rate(0.85)
+    WRAP_SOC_HI_SLR = 1000.  # Huge to disable e_wrap (1000)
+    WRAP_SOC_LO_SLR = 60.  # Large to disable e_wrap (60. for startup)
 
     # """Nominal battery bank capacity, Ah(100).Accounts for internal losses.This is
     #                         what gets delivered, e.g. Wshunt / NOM_SYS_VOLT.  Also varies 0.2 - 0.4 C currents
@@ -607,7 +610,7 @@ class BatteryMonitor(Battery, EKF1x1):
             (self.voc_stat > (self.vsat-Battery.WRAP_HI_SAT_MARG) and
              self.ib / Battery.UNIT_CAP_RATED > Battery.WRAP_MOD_C_RATE and
              self.soc > Battery.WRAP_SOC_MOD_OFF)):
-            ewsat_slr = Battery.WRAP_SOC_HI_SlR
+            ewsat_slr = Battery.WRAP_SOC_HI_SLR
             ewmin_slr = 1.
         else:
             ewsat_slr = 1.
