@@ -431,6 +431,9 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 
   // Overall Logic
   #ifdef HDWE_IB_HI_LO
+    ib_noa_invalid  do not use and 'fail'
+    ib_amp_invalid  do not use and 'redl' + 'accy' (new)
+    both invalid 'fail' + 'accy'
     scale for  e_wrap
     wrap_hi = wrap_m_hi & wrap_n_hi
     wrap_lo = ...
