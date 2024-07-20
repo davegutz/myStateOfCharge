@@ -409,21 +409,15 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
 void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   boolean reset_loc = reset | reset_all_faults_;
+  if ( reset_loc )
+  {
+    failAssign(false, WRAP_VB_FA);
+  }
 
+  // Thresholds
   wrap_scalars(Mon);
 
-  e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
-  e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
-  // sat logic screens out voc jumps when ib>0 when saturated
-  // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
-  // wrap_vb latches because vb is single sensor
-  // Thresholds calculated by wrap_scalars()
-  faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
-  faultAssign( (e_wrap_filt_ <= ewlo_thr_), WRAP_LO_FLT);
-  failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // not latched
-  failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // not latched
-  failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_hi_or_lo_fa()), WRAP_VB_FA);    // WRAP_VB_FA latches
-
+  // HI_LO-Only Logic
   LoopIbNoa->calculate(reset_loc, Sen->ib_noa());
   LoopIbAmp->calculate(reset_loc || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO, Sen->ib_amp());
   faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
@@ -434,6 +428,27 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   failAssign( LoopIbNoa->hi_fail(), WRAP_HI_N_FA);  // WRAP_HI_N_FA not latched
   faultAssign( LoopIbNoa->lo_fault(), WRAP_LO_N_FLT);
   failAssign( LoopIbNoa->lo_fail(), WRAP_LO_N_FA);  // WRAP_LO_N_FA not latched
+
+  // Overall Logic
+  #ifdef HDWE_IB_HI_LO
+    scale for  e_wrap
+    wrap_hi = wrap_m_hi & wrap_n_hi
+    wrap_lo = ...
+    wrap = wrap_hi || wrap_lo_fa
+    flts and fa same type selection
+  #else
+    e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
+    e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
+    // sat logic screens out voc jumps when ib>0 when saturated
+    // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
+    // wrap_vb latches because vb is single sensor
+    // Thresholds calculated by wrap_scalars()
+    faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
+    faultAssign( (e_wrap_filt_ <= ewlo_thr_), WRAP_LO_FLT);
+    failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // not latched
+    failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // not latched
+    failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_hi_or_lo_fa()), WRAP_VB_FA);    // WRAP_VB_FA latches latches because vb is single sensor
+  #endif
 }
 
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
@@ -686,12 +701,12 @@ void Fault::ib_select_decision(Sensors *Sen)
     ib_sel_stat_ = 1;
     latched_fail_ = true;
   }
-  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_shunt() && !(sp.mod_ib() && reset_all_faults_) )  // latches - use hard reset
+  else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_shunt() && !reset_all_faults_ )  // latches
   {
     ib_sel_stat_ = -1;
     latched_fail_ = true;
   }
-  else if ( sp.ib_force()<0 && !Sen->ShuntNoAmp->bare_shunt() )  // latches - use hard reset
+  else if ( sp.ib_force()<0 && !Sen->ShuntNoAmp->bare_shunt() && !reset_all_faults_)  // latches
   {
     ib_sel_stat_ = -1;
     latched_fail_ = true;
@@ -735,11 +750,11 @@ void Fault::ib_select_decision_fake(Sensors *Sen)
     {
       latched_fail_fake_ = true;
     }
-    else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() )  // latches use hard reset
+    else if ( ib_sel_stat_last_==-1 && !Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() && !reset_all_faults_ )  // latches
     {
       latched_fail_fake_ = true;
     }
-    else if ( sp.ib_force()<0 && !Sen->ShuntNoAmp->bare_shunt() )  // latches use hard reset
+    else if ( sp.ib_force()<0 && !Sen->ShuntNoAmp->bare_shunt() && !reset_all_faults_ )  // latches
     {
       latched_fail_fake_ = true;
     }
