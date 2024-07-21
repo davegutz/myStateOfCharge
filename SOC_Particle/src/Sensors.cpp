@@ -431,14 +431,25 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 
   // Overall Logic
   #ifdef HDWE_IB_HI_LO
-    ib_noa_invalid  do not use and 'fail'
-    ib_amp_invalid  do not use and 'redl' + 'accy' (new)
-    both invalid 'fail' + 'accy'
-    scale for  e_wrap
-    wrap_hi = wrap_m_hi & wrap_n_hi
-    wrap_lo = ...
-    wrap = wrap_hi || wrap_lo_fa
-    flts and fa same type selection
+    e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
+    e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
+    // sat logic screens out voc jumps when ib>0 when saturated
+    // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
+    // wrap_vb latches because vb is single sensor
+    // Thresholds calculated by wrap_scalars()
+    faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
+    faultAssign( (e_wrap_filt_ <= ewlo_thr_), WRAP_LO_FLT);
+    failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // not latched
+    failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // not latched
+    failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_hi_or_lo_fa()), WRAP_VB_FA);    // WRAP_VB_FA latches latches because vb is single sensor
+    // ib_noa_invalid  do not use and 'fail'
+    // ib_amp_invalid  do not use and 'redl' + 'accy' (new)
+    // both invalid 'fail' + 'accy'
+    // scale for  e_wrap
+    // wrap_hi = wrap_m_hi & wrap_n_hi
+    // wrap_lo = ...
+    // wrap = wrap_hi || wrap_lo_fa
+    // flts and fa same type selection
   #else
     e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
     e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
@@ -947,7 +958,7 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   this->T = T;
   this->T_filt = T;
   this->T_temp = T_temp;
-  #if defined(defined(HDWE_IB_HI_LO) || defined(HDWE_BARE)
+  #if defined(HDWE_IB_HI_LO) || defined(HDWE_BARE)
     this->ShuntAmp = new Shunt("Amp", 0x49, &sp.ib_scale_amp_z, &sp.ib_bias_amp_z, SHUNT_AMP_GAIN, pins->Vcm_pin, pins->Vom_pin, pins->Vh3v3_pin, true);
     this->ShuntNoAmp = new Shunt("No Amp", 0x48, &sp.ib_scale_noa_z, &sp.ib_bias_noa_z, SHUNT_NOA_GAIN, pins->Vcn_pin, pins->Von_pin, pins->Vh3v3_pin, true);
   #else

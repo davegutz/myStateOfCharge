@@ -221,7 +221,7 @@ void Chemistry::assign_CH()
     coul_eff = 0.9976; // Coulombic efficiency - the fraction of charging input that gets turned into usable Coulombs (0.9976 for sres=1.6)
     dqdt = 0.01;       // Change of charge with temperature, fraction/deg C (0.01 from literature)
     dv_min_abs = 0.06; // Absolute value of +/- hysteresis limit, V (0.06)
-    dvoc = -0.1;       // Baked-in table bias
+    dvoc = -0.14;      // Baked-in table bias
     dvoc_dt = -0.01;   // Change of VOC with operating temperature in range 0 - 50 C V/deg C (-0.01)
     hys_cap = 1.e4;    // Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s (1e4)
     Serial.printf("CH dv_min_abs=%7.3f, cap=%7.1f\n", dv_min_abs, hys_cap);
