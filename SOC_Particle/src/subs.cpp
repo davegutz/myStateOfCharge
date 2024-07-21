@@ -351,13 +351,13 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
   // ---------- Top Line of Display -------------------------------------------
   // Tb
   sprintf(pr.buff, "%3.0f", pp.pubList.Tb);
-  disp_0 = pr.buff;
+  disp_0 = pr.buff;  // Default
   if ( Sen->Flt->tb_fa() && (blink==0 || blink==1) )
     disp_0 = "***";
 
   // Voc
   sprintf(pr.buff, "%5.2f", pp.pubList.Voc);
-  disp_1 = pr.buff;
+  disp_1 = pr.buff;  // Default
   if ( Sen->Flt->vb_sel_stat()==0 && (blink==1 || blink==2) )
     disp_1 = "*fail";
   else if ( Sen->bms_off )
@@ -365,31 +365,56 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
 
   // Ib
   sprintf(pr.buff, "%6.1f", pp.pubList.Ib);
-  disp_2 = pr.buff;
-  if ( blink==2 )
-  {
-    if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() )
-      disp_2 = "*fail";
-    else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
-      disp_2 = " conn ";
-    else if ( Sen->Flt->ib_diff_fa() )
-      disp_2 = " diff ";
-    else if ( Sen->Flt->red_loss() )
-      disp_2 = " redl ";
-  }
-  else if ( blink==3 )
-  {
-    if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() )
-      disp_2 = "*fail";
-    else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
-      disp_2 = " conn ";
-  }
+  disp_2 = pr.buff;  // Default
+  #ifdef HDWE_IB_HI_LO
+    if ( blink==2 )
+    {
+      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+        disp_2 = "*fail";
+      else if ( !Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+        disp_2 = "*fail";
+      else if ( Sen->Flt->ib_amp_fa() && !Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+        disp_2 = "*amp";
+      else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
+        disp_2 = " conn ";
+      else if ( Sen->Flt->ib_diff_fa() )
+        disp_2 = " diff ";
+      else if ( Sen->Flt->red_loss() )
+        disp_2 = " redl ";
+    }
+    else if ( blink==3 )
+    {
+      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+        disp_2 = "*fail";
+      else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
+        disp_2 = " conn ";
+    }
+  #else
+    if ( blink==2 )
+    {
+      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+        disp_2 = "*fail";
+      else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
+        disp_2 = " conn ";
+      else if ( Sen->Flt->ib_diff_fa() )
+        disp_2 = " diff ";
+      else if ( Sen->Flt->red_loss() )
+        disp_2 = " redl ";
+    }
+    else if ( blink==3 )
+    {
+      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+        disp_2 = "*fail";
+      else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
+        disp_2 = " conn ";
+    }
+  #endif
   String disp_Tbop = disp_0.substring(0, 4) + " " + disp_1.substring(0, 6) + " " + disp_2.substring(0, 7);
 
   // --------------------- Bottom line of Display ------------------------------
   // Hrs EHK
   sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
-  disp_0 = pr.buff;
+  disp_0 = pr.buff;  // Default
   if ( blink==0 || blink==1 || blink==2 )
   {
     if ( Sen->Flt->cc_diff_fa() )
@@ -408,13 +433,28 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
   disp_1 = pr.buff;
 
   // Hrs large
-  if ( blink==1 || blink==3 || !Sen->saturated )
-  {
-    sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
-    disp_2 = pr.buff;
-  }
-  else if (Sen->saturated)
-    disp_2 = "SAT";
+  #ifdef HDWE_IB_HI_LO
+    if ( blink==1 || blink==3 || !Sen->saturated )
+    {
+      sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
+      disp_2 = pr.buff;
+    }
+    else if ( blink==2 )
+      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+        disp_2 = "fail";
+      else if ( ( Sen->Flt->ib_amp_fa() || Sen->Flt->ib_noa_fa() ) && !sp.mod_ib() )
+        disp_2 = "accy";
+    else if (Sen->saturated)
+      disp_2 = "SAT";
+  #else
+    if ( blink==1 || blink==3 || !Sen->saturated )
+    {
+      sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
+      disp_2 = pr.buff;
+    }
+    else if (Sen->saturated)
+      disp_2 = "SAT";
+  #endif
   String dispBot = disp_0 + disp_1 + " " + disp_2;
 
   // Text basic Bluetooth (use serial bluetooth app)

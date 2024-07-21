@@ -307,6 +307,8 @@ public:
   void reset_all_faults(const boolean cmd) { reset_all_faults_ = cmd; };
   boolean reset_all_faults() { return reset_all_faults_; };
   void select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
+  boolean ib_amp_invalid() { return ib_amp_invalid_; };
+  boolean ib_noa_invalid() { return ib_noa_invalid_; };
   void ib_select_decision(Sensors *Sen);
   void ib_select_decision_fake(Sensors *Sen);
   void select_reset();
@@ -350,37 +352,39 @@ protected:
   General2_Pole *QuietFilt; // Linear filter to test for quiet
   TFDelay *QuietPer;        // Persistence ib quiet disconnect detection
   RateLagExp *QuietRate;    // Linear filter to calculate rate for quiet
-  TFDelay *TbStaleFail;     // Persistence stale tb one-wire data
   TFDelay *TbHardFail;      // Persistence Tb hard fail
+  TFDelay *TbStaleFail;     // Persistence stale tb one-wire data
   TFDelay *VbHardFail;      // Persistence vb hard fail
   TFDelay *VcHardFail;      // Persistence vc hard fail
   LagTustin *WrapErrFilt;   // Noise filter for voltage wrap
-  boolean cc_diff_fa_;      // EKF tested disagree, T = error
+  TFDelay *WrapHi;          // Time high wrap fail persistence
+  TFDelay *WrapLo;          // Time low wrap fail persistence
   float cc_diff_;           // EKF tracking error, C
+  boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_empty_slr_; // Scale cc_diff when soc low, scalar
   float ewmin_slr_;         // Scale wrap detection thresh when voc(soc) less than min, scalar
   float ewsat_slr_;         // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
   float e_wrap_filt_;       // Wrap error, V
-  float ib_diff_;           // Current sensor difference error, A
-  float ib_diff_f_;         // Filtered sensor difference error, A
-  boolean ib_lo_active_;   // Battery low amp is in active range, T=active
-  float ib_quiet_;          // ib hardware noise, A/s
-  float ib_rate_;           // ib rate, A/s
-  boolean latched_fail_;    // There is a latched fail, T=latched fail
-  boolean latched_fail_fake_;  // There would be a latched fail if not faking, T=latched fail
-  int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
-  int8_t vb_sel_stat_;      // Memory of Vb signal selection, 0=none, 1=sensor
-  int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noa, 0=none, 1=a
-  boolean reset_all_faults_;// Reset all fault logic
-  int8_t tb_sel_stat_last_; // past value
-  int8_t vb_sel_stat_last_; // past value
-  int8_t ib_sel_stat_last_; // past value
   uint32_t fltw_;           // Bitmapped faults
   uint32_t falw_;           // Bitmapped fails
-  TFDelay *WrapHi;          // Time high wrap fail persistence
-  TFDelay *WrapLo;          // Time low wrap fail persistence
+  boolean ib_amp_invalid_;  // Battery amp is invalid (hard failed)
+  float ib_diff_;           // Current sensor difference error, A
+  float ib_diff_f_;         // Filtered sensor difference error, A
+  boolean ib_lo_active_;    // Battery low amp is in active range, T=active
+  boolean ib_noa_invalid_;  // Battery noa is invalid (hard failed)
+  float ib_quiet_;          // ib hardware noise, A/s
+  float ib_rate_;           // ib rate, A/s
+  int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noa, 0=none, 1=a
+  int8_t ib_sel_stat_last_; // past value
+  boolean latched_fail_;    // There is a latched fail, T=latched fail
+  boolean latched_fail_fake_;  // There would be a latched fail if not faking, T=latched fail
+  boolean reset_all_faults_;// Reset all fault logic
   uint8_t *sp_preserving_;  // Saving fault buffer.   Stopped recording.  T=preserve
+  int8_t tb_sel_stat_;      // Memory of Tb signal selection, 0=none, 1=sensor
+  int8_t tb_sel_stat_last_; // past value
+  int8_t vb_sel_stat_;      // Memory of Vb signal selection, 0=none, 1=sensor
+  int8_t vb_sel_stat_last_; // past value
 };
 
 
