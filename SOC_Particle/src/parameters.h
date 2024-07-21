@@ -156,7 +156,7 @@ protected:
 // needed to allow testing with resets.  Others allow application to remember dynamic
 // tweaks.  Default values below are important:  they prevent junk
 // behavior on initial build. Don't put anything in here that you can't live with normal running
-// because could get set by testing and forgotten.  Not reset by hard reset
+// because could get set by testing and forgotten.
 // SavedPars Class
 class SavedPars : public Parameters
 {

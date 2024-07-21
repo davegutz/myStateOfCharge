@@ -268,7 +268,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   disp_2 = pr.buff;
   if ( blink==2 )
   {
-    if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() )
+    if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
       disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
       disp_2 = " conn ";
@@ -279,7 +279,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   }
   else if ( blink==3 )
   {
-    if ( Sen->ShuntAmp->bare_shunt() && Sen->ShuntNoAmp->bare_shunt() && !sp.mod_ib() )
+    if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
       disp_2 = "*fail";
     else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
       disp_2 = " conn ";

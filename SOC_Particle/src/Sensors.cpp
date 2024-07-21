@@ -442,9 +442,10 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // not latched
     failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // not latched
     failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_hi_or_lo_fa()), WRAP_VB_FA);    // WRAP_VB_FA latches latches because vb is single sensor
-    // ib_noa_invalid  do not use and 'fail'
-    // ib_amp_invalid  do not use and 'redl' + 'accy' (new)
-    // both invalid 'fail' + 'accy'
+    // use ib_???_fa instead of bare
+    // ib_noa_invalid  do not use noa (set to 0.) and announce 'fail'
+    // ib_amp_invalid  do not use amp  and announce 'redl' + 'accy' (new)
+    // both invalid announce 'fail' + 'accy'
     // scale for  e_wrap
     // wrap_hi = wrap_m_hi & wrap_n_hi
     // wrap_lo = ...
