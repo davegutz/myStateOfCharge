@@ -487,6 +487,7 @@ public:
   float vc() { return Vc_hdwe; };       // Common select hardware unit voltage, V
   float vc_hdwe() { return Vc_hdwe; };  // Common select hardware unit voltage, V
   Fault *Flt;
+  ScaleBrk *sel_brk_hdwe;                  // Active/active scale break
 protected:
   LagExp *AmpFilt;      // Noise filter for calibration
   LagExp *NoaFilt;      // Noise filter for calibration
@@ -506,7 +507,6 @@ protected:
   unsigned long long dt_ib_;                // Delta update of selected Ib sample, ms
   unsigned long long inst_time_;            // UTC Zulu at instantiation, s
   unsigned long long inst_millis_;          // millis offset to account for setup() time, ms
-  ScaleBrk *sel_brk_hdwe_;                  // Active/active scale break
 };
 
 // Misc

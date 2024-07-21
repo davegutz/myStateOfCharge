@@ -314,10 +314,9 @@ void Looparound::pretty_print()
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *Sen):
   cc_diff_(0.), cc_diff_empty_slr_(1), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0), fltw_(0UL), falw_(0UL),
-  ib_amp_invalid_(false), ib_diff_(0), ib_diff_f_(0), ib_lo_active_(true), ib_noa_invalid_(false), ib_sel_stat_(1),
-  ib_sel_stat_last_(1), ib_quiet_(0), ib_rate_(0),  latched_fail_(false), latched_fail_fake_(false),
-  reset_all_faults_(false), sp_preserving_(preserving),
-  tb_sel_stat_(1), tb_sel_stat_last_(1), vb_sel_stat_(1), vb_sel_stat_last_(1)
+  ib_amp_invalid_(false), ib_diff_(0), ib_diff_f_(0), ib_lo_active_(true), ib_noa_invalid_(false), ib_quiet_(0), ib_rate_(0),
+  ib_sel_stat_(1), ib_sel_stat_last_(1), latched_fail_(false), latched_fail_fake_(false), reset_all_faults_(false),
+  sp_preserving_(preserving), tb_sel_stat_(1), tb_sel_stat_last_(1), vb_sel_stat_(1), vb_sel_stat_last_(1)
 {
   IbErrFilt = new LagTustin(T, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
   IbdHiPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
@@ -432,27 +431,12 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 
   // Overall Logic
   #ifdef HDWE_IB_HI_LO
-    e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
-    e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
-    // sat logic screens out voc jumps when ib>0 when saturated
-    // wrap_hi and wrap_lo don't latch because need them available to check next ib sensor selection for dual ib sensor
-    // wrap_vb latches because vb is single sensor
-    // Thresholds calculated by wrap_scalars()
-    faultAssign( (e_wrap_filt_ >= ewhi_thr_ && !Mon->sat()), WRAP_HI_FLT);
-    faultAssign( (e_wrap_filt_ <= ewlo_thr_), WRAP_LO_FLT);
-    failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // not latched
-    failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // not latched
-    failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_hi_or_lo_fa()), WRAP_VB_FA);    // WRAP_VB_FA latches latches because vb is single sensor
-    // use ib_???_fa instead of bare  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    // ib_noa_invalid  do not use noa (set to 0.) and announce 'fail' only for HI_LO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    // ib_amp_invalid  do not use amp  and announce 'amp' + 'accy' (new) only for HI_LO vvvvvvvvvvvvvvvvvvvvvvvvvvv
-    // both invalid announce 'fail' + 'fail' only for HI_LO vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-
-    // scale for  e_wrap only for HI_LO
-    // wrap_hi = wrap_m_hi & wrap_n_hi only for HI_LO
-    // wrap_lo = ... only for HI_LO
-    // wrap = wrap_hi || wrap_lo_fa only for HI_LO
-    // flts and fa same type selection
+    e_wrap_ = scale_select(Sen->Ib_noa_hdwe, Sen->sel_brk_hdwe, LoopIbAmp->e_wrap(), LoopIbNoa->e_wrap());
+    e_wrap_filt_ = scale_select(Sen->Ib_noa_hdwe, Sen->sel_brk_hdwe, LoopIbAmp->e_wrap_filt(), LoopIbNoa->e_wrap_filt());
+    faultAssign( ( wrap_hi_m_flt() && wrap_hi_n_flt()&& !Mon->sat() ), WRAP_HI_FLT);
+    faultAssign( ( wrap_hi_m_flt() && wrap_hi_n_flt()&& !Mon->sat() ), WRAP_LO_FLT);
+    failAssign( ( wrap_hi_m_fa() && wrap_hi_n_fa()&& !Mon->sat() ), WRAP_HI_FA);
+    failAssign( ( wrap_hi_m_fa() && wrap_hi_n_fa()&& !Mon->sat() ), WRAP_LO_FA);
   #else
     e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
     e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
@@ -464,8 +448,8 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     faultAssign( (e_wrap_filt_ <= ewlo_thr_), WRAP_LO_FLT);
     failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // not latched
     failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // not latched
-    failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_hi_or_lo_fa()), WRAP_VB_FA);    // WRAP_VB_FA latches latches because vb is single sensor
   #endif
+  failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_hi_or_lo_fa()), WRAP_VB_FA);    // WRAP_VB_FA latches latches because vb is single sensor
 }
 
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
@@ -995,9 +979,9 @@ Sensors::Sensors(double T, double T_temp, Pins *pins, Sync *ReadSensors, Sync *T
   SelFilt = new LagExp(T, AMP_FILT_TAU, -NOM_UNIT_CAP*sp.nS()*sp.nP(), NOM_UNIT_CAP*sp.nS()*sp.nP());
   VbFilt = new LagExp(T, AMP_FILT_TAU, 0., NOMINAL_VB*2.5);
   #ifdef HDWE_IB_HI_LO
-    sel_brk_hdwe_ = new ScaleBrk(HDWE_IB_HI_LO_NOA_LO, HDWE_IB_HI_LO_AMP_LO, HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_NOA_HI);
+    sel_brk_hdwe = new ScaleBrk(HDWE_IB_HI_LO_NOA_LO, HDWE_IB_HI_LO_AMP_LO, HDWE_IB_HI_LO_AMP_HI, HDWE_IB_HI_LO_NOA_HI);
   #else
-    sel_brk_hdwe_ = new ScaleBrk(0., 0., 0., 0.);
+    sel_brk_hdwe = new ScaleBrk(0., 0., 0., 0.);
   #endif
 }
 
@@ -1009,7 +993,7 @@ void Sensors::ib_choose()
   if ( Flt->ib_sel_stat()==1 )
   {
     #ifdef HDWE_IB_HI_LO
-      Ib_hdwe = scale_select(Ib_noa_hdwe, sel_brk_hdwe_, Ib_amp_hdwe, Ib_noa_hdwe);
+      Ib_hdwe = scale_select(Ib_noa_hdwe, sel_brk_hdwe, Ib_amp_hdwe, Ib_noa_hdwe);
       // if ( sp.debug()==99 ) Serial.printf("choose: Ib_noa_hdwe=%7.3f, Ib_amp_hdwe=%7.3f, Ib_hdwe=%7.3f\n", Ib_noa_hdwe, Ib_amp_hdwe, Ib_hdwe);
       Ib_hdwe_model = Ib_hdwe;
       sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
