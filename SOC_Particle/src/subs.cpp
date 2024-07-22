@@ -454,9 +454,11 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
 
   // Hrs large
   #ifdef HDWE_IB_HI_LO
-    if ( blink==1 || blink==3 || !Sen->saturated )
+    sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
+    if ( Sen->saturated )
+      disp_2 = "SAT";
+    else if ( blink==1 || blink==3 )
     {
-      sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
       disp_2 = pr.buff;
     }
     #ifdef HDWE_IB_HI_LO
@@ -464,7 +466,7 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
       {
         if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
           disp_2 = "fail";
-        else if ( Sen->Flt->ib_sel_stat()==-1 )
+        else if ( Sen->Flt->ib_sel_stat()!=0 )
           disp_2 = "accy";
       }
     #else
@@ -476,16 +478,14 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
           disp_2 = "accy";
       }
     #endif
-    else if ( Sen->saturated )
-      disp_2 = "SAT";
   #else
-    if ( blink==1 || blink==3 || !Sen->saturated )
+    if (Sen->saturated)
+      disp_2 = "SAT";
+    else if ( blink==1 || blink==3 )
     {
       sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
       disp_2 = pr.buff;
     }
-    else if (Sen->saturated)
-      disp_2 = "SAT";
   #endif
   String dispBot = disp_0 + disp_1 + " " + disp_2;
 
