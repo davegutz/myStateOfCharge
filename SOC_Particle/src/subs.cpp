@@ -268,14 +268,26 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
   disp_2 = pr.buff;
   if ( blink==2 )
   {
-    if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
-      disp_2 = "*fail";
-    else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
-      disp_2 = " conn ";
-    else if ( Sen->Flt->ib_diff_fa() )
-      disp_2 = " diff ";
-    else if ( Sen->Flt->red_loss() )
-      disp_2 = " redl ";
+    #ifdef HDWE_IB_HI_LO
+      if ( Sen->Flt->ib_amp_fa() 
+      && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+        disp_2 = "*fail";
+      else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
+        disp_2 = " conn ";
+      else if ( Sen->Flt->ib_diff_fa() )
+        disp_2 = " diff ";
+      else if ( Sen->Flt->ib_sel_stat()!=0 )
+        disp_2 = " redl ";
+    #else
+      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+        disp_2 = "*fail";
+      else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
+        disp_2 = " conn ";
+      else if ( Sen->Flt->ib_diff_fa() )
+        disp_2 = " diff ";
+      else if ( Sen->Flt->red_loss() )
+        disp_2 = " redl ";
+    #endif
   }
   else if ( blink==3 )
   {
@@ -369,24 +381,22 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
   #ifdef HDWE_IB_HI_LO
     if ( blink==2 )
     {
-      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
         disp_2 = "*fail";
-      else if ( !Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+      else if ( Sen->Flt->ib_sel_stat()==1 )
         disp_2 = "*fail";
-      else if ( Sen->Flt->ib_amp_fa() && !Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+      else if ( Sen->Flt->ib_sel_stat()==-1 )
         disp_2 = "*amp";
-      else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
-        disp_2 = " conn ";
+      // auto section
       else if ( Sen->Flt->ib_diff_fa() )
         disp_2 = " diff ";
-      else if ( Sen->Flt->red_loss() )
+      // another default
+      else if ( Sen->Flt->ib_sel_stat()!=0 )
         disp_2 = " redl ";
     }
     else if ( blink==3 )
     {
-      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
-        disp_2 = "*fail";
-      else if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
+      if ( Sen->Flt->dscn_fa() && !sp.mod_ib() )
         disp_2 = " conn ";
     }
   #else
@@ -415,11 +425,19 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
   // Hrs EHK
   sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
   disp_0 = pr.buff;  // Default
-  if ( blink==0 || blink==1 || blink==2 )
-  {
-    if ( Sen->Flt->cc_diff_fa() )
-      disp_0 = "---";
-  }
+  #ifdef HDWE_IB_HI_LO
+    if ( blink==0 || blink==1 || blink==2 )
+    {
+      if ( Sen->Flt->cc_diff_fa() && !Sen->Flt->ib_diff_fa() )
+        disp_0 = "---";
+    }
+  #else
+    if ( blink==0 || blink==1 || blink==2 )
+    {
+      if ( Sen->Flt->cc_diff_fa() )
+        disp_0 = "---";
+    }
+  #endif
 
   // t charge
   if ( abs(pp.pubList.tcharge) < 24. )
@@ -439,12 +457,24 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
       sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
       disp_2 = pr.buff;
     }
-    else if ( blink==2 )
-      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
-        disp_2 = "fail";
-      else if ( ( Sen->Flt->ib_amp_fa() || Sen->Flt->ib_noa_fa() ) && !sp.mod_ib() )
-        disp_2 = "accy";
-    else if (Sen->saturated)
+    #ifdef HDWE_IB_HI_LO
+      else if ( blink==2 )
+      {
+        if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
+          disp_2 = "fail";
+        else if ( Sen->Flt->ib_sel_stat()==-1 )
+          disp_2 = "accy";
+      }
+    #else
+      else if ( blink==2 )
+      {
+        if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+          disp_2 = "fail";
+        else if ( ( Sen->Flt->ib_amp_fa() || Sen->Flt->ib_noa_fa() ) && !sp.mod_ib() )
+          disp_2 = "accy";
+      }
+    #endif
+    else if ( Sen->saturated )
       disp_2 = "SAT";
   #else
     if ( blink==1 || blink==3 || !Sen->saturated )

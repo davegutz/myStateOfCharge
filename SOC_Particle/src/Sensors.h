@@ -309,8 +309,10 @@ public:
   void select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
   boolean ib_amp_invalid() { return ib_amp_invalid_; };
   boolean ib_noa_invalid() { return ib_noa_invalid_; };
-  void ib_select_decision(Sensors *Sen);
-  void ib_select_decision_fake(Sensors *Sen);
+  void ib_decision_active_standby(Sensors *Sen);
+  void ib_decision_active_standby_fake(Sensors *Sen);
+  void ib_decision_hi_lo(Sensors *Sen);
+  void ib_decision_hi_lo_fake(Sensors *Sen);
   void select_reset();
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
   void shunt_select_initial(const boolean reset);   // Choose between shunts for model
@@ -340,6 +342,8 @@ public:
   boolean wrap_lo_m_flt() { return faultRead(WRAP_LO_M_FLT); };
   boolean wrap_lo_n_fa() { return failRead(WRAP_LO_N_FA); };
   boolean wrap_lo_n_flt() { return faultRead(WRAP_LO_N_FLT); };
+  boolean wrap_m_fa() { return failRead(WRAP_LO_M_FA) || failRead(WRAP_HI_M_FA); };
+  boolean wrap_n_fa() { return failRead(WRAP_LO_N_FA) || failRead(WRAP_HI_N_FA); };
   void wrap_scalars(BatteryMonitor *Mon);
   boolean wrap_vb_fa() { return failRead(WRAP_VB_FA); };
   void wrap_err_filt_state(const float in) { WrapErrFilt->state(in); }
