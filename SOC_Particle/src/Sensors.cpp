@@ -586,33 +586,17 @@ void Fault::select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean re
 
   // Ib decision tables
   #ifdef HDWE_IB_HI_LO
-    if ( !ap.fake_faults )
-    {
-      ib_decision_hi_lo(Sen);
-    }
-    else  // fake_faults
-    {
-      ib_decision_hi_lo_fake(Sen);
-    }
-    if ( ap.fake_faults )
-    {
-      ib_sel_stat_ = sp.ib_force();  // Can manually select ib amp or noa using talk when ap.fake_faults is set
-    }
+    ib_decision_hi_lo(Sen);
   #else
-    if ( !ap.fake_faults )
-    {
-      ib_decision_active_standby(Sen);
-    }
-    else  // fake_faults
-    {
-      ib_decision_active_standby_fake(Sen);
-    }
+    ib_decision_active_standby(Sen);
     faultAssign(ib_sel_stat_!=1 || (sp.ib_force()!=0 && !ap.fake_faults)  || ib_diff_fa() || ib_amp_fa() || ib_noa_fa() || vb_fail(), RED_LOSS); // for active-standby, redundancy loss anytime ib_sel_stat<0
-    if ( ap.fake_faults )
-    {
-      ib_sel_stat_ = sp.ib_force();  // Can manually select ib amp or noa using talk when ap.fake_faults is set
-    }
   #endif
+  if ( ap.fake_faults )
+  {
+    latched_fail_fake_ = latched_fail_;
+    latched_fail_ = false;
+    ib_sel_stat_ = sp.ib_force();
+  }
 
   // vb failure from wrap result
   if ( !ap.fake_faults )
@@ -698,12 +682,7 @@ void Fault::select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean re
 // Select ib decision table active-standby
 void Fault::ib_decision_active_standby(Sensors *Sen)
 {
-  if ( ap.fake_faults )
-  {
-    ib_sel_stat_ = 1;
-    latched_fail_ = false;
-  }
-  else if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )  // these separate inputs don't latch
+  if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )  // these separate inputs don't latch
   {
     ib_sel_stat_ = 0;    // takes two not latched inputs to set and latch
     latched_fail_ = true;
@@ -754,41 +733,6 @@ void Fault::ib_decision_active_standby(Sensors *Sen)
     latched_fail_ = false;
   }
   faultAssign(ib_sel_stat_!=1 || sp.ib_force()!=0  || ib_diff_fa() || ib_amp_fa() || ib_noa_fa() || vb_fail(), RED_LOSS); // for active-standby, redundancy loss anytime ib_sel_stat<0
-}
-
-// select ib decision fake.  Provide same recording behavior as normal operation so can see debug faults without shutdown of anything
-void Fault::ib_decision_active_standby_fake(Sensors *Sen)
-{
-  if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )  // these separate inputs don't latch
-  {
-    latched_fail_fake_ = true;
-  }
-  else if ( ib_sel_stat_last_==-1 && !Sen->Flt->ib_noa_fa() && !sp.mod_ib() && !reset_all_faults_ )  // latches
-  {
-    latched_fail_fake_ = true;
-  }
-  else if ( sp.ib_force()<0 && !Sen->Flt->ib_noa_fa() && !reset_all_faults_ )  // latches
-  {
-    latched_fail_fake_ = true;
-  }
-  else if ( Sen->Flt->ib_amp_fa() && !Sen->Flt->ib_noa_fa() )  // these inputs don't latch
-  {
-    latched_fail_fake_ = true;
-  }
-  else if ( ib_diff_fa() )  // this input doesn't latch
-  {
-    if ( vb_sel_stat_ && wrap_hi_or_lo_fa() )    // wrap_hi_or_lo_fa is not latched but result is latched
-    {
-      latched_fail_fake_ = true;
-    }
-    else if ( cc_diff_fa() )  // cc_diff_fa is not latched but result is latched
-    {
-      latched_fail_fake_ = true;
-    }
-  }
-  else
-    latched_fail_fake_ = false;
-  faultAssign(ib_sel_stat_!=1 || ib_diff_fa() || ib_amp_fa() || ib_noa_fa() || vb_fail(), RED_LOSS); // for active-standby, redundancy loss anytime ib_sel_stat<0
 }
 
 // Select ib decision table active-standby
@@ -879,41 +823,6 @@ void Fault::ib_decision_hi_lo(Sensors *Sen)
   {
     latched_fail_ = false;
   }
-  faultAssign(ib_sel_stat_!=0 || vb_sel_stat_!=1, RED_LOSS);
-}
-
-// select ib decision fake.  Provide same recording behavior as normal operation so can see debug faults without shutdown of anything
-void Fault::ib_decision_hi_lo_fake(Sensors *Sen)
-{
-  if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )  // these separate inputs don't latch
-  {
-    latched_fail_fake_ = true;
-  }
-  else if ( ib_sel_stat_last_==-1 && !Sen->Flt->ib_noa_fa() && !sp.mod_ib() && !reset_all_faults_ )  // latches
-  {
-    latched_fail_fake_ = true;
-  }
-  else if ( sp.ib_force()<0 && !Sen->Flt->ib_noa_fa() && !reset_all_faults_ )  // latches
-  {
-    latched_fail_fake_ = true;
-  }
-  else if ( Sen->Flt->ib_amp_fa() && !Sen->Flt->ib_noa_fa() )  // these inputs don't latch
-  {
-    latched_fail_fake_ = true;
-  }
-  else if ( ib_diff_fa() )  // this input doesn't latch
-  {
-    if ( vb_sel_stat_ && wrap_hi_or_lo_fa() )    // wrap_hi_or_lo_fa is not latched but result is latched
-    {
-      latched_fail_fake_ = true;
-    }
-    else if ( cc_diff_fa() )  // cc_diff_fa is not latched but result is latched
-    {
-      latched_fail_fake_ = true;
-    }
-  }
-  else
-    latched_fail_fake_ = false;
   faultAssign(ib_sel_stat_!=0 || vb_sel_stat_!=1, RED_LOSS);
 }
 

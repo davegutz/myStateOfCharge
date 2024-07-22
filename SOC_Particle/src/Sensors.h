@@ -310,9 +310,7 @@ public:
   boolean ib_amp_invalid() { return ib_amp_invalid_; };
   boolean ib_noa_invalid() { return ib_noa_invalid_; };
   void ib_decision_active_standby(Sensors *Sen);
-  void ib_decision_active_standby_fake(Sensors *Sen);
   void ib_decision_hi_lo(Sensors *Sen);
-  void ib_decision_hi_lo_fake(Sensors *Sen);
   void select_reset();
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
   void shunt_select_initial(const boolean reset);   // Choose between shunts for model
