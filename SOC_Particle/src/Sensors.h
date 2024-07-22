@@ -281,6 +281,7 @@ public:
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
   float ib_quiet_thr_;     // Threshold below which ib is quiet, A pk
   float ib_quiet_thr() { return ib_quiet_thr_; };
+  void ib_range(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   int8_t ib_sel_stat() { return ib_sel_stat_; };
   void ib_sel_stat(const boolean cmd) { ib_sel_stat_ = cmd; };
   float ib_diff() { return ( ib_diff_ ); };

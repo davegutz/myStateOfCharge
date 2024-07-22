@@ -404,6 +404,63 @@ void Fault::ib_quiet(const boolean reset, Sensors *Sen)
   #endif
 }
 
+// Range checks latch
+void Fault::ib_range(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
+{
+  boolean reset_loc = reset | reset_all_faults_;
+  if ( reset_loc )
+  {
+    failAssign(false, IB_AMP_FA);
+    failAssign(false, IB_NOA_FA);
+  }
+  faultAssign( Sen->ShuntAmp->bare_shunt(), IB_AMP_BARE);
+  faultAssign( Sen->ShuntNoAmp->bare_shunt(), IB_NOA_BARE);
+
+  // Range checks latch
+  if ( sp.mod_ib() )
+  {
+    faultAssign( ( abs(Sen->ib_amp_model()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa, IB_AMP_FLT );
+    faultAssign( ( abs(Sen->ib_noa_model()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa, IB_NOA_FLT );
+  }
+  else
+  {
+    #ifndef HDWE_BARE
+      faultAssign( ( ib_amp_bare() || abs(Sen->ib_amp_hdwe()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa, IB_AMP_FLT );
+      faultAssign( ( ib_noa_bare() || abs(Sen->ib_noa_hdwe()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa, IB_NOA_FLT );
+    #else
+      float current_max = NOM_UNIT_CAP * sp.nP();
+      faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_AMP_FLT );
+      faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_NOA_FLT );
+    #endif
+  }
+
+  // Fail persistence
+  if ( ap.disab_ib_fa )
+  {
+    failAssign( false, IB_AMP_FA );
+    failAssign( false, IB_NOA_FA);
+  }
+  else
+  {
+    failAssign( vc_fa() || ib_amp_bare() || ib_amp_fa() || IbAmpHardFail->calculate(ib_amp_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_AMP_FA );
+    failAssign( vc_fa() || ib_noa_bare() || ib_noa_fa() || IbNoAmpHardFail->calculate(ib_noa_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_NOA_FA);
+  }
+  #ifdef HDWE_IB_HI_LO
+    ib_lo_active_ = IbLoActive->calculate(HDWE_IB_HI_LO_AMP_LO < Sen->Ib_noa_hdwe && Sen->Ib_noa_hdwe < HDWE_IB_HI_LO_AMP_HI,
+                                         IB_LO_ACTIVE_SET, IB_LO_ACTIVE_RESET, Sen->T , reset_loc);
+  #endif
+  #ifdef DEBUG_DETAIL
+    if ( sp.mod_ib() )
+    {
+      if ( sp.debug()==62 ) Serial.printf("ibmm%7.3f mx%7.3f ibnm%7.3f nx%7.3f IB_AMP_FLT=%d IB_NOA_FLT=%d\n", Sen->ib_amp_model(), IB_ABS_MAX_AMP, Sen->ib_noa_model(), IB_ABS_MAX_NOA, ib_amp_flt(), ib_noa_flt());
+    }
+    else
+    {
+      if ( sp.debug()==62 ) Serial.printf("ib_amp_bare=%d ib_noa_bare=%d ibm%7.3f mx%7.3f ibn%7.3f nx%7.3f IB_AMP_FLT=%d IB_NOA_FLT=%d\n", ib_amp_bare(), ib_noa_bare(), Sen->ib_amp_hdwe(), IB_ABS_MAX_AMP, Sen->ib_noa_hdwe(), IB_ABS_MAX_NOA, ib_amp_flt(), ib_noa_flt());
+    }
+  #endif
+}
+
 // Voltage wraparound logic for current selection
 // Avoid using hysteresis data for this test and accept more generous thresholds
 void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
@@ -901,6 +958,9 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   #ifndef HDWE_BARE
     faultAssign( ( ib_amp_bare() || abs(Sen->ShuntAmp->Ishunt_cal()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa, IB_AMP_FLT );
     faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa, IB_NOA_FLT );
+    #ifdef DEBUG_DETAIL
+      if ( sp.debug()==62 ) Serial.printf("ib_amp_bare=%d ib_noa_bare=%d ibm%7.3f mx%7.3f ibn%7.3f nx%7.3f IB_AMP_FLT=%d IB_NOA_FLT=%d\n", ib_amp_bare(), ib_noa_bare(), Sen->ShuntAmp->Ishunt_cal(), IB_ABS_MAX_AMP, Sen->ShuntNoAmp->Ishunt_cal(), IB_ABS_MAX_NOA, IB_AMP_FLT, IB_NOA_FLT);
+    #endif
   #else
     float current_max = NOM_UNIT_CAP * sp.nP();
     faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_AMP_FLT );

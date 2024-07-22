@@ -190,7 +190,6 @@ void load_ib_vb(const boolean reset, const boolean reset_temp, Sensors *Sen, Pin
   Sen->ShuntAmp->convert(sp.mod_ib_amp_dscn(), reset, Sen);
   Sen->ShuntNoAmp->convert(sp.mod_ib_noa_dscn(), reset, Sen);
   Sen->Flt->vc_check(Sen, Mon, VC_MIN, VC_MAX, reset);
-  Sen->Flt->shunt_check(Sen, Mon, reset);
   Sen->shunt_select_initial(reset);
   if ( sp.debug()==14 ) Sen->shunt_print();
   #ifdef DEBUG_DETAIL
@@ -524,6 +523,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   // Load Ib and Vb
   // Outputs: Sen->Ib_model_in, Sen->Ib, Sen->Vb
   load_ib_vb(reset, reset_temp, Sen, myPins, Mon);
+  Sen->Flt->ib_range(reset, Sen, Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
   Sen->Flt->ib_quiet(reset, Sen);
   Sen->Flt->cc_diff(Sen, Mon);
