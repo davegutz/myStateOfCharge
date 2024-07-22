@@ -171,7 +171,7 @@ void talkH(BatteryMonitor *Mon, Sensors *Sen)
 
   Serial.printf("  -<>: Negative - Arduino plot compatible\n");
   Serial.printf(" vv-2: ADS counts for throughput meas\n");
-  #ifdef DEBUG_INIT
+  #ifdef DEBUG_DETAIL
     Serial.printf("  v-1: Debug\n");
   #endif
   Serial.printf("  vv1: GP\n");

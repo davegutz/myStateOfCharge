@@ -46,7 +46,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     if ( ap.init_all_soc_p->success() )
                     {
                         initialize_all(Mon, Sen, ap.init_all_soc, true);
-                        #ifdef DEBUG_INIT
+                        #ifdef DEBUG_DETAIL
                         if ( sp.debug()==-1 ){ Serial.printf("after initialize_all:"); debug_m1(Mon, Sen);}
                         #endif
                         if ( sp.modeling() )

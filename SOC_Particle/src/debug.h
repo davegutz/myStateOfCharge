@@ -29,7 +29,7 @@
 
 void add_verify(String *src, const String addend);
 
-#ifdef DEBUG_INIT
+#ifdef DEBUG_DETAIL
     void debug_m1(BatteryMonitor *Mon, Sensors *Sen);
 #endif
 

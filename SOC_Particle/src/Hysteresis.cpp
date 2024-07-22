@@ -139,7 +139,7 @@ float Hysteresis::update(const double dt, const boolean init_high, const boolean
         res_ = look_hys(dv_hys_, soc_);
         slr_ = look_slr(dv_hys_, soc_);
         ioc_ = ib_ * slr_;
-        #ifdef DEBUG_INIT
+        #ifdef DEBUG_DETAIL
             if ( sp.debug()==-1 ) Serial.printf("ib%7.3f ibs%7.3f ioc%7.3f dv%9.6f res%7.3f slr%7.3f\n", ib_, ibs_, ioc_, dv_hys_, res_, slr_);
         #endif
     }

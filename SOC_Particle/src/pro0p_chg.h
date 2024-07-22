@@ -13,7 +13,7 @@
 #define HDWE_DS18B20_SWIRE
 #define SOFT_DEPLOY_PHOTON
 // #define SOFT_DEBUG_QUEUE
-// #define DEBUG_INIT                    // Use this to debug initialization using 'v-1;' *****Not possible Photon.  Use Argon or Photon2
+// #define DEBUG_DETAIL                    // Use this to debug initialization using 'v-1;' *****Not possible Photon.  Use Argon or Photon2
 // #define LOGHANDLE
 
 // * = SRAM EEPROM adjustments, retained on power reset

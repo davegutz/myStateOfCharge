@@ -59,6 +59,10 @@ struct ScaleBrk
     n_d = n_hi - n_lo;
     p_d = p_hi - p_lo;
   }
+  void pretty_print()
+  {
+    Serial.printf("ScaleBrk  [%7.3f %7.3f  %7.3f %7.3f]\n", n_lo, n_hi, p_lo, p_hi);
+  }
 };
 
 // DS18-based temp sensor
@@ -475,6 +479,7 @@ public:
   boolean reset_temp() { return ( reset_temp_ ); };
   unsigned long long sample_time_ib(void) { return sample_time_ib_; };
   unsigned long long sample_time_vb(void) { return sample_time_vb_; };
+  void select_print(Sensors *Sen, BatteryMonitor *Mon);
   void shunt_print();         // Print selection result
   void shunt_select_initial(const boolean reset);   // Choose between shunts for model
   void temp_load_and_filter(Sensors *Sen, const boolean reset_temp);

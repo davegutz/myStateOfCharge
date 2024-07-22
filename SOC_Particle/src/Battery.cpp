@@ -407,7 +407,7 @@ void BatteryMonitor::init_battery_mon(const boolean reset, Sensors *Sen)
     if ( isnan(ib_) ) ib_ = 0.;     // reset overflow
     dv_dyn_ = ib_*chem_.r_ss*ap.slr_res;
     voc_ = vb_ - dv_dyn_;
-    #ifdef DEBUG_INIT
+    #ifdef DEBUG_DETAIL
         if ( sp.debug()==-1 )
             Serial.printf("mon: ib%7.3f vb%7.3f voc%7.3f\n", ib_, vb_, voc_);
     #endif
@@ -536,7 +536,7 @@ boolean BatteryMonitor::solve_ekf(const boolean reset, const boolean reset_temp,
     }
     init_soc_ekf(soc_solved);
 
-    #ifdef DEBUG_INIT
+    #ifdef DEBUG_DETAIL
         if ( sp.debug()==-1 && reset_temp) Serial.printf("sek: Vb%7.3f Vba%7.3f voc_soc%7.3f voc_stat%7.3f voc_sol%7.3f cnt %d dx%8.4f e%10.6f soc_sol%8.4f\n",
             Sen->Vb, Vb_avg, voc_soc_, voc_stat_, voc_solved, ice_->count(), ice_->dx(), ice_->e(), soc_solved);
     #endif
@@ -858,7 +858,7 @@ void BatterySim::init_battery_sim(const boolean reset, Sensors *Sen)
     ib_fut_ = ib_;
     init_hys(0.0);
     ibs_ = hys_->ibs();
-    #ifdef DEBUG_INIT
+    #ifdef DEBUG_DETAIL
         if ( sp.debug()==-1 )
         {
             Serial.printf("sim: ib%7.3f ibs%7.3f voc%7.3f vb%7.3f\n", ib_, ibs_, voc_, vb_);
