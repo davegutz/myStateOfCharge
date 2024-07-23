@@ -49,7 +49,8 @@ plt.rcParams.update({'figure.max_open_warning': 0})
 
 def plq(plt_, sx, st, sy, yt, slr=1., add=0., color='black', linestyle='-', label=None, marker=None,
         markersize=None, markevery=None):
-    if sx is not None and sy is not None and hasattr(sx, st) and hasattr(sy, yt) and getattr(sy, yt)[0] is not None:
+    if (sx is not None and sy is not None and hasattr(sx, st) and hasattr(sy, yt) and
+            len(getattr(sy, yt)) > 0 and getattr(sy, yt)[0] is not None):
         try:
             yscld = getattr(sy, yt) * slr + add
         except TypeError:

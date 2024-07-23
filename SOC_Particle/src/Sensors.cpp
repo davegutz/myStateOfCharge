@@ -678,7 +678,6 @@ void Fault::select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean re
       latched_fail_ = false;
       ib_sel_stat_ = sp.ib_force();
     }
-    faultAssign(ib_sel_stat_!=1 || (sp.ib_force()!=0 && !ap.fake_faults)  || ib_diff_fa() || ib_amp_fa() || ib_noa_fa() || vb_fail(), RED_LOSS); // for active-standby, redundancy loss anytime ib_sel_stat<0
   #endif
 
   // vb failure from wrap result
@@ -782,23 +781,36 @@ void Fault::select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean re
 // Select ib decision table active-standby
 void Fault::ib_decision_active_standby(Sensors *Sen)
 {
-  if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )  // these separate inputs don't latch
+  if ( ap.fake_faults )
   {
+    ib_sel_stat_ = IB_SEL_STAT_DEF;
+    latched_fail_ = false;
+    ib_decision_ = 1;
+  }
+  else if ( latched_fail_ )
+    // ib_decision_ = 2;
+    {}
+  else if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )  // these separate inputs don't latch
+  {
+    ib_decision_ = 3;
     ib_sel_stat_ = 0;    // takes two not latched inputs to set and latch
     latched_fail_ = true;
   }
   else if ( sp.ib_force()>0 && !Sen->Flt->ib_amp_fa() )
   {
+    ib_decision_ = 4;
     ib_sel_stat_ = 1;
     latched_fail_ = true;
   }
   else if ( ib_sel_stat_last_==-1 && !Sen->Flt->ib_noa_fa() && !reset_all_faults_ )  // latches
   {
+    ib_decision_ = 5;
     ib_sel_stat_ = -1;
     latched_fail_ = true;
   }
   else if ( sp.ib_force()<0 && !Sen->Flt->ib_noa_fa() && !reset_all_faults_)  // latches
   {
+    ib_decision_ = 6;
     ib_sel_stat_ = -1;
     latched_fail_ = true;
   }
@@ -806,6 +818,7 @@ void Fault::ib_decision_active_standby(Sensors *Sen)
   {
     if ( Sen->Flt->ib_amp_fa() && !Sen->Flt->ib_noa_fa() )  // these inputs don't latch
     {
+      ib_decision_ = 7;
       ib_sel_stat_ = -1;
       latched_fail_ = true;
     }
@@ -813,11 +826,13 @@ void Fault::ib_decision_active_standby(Sensors *Sen)
     {
       if ( vb_sel_stat_ && wrap_hi_or_lo_fa() )    // wrap_hi_or_lo_fa is not latched
       {
+        ib_decision_ = 8;
         ib_sel_stat_ = -1;      // two not latched fails but result of 'and' with ib_diff_fa latches latched_fail
         latched_fail_ = true;
       }
       else if ( cc_diff_fa() )  // this input doesn't latch but result of 'and' with ib_diff_fa latches latched_fail
       {
+        ib_decision_ = 9;
         ib_sel_stat_ = -1;      // takes two not latched inputs to isolate ib failure and to set and latch ib_sel
         latched_fail_ = true;
       }
@@ -826,6 +841,7 @@ void Fault::ib_decision_active_standby(Sensors *Sen)
   else if ( ( (sp.ib_force() <  0) && ib_sel_stat_last_>-1 ) ||
             ( (sp.ib_force() >= 0) && ib_sel_stat_last_< 1 )   )  // Latches.  Must reset to move out of no amp selection.  ==0 not reachable
   {
+    ib_decision_ = 10;
     latched_fail_ = true;
   }
   else
@@ -833,6 +849,10 @@ void Fault::ib_decision_active_standby(Sensors *Sen)
     latched_fail_ = false;
   }
   faultAssign(ib_sel_stat_!=1 || sp.ib_force()!=0  || ib_diff_fa() || ib_amp_fa() || ib_noa_fa() || vb_fail(), RED_LOSS); // for active-standby, redundancy loss anytime ib_sel_stat<0
+
+  #ifdef DEBUG_DETAIL
+    if ( sp.debug()==62 ) Serial.printf("fake_faults=%d ib_force=%d reset=%d ib_sel_stat_last%d ib_amp_fa%d ib_noa_fa%d ib_diff_fa%d vb_sel_stat_last%d wrap_m_fa%d wrap_n_fa%d  cc_diff_fa%d latched_fail_=%d ib_sel_stat%d ib_decision_=%d\n", ap.fake_faults, sp.ib_force(), reset_all_faults_, ib_sel_stat_last_, ib_amp_fa(), ib_noa_fa(), ib_diff_fa(), vb_sel_stat_last_, wrap_m_fa(), wrap_n_fa(), cc_diff_fa(), latched_fail_, ib_sel_stat_, ib_decision_);
+  #endif
 }
 
 // Select ib decision table active-standby
@@ -946,18 +966,10 @@ void Fault::ib_decision_hi_lo(Sensors *Sen)
     latched_fail_ = false;
     ib_decision_ = 17;
   }
-  #ifdef HDWE_IB_HI_LO
-    faultAssign(ib_choice_!=1 || vb_sel_stat_!=1, RED_LOSS);  // hi_lo
-  #else
-    faultAssign(ib_sel_stat_!=1 || vb_sel_stat_!=1, RED_LOSS);  // hi_lo
-  #endif
+  faultAssign(ib_choice_!=1 || vb_sel_stat_!=1, RED_LOSS);  // hi_lo
 
   #ifdef DEBUG_DETAIL
-    #ifdef HDWE_IB_HI_LO
-      if ( sp.debug()==62 ) Serial.printf("latched_fail_enter %d fake_faults=%d ib_force=%d reset=%d ib_choice_last%d ib_amp_fa%d ib_noa_fa%d ib_diff_fa%d vb_sel_stat_last%d wrap_m_fa%d wrap_n_fa%d  cc_diff_fa%d latched_fail_=%d ib_choice_%d ib_decision_=%d\n", latched_fail_enter, ap.fake_faults, sp.ib_force(), reset_all_faults_, ib_choice_last_, ib_amp_fa(), ib_noa_fa(), ib_diff_fa(), vb_sel_stat_last_, wrap_m_fa(), wrap_n_fa(), cc_diff_fa(), latched_fail_, ib_choice_, ib_decision_);
-    #else
-      if ( sp.debug()==62 ) Serial.printf("latched_fail_enter %d fake_faults=%d ib_force=%d reset=%d ib_sel_stat_last%d ib_amp_fa%d ib_noa_fa%d ib_diff_fa%d vb_sel_stat_last%d wrap_m_fa%d wrap_n_fa%d  cc_diff_fa%d latched_fail_=%d ib_sel_stat%d ib_decision_=%d\n", latched_fail_enter, ap.fake_faults, sp.ib_force(), reset_all_faults_, ib_sel_stat_last_, ib_amp_fa(), ib_noa_fa(), ib_diff_fa(), vb_sel_stat_last_, wrap_m_fa(), wrap_n_fa(), cc_diff_fa(), latched_fail_, ib_sel_stat_, ib_decision_);
-    #endif
+    if ( sp.debug()==62 ) Serial.printf("latched_fail_enter %d fake_faults=%d ib_force=%d reset=%d ib_choice_last%d ib_amp_fa%d ib_noa_fa%d ib_diff_fa%d vb_sel_stat_last%d wrap_m_fa%d wrap_n_fa%d  cc_diff_fa%d latched_fail_=%d ib_choice_%d ib_decision_=%d\n", latched_fail_enter, ap.fake_faults, sp.ib_force(), reset_all_faults_, ib_choice_last_, ib_amp_fa(), ib_noa_fa(), ib_diff_fa(), vb_sel_stat_last_, wrap_m_fa(), wrap_n_fa(), cc_diff_fa(), latched_fail_, ib_choice_, ib_decision_);
   #endif
 }
 
