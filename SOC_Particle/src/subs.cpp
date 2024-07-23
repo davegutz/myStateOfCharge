@@ -502,6 +502,16 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
 
   blink += 1;
   if (blink>3) blink = 0;
+
+  #ifdef DEBUG_DETAIL
+    if ( sp.debug()==63 )
+    {
+      Serial.printf("\nmodib %d ibsst %d vbsst %d tbfa %d ibmfa %d ibnafa %d ibdiffa %d dscnfa %d redloss %d\n",
+          sp.mod_ib(), Sen->Flt->ib_sel_stat(), Sen->Flt->vb_sel_stat(), Sen->Flt->tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),  Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
+      Serial.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
+          disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
+    }
+  #endif
 }
 
 // Read sensors, model signals, select between them.

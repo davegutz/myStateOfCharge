@@ -914,7 +914,7 @@ void Fault::ib_decision_hi_lo(Sensors *Sen)
     latched_fail_ = false;
     choice = 17;
   }
-  faultAssign(ib_sel_stat_!=0 || vb_sel_stat_!=1, RED_LOSS);
+  faultAssign(ib_sel_stat_!=1 || vb_sel_stat_!=1, RED_LOSS);  // hi_lo
   #ifdef DEBUG_DETAIL
     if ( sp.debug()==62 ) Serial.printf("latched_fail_enter %d fake_faults=%d ib_force=%d reset=%d ib_sel_stat_last%d ib_amp_fa%d ib_noa_fa%d ib_diff_fa%d vb_sel_stat_last%d wrap_m_fa%d wrap_n_fa%d  cc_diff_fa%d latched_fail_=%d ib_sel_stat%d choice=%d\n", latched_fail_enter, ap.fake_faults, sp.ib_force(), reset_all_faults_, ib_sel_stat_last_, ib_amp_fa(), ib_noa_fa(), ib_diff_fa(), vb_sel_stat_last_, wrap_m_fa(), wrap_n_fa(), cc_diff_fa(), latched_fail_, ib_sel_stat_, choice);
   #endif
