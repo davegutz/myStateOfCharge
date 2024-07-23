@@ -278,7 +278,7 @@ void oled_display(Adafruit_SSD1306 *display, Sensors *Sen, BatteryMonitor *Mon)
         disp_2 = " conn ";
       else if ( Sen->Flt->ib_diff_fa() )
         disp_2 = " diff ";
-      else if ( Sen->Flt->ib_sel_stat()!=0 )
+      else if ( Sen->Flt->ib_choice()!=0 )
         disp_2 = " redl ";
     #else
       if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
@@ -385,15 +385,15 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
     {
       if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
         disp_2 = "*fail";
-      else if ( Sen->Flt->ib_sel_stat()==1 )
+      else if ( Sen->Flt->ib_choice()==1 )
         disp_2 = "*fail";
-      else if ( Sen->Flt->ib_sel_stat()==-1 )
+      else if ( Sen->Flt->ib_choice()==-1 )
         disp_2 = "*amp";
       // auto section
       else if ( Sen->Flt->ib_diff_fa() )
         disp_2 = " diff ";
       // another default
-      else if ( Sen->Flt->ib_sel_stat()!=0 )
+      else if ( Sen->Flt->ib_choice()!=0 )
         disp_2 = " redl ";
     }
     else if ( blink==3 )
@@ -466,7 +466,7 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
       {
         if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
           disp_2 = "fail";
-        else if ( Sen->Flt->ib_sel_stat()!=0 )
+        else if ( Sen->Flt->ib_choice()!=0 )
           disp_2 = "accy";
       }
     #else
@@ -506,10 +506,17 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
   #ifdef DEBUG_DETAIL
     if ( sp.debug()==63 )
     {
-      Serial.printf("\nmodib %d ibsst %d vbsst %d tbfa %d ibmfa %d ibnafa %d ibdiffa %d dscnfa %d redloss %d\n",
-          sp.mod_ib(), Sen->Flt->ib_sel_stat(), Sen->Flt->vb_sel_stat(), Sen->Flt->tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),  Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
-      Serial.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
-          disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
+      #ifdef HDWE_IB_HI_LO
+        Serial.printf("\nmodib %d ibchc %d vbsst %d tbfa %d ibmfa %d ibnafa %d ibdiffa %d dscnfa %d redloss %d\n",
+            sp.mod_ib(), Sen->Flt->ib_choice(), Sen->Flt->vb_sel_stat(), Sen->Flt->tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),  Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
+        Serial.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
+            disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
+      #else
+        Serial.printf("\nmodib %d ibsst %d vbsst %d tbfa %d ibmfa %d ibnafa %d ibdiffa %d dscnfa %d redloss %d\n",
+            sp.mod_ib(), Sen->Flt->ib_sel_stat(), Sen->Flt->vb_sel_stat(), Sen->Flt->tb_fa(), Sen->Flt->ib_amp_fa(), Sen->Flt->ib_noa_fa(),  Sen->Flt->ib_diff_fa(), Sen->Flt->dscn_fa(), Sen->Flt->red_loss());
+        Serial.printf("%s   Tb,C  VOC,V  Ib,A \n%s   EKF,Ah  chg,hrs  CC, Ah\nPf; for fails.  prints=%ld\n\n",
+            disp_Tbop.c_str(), dispBot.c_str(), cp.num_v_print);
+      #endif
     }
   #endif
 }

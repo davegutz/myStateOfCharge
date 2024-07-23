@@ -46,6 +46,18 @@ extern SavedPars sp;    // Various parameters to be static at system level and s
 extern VolatilePars ap; // Various adjustment parameters shared at system level
 struct Pins;
 
+#ifdef HDWE_IB_HI_LO
+  #define IB_SEL_STAT_DEF 0
+  #define TB_SEL_STAT_DEF 1
+  #define VB_SEL_STAT_DEF 1
+#else
+  #define IB_SEL_STAT_DEF 1
+  #define TB_SEL_STAT_DEF 1
+  #define VB_SEL_STAT_DEF 1
+#endif
+
+enum ibSel {UsingNoa=-1, UsingDef=0, UsingAmp=1, UsingNone=2};
+
 struct ScaleBrk
 {
   float n_lo;
@@ -268,10 +280,24 @@ public:
   uint32_t fltw() { return fltw_; };
   uint32_t falw() { return falw_; };
   TFDelay *IbLoActive;    // Persistence low amp active status
+  boolean ib_noa_invalid() { return ib_noa_invalid_; };
   boolean ib_amp_bare() { return faultRead(IB_AMP_BARE);  };
   boolean ib_amp_fa() { return failRead(IB_AMP_FA); };
   boolean ib_amp_flt() { return faultRead(IB_AMP_FLT);  };
+  boolean ib_amp_invalid() { return ib_amp_invalid_; };
+  ibSel ib_choice() { return ib_choice_; };
+  ibSel ib_choice_past() { return ib_choice_last_; };
+  uint16_t ib_decision() { return ib_decision_;  };
+  void ib_decision_active_standby(Sensors *Sen);
+  void ib_decision_hi_lo(Sensors *Sen);
   void ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
+  float ib_diff() { return ( ib_diff_ ); };
+  float ib_diff_f() { return ( ib_diff_f_ ); };
+  boolean ib_diff_fa() { return ( failRead(IB_DIFF_HI_FA) || failRead(IB_DIFF_LO_FA) ); };
+  boolean ib_diff_hi_fa() { return failRead(IB_DIFF_HI_FA); };
+  boolean ib_diff_hi_flt() { return faultRead(IB_DIFF_HI_FLT); };
+  boolean ib_diff_lo_fa() { return failRead(IB_DIFF_LO_FA); };
+  boolean ib_diff_lo_flt() { return faultRead(IB_DIFF_LO_FLT); };
   float ib_diff_thr_;     // Threshold current difference faults, A
   float ib_diff_thr() { return ib_diff_thr_; };
   boolean ib_dscn_fa() { return failRead(IB_DSCN_FA); };
@@ -283,14 +309,6 @@ public:
   float ib_quiet_thr() { return ib_quiet_thr_; };
   void ib_range(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   int8_t ib_sel_stat() { return ib_sel_stat_; };
-  void ib_sel_stat(const boolean cmd) { ib_sel_stat_ = cmd; };
-  float ib_diff() { return ( ib_diff_ ); };
-  float ib_diff_f() { return ( ib_diff_f_ ); };
-  boolean ib_diff_fa() { return ( failRead(IB_DIFF_HI_FA) || failRead(IB_DIFF_LO_FA) ); };
-  boolean ib_diff_hi_fa() { return failRead(IB_DIFF_HI_FA); };
-  boolean ib_diff_hi_flt() { return faultRead(IB_DIFF_HI_FLT); };
-  boolean ib_diff_lo_fa() { return failRead(IB_DIFF_LO_FA); };
-  boolean ib_diff_lo_flt() { return faultRead(IB_DIFF_LO_FLT); };
   void ib_quiet(const boolean reset, Sensors *Sen);
   float ib_quiet() { return ib_quiet_; };
   float ib_rate() { return ib_rate_; };
@@ -312,11 +330,7 @@ public:
   void reset_all_faults(const boolean cmd) { reset_all_faults_ = cmd; };
   boolean reset_all_faults() { return reset_all_faults_; };
   void select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);
-  boolean ib_amp_invalid() { return ib_amp_invalid_; };
-  boolean ib_noa_invalid() { return ib_noa_invalid_; };
-  void ib_decision_active_standby(Sensors *Sen);
-  void ib_decision_hi_lo(Sensors *Sen);
-  void select_reset();
+  void reset_all_faults_select();
   void shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset);  // Range check Ib signals
   void shunt_select_initial(const boolean reset);   // Choose between shunts for model
   void tb_check(Sensors *Sen, const float _tb_min, const float _tb_max, const boolean reset);  // Range check Tb
@@ -376,6 +390,9 @@ protected:
   uint32_t fltw_;           // Bitmapped faults
   uint32_t falw_;           // Bitmapped fails
   boolean ib_amp_invalid_;  // Battery amp is invalid (hard failed)
+  ibSel ib_choice_;         // ib signal selection
+  ibSel ib_choice_last_;         // ib signal selection
+  uint16_t ib_decision_;    // ib_decision_hi_lo_, code (stops 0, stops on last decision)
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
   boolean ib_lo_active_;    // Battery low amp is in active range, T=active
@@ -498,23 +515,24 @@ public:
   ScaleBrk *sel_brk_hdwe;                  // Active/active scale break
 protected:
   LagExp *AmpFilt;      // Noise filter for calibration
+  unsigned long long dt_ib_;                // Delta update of selected Ib sample, ms
+  unsigned long long dt_ib_hdwe_;           // Delta update of Ib sample, ms
+  void ib_choose_active_standby(void);   // Deliberate choice based on inputs and results
+  void ib_choose_hi_lo(void);   // Deliberate choice based on inputs and results
+  unsigned long long inst_millis_;          // millis offset to account for setup() time, ms
+  unsigned long long inst_time_;            // UTC Zulu at instantiation, s
   LagExp *NoaFilt;      // Noise filter for calibration
-  LagExp *SelFilt;      // Noise filter for calibration
-  LagExp *VbFilt;       // Noise filter for calibration
-  void ib_choose(void);   // Deliberate choice based on inputs and results
   PRBS_7 *Prbn_Tb_;     // Tb noise generator model only
   PRBS_7 *Prbn_Vb_;     // Vb noise generator model only
   PRBS_7 *Prbn_Ib_amp_; // Ib amplified sensor noise generator model only
   PRBS_7 *Prbn_Ib_noa_; // Ib non-amplified sensor noise generator model only
   boolean reset_temp_;  // Keep track of temperature reset, stored for plotting, T=reset
   unsigned long long sample_time_ib_;       // Exact moment of selected Ib sample, ms
-  unsigned long long sample_time_vb_;       // Exact moment of selected Vb sample, ms
   unsigned long long sample_time_ib_hdwe_;  // Exact moment of Ib sample, ms
+  unsigned long long sample_time_vb_;       // Exact moment of selected Vb sample, ms
   unsigned long long sample_time_vb_hdwe_;  // Exact moment of Vb sample, ms
-  unsigned long long dt_ib_hdwe_;           // Delta update of Ib sample, ms
-  unsigned long long dt_ib_;                // Delta update of selected Ib sample, ms
-  unsigned long long inst_time_;            // UTC Zulu at instantiation, s
-  unsigned long long inst_millis_;          // millis offset to account for setup() time, ms
+  LagExp *SelFilt;      // Noise filter for calibration
+  LagExp *VbFilt;       // Noise filter for calibration
 };
 
 // Misc

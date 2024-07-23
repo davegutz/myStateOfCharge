@@ -109,7 +109,7 @@ boolean recall_P(const char letter_1, BatteryMonitor *Mon, Sensors *Sen)
                 Sen->ShuntAmp->vshunt_int(), Sen->ShuntAmp->vshunt(), Sen->ShuntAmp->Vc(), Sen->ShuntAmp->Vo(), Sen->ShuntAmp->Ishunt_cal());
             Serial.printf("Noa:"); Serial.printf("Vshunt_int,Vshunt,Vc,Vo,ib_tot_bias,Ishunt_cal=,%d,%7.3f,%7.3f,%7.3f,%7.3f,\n", 
                 Sen->ShuntNoAmp->vshunt_int(), Sen->ShuntNoAmp->vshunt(), Sen->ShuntNoAmp->Vc(), Sen->ShuntNoAmp->Vo(), Sen->ShuntNoAmp->Ishunt_cal());
-            Serial.printf("Sel:Noa,Ib=,%d,%7.3f\n", sp.ib_force(), Sen->Ib);
+            Serial.printf("I_f:Noa,Ib=,%d,%7.3f\n", sp.ib_force(), Sen->Ib);
             break;
 
         default:
