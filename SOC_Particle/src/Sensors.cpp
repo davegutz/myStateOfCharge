@@ -421,18 +421,18 @@ void Fault::ib_range(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   // Range checks latch
   if ( sp.mod_ib() )
   {
-    faultAssign( ( abs(Sen->ib_amp_model()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa, IB_AMP_FLT );
-    faultAssign( ( abs(Sen->ib_noa_model()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa, IB_NOA_FLT );
+    faultAssign( ( abs(Sen->ib_amp_model()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_AMP_FLT );
+    faultAssign( ( abs(Sen->ib_noa_model()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_NOA_FLT );
   }
   else
   {
     #ifndef HDWE_BARE
-      faultAssign( ( ib_amp_bare() || abs(Sen->ib_amp_hdwe()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa, IB_AMP_FLT );
-      faultAssign( ( ib_noa_bare() || abs(Sen->ib_noa_hdwe()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa, IB_NOA_FLT );
+      faultAssign( ( ib_amp_bare() || abs(Sen->ib_amp_hdwe()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_AMP_FLT );
+      faultAssign( ( ib_noa_bare() || abs(Sen->ib_noa_hdwe()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_NOA_FLT );
     #else
       float current_max = NOM_UNIT_CAP * sp.nP();
-      faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_AMP_FLT );
-      faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa, IB_NOA_FLT );
+      faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa && !sp.tweak_test(), IB_AMP_FLT );
+      faultAssign( abs(Sen->ShuntNoAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa && !sp.tweak_test(), IB_NOA_FLT );
     #endif
   }
 
@@ -1480,14 +1480,20 @@ void Sensors::shunt_select_initial(const boolean reset)
     }
     else
     {
-      mod_add = sp.inj_bias() + sp.ib_bias_all();
+      mod_add = sp.ib_bias_all() + sp.inj_bias();
       if ( sp.tweak_test() )
+      {
         hdwe_add = sp.inj_bias();
+        Ib_amp_model = Ib_model + Ib_amp_add() + mod_add; // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm/Mm/Nm
+        Ib_noa_model = Ib_model + Ib_noa_add() + mod_add; // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Mn/Nn
+      }
       else
+      {
         hdwe_add = 0.;
+        Ib_amp_model = max(min(Ib_model + Ib_amp_add() + mod_add, Ib_amp_max()), Ib_amp_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm/Mm/Nm
+        Ib_noa_model = max(min(Ib_model + Ib_noa_add() + mod_add, Ib_noa_max()), Ib_noa_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Mn/Nn
+      }
     }
-    Ib_amp_model = max(min(Ib_model + Ib_amp_add(), Ib_amp_max()), Ib_amp_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm/Mm/Nm
-    Ib_noa_model = max(min(Ib_model + Ib_noa_add(), Ib_noa_max()), Ib_noa_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Mn/Nn
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
     Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);
     Vc_hdwe = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());
