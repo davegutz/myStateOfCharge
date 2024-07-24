@@ -4,7 +4,7 @@
 #include "version.h"
 
 // Features config
-#define HDWE_UNIT                    "pro0p"
+#define HDWE_UNIT                    "pro0p_chg"
 #define SOFT_SBAUD              230400      // Default Serial baud 
 #define SOFT_S1BAUD             230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9
 #define HDWE_PHOTON

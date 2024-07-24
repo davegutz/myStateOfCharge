@@ -551,8 +551,8 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
     Serial.printf("HDWE_IB_HI_LO Decisions\n");
     Serial1.printf("HDWE_IB_HI_LO Decisions\n");
   #else
-    Serial.printf"Active/Standby Decisions\n");
-    Serial1.printf"Active/Standby Decisions\n");
+    Serial.printf("Active/Standby Decisions\n");
+    Serial1.printf("Active/Standby Decisions\n");
   #endif
   Serial.printf(" wml     %d  %d 'Fo ^'\n", wrap_lo_m_flt(), wrap_lo_m_fa());
   Serial.printf(" wmh     %d  %d 'Fi ^'\n", wrap_hi_m_flt(), wrap_hi_m_fa());

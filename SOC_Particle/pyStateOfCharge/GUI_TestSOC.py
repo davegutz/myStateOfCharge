@@ -86,7 +86,10 @@ def_dict = {
     }
 
 # Transient string
-unit_list = ['pro0p', 'pro1a', 'pro2p2', 'pro3p2', 'pro4p2', 'soc0p', 'soc1a', 'soc2p2', 'soc3p2', 'soc4p2']
+unit_list = [
+    'pro0p', 'pro1a', 'pro2p2', 'pro2p2_hi_lo', 'pro3p2', 'pro3p2_hi_lo', 'pro4p2', 'soc0p', 'soc1a', 'soc2p2_hi_lo',
+    'soc3p2_hi_lo', 'soc4p2_hi_lo',
+    ]
 batt_list = ['bb', 'ch', 'chg']
 sel_list = [
     'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'noaHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
@@ -272,11 +275,16 @@ putty_connection = {'': 'test',
                     'pro0p': 'testpro0p',
                     'pro1a': 'testpro1a',
                     'pro2p2': 'testpro2p2',
+                    'pro2p2_hi_lo': 'testpro2p2',
                     'pro3p2': 'testpro3p2',
+                    'pro3p2_hi_lo': 'testpro3p2',
                     'pro4p2': 'testpro4p2',
                     'soc2p2': 'testsoc2p2',
+                    'soc2p2_hi_lo': 'testsoc2p2',
                     'soc3p2': 'testsoc3p2',
+                    'soc3p2_hi_lo': 'testsoc3p2',
                     'soc4p2': 'testsoc4p2',
+                    'soc4p2_hi_lo': 'testsoc4p2',
                     }
 
 
@@ -431,9 +439,9 @@ class Exec:
 
     def enter_unit(self):
         answer = tk.simpledialog.askstring(title=self.level, initialvalue=self.unit,
-                                           prompt="Enter unit e.g. 'pro0p', 'pro1a',"
-                                                  " pro3p2', 'pro4p2', 'soc0p', 'soc1a',"
-                                                  "'soc2p2', 'soc3p2', 'soc4p2':")
+                                           prompt="Enter unit e.g. 'pro0p', 'pro1a', 'pro2p2'"
+                                                  "'pro2p2_hi_lo', 'pro3p2', 'pro3p2_hi_lo', 'pro4p2', 'soc0p', 'soc1a',"
+                                                  "'soc2p2_hi_lo', 'soc3p2_hi_lo', 'soc4p2_hi_lo':")
         if answer is None or answer == ():
             print('enter operation cancelled')
             return

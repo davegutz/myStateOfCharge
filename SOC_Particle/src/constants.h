@@ -110,7 +110,7 @@ const String unit = version + "_" + HDWE_UNIT;
     #ifdef SOFT_DEPLOY_PHOTON
         #define NFLT   7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  (7)
         #define NHIS  49  // Number of saved SRAM history data slices. Sized to approx match  Photon2, If too large, will get compile error BACKUPSRAM   (49)
-        #define NSUM 106  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error APP_FLASH, or GUI FRAG msg  (110)
+        #define NSUM  91  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error APP_FLASH, or GUI FRAG msg  (110)
     #else
         #ifdef DEBUG_DETAIL
             #error("Not possible to deploy Photon with DEBUG_DETAIL")
