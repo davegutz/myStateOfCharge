@@ -604,6 +604,10 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plq(plt, mv, 'time', mv, 'wv_fa', add=-2, color='red', linestyle='--', label='wrap_vb_fa' + test_str + '-2')
     plq(plt, mo, 'time', mo, 'ccd_fa', add=-4, color='green', linestyle='-', label='cc_diff_fa' + ref_str + '-4')
     plq(plt, mv, 'time', mv, 'ccd_fa', add=-4, color='red', linestyle='--', label='cc_diff_fa' + test_str + '-4')
+    plq(plt, mo, 'time', mo, 'ib_diff_fa', add=-6, color='green', linestyle='-', label='ib_diff_fa' + ref_str + '-6')
+    plq(plt, mv, 'time', mv, 'ib_diff_fa', add=-6, color='red', linestyle='--', label='ib_diff_fa' + test_str + '-6')
+    plq(plt, mo, 'time', mo, 'ib_diff_flt', add=-8, color='green', linestyle='-', label='ib_diff_flt' + ref_str + '-8')
+    plq(plt, mv, 'time', mv, 'ib_diff_flt', add=-8, color='red', linestyle='--', label='ib_diff_flt' + test_str + '-8')
     plt.legend(loc=1)
     plt.subplot(335)
     if hasattr(mo, 'mod_data'):
