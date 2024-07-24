@@ -122,7 +122,7 @@ const String unit = version + "_" + HDWE_UNIT;
             #else
                 #define NFLT  7  // Number of saved SRAM/EERAM fault data slices 10 s intervals.  If too large, will get compile error BACKUPSRAM (7)
                 #define NHIS 56  // Number of saved SRAM history data slices. Sized to approx match  Photon2  (56)
-                #define NSUM  9  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (9)
+                #define NSUM  2  // Number of saved summaries. If NFLT + NHIS + NSUM too large, will get compile error BACKUPSRAM  (9)
             #endif
         #endif
     #endif
@@ -235,6 +235,10 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define HDWE_RS_2WIRE   15000.          // 2-wire thermistor characteristic   TODO: switch over to industry accepted exponential equation Steinhart-Hart (see '2-wireRTD.ods')
 #define HDWE_B_2WIRE    262.79          // 2-wire thermistor characteristic   TODO: switch over to industry accepted exponential equation Steinhart-Hart (see '2-wireRTD.ods')
 #define SIZE_MARG         1.05          // Threshold margin, scalar (1.05)
+
+#if !defined(NOM_DY)
+    #define NOM_DY             0.0          // Nominal Dy Sim table bias (0.0)
+#endif
 
 #if !defined(IB_ABS_MAX_AMP)
     #define IB_ABS_MAX_AMP (float(NOM_UNIT_CAP)*float(NP))

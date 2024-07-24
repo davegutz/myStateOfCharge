@@ -1418,11 +1418,11 @@ float Sensors::Tb_noise()
 
 // Conversion.   Here to avoid circular reference to sp in headers.
 float Sensors::Ib_amp_add() { return ( ap.ib_amp_add * sp.nP() ); };
-float Sensors::Ib_amp_max() { return ( ap.ib_amp_max * sp.nP() ); };
-float Sensors::Ib_amp_min() { return ( ap.ib_amp_min * sp.nP() ); };
+float Sensors::Ib_amp_max() { if (sp.tweak_test()) return ( __FLT_MAX__ ); else return ( ap.ib_amp_max * sp.nP() ); };
+float Sensors::Ib_amp_min() { if (sp.tweak_test()) return ( -__FLT_MAX__ ); else return ( ap.ib_amp_min * sp.nP() ); };
 float Sensors::Ib_noa_add() { return ( ap.ib_noa_add * sp.nP() ); };
-float Sensors::Ib_noa_max() { return ( ap.ib_noa_max * sp.nP() ); };
-float Sensors::Ib_noa_min() { return ( ap.ib_noa_min * sp.nP() ); };
+float Sensors::Ib_noa_max() { if (sp.tweak_test()) return ( __FLT_MAX__ ); else return ( ap.ib_noa_max * sp.nP() ); };
+float Sensors::Ib_noa_min() { if (sp.tweak_test()) return ( -__FLT_MAX__ ); else return ( ap.ib_noa_min * sp.nP() ); };
 float Sensors::Vb_add() { return ( ap.vb_add * sp.nS() ); };
 
 // Vb noise
@@ -1481,19 +1481,10 @@ void Sensors::shunt_select_initial(const boolean reset)
     else
     {
       mod_add = sp.ib_bias_all() + sp.inj_bias();
-      if ( sp.tweak_test() )
-      {
-        hdwe_add = sp.inj_bias();
-        Ib_amp_model = Ib_model + Ib_amp_add() + mod_add; // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm/Mm/Nm
-        Ib_noa_model = Ib_model + Ib_noa_add() + mod_add; // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Mn/Nn
-      }
-      else
-      {
-        hdwe_add = 0.;
-        Ib_amp_model = max(min(Ib_model + Ib_amp_add() + mod_add, Ib_amp_max()), Ib_amp_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm/Mm/Nm
-        Ib_noa_model = max(min(Ib_model + Ib_noa_add() + mod_add, Ib_noa_max()), Ib_noa_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Mn/Nn
-      }
+      hdwe_add = 0.;
     }
+    Ib_amp_model = max(min(Ib_model + Ib_amp_add() + mod_add, Ib_amp_max()), Ib_amp_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm/Mm/Nm
+    Ib_noa_model = max(min(Ib_model + Ib_noa_add() + mod_add, Ib_noa_max()), Ib_noa_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Mn/Nn
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
     Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);
     Vc_hdwe = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());

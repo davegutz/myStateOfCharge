@@ -242,7 +242,7 @@ class Chemistry(BMS):
         # usable Coulombs (.9976)
         self.dqdt = 0.01  # Change of charge with temperature, fraction/deg C (0.01 from literature)
         self.dvoc_dt = -.01  # Change of VOC with operating temperature in range 0 - 50 C V/deg C (0.004)
-        self.dvoc = -0.1  # Adjustment for calibration error, V (systematic error; may change in the future, 0)
+        self.dvoc = -0.14  # Adjustment for calibration error, V (systematic error; may change in the future, 0)
         self.hys_cap = 1.e4  # Capacitance of hysteresis, Farads.  tau_null = 1 / 0.001 / 1.8e4 = 0.056 s (1e4)
         self.low_voc = 9.0  # Voltage threshold for BMS to turn off battery (9.0)
         self.low_t = 0.  # Minimum temperature for valid saturation check, because BMS shuts off battery low.\

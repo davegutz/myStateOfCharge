@@ -4,11 +4,11 @@
 #include "version.h"
 
 // Features config
-#define HDWE_UNIT               "pro3p2_hi_lo"
+#define HDWE_UNIT               "pro3p2"
 #define SOFT_SBAUD              460800      // Default Serial baud when able (don't think this does anything)
 #define SOFT_S1BAUD             230400      // Default Serial1 baud when able to run AT to set it using AT+BAUD9 (don't think this does anything)
 #define HDWE_PHOTON2
-#define HDWE_IB_HI_LO
+// #define HDWE_IB_HI_LO
 #define HDWE_2WIRE
 // #define SOFT_DEBUG_QUEUE
 // #define DEBUG_DETAIL                    // Use this to debug initialization using 'v-1;'
@@ -26,23 +26,15 @@
 #define CURR_BIAS_NOA         -0.6  // Calibration of non-amplified shunt sensor (* 'DB'), A
 #define CURR_SCALE_NOA         1.0  // Hardware to match data (* 'SB')
 #define CURR_SCALE_DISCH       1.0  // Scale discharge to account for asymetric inverter action only on discharge (* 'SD'), slr
-#define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (1333 is 100A/0.075V)
-#define SHUNT_AMP_R1          5100. // Internal amp resistance 196x, ohms (5100)
-#define SHUNT_AMP_R2       1000000. // Internal amp resistance 196x, ohms (1000000)
-#define IB_ABS_MAX_AMP        12.2  // Hard range limit of sensor electrically impossible (=1.65 * SHUNT_GAIN * SHUNT_AMP_R1 / SHUNT_AMP_R2 *1.05) but saw -11.48 A
-#define SHUNT_NOA_R1          5100. // Internal amp resistance 29.4x, ohms (5100)
-#define SHUNT_NOA_R2         75000. // Internal amp resistance 29.4x, ohms (varies)
-#define IB_ABS_MAX_NOA         314. // Hard range limit of sensor electrically impossible (=1.65 * SHUNT_GAIN * SHUNT_NOA_R1 / SHUNT_NOA_R2 *1.05)
-#define HDWE_IB_HI_LO_NOA_LO   -11. // Fully NOA bank discharge transition, A (-11)
-#define HDWE_IB_HI_LO_AMP_LO   -10. // Fully AMP bank discharge transition, A (-10)  
-#define HDWE_IB_HI_LO_AMP_HI    10. // Fully AMP bank charge transition, A (10)
-#define HDWE_IB_HI_LO_NOA_HI    11. // Fully NOA bank charge transition, A (11)
-#define CURR_BIAS_ALL           0.0 // Bias on all shunt sensors (* 'DI'), A
-#define VOLT_BIAS              -6.0 // Bias on Vb sensor (* 'Dc'), V
-#define TEMP_BIAS               0.0 // Bias on Tb sensor (* 'Dt'), deg C
-#define VB_SENSE_R_LO          4700 // Vb low sense resistor, ohm (4700)
-#define VB_SENSE_R_HI         22000 // Vb high sense resistor, ohm (22000)
-#define VB_SCALE                1.0 // Scale Vb sensor (* 'SV')
+#define SHUNT_GAIN            1333. // Shunt V2A gain (scale with * 'SA' and 'SB'), A/V (-1333 is -100A/0.075V)
+#define SHUNT_AMP_R1          5600.     // Amplifed shunt ADS resistance, ohms
+#define SHUNT_AMP_R2          27000.    // Amplifed shunt ADS resistance, ohms
+#define CURR_BIAS_ALL         0.0   // Bias on all shunt sensors (* 'DI'), A
+#define VOLT_BIAS             1.8   // Bias on Vb sensor (* 'Dc'), V
+#define TEMP_BIAS             0.0   // Bias on Tb sensor (* 'Dt'), deg C
+#define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
+#define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
+#define VB_SCALE              1.017  // Scale Vb sensor (* 'SV')
 #define VTAB_BIAS             0.14    // Bias on voc_soc table (* 'Dw'), V    ** match g20240331
 #define NOM_DY                0.14    // Bias on voc_soc table in Sim ('Dy'), V  ** match g20240331
 
