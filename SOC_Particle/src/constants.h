@@ -236,10 +236,22 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define HDWE_B_2WIRE    262.79          // 2-wire thermistor characteristic   TODO: switch over to industry accepted exponential equation Steinhart-Hart (see '2-wireRTD.ods')
 #define SIZE_MARG         1.05          // Threshold margin, scalar (1.05)
 
-#if !defined(NOM_DY)
-    #define NOM_DY             0.0          // Nominal Dy Sim table bias (0.0)
+// Default values for constants that can be overridden
+#if !defined(NOM_DS)
+    #define NOM_DS             0.0          // Nominal VOC(SOC) del soc (Ds) 0.0)
 #endif
-
+#if !defined(NOM_DY)
+    #define NOM_DY             0.0          // Nominal Dy Sim table bias (Dy) (0.0)
+#endif
+#if !defined(TEMP_BIAS)
+    #define TEMP_BIAS          0.0          // Nominal bias on Tb (D^) (0.0)
+#endif
+#if !defined(NOM_VB_ADD)
+    #define NOM_VB_ADD         0.0          // Nominal bias on Vb (Dv) (0.0)
+#endif
+#if !defined(NOM_VC_ADD)
+    #define NOM_VC_ADD         0.0          // Nominal bias on Vc (D3) (0.0)
+#endif
 #if !defined(IB_ABS_MAX_AMP)
     #define IB_ABS_MAX_AMP (float(NOM_UNIT_CAP)*float(NP))
 #endif
@@ -278,9 +290,6 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #endif
 #if !defined(VOLT_BIAS)
     #define VOLT_BIAS 0.
-#endif
-#if !defined(TEMP_BIAS)
-    #define TEMP_BIAS 0.
 #endif
 #if !defined(CURR_BIAS_ALL)
     #define CURR_BIAS_ALL 0.

@@ -477,16 +477,18 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   wrap_scalars(Mon);
 
   // HI_LO-Only Logic
-  LoopIbNoa->calculate(reset_loc, Sen->ib_noa());
-  LoopIbAmp->calculate(reset_loc || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO, Sen->ib_amp());
-  faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
-  failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // WRAP_HI_M_FA not latched
-  faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);
-  failAssign( LoopIbAmp->lo_fail(), WRAP_LO_M_FA);  // WRAP_LO_M_FA not latched
-  faultAssign( LoopIbNoa->hi_fault(), WRAP_HI_N_FLT);
-  failAssign( LoopIbNoa->hi_fail(), WRAP_HI_N_FA);  // WRAP_HI_N_FA not latched
-  faultAssign( LoopIbNoa->lo_fault(), WRAP_LO_N_FLT);
-  failAssign( LoopIbNoa->lo_fail(), WRAP_LO_N_FA);  // WRAP_LO_N_FA not latched
+  #ifdef HDWE_IB_HI_LO
+    LoopIbNoa->calculate(reset_loc, Sen->ib_noa());
+    LoopIbAmp->calculate(reset_loc || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO, Sen->ib_amp());
+    faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
+    failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // WRAP_HI_M_FA not latched
+    faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);
+    failAssign( LoopIbAmp->lo_fail(), WRAP_LO_M_FA);  // WRAP_LO_M_FA not latched
+    faultAssign( LoopIbNoa->hi_fault(), WRAP_HI_N_FLT);
+    failAssign( LoopIbNoa->hi_fail(), WRAP_HI_N_FA);  // WRAP_HI_N_FA not latched
+    faultAssign( LoopIbNoa->lo_fault(), WRAP_LO_N_FLT);
+    failAssign( LoopIbNoa->lo_fail(), WRAP_LO_N_FA);  // WRAP_LO_N_FA not latched
+  #endif
 
   // Overall Logic
   #ifdef HDWE_IB_HI_LO

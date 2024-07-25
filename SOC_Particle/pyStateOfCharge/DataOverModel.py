@@ -593,8 +593,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plq(plt, mv, 'time', mv, 'wh_n_fa', add=+8, color='red', linestyle='--', label='wrap_hi_n_fa' + test_str + '+8')
     plq(plt, mo, 'time', mo, 'wh_n_flt', add=+6, color='green', linestyle='-', label='wrap_hi_n_flt' + ref_str + '+6')
     plq(plt, mv, 'time', mv, 'wh_n_flt', add=+6, color='red', linestyle='--', label='wrap_hi_n_flt' + test_str + '+6')
-    plq(plt, mv, 'time', mo, 'wl_n_fa', add=+4, color='green', linestyle='-.', label='wrap_lo_n_fa' + ref_str + '+4')
-    plq(plt, mv, 'time', mv, 'wl_n_fa', add=+4, color='red', linestyle='-.', label='wrap_lo_n_fa' + test_str + '+4')
+    plq(plt, mo, 'time', mo, 'wl_n_fa', add=+4, color='green', linestyle='-', label='wrap_lo_n_fa' + ref_str + '+4')
+    plq(plt, mv, 'time', mv, 'wl_n_fa', add=+4, color='red', linestyle='--', label='wrap_lo_n_fa' + test_str + '+4')
     plq(plt, mo, 'time', mo, 'wl_n_flt', add=+2, color='green', linestyle='-', label='wrap_lo_n_flt' + ref_str + '+2')
     plq(plt, mv, 'time', mv, 'wl_n_flt', add=+2, color='red', linestyle='--', label='wrap_lo_n_flt' + test_str + '+2')
 
