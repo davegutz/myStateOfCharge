@@ -123,8 +123,8 @@ void  VolatilePars::initialize()
     V_[n_++] =(hys_state_p      = new FloatV("  ", "SH", NULL,"Sim hys state",        "v",      -10,  10,   &hys_state,         0));
     V_[n_++] =(Ib_amp_noise_amp_p= new FloatV("  ","DM", NULL,"Amp amp noise",        "A",      0,    1000, &Ib_amp_noise_amp,  IB_AMP_NOISE));
     V_[n_++] =(ib_amp_add_p     = new FloatV("  ", "Dm", NULL,"Amp signal add",       "A",      -1000,1000, &ib_amp_add,        0));
-    V_[n_++] =(ib_max_amp_p     = new FloatV("  ", "Mm", NULL,"Amp hdwe signal max",  "A",      0,    __FLT_MAX__, &ib_amp_max, (IB_ABS_MAX_AMP/NP/0.95)));
-    V_[n_++] =(ib_min_amp_p     = new FloatV("  ", "Mn", NULL,"Amp hdwe signal min",  "A",      -__FLT_MAX__,   0, &ib_amp_min, (-IB_ABS_MAX_AMP/NP/0.95)));
+    V_[n_++] =(ib_max_amp_p     = new FloatV("  ", "Mm", NULL,"Amp hdwe unit max",    "A",      0,    __FLT_MAX__, &ib_amp_max, (IB_ABS_MAX_AMP/NP/0.95)));
+    V_[n_++] =(ib_min_amp_p     = new FloatV("  ", "Mn", NULL,"Amp hdwe unit min",    "A",      -__FLT_MAX__,   0, &ib_amp_min, (-IB_ABS_MAX_AMP/NP/0.95)));
     V_[n_++] =(ib_diff_slr_p    = new FloatV("  ", "Fd", NULL,"Slr ib_diff thr",      "A",      0,    1000, &ib_diff_slr,       1));
     V_[n_++] =(Ib_noa_noise_amp_p= new FloatV("  ","DN", NULL,"Amp noa noise",        "A",      0,    1000, &Ib_noa_noise_amp,  IB_NOA_NOISE));
     V_[n_++] =(ib_noa_add_p     = new FloatV("  ", "Dn", NULL,"No amp signal add",    "A",      -1000,1000, &ib_noa_add,        0));

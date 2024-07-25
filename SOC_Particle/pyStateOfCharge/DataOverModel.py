@@ -539,16 +539,16 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plt.ylim(-1, 1)
     plt.legend(loc=1)
     plt.subplot(334)
-    plq(plt, mo, 'time', mo, 'ib_sel_stat', add=-2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')
-    plq(plt, mv, 'time', mv, 'ib_sel_stat', add=-2, color='blue', linestyle='--', label='ib_sel_stat' + test_str + '-2')
+    plq(plt, mo, 'time', mo, 'tb_sel', add=+6, color='green', linestyle='-', label='tb_sel_stat' + ref_str + '+6')
+    plq(plt, mv, 'time', mv, 'tb_sel', add=+6, color='red', linestyle='--', label='tb_sel_stat' + test_str + '+6')
+    plq(plt, mo, 'time', mo, 'vb_sel', add=+2, color='magenta', linestyle='-', label='vb_sel_stat' + ref_str + '+2')
+    plq(plt, mv, 'time', mv, 'vb_sel', add=+2, color='cyan', linestyle='--', label='vb_sel_stat' + test_str + '+2')
     plq(plt, mo, 'time', mo, 'tb_flt', color='green', linestyle='-', label='tb_flt' + ref_str)
     plq(plt, mv, 'time', mv, 'tb_flt', color='red', linestyle='--', label='tb_flt' + test_str)
     plq(plt, mo, 'time', mo, 'tb_fa', color='magenta', linestyle='-.', label='tb_fa' + ref_str)
     plq(plt, mv, 'time', mv, 'tb_fa', color='cyan', linestyle=':', label='tb_fa' + test_str)
-    plq(plt, mo, 'time', mo, 'vb_sel', add=+2, color='magenta', linestyle='-', label='vb_sel_stat' + ref_str + '+2')
-    plq(plt, mv, 'time', mv, 'vb_sel', add=+2, color='cyan', linestyle='--', label='vb_sel_stat' + test_str + '+2')
-    plq(plt, mo, 'time', mo, 'tb_sel', add=+6, color='green', linestyle='-', label='tb_sel_stat' + ref_str + '+6')
-    plq(plt, mv, 'time', mv, 'tb_sel', add=+6, color='red', linestyle='--', label='tb_sel_stat' + test_str + '+6')
+    plq(plt, mo, 'time', mo, 'ib_sel_stat', add=-2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')
+    plq(plt, mv, 'time', mv, 'ib_sel_stat', add=-2, color='blue', linestyle='--', label='ib_sel_stat' + test_str + '-2')
     plt.legend(loc=1)
     plt.subplot(337)
     plq(plt, mo, 'time', mo, 'e_wm_f', color='blue', linestyle='-', label='e_wrap_m_filt' + ref_str)
@@ -610,18 +610,16 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plq(plt, mv, 'time', mv, 'ib_diff_flt', add=-8, color='red', linestyle='--', label='ib_diff_flt' + test_str + '-8')
     plt.legend(loc=1)
     plt.subplot(335)
+    plt.plot(mo.time, np.array(mo.bms_off) + 4, color='red', linestyle='-', label='bms_off' + ref_str + '+4')
+    plt.plot(mv.time, np.array(mv.bms_off) + 4, color='green', linestyle='--', label='bms_off' + test_str + '+4')
+    if so is not None:
+        plt.plot(so.time, np.array(so.bms_off_s) + 4, color='blue', linestyle='-.', label='bms_off_s' + ref_str + '+4')
     if hasattr(mo, 'mod_data'):
         mod_min = min(min(mo.mod_data), min(mv.mod_data))
     else:
         mod_min = min(mv.mod_data)
     plq(plt, mo, 'time', mo, 'mod_data', add=-mod_min, color='blue', linestyle='-', label='mod' + ref_str + '-' + str(mod_min))
     plq(plt, mv, 'time', mv, 'mod_data', add=-mod_min, color='red', linestyle='--', label='mod' + test_str + '-' + str(mod_min))
-    plt.plot(mo.time, mo.sat + 2, color='black', linestyle='-', label='sat' + ref_str + '+2')
-    plt.plot(mv.time, np.array(mv.sat) + 2, color='green', linestyle='--', label='sat' + test_str + '+2')
-    plt.plot(mo.time, np.array(mo.bms_off) + 4, color='red', linestyle='-', label='bms_off' + ref_str + '+4')
-    plt.plot(mv.time, np.array(mv.bms_off) + 4, color='green', linestyle='--', label='bms_off' + test_str + '+4')
-    if so is not None:
-        plt.plot(so.time, np.array(so.bms_off_s) + 4, color='blue', linestyle='-.', label='bms_off_s' + ref_str + '+4')
     if smv is not None:
         if hasattr(smv, 'bmso_s'):
             plt.plot(smv.time, np.array(smv.bmso_s) + 4, color='orange', linestyle=':',
@@ -629,6 +627,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
         elif hasattr(smv, 'bms_off_s'):
             plt.plot(smv.time, np.array(smv.bms_off_s) + 4, color='orange', linestyle=':',
                      label='bms_off_s' + test_str + '+4')
+    plt.plot(mo.time, mo.sat + 2, color='black', linestyle='-', label='sat' + ref_str + '+2')
+    plt.plot(mv.time, np.array(mv.sat) + 2, color='green', linestyle='--', label='sat' + test_str + '+2')
     plt.plot(mo.time, mo.sel, color='red', linestyle='-.', label='sel' + ref_str)
     plt.plot(mv.time, mv.sel, color='blue', linestyle=':', label='sel' + test_str)
     plq(plt, mo, 'time', mo, 'ib_sel_stat', add=-2, color='black', linestyle='-', label='ib_sel_stat' + ref_str + '-2')

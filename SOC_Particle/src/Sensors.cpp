@@ -255,7 +255,7 @@ void Shunt::sample(const boolean reset_loc, const float T)
 // Class Looparound
 Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp, const double wrap_trim_gain):
   chem_(Mon->chem()), e_wrap_(0.), e_wrap_filt_(0.), e_wrap_trim_(0.), e_wrap_trimmed_(0.), hi_fail_(false), hi_fault_(false), ib_(0.), 
-  lo_fail_(false), lo_fault_(false), Mon_(Mon), Sen_(Sen), voc_(0.), wrap_hi_amp_(wrap_hi_amp), wrap_lo_amp_(wrap_lo_amp),
+  lo_fail_(false), lo_fault_(false), Mon_(Mon), reset_(false), Sen_(Sen), voc_(0.), wrap_hi_amp_(wrap_hi_amp), wrap_lo_amp_(wrap_lo_amp),
   wrap_trim_gain_(wrap_trim_gain)
 {
   ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_->tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);     // actual update time provided run time
@@ -421,14 +421,14 @@ void Fault::ib_range(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   // Range checks latch
   if ( sp.mod_ib() )
   {
-    faultAssign( ( abs(Sen->ib_amp_model()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_AMP_FLT );
-    faultAssign( ( abs(Sen->ib_noa_model()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_NOA_FLT );
+    faultAssign( ( abs(Sen->ib_amp_model()) >= ap.ib_amp_max ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_AMP_FLT );
+    faultAssign( ( abs(Sen->ib_noa_model()) >= ap.ib_noa_max ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_NOA_FLT );
   }
   else
   {
     #ifndef HDWE_BARE
-      faultAssign( ( ib_amp_bare() || abs(Sen->ib_amp_hdwe()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_AMP_FLT );
-      faultAssign( ( ib_noa_bare() || abs(Sen->ib_noa_hdwe()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_NOA_FLT );
+      faultAssign( ( ib_amp_bare() || abs(Sen->ib_amp_hdwe()) >= ap.ib_amp_max ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_AMP_FLT );
+      faultAssign( ( ib_noa_bare() || abs(Sen->ib_noa_hdwe()) >= ap.ib_noa_max ) && !ap.disab_ib_fa && !sp.tweak_test(), IB_NOA_FLT );
     #else
       float current_max = NOM_UNIT_CAP * sp.nP();
       faultAssign( abs(Sen->ShuntAmp->Ishunt_cal()) >= current_max && !ap.disab_ib_fa && !sp.tweak_test(), IB_AMP_FLT );
@@ -454,11 +454,11 @@ void Fault::ib_range(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   #ifdef DEBUG_DETAIL
     if ( sp.mod_ib() )
     {
-      if ( sp.debug()==62 ) Serial.printf("ibmm%7.3f mx%7.3f ibnm%7.3f nx%7.3f IB_AMP_FLT=%d IB_NOA_FLT=%d\n", Sen->ib_amp_model(), IB_ABS_MAX_AMP, Sen->ib_noa_model(), IB_ABS_MAX_NOA, ib_amp_flt(), ib_noa_flt());
+      if ( sp.debug()==62 ) Serial.printf("ibmm%7.3f mx%7.3f ibnm%7.3f nx%7.3f IB_AMP_FLT=%d IB_NOA_FLT=%d\n", Sen->ib_amp_model(), ap.ib_amp_max, Sen->ib_noa_model(), ap.ib_noa_max, ib_amp_flt(), ib_noa_flt());
     }
     else
     {
-      if ( sp.debug()==62 ) Serial.printf("ib_amp_bare=%d ib_noa_bare=%d ibm%7.3f mx%7.3f ibn%7.3f nx%7.3f IB_AMP_FLT=%d IB_NOA_FLT=%d\n", ib_amp_bare(), ib_noa_bare(), Sen->ib_amp_hdwe(), IB_ABS_MAX_AMP, Sen->ib_noa_hdwe(), IB_ABS_MAX_NOA, ib_amp_flt(), ib_noa_flt());
+      if ( sp.debug()==62 ) Serial.printf("ib_amp_bare=%d ib_noa_bare=%d ibm%7.3f mx%7.3f ibn%7.3f nx%7.3f IB_AMP_FLT=%d IB_NOA_FLT=%d\n", ib_amp_bare(), ib_noa_bare(), Sen->ib_amp_hdwe(), ap.ib_amp_max, Sen->ib_noa_hdwe(), ap.ib_noa_max, ib_amp_flt(), ib_noa_flt());
     }
   #endif
 }
@@ -1007,10 +1007,10 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
   faultAssign( Sen->ShuntAmp->bare_shunt(), IB_AMP_BARE);
   faultAssign( Sen->ShuntNoAmp->bare_shunt(), IB_NOA_BARE);
   #ifndef HDWE_BARE
-    faultAssign( ( ib_amp_bare() || abs(Sen->ShuntAmp->Ishunt_cal()) >= IB_ABS_MAX_AMP ) && !ap.disab_ib_fa, IB_AMP_FLT );
-    faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= IB_ABS_MAX_NOA ) && !ap.disab_ib_fa, IB_NOA_FLT );
+    faultAssign( ( ib_amp_bare() || abs(Sen->ShuntAmp->Ishunt_cal()) >= Sen->Ib_amp_max() ) && !ap.disab_ib_fa, IB_AMP_FLT );
+    faultAssign( ( ib_noa_bare() || abs(Sen->ShuntNoAmp->Ishunt_cal()) >= Sen->Ib_noa_max() ) && !ap.disab_ib_fa, IB_NOA_FLT );
     #ifdef DEBUG_DETAIL
-      if ( sp.debug()==62 ) Serial.printf("ib_amp_bare=%d ib_noa_bare=%d ibm%7.3f mx%7.3f ibn%7.3f nx%7.3f IB_AMP_FLT=%d IB_NOA_FLT=%d\n", ib_amp_bare(), ib_noa_bare(), Sen->ShuntAmp->Ishunt_cal(), IB_ABS_MAX_AMP, Sen->ShuntNoAmp->Ishunt_cal(), IB_ABS_MAX_NOA, IB_AMP_FLT, IB_NOA_FLT);
+      if ( sp.debug()==62 ) Serial.printf("ib_amp_bare=%d ib_noa_bare=%d Ibm%7.3f mX%7.3f Ibn%7.3f nX%7.3f IB_AMP_FLT=%d IB_NOA_FLT=%d\n", ib_amp_bare(), ib_noa_bare(), Sen->ShuntAmp->Ishunt_cal(), Sen->Ib_amp_max(), Sen->ShuntNoAmp->Ishunt_cal(), Sen->Ib_noa_max(), IB_AMP_FLT, IB_NOA_FLT);
     #endif
   #else
     float current_max = NOM_UNIT_CAP * sp.nP();
@@ -1390,7 +1390,7 @@ void Sensors::select_all_hdwe_or_model(BatteryMonitor *Mon)
   void Sensors::select_print(Sensors *Sen, BatteryMonitor *Mon)  // vv==62
   {
     Serial.printf("ib_ %7.3f                     vb_hdwe %7.3f                      Tb_hdwe %7.3f\n", ib_hdwe(), vb_hdwe(), Tb_hdwe);
-    Serial.printf("ib limits amp%7.3f noa %7.3f  diff %7.3f\n", IB_ABS_MAX_AMP/sp.nP(), IB_ABS_MAX_NOA/sp.nP(), Flt->ib_diff_thr()/sp.nP());
+    Serial.printf("ib limits amp%7.3f noa %7.3f  diff %7.3f\n", ap.ib_amp_max, ap.ib_noa_max, Flt->ib_diff_thr());
     Serial.printf("ib_hdwe_?: %7.3f %7.3f ib_model_?: %7.3f %7.3f", ib_amp_hdwe(), ib_noa_hdwe(), ib_amp_model(), ib_noa_model());
     #ifdef HDWE_IB_HI_LO
       Serial.printf(" ib_choice_ %d ibmfa %d ibnfa %d ibdfa %d\n", Flt->ib_choice(), Flt->ib_amp_fa(), Flt->ib_noa_fa(), Flt->ib_diff_fa());
@@ -1401,7 +1401,7 @@ void Sensors::select_all_hdwe_or_model(BatteryMonitor *Mon)
     Serial.printf("               ib:  %7.3f\n", ib());
     Serial.printf("     ");
     Serial.printf("ib_ %7.3f                     vb_hdwe %7.3f                      Tb_hdwe %7.3f\n", ib_hdwe(), vb_hdwe(), Tb_hdwe);
-    Serial.printf("ib limits amp%7.3f noa %7.3f  diff %7.3f\n", IB_ABS_MAX_AMP/sp.nP(), IB_ABS_MAX_NOA/sp.nP(), Flt->ib_diff_thr()/sp.nP());
+    Serial.printf("ib limits amp%7.3f noa %7.3f  diff %7.3f\n", ap.ib_amp_max, ap.ib_noa_max, Flt->ib_diff_thr());
     Serial.printf("ib_hdwe_?: %7.3f %7.3f ib_model_?: %7.3f %7.3f", ib_amp_hdwe(), ib_noa_hdwe(), ib_amp_model(), ib_noa_model());
     Serial.printf("ib_hdwe:     %7.3f     ib_hdwe_model: %7.3f  modeling=%d\n", ib_hdwe(), ib_hdwe_model(), sp.mod_ib());
     Serial.printf("               ib:  %7.3f\n", ib());
