@@ -147,7 +147,7 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=F
 
 
 def main():
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20240704\\ampHiFailSlow_pro3p2_chg.csv'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20240704\\offSitHysBmsCHG_pro3p2_chg.csv'
     unit_key = 'g20240704_pro3p2_chg'
     time_end_in = None
     data_only = False

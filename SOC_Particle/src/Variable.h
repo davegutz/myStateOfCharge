@@ -119,7 +119,7 @@ public:
     {
         if ( val>max_ || val<min_ )
         {
-            Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            Serial.printf("%s %s set:: out range %d (%d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
             return false;
         }
         else
@@ -248,7 +248,7 @@ public:
     {
         if ( val>max_ || val<min_ )
         {
-            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
             return false;
         }
         else
@@ -380,7 +380,7 @@ public:
     {
         if ( val>max_ || val<min_ )
         {
-            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %7.3f (%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
             return false;
         }
         else
@@ -512,7 +512,7 @@ public:
     {
         if ( val>max_ || val<min_ )
         {
-            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
             return false;
         }
         else
@@ -643,7 +643,7 @@ public:
     {
         if ( val>max_ || val<min_ )
         {
-            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
             return false;
         }
         else
@@ -775,7 +775,7 @@ public:
     {
         if ( val>max_ || val<min_ )
         {
-            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
             return false;
         }
         else
@@ -906,7 +906,7 @@ public:
     {
         if ( val>max_ || val<min_ )
         {
-            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %d (%d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
             return false;
         }
         else
@@ -1035,7 +1035,7 @@ public:
     {
         if ( val>max_ || val<min_ )
         {
-            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %ld (%-ld, %ld)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+            if ( val>max_ || val<min_ ) Serial.printf("%s %s set:: out range %ld (%ld, %ld)\n", code_.c_str(), description_.c_str(), val, min_, max_);
             return false;
         }
         else

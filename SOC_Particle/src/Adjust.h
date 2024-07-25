@@ -211,7 +211,7 @@ public:
 
     virtual void set_push(const boolean val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s %s set_push:: out range %d (%-d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s %s set_push:: out range %d (%d, %d)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
         {
             *val_ptr_ = val;
@@ -276,7 +276,7 @@ public:
 
     virtual void set_push(double val)
     {
-        if ( val>max_ || val<min_ ) Serial.printf("%s %s set_push:: out range %7.3f (-%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
+        if ( val>max_ || val<min_ ) Serial.printf("%s %s set_push:: out range %7.3f (%7.3f, %7.3f)\n", code_.c_str(), description_.c_str(), val, min_, max_);
         else
         {
             *val_ptr_ = val;

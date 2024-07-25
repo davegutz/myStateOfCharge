@@ -1486,7 +1486,7 @@ void Sensors::shunt_select_initial(const boolean reset)
       hdwe_add = 0.;
     }
     Ib_amp_model = max(min(Ib_model + Ib_amp_add() + mod_add, Ib_amp_max()), Ib_amp_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dm/Mm/Nm
-    Ib_noa_model = max(min(Ib_model + Ib_noa_add() + mod_add, Ib_noa_max()), Ib_noa_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Mn/Nn
+    Ib_noa_model = max(min(Ib_model + Ib_noa_add() + mod_add, Ib_noa_max()), Ib_noa_min()); // uses past Ib.  Synthesized signal to use as substitute for sensor, Dn/Nx/Nm
     Ib_amp_hdwe = ShuntAmp->Ishunt_cal() + hdwe_add;    // Sense fault injection feeds logic, not model
     Ib_amp_hdwe_f = AmpFilt->calculate(Ib_amp_hdwe, reset, AMP_FILT_TAU, T);
     Vc_hdwe = max(ShuntAmp->Vc(), ShuntNoAmp->Vc());
