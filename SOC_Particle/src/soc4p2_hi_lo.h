@@ -22,7 +22,7 @@
 #define MODELING              0   // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
 
 // Sensor biases
-#define CURR_BIAS_AMP        -0.40  // Calibration of amplified shunt sensor (* 'DA'), A
+#define CURR_BIAS_AMP        -0.50  // Calibration of amplified shunt sensor (* 'DA'), A
 #define CURR_SCALE_AMP         1.0  // Hardware to match data (* 'SA')
 #define CURR_BIAS_NOA        -0.25  // Calibration of non-amplified shunt sensor (* 'DB'), A
 #define CURR_SCALE_NOA         1.0  // Hardware to match data (* 'SB')
