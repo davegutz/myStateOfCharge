@@ -79,7 +79,7 @@ String chat_cmd_from(String *source)
   String out_str = "";
 
   #ifdef SOFT_DEBUG_QUEUE
-    // SOFT_DEBUG_QUEUE("chat_cmd_from enter");
+    // debug_queue("chat_cmd_from enter");
   #endif
 
   while ( source->length() )
@@ -96,7 +96,7 @@ String chat_cmd_from(String *source)
   }
 
   #ifdef SOFT_DEBUG_QUEUE
-    // SOFT_DEBUG_QUEUE("chat_cmd_from exit");
+    // debug_queue("chat_cmd_from exit");
   #endif
 
   return out_str;

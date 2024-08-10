@@ -186,7 +186,7 @@ void debug_99(BatteryMonitor *Mon, Sensors *Sen)
 #endif
 
 #ifdef SOFT_DEBUG_QUEUE
-void SOFT_DEBUG_QUEUE(const String who)
+void debug_queue(const String who)
 {
   if ( cp.inp_str.length() || cp.ctl_str.length() || cp.asap_str.length() || cp.soon_str.length() || cp.queue_str.length() || cp.last_str.length() )
     Serial.printf("%s:  chitchat %d freeze %d inp_token %d CONTROL[%s] ASAP[%s] SOON[%s] QUEUE[%s] LAST[%s] CMD[%s]\n",

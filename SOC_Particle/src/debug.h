@@ -49,7 +49,7 @@ void debug_99(BatteryMonitor *Mon, Sensors *Sen);
 void debug_q(BatteryMonitor *Mon, Sensors *Sen);
 
 #ifdef SOFT_DEBUG_QUEUE
-    void SOFT_DEBUG_QUEUE(const String who);
+    void debug_queue(const String who);
 #endif
 
 #endif  // DEBUG_H

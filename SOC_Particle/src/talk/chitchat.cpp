@@ -113,7 +113,7 @@ void chatter()
     }
   }
   #ifdef SOFT_DEBUG_QUEUE
-    if ( cp.chitchat || ( cp.freeze && cp.chitchat && cp.asap_str.length() ) || ( !cp.freeze && cp.asap_str.length() ) ) SOFT_DEBUG_QUEUE("chatter exit");
+    if ( cp.chitchat || ( cp.freeze && cp.chitchat && cp.asap_str.length() ) || ( !cp.freeze && cp.asap_str.length() ) ) debug_queue("chatter exit");
   #endif
 
   return;
@@ -163,7 +163,7 @@ void chit(const String from, const urgency when)
   }
 
   #ifdef SOFT_DEBUG_QUEUE
-    if ( cp.chitchat || cp.ctl_str.length() || cp.asap_str.length() ) SOFT_DEBUG_QUEUE("chit exit");
+    if ( cp.chitchat || cp.ctl_str.length() || cp.asap_str.length() ) debug_queue("chit exit");
   #endif
 
 }
@@ -192,11 +192,11 @@ void chitter(const boolean chitchat, BatteryMonitor *Mon, Sensors *Sen)
         cp.cmd_str = cp.ctl_str;
         cp.ctl_str = "";
         #ifdef SOFT_DEBUG_QUEUE
-          SOFT_DEBUG_QUEUE("chitter control:");
+          debug_queue("chitter control:");
         #endif
         describe(Mon, Sen);  // may set cp.freeze
         #ifdef SOFT_DEBUG_QUEUE
-          SOFT_DEBUG_QUEUE("chitter control response:");
+          debug_queue("chitter control response:");
         #endif
       }
 
@@ -246,7 +246,7 @@ void chitter(const boolean chitchat, BatteryMonitor *Mon, Sensors *Sen)
       cp.inp_token = false;
 
       #ifdef SOFT_DEBUG_QUEUE
-        if ( cp.chitchat || cp.asap_str.length() ) SOFT_DEBUG_QUEUE("chitter exit");
+        if ( cp.chitchat || cp.asap_str.length() ) debug_queue("chitter exit");
       #endif
     }
   }
@@ -309,9 +309,15 @@ urgency chit_classify_nibble(String *nibble)
 String chit_nibble_inp()
 {
   int semi_loc = cp.inp_str.indexOf(';');
+ 
   String nibble = cp.inp_str.substring(0, semi_loc+1);  // 2nd index is exclusive
   nibble.replace(" ", "");  // Strip blanks again, TODO:  why didn't replace in finish_all() do the job?
+
+  Serial.printf("inp_str=%s|semi_loc=%d|nibble=%s|", cp.inp_str.c_str(), semi_loc, nibble.c_str());
+
   cp.inp_str = cp.inp_str.substring(semi_loc+1);  // +1 to grab the semi-colon
+
+  Serial.printf("mod inp_str=%s|\n", cp.inp_str.c_str());
   return nibble;
 }
 
