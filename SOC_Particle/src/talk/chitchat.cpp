@@ -313,11 +313,11 @@ String chit_nibble_inp()
   String nibble = cp.inp_str.substring(0, semi_loc+1);  // 2nd index is exclusive
   nibble.replace(" ", "");  // Strip blanks again, TODO:  why didn't replace in finish_all() do the job?
 
-  Serial.printf("inp_str=%s|semi_loc=%d|nibble=%s|", cp.inp_str.c_str(), semi_loc, nibble.c_str());
+  // Serial.printf("inp_str=%s|semi_loc=%d|nibble=%s|", cp.inp_str.c_str(), semi_loc, nibble.c_str());
 
   cp.inp_str = cp.inp_str.substring(semi_loc+1);  // +1 to grab the semi-colon
 
-  Serial.printf("mod inp_str=%s|\n", cp.inp_str.c_str());
+  // Serial.printf("mod inp_str=%s|\n", cp.inp_str.c_str());
   return nibble;
 }
 

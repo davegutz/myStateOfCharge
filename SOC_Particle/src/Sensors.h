@@ -309,6 +309,7 @@ public:
   float ib_quiet_thr() { return ib_quiet_thr_; };
   void ib_range(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   int8_t ib_sel_stat() { return ib_sel_stat_; };
+  void ib_sel_stat(const int sel_stat) { ib_sel_stat_ = sel_stat; };
   void ib_quiet(const boolean reset, Sensors *Sen);
   float ib_quiet() { return ib_quiet_; };
   float ib_rate() { return ib_rate_; };
