@@ -543,7 +543,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   Serial.printf(" mod_tb %d mod_vb %d mod_ib  %d\n", sp.mod_tb(), sp.mod_vb(), sp.mod_ib());
   Serial.printf(" mod_tb_dscn %d mod_vb_dscn %d mod_ib_amp_dscn %d mod_ib_noa_dscn %d\n", sp.mod_tb_dscn(), sp.mod_vb_dscn(), sp.mod_ib_amp_dscn(), sp.mod_ib_noa_dscn());
   #ifdef HDWE_IB_HI_LO
-    Serial.printf(" tb_s_st %d  vb_s_st %d  ib_choice %d ib_decision_ %d\n", tb_sel_stat_, vb_sel_stat_, ib_choice_, ib_decision_);
+    Serial.printf(" tb_s_st %d  vb_s_st %d  ib_choice %d ib_decision_ %d ib_s_st %d\n", tb_sel_stat_, vb_sel_stat_, ib_choice_, ib_decision_, ib_sel_stat_);
   #else
     Serial.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d ib_decision_ %d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_, ib_decision_);
   #endif
@@ -1244,8 +1244,8 @@ void Sensors::ib_choose_hi_lo()
     sample_time_ib_hdwe_ = 0ULL;
     dt_ib_hdwe_ = 0ULL;
   }
-  if ( Ib_hdwe==Ib_noa_hdwe ) Flt->ib_sel_stat(-1);
-  else if ( Ib_hdwe==Ib_amp_hdwe ) Flt->ib_sel_stat(1);
+  if ( Ib_hdwe==Ib_amp_hdwe ) Flt->ib_sel_stat(1);
+  else if ( Ib_hdwe==Ib_noa_hdwe ) Flt->ib_sel_stat(-1);
   else Flt->ib_sel_stat(0);
 }
 
