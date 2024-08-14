@@ -1215,13 +1215,15 @@ void Sensors::ib_choose_active_standby()
 // Outputs:  Ib_hdwe_model, Ib_hdwe
 void Sensors::ib_choose_hi_lo()
 {
+  int8_t sel_stat = 0;
   if ( Flt->ib_choice()==UsingDef )
   {
-    Ib_hdwe = scale_select(Ib_noa_hdwe, sel_brk_hdwe, Ib_amp_hdwe, Ib_noa_hdwe);
+    Ib_hdwe = scale_select(Ib_noa_hdwe, sel_brk_hdwe, Ib_amp_hdwe, Ib_noa_hdwe, &sel_stat);
     // if ( sp.debug()==99 ) Serial.printf("choose: Ib_noa_hdwe=%7.3f, Ib_amp_hdwe=%7.3f, Ib_hdwe=%7.3f\n", Ib_noa_hdwe, Ib_amp_hdwe, Ib_hdwe);
     Ib_hdwe_model = Ib_hdwe;
     sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
     dt_ib_hdwe_ = ShuntNoAmp->dt();
+    Flt->ib_sel_stat(sel_stat);
   }
   else if ( Flt->ib_choice()==UsingNoa )
   {
@@ -1229,6 +1231,7 @@ void Sensors::ib_choose_hi_lo()
     Ib_hdwe_model = Ib_noa_model;
     sample_time_ib_hdwe_ = ShuntNoAmp->sample_time();
     dt_ib_hdwe_ = ShuntNoAmp->dt();
+    Flt->ib_sel_stat(-1);
   }
   else if ( Flt->ib_choice()==UsingAmp )
   {
@@ -1236,6 +1239,7 @@ void Sensors::ib_choose_hi_lo()
     Ib_hdwe_model = Ib_amp_model;
     sample_time_ib_hdwe_ = ShuntAmp->sample_time();
     dt_ib_hdwe_ = ShuntAmp->dt();
+    Flt->ib_sel_stat(1);
   }
   else
   {
@@ -1243,10 +1247,8 @@ void Sensors::ib_choose_hi_lo()
     Ib_hdwe_model = 0.;
     sample_time_ib_hdwe_ = 0ULL;
     dt_ib_hdwe_ = 0ULL;
+    Flt->ib_sel_stat(0);
   }
-  if ( Ib_hdwe==Ib_amp_hdwe ) Flt->ib_sel_stat(1);
-  else if ( Ib_hdwe==Ib_noa_hdwe ) Flt->ib_sel_stat(-1);
-  else Flt->ib_sel_stat(0);
 }
 
 // Make final assignemnts
@@ -1363,17 +1365,11 @@ void Sensors::select_all_hdwe_or_model(BatteryMonitor *Mon)
           Mon->voc_soc(), Flt->e_wrap(), Flt->e_wrap_filt(), Flt->e_wrap_m(), Flt->e_wrap_m_filt(), Flt->e_wrap_n(), Flt->e_wrap_n_filt());
       Serial.printf("%s", pr.buff);
 
-      #ifdef HDWE_IB_HI_LO
-        sprintf(pr.buff, "  %d,%8.5f,%8.5f,%8.5f, %d,%8.5f,  %d,%8.5f,%8.5f, %d,%8.5f,  %5.2f,%5.2f, %d, %5.2f, ",
-            Flt->ib_choice(), vc_hdwe(), ib_hdwe(), ib_hdwe_model(), sp.mod_ib(), ib(),
-            Flt->vb_sel_stat(), vb_hdwe(), vb_model(), sp.mod_vb(), vb(),
-            Tb_hdwe, Tb, sp.mod_tb(), Tb_filt);
-      #else
         sprintf(pr.buff, "  %d,%8.5f,%8.5f,%8.5f, %d,%8.5f,  %d,%8.5f,%8.5f, %d,%8.5f,  %5.2f,%5.2f, %d, %5.2f, ",
             Flt->ib_sel_stat(), vc_hdwe(), ib_hdwe(), ib_hdwe_model(), sp.mod_ib(), ib(),
             Flt->vb_sel_stat(), vb_hdwe(), vb_model(), sp.mod_vb(), vb(),
             Tb_hdwe, Tb, sp.mod_tb(), Tb_filt);
-      #endif
+
       Serial.printf("%s", pr.buff);
 
       sprintf(pr.buff, "%ld, %ld, %7.3f, %7.3f, %d, %9.6f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%d,%7.3f,",
@@ -1575,6 +1571,7 @@ void Sensors::vb_print()
     reset, T, sp.mod_vb_dscn(), Vb_raw, sp.Vb_bias_hdwe(), Vb_hdwe, Flt->vb_flt(), Flt->vb_fa(), Flt->wrap_vb_fa());
 }
 
+
 // Scale select between a high and low set of inputs.  Low might be a precise, amplified sensor and high might be the high range equivalent
 float scale_select(const float in, const ScaleBrk *brk, const float lo, const float hi)
 {
@@ -1599,6 +1596,38 @@ float scale_select(const float in, const ScaleBrk *brk, const float lo, const fl
 
   else
   {
+    // if ( sp.debug()==99 ) Serial.printf("scale_select p t: in=%7.3f, brk->n_hi=%7.3f, brk->p_lo=%7.3f, lo=%7.3f, hi=%7.3f\n", in, brk->n_hi, brk->p_lo, lo, hi);
+    return ( (in - brk->p_lo) / brk->p_d * (hi - lo) + hi );
+  }
+
+}
+float scale_select(const float in, const ScaleBrk *brk, const float lo, const float hi, int8_t *sel_stat)
+{
+  
+  if ( brk->n_hi <= in && in <= brk->p_lo )
+  {
+    *sel_stat = 1;
+    // if ( sp.debug()==99 ) Serial.printf("scale_select lo: in=%7.3f, brk->n_hi=%7.3f, brk->p_lo=%7.3f, lo=%7.3f, hi=%7.3f, sel=%7.3f\n", in, brk->n_hi, brk->p_lo, lo, hi, lo);
+    return ( lo );
+  }
+
+  else if ( in <= brk->n_lo || in >= brk->p_hi )
+  {
+    *sel_stat = -1;
+    // if ( sp.debug()==99 ) Serial.printf("scale_select hi: in=%7.3f, brk->n_lo=%7.3f, brk->p_hi=%7.3f, lo=%7.3f, hi=%7.3f, sel=%7.3f\n", in, brk->n_lo, brk->p_hi, lo, hi, hi);
+    return ( hi );
+  }
+
+  else if ( in < brk->n_hi )
+  {
+    *sel_stat = 0;
+    // if ( sp.debug()==99 ) Serial.printf("scale_select n t: in=%7.3f, brk->n_hi=%7.3f, brk->p_lo=%7.3f, lo=%7.3f, hi=%7.3f\n", in, brk->n_hi, brk->p_lo, lo, hi);
+    return ( (in - brk->n_lo) / brk->n_d * (hi - lo) + hi );
+  }
+
+  else
+  {
+    *sel_stat = 0;
     // if ( sp.debug()==99 ) Serial.printf("scale_select p t: in=%7.3f, brk->n_hi=%7.3f, brk->p_lo=%7.3f, lo=%7.3f, hi=%7.3f\n", in, brk->n_hi, brk->p_lo, lo, hi);
     return ( (in - brk->p_lo) / brk->p_d * (hi - lo) + hi );
   }

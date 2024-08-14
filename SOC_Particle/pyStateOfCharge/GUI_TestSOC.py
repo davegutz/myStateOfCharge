@@ -362,14 +362,16 @@ class ExRoot:
 
 # Executive class to control the global variables
 class Exec:
-    def __init__(self, cf_, ind, level=None, path_disp_len_=25):
+    def __init__(self, cf_=None, ind=None, level=None, path_disp_len_=25):
         self.cf = cf_
         self.ind = ind
         self.script_loc = os.path.dirname(os.path.abspath(__file__))
         self.config_path = os.path.join(self.script_loc, 'root_config.ini')
+        self.version_button = None
         self.dataReduction_folder = self.cf[self.ind]['dataReduction_folder']
         self.version = self.cf[self.ind]['version']
-        self.version_button = None
+        self.battery = self.cf[self.ind]['battery']
+        self.unit = self.cf[self.ind]['unit']
         if self.version is None:
             self.version = 'undefined'
         self.version_path = str(os.path.join(self.dataReduction_folder, self.version))
@@ -377,13 +379,11 @@ class Exec:
             os.makedirs(self.version_path, exist_ok=True)
         except OSError:
             tk.messagebox.showerror(title="Error", message="check google-drive available")
-        self.battery = self.cf[self.ind]['battery']
         self.battery_button = None
         self.level = level
         self.level_button = None
         self.folder_butt = myButton(master, text=self.dataReduction_folder[-20:],
                                     command=self.enter_data_reduction_folder, fg="blue", bg=bg_color)
-        self.unit = self.cf[self.ind]['unit']
         self.unit_button = None
         self.key_label = None
         self.root_config = None
@@ -396,6 +396,10 @@ class Exec:
         self.label = None
         self.key = None
         self.path_disp_len = path_disp_len_
+
+    def __copy__(self):
+        """Shallow copy function"""
+        return Exec(self.cf, ind=self.ind, level=self.level, path_disp_len_=self.path_disp_len)
 
     def create_file_path_and_key(self, name_override=None):
         if name_override is None:
@@ -1070,15 +1074,6 @@ def stay_awake(up_set_min=3.):
     print(f"stay_awake: ending")
 
 
-def tksleep(t):
-    """emulating time.sleep(seconds)"""
-    ms = int(t*1000)
-    root = tk._get_default_root()
-    var = tk.IntVar(root)
-    root.after(ms, lambda: var.set(1))
-    root.wait_variable(var)
-
-
 def save_data():
     print(f"save_data: {putty_test_csv_path.get()=}")
     if size_of(putty_test_csv_path.get()) > 64:  # bytes
@@ -1222,6 +1217,23 @@ def start_timer():
     CountdownTimer(master, timer_val.get(), max_flash=60, exit_function=None, trigger=True)
 
 
+def swap_ref_test():
+    """Swap and save Test and Ref choices"""
+    global Test, Ref
+    Test, Ref = Ref.__copy__(), Test.__copy__()
+    Test.update_battery_stuff()
+    Ref.update_battery_stuff()
+
+
+def tksleep(t):
+    """emulating time.sleep(seconds)"""
+    ms = int(t*1000)
+    root = tk._get_default_root()
+    var = tk.IntVar(root)
+    root.after(ms, lambda: var.set(1))
+    root.wait_variable(var)
+
+
 def update_data_buttons():
     save_data_button.config(bg=bg_color, activebackground=bg_color, fg='black', activeforeground='black',
                             text='save data')
@@ -1298,9 +1310,11 @@ if __name__ == '__main__':
 
     # Folder row
     working_label = tk.Label(top_panel_left, text="dataReduction Folder", font=label_font)
-    Test.folder_butt = myButton(top_panel_left_ctr, text=Test.dataReduction_folder[-folder_reveal:], command=Test.enter_data_reduction_folder,
+    Test.folder_butt = myButton(top_panel_left_ctr, text=Test.dataReduction_folder[-folder_reveal:],
+                                command=Test.enter_data_reduction_folder,
                                 fg="blue", bg=bg_color)
-    Ref.folder_butt = myButton(top_panel_right, text=Ref.dataReduction_folder[-folder_reveal:], command=Ref.enter_data_reduction_folder,
+    Ref.folder_butt = myButton(top_panel_right, text=Ref.dataReduction_folder[-folder_reveal:],
+                               command=Ref.enter_data_reduction_folder,
                                fg="blue", bg=bg_color)
     working_label.pack(padx=5, pady=5)
     Test.folder_butt.pack(padx=5, pady=5, anchor=tk.W)
@@ -1342,6 +1356,12 @@ if __name__ == '__main__':
     Test.key_label.pack(padx=5, pady=5)
     Ref.key_label = tk.Label(top_panel_right, text=Ref.key)
     Ref.key_label.pack(padx=5, pady=5)
+
+    # Swap row
+    tk.Label(top_panel_left, text="", font=label_font).pack(pady=2, expand=True, fill='both')
+    tk.Label(top_panel_left_ctr, text="", font=label_font).pack(pady=2, expand=True, fill='both')
+    swap_button = myButton(top_panel_right, text="swap Ref<-->Test", command=swap_ref_test, bg=bg_color)
+    swap_button.pack(side=tk.RIGHT, padx=5, pady=5)
 
     # Image
     pic_path = os.path.join(ex_root.script_loc, 'GUI_TestSOC.png')

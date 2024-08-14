@@ -539,5 +539,6 @@ protected:
 // Misc
 
 float scale_select(const float in, const ScaleBrk *brk, const float lo, const float hi);
+float scale_select(const float in, const ScaleBrk *brk, const float lo, const float hi, int8_t *sel_stat);
 
 #endif
