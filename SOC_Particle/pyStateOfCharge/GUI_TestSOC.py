@@ -365,9 +365,12 @@ class Exec:
     def __init__(self, cf_=None, ind=None, level=None, path_disp_len_=25):
         self.cf = cf_
         self.ind = ind
+        self.level = level
+        self.path_disp_len = path_disp_len_
         self.script_loc = os.path.dirname(os.path.abspath(__file__))
         self.config_path = os.path.join(self.script_loc, 'root_config.ini')
-        self.version_button = None
+        # self.root_config = None
+        self.load_root_config(self.config_path)
         self.dataReduction_folder = self.cf[self.ind]['dataReduction_folder']
         self.version = self.cf[self.ind]['version']
         self.battery = self.cf[self.ind]['battery']
@@ -379,15 +382,14 @@ class Exec:
             os.makedirs(self.version_path, exist_ok=True)
         except OSError:
             tk.messagebox.showerror(title="Error", message="check google-drive available")
+        # Following need explicit shallow copy lines
+        self.version_button = None
         self.battery_button = None
-        self.level = level
         self.level_button = None
-        self.folder_butt = myButton(master, text=self.dataReduction_folder[-20:],
+        self.folder_button = myButton(master, text=self.dataReduction_folder[-20:],
                                     command=self.enter_data_reduction_folder, fg="blue", bg=bg_color)
         self.unit_button = None
         self.key_label = None
-        self.root_config = None
-        self.load_root_config(self.config_path)
         self.file_txt = None
         self.file_path = None
         self.file_exists = None
@@ -395,18 +397,12 @@ class Exec:
         self.key_exists_in_file = None
         self.label = None
         self.key = None
-        self.path_disp_len = path_disp_len_
 
     def __copy__(self):
         """Shallow copy function"""
-        # Swap = Exec(self.cf, ind=self.ind, level=self.level, path_disp_len_=self.path_disp_len)
-        # Swap.version_button = self.version_button
-        # Swap.version = self.version
-        # Swap.version_path = self.version_path
-        # self.battery_button
-        instance = object.__new__(Exec);
-        vars(instance).update(vars(self));
-        return instance
+        Instance = object.__new__(Exec);
+        vars(Instance).update(vars(self));
+        return Instance
 
     def create_file_path_and_key(self, name_override=None):
         if name_override is None:
@@ -421,7 +417,7 @@ class Exec:
         self.file_exists = os.path.isfile(self.file_path)
         self.update_file_label()
         self.update_key_label()
-        self.update_folder_butt()
+        self.update_folder_button()
 
     def enter_battery(self):
         answer = tk.simpledialog.askstring(title=self.level,
@@ -445,8 +441,8 @@ class Exec:
         self.dataReduction_folder = answer
         self.cf[self.ind]['dataReduction_folder'] = self.dataReduction_folder
         self.cf.save_to_file()
-        self.folder_butt.config(text=self.dataReduction_folder[self.path_disp_len:])
-        self.update_folder_butt()
+        self.folder_button.config(text=self.dataReduction_folder[self.path_disp_len:])
+        self.update_folder_button()
 
     def enter_unit(self):
         answer = tk.simpledialog.askstring(title=self.level, initialvalue=self.unit,
@@ -501,6 +497,24 @@ class Exec:
             print('Saved', config_path_)
         return self.root_config
 
+    def super_shallow_copy(self, other):
+        self.level = other.level
+        self.path_disp_len = other.path_disp_len
+        self.script_loc = other.script_loc
+        self.config_path = other.config_path
+        self.root_config = other.root_config
+        self.dataReduction_folder = other.dataReduction_folder
+        self.version = other.version
+        self.battery = other.battery
+        self.unit = other.unit
+        self.version_path = other.version_path
+        self.file_txt = other.file_txt
+        self.file_path = other.file_path
+        self.file_exists = other.file_exists
+        self.dataReduction_folder_exists = other.dataReduction_folder_exists
+        self.key_exists_in_file = other.key_exists_in_file
+        self.key = other.key
+
     def update_battery_stuff(self):
         self.cf[self.ind]['unit'] = self.unit
         self.cf[self.ind]['battery'] = self.battery
@@ -508,6 +522,10 @@ class Exec:
         self.create_file_path_and_key()
         self.update_key_label()
         self.update_file_label()
+        self.update_folder_button()
+        self.update_version_button()
+        self.update_unit_button()
+        self.update_battery_button()
 
     def update_file_label(self):
         self.label.config(text=self.file_txt)
@@ -516,16 +534,19 @@ class Exec:
         else:
             self.label.config(bg='pink')
 
-    def update_folder_butt(self):
+    def update_battery_button(self):
+        self.battery_button.config(text=self.battery)
+
+    def update_folder_button(self):
         if os.path.exists(self.dataReduction_folder):
             self.dataReduction_folder_exists = True
         else:
             self.dataReduction_folder_exists = False
-        self.folder_butt.config(text=self.dataReduction_folder[-self.path_disp_len:])
+        self.folder_button.config(text=self.dataReduction_folder[-self.path_disp_len:])
         if self.dataReduction_folder_exists:
-            self.folder_butt.config(bg='lightgreen')
+            self.folder_button.config(bg='lightgreen')
         else:
-            self.folder_butt.config(bg='pink')
+            self.folder_button.config(bg='pink')
 
     def update_key_label(self):
         self.key_label.config(text=self.key)
@@ -540,6 +561,12 @@ class Exec:
         else:
             self.key_label.config(bg='pink')
         test_filename.set(putty_connection.get(Test.unit))
+
+    def update_unit_button(self):
+        self.unit_button.config(text=self.unit)
+
+    def update_version_button(self):
+        self.version_button.config(text=self.version)
 
 
 # Global methods
@@ -1227,9 +1254,11 @@ def start_timer():
 def swap_ref_test():
     """Swap and save Test and Ref choices"""
     global Test, Ref
-    Test, Ref = Ref.__copy__(), Test.__copy__()
-    Test.update_battery_stuff()
-    Ref.update_battery_stuff()
+    swap = Test.__copy__()
+    Test.super_shallow_copy(Ref)
+    Ref.super_shallow_copy(swap)
+    test_unit.set(Test.unit)  # does Test update
+    ref_unit.set(Ref.unit)  # does Ref update
 
 
 def tksleep(t):
@@ -1317,15 +1346,15 @@ if __name__ == '__main__':
 
     # Folder row
     working_label = tk.Label(top_panel_left, text="dataReduction Folder", font=label_font)
-    Test.folder_butt = myButton(top_panel_left_ctr, text=Test.dataReduction_folder[-folder_reveal:],
+    Test.folder_button = myButton(top_panel_left_ctr, text=Test.dataReduction_folder[-folder_reveal:],
                                 command=Test.enter_data_reduction_folder,
                                 fg="blue", bg=bg_color)
-    Ref.folder_butt = myButton(top_panel_right, text=Ref.dataReduction_folder[-folder_reveal:],
+    Ref.folder_button = myButton(top_panel_right, text=Ref.dataReduction_folder[-folder_reveal:],
                                command=Ref.enter_data_reduction_folder,
                                fg="blue", bg=bg_color)
     working_label.pack(padx=5, pady=5)
-    Test.folder_butt.pack(padx=5, pady=5, anchor=tk.W)
-    Ref.folder_butt.pack(padx=5, pady=5, anchor=tk.E)
+    Test.folder_button.pack(padx=5, pady=5, anchor=tk.W)
+    Ref.folder_button.pack(padx=5, pady=5, anchor=tk.E)
 
     # Version row
     tk.Label(top_panel_left, text="Version", font=label_font).pack(pady=2)
