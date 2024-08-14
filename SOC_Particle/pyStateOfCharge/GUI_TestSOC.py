@@ -399,7 +399,14 @@ class Exec:
 
     def __copy__(self):
         """Shallow copy function"""
-        return Exec(self.cf, ind=self.ind, level=self.level, path_disp_len_=self.path_disp_len)
+        # Swap = Exec(self.cf, ind=self.ind, level=self.level, path_disp_len_=self.path_disp_len)
+        # Swap.version_button = self.version_button
+        # Swap.version = self.version
+        # Swap.version_path = self.version_path
+        # self.battery_button
+        instance = object.__new__(Exec);
+        vars(instance).update(vars(self));
+        return instance
 
     def create_file_path_and_key(self, name_override=None):
         if name_override is None:
