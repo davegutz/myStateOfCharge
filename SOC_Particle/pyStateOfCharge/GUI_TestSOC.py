@@ -516,16 +516,18 @@ class Exec:
         self.key = other.key
 
     def update_battery_stuff(self):
+        self.cf[self.ind]['version'] = self.version
         self.cf[self.ind]['unit'] = self.unit
         self.cf[self.ind]['battery'] = self.battery
+        self.cf[self.ind]['dataReduction_folder'] = self.dataReduction_folder
         self.cf.save_to_file()
         self.create_file_path_and_key()
-        self.update_key_label()
-        self.update_file_label()
         self.update_folder_button()
         self.update_version_button()
         self.update_unit_button()
         self.update_battery_button()
+        self.update_key_label()
+        self.update_file_label()
 
     def update_file_label(self):
         self.label.config(text=self.file_txt)
@@ -1257,6 +1259,8 @@ def swap_ref_test():
     swap = Test.__copy__()
     Test.super_shallow_copy(Ref)
     Ref.super_shallow_copy(swap)
+    test_unit.set(Test.unit)  # does Test update
+    ref_unit.set(Ref.unit)  # does Ref update
     test_unit.set(Test.unit)  # does Test update
     ref_unit.set(Ref.unit)  # does Ref update
 
