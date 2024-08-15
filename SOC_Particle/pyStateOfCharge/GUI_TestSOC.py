@@ -1,11 +1,11 @@
 #! /bin/sh
 "exec" "`dirname $0`/venv/bin/python3" "$0" "$@"
-##! /Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/venv/bin/python
+#  #! /Users/daveg/Documents/GitHub/myStateOfCharge/SOC_Particle/py/venv/bin/python
 # The #! operates for macOS only. 'Python Launcher' (Python Script Preferences) option for 'Allow override with #! in script' is checked.
 #  Graphical interface to Test State of Charge application
 #  Run in PyCharm
 #     or
-#  'python3 GUI_TestSOC.py
+#  python3 GUI_TestSOC.py
 #
 #  2023-Jun-15  Dave Gutz   Create
 # Copyright (C) 2024 Dave Gutz
@@ -90,7 +90,7 @@ unit_list = [
     'pro0p', 'pro1a', 'pro2p2', 'pro2p2_hi_lo', 'pro3p2', 'pro3p2_hi_lo', 'pro4p2', 'soc0p', 'soc1a', 'soc2p2_hi_lo',
     'soc3p2_hi_lo', 'soc4p2_hi_lo',
     ]
-batt_list = ['bb', 'ch', 'chg']
+battery_list = ['bb', 'ch', 'chg']
 sel_list = [
     'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'noaHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
     'allInCHG', 'allProto', 'pulseSS', 'rapidTweakRegressionH0', 'offSitHysBmsBB', 'offSitHysBmsCH', 'offSitHysBmsCHG',
@@ -98,7 +98,7 @@ sel_list = [
     'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'satSitCHG',
     ]
 sel_list1 = [
-    'flatSitHys', 'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'offSitHysBmsNoiseCHG','ampHiFailSlow',
+    'flatSitHys', 'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'offSitHysBmsNoiseCHG', 'ampHiFailSlow',
     'noaHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'DvMon', 'DvSim',
     'faultParade', 'allInBBn', 'allInCHn', 'allInCHGn',
     ]
@@ -383,12 +383,11 @@ class Exec:
         except OSError:
             tk.messagebox.showerror(title="Error", message="check google-drive available")
         # Following need explicit shallow copy lines
-        self.version_button = None
-        self.battery_button = None
-        self.level_button = None
         self.folder_button = myButton(master, text=self.dataReduction_folder[-20:],
-                                    command=self.enter_data_reduction_folder, fg="blue", bg=bg_color)
+                                      command=self.enter_data_reduction_folder, fg="blue", bg=bg_color)
+        self.version_button = None
         self.unit_button = None
+        self.battery_button = None
         self.key_label = None
         self.file_txt = None
         self.file_path = None
@@ -400,9 +399,9 @@ class Exec:
 
     def __copy__(self):
         """Shallow copy function"""
-        Instance = object.__new__(Exec);
-        vars(Instance).update(vars(self));
-        return Instance
+        instance = object.__new__(Exec)
+        vars(instance).update(vars(self))
+        return instance
 
     def create_file_path_and_key(self, name_override=None):
         if name_override is None:
@@ -628,7 +627,7 @@ def compare_hist_hist_choose():
                 ref_folder_path, ref_parent, ref_basename, ref_txt, ref_key = contain_all(ref_path)
                 print('GUI_TestSOC compare_hist_hist_choose:  Ref', ref_basename, ref_key)
                 print('GUI_TestSOC compare_hist_hist_choose:  Test', test_basename, test_key)
-                keys = [(ref_basename, ref_key), (test_basename, test_key)]
+                # keys = [(ref_basename, ref_key), (test_basename, test_key)]
                 # master.withdraw()
                 compare_hist_hist(data_file_ref=ref_path, unit_key_ref=ref_key,
                                   data_file_tst=testpath, unit_key_tst=test_key,
@@ -855,11 +854,11 @@ def grab_all_nominal():
 
 
 def grab_time():
-    current_UT = 'UT' + str(int(time.time())) + ';'
-    add_to_clip_board(current_UT)
+    current_ut = 'UT' + str(int(time.time())) + ';'
+    add_to_clip_board(current_ut)
     grab_all_nominal()
     get_time_button.config(bg='yellow', activebackground='yellow', fg='black', activeforeground='black',
-                           text=current_UT)
+                           text=current_ut)
     print('UT in paste buffer')
 
 
@@ -935,8 +934,8 @@ def handle_option(*_args):
     update_data_buttons()
 
 
-def handle_ref_batt(*_args):
-    Ref.battery = ref_batt.get()
+def handle_ref_battery(*_args):
+    Ref.battery = ref_battery.get()
     Ref.update_battery_stuff()
     update_data_buttons()
 
@@ -947,8 +946,8 @@ def handle_ref_unit(*_args):
     update_data_buttons()
 
 
-def handle_test_batt(*_args):
-    Test.battery = test_batt.get()
+def handle_test_battery(*_args):
+    Test.battery = test_battery.get()
     Test.update_battery_stuff()
     update_data_buttons()
 
@@ -1261,8 +1260,8 @@ def swap_ref_test():
     Ref.super_shallow_copy(swap)
     test_unit.set(Test.unit)  # does Test update
     ref_unit.set(Ref.unit)  # does Ref update
-    test_unit.set(Test.unit)  # does Test update
-    ref_unit.set(Ref.unit)  # does Ref update
+    test_battery.set(Test.battery)  # does Test update
+    ref_battery.set(Ref.battery)  # does Ref update
 
 
 def tksleep(t):
@@ -1351,11 +1350,11 @@ if __name__ == '__main__':
     # Folder row
     working_label = tk.Label(top_panel_left, text="dataReduction Folder", font=label_font)
     Test.folder_button = myButton(top_panel_left_ctr, text=Test.dataReduction_folder[-folder_reveal:],
-                                command=Test.enter_data_reduction_folder,
-                                fg="blue", bg=bg_color)
+                                  command=Test.enter_data_reduction_folder,
+                                  fg="blue", bg=bg_color)
     Ref.folder_button = myButton(top_panel_right, text=Ref.dataReduction_folder[-folder_reveal:],
-                               command=Ref.enter_data_reduction_folder,
-                               fg="blue", bg=bg_color)
+                                 command=Ref.enter_data_reduction_folder,
+                                 fg="blue", bg=bg_color)
     working_label.pack(padx=5, pady=5)
     Test.folder_button.pack(padx=5, pady=5, anchor=tk.W)
     Ref.folder_button.pack(padx=5, pady=5, anchor=tk.E)
@@ -1377,17 +1376,18 @@ if __name__ == '__main__':
     Ref.unit_button = tk.OptionMenu(top_panel_right, ref_unit, *unit_list)
     ref_unit.trace_add('write', handle_ref_unit)
     Ref.unit_button.pack(pady=2)
+    
     test_filename = tk.StringVar(master, putty_connection.get(Test.unit))
 
     # Battery row
     tk.Label(top_panel_left, text="Battery", font=label_font).pack(pady=2, expand=True, fill='both')
-    test_batt = tk.StringVar(master, Test.battery)
-    Test.battery_button = tk.OptionMenu(top_panel_left_ctr, test_batt, *batt_list)
-    test_batt.trace_add('write', handle_test_batt)
+    test_battery = tk.StringVar(master, Test.battery)
+    Test.battery_button = tk.OptionMenu(top_panel_left_ctr, test_battery, *battery_list)
+    test_battery.trace_add('write', handle_test_battery)
     Test.battery_button.pack(pady=2)
-    ref_batt = tk.StringVar(master, Ref.battery)
-    Ref.battery_button = tk.OptionMenu(top_panel_right, ref_batt, *batt_list)
-    ref_batt.trace_add('write', handle_ref_batt)
+    ref_battery = tk.StringVar(master, Ref.battery)
+    Ref.battery_button = tk.OptionMenu(top_panel_right, ref_battery, *battery_list)
+    ref_battery.trace_add('write', handle_ref_battery)
     Ref.battery_button.pack(pady=2)
 
     # Key row
@@ -1602,8 +1602,8 @@ if __name__ == '__main__':
     # Begin
     handle_test_unit()
     handle_ref_unit()
-    handle_test_batt()
-    handle_ref_batt()
+    handle_test_battery()
+    handle_ref_battery()
     handle_modeling()
     handle_macro()
     handle_option()
