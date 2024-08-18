@@ -653,7 +653,7 @@ def compare_hist_sim_choose():
             if key != '':
                 answer = tk.simpledialog.askinteger(title=__file__,
                                                     prompt="Simulation re-construction sample time in seconds",
-                                                    initialvalue=10)
+                                                    initialvalue=900)
                 if answer is None:
                     print('enter operation cancelled')
                     return
