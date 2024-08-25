@@ -215,7 +215,7 @@ public:
   Looparound();
   Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp, const double wrap_trim_gain);
   ~Looparound();
-  void calculate(const boolean reset, const float ib);
+  void calculate(const boolean reset, const float ib, const boolean amp);
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
   uint8_t hi_fail() { return hi_fail_; };

@@ -60,5 +60,5 @@
 // Faults
 #define FAKE_FAULTS           false    // What to do with faults, T=detect and display them but don't change signals
 #define CC_DIFF_SOC_DIS_THRESH  0.5   // Signal selection threshold for Coulomb counter EKF disagree test (0.2, 0.1 too small on truck)
-// #define DEBUG_DETAIL                  // Use this with vv-1, vv61 to get more detail.
+#define DEBUG_DETAIL                  // Use this with vv-1, vv61 to get more detail.
 #endif
