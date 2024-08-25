@@ -215,7 +215,7 @@ public:
   Looparound();
   Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp, const double wrap_trim_gain);
   ~Looparound();
-  void calculate(const boolean reset, const float ib, const boolean amp);
+  void calculate(const boolean reset, const float ib);
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
   uint8_t hi_fail() { return hi_fail_; };
@@ -235,6 +235,7 @@ protected:
   uint8_t hi_fail_;         // Fail bit
   uint8_t hi_fault_;        // Fault bit
   float ib_;                // Sensed unit shunt current, A
+  float ib_past_;           // Sensed unit shunt current past value, A
   uint8_t lo_fail_;         // Fail bit
   uint8_t lo_fault_;        // Fault bit
   BatteryMonitor *Mon_;     // Monitor ptr

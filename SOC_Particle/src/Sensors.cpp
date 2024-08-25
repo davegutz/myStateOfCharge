@@ -254,8 +254,8 @@ void Shunt::sample(const boolean reset_loc, const float T)
 
 // Class Looparound
 Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp, const double wrap_trim_gain):
-  chem_(Mon->chem()), e_wrap_(0.), e_wrap_filt_(0.), e_wrap_trim_(0.), e_wrap_trimmed_(0.), hi_fail_(false), hi_fault_(false), ib_(0.), 
-  lo_fail_(false), lo_fault_(false), Mon_(Mon), reset_(false), Sen_(Sen), voc_(0.), wrap_hi_amp_(wrap_hi_amp), wrap_lo_amp_(wrap_lo_amp),
+  chem_(Mon->chem()), e_wrap_(0.), e_wrap_filt_(0.), e_wrap_trim_(0.), e_wrap_trimmed_(0.), hi_fail_(false), hi_fault_(false), ib_(0.),
+  ib_past_(0), lo_fail_(false), lo_fault_(false), Mon_(Mon), reset_(false), Sen_(Sen), voc_(0.), wrap_hi_amp_(wrap_hi_amp), wrap_lo_amp_(wrap_lo_amp),
   wrap_trim_gain_(wrap_trim_gain)
 {
   ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_->tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);     // actual update time provided run time
@@ -266,11 +266,16 @@ Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_am
 }
 
 // Update the loop
-void Looparound::calculate(const boolean reset, const float ib, const boolean amp)
+void Looparound::calculate(const boolean reset, const float ib)
 {
   reset_ = reset | Sen_->Flt->reset_all_faults();
   ib_ = ib;
-  voc_ = Mon_->vb() - (ChargeTransfer_->calculate(ib_, reset_, chem_->tau_ct, Sen_->T)*chem_->r_ct*ap.slr_res + ib_*chem_->r_0*ap.slr_res);
+
+  // Dynamic emf. vb_ is stale when running with model
+  float ib_dyn;
+  if (sp.mod_vb()) ib_dyn = ib_past_;
+  else ib_dyn = ib_;
+  voc_ = Mon_->vb() - (ChargeTransfer_->calculate(ib_dyn, reset_, chem_->tau_ct, Sen_->T)*chem_->r_ct*ap.slr_res + ib_dyn*chem_->r_0*ap.slr_res);
   e_wrap_ = Mon_->voc_soc() - voc_;
   e_wrap_trim_ = -Trim_->calculate(e_wrap_filt_*wrap_trim_gain_, reset_, 0.);  // Always initialize to zero
   if (reset_)
@@ -291,13 +296,10 @@ void Looparound::calculate(const boolean reset, const float ib, const boolean am
   hi_fail_ = WrapHi_->calculate(hi_fault_, WRAP_HI_S, WRAP_HI_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // not latched
   lo_fault_ = e_wrap_filt_ <= ewlo_thr_;
   lo_fail_ = WrapLo_->calculate(lo_fault_, WRAP_LO_S, WRAP_LO_R, Sen_->T, reset_) && !Sen_->Flt->vb_fa();  // not latched
-  if ( (sp.debug()==2 || sp.debug()==4) && reset_  && !amp )
-    Serial.printf("looparound, reset, ib, voc, e_wrap, e_wrap_trim, e_wrap_filt, ewhi_thr, ewlo_thr, vb_fa, lo_fault, lo_fail, hi_fault, hi_fail\n");
-  if ( (sp.debug()==2 || sp.debug()==4) && !amp)
-    Serial.printf("looparound,%d, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %7.3f, %d, %d, %d, %d, %d\n",
-    reset_, ib_, voc_, e_wrap_, e_wrap_trim_, e_wrap_filt_, ewhi_thr_, ewlo_thr_, Sen_->Flt->vb_fa(), lo_fault_, lo_fail_, hi_fault_, hi_fail_);
+
   if ( sp.debug()==71 ) Serial.printf("ib%7.3f reset%d ewlo_thr/e_wrap_filt/ewhi_thr  %7.3f/%7.3f/%7.3f trim%7.3f vb_fa %d lo_fault/fail %d/%d hi_fault/fail %d/%d\n",
    ib_, reset_, ewlo_thr_, e_wrap_filt_, ewhi_thr_, e_wrap_trim_, Sen_->Flt->vb_fa(), lo_fault_, lo_fail_, hi_fault_, hi_fail_);
+  ib_past_ = ib_;
 }
 
 void Looparound::pretty_print()
@@ -493,8 +495,8 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 
   // HI_LO-Only Logic
   #ifdef HDWE_IB_HI_LO
-    LoopIbNoa->calculate(reset_loc, Sen->ib_noa(), false);
-    LoopIbAmp->calculate(reset_loc || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO, Sen->ib_amp(), true);
+    LoopIbNoa->calculate(reset_loc, Sen->ib_noa());
+    LoopIbAmp->calculate(reset_loc || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO, Sen->ib_amp());
     faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
     failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // WRAP_HI_M_FA not latched
     faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);
