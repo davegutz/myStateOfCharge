@@ -122,9 +122,9 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('offSitHysBmsCHG_pro0p_chg.csv', 'g20240331_pro0p_chg'),
-            ('offSitHysBmsCHG_pro3p2_chg.csv', 'g20240704_pro3p2_chg')]
-    data_file_folder_ref = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20240331'
+    keys = [('offSitHysBmsCHG_pro0p_chg_bomb.csv', 'myStateOfCharge_last_g20240331_pro0p_chg'),
+            ('offSitHysBmsCHG_pro3p2_hi_lo_chg_bomb.csv', 'g20240704_pro3p2_hi_lo_chg')]
+    data_file_folder_ref = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\myStateOfCharge_last_g20240331'
     data_file_folder_test = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20240704'
     sync_to_ctime = False
     compare_run_run(keys=keys, data_file_folder_ref=data_file_folder_ref, data_file_folder_test=data_file_folder_test,

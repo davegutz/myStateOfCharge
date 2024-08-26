@@ -1083,6 +1083,7 @@ class SavedDataSim:
             self.time = self.time[:i_end]
             self.time_min = self.time / 60.
             self.time_day = self.time / 3600. / 24.
+
             self.chm_s = data.chm_s[:i_end]
             if hasattr(data, 'qcrs_s'):
                 self.qcrs_s = data.qcrs_s[:i_end]
