@@ -17,7 +17,6 @@
 a monitor object (MON) and a simulation object (SIM).   The monitor is
 the EKF and Coulomb Counter.   The SIM is a battery model, that also has a
 Coulomb Counter built in."""
-import numpy as np
 
 from DataOverModel import dom_plot
 from CompareFault import over_fault
@@ -26,7 +25,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from PlotKiller import show_killer
 import os
-from load_data import load_data, SyncInfo, calculate_master_sync
+from load_data import load_data, calculate_master_sync
 from local_paths import version_from_data_path, local_paths
 
 import sys
@@ -122,8 +121,8 @@ def compare_run_run(keys=None, data_file_folder_ref=None, data_file_folder_test=
 
 
 def main():
-    keys = [('offSitHysBmsCHG_pro0p_chg_bomb.csv', 'myStateOfCharge_last_g20240331_pro0p_chg'),
-            ('offSitHysBmsCHG_pro3p2_hi_lo_chg_bomb.csv', 'g20240704_pro3p2_hi_lo_chg')]
+    keys = [('ampHiFail_pro0p_chg.csv', 'myStateOfCharge_last_g20240331_pro0p_chg'),
+            ('ampHiFail_pro3p2_hi_lo_chg.csv', 'g20240704_pro3p2_hi_lo_chg')]
     data_file_folder_ref = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\myStateOfCharge_last_g20240331'
     data_file_folder_test = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20240704'
     sync_to_ctime = False
