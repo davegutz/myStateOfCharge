@@ -868,7 +868,10 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
         dv_hys_remodel_ = np.copy(h.soc)
         for i in range(len(h.time_ux)):
             t_min = int(float(h.time_ux[i]) / 60.)
-            dv_hys_remodel_[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
+            if len(hys_time_min) > 0:
+                dv_hys_remodel_[i] = np.interp(t_min, hys_time_min, dv_hys_remodel)
+            else:
+                dv_hys_remodel_[i] = 0.
 
         hys_redesign = Hysteresis_20220926(scale=HYS_SCALE_20220926, cap=HYS_CAP_REDESIGN)
         # Battery hysteresis model - drift of voc
@@ -916,12 +919,18 @@ def filter_Tb(raw, temp_corr, mon, tb_band=5., rated_batt_cap=100.):
         voc_stat_redesign_r_ = np.copy(h.soc)
         for i in range(len(h.time_ux)):
             t_min = h.time_min[i]
-            dv_hys_redesign_[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
-            res_redesign_[i] = np.interp(t_min, hys_time_min, res_redesign)
-            ioc_redesign_[i] = np.interp(t_min, hys_time_min, ioc_redesign)
-            dv_dot_redesign_[i] = np.interp(t_min, hys_time_min, dv_dot_redesign)
-            voc_stat_redesign_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign)
-            voc_stat_redesign_r_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign_r)
+            if len(hys_time_min) > 0:
+                dv_hys_redesign_[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
+                dv_hys_redesign_[i] = np.interp(t_min, hys_time_min, dv_hys_redesign)
+                dv_dot_redesign_[i] = np.interp(t_min, hys_time_min, dv_dot_redesign)
+                voc_stat_redesign_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign)
+                voc_stat_redesign_r_[i] = np.interp(t_min, hys_time_min, voc_stat_redesign_r)
+            else:
+                dv_hys_redesign_[i] = 0.
+                ioc_redesign_[i] = 0.
+                dv_dot_redesign_[i] = 0.
+                voc_stat_redesign_[i] = 0.
+                voc_stat_redesign_r_[i] = 0.
         voc_stat_redesign_r_chg = np.copy(voc_stat_redesign_r_)
         voc_stat_redesign_r_dis = np.copy(voc_stat_redesign_r_)
         dv_hys_redesign_chg = np.copy(dv_hys_redesign_)
