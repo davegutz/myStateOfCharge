@@ -611,6 +611,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plq(plt, mv, 'time', mv, 'ib_diff_fa', add=-6, color='red', linestyle='--', label='ib_diff_fa' + test_str + '-6')
     plq(plt, mo, 'time', mo, 'ib_diff_flt', add=-8, color='green', linestyle='-', label='ib_diff_flt' + ref_str + '-8')
     plq(plt, mv, 'time', mv, 'ib_diff_flt', add=-8, color='red', linestyle='--', label='ib_diff_flt' + test_str + '-8')
+    plq(plt, mo, 'time', mo, 'ib_dec', color='blue', linestyle='-.', label='ib_dec' + ref_str)
+    plq(plt, mv, 'time', mv, 'ib_dec', color='orange', linestyle=':', label='ib_dec' + test_str)
     plt.legend(loc=1)
     plt.subplot(335)
     plt.plot(mo.time, np.array(mo.bms_off) + 4, color='red', linestyle='-', label='bms_off' + ref_str + '+4')
@@ -912,6 +914,7 @@ class SavedData:
             self.ibq_thr = None
             self.preserving = None
             self.y_ekf_f = None
+            self.ib_dec = None
         else:
             falw = np.array(sel.falw[:i_end], dtype=np.uint32)
             fltw = np.array(sel.fltw[:i_end], dtype=np.uint32)
@@ -987,6 +990,8 @@ class SavedData:
             self.preserving = np.array(sel.preserving[:i_end])
             if hasattr(sel, 'y_ekf_f'):
                 self.y_ekf_f = np.array(sel.y_ekf_f[:i_end])
+            if hasattr(sel, 'ib_dec'):
+                self.ib_dec = np.array(sel.ib_dec[:i_end])
         if ekf is None:
             self.c_time_e = None
             self.Fx = None

@@ -940,7 +940,7 @@ void Fault::ib_decision_hi_lo(Sensors *Sen)
         {
           ib_choice_ = ib_choice_last_;
           latched_fail_ = latched_fail_enter;
-          ib_decision_ = 9;
+          ib_decision_ = 0;
         }
       }
       else if ( cc_diff_fa() )  // don't know how to isolate due to weighting of amp and noa
@@ -953,7 +953,7 @@ void Fault::ib_decision_hi_lo(Sensors *Sen)
       {
         ib_choice_ = ib_choice_last_;
         latched_fail_ = latched_fail_enter;
-        ib_decision_ = 11;
+        ib_decision_ = 0;
       }
     }
     else if ( cc_diff_fa() )  // don't know how to isolate due to weighting of amp and noa
@@ -1389,10 +1389,10 @@ void Sensors::select_all_hdwe_or_model(BatteryMonitor *Mon)
 
       Serial.printf("%s", pr.buff);
 
-      sprintf(pr.buff, "%ld, %ld, %7.3f, %7.3f, %d, %9.6f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%d,%7.3f,",
+      sprintf(pr.buff, "%ld, %ld, %7.3f, %7.3f, %d, %9.6f,%7.3f,%7.3f,%7.3f,%7.3f,%d,%d,%7.3f,%d,",
           Flt->fltw(), Flt->falw(), Flt->ib_rate(), Flt->ib_quiet(), Flt->tb_sel_status(),
           Flt->cc_diff_thr(), Flt->ewhi_thr(), Flt->ewlo_thr(), Flt->ib_diff_thr(), Flt->ib_quiet_thr(), Flt->preserving(), ap.fake_faults,
-          Mon->y_ekf_filt());
+          Mon->y_ekf_filt(), Flt->ib_decision());
       Serial.printf("%s\n", pr.buff);
   }
 }
