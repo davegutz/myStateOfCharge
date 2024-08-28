@@ -368,6 +368,7 @@ public:
   void wrap_err_filt_state(const float in) { WrapErrFilt->state(in); }
 protected:
   TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
+  RateLagExp *IbAmpRate;    // Linear filter to calculate rate for amp
   TFDelay *IbdHiPer;        // Persistence ib diff hi
   TFDelay *IbdLoPer;        // Persistence ib diff lo
   LagTustin *IbErrFilt;     // Noise filter for signal selection
@@ -385,6 +386,8 @@ protected:
   float cc_diff_;           // EKF tracking error, C
   boolean cc_diff_fa_;      // EKF tested disagree, T = error
   float cc_diff_empty_slr_; // Scale cc_diff when soc low, scalar
+  boolean disable_amp_fault_;  // Disable amp faults (both sensors agree), T=disable
+  float ewmax_slr_;         // Scale wrap detection thresh when voc(soc) greater than max, scalar
   float ewmin_slr_;         // Scale wrap detection thresh when voc(soc) less than min, scalar
   float ewsat_slr_;         // Scale wrap detection thresh when voc(soc) saturated, scalar
   float e_wrap_;            // Wrap error, V
@@ -392,15 +395,18 @@ protected:
   uint32_t fltw_;           // Bitmapped faults
   uint32_t falw_;           // Bitmapped fails
   boolean ib_amp_hi_;       // ib amp near it's range limit, T=near hi
-  boolean ib_amp_lo_;       // ib amp near it's range limit, T=near lo
   boolean ib_amp_invalid_;  // Battery amp is invalid (hard failed)
+  boolean ib_amp_lo_;       // ib amp near it's range limit, T=near lo
+  float ib_amp_rate_;       // ib amp rate, A/s
   ibSel ib_choice_;         // ib signal selection
   ibSel ib_choice_last_;         // ib signal selection
   uint16_t ib_decision_;    // ib_decision_hi_lo_, code (stops 0, stops on last decision)
   float ib_diff_;           // Current sensor difference error, A
   float ib_diff_f_;         // Filtered sensor difference error, A
   boolean ib_lo_active_;    // Battery low amp is in active range, T=active
+  boolean ib_noa_hi_;       // ib noa above amp high limit, T=above hi
   boolean ib_noa_invalid_;  // Battery noa is invalid (hard failed)
+  boolean ib_noa_lo_;       // ib noa below amp low limit, T=below hi
   float ib_quiet_;          // ib hardware noise, A/s
   float ib_rate_;           // ib rate, A/s
   int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noa, 0=none, 1=a
