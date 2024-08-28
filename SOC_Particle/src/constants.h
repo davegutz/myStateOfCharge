@@ -181,7 +181,7 @@ const float T_DESAT =         20;       // De-saturation time, sec
 #define WRAP_ERR_FILT         4.        // Wrap error filter time constant, s (4)
 #define F_MAX_T_WRAP          2.8       // Maximum update time of Wrap filter for stability at WRAP_ERR_FILT (0.7*T for Tustin), s (2.8)
 #define MAX_WRAP_ERR_FILT     10.       // Anti-windup wrap error filter, V (10)
-const float WRAP_LO_S =       9.;       // Wrap low failure set time, sec (9) // 9 is legacy must be quicker than SAT test
+const float WRAP_LO_S =       17.;      // Wrap low failure set time, sec (9) // 9 is legacy must be quicker than SAT test (9)
 const float WRAP_LO_R = (WRAP_LO_S/2.); // Wrap low failure reset time, sec ('up 1, down 2')
 const float WRAP_HI_S = WRAP_LO_S;      // Wrap high failure set time, sec (WRAP_LO_S)
 const float WRAP_HI_R = (WRAP_HI_S/2.); // Wrap high failure reset time, sec ('up 1, down 2')

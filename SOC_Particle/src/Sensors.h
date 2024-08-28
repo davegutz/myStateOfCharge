@@ -391,6 +391,8 @@ protected:
   float e_wrap_filt_;       // Wrap error, V
   uint32_t fltw_;           // Bitmapped faults
   uint32_t falw_;           // Bitmapped fails
+  boolean ib_amp_hi_;       // ib amp near it's range limit, T=near hi
+  boolean ib_amp_lo_;       // ib amp near it's range limit, T=near lo
   boolean ib_amp_invalid_;  // Battery amp is invalid (hard failed)
   ibSel ib_choice_;         // ib signal selection
   ibSel ib_choice_last_;         // ib signal selection

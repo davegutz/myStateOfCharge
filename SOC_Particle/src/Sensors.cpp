@@ -321,6 +321,7 @@ void Looparound::pretty_print()
 // Class Fault
 Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *Sen):
   cc_diff_(0.), cc_diff_empty_slr_(1), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0), fltw_(0UL), falw_(0UL),
+  ib_amp_hi_(false), ib_amp_lo_(false),
   ib_amp_invalid_(false), ib_choice_(UsingDef), ib_choice_last_(UsingDef), ib_decision_(0), ib_diff_(0), ib_diff_f_(0),
   ib_lo_active_(true), ib_noa_invalid_(false), ib_quiet_(0), ib_rate_(0), ib_sel_stat_(IB_SEL_STAT_DEF),
   ib_sel_stat_last_(IB_SEL_STAT_DEF), latched_fail_(false), latched_fail_fake_(false), reset_all_faults_(false),
@@ -374,15 +375,31 @@ void Fault::ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   if ( sp.mod_ib() )
   {
     ib_diff_ = Sen->ib_amp_model() - Sen->ib_noa_model();
+    #ifdef HDWE_IB_HI_LO
+      ib_amp_hi_ = Sen->ib_amp_model() >= HDWE_IB_HI_LO_AMP_HI / sp.nP();
+      ib_amp_lo_ = Sen->ib_amp_model() <= HDWE_IB_HI_LO_AMP_LO / sp.nP();
+    #else
+      ib_amp_hi_ = false;
+      ib_amp_lo_ = false;
+    #endif
   }
   else
   {
     ib_diff_ = Sen->ib_amp_hdwe() - Sen->ib_noa_hdwe();
+    #ifdef HDWE_IB_HI_LO
+      ib_amp_hi_ = Sen->ib_amp_hdwe() >= HDWE_IB_HI_LO_AMP_HI / sp.nP();
+      ib_amp_lo_ = Sen->ib_amp_hdwe() <= HDWE_IB_HI_LO_AMP_LO / sp.nP();
+    #else
+      ib_amp_hi_ = false;
+      ib_amp_lo_ = false;
+    #endif
   }
   ib_diff_f_ = IbErrFilt->calculate(ib_diff_, reset_loc, min(Sen->T, MAX_ERR_T));
   ib_diff_thr_ = IBATT_DISAGREE_THRESH*ap.ib_diff_slr;
-  faultAssign( (ib_diff_f_>=ib_diff_thr_) && ib_lo_active_, IB_DIFF_HI_FLT );
-  faultAssign( (ib_diff_f_<=-ib_diff_thr_) && ib_lo_active_, IB_DIFF_LO_FLT );
+  faultAssign( (ib_diff_f_>=ib_diff_thr_) && ib_lo_active_ && !ib_amp_lo_, IB_DIFF_HI_FLT );
+  faultAssign( (ib_diff_f_<=-ib_diff_thr_) && ib_lo_active_ && !ib_amp_hi_, IB_DIFF_LO_FLT );
+  if ( sp.debug()==2 || sp.debug()==4 )Serial.printf("ib_amp%7.3f ib_no%7.3f ib_diff_f%7.3f ib_lo_active %d ib_amp_lo %d ib_amp_hi %d ib_diff_hi %d ib_diff_lo %d\n",
+   Sen->ib_amp_model(), Sen->ib_noa_model(), ib_diff_f_, ib_lo_active_, ib_amp_lo_, ib_amp_hi_, ib_diff_hi_flt(), ib_diff_lo_flt());
   failAssign( IbdHiPer->calculate(ib_diff_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIFF_HI_FA ); // IB_DIFF_FA not latched
   failAssign( IbdLoPer->calculate(ib_diff_lo_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIFF_LO_FA ); // IB_DIFF_FA not latched
 }
