@@ -177,13 +177,13 @@ lookup = {
                     ('All the best transients BB', "Must have same 'vv*' throughout", "")),
         'allInCH': (1200,
                     slow + 'Dh4000;' +
-                    modLowInitCH + slowTwitchDef + 'Xa-162;' + slowTranPrep + twitch + 'XQ568000;' + 'Xa0;' +  # offSitHysBmsCH
+                    modLowInitCH + slowTwitchDef + 'Xa-324;' + slowTranPrep + twitch + 'XQ568000;' + 'Xa0;' +  # offSitHysBmsCH
                     'Xm247;Ca0.9920;' + fastTwitchDef + 'Xa17;' + slowTranPrep + 'XR;XQ600000;' + 'Xa0;' +  # satSitCH
                     quiet + cleanup,
                     ('All the best transients CH', "Must have same 'vv*' throughout", "")),
         'allInCHG': (1200,
                      slow + 'Dh4000;' +
-                     modLowInitCHG + slowTwitchDef + 'Xa-162;' + slowTranPrep + twitch + 'XQ568000;' + 'Xa0;' +  # offSitHysBmsCHG
+                     modLowInitCHG + slowTwitchDef + 'Xa-324;' + slowTranPrep + twitch + 'XQ568000;' + 'Xa0;' +  # offSitHysBmsCHG
                      'Xm247;Ca0.9920;' + fastTwitchDef + 'Xa17;' + slowTranPrep + 'XR;XQ600000;' + 'Xa0;' +  # satSitCHG
                      quiet + cleanup,
                      ('All the best transients CHG', "Must have same 'vv*' throughout", "")),
@@ -196,13 +196,13 @@ lookup = {
         'allInCHn': (690,
                      slow + 'Dh4000;' +
                      modMidInit + slowTranPrep + noisePackage + c50 + 'XQ25000;' + c00 + silentPackage + tempCleanup +  # 1 ampHiFailNoise 0
-                     modLowInitCH + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage +  # 1 offSitHysBmsNoiseCHG 70
+                     modLowInitCH + slowTwitchDef + 'Xa-324;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage +  # 1 offSitHysBmsNoiseCHG 70
                      quiet + cleanup,
                      ('All the best transients CHG noise', "Must have same 'vv*' throughout", "")),
         'allInCHGn': (690,
                       slow + 'Dh4000;' +
                       modMidInit + slowTranPrep + noisePackage + c50 + 'XQ25000;' + c00 + silentPackage + tempCleanup +  # 1 ampHiFailNoise 0
-                      modLowInitCHG + slowTwitchDef + 'Xa-162;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage +  # 1 offSitHysBmsNoiseCHG 70
+                      modLowInitCHG + slowTwitchDef + 'Xa-324;' + noisePackage + tranPrep + 'XR;XQ568000;' + 'Xa0;' + silentPackage +  # 1 offSitHysBmsNoiseCHG 70
                       quiet + cleanup,
                       ('All the best transients CHG noise', "Must have same 'vv*' throughout", "")),
         'ampHiFail': (85, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure (reset when current display changes from '50/diff' back to normal '0' and wait for CoolTerm to stop streaming.)", "'diff' will be displayed. After a bit more, current display will change to 0.", "To evaluate plots, start looking at 'DOM 1' fig 3. Fault record (frozen). Will see 'diff' flashing on OLED even after fault cleared automatically (lost redundancy).", "ib_diff_fa will set red_loss but wait for wrap_fa to isolate and make selection change")),
