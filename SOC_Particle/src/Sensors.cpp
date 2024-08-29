@@ -410,6 +410,9 @@ void Fault::ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   faultAssign( (ib_diff_f_<=-ib_diff_thr_) && ib_lo_active_, IB_DIFF_LO_FLT );
   failAssign( IbdHiPer->calculate(ib_diff_hi_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIFF_HI_FA ); // IB_DIFF_FA not latched
   failAssign( IbdLoPer->calculate(ib_diff_lo_flt(), IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, Sen->T, reset_loc), IB_DIFF_LO_FA ); // IB_DIFF_FA not latched
+
+  // if ( sp.debug()==2 || sp.debug()==4 ) Serial.printf("ib_diff_%7.3f reset_loc %d disable_amp_fault_ %d ib_diff_f_ %7.3f ib_diff_thr_ %7.3f ib_lo_active_ %d\n",
+  //    ib_diff_, reset_loc, disable_amp_fault_, ib_diff_f_, ib_diff_thr_, ib_lo_active_);
 }
 
 // Detect no signal present based on detection of quiet signal.
@@ -1067,10 +1070,6 @@ void Fault::shunt_check(Sensors *Sen, BatteryMonitor *Mon, const boolean reset)
     failAssign( vc_fa() || ib_amp_bare() || ib_amp_fa() || IbAmpHardFail->calculate(ib_amp_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_AMP_FA );
     failAssign( vc_fa() || ib_noa_bare() || ib_noa_fa() || IbNoAmpHardFail->calculate(ib_noa_flt(), IB_HARD_SET, IB_HARD_RESET, Sen->T, reset_loc), IB_NOA_FA);
   }
-  #ifdef HDWE_IB_HI_LO
-    ib_lo_active_ = IbLoActive->calculate(HDWE_IB_HI_LO_AMP_LO < Sen->Ib_noa_hdwe && Sen->Ib_noa_hdwe < HDWE_IB_HI_LO_AMP_HI,
-                                         IB_LO_ACTIVE_SET, IB_LO_ACTIVE_RESET, Sen->T , reset_loc);
-  #endif
 }
 
 // Check Tb 2-wire analog voltage.  Latches
