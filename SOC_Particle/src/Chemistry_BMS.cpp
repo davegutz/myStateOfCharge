@@ -146,8 +146,8 @@ void Chemistry::assign_all_chm()
         4.000,  4.000,  6.686,  8.206, 10.739, 12.045, 12.411, 12.799, 12.866, 12.890, 12.914, 12.949, 12.963, 13.037, 13.052, 13.067, 13.089, 13.112, 13.146, 13.196, 13.284, 13.318, 13.320, 13.320, 13.320, 13.320, 13.320, 14.760, 
         };
     const uint8_t N_N = 3; // Number of temperature breakpoints for x_soc_min table
-    float X_SOC_MIN[N_N] = {21.5, 25.0, 35.0, };  // Temperature breakpoints for soc_min table
-    float T_SOC_MIN[N_N] = {0.13, 0.00, -0.14, };  // soc_min(t)
+    float X_SOC_MIN[N_N] = {21.5,  25.0, 35.0, };  // Temperature breakpoints for soc_min table
+    float T_SOC_MIN[N_N] = {0.13, -0.04, -0.2, };  // soc_min(t)  ****EXTENDED MIN for model bms_off testing
 #endif
 
 

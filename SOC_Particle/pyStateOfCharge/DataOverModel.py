@@ -340,7 +340,7 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plt.plot(mo.time, mo.soc, color='orange', linestyle='-', label='soc'+ref_str)
     plt.plot(mv.time, mv.soc, color='green', linestyle='--', label='soc'+test_str)
     plq(plt, smv, 'time', smv, 'soc_s', color='black', linestyle='-.', label='soc_s'+test_str)
-    plt.plot(mo.time, mo.soc_ekf, color='red', linestyle=':', label='soc'+ref_str)
+    plt.plot(mo.time, mo.soc_ekf, color='red', linestyle=':', label='soc_ekf'+ref_str)
     plt.plot(mv.time, mv.soc_ekf, color='cyan', linestyle=':', label='soc_ekf'+test_str)
     plt.legend(loc=1)
     plt.subplot(132)

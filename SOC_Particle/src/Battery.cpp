@@ -249,7 +249,8 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
     float ib_dyn;
     if (sp.mod_vb()) ib_dyn = ib_past_;
     else ib_dyn = ib_;
-    voc_ = vb_ - (ChargeTransfer_->calculate(ib_dyn, reset_temp, chem_.tau_ct, dt_)*chem_.r_ct*ap.slr_res + ib_dyn*chem_.r_0*ap.slr_res);
+    float dvdyn = (ChargeTransfer_->calculate(ib_dyn, reset_temp, chem_.tau_ct, dt_)*chem_.r_ct*ap.slr_res + ib_dyn*chem_.r_0*ap.slr_res);
+    voc_ = vb_ - dvdyn;
     if ( !ap.fake_faults )
     {
         if ( (bms_off_ && voltage_low_) ||  Sen->Flt->vb_fa())
@@ -267,6 +268,9 @@ float BatteryMonitor::calculate(Sensors *Sen, const boolean reset_temp)
 
     // Reversionary model
     vb_model_rev_ = voc_soc_ + dv_dyn_ + dv_hys_;
+
+// if ( sp.debug()==1 || sp.debug()==4) Serial.printf("ib_dyn%7.3f bms_off %d voltage_low %d bms_charging %d vb_fa %d tweak_test %d vb%7.3f voc_stat%7.3f voc_soc%7.3f voc%7.3f voc_filt%7.3f dvdyn%7.3f\n",
+//      ib_dyn, bms_off_, voltage_low_, bms_charging_, Sen->Flt->vb_fa(), sp.tweak_test(), vb_, voc_stat_, voc_soc_, voc_, voc_filt_, dvdyn);
 
     // EKF 1x1
     if ( eframe_ == 0 )
@@ -653,7 +657,8 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
         ib_ = 0.;
 
     // ChargeTransfer dynamic model for model, reverse version to generate sensor inputs
-    vb_ = voc_ + (ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_)*chem_.r_ct*ap.slr_res + ib_*chem_.r_0*ap.slr_res);
+    float dvdyn = (ChargeTransfer_->calculate(ib_, reset, chem_.tau_ct, dt_)*chem_.r_ct*ap.slr_res + ib_*chem_.r_0*ap.slr_res);
+    vb_ = voc_ + dvdyn;
 
     // Special cases override
     if ( bms_off_ )
@@ -672,7 +677,9 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     ib_fut_ = min(ib_charge_fut, sat_ib_max_);      // the feedback of ib_
     // ib_charge_ = ib_charge_fut;  // Same time plane as volt calcs, added past value.  (This prevents sat logic from working)
     ib_charge_ = ib_fut_;  // Same time plane as volt calcs, added past value
-    if ( (q_ <= 0.) && (ib_charge_ < 0.) && sp.mod_ib() ) ib_charge_ = 0.;   //  empty
+
+    // if ( (q_ <= 0.) && (ib_charge_ < 0.) && sp.mod_ib() ) ib_charge_ = 0.;   //  empty  **** don't know why this was hear.  cannot bms_off_ with it
+
     model_cutback_ = (voc_stat_ > vsat_) && (ib_charge_ == sat_ib_max_);
     model_saturated_ = model_cutback_ && (ib_charge_ < ib_sat_);
     Coulombs::sat_ = model_saturated_;
