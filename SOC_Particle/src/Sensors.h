@@ -260,7 +260,7 @@ public:
   Fault(const double T, uint8_t *sp_preserving, BatteryMonitor *Mon, Sensors *Sen);
   ~Fault();
   float cc_diff() { return cc_diff_; };
-  void cc_diff(Sensors *Sen, BatteryMonitor *Mon);
+  void cc_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   boolean cc_diff_fa() { return failRead(CC_DIFF_FA); };
   float cc_diff_thr_;     // Threshold Coulomb Counters difference faults, soc fraction
   float cc_diff_thr() { return cc_diff_thr_; };
@@ -367,6 +367,8 @@ public:
   boolean wrap_vb_fa() { return failRead(WRAP_VB_FA); };
   void wrap_err_filt_state(const float in) { WrapErrFilt->state(in); }
 protected:
+
+  TFDelay *CcdiffPer;       // Persistence cc_diff ekf fail amp
   TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
   RateLagExp *IbAmpRate;    // Linear filter to calculate rate for amp
   TFDelay *IbdHiPer;        // Persistence ib diff hi

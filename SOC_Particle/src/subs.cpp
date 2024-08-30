@@ -543,7 +543,7 @@ void sense_synth_select(const boolean reset, const boolean reset_temp, const uns
   Sen->Flt->ib_range(reset, Sen, Mon);
   Sen->Flt->ib_wrap(reset, Sen, Mon);
   Sen->Flt->ib_quiet(reset, Sen);
-  Sen->Flt->cc_diff(Sen, Mon);
+  Sen->Flt->cc_diff(reset, Sen, Mon);
   Sen->Flt->ib_diff(reset, Sen, Mon);
 
 

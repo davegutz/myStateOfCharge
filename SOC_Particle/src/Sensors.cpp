@@ -332,6 +332,7 @@ Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *
   IbErrFilt = new LagTustin(T, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
   IbdHiPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   IbdLoPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
+  CcdiffPer  = new TFDelay(false, CC_DIFF_SET, CC_DIFF_RESET, T);
   IbAmpHardFail  = new TFDelay(false, IB_HARD_SET, IB_HARD_RESET, T);
   IbLoActive  = new TFDelay(true, IB_LO_ACTIVE_SET, IB_LO_ACTIVE_RESET, T);
   IbNoAmpHardFail  = new TFDelay(false, IB_HARD_SET, IB_HARD_RESET, T);
@@ -350,7 +351,7 @@ Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *
 }
 
 // Coulomb Counter difference test - failure conditions track poorly
-void Fault::cc_diff(Sensors *Sen, BatteryMonitor *Mon)
+void Fault::cc_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 {
   cc_diff_ = Mon->soc_ekf() - Mon->soc(); // These are filtered in their construction (EKF is a dynamic filter and 
                                           // Coulomb counter is wrapa big integrator)
@@ -364,7 +365,7 @@ void Fault::cc_diff(Sensors *Sen, BatteryMonitor *Mon)
   }
   // ewsat_slr_ used here because voc_soc map inaccurate on cold days
   cc_diff_thr_ = CC_DIFF_SOC_DIS_THRESH*ap.cc_diff_slr*cc_diff_empty_slr_*ewsat_slr_;
-  failAssign( abs(cc_diff_)>=cc_diff_thr_ , CC_DIFF_FA );  // CC_DIFF_FA not latched
+  failAssign( CcdiffPer->calculate(abs(cc_diff_)>=cc_diff_thr_, CC_DIFF_SET, CC_DIFF_RESET, Sen->T, reset), CC_DIFF_FA ); // CC_DIFF_FA not latched
 }
 
 // Compare current sensors - failure conditions large difference
