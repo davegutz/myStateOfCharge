@@ -541,10 +541,10 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   #ifdef HDWE_IB_HI_LO
     e_wrap_ = scale_select(Sen->Ib_noa_hdwe, Sen->sel_brk_hdwe, LoopIbAmp->e_wrap(), LoopIbNoa->e_wrap());
     e_wrap_filt_ = scale_select(Sen->Ib_noa_hdwe, Sen->sel_brk_hdwe, LoopIbAmp->e_wrap_filt(), LoopIbNoa->e_wrap_filt());
-    faultAssign( ( wrap_hi_m_flt() && wrap_hi_n_flt()&& !Mon->sat() ), WRAP_HI_FLT);
-    faultAssign( ( wrap_hi_m_flt() && wrap_hi_n_flt()&& !Mon->sat() ), WRAP_LO_FLT);
-    failAssign( ( wrap_hi_m_fa() && wrap_hi_n_fa()&& !Mon->sat() ), WRAP_HI_FA);
-    failAssign( ( wrap_hi_m_fa() && wrap_hi_n_fa()&& !Mon->sat() ), WRAP_LO_FA);
+    faultAssign( ( wrap_hi_m_flt() && wrap_hi_n_flt() && !Mon->sat() ), WRAP_HI_FLT);
+    faultAssign( ( wrap_lo_m_flt() && wrap_lo_n_flt() ), WRAP_LO_FLT);
+    failAssign( ( wrap_hi_m_fa() && wrap_hi_n_fa() && !Mon->sat() ), WRAP_HI_FA);
+    failAssign( ( wrap_lo_m_fa() && wrap_lo_n_fa() ), WRAP_LO_FA);
   #else
     e_wrap_ = Mon->voc_soc() - Mon->voc_stat();
     e_wrap_filt_ = WrapErrFilt->calculate(e_wrap_, reset_loc, min(Sen->T, F_MAX_T_WRAP));
@@ -557,7 +557,7 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     failAssign( (WrapHi->calculate(wrap_hi_flt(), WRAP_HI_S, WRAP_HI_R, Sen->T, reset_loc) && !vb_fa()), WRAP_HI_FA );  // not latched
     failAssign( (WrapLo->calculate(wrap_lo_flt(), WRAP_LO_S, WRAP_LO_R, Sen->T, reset_loc) && !vb_fa()), WRAP_LO_FA );  // not latched
   #endif
-  failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_hi_or_lo_fa()), WRAP_VB_FA);    // WRAP_VB_FA latches latches because vb is single sensor
+  failAssign( (wrap_vb_fa() && !reset_loc) || (!ib_diff_fa() && wrap_m_and_n_fa()), WRAP_VB_FA);    // WRAP_VB_FA latches latches because vb is single sensor
 }
 
 void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
@@ -568,25 +568,25 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
   LoopIbNoa->pretty_print();
 
   Serial.printf("\nFault:\n");
-  Serial.printf(" cc_diff  %9.6f  thr=%9.6f Fc^\n", cc_diff_, cc_diff_thr_);
-  Serial.printf(" ib_lo_active  %d\n", ib_lo_active_);
-  Serial.printf(" ib_diff  %7.3f  thr=%7.3f Fd^\n", ib_diff_f_, ib_diff_thr_);
-  Serial.printf(" e_wrap   %7.3f  thr=%7.3f Fo^%7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
-  Serial.printf(" ib_quiet %7.3f  thr=%7.3f Fq v\n", ib_quiet_, ib_quiet_thr_);
+  Serial.printf(" cc_diff%9.6f  thr%9.6f Fc^\n", cc_diff_, cc_diff_thr_);
+  Serial.printf(" ib_lo_active %d\n", ib_lo_active_);
+  Serial.printf(" ib_diff%7.3f thr%7.3f Fd^\n", ib_diff_f_, ib_diff_thr_);
+  Serial.printf(" e_wrap_filt%7.3f thr%7.3f Fo^%7.3f Fi^\n", e_wrap_filt_, ewlo_thr_, ewhi_thr_);
+  Serial.printf(" ib_quiet%7.3f thr%7.3f Fq v\n", ib_quiet_, ib_quiet_thr_);
   Serial.printf(" sel_brk_hdwe:     ");
   Sen->sel_brk_hdwe->pretty_print();
   Serial.printf("\n");
 
-  Serial.printf(" soc  %7.3f  soc_inf %7.3f voc %7.3f  voc_soc %7.3f\n", Mon->soc(), Mon->soc_inf(), Mon->voc(), Mon->voc_soc());
+  Serial.printf(" soc%7.3f soc_inf%7.3f voc%7.3f  voc_soc%7.3f\n", Mon->soc(), Mon->soc_inf(), Mon->voc(), Mon->voc_soc());
   Serial.printf(" dis_tb_fa %d  dis_vb_fa %d  dis_ib_fa %d\n", ap.disab_tb_fa, ap.disab_vb_fa, ap.disab_ib_fa);
-  Serial.printf(" bms_off   %d\n\n", Mon->bms_off());
+  Serial.printf(" bms_off  %d\n\n", Mon->bms_off());
 
-  Serial.printf(" Tbh=%7.3f  Tbm=%7.3f sel %7.3f\n", Sen->Tb_hdwe, Sen->Tb_model, Sen->Tb);
-  Serial.printf(" Vbh %7.3f  Vbm %7.3f sel %7.3f\n", Sen->Vb_hdwe, Sen->Vb_model, Sen->Vb);
-  Serial.printf(" V3v3%7.3f \n", Sen->ShuntAmp->Vc()*2.);
-  Serial.printf(" Imh %7.3f  Imm %7.3f Ib %7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model, Sen->Ib);
-  Serial.printf(" Inh %7.3f  Inm %7.3f Ib %7.3f\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model, Sen->Ib);
-  Serial.printf(" Ibh %7.3f  Ibh %7.3f Ib %7.3f\n\n", Sen->Ib_hdwe, Sen->Ib_hdwe_model, Sen->Ib);
+  Serial.printf(" Tbh%7.3f Tbm=%7.3f sel%7.3f\n", Sen->Tb_hdwe, Sen->Tb_model, Sen->Tb);
+  Serial.printf(" Vbh%7.3f Vbm %7.3f sel%7.3f\n", Sen->Vb_hdwe, Sen->Vb_model, Sen->Vb);
+  Serial.printf(" V3v3%7.3f\n", Sen->ShuntAmp->Vc()*2.);
+  Serial.printf(" Imh%7.3f Imm %7.3f Ib%7.3f\n", Sen->Ib_amp_hdwe, Sen->Ib_amp_model, Sen->Ib);
+  Serial.printf(" Inh%7.3f Inm %7.3f Ib%7.3f\n", Sen->Ib_noa_hdwe, Sen->Ib_noa_model, Sen->Ib);
+  Serial.printf(" Ibh%7.3f Ibh %7.3f Ib%7.3f\n\n", Sen->Ib_hdwe, Sen->Ib_hdwe_model, Sen->Ib);
 
   Serial.printf(" mod_tb %d mod_vb %d mod_ib  %d\n", sp.mod_tb(), sp.mod_vb(), sp.mod_ib());
   Serial.printf(" mod_tb_dscn %d mod_vb_dscn %d mod_ib_amp_dscn %d mod_ib_noa_dscn %d\n", sp.mod_tb_dscn(), sp.mod_vb_dscn(), sp.mod_ib_amp_dscn(), sp.mod_ib_noa_dscn());
@@ -596,6 +596,7 @@ void Fault::pretty_print(Sensors *Sen, BatteryMonitor *Mon)
     Serial.printf(" tb_s_st %d  vb_s_st %d  ib_s_st %d ib_decision_ %d\n", tb_sel_stat_, vb_sel_stat_, ib_sel_stat_, ib_decision_);
   #endif
   Serial.printf(" fake_faults %d latched_fail %d latched_fail_fake %d preserving %d\n\n", ap.fake_faults, latched_fail_, latched_fail_fake_, *sp_preserving_);
+  Serial.printf(" wrap_hi_or_lo-fa %d wrap_hi_and_lo_fa %d\n\n", wrap_hi_or_lo_fa(), wrap_hi_and_lo_fa());
 
   #ifdef HDWE_IB_HI_LO
     Serial.printf("HDWE_IB_HI_LO Decisions\n");

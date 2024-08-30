@@ -142,7 +142,11 @@ const String unit = version + "_" + HDWE_UNIT;
 
 #define HDB_TBATT             0.06      // Half deadband to filter Tb, F (0.06)
 #define HDB_VB                0.05      // Half deadband to filter Vb, V (0.05)
-#define T_SAT                 22        // Saturation time, sec (>21 for no SAT with Dv0.82)
+#ifndef HDWE_IB_HI_LO
+    #define T_SAT                 22        // Saturation time, sec (>21 for no SAT with Dv0.82)
+#else
+    #define T_SAT                 24        // Saturation time, sec (>21 for no SAT with Dv0.82)
+#endif
 const float T_DESAT =         20;       // De-saturation time, sec
 #define TEMP_PARASITIC        true      // DS18 sensor power. true means leave it on all the time (true)
 #define TEMP_DELAY            1         // Time to block temperature sensor read in DS18 routine, ms (1)

@@ -171,10 +171,10 @@ protected:
 #define IB_AMP_BARE   11  // Unconnected ib bus, T = bare bus
 #define IB_NOA_BARE   12  // Unconnected ib bus, T = bare bus
 #define VC_FLT        13  // Momentary isolation of Vc failure, T=faulted
-#define WRAP_HI_M_FLT 14  // Wrap isolates to Ib amp high fault
-#define WRAP_LO_M_FLT 15  // Wrap isolates to Ib amp low fault
-#define WRAP_HI_N_FLT 16  // Wrap isolates to Ib noa high fault
-#define WRAP_LO_N_FLT 17  // Wrap isolates to Ib noa low fault
+#define WRAP_HI_M_FLT 14  // Wrap reports Vb lo / Ib amp high fault
+#define WRAP_LO_M_FLT 15  // Wrap reports Vb hi / Ib amp low fault
+#define WRAP_HI_N_FLT 16  // Wrap reports Vb lo / Ib noa high fault
+#define WRAP_LO_N_FLT 17  // Wrap reports Vb hi / Ib noa low fault
 #define NUM_FLT       18  // Number of these
 
 // Fail word bits.   A couple don't latch because single sensor fail in dual sensor system
@@ -342,12 +342,16 @@ public:
   void tb_stale(const boolean reset, Sensors *Sen);
   void vb_check(Sensors *Sen, BatteryMonitor *Mon, const float _vb_min, const float _vb_max, const boolean reset);  // Range check Vb
   void vc_check(Sensors *Sen, BatteryMonitor *Mon, const float _vc_min, const float _vc_max, const boolean reset);  // Range check Vc
+  boolean vb_clean() { return ( !vb_fail() ); };
   boolean vb_fail() { return ( vb_fa() || vb_sel_stat_==0 ); };
   int8_t vb_sel_stat() { return vb_sel_stat_; };
   boolean vb_fa() { return failRead(VB_FA); };
   boolean vb_flt() { return faultRead(VB_FLT); };
   boolean vc_fa() { return failRead(VC_FA); };
   boolean vc_flt() { return faultRead(VC_FLT); };
+  boolean wrap_m_and_n_fa() { return ( (failRead(WRAP_LO_M_FA) && failRead(WRAP_LO_N_FA)) ||
+                                       (failRead(WRAP_HI_M_FA) && failRead(WRAP_HI_N_FA))  ); };
+  boolean wrap_hi_and_lo_fa() { return ( failRead(WRAP_HI_FA) && failRead(WRAP_LO_FA) ); };
   boolean wrap_hi_or_lo_fa() { return ( failRead(WRAP_HI_FA) || failRead(WRAP_LO_FA) ); };
   boolean wrap_hi_fa() { return failRead(WRAP_HI_FA); };
   boolean wrap_hi_flt() { return faultRead(WRAP_HI_FLT); };
