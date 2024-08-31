@@ -763,6 +763,7 @@ void Fault::select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean re
     tb_sel_stat_last_ = 1;
     tb_sel_stat_ = 1;
     Serial.printf("reset tb flts\n");
+    failAssign(false, TB_FA);
   }
   if ( tb_fa() )  // Latches
   {
@@ -1084,13 +1085,17 @@ void Fault::tb_check(Sensors *Sen, const float _tb_min, const float _tb_max, con
   }
   if ( ap.disab_tb_fa || sp.mod_tb() )
   {
-    faultAssign(false, TB_FLT);
-    failAssign( false, TB_FA);
+    faultAssign( (Sen->Tb_model_filt<=_tb_min) || (Sen->Tb_model_filt>=_tb_max), TB_FLT);
+    failAssign( tb_fa() || TbHardFail->calculate(tb_flt(), TB_HARD_SET, TB_HARD_RESET, Sen->T_temp, reset_loc), TB_FA);
   }
+  else if ( ap.disab_ib_fa )
+  {
+    faultAssign( false, TB_FLT);
+    failAssign( false, TB_FA); }
   else
   {
     faultAssign( (Sen->Tb_hdwe<=_tb_min) || (Sen->Tb_hdwe>=_tb_max), TB_FLT);
-    failAssign( tb_fa() || TbHardFail->calculate(tb_flt(), TB_HARD_SET, TB_HARD_RESET, Sen->T, reset_loc), TB_FA);
+    failAssign( tb_fa() || TbHardFail->calculate(tb_flt(), TB_HARD_SET, TB_HARD_RESET, Sen->T_temp, reset_loc), TB_FA);
   }
 }
 

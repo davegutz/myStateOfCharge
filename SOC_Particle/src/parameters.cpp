@@ -140,7 +140,7 @@ void  VolatilePars::initialize()
     V_[n_++] =(sum_delay_p      = new ULongV("  ", "Dh", NULL,"Summary frame",        "ms",    1000UL,SUMMARY_DELAY,&sum_delay, SUMMARY_DELAY));
     V_[n_++] =(tail_inj_p       = new ULongV("  ", "XT", NULL,"Tail end inj",         "ms",     0UL,  120000UL,&tail_inj,       0UL));
     V_[n_++] =(talk_delay_p     = new ULongV("  ", "D>", NULL,"Talk frame",           "ms",     0UL,  120000UL,&talk_delay,     TALK_DELAY));
-    V_[n_++] =(Tb_bias_model_p  = new FloatV("  ", "D^", NULL,"Del model",            "dg C",   -50,  50,   &Tb_bias_model,     TEMP_BIAS));
+    V_[n_++] =(Tb_bias_model_p  = new FloatV("  ", "D^", NULL,"Del model",            "dg C",   -120, 50,   &Tb_bias_model,     TEMP_BIAS));
     V_[n_++] =(Tb_noise_amp_p   = new FloatV("  ", "DT", NULL,"Tb noise",             "dg C pk-pk", 0,50,   &Tb_noise_amp,      TB_NOISE));
     V_[n_++] =(tb_stale_time_slr_p=new FloatV("  ","Xv", NULL,"Scale Tb 1-wire pers", "slr",    0,    100,  &tb_stale_time_slr,1));
     V_[n_++] =(until_q_p        = new ULongV("  ", "XQ", NULL,"Time until vv0",       "ms",     0UL,  1000000UL,  &until_q,     0UL));
