@@ -99,7 +99,7 @@ sel_list = [
     ]
 sel_list1 = [
     'flatSitHys', 'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'offSitHysBmsNoiseCHG', 'ampHiFailSlow',
-    'noaHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod', 'tbFailHdwe1W', 'tLoFailMod1W',
+    'noaHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod1W', 'tbFailHdwe1W', 'tLoFailMod',
     'tLoFailHdwe', 'DvMon', 'DvSim', 'faultParade', 'allInBBn', 'allInCHn', 'allInCHGn',
     ]
 macro_sel_list = [
