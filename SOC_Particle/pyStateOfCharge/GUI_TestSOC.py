@@ -99,7 +99,7 @@ sel_list = [
     ]
 sel_list1 = [
     'flatSitHys', 'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'offSitHysBmsNoiseCHG', 'ampHiFailSlow',
-    'noaHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod', 'tbFailHdwe', 'tLoFailMod',
+    'noaHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod', 'tbFailHdwe1W', 'tLoFailMod1W',
     'tLoFailHdwe', 'DvMon', 'DvSim', 'faultParade', 'allInBBn', 'allInCHn', 'allInCHGn',
     ]
 macro_sel_list = [
@@ -236,8 +236,8 @@ lookup = {
         'vHiFailH': (66, modMidInit + tranPrep + 'SH.3;W10;' + 'XY;Dv0.82;XQ30000;' + 'Dv0;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with 'Ult 1' fig 4.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION.  Initial BB shift will be limited by hys table")),
         'vHiFailFf': (90, modMidInit + tranPrep + 'Ff1;XY;Dv0.8;XQ60000;' + 'Dv0;' + quiet + cleanup, ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.", "Usually shows SAT.")),
         'pulseSSH': (25, slow + 'Xp8;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.", "ib_diff_flt will take time beyond event to reset running Hi-Lo.")),
-        'tbFailMod': (136, modMidInit + tranPrep + 'Xv.002;XY;Xu1;XQ80000;Xu0;Xv1;W50;' + quiet + cleanup, ("Run for 80 sec.   Plot Ult 1 Fig 4 should show Tb was detected as fault but not failed.",)),
-        'tbFailHdwe': (136, modMidInit + 'Xm246;' + tranPrep + 'Xv.002;W10;XY;Xu1;XQ80000;Xu0;Xv1;W50;' + quiet + cleanup, ("Run for 80 sec.   Plot Ult 1 Fig 4 should show Tb was detected as failed.", "")),
+        'tbFailMod1W': (136, modMidInit + tranPrep + 'Xv.002;XY;Xu1;XQ80000;Xu0;Xv1;W50;' + quiet + cleanup, ("Run for 80 sec.   Plot Ult 1 Fig 4 should show Tb was detected as fault but not failed.",)),
+        'tbFailHdwe1W': (136, modMidInit + 'Xm246;' + tranPrep + 'Xv.002;W10;XY;Xu1;XQ80000;Xu0;Xv1;W50;' + quiet + cleanup, ("Run for 80 sec.   Plot Ult 1 Fig 4 should show Tb was detected as failed.", "")),
         'tLoFailMod': (185, modMidInit + tranPrep + 'XY;D^-113;XQ120000;' + 'D^0;' + cleanup + '<W50;' + quietwait + '<Pf;', ("Simulates open thermistor.", "To diagnose, begin with 'Ult 1' fig 4.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION")),
         'tLoFailHdwe': (185, modMidInit + 'Xm230;' + tranPrep + 'XY;Dt-113;XQ120000;' + 'Dt0;' + cleanup + '<W50;' + quietwait + '<Pf;', ("Simulates open thermistor.", "To diagnose, begin with 'Ult 1' fig 4.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION")),
         'DvMon': (152, modMidInit + tranPrep + 'XY;Dw-0.8;Dn0.0001;XQ120000;Dw0;' + quiet + cleanup, ("Should detect and switch voltage failure and use vb_model", "'*fail' will be displayed.", "To evaluate plots, start looking at 'Ult 1' fig 4. Fault record (frozen). Will see 'redl' flashing on OLED even after fault cleared automatically (lost redundancy).", "Run for 2 min to confirm no cc_diff_fa")),
