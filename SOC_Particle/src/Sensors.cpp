@@ -778,21 +778,16 @@ void Fault::select_all_logic(Sensors *Sen, BatteryMonitor *Mon, const boolean re
     if ( ib_choice_ != ib_choice_last_ || vb_sel_stat_ != vb_sel_stat_last_ || tb_sel_stat_ != tb_sel_stat_last_ )
     {
       Serial.printf("Sel chg:  Amp->bare %d NoAmp->bare %d ib_diff_fa %d wh_fa %d wl_fa %d wv_fa %d cc_diff_fa_ %d\n sp.ib_force() %d ib_choice %d vb_sel_stat %d tb_sel_stat %d vb_fail %d Tb_fail %d\n",
-        Sen->ShuntAmp->bare_shunt(), Sen->ShuntNoAmp->bare_shunt(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa_, sp.ib_force(), ib_choice_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
+        Sen->ShuntAmp->bare_shunt(), Sen->ShuntNoAmp->bare_shunt(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa(), sp.ib_force(), ib_choice_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
       Serial.printf("  fake %d ibchc %d ibchcl %d ib_dec %d vbss %d vbssl %d tbss %d  tbssl %d latched_fail %d latched_fail_fake %d\n",
         ap.fake_faults, ib_choice_, ib_choice_last_, ib_decision_, vb_sel_stat_, vb_sel_stat_last_, tb_sel_stat_, tb_sel_stat_last_, latched_fail_, latched_fail_fake_);
       Serial.printf("  preserving %d\n", *sp_preserving_);
     }
-    // if ( ( ib_choice_ != ib_choice_last_ ) && ib_choice_ == -1 )
-    // {
-    //   Serial.printf("Small reset ib_decision %d ib_choice %d\n", ib_decision_, ib_choice_);
-    //   cp.cmd_reset();   
-    // }
   #else
     if ( ib_sel_stat_ != ib_sel_stat_last_ || vb_sel_stat_ != vb_sel_stat_last_ || tb_sel_stat_ != tb_sel_stat_last_ )
     {
       Serial.printf("Sel chg:  Amp->bare %d NoAmp->bare %d ib_diff_fa %d wh_fa %d wl_fa %d wv_fa %d cc_diff_fa_ %d\n sp.ib_force() %d ib_sel_stat %d vb_sel_stat %d tb_sel_stat %d vb_fail %d Tb_fail %d\n",
-        Sen->ShuntAmp->bare_shunt(), Sen->ShuntNoAmp->bare_shunt(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa_, sp.ib_force(), ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
+        Sen->ShuntAmp->bare_shunt(), Sen->ShuntNoAmp->bare_shunt(), ib_diff_fa(), wrap_hi_fa(), wrap_lo_fa(), wrap_vb_fa(), cc_diff_fa(), sp.ib_force(), ib_sel_stat_, vb_sel_stat_, tb_sel_stat_, vb_fa(), tb_fa());
       Serial.printf("  fake %d ibss %d ibssl %d vbss %d vbssl %d tbss %d  tbssl %d latched_fail %d latched_fail_fake %d\n",
         ap.fake_faults, ib_sel_stat_, ib_sel_stat_last_, vb_sel_stat_, vb_sel_stat_last_, tb_sel_stat_, tb_sel_stat_last_, latched_fail_, latched_fail_fake_);
       Serial.printf("  preserving %d\n", *sp_preserving_);
@@ -1542,7 +1537,6 @@ void Sensors::shunt_select_initial(const boolean reset)
     Ib_noa_hdwe = ShuntNoAmp->Ishunt_cal() + hdwe_add;  // Sense fault injection feeds logic, not model
     Ib_noa_hdwe_f = NoaFilt->calculate(Ib_noa_hdwe, reset, AMP_FILT_TAU, T);
     Ib_hdwe_f = SelFilt->calculate(Ib_hdwe, reset, AMP_FILT_TAU, T);
-
     // Initial choice
     // Inputs:  ib_choice/ib_sel_stat_, Ib_amp_hdwe, Ib_noa_hdwe, Ib_amp_model(past), Ib_noa_model(past)
     // Outputs:  Ib_hdwe_model, Ib_hdwe
