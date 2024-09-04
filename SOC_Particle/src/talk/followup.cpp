@@ -101,7 +101,7 @@ boolean followup(const char letter_0, const char letter_1, BatteryMonitor *Mon, 
                     break;
 
                 case ( 't' ):  //*  Dt<>:  Temp bias change hardware
-                    if ( sp.Tb_bias_hdwe_p->success() )
+                    if ( sp.Tb_bias_hdwe_p->success() &&  sp.modeling()!=230 )  // modeling==230 is special regression test
                         cp.cmd_reset();
                     break;
 

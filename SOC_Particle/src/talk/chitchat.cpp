@@ -66,9 +66,11 @@ void benign_zero(BatteryMonitor *Mon, Sensors *Sen) // BZ
   ap.vc_add = NOM_VC_ADD;   // D3
   ap.tb_stale_time_slr = 1; // Xv 1
   ap.fail_tb = false;       // Xu 0
+  ap.ib_amp_max = (IB_ABS_MAX_AMP/NP/0.95);   // Mm 0
+  ap.ib_amp_min = -(IB_ABS_MAX_AMP/NP/0.95);  // Mn 0
+  ap.ib_noa_max = (IB_ABS_MAX_NOA/NP/0.95);   // Nm 0
+  ap.ib_noa_min = -(IB_ABS_MAX_NOA/NP/0.95);  // Nn 0
   
-
-
   // Noise
   ap.Tb_noise_amp = TB_NOISE;         // DT 0
   ap.Vb_noise_amp = VB_NOISE;         // DV 0
