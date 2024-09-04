@@ -526,7 +526,7 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     disable_amp_fault_ = (ib_amp_hi_ && ib_noa_hi_) || (ib_amp_lo_ && ib_noa_lo_);
     boolean ib_amp_reset = reset_loc || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO || disable_amp_fault_;
     ib_amp_rate_ = IbAmpRate->calculate(Sen->ib_amp(), reset_loc, min(Sen->T, F_MAX_T_WRAP));
-    LoopIbAmp->calculate(ib_amp_reset or abs(ib_amp_rate_)>MAX_AMP_RATE, Sen->ib_amp());
+    LoopIbAmp->calculate(ib_amp_reset || abs(ib_amp_rate_)>MAX_AMP_RATE, Sen->ib_amp());
     faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
     failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // WRAP_HI_M_FA not latched
     faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);
