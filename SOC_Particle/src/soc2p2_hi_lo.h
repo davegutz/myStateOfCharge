@@ -18,7 +18,7 @@
 // * = SRAM EEPROM adjustments, retained on power reset
 
 // Miscellaneous
-#define ASK_DURING_BOOT       0   // Flag to ask for application of this file to * retained adjustements
+#define ASK_DURING_BOOT       1   // Flag to ask for application of this file to * retained adjustements
 #define MODELING              0 // Nominal modeling bitmap (* 'Xm'), 0=all hdwe, 1+=Tb, 2+=Vb, 4+=Ib, 7=all model.  +240 for discn
 
 // Sensor biases
@@ -39,7 +39,7 @@
 #define HDWE_IB_HI_LO_AMP_HI    19. // Fully AMP bank charge transition, A (19)
 #define HDWE_IB_HI_LO_NOA_HI    20. // Fully NOA bank charge transition, A (20)
 #define CURR_BIAS_ALL           0.0 // Bias on all shunt sensors (* 'DI'), A
-#define VOLT_BIAS             -0.47 // Bias on Vb sensor (* 'Dc'), V
+#define VOLT_BIAS             -0.42 // Bias on Vb sensor (* 'Dc'), V
 #define TEMP_BIAS               0.0 // Bias on Tb sensor (* 'Dt'), deg C
 #define VB_SENSE_R_LO          4700 // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI         47000 // Vb high sense resistor, ohm (47000)
