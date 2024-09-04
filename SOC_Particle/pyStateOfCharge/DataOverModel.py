@@ -984,8 +984,8 @@ class SavedData:
             self.ccd_thr = np.array(sel.ccd_thr[:i_end])
             self.ewh_thr = np.array(sel.ewh_thr[:i_end])
             self.ewl_thr = np.array(sel.ewl_thr[:i_end])
-            self.ewhm_thr = self.ewh_thr / 10.
-            self.ewlm_thr = self.ewl_thr / 10.
+            self.ewhm_thr = self.ewh_thr / 10.  # WRAP_HI_NOA / WRAP_HI_AMP = SHUNT_AMP_R2 / SHUNT_NOA_R2
+            self.ewlm_thr = self.ewl_thr / 10.  # WRAP_LO_NOA / WRAP_LO_AMP = SHUNT_AMP_R2 / SHUNT_NOA_R2
             self.ibd_thr = np.array(sel.ibd_thr[:i_end])
             self.ibq_thr = np.array(sel.ibq_thr[:i_end])
             self.preserving = np.array(sel.preserving[:i_end])
