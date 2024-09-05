@@ -213,11 +213,13 @@ class Looparound
 {
 public:
   Looparound();
-  Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp, const double wrap_trim_gain);
+  Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp, const double wrap_trim_gain,
+    const float imax, const float imin);
   ~Looparound();
   void calculate(const boolean reset, const float ib);
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
+  float e_wrap_trim() { return e_wrap_trim_; };
   uint8_t hi_fail() { return hi_fail_; };
   uint8_t hi_fault() { return hi_fault_; };
   uint8_t lo_fail() { return lo_fail_; };
@@ -236,6 +238,8 @@ protected:
   uint8_t hi_fault_;        // Fault bit
   float ib_;                // Sensed unit shunt current, A
   float ib_past_;           // Sensed unit shunt current past value, A
+  float imax_;              // Current range max, A
+  float imin_;              // Current range min, A
   uint8_t lo_fail_;         // Fail bit
   uint8_t lo_fault_;        // Fault bit
   BatteryMonitor *Mon_;     // Monitor ptr
