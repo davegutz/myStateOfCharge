@@ -227,7 +227,7 @@ class Battery(Coulombs):
     def calc_soc_voc(self, soc, temp_c):
         """SOC-OCV curve fit method per Zhang, etal """
         dv_dsoc = self.calc_h_jacobian(soc, temp_c)
-        voc = self.chemistry.lookup_voc(soc, temp_c) + self.dvoc
+        voc = self.chemistry.lookup_voc(soc, temp_c)
         # print("soc=", soc, "temp_c=", temp_c, "dvoc=", self.dvoc, "voc=", voc)
         return voc, dv_dsoc
 

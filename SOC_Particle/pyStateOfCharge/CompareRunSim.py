@@ -151,7 +151,7 @@ def main():
     unit_key = 'g20240902_soc2p2_hi_lo_chg'
     time_end_in = None
     data_only = False
-    dw_in = -0.14  # soc2p2 chg applied to BatteryModel only (not Sim)
+    dw_in = 0.  # soc2p2 chg applied to BatteryModel only (not Sim)
 
     compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only, time_end_in=time_end_in, Dw=dw_in)
 
