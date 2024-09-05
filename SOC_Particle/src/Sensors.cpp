@@ -277,7 +277,7 @@ void Looparound::calculate(const boolean reset, const float ib)
   else ib_dyn = ib_;
   voc_ = Mon_->vb() - (ChargeTransfer_->calculate(ib_dyn, reset_, chem_->tau_ct, Sen_->T)*chem_->r_ct*ap.slr_res + ib_dyn*chem_->r_0*ap.slr_res);
   e_wrap_ = Mon_->voc_soc() - voc_;
-  e_wrap_trim_ = -Trim_->calculate(e_wrap_filt_*wrap_trim_gain_, reset_, 0.);  // Always initialize to zero
+  e_wrap_trim_ = -Trim_->calculate(e_wrap_filt_*wrap_trim_gain_, min(Sen_->T, F_MAX_T_WRAP), reset_, 0.);  // Always initialize to zero
   if (reset_)
     e_wrap_trimmed_ = 0.;  // Always initialize to zero
   else
@@ -329,7 +329,7 @@ Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *
   tb_sel_stat_last_(TB_SEL_STAT_DEF), vb_sel_stat_(VB_SEL_STAT_DEF), vb_sel_stat_last_(VB_SEL_STAT_DEF)
 {
   IbAmpRate = new RateLagExp(T, WRAP_ERR_FILT/4., -MAX_ERR_FILT, MAX_ERR_FILT);
-  IbErrFilt = new LagTustin(T, TAU_ERR_FILT, -MAX_ERR_FILT, MAX_ERR_FILT);  // actual update time provided run time
+  IbErrFilt = new LagTustin(T, TAU_ERR_FILT, -IBATT_DISAGREE_THRESH*1.5, IBATT_DISAGREE_THRESH*1.5);  // actual update time provided run time
   IbdHiPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   IbdLoPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   CcdiffPer  = new TFDelay(false, CC_DIFF_SET, CC_DIFF_RESET, T);

@@ -45,7 +45,7 @@ if sys.platform == 'darwin':
 plt.rcParams['axes.grid'] = True
 
 
-def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=False):
+def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=False, Dw=0.):
     print(f"\ncompare_run_sim:\n{data_file=}\n{unit_key=}\n{time_end_in=}\n{data_only=}\n")
 
     date_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
@@ -62,7 +62,7 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=F
     ds_voc_soc_in = 0.
     use_vb_raw = False
     dvoc_sim_in = 0.
-    dvoc_mon_in = 0.
+    dvoc_mon_in = Dw
     use_mon_soc_in = True
 
     # detect running interactively
@@ -147,12 +147,13 @@ def compare_run_sim(data_file=None, unit_key=None, time_end_in=None, data_only=F
 
 
 def main():
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction\\g20240704\\offSitHysBmsCHG_pro3p2_chg.csv'
-    unit_key = 'g20240704_pro3p2_chg'
+    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240902/gar init loop_soc2p2_hi_lo_chg.csv'
+    unit_key = 'g20240902_soc2p2_hi_lo_chg'
     time_end_in = None
     data_only = False
+    dw_in = -0.14  # soc2p2 chg applied to BatteryModel only (not Sim)
 
-    compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only, time_end_in=time_end_in)
+    compare_run_sim(data_file=data_file, unit_key=unit_key, data_only=data_only, time_end_in=time_end_in, Dw=dw_in)
 
 
 # import cProfile
