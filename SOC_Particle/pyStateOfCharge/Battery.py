@@ -648,7 +648,6 @@ class BatteryMonitor(Battery, EKF1x1):
             self.LoopIbAmp.calculate(reset=(ib_amp_reset or abs(self.ib_amp_rate) > Battery.MAX_AMP_RATE), ib=ib_amp,
                                      loop_gain=Battery.AMP_WRAP_TRIM_GAIN, dt=min(self.dt, Battery.F_MAX_T_WRAP),
                                      ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr)
-            # print(f"{ib_amp=} {ib_amp_reset=} {self.ib_amp_rate=} {ib_amp_hi=} {ib_amp_lo=} {ib_noa_hi=} {ib_noa_lo=}")
             self.ewmhi_thr = self.LoopIbAmp.ewhi_thr
             self.ewmlo_thr = self.LoopIbAmp.ewlo_thr
             self.e_wrap_m = self.LoopIbAmp.e_wrap
@@ -987,9 +986,6 @@ class Looparound:
         self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
         self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap_trimmed, reset=self.reset,
                                                       dt=min(self.dt, Battery.F_MAX_T_WRAP))
-
-        # if loop_gain > 0.:
-        #     print(f"{self.reset=} {self.ib=} {self.dt=} {trim_init=} {self.e_wrap_trim=} {self.e_wrap_trimmed=} {self.e_wrap_filt=}")
 
         # Thresholds. Scalars are calculated by Flt->wrap_scalars()
         self.ewhi_thr = self.Mon.chemistry.r_ss * self.wrap_hi_amp * ewsat_slr * ewmin_slr

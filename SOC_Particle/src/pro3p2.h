@@ -35,8 +35,8 @@
 #define VB_SENSE_R_LO      4700      // Vb low sense resistor, ohm (4700)
 #define VB_SENSE_R_HI      20000     // Vb high sense resistor, ohm (20000)
 #define VB_SCALE              1.017  // Scale Vb sensor (* 'SV')
-#define VTAB_BIAS             0.14    // Bias on voc_soc table (* 'Dw'), V    ** match g20240331
-#define NOM_DY                0.14    // Bias on voc_soc table in Sim ('Dy'), V  ** match g20240331
+#define VTAB_BIAS             0.00  // Bias on voc_soc table (* 'Dw'), V
+#define NOM_DY                0.00  // Bias on voc_soc table in Sim ('Dy'), V
 
 // Battery.  One 12 V 100 Ah battery bank would have NOM_UNIT_CAP 100, NS 1, and NP 1
 // Two 12 V 100 Ah series battery bank would have NOM_UNIT_CAP 100, NS 2, and NP 1

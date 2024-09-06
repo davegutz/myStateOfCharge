@@ -271,7 +271,6 @@ void Looparound::calculate(const boolean reset, const float ib)
 {
   reset_ = reset || Sen_->Flt->reset_all_faults();
   ib_ = ib;
-  float ib_lim = max(min(ib_, imax_), imin_);
 
   // Dynamic emf. vb_ is stale when running with model
   float ib_dyn;
