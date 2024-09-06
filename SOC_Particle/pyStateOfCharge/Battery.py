@@ -18,7 +18,7 @@
 import numpy as np
 from EKF1x1 import EKF1x1
 from Coulombs import Coulombs
-from GenerateDV_Data_Loop import dv_dyn
+# from GenerateDV_Data_Loop import dv_dyn
 from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
@@ -640,11 +640,10 @@ class BatteryMonitor(Battery, EKF1x1):
             ib_noa_lo = ib_noa <= Battery.HDWE_IB_HI_LO_NOA_LO
             self.disable_amp_fault = (ib_amp_hi and ib_noa_hi) or (ib_amp_lo and ib_noa_lo)
             ib_amp_reset = reset or self.disable_amp_fault
-            self.ib_amp_rate = self.IbAmpRate.calculate(in_=ib_amp, reset=ib_amp_reset,
-                                                        dt=min(self.dt, Battery.F_MAX_T_WRAP))
+            self.ib_amp_rate = self.IbAmpRate.calculate(in_=ib_amp, reset=reset, dt=min(self.dt, Battery.F_MAX_T_WRAP))
             self.LoopIbAmp.calculate(reset=(ib_amp_reset or abs(self.ib_amp_rate) > Battery.MAX_AMP_RATE), ib=ib_amp,
-                                     loop_gain=Battery.AMP_WRAP_TRIM_GAIN,
-                                     dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr)
+                                     loop_gain=Battery.AMP_WRAP_TRIM_GAIN, dt=min(self.dt, Battery.F_MAX_T_WRAP),
+                                     ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr)
             self.ewmhi_thr = self.LoopIbAmp.ewhi_thr
             self.ewmlo_thr = self.LoopIbAmp.ewlo_thr
             self.e_wrap_m = self.LoopIbAmp.e_wrap
@@ -967,10 +966,10 @@ class Looparound:
     # Update the loop
     def calculate(self, reset=True, ib=0., loop_gain=0., dt=None, ewsat_slr=1., ewmin_slr=1.,
                   e_w_0=None, e_w_filt_0=None, zero=None):
-        self.dt = dt
-        self.reset = reset
         self.ib = ib
-        dv_dyn_ = self.ChargeTransfer.calculate(self.ib, self.reset, dt) * self.chem.r_ct + self.ib * self.chem.r_0
+        self.reset = reset
+        self.dt = dt
+        dv_dyn_ = self.ChargeTransfer.calculate(self.ib, self.reset, self.dt) * self.chem.r_ct + self.ib * self.chem.r_0
         self.voc = self.Mon.vb - dv_dyn_
         self.e_wrap = self.Mon.voc_soc - self.voc
 
