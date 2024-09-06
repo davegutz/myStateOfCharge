@@ -18,6 +18,7 @@
 import numpy as np
 from EKF1x1 import EKF1x1
 from Coulombs import Coulombs
+from GenerateDV_Data_Loop import dv_dyn
 from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
@@ -628,7 +629,15 @@ class BatteryMonitor(Battery, EKF1x1):
         if self.ib_amp is not None:
             ib_noa_range = ib_noa > Battery.HDWE_IB_HI_LO_NOA_HI or ib_noa < Battery.HDWE_IB_HI_LO_NOA_LO
             zero_cmd = ib_noa_range is np.True_ or reset is np.True_ or reset is True
-            self.LoopIbAmp.calculate(reset=reset, ib=ib_amp, loop_gain=Battery.AMP_WRAP_TRIM_GAIN,
+
+            ib_amp_hi = ib_amp_model >= Battery.HDWE_IB_HI_LO_AMP_HI / sp.nP();
+            ib_amp_lo = ib_amp_model <= Battery.HDWE_IB_HI_LO_AMP_LO / sp.nP();
+            ib_noa_hi = ib_noa_model >= Battery.HDWE_IB_HI_LO_AMP_HI / sp.nP();
+            ib_noa_lo = ib_noa_model <= Battery.HDWE_IB_HI_LO_AMP_LO / sp.nP();
+
+            disable_amp_fault = (ib_amp_hi and ib_noa_hi) or (ib_amp_lo and ib_noa_lo)
+            ib_amp_reset = reset or ib_noa> Battery.HDWE_IB_HI_LO_NOA_HI or ib_noa < Battery.HDWE_IB_HI_LO_NOA_LO or disable_amp_fault
+            self.LoopIbAmp.calculate(reset=ib_amp_reset, ib=ib_amp, loop_gain=Battery.AMP_WRAP_TRIM_GAIN,
                                      dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr,
                                      e_w_0=e_w_amp_0, e_w_filt_0=e_w_amp_filt_0, zero=zero_cmd)
             self.ewmhi_thr = self.LoopIbAmp.ewhi_thr
@@ -956,35 +965,19 @@ class Looparound:
         self.dt = dt
         self.reset = reset
         self.ib = ib
-        self.zero = zero
-        if self.zero:
-            self.e_wrap_trim = -self.Trim.calculate(in_=0., dt=self.dt, reset=True, init_value=0.)
-            self.e_wrap_filt = self.WrapErrFilt.calculate(in_=0., reset=True, dt=min(self.dt, Battery.F_MAX_T_WRAP))
-        self.voc = self.Mon.vb - (self.ChargeTransfer.calculate(self.ib, self.reset, dt) * self.chem.r_ct +
-                                  self.ib * self.chem.r_0)
+        dv_dyn_ = self.ChargeTransfer.calculate(self.ib, self.reset, dt) * self.chem.r_ct + self.ib * self.chem.r_0
+        self.voc = self.Mon.vb - dv_dyn_
         self.e_wrap = self.Mon.voc_soc - self.voc
-        if self.reset:
-            if e_w_0 is not None:
-                self.e_wrap = e_w_0
-            else:
-                self.e_wrap = 0.
-            if e_w_filt_0 is not None:
-                self.e_wrap_filt = e_w_filt_0
-            else:
-                self.e_wrap_filt = 0.
-        if not self.zero:
-            if loop_gain != 0.:
-                self.e_wrap_trim = -self.Trim.calculate(in_=self.e_wrap_filt*loop_gain, dt=self.dt,
-                                                        reset=self.reset, init_value=self.e_wrap-self.e_wrap_filt)
-            else:
-                self.e_wrap_trim = -self.Trim.calculate(in_=self.e_wrap_filt*loop_gain, dt=self.dt,
-                                                        reset=self.reset, init_value=0.)
-            self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
-            self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap_trimmed, reset=self.reset,
-                                                          dt=min(self.dt, Battery.F_MAX_T_WRAP) )
-        else:
-            self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
 
+        # Trimmer using past values
+        trim_init = 0.
+        if loop_gain > 0.:
+            trim_init = -(self.Mon.vb - self.Mon.voc_soc - dv_dyn_)
+        self.e_wrap_trim = -self.Trim.calculate(in_=self.e_wrap_filt * loop_gain, dt=self.dt,
+                                                reset=self.reset, init_value=trim_init)
+        self.e_wrap_trimmed = self.e_wrap + self.e_wrap_trim
+        self.e_wrap_filt = self.WrapErrFilt.calculate(in_=self.e_wrap_trimmed, reset=self.reset,
+                                                      dt=min(self.dt, Battery.F_MAX_T_WRAP))
 
         # Thresholds. Scalars are calculated by Flt->wrap_scalars()
         self.ewhi_thr = self.Mon.chemistry.r_ss * self.wrap_hi_amp * ewsat_slr * ewmin_slr
