@@ -333,7 +333,7 @@ Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *
   latched_fail_fake_(false), reset_all_faults_(false), sp_preserving_(preserving), tb_sel_stat_(TB_SEL_STAT_DEF),
   tb_sel_stat_last_(TB_SEL_STAT_DEF), vb_sel_stat_(VB_SEL_STAT_DEF), vb_sel_stat_last_(VB_SEL_STAT_DEF)
 {
-  IbAmpRate = new RateLagExp(T, WRAP_ERR_FILT/4., -MAX_ERR_FILT, MAX_ERR_FILT);
+  IbNoaRate = new RateLagExp(T, WRAP_ERR_FILT/4., -MAX_ERR_FILT, MAX_ERR_FILT);
   IbErrFilt = new LagTustin(T, TAU_ERR_FILT, -IBATT_DISAGREE_THRESH*1.5, IBATT_DISAGREE_THRESH*1.5);  // actual update time provided run time
   IbdHiPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   IbdLoPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
@@ -531,7 +531,7 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     LoopIbNoa->calculate(reset_loc, Sen->ib_noa());
     disable_amp_fault_ = (ib_amp_hi_ && ib_noa_hi_) || (ib_amp_lo_ && ib_noa_lo_);
     boolean ib_amp_reset = reset_loc || disable_amp_fault_;
-    ib_noa_rate_ = IbAmpRate->calculate(Sen->ib_amp(), reset_loc, min(Sen->T, F_MAX_T_WRAP));
+    ib_noa_rate_ = IbNoaRate->calculate(Sen->ib_noa(), reset_loc, min(Sen->T, F_MAX_T_WRAP));
     LoopIbAmp->calculate(ib_amp_reset || abs(ib_noa_rate_)>MAX_NOA_RATE, Sen->ib_amp());
     faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
     failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // WRAP_HI_M_FA not latched

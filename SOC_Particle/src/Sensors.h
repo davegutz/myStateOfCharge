@@ -378,7 +378,7 @@ protected:
 
   TFDelay *CcdiffPer;       // Persistence cc_diff ekf fail amp
   TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
-  RateLagExp *IbAmpRate;    // Linear filter to calculate rate for amp
+  RateLagExp *IbNoaRate;    // Linear filter to calculate rate for amp
   TFDelay *IbdHiPer;        // Persistence ib diff hi
   TFDelay *IbdLoPer;        // Persistence ib diff lo
   LagTustin *IbErrFilt;     // Noise filter for signal selection
