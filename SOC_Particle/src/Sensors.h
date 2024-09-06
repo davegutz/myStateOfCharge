@@ -407,7 +407,7 @@ protected:
   boolean ib_amp_hi_;       // ib amp near it's range limit, T=near hi
   boolean ib_amp_invalid_;  // Battery amp is invalid (hard failed)
   boolean ib_amp_lo_;       // ib amp near it's range limit, T=near lo
-  float ib_amp_rate_;       // ib amp rate, A/s
+  float ib_noa_rate_;       // ib amp rate, A/s
   ibSel ib_choice_;         // ib signal selection
   ibSel ib_choice_last_;         // ib signal selection
   uint16_t ib_decision_;    // ib_decision_hi_lo_, code (stops 0, stops on last decision)

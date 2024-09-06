@@ -327,7 +327,7 @@ void Looparound::pretty_print()
 Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *Sen):
   cc_diff_(0.), cc_diff_empty_slr_(1), disable_amp_fault_(false), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0),
   fltw_(0UL), falw_(0UL),
-  ib_amp_hi_(false), ib_amp_invalid_(false), ib_amp_lo_(false), ib_amp_rate_(0), ib_choice_(UsingDef), ib_choice_last_(UsingDef),
+  ib_amp_hi_(false), ib_amp_invalid_(false), ib_amp_lo_(false), ib_noa_rate_(0), ib_choice_(UsingDef), ib_choice_last_(UsingDef),
   ib_decision_(0), ib_diff_(0), ib_diff_f_(0), ib_lo_active_(true), ib_noa_hi_(false), ib_noa_invalid_(false), ib_noa_lo_(false), 
   ib_quiet_(0), ib_rate_(0), ib_sel_stat_(IB_SEL_STAT_DEF), ib_sel_stat_last_(IB_SEL_STAT_DEF), latched_fail_(false),
   latched_fail_fake_(false), reset_all_faults_(false), sp_preserving_(preserving), tb_sel_stat_(TB_SEL_STAT_DEF),
@@ -410,6 +410,7 @@ void Fault::ib_diff(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     #endif
   }
 
+  if ( disable_amp_fault_ ) ib_diff_ = 0.;
   ib_diff_f_ = IbErrFilt->calculate(ib_diff_, reset_loc || disable_amp_fault_, min(Sen->T, MAX_ERR_T));
   ib_diff_thr_ = IBATT_DISAGREE_THRESH*ap.ib_diff_slr;
   faultAssign( (ib_diff_f_>=ib_diff_thr_) && ib_lo_active_, IB_DIFF_HI_FLT );
@@ -529,10 +530,9 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
   #ifdef HDWE_IB_HI_LO
     LoopIbNoa->calculate(reset_loc, Sen->ib_noa());
     disable_amp_fault_ = (ib_amp_hi_ && ib_noa_hi_) || (ib_amp_lo_ && ib_noa_lo_);
-    // boolean ib_amp_reset = reset_loc || Sen->ib_noa()>HDWE_IB_HI_LO_NOA_HI || Sen->ib_noa()<HDWE_IB_HI_LO_NOA_LO || disable_amp_fault_;
     boolean ib_amp_reset = reset_loc || disable_amp_fault_;
-    ib_amp_rate_ = IbAmpRate->calculate(Sen->ib_amp(), reset_loc, min(Sen->T, F_MAX_T_WRAP));
-    LoopIbAmp->calculate(ib_amp_reset || abs(ib_amp_rate_)>MAX_AMP_RATE, Sen->ib_amp());
+    ib_noa_rate_ = IbAmpRate->calculate(Sen->ib_amp(), reset_loc, min(Sen->T, F_MAX_T_WRAP));
+    LoopIbAmp->calculate(ib_amp_reset || abs(ib_noa_rate_)>MAX_NOA_RATE, Sen->ib_amp());
     faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
     failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // WRAP_HI_M_FA not latched
     faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);

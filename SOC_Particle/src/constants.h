@@ -239,7 +239,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define HDWE_RS_2WIRE   15000.          // 2-wire thermistor characteristic   TODO: switch over to industry accepted exponential equation Steinhart-Hart (see '2-wireRTD.ods')
 #define HDWE_B_2WIRE    262.79          // 2-wire thermistor characteristic   TODO: switch over to industry accepted exponential equation Steinhart-Hart (see '2-wireRTD.ods')
 #define SIZE_MARG         1.05          // Threshold margin, scalar (1.05)
-#define MAX_AMP_RATE        1.          // Max reasonable amp rate used to disable e_wrap and ib_diff fault logic, A/s (1.0)
+#define MAX_NOA_RATE        1.          // Max reasonable noa rate used to disable amp e_wrap logic, A/s (1.0)
 #define CC_DIFF_RESET       1.          // Signal selection cc_diff ekf test reset persistence, s (1.)
 #define CC_DIFF_SET         5.          // Signal selection cc_diff ekf test set persistence, s (5. to handle sawtooth action on cc_diff)
 // Default values for constants that can be overridden
