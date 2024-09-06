@@ -307,6 +307,7 @@ public:
   float ib_diff_thr() { return ib_diff_thr_; };
   boolean ib_dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean ib_dscn_flt() { return faultRead(IB_DSCN_FLT); };
+  void ib_logic(const boolean reset, Sensors *Sen, BatteryMonitor *Mon);
   boolean ib_noa_bare() { return faultRead(IB_NOA_BARE); };
   boolean ib_noa_fa() { return failRead(IB_NOA_FA); };
   boolean ib_noa_flt() { return faultRead(IB_NOA_FLT); };
@@ -379,6 +380,8 @@ protected:
   TFDelay *CcdiffPer;       // Persistence cc_diff ekf fail amp
   TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
   RateLagExp *IbNoaRate;    // Linear filter to calculate rate for amp
+  TFDelay *IbdPosPer;       // Persistence ib diff hi instantaneous
+  TFDelay *IbdNegPer;       // Persistence ib diff lo instantaneous
   TFDelay *IbdHiPer;        // Persistence ib diff hi
   TFDelay *IbdLoPer;        // Persistence ib diff lo
   LagTustin *IbErrFilt;     // Noise filter for signal selection
@@ -417,6 +420,7 @@ protected:
   boolean ib_noa_hi_;       // ib noa above amp high limit, T=above hi
   boolean ib_noa_invalid_;  // Battery noa is invalid (hard failed)
   boolean ib_noa_lo_;       // ib noa below amp low limit, T=below hi
+  boolean ib_noa_moving_;   // ib noa moving, T=moving
   float ib_quiet_;          // ib hardware noise, A/s
   float ib_rate_;           // ib rate, A/s
   int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noa, 0=none, 1=a
