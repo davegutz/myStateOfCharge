@@ -22,7 +22,7 @@ from GenerateDV_Data_Loop import dv_dyn
 from Hysteresis import Hysteresis
 import matplotlib.pyplot as plt
 from TFDelay import TFDelay
-from myFilters import LagTustin, LagExp, General2Pole, RateLimit, SlidingDeadband, TustinIntegrator
+from myFilters import LagTustin, LagExp, General2Pole, RateLimit, SlidingDeadband, TustinIntegrator, RateLagExp
 from Scale import Scale
 
 import sys
@@ -93,8 +93,11 @@ class Battery(Coulombs):
     WRAP_LO_AMP = -4.  # Wrap high voltage threshold amplified, A (-4)
     WRAP_HI_NOA = 32  # Wrap high voltage threshold non-amplified, A(32)
     WRAP_LO_NOA = -40.  # Wrap high voltage threshold non-amplified, A (-40)
-    HDWE_IB_HI_LO_NOA_HI = 10.  # Fully NOA unit charge transition, A (11)
-    HDWE_IB_HI_LO_NOA_LO = -10. # Fully NOA unit discharge transition, A (-11)
+    HDWE_IB_HI_LO_AMP_HI = 19./2.  # Fully NOA unit charge transition, A (19, soc2p2)
+    HDWE_IB_HI_LO_AMP_LO = -19./2. # Fully NOA unit discharge transition, A (-19, soc2p2)
+    HDWE_IB_HI_LO_NOA_HI = 20./2.  # Fully NOA unit charge transition, A (20, soc2p2)
+    HDWE_IB_HI_LO_NOA_LO = -20./2. # Fully NOA unit discharge transition, A (-20, soc2p2)
+    MAX_AMP_RATE =  1.  # Max reasonable amp rate used to disable e_wrap and ib_diff fault logic, A/s (1.0)
     WRAP_SOC_HI_OFF = 0.97  # Disable e_wrap_hi when saturated (0.97)
     WRAP_SOC_LO_OFF_REL = 0.2  # Disable e_wrap when near empty (soc lo for high Tb where soc_min=.2, voltage cutback, 0.2)
     WRAP_SOC_LO_OFF_ABS = 0.35  # Disable e_wrap when near empty (soc lo any Tb, 0.35)
@@ -316,6 +319,10 @@ class BatteryMonitor(Battery, EKF1x1):
         self.e_wrap_n = None
         self.e_wrap_n_filt = None
         self.e_wrap_n_trim = None
+        self.ib_amp_rate = None
+        self.disable_amp_fault = None
+        self.IbAmpRate = RateLagExp(dt=0.1, tau=Battery.WRAP_ERR_FILT/4., min_=-Battery.MAX_WRAP_ERR_FILT,
+                                    max_=Battery.MAX_WRAP_ERR_FILT)
         self.LoopIbAmp = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_AMP,
                                     wrap_lo_amp=Battery.WRAP_LO_AMP)
         self.LoopIbNoa = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_NOA,
@@ -627,19 +634,17 @@ class BatteryMonitor(Battery, EKF1x1):
             self.ewnhi_thr = self.LoopIbNoa.ewhi_thr
             self.ewnlo_thr = self.LoopIbNoa.ewlo_thr
         if self.ib_amp is not None:
-            ib_noa_range = ib_noa > Battery.HDWE_IB_HI_LO_NOA_HI or ib_noa < Battery.HDWE_IB_HI_LO_NOA_LO
-            zero_cmd = ib_noa_range is np.True_ or reset is np.True_ or reset is True
-
-            ib_amp_hi = ib_amp_model >= Battery.HDWE_IB_HI_LO_AMP_HI / sp.nP();
-            ib_amp_lo = ib_amp_model <= Battery.HDWE_IB_HI_LO_AMP_LO / sp.nP();
-            ib_noa_hi = ib_noa_model >= Battery.HDWE_IB_HI_LO_AMP_HI / sp.nP();
-            ib_noa_lo = ib_noa_model <= Battery.HDWE_IB_HI_LO_AMP_LO / sp.nP();
-
-            disable_amp_fault = (ib_amp_hi and ib_noa_hi) or (ib_amp_lo and ib_noa_lo)
-            ib_amp_reset = reset or ib_noa> Battery.HDWE_IB_HI_LO_NOA_HI or ib_noa < Battery.HDWE_IB_HI_LO_NOA_LO or disable_amp_fault
-            self.LoopIbAmp.calculate(reset=ib_amp_reset, ib=ib_amp, loop_gain=Battery.AMP_WRAP_TRIM_GAIN,
-                                     dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr,
-                                     e_w_0=e_w_amp_0, e_w_filt_0=e_w_amp_filt_0, zero=zero_cmd)
+            ib_amp_hi = ib_amp >= Battery.HDWE_IB_HI_LO_AMP_HI
+            ib_amp_lo = ib_amp <= Battery.HDWE_IB_HI_LO_AMP_LO
+            ib_noa_hi = ib_noa >= Battery.HDWE_IB_HI_LO_NOA_HI
+            ib_noa_lo = ib_noa <= Battery.HDWE_IB_HI_LO_NOA_LO
+            self.disable_amp_fault = (ib_amp_hi and ib_noa_hi) or (ib_amp_lo and ib_noa_lo)
+            ib_amp_reset = reset or self.disable_amp_fault
+            self.ib_amp_rate = self.IbAmpRate.calculate(in_=ib_amp, reset=ib_amp_reset,
+                                                        dt=min(self.dt, Battery.F_MAX_T_WRAP))
+            self.LoopIbAmp.calculate(reset=(ib_amp_reset or abs(self.ib_amp_rate) > Battery.MAX_AMP_RATE), ib=ib_amp,
+                                     loop_gain=Battery.AMP_WRAP_TRIM_GAIN,
+                                     dt=min(self.dt, Battery.F_MAX_T_WRAP), ewmin_slr=ewmin_slr, ewsat_slr=ewsat_slr)
             self.ewmhi_thr = self.LoopIbAmp.ewhi_thr
             self.ewmlo_thr = self.LoopIbAmp.ewlo_thr
             self.e_wrap_m = self.LoopIbAmp.e_wrap

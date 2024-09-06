@@ -418,6 +418,93 @@ class LagExp(DiscreteFilter):
         self.saved.out_.append(self.out_)
 
 
+class RateLagExp(DiscreteFilter):
+    # Exponential lag calculator
+
+    def __init__(self, dt, tau, min_, max_):
+        DiscreteFilter.__init__(self, dt, tau, min_, max_)
+        self.a = 0.
+        self.b = 0.
+        self.c = 0.
+        self.rate = 0.
+        self.rstate = 0.
+        self.state = 0.
+        self.assign_coeff(tau)
+        self.saved = Saved1()
+        self.in_ = 0.
+        self.out_ = 0.
+
+    def __str__(self, prefix=''):
+        s = prefix + "LagExp:"
+        s += "\n  "
+        s += DiscreteFilter.__str__(self, prefix + 'LagExp:')
+        s += "  a        =    {:7.3f}  // Discrete coefficient\n".format(self.a)
+        s += "  b        =    {:7.3f}  // Discrete coefficient\n".format(self.b)
+        s += "  c        =    {:7.3f}  // Discrete coefficient\n".format(self.c)
+        s += "  tau      =    {:7.3f}  // Time constant, s\n".format(self.tau)
+        s += "  in_      =    {:7.3f}  // Input\n".format(self.in_)
+        s += "  out_     =    {:7.3f}  // Output\n".format(self.out_)
+        return s
+
+    def absorb(self, other):
+        self.state = other.state
+        self.rstate = other.rstate
+
+    def assign_coeff(self, _tau):
+        self.tau = _tau
+        if self.dt > 0:
+            eTt = np.exp(-self.dt / self.tau)
+            meTt = 1. - eTt
+            self.a = self.tau / self.dt - eTt / meTt
+            self.b = 1.0 / meTt - self.tau / self.dt
+            self.c = meTt / self.dt
+
+    def calc_state_(self, in_):
+        self.rate = self.c * (self.a * self.rstate + self.b * in_ - self.state)
+        self.rstate = in_
+        self.state = max(min(self.state + self.dt * self.rate, self.max), self.min)
+        # print('in_', in_, 'rate', self.rate, 'state', self.state)
+
+    def calc_state(self, in_, dt):
+        self.dt = dt
+        self.assign_coeff(self.tau)
+        self.calc_state_(in_)
+
+    def calculate(self, in_, reset, dt):
+        self.in_ = in_
+        if reset:
+            self.state = self.in_
+            self.rstate = self.in_
+        self.rate_state_(self.in_, dt)
+        self.out_ = self.rate
+        return self.out_
+
+    def calculate_tau(self, in_, reset, dt, tau_):
+        self.in_ = in_
+        self.tau = tau_
+        if reset:
+            self.state = self.in_
+            self.rstate = self.in_
+        self.calc_state(self.in_, dt)
+        self.out_ = self.state
+        return self.out_
+
+    def rate_state_(self, in_, dt):
+        self.dt = dt
+        self.rate = max(min(self.c * (self.a * self.rstate + self.b * in_ - self.state), self.max), self.min)
+        self.rstate = in_
+        self.state += self.dt * self.rate
+        # print('in_', in_, 'rate', self.rate, 'state', self.state)
+
+    def save(self, time):
+        self.saved.time.append(time)
+        self.saved.rate.append(self.rate)
+        self.saved.state.append(self.rstate)
+        self.saved.state.append(self.state)
+        self.saved.in_.append(self.in_)
+        self.saved.out_.append(self.out_)
+
+
 class LagTustin(DiscreteFilter):
     # Tustin lag calculator, non-pre-warped
 
