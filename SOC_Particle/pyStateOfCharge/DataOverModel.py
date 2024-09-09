@@ -299,8 +299,8 @@ def dom_plot(mo, mv, so, sv, smv, filename, fig_files=None, plot_title=None, fig
     plt.subplot(326)
     plt.plot(mo.time, mo.Tb, color='green', linestyle='-', label='temp_c'+ref_str)
     plt.plot(mv.time, mv.Tb, color='orange', linestyle='--', label='temp_c'+test_str)
-    plt.plot(mo.time, mo.chm, color='black', linestyle='-', label='mon_mod'+ref_str)
-    plq(plt, so, 'time', so, 'chm_s', color='cyan', linestyle='--', label='sim_mod'+ref_str)
+    plt.plot(mo.time, mo.chm, color='black', linestyle='-', label='mon_chm'+ref_str)
+    plq(plt, so, 'time', so, 'chm_s', color='cyan', linestyle='--', label='sim_chm'+ref_str)
     plt.ylim(0., 50.)
     plt.legend(loc=1)
     fig_file_name = filename + '_' + str(len(fig_list)) + ".png"
