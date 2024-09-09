@@ -358,8 +358,8 @@ public:
   virtual ~DiscreteIntegrator();
   // operators
   // functions
-  virtual double calculate(double in, int RESET, double init_value);
-  virtual double calculate(double in, double T, int RESET, double init_value);
+  virtual double calculate(double in, boolean RESET, double init_value);
+  virtual double calculate(double in, double T, boolean RESET, double init_value);
   virtual void newState(double newState);
   virtual double state() { return lstate_; };
   virtual bool lim() { return lim_; };

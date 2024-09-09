@@ -244,6 +244,9 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define MAX_NOA_RATE        1.          // Max reasonable noa rate used to disable amp e_wrap logic, A/s (1.0)
 #define CC_DIFF_RESET       1.          // Signal selection cc_diff ekf test reset persistence, s (1.)
 #define CC_DIFF_SET         5.          // Signal selection cc_diff ekf test set persistence, s (5. to handle sawtooth action on cc_diff)
+#define DISAB_LO_SET       0.4          // Disable lo=amp wrap fault set persistence, s (0.4)
+#define DISAB_LO_RESET     0.8          // Disable lo=amp wrap fault reset persistence, s (0.8)
+#define MAX_TRIM_RATE    0.005          // Max allowable amp e_wraptrim rate, V/s (0.005)
 // Default values for constants that can be overridden
 #if !defined(NOM_DS)
     #define NOM_DS             0.0          // Nominal VOC(SOC) del soc (Ds) 0.0)

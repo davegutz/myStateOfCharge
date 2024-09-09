@@ -216,7 +216,7 @@ public:
   Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp, const double wrap_trim_gain,
     const float imax, const float imin);
   ~Looparound();
-  void calculate(const boolean reset, const float ib);
+  void calculate(const boolean reset, const float ib, Sensors *Sen);
   float e_wrap() { return e_wrap_; };
   float e_wrap_filt() { return e_wrap_filt_; };
   float e_wrap_trim() { return e_wrap_trim_; };
@@ -270,6 +270,7 @@ public:
   float cc_diff_thr() { return cc_diff_thr_; };
   boolean dscn_fa() { return failRead(IB_DSCN_FA); };
   boolean dscn_flt() { return faultRead(IB_DSCN_FLT); };
+  boolean disable_amp_fault() { return disable_amp_fault_; };
   float ewhi_thr_;      // Threshold e_wrap failed high, V
   float ewhi_thr() { return ewhi_thr_; };
   float ewlo_thr_;      // Threshold e_wrap failed low, V
@@ -376,8 +377,8 @@ public:
   boolean wrap_vb_fa() { return failRead(WRAP_VB_FA); };
   void wrap_err_filt_state(const float in) { WrapErrFilt->state(in); }
 protected:
-
   TFDelay *CcdiffPer;       // Persistence cc_diff ekf fail amp
+  TFDelay *DisabAmpFltPer;  // Persistence on disable_fault_amp to debounce ib_amp_wrap faults to make them more noise tolerant and prevent false negatives
   TFDelay *IbAmpHardFail;   // Persistence ib hard fail amp
   RateLagExp *IbNoaRate;    // Linear filter to calculate rate for amp
   TFDelay *IbdPosPer;       // Persistence ib diff hi instantaneous
@@ -420,7 +421,6 @@ protected:
   boolean ib_noa_hi_;       // ib noa above amp high limit, T=above hi
   boolean ib_noa_invalid_;  // Battery noa is invalid (hard failed)
   boolean ib_noa_lo_;       // ib noa below amp low limit, T=below hi
-  boolean ib_noa_moving_;   // ib noa moving, T=moving
   float ib_quiet_;          // ib hardware noise, A/s
   float ib_rate_;           // ib rate, A/s
   int8_t ib_sel_stat_;      // Memory of Ib signal selection, -1=noa, 0=none, 1=a

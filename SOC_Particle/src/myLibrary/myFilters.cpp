@@ -651,9 +651,9 @@ void DiscreteIntegrator::newState(double newState)
   lstate_ = max(min(newState, max_), min_);
   rstate_ = 0.0;
 }
-double DiscreteIntegrator::calculate(double in, int RESET, double init_value)
+double DiscreteIntegrator::calculate(double in, boolean RESET, double init_value)
 {
-  if (RESET > 0)
+  if (RESET)
   {
     lstate_ = init_value;  rstate_ = 0.0;
   }
@@ -675,10 +675,10 @@ double DiscreteIntegrator::calculate(double in, int RESET, double init_value)
   }
   return (lstate_);
 }
-double DiscreteIntegrator::calculate(double in, double T, int RESET, double init_value)
+double DiscreteIntegrator::calculate(double in, double T, boolean RESET, double init_value)
 {
   T_ = T;
-  if (RESET > 0)
+  if (RESET)
   {
     lstate_ = init_value;  rstate_ = 0.0;
   }

@@ -267,7 +267,7 @@ Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_am
 }
 
 // Update the loop
-void Looparound::calculate(const boolean reset, const float ib)
+void Looparound::calculate(const boolean reset, const float ib, Sensors *Sen)
 {
   reset_ = reset || Sen_->Flt->reset_all_faults();
   ib_ = ib;
@@ -282,11 +282,22 @@ void Looparound::calculate(const boolean reset, const float ib)
 
   // Trimmer using past values
   float trim_init = 0.;
-  if ( wrap_trim_gain_ > 0. ) trim_init = -(Mon_->vb() - Mon_->voc_soc() - dv_dyn);
-  e_wrap_trim_ = -Trim_->calculate(e_wrap_filt_*wrap_trim_gain_, min(Sen_->T, F_MAX_T_WRAP), reset_, trim_init);
-  e_wrap_trimmed_ = e_wrap_ + e_wrap_trim_;
+  float trim_rate_lim = 0.;
+  if ( wrap_trim_gain_ > 0. )
+  {
+    trim_init = -(Mon_->vb() - Mon_->voc_soc() - dv_dyn);
+    trim_rate_lim = max(min(e_wrap_filt_*wrap_trim_gain_, MAX_TRIM_RATE), -MAX_TRIM_RATE);
+    e_wrap_trim_ = -Trim_->calculate(trim_rate_lim, min(Sen_->T, F_MAX_T_WRAP), reset_, trim_init);
+  }
+  else
+  {
+    trim_init = 0.;
+    trim_rate_lim = 0.;
+    e_wrap_trim_ = 0.;
+  }
 
   // e_wrap using present values
+  e_wrap_trimmed_ = e_wrap_ + e_wrap_trim_;
   e_wrap_filt_ = WrapErrFilt_->calculate(e_wrap_trimmed_, reset_, min(Sen_->T, F_MAX_T_WRAP));
 
   // Thresholds. Scalars are calculated by Flt->wrap_scalars()
@@ -329,7 +340,7 @@ Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *
   fltw_(0UL), falw_(0UL),
   ib_amp_hi_(false), ib_amp_invalid_(false), ib_amp_lo_(false), ib_noa_rate_(0), ib_choice_(UsingDef),
   ib_choice_last_(UsingDef), ib_decision_(0), ib_diff_(0), ib_diff_f_(0), ib_lo_active_(true),
-  ib_noa_hi_(false), ib_noa_invalid_(false), ib_noa_lo_(false), ib_noa_moving_(false), ib_quiet_(0), ib_rate_(0),
+  ib_noa_hi_(false), ib_noa_invalid_(false), ib_noa_lo_(false), ib_quiet_(0), ib_rate_(0),
   ib_sel_stat_(IB_SEL_STAT_DEF), ib_sel_stat_last_(IB_SEL_STAT_DEF), latched_fail_(false),
   latched_fail_fake_(false), reset_all_faults_(false), sp_preserving_(preserving), tb_sel_stat_(TB_SEL_STAT_DEF),
   tb_sel_stat_last_(TB_SEL_STAT_DEF), vb_sel_stat_(VB_SEL_STAT_DEF), vb_sel_stat_last_(VB_SEL_STAT_DEF)
@@ -340,6 +351,7 @@ Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *
   IbdNegPer = new TFDelay(false, IBATT_INST_DIFF_SET, IBATT_INST_DIFF_RESET, T);
   IbdHiPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
   IbdLoPer = new TFDelay(false, IBATT_DISAGREE_SET, IBATT_DISAGREE_RESET, T);
+  DisabAmpFltPer = new TFDelay(false, DISAB_LO_SET, DISAB_LO_RESET, T);
   CcdiffPer  = new TFDelay(false, CC_DIFF_SET, CC_DIFF_RESET, T);
   IbAmpHardFail  = new TFDelay(false, IB_HARD_SET, IB_HARD_RESET, T);
   IbLoActive  = new TFDelay(true, IB_LO_ACTIVE_SET, IB_LO_ACTIVE_RESET, T);
@@ -441,8 +453,8 @@ void Fault::ib_logic(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     #endif
   }
   ib_noa_rate_ = IbNoaRate->calculate(Sen->ib_noa(), reset_loc, min(Sen->T, F_MAX_T_WRAP));
-  ib_noa_moving_ = abs(ib_noa_rate_)>MAX_NOA_RATE, Sen->ib_amp();
-  disable_amp_fault_ = (ib_amp_hi_ && ib_noa_hi_) || (ib_amp_lo_ && ib_noa_lo_);
+  disable_amp_fault_ = DisabAmpFltPer->calculate( (ib_amp_hi_ && ib_noa_hi_) || (ib_amp_lo_ && ib_noa_lo_), DISAB_LO_SET, DISAB_LO_RESET, Sen->T, reset);
+
 }
 
 // Detect no signal present based on detection of quiet signal.
@@ -539,9 +551,9 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
 
   // HI_LO-Only Logic
   #ifdef HDWE_IB_HI_LO
-    LoopIbNoa->calculate(reset_loc, Sen->ib_noa());
+    LoopIbNoa->calculate(reset_loc, Sen->ib_noa(), Sen);
     boolean ib_amp_reset = reset_loc || disable_amp_fault_;
-    LoopIbAmp->calculate(ib_amp_reset || ib_noa_moving_, Sen->ib_amp());
+    LoopIbAmp->calculate(ib_amp_reset, Sen->ib_amp(), Sen);
     faultAssign( LoopIbAmp->hi_fault(), WRAP_HI_M_FLT);
     failAssign( LoopIbAmp->hi_fail(), WRAP_HI_M_FA);  // WRAP_HI_M_FA not latched
     faultAssign( LoopIbAmp->lo_fault(), WRAP_LO_M_FLT);
@@ -552,7 +564,7 @@ void Fault::ib_wrap(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
     failAssign( LoopIbNoa->lo_fail(), WRAP_LO_N_FA);  // WRAP_LO_N_FA not latched
   #endif
 
-  // Overall Logic
+  // Overall wrap logic (separates amp/noa and hi/lo)
   #ifdef HDWE_IB_HI_LO
     e_wrap_ = scale_select(Sen->Ib_noa_hdwe, Sen->sel_brk_hdwe, LoopIbAmp->e_wrap(), LoopIbNoa->e_wrap());
     e_wrap_filt_ = scale_select(Sen->Ib_noa_hdwe, Sen->sel_brk_hdwe, LoopIbAmp->e_wrap_filt(), LoopIbNoa->e_wrap_filt());
