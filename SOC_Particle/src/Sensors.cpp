@@ -338,7 +338,7 @@ void Looparound::pretty_print()
 Fault::Fault(const double T, uint8_t *preserving, BatteryMonitor *Mon, Sensors *Sen):
   cc_diff_(0.), cc_diff_empty_slr_(1), disable_amp_fault_(false), ewmin_slr_(1), ewsat_slr_(1), e_wrap_(0), e_wrap_filt_(0),
   fltw_(0UL), falw_(0UL),
-  ib_amp_hi_(false), ib_amp_invalid_(false), ib_amp_lo_(false), ib_noa_rate_(0), ib_choice_(UsingDef),
+  ib_amp_hi_(false), ib_amp_invalid_(false), ib_amp_lo_(false), ib_choice_(UsingDef),
   ib_choice_last_(UsingDef), ib_decision_(0), ib_diff_(0), ib_diff_f_(0), ib_lo_active_(true),
   ib_noa_hi_(false), ib_noa_invalid_(false), ib_noa_lo_(false), ib_quiet_(0), ib_rate_(0),
   ib_sel_stat_(IB_SEL_STAT_DEF), ib_sel_stat_last_(IB_SEL_STAT_DEF), latched_fail_(false),
@@ -452,7 +452,6 @@ void Fault::ib_logic(const boolean reset, Sensors *Sen, BatteryMonitor *Mon)
       ib_lo_active_ = false;
     #endif
   }
-  ib_noa_rate_ = IbNoaRate->calculate(Sen->ib_noa(), reset_loc, min(Sen->T, F_MAX_T_WRAP));
   disable_amp_fault_ = DisabAmpFltPer->calculate( (ib_amp_hi_ && ib_noa_hi_) || (ib_amp_lo_ && ib_noa_lo_), DISAB_LO_SET, DISAB_LO_RESET, Sen->T, reset);
 
 }
