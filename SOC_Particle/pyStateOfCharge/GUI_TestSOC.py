@@ -99,8 +99,9 @@ sel_list = [
     ]
 sel_list1 = [
     'flatSitHys', 'offSitHysBmsNoiseBB', 'offSitHysBmsNoiseCH', 'offSitHysBmsNoiseCHG', 'ampHiFailSlow',
-    'noaHiFailSlow', 'vHiFail', 'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod1W', 'tbFailHdwe1W', 'tLoFailMod',
-    'tLoFailHdwe', 'DvMon', 'DvSim', 'faultParade', 'allInBBn', 'allInCHn', 'allInCHGn', 'stepDown', 'stepUp',
+    'noaHiFailSlow', 'vHiFail', 'vHiFailNoise', 'vHiFailH', 'vHiFailFf', 'pulseSSH', 'tbFailMod1W', 'tbFailHdwe1W',
+    'tLoFailMod', 'tLoFailHdwe', 'DvMon', 'DvSim', 'faultParade', 'allInBBn', 'allInCHn', 'allInCHGn', 'stepDown',
+    'stepUp',
     ]
 macro_sel_list = [
     'end_early', 'modMidInit', 'modMidInitNoCc', 'modLowInitBB', 'modLowInitCH', 'modLowInitCHG',
@@ -236,6 +237,7 @@ lookup = {
         'ampHiFailSlow': (470, modMidInit + tranPrep + c08 + 'Fc0.001;Fd0.5;XQ400000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.", "Run for 6  minutes to see cc_diff_fa")),
         'noaHiFailSlow': (470, modMidInit + tranPrep + d08 + 'Fc0.001;Fd0.5;XQ400000;' + c00 + quiet + cleanup, ("Should detect and switch amp current failure. Will be slow (~6 min) detection as it waits for the EKF to wind up to produce a cc_diff fault.", "Will display “diff” on OLED due to 6 A difference before switch (not cc_diff).", "EKF should tend to follow voltage while soc wanders away.", "Run for 6  minutes to see cc_diff_fa")),
         'vHiFail': (90, modMidInit + tranPrep + 'XY;Dv0.82;XQ60000;' + 'Dv0;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with 'Ult 1' fig 4.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION")),
+        'vHiFailNoise': (90, modMidInit + noisePackage + tranPrep + 'XY;Dv0.82;XQ60000;' + 'Dv0;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with 'Ult 1' fig 4.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION")),
         'vHiFailH': (66, modMidInit + tranPrep + 'SH.3;W10;' + 'XY;Dv0.82;XQ30000;' + 'Dv0;' + quiet + cleanup, ("Should detect voltage failure and display '*fail' and 'redl' within 60 seconds.", "To diagnose, begin with 'Ult 1' fig 4.   Look for e_wrap to go through ewl_thr.", "You may have to increase magnitude of injection (Dv).  The threshold is 32 * r_ss.", "There MUST be no SATURATION.  Initial BB shift will be limited by hys table")),
         'vHiFailFf': (90, modMidInit + tranPrep + 'Ff1;XY;Dv0.8;XQ60000;' + 'Dv0;' + quiet + cleanup, ("Run for about 1 minute.", "Should detect voltage failure (see DOM1 fig 2 or 3) but not display anything on OLED.", "Usually shows SAT.")),
         'pulseSSH': (25, slow + 'Xp8;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.", "ib_diff_flt will take time beyond event to reset running Hi-Lo.")),
