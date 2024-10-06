@@ -663,7 +663,7 @@ float BatterySim::calculate(Sensors *Sen, const boolean dc_dc_on, const boolean 
     // Special cases override
     if ( bms_off_ )
     {
-        vb_ = voc_;
+        vb_ = 0;
     }
     if ( bms_off_ && dc_dc_on )
     {

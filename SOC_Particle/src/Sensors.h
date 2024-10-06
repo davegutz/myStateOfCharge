@@ -214,7 +214,7 @@ class Looparound
 public:
   Looparound();
   Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_amp, const float wrap_lo_amp, const double wrap_trim_gain,
-    const float imax, const float imin);
+    const float imax, const float imin, const float err_max);
   ~Looparound();
   void calculate(const boolean reset, const float ib, Sensors *Sen);
   float e_wrap() { return e_wrap_; };

@@ -93,8 +93,8 @@ unit_list = [
 battery_list = ['bb', 'ch', 'chg']
 sel_list = [
     'custom', 'init1', 'saveAdjusts', 'ampHiFail', 'noaHiFail', 'rapidTweakRegression', 'allIn', 'allInBB', 'allInCH',
-    'allInCHG', 'allProto', 'pulseSS', 'rapidTweakRegressionH0', 'offSitHysBmsBB', 'offSitHysBmsCH', 'offSitHysBmsCHG',
-    'triTweakDisch', 'ampHiFailFf', 'ampLoFail', 'noaLoFail', 'ampHiFailNoise', 'noaHiFailNoise',
+    'allInCHG', 'allProto', 'pulseSS', 'rapidTweakRegressionH0', 'offLowSoc', 'offSitHysBmsBB', 'offSitHysBmsCH',
+    'offSitHysBmsCHG', 'triTweakDisch', 'ampHiFailFf', 'ampLoFail', 'noaLoFail', 'ampHiFailNoise', 'noaHiFailNoise',
     'rapidTweakRegression40C', 'slowTweakRegression', 'satSitBB', 'satSitCH', 'satSitCHG',
     ]
 sel_list1 = [
@@ -117,6 +117,7 @@ modMidInitNoCc = 'Xm247;Ca0.50;BZ;Ff0;DP1;HR;Rf;XD;'
 modLowInitBB = 'Xm247;Ca0.050;BZ;Ff0;DP1;HR;Rf;XD;'
 modLowInitCH = 'Xm247;Ca0.103;BZ;Ff0;DP1;HR;Rf;XD;'
 modLowInitCHG = 'Xm247;Ca-0.004;BZ;Ff0;DP1;HR;Rf;XD;'
+modLowInitGen = 'Xm247;Ca0.17;BZ;Ff0;DP1;HR;Rf;XD;'
 noisePackage = 'DT.05;DV0.3;DM.75;DN6;'
 silentPackage = 'DT0;DV0;DM0;DN0;'
 slow = 'Dr400;D>400;DP1;'
@@ -144,6 +145,8 @@ sd50 = time_stamp + 'DI-50;'  # 50 amp discharge
 c00 = 'Dm0;Dn0;Rf;W50;'
 s00 = 'DI0;Rf;W100;'
 twitch = time_stamp + 'XR;'
+vm12 = 'Dv-12;'
+v00 = 'Dv0;'
 
 # Note:  Photon 2 is throughput limited on the Serial buses.  The *tweak* transients are sensitive to differences
 # caused by over-runs and slip and set Dr400 before Xp* then resets to Dr100 (nominal).
@@ -216,6 +219,7 @@ lookup = {
         'allProto': (552, modMidInit + tranPrep + c50 + 'XQ25000;' + c00 + tempCleanup + '  Xp10;  Xp13;  ' + modMidInitNoCc + tranPrep + cm50 + 'XQ50000;' + c00 + quiet + cleanup, ('Proto multi', "Must have same 'vv*' throughout", "No 'HR' either")),
         'pulseSS': (20, slow + 'Xp7;' + quiet + cleanup, ("Should generate a very short <10 sec data burst with a hw pulse.  Look at plots for good overlay. e_wrap should be flat.", "This is the shortest of all tests.  Useful for quick checks.", "ib_diff_flt will take time beyond event to reset running Hi-Lo.")),
         'rapidTweakRegressionH0': (200, 'Sh0;' + slow + 'Xp10;' + quiet + cleanup, ('Should run three very large current discharge/recharge cycles without fault', 'No hysteresis. Best test for seeing time skews and checking fault logic for false trips', 'Tease out cause of e_wrap faults.  e_wrap MUST be flat!')),
+        'offLowSoc': (85, modLowInitGen + tranPrep  + vm12 + 'XQ25000;' + v00 + quiet + cleanup, ('Test for clean faults on shutoff.',)),
         'offSitHysBmsBB': (625, modLowInitBB + slowTwitchDef + 'Xa-162;' + tranPrep + twitch + 'XQ568000;' + 'Xa0;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),
         'offSitHysBmsCH': (625, modLowInitCH + slowTwitchDef + 'Xa-324;' + tranPrep + twitch + 'XQ568000;' + 'Xa0;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),
         'offSitHysBmsCHG': (625, modLowInitCHG + slowTwitchDef + 'Xa-324;' + tranPrep + twitch + 'XQ568000;' + 'Xa0;' + quiet + cleanup, ('for CompareRunRun.py Argon vs Photon builds. This is the only test for that.',)),

@@ -1213,11 +1213,11 @@ def compare_hist_sim(data_file=None, time_end_in=None, data_only=False, mon_t=Fa
 def main():
 
     # User inputs (multiple input_files allowed
-    data_file = 'G:/My Drive/GitHubArchive/SOC_Particle/dataReduction/g20240704/overnight wrap 20240713.csv'
+    data_file = '/home/daveg/google-drive/GitHubArchive/SOC_Particle/dataReduction/g20240909/soc2p2_hist_20241005.csv'
     data_only = False
     mon_t = False
-    unit_key = 'g20240704_soc2p2_chg'
-    dt_resample = 10
+    unit_key = 'g20240909_soc2p2_hi_lo_chg'
+    dt_resample = 900
     Tb_force = None
     # Do this when running compare_hist_sim on run that schedule extracted assuming constant Tb
     # Tb_force = 35
