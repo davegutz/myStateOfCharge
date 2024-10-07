@@ -328,9 +328,11 @@ class BatteryMonitor(Battery, EKF1x1):
         self.IbAmpRate = RateLagExp(dt=0.1, tau=Battery.WRAP_ERR_FILT/4., min_=-Battery.MAX_WRAP_ERR_FILT,
                                     max_=Battery.MAX_WRAP_ERR_FILT)
         self.LoopIbAmp = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_AMP,
-                                    wrap_lo_amp=Battery.WRAP_LO_AMP)
+                                    wrap_lo_amp=Battery.WRAP_LO_AMP,
+                                    max_err=Battery.MAX_WRAP_ERR_FILT*Battery.WRAP_LO_AMP/Battery.WRAP_LO_NOA)
         self.LoopIbNoa = Looparound(Mon_=self, Sen_=Sen, wrap_hi_amp=Battery.WRAP_HI_NOA,
-                                    wrap_lo_amp=Battery.WRAP_LO_NOA)
+                                    wrap_lo_amp=Battery.WRAP_LO_NOA,
+                                    max_err=Battery.MAX_WRAP_ERR_FILT)
         self.ewnhi_thr = None
         self.ewnlo_thr = None
         self.ewmhi_thr = None
@@ -936,7 +938,7 @@ def sat_voc(temp_c, vsat, dvoc_dt):
 class Looparound:
     """Compare predicted voltage to actual and track toward zero to eliminate biases """
 
-    def __init__(self, Mon_, Sen_, wrap_hi_amp=0., wrap_lo_amp=0.):
+    def __init__(self, Mon_, Sen_, wrap_hi_amp=0., wrap_lo_amp=0., max_err=None):
         self.Mon = Mon_
         self.reset = True
         self.zero = False
@@ -957,10 +959,9 @@ class Looparound:
         self.ewhi_thr = 0.
         self.ewlo_thr = 0.
         self.ib = 0.
-        self.Trim = TustinIntegrator(dt=2., min_=-Battery.MAX_WRAP_ERR_FILT, max_=Battery.MAX_WRAP_ERR_FILT)
+        self.Trim = TustinIntegrator(dt=2., min_=-max_err*10., max_=max_err*10.)
         self.voc = 0.
-        self.WrapErrFilt = LagTustin(dt=2., min_=-Battery.MAX_WRAP_ERR_FILT, max_=Battery.MAX_WRAP_ERR_FILT,
-                                     tau=Battery.WRAP_ERR_FILT)
+        self.WrapErrFilt = LagTustin(dt=2., min_=-max_err, max_=max_err, tau=Battery.WRAP_ERR_FILT)
         self.WrapHi = TFDelay(dt=2., in_=False, t_true=Battery.WRAP_HI_S, t_false=Battery.WRAP_HI_R)
         self.WrapLo = TFDelay(dt=2., in_=False, t_true=Battery.WRAP_LO_S, t_false=Battery.WRAP_LO_R)
 

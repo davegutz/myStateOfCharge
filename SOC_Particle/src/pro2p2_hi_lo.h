@@ -9,6 +9,7 @@
 #define HDWE_PHOTON2
 #define HDWE_IB_HI_LO
 #define HDWE_2WIRE
+#define HDWE_BARE
 // #define SOFT_DEBUG_QUEUE
 // #define DEBUG_DETAIL                    // Use this to debug initialization using 'v-1;'
 // #define LOGHANDLE
