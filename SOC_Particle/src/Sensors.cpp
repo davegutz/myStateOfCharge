@@ -260,7 +260,7 @@ Looparound::Looparound(BatteryMonitor *Mon, Sensors *Sen, const float wrap_hi_am
   wrap_trim_gain_(wrap_trim_gain)
 {
   ChargeTransfer_ = new LagExp(EKF_NOM_DT, chem_->tau_ct, -NOM_UNIT_CAP, NOM_UNIT_CAP);     // actual update time provided run time
-  Trim_ = new TustinIntegrator(EKF_NOM_DT, -err_max, err_max);          // actual update time provided run time
+  Trim_ = new TustinIntegrator(EKF_NOM_DT, -err_max*10., err_max*10.);          // actual update time provided run time
   WrapErrFilt_ = new LagTustin(2., WRAP_ERR_FILT, -err_max, err_max);   // actual update time provided run time
   WrapHi_ = new TFDelay(false, WRAP_HI_S, WRAP_HI_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
   WrapLo_ = new TFDelay(false, WRAP_LO_S, WRAP_LO_R, EKF_NOM_DT);  // Wrap test persistence.  Initializes false
