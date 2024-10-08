@@ -454,7 +454,7 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
 
   // Hrs large
   #ifdef HDWE_IB_HI_LO
-    sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_ekf);
+    sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_soc);
     if ( Sen->saturated )
       disp_2 = "SAT";
     else if ( blink==1 || blink==3 )
