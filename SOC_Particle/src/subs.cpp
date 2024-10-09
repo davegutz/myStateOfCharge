@@ -455,35 +455,40 @@ void oled_display(Sensors *Sen, BatteryMonitor *Mon)
   // Hrs large
   #ifdef HDWE_IB_HI_LO
     sprintf(pr.buff, "%3.0f", pp.pubList.Amp_hrs_remaining_soc);
-    if ( Sen->saturated )
+    if ( Sen->saturated && blink==0 )
       disp_2 = "SAT";
-    else if ( blink==1 || blink==3 )
+    else if ( blink==2 )
+    {
+      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
+        disp_2 = "fail";
+      else if ( Sen->Flt->ib_choice()!=0 )
+        disp_2 = "accy";
+      else
+      {
+        disp_2 = pr.buff;
+      }
+    }
+    else
     {
       disp_2 = pr.buff;
     }
-    #ifdef HDWE_IB_HI_LO
-      else if ( blink==2 )
-      {
-        if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() )
-          disp_2 = "fail";
-        else if ( Sen->Flt->ib_choice()!=0 )
-          disp_2 = "accy";
-      }
-    #else
-      else if ( blink==2 )
-      {
-        if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
-          disp_2 = "fail";
-        else if ( ( Sen->Flt->ib_amp_fa() || Sen->Flt->ib_noa_fa() ) && !sp.mod_ib() )
-          disp_2 = "accy";
-      }
-    #endif
   #else
-    if (Sen->saturated)
+    sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
+    if (Sen->saturated && blink==0)
       disp_2 = "SAT";
-    else if ( blink==1 || blink==3 )
+    else if ( blink==2 )
     {
-      sprintf(pr.buff, "%3.0f", min(pp.pubList.Amp_hrs_remaining_soc, 999.));
+      if ( Sen->Flt->ib_amp_fa() && Sen->Flt->ib_noa_fa() && !sp.mod_ib() )
+        disp_2 = "fail";
+      else if ( ( Sen->Flt->ib_amp_fa() || Sen->Flt->ib_noa_fa() ) && !sp.mod_ib() )
+        disp_2 = "accy";
+      else
+      {
+        disp_2 = pr.buff;
+      }
+    }
+    else
+    {
       disp_2 = pr.buff;
     }
   #endif
