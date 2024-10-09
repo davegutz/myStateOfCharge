@@ -40,5 +40,5 @@
     "particle.targetPlatform": "p2",
     "C_Cpp.errorSquiggles": "disabled",
     "cmake.configureOnOpen": false,
-    "particle.targetDevice": "pro3p2"
+    "particle.targetDevice": "soc4p2"
 }
