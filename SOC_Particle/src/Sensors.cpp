@@ -69,6 +69,7 @@ float TempSensor::sample(Sensors *Sen)
   // Read Sensor
   // MAXIM conversion 1-wire Tp plenum temperature
   static float Tb_hdwe = 0.;
+
   #ifdef HDWE_DS18B20_SWIRE
     uint8_t count = 0;
     float temp = 0.;
@@ -92,6 +93,7 @@ float TempSensor::sample(Sensors *Sen)
       tb_stale_flt_ = true;
       // Using last-good-value:  no assignment
     }
+
   #elif defined(HDWE_DS2482_1WIRE)
     // Check success
 
@@ -108,12 +110,28 @@ float TempSensor::sample(Sensors *Sen)
       tb_stale_flt_ = true;
       // Using last-good-value:  no assignment
     }
+
   #elif defined(HDWE_2WIRE)
+
     float volt = float(analogRead(VTb_pin_))*VTB_CONV_GAIN;
-    Tb_hdwe = float(HDWE_M_2WIRE) * log10( volt * float(HDWE_RS_2WIRE) / (V3V3 - volt) ) + float(HDWE_B_2WIRE);
+    float res = volt * float(HDWE_RS_2WIRE) / (V3V3 - volt);
+
+    #ifdef USE_SH_2WIRE
+      // Steinhart-Hart (see '2-wireRTD.ods')
+      lnres = ln(res);
+      Tb_hdwe = ( 1. / max( HDWE_SHA_2WIRE + (HDWE_SHB_2WIRE + HDWE_SHC_2WIRE *lnres*lnres) * lnres, 0.000001 ) ) - 273.;
+
+    #else
+      // Data fit (see '2-wireRTD.ods')
+      Tb_hdwe = float(HDWE_M_2WIRE) * log10(res) + float(HDWE_B_2WIRE);
+
+    #endif
+
     tb_stale_flt_ = false;
     if ( sp.debug()==16 ) Serial.printf("I 2wire:  volt=%7.3f Tb_hdwe=%7.3f,\n", volt, Tb_hdwe);
+
   #endif
+
   return ( Tb_hdwe );
 }
 
