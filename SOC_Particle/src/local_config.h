@@ -6,11 +6,11 @@
 // #include "pro1a.h"
 // #include "pro2p2_hi_lo.h"
 // #include "pro3p2.h"
-// #include "pro3p2_hi_lo.h"
+#include "pro3p2_hi_lo.h"
 // #include "soc0p.h"  // Guest room (old)
 // #include "soc1a.h"  // Truck (old)
 // #include "soc2p2_hi_lo.h"  // Garage 474/475
 // #include "soc3p2_hi_lo.h"  // Guest room 474/475
-#include "soc4p2_hi_lo.h"  // Truck 474/475
+// #include "soc4p2_hi_lo.h"  // Truck 474/475
 
 #endif

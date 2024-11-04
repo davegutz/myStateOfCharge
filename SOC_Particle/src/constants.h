@@ -237,7 +237,7 @@ const float QUIET_R   (QUIET_S/10.);    // Quiet reset persistence, sec ('up 1 d
 #define VC_BARE_DETECTED    0.16        // Level of common voltage to declare circuit unconnected, V (0.16)
 #define V3V3                3.3         // Theoretical nominal V3v3, V (3.3)
 #define HALF_V3V3         (V3V3/2.)     // Theoretical center of differential TSC2010
-// #define USE_SH_2WIRE                    // Use Steinhart-Hart 2-wire temperature characteristic when defined
+#define USE_SH_2WIRE                    // Use Steinhart-Hart 2-wire temperature characteristic when defined
 #define HDWE_RS_2WIRE   15000.          // 2-wire sense resistor, ohm (15000.)
 #define HDWE_M_2WIRE    -58.96          // 2-wire thermistor characteristic, data fit (-58.96; see '2-wireRTD.ods')  TODO: switch over to industry accepted exponential equation Steinhart-Hart (see '2-wireRTD.ods')
 #define HDWE_B_2WIRE    262.79          // 2-wire thermistor characteristic, data fit (262.79; see '2-wireRTD.ods')

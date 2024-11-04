@@ -118,7 +118,7 @@ float TempSensor::sample(Sensors *Sen)
 
     #ifdef USE_SH_2WIRE
       // Steinhart-Hart (see '2-wireRTD.ods')
-      lnres = ln(res);
+      float lnres = log(res);
       Tb_hdwe = ( 1. / max( HDWE_SHA_2WIRE + (HDWE_SHB_2WIRE + HDWE_SHC_2WIRE *lnres*lnres) * lnres, 0.000001 ) ) - 273.;
 
     #else
