@@ -39,9 +39,6 @@ import os
 if sys.platform == 'darwin':
     import matplotlib
     matplotlib.use('tkagg')
-if sys.platform == 'darwin':
-    import matplotlib
-    matplotlib.use('tkagg')
 plt.rcParams['axes.grid'] = True
 
 
