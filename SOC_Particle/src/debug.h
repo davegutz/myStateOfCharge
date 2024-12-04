@@ -34,7 +34,6 @@ void add_verify(String *src, const String addend);
 #endif
 
 void debug_4(BatteryMonitor *Mon, Sensors *Sen);
-void debug_5(BatteryMonitor *Mon, Sensors *Sen);
 void debug_m7(BatteryMonitor *Mon, Sensors *Sen);
 
 #ifndef HDWE_PHOTON
