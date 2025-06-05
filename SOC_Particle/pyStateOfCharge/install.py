@@ -85,6 +85,13 @@ Categories=Utility
     else:
         print(Colors.fg.green, 'success', Colors.reset)
 
+    # Check executable is local
+    if sys.executable.__contains__("venv" + os.path.sep + "bin" + os.path.sep + "python"):
+        pass
+    else:
+        print(Colors.fg.red, 'failed:  need to use local venv interpreter', Colors.reset)
+        exit(1)
+
     # Execute permission
     test_cmd_perm = 'chmod a+x ~/Desktop/GUI_TestSOC.desktop'
     result = run_shell_cmd(test_cmd_perm, silent=False)
