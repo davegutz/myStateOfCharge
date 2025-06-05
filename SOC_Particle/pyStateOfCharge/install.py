@@ -55,7 +55,7 @@ if sys.platform == 'linux':
         login = os.environ['LOGNAME']
     desktop_entry = f"""[Desktop Entry]
 Name=GUI_TestSOC
-Exec=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/pyStateOfCharge/venv/bin/python3 /home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/pyStateOfCharge/GUI_TestSOC.py
+Exec=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/pyStateOfCharge/.venv/bin/python3 /home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/pyStateOfCharge/GUI_TestSOC.py
 Path=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/pyStateOfCharge
 Icon=/home/{login}/Documents/GitHub/myStateOfCharge/SOC_Particle/pyStateOfCharge/GUI_TestSOC.ico
 comment=app
